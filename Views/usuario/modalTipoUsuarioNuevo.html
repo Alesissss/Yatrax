@@ -1,0 +1,66 @@
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="txt_TipoUsuario">Nombre</label>
+                        <div class="input-group">
+                            <input type="text" id="txt_TipoUsuario" class="form-control" placeholder="Nombre" oninput="this.value = this.value.toUpperCase();">
+                            <div class="input-group-append">
+                                <div class="input-group-text"><i class="fas fa-user"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button id="btn_Cancelar" type="button" class="btn btn-danger">Cancelar</button>
+                        <button id="btn_Guardar" type="button" class="btn btn-primary">Registrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $("#btn_Guardar").click(function () {
+        let nombre = $("#txt_TipoUsuario").val().trim();
+
+        if (!nombre) {
+            toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+            return;
+        }
+
+        let datos = {
+            nombre: nombre,
+        };
+
+        $.ajax({
+            url: "/trabajadores/usuarios/RegistrarTipoUsuario",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(datos),
+            success: function (response) {
+                if (response.Status === "success") {
+                    if (response.Msj2 !== '' && response.Msj2 !== null) {
+                        toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                        return;
+                    }
+                    toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                    fct_GetTiposUsuarios();
+                    $('#dynamic-modal').modal('hide');
+                } else {
+                    toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                    console.error('Error: ' + response.Msj);
+                }
+            },
+            error: function (xhr, Status, error) {
+                toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                console.error('Error:' + error);
+            }
+        });
+    });
+
+    $("#btn_Cancelar").click(function () {
+        $('#dynamic-modal').modal('hide');
+    });
+</script>

@@ -1,0 +1,8 @@
+# Ignorar archivos de configuración de la bd
+config.py
+# Ignorar entorno virtual
+.venv/
+# Ignorar archivos de caché de Python
+__pycache__/
+Models/__pycache__/
+Controllers/__pycache__/

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}PROYECTO BASE - Inicio{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='/img/dashboard.ico') }}">
+
+    <!-- AdminLTE -->
+    <link rel="stylesheet" href="/Static/css/adminlte.min.css">
+    <link rel="stylesheet" href="/Static/css/all.min.css">
+
+    <!-- DataTables -->
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="/Static/plugins/datatables/datatables.min.css">
+    <link rel="stylesheet" href="/Static/plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
+    <link rel="stylesheet" href="/Static/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="/Static/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
+    <!-- Toastr -->
+    <link rel="stylesheet" href="/Static/plugins/toastr/toastr.min.css">
+    <!-- Select2 -->
+    <link rel="stylesheet" href="/Static/plugins/select2/css/select2.min.css">
+    <link rel="stylesheet" href="/Static/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
+    <!-- Tempusdominus Bootstrap 4 -->
+    <link rel="stylesheet" href="/Static/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
+    <!-- Google Font: Source Sans Pro -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700">
+    {% block styles %}{% endblock %}
+</head>
+
+<body class="hold-transition sidebar-mini sidebar-collapse">
+    <div class="wrapper">
+
+        <!-- Navbar -->
+        <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+                </li>
+                <li class="nav-item d-none d-sm-inline-block">
+                    <a href="{{ url_for('home.index') }}" class="nav-link">Inicio</a>
+                </li>
+            </ul>
+
+            <!-- Botón de Logout -->
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <form action="{{ url_for('home.logout') }}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Sidebar -->
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+            <a href="#" class="brand-link">
+                <span class="brand-text font-weight-light">PROYECTO BASE</span>
+            </a>
+            <div class="sidebar">
+                <nav class="mt-2">
+                    <ul class="nav nav-pills nav-sidebar flex-column">
+                        <li class="nav-item">
+                            <a href="{{ url_for('home.index') }}"
+                                class="nav-link {% if active_page == 'home' %}active{% endif %}">
+                                <i class="nav-icon fas fa-home"></i>
+                                <p>Dashboard</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url_for('usuario.Modulo_Usuarios') }}"
+                                class="nav-link {% if active_page == 'usuarios' %}active{% endif %}">
+                                <i class="nav-icon fas fa-users"></i>
+                                <p>Usuarios</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link {% if active_page == 'configuracion' %}active{% endif %}">
+                                <i class="nav-icon fas fa-cogs"></i>
+                                <p>Configuración</p>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+        <!-- Contenido principal -->
+        <div class="content-wrapper">
+            {% block content %}{% endblock %}
+            <!-- <section class="content">
+                <div class="container-fluid">
+                    <h1>Bienvenido al Dashboard</h1>
+                    <p>Esta es una plantilla optimizada con más plugins.</p>
+                    <button id="testButton" class="btn btn-primary">Haz clic aquí</button>
+                    <div class="form-group">
+                        <label>Fecha y Hora:</label>
+                        <div class="input-group date" id="datetimepicker1" data-target-input="nearest">
+                            <input type="text" class="form-control datetimepicker-input"
+                                data-target="#datetimepicker1" />
+                            <div class="input-group-append" data-target="#datetimepicker1" data-toggle="datetimepicker">
+                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section> -->
+        </div>
+    </div>
+    <div id="dynamic-modal" class="modal fade" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 id="modal-title" class="modal-title">Default Modal</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span>×</span>
+                    </button>
+                </div>
+                <div id="modal-body" class="modal-body">
+                    <p>One fine body…</p>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+
+    <!-- jQuery -->
+    <script src="/Static/js/jquery.min.js"></script>
+    <!-- Bootstrap JS -->
+     <script src="/Static/js/bootstrap.bundle.min.js"></script>
+    <!-- AdminLTE JS -->
+    <script src="/Static/js/adminlte.min.js"></script>
+
+    <!-- JSZip (necesario para exportar Excel) -->
+    <script src="/Static/plugins/datatables-buttons/js/jszip.min.js"></script>
+    <!-- DataTables -->
+    <script src="/Static/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="/Static/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="/Static/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="/Static/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+    <script src="/Static/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
+    <script src="/Static/plugins/datatables-buttons/js/buttons.print.min.js"></script>
+    <script src="/Static/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+    <script src="/Static/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+
+    <!-- pdfmake (para PDF) -->
+    <script src="/Static/plugins/pdfmake/pdfmake.min.js"></script>
+    <script src="/Static/plugins/pdfmake/vfs_fonts.js"></script>
+
+    <!-- Moment.js (para formateo de fechas) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+
+    <!-- SweetAlert2 -->
+    <script src="/Static/plugins/sweetalert2/sweetalert2.min.js"></script>
+    <!-- Toastr -->
+    <script src="/Static/plugins/toastr/toastr.min.js"></script>
+    <!-- Select2 -->
+    <script src="/Static/plugins/select2/js/select2.full.min.js"></script>
+    <!-- InputMask -->
+    <script src="/Static/plugins/inputmask/jquery.inputmask.min.js"></script>
+    <!-- Tempusdominus Bootstrap 4 -->
+    <script src="/Static/plugins/moment/moment.min.js"></script>
+    <script src="/Static/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+
+    <script>
+        function loadBigModal(url, title) {
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function (html) {
+                    // Cambiar el contenido del modal
+                    $('#dynamic-modal .modal-dialog').attr('class', 'modal-dialog modal-xl');
+                    $('#modal-body').html(html);
+                    $('#modal-title').text(title);
+                    $('#dynamic-modal').modal('show');
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error al cargar el contenido del modal:', error);
+                }
+            });
+        }
+
+        function loadMediumModal(url, title) {
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function (html) {
+                    $('#dynamic-modal .modal-dialog').attr('class', 'modal-dialog modal-lg');
+                    $('#modal-body').html(html);
+                    $('#modal-title').text(title);
+                    $('#dynamic-modal').modal('show');
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error al cargar el contenido del modal:', error);
+                }
+            });
+        }
+
+        function loadShortModal(url, title) {
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function (html) {
+                    $('#dynamic-modal .modal-dialog').attr('class', 'modal-dialog modal-sm');
+                    $('#modal-body').html(html);
+                    $('#modal-title').text(title);
+                    $('#dynamic-modal').modal('show');
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error al cargar el contenido del modal:', error);
+                }
+            });
+        }
+
+        function newexportactionServerSideOff(e, dt, button, config) {
+            // Guardar el contenido original del botón
+            var originalText = $(button).html();
+            // Cambiar el contenido del botón para incluir un spinner
+            $(button).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+
+            var self = this;
+
+            // Almacenar el estado actual del DataTable
+            var oldStart = dt.settings()[0]._iDisplayStart;
+
+            // Configurar DataTable para cargar todos los datos en memoria
+            dt.settings()[0]._iDisplayLength = 2147483647;
+
+            // Redibujar el DataTable con todos los datos antes de la exportación
+            dt.draw('page');
+
+            // Llamar a la acción de exportación original
+            if (button[0].className.indexOf('buttons-copy') >= 0 || button[0].className.indexOf('btn btn-primary') >= 0) {
+                $.fn.dataTable.ext.buttons.copyHtml5.action.call(self, e, dt, button, config);
+            }
+            else if (button[0].className.indexOf('btn btn-success') >= 0) {
+                $.fn.dataTable.ext.buttons.excelHtml5.available(dt, config) ?
+                    $.fn.dataTable.ext.buttons.excelHtml5.action.call(self, e, dt, button, config) :
+                    $.fn.dataTable.ext.buttons.excelFlash.action.call(self, e, dt, button, config);
+            }
+            else if (button[0].className.indexOf('buttons-csv') >= 0) {
+                $.fn.dataTable.ext.buttons.csvHtml5.available(dt, config) ?
+                    $.fn.dataTable.ext.buttons.csvHtml5.action.call(self, e, dt, button, config) :
+                    $.fn.dataTable.ext.buttons.csvFlash.action.call(self, e, dt, button, config);
+            }
+            else if (button[0].className.indexOf('buttons-pdf') >= 0 || button[0].className.indexOf('btn btn-danger') >= 0) {
+                $.fn.dataTable.ext.buttons.pdfHtml5.available(dt, config) ?
+                    $.fn.dataTable.ext.buttons.pdfHtml5.action.call(self, e, dt, button, config) :
+                    $.fn.dataTable.ext.buttons.pdfFlash.action.call(self, e, dt, button, config);
+            }
+            else if (button[0].className.indexOf('buttons-print') >= 0 || button[0].className.indexOf('btn btn-info') >= 0) {
+                $.fn.dataTable.ext.buttons.print.action(e, dt, button, config);
+            }
+
+            // Restaurar el estado original del DataTable después de la exportación
+            dt.settings()[0]._iDisplayStart = oldStart;
+            dt.settings()[0]._iDisplayLength = 10; // O el valor original de longitud de página que estabas usando
+            dt.draw(false);
+
+            // Restaurar el contenido original del botón después de que la exportación ha concluido
+            $(button).html(originalText);
+        }
+
+        $(document).ready(function () {
+            $('body').addClass('sidebar-collapse');
+            var windowHeight = $('body > div.os-padding.menu-open > div > div > div > div.content-wrapper').height() / 2;
+
+            $(document).on('column-visibility.dt', function (e, settings) {
+                var table = new $.fn.dataTable.Api(settings);
+                setTimeout(function () {
+                    table.columns.adjust().draw();
+                }, 10); // Pequeño delay para evitar errores
+            });
+
+            // Inicializar Select2
+            $(".select2").select2();
+
+            // Aplicar InputMask
+            $("[data-mask]").inputmask();
+
+            // Inicializar DateTimePicker
+            $('#datetimepicker1').datetimepicker({
+                format: 'YYYY-MM-DD HH:mm'
+            });
+
+            // Mostrar alertas con SweetAlert2
+            $("#testButton").click(function () {
+                Swal.fire({
+                    title: "¡Bien!",
+                    text: "SweetAlert2 está funcionando correctamente.",
+                    icon: "success"
+                });
+                toastr.success("¡Toastr también funciona!", 'MENSAJE DE SISTEMA');
+            });
+
+            $('#datetimepicker1').datetimepicker({
+                format: 'YYYY-MM-DD HH:mm'
+            });
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>
+<style>
+    .dt-button-collection {
+        position: absolute !important;
+        left: auto !important;
+        right: 0 !important;
+        z-index: 1050 !important;
+    }
+</style>

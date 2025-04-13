@@ -1,0 +1,138 @@
+{% extends "index.html" %}
+
+{% block title %}PROYECTO BASE - Registrar Usuario{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="text-center mb-0">Registro de Usuario</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="txt_Nombre">Nombre Completo</label>
+                        <div class="input-group">
+                            <input type="text" id="txt_Nombre" class="form-control" placeholder="Nombre completo">
+                            <div class="input-group-append">
+                                <div class="input-group-text"><i class="fas fa-user"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="txt_Email">Correo Electrónico</label>
+                        <div class="input-group">
+                            <input type="email" id="txt_Email" class="form-control" placeholder="Correo electrónico">
+                            <div class="input-group-append">
+                                <div class="input-group-text"><i class="fas fa-envelope"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="txt_Password">Contraseña</label>
+                        <div class="input-group">
+                            <input type="password" id="txt_Password" class="form-control" placeholder="Contraseña">
+                            <div class="input-group-append">
+                                <div class="input-group-text"><i class="fas fa-lock"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cbx_TipoUsuario">Tipo de Usuario</label>
+                        <div class="input-group">
+                            <select id="cbx_TipoUsuario" class="form-control"></select>
+                            <div class="input-group-append">
+                                <button id="btn_TipoUsuario" type="button" class="btn btn-info"><i
+                                        class="bi bi-plus"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button id="btn_Volver" type="button" class="btn btn-danger">Volver</button>
+                        <button id="btn_Registrar" type="button" class="btn btn-primary">Registrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function fct_GetTiposUsuarios() {
+        $.getJSON('/trabajadores/usuarios/GetTiposUsuarios', function (response) {
+            if (response.Status === 'success') {
+                let items = '<option disabled selected>--SELECCIONAR--</option>';
+
+                $.each(response.data, function (index, item) {
+                    items += `<option value="${item.id}">${item.nombre}</option>`;
+                });
+
+                $('#cbx_TipoUsuario').html(items);
+            } else {
+                console.error('Error al obtener los tipos de usuario:', response.Msj);
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        fct_GetTiposUsuarios();
+
+        $('#btn_TipoUsuario').click(function () {
+            loadMediumModal('/trabajadores/usuarios/TipoUsuarioNuevo', 'Registrar Tipo Usuario');
+        });
+
+        $("#btn_Registrar").click(function () {
+            let nombre = $("#txt_Nombre").val().trim();
+            let email = $("#txt_Email").val().trim();
+            let password = $("#txt_Password").val().trim();
+            let tipoUsuario = $('#cbx_TipoUsuario').val();
+
+            if (!nombre || !email || !password || !tipoUsuario) {
+                toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                return;
+            }
+
+            let datos = {
+                nombre: nombre,
+                email: email,
+                password: password,
+                idTipoUsuario: tipoUsuario
+            };
+
+            $.ajax({
+                url: "/trabajadores/usuarios/RegistrarUsuario",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(datos),
+                success: function (response) {
+                    if (response.Status === "success") {
+                        if (response.Msj2 !== '' && response.Msj2 !== null) {
+                            toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                            return;
+                        }
+                        toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                        setTimeout(() => {
+                            window.location.href = "/usuarios/GestionarUsuarios";
+                        }, 500);
+                    } else {
+                        toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                        console.error('Error: ' + response.Msj);
+                    }
+                },
+                error: function (xhr, Status, error) {
+                    toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                    console.error('Error:' + error);
+                }
+            });
+        });
+
+        $("#btn_Volver").click(function () {
+            window.location.href = "/trabajadores/usuarios/GestionarUsuarios";
+        });
+    });
+</script>
+{% endblock %}
