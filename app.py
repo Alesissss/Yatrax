@@ -7,7 +7,7 @@ app = Flask(__name__, template_folder="Views", static_folder="Static")
 
 # Manejar errores 401 (Página no autorizada)
 @app.errorhandler(401)
-def error_404(error):
+def error_401(error):
     return render_template("error.html", error="Página no autorizada"), 401
 
 # Manejar errores 404 (Página no encontrada)
