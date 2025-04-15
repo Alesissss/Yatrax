@@ -1,6 +1,6 @@
 {% extends "index.html" %}
 
-{% block title %}PROYECTO BASE - Registrar Usuario{% endblock %}
+{% block title %}YATRAX - Registrar Usuario{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -116,7 +116,7 @@
                         }
                         toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                         setTimeout(() => {
-                            window.location.href = "/usuarios/GestionarUsuarios";
+                            window.location.href = "/trabajadores/usuarios/GestionarUsuarios";
                         }, 500);
                     } else {
                         toastr.error(response.Msj, "MENSAJE DE SISTEMA");

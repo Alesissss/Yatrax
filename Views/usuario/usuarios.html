@@ -1,6 +1,6 @@
 {% extends "index.html" %}
 
-{% block title %}PROYECTO BASE - Gestión de Usuarios{% endblock %}
+{% block title %}YATRAX - Gestión de Usuarios{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -49,7 +49,7 @@
             scrollY: windowHeight,
             scrollX: true,
             scrollCollapse: true,
-            ordering: false,
+            ordering: true,
             destroy: true,
             responsive: true,
             autoWidth: false,
@@ -119,7 +119,7 @@
                     exportOptions:
                     {
                         stripHtml: true,
-                        // columns: ':not(:last-child)'
+                        columns: ':not(:last-child)'
                     },
                 },
                 {
@@ -131,7 +131,7 @@
                     exportOptions:
                     {
                         stripHtml: true,
-                        // columns: ':not(:last-child)'
+                        columns: ':not(:last-child)'
                     },
                     orientation: 'landscape',
                     pageSize: 'LEGAL',
