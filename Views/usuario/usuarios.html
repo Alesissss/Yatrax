@@ -3,7 +3,7 @@
 {% block title %}YATRAX - Gestión de Usuarios{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
+<div class="container-fluid m-1">
     <div class="panel-heading">
         <div class="row">
             <div class="col-md-12">
@@ -37,7 +37,7 @@
     var dtUsuarios;
 
     $(document).ready(function () {
-        $('body').addClass('sidebar-collapse');
+        // $('body').addClass('sidebar-collapse');
         var windowHeight = $('body > div.os-padding.menu-open > div > div > div > div.content-wrapper').height() / 2;
         //CONFIGURACION POR DEFECTO DATATABLES
         $.extend($.fn.dataTable.defaults, {
@@ -48,6 +48,7 @@
             deferRender: true,
             scrollY: windowHeight,
             scrollX: true,
+            fixedHeader: true,
             scrollCollapse: true,
             ordering: true,
             destroy: true,
@@ -185,7 +186,7 @@
                 {
                     data: null,
                     render: function (data, type, row) {
-                        return `</button> <button class="btn btn-xs btn-success" onclick="fct_UsuarioEditar('${data.id}')"><i class="bi bi-pencil-square"></i></button>
+                        return `</button> <button class="btn btn-xs btn-primary" onclick="fct_UsuarioEditar('${data.id}')"><i class="bi bi-pencil-square"></i></button>
                            <button class="btn btn-xs btn-danger" onclick = "fct_UsuarioEliminar('${data.id}')" > <i class="bi bi-trash" > </i></button>`;
                         //Todos los permisos comentados para reutilizarlos
                         //return `</button> <button class="btn btn-xs btn-info" onclick="fct_ProyectoVer('${data.id}')"><i class="bi bi-eye"></i></button>

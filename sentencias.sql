@@ -89,7 +89,7 @@ BEGIN
     SET @MSJ2 = NULL;
 
     SELECT COUNT(*) INTO cUsuario FROM USUARIOS WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
-    SELECT COUNT(*) INTO cEmail FROM USUARIOS WHERE EMAIL = P_EMAIL;
+    SELECT COUNT(*) INTO cEmail FROM USUARIOS WHERE EMAIL = P_EMAIL AND ID != P_ID;
 
     IF cUsuario <= 0 THEN
         SET @MSJ2 = 'El usuario que intenta editar no existe';
