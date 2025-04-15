@@ -7,10 +7,18 @@ home_bp = Blueprint('home', __name__, url_prefix='/trabajadores/home')
 # RESTRICCIONES
 @home_bp.before_request
 def verificar_sesion():
-    rutas_permitidas = ['home.login', 'home.logout', 'static']  # Excluir login, logout y archivos estáticos
+    rutas_permitidas = ['home.login', 'home.logout', 'static']
     usuario = session.get('usuario')
-    if usuario and usuario['tipousuario'].upper() == 'CLIENTE' and request.endpoint not in rutas_permitidas:
+
+    if (
+        (not usuario and request.endpoint not in rutas_permitidas)
+        or (usuario and usuario['tipousuario'].upper() == 'CLIENTE' and request.endpoint not in rutas_permitidas)
+    ):
+        session.clear()
+        if not usuario:
+            return redirect(url_for('home.login'))
         abort(401)
+
 
 #Login
 @home_bp.route('/')

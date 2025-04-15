@@ -79,6 +79,7 @@ CREATE PROCEDURE SP_EDITAR_USUARIO(
 )
 BEGIN
     DECLARE cUsuario INT;
+    DECLARE cEmail INT;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         SET @MSJ2 = CONCAT('Error inesperado: ', (SELECT MESSAGE_TEXT FROM INFORMATION_SCHEMA.INNODB_TRX LIMIT 1));
@@ -88,12 +89,18 @@ BEGIN
     SET @MSJ2 = NULL;
 
     SELECT COUNT(*) INTO cUsuario FROM USUARIOS WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+    SELECT COUNT(*) INTO cEmail FROM USUARIOS WHERE EMAIL = P_EMAIL;
 
     IF cUsuario <= 0 THEN
         SET @MSJ2 = 'El usuario que intenta editar no existe';
+    ELSEIF cEmail != 0 THEN
+        SET @MSJ2 = 'El correo ingresado ya existe';
     ELSE
         UPDATE USUARIOS 
-        SET NOMBRE = P_NOMBRE, EMAIL = P_EMAIL, ID_TIPOUSUARIO = P_IDTIPOUSUARIO, estado_proceso = 'MODIFICADO' 
+        SET NOMBRE = P_NOMBRE, 
+            EMAIL = P_EMAIL, 
+            ID_TIPOUSUARIO = P_IDTIPOUSUARIO, 
+            estado_proceso = 'MODIFICADO' 
         WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
 
         SET @MSJ = 'Se modificó correctamente al usuario';
