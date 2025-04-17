@@ -13,12 +13,6 @@
     <link rel="stylesheet" href="/Static/css/adminlte.min.css">
     <link rel="stylesheet" href="/Static/css/all.min.css">
 
-    <!-- DataTables -->
-    <!-- DataTables CSS -->
-    <link rel="stylesheet" href="/Static/plugins/datatables/datatables.min.css">
-    <link rel="stylesheet" href="/Static/plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
-    <link rel="stylesheet" href="/Static/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
-
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 
     <!-- SweetAlert2 -->
@@ -35,7 +29,7 @@
     {% block styles %}{% endblock %}
 </head>
 
-<body class="hold-transition sidebar-mini">
+<body class="hold-transition sidebar-mini layout-footer-fixed">
     <div class="wrapper">
 
         <!-- Navbar -->
@@ -64,6 +58,119 @@
 
         <!-- Sidebar -->
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
+            <!-- Brand Logo -->
+            <a href="index3.html" class="brand-link">
+                <img src="/Static/img/yatrax_icon.ico" alt="YATRAX Logo" class="brand-image img-circle elevation-3"
+                    style="opacity: .8">
+                <span class="brand-text font-weight-light">YATRAX</span>
+            </a>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Sidebar user panel (optional) -->
+                <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+                    <div class="image">
+                        {% if session.get('usuario') and 'imagen' in session.get('usuario') %}
+                        <img src="{{ session['usuario']['imagen'] }}" class="img-circle elevation-2" alt="User Image">
+                        {% else %}
+                        <img src="{{ '/Static/img/trabajadores/default-user.png' }}" class="img-circle elevation-2"
+                            alt="User Image">
+                        <!-- Imagen por defecto -->
+                        {% endif %}
+                    </div>
+                    <div class="info">
+                        {% if session.get('usuario') and 'email' in session.get('usuario') %}
+                        <a href="#" class="d-block">{{ session['usuario']['email'] }}</a>
+                        {% else %}
+                        <a href="#" class="d-block">Usuario desconocido</a> <!-- Texto por defecto -->
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- SidebarSearch Form -->
+                <div class="form-inline">
+                    <div class="input-group" data-widget="sidebar-search">
+                        <input class="form-control form-control-sidebar" type="search" placeholder="Buscar"
+                            aria-label="Search">
+                        <div class="input-group-append">
+                            <button class="btn btn-sidebar">
+                                <i class="fas fa-fw fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="sidebar-search-results">
+                        <div class="list-group"><a href="#" class="list-group-item">
+                                <div class="search-title"><strong class="text-light"></strong>N<strong
+                                        class="text-light"></strong>o<strong class="text-light"></strong> <strong
+                                        class="text-light"></strong>e<strong class="text-light"></strong>l<strong
+                                        class="text-light"></strong>e<strong class="text-light"></strong>m<strong
+                                        class="text-light"></strong>e<strong class="text-light"></strong>n<strong
+                                        class="text-light"></strong>t<strong class="text-light"></strong> <strong
+                                        class="text-light"></strong>f<strong class="text-light"></strong>o<strong
+                                        class="text-light"></strong>u<strong class="text-light"></strong>n<strong
+                                        class="text-light"></strong>d<strong class="text-light"></strong>!<strong
+                                        class="text-light"></strong></div>
+                                <div class="search-path"></div>
+                            </a></div>
+                    </div>
+                </div>
+
+                <!-- Sidebar Menu -->
+                <nav class="mt-2">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+                        data-accordion="false">
+                        <!-- Add icons to the links using the .nav-icon class
+                       with font-awesome or any other icon font library -->
+                        <li class="nav-item">
+                            <a href="{{ url_for('home.index') }}"
+                                class="nav-link {% if active_page == 'home' %}active{% endif %}">
+                                <i class="nav-icon fas fa-home"></i>
+                                <p>
+                                    INICIO
+                                </p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link {% if active_menu == 'mUsuarios' %}active{% endif %}">
+                                <i class="nav-icon fas fas fa-users"></i>
+                                <p>
+                                    USUARIOS
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview" style="display: none;">
+                                <li class="nav-item">
+                                    <a href="{{ url_for('usuario.Modulo_Usuarios') }}"
+                                        class="nav-link {% if active_page == 'usuarios' %}active{% endif %}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Gestionar usuarios</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link {% if active_page == 'configuracion' %}active{% endif %}">
+                                <i class="nav-icon fas fa-cogs"></i>
+                                <p>CONFIGRUACIÓN</p>
+                                <i class="right fas fa-angle-left"></i>
+                            </a>
+                            <ul class="nav nav-treeview" style="display: none;">
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Gestionar permisos</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </nav>
+                <!-- /.sidebar-menu -->
+            </div>
+            <!-- /.sidebar -->
+        </aside>
+
+        <!-- <aside class="main-sidebar sidebar-dark-primary elevation-4">
             <a href="#" class="brand-link">
                 <span class="brand-text font-weight-light">YATRAX</span>
             </a>
@@ -93,7 +200,7 @@
                     </ul>
                 </nav>
             </div>
-        </aside>
+        </aside> -->
         <!-- Contenido principal -->
         <div class="content-wrapper">
             {% block content %}{% endblock %}
@@ -115,7 +222,15 @@
                 </div>
             </section> -->
         </div>
+        <footer class="main-footer">
+            <div class="float-right d-none d-sm-block">
+                <b>Versión</b> 1.0
+            </div>
+            <strong>Copyright © 2025 <a href="{{ url_for('home.index') }}">YATRAX</a>.</strong> Todos los derechos
+            reservados.
+        </footer>
     </div>
+
     <div id="dynamic-modal" class="modal fade" style="display: none;">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -141,22 +256,6 @@
     <!-- AdminLTE JS -->
     <script src="/Static/js/adminlte.min.js"></script>
 
-    <!-- JSZip (necesario para exportar Excel) -->
-    <script src="/Static/plugins/datatables-buttons/js/jszip.min.js"></script>
-    <!-- DataTables -->
-    <script src="/Static/plugins/datatables/jquery.dataTables.min.js"></script>
-    <script src="/Static/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
-    <script src="/Static/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
-    <script src="/Static/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
-    <script src="/Static/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
-    <script src="/Static/plugins/datatables-buttons/js/buttons.print.min.js"></script>
-    <script src="/Static/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
-    <script src="/Static/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
-
-    <!-- pdfmake (para PDF) -->
-    <script src="/Static/plugins/pdfmake/pdfmake.min.js"></script>
-    <script src="/Static/plugins/pdfmake/vfs_fonts.js"></script>
-
     <!-- Moment.js (para formateo de fechas) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
 
@@ -171,6 +270,14 @@
     <!-- Tempusdominus Bootstrap 4 -->
     <script src="/Static/plugins/moment/moment.min.js"></script>
     <script src="/Static/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+
+    <!-- Datatables -->
+    <link rel="stylesheet" href="/Static/plugins/datatables-test/datatables.min.css">
+    <script src="/Static/plugins/datatables-test/datatables.min.js"></script>
+
+    <!-- Dropzone -->
+    <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
 
     <script>
         function loadBigModal(url, title) {
@@ -322,10 +429,25 @@
 
 </html>
 <style>
-    .dt-button-collection {
-        position: absolute !important;
-        left: auto !important;
-        right: 0 !important;
-        z-index: 1050 !important;
+    div.dts div.dt-length,
+    div.dts div.dt-paging,
+    div.dts div.dataTables_paginate,
+    div.dts div.dataTables_length {
+        display: block !important;
+    }
+
+    div.dt-search {
+        display: flex;
+        align-items: center;
+    }
+
+    div.dt-search input[type="search"] {
+        width: 100% !important;
+        transition: width 0.3s ease;
+    }
+
+    /* Al hacer foco, se expande suavemente */
+    div.dt-search input[type="search"]:focus {
+        width: 100% !important;
     }
 </style>

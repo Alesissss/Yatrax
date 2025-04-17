@@ -1,4 +1,6 @@
+import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort
+from werkzeug.utils import secure_filename
 from Models.usuario import Usuario
 from Models.tipoUsuario import TipoUsuario
 
@@ -21,11 +23,11 @@ def verificar_sesion():
 # VIEWS
 @usuario_bp.route('/GestionarUsuarios')
 def Modulo_Usuarios():
-    return render_template('usuario/usuarios.html', active_page="usuarios")
+    return render_template('usuario/usuarios.html', active_page="usuarios", active_menu='mUsuarios')
 
 @usuario_bp.route('/UsuarioNuevo')
 def Usuario_Nuevo():
-    return render_template('usuario/usuarioNuevo.html', active_page="usuarios")
+    return render_template('usuario/usuarioNuevo.html', active_page="usuarios", active_menu='mUsuarios')
 
 @usuario_bp.route('TipoUsuarioNuevo')
 def TipoUsuario_Nuevo():
@@ -34,6 +36,11 @@ def TipoUsuario_Nuevo():
 # END VIEWS
 
 # FUNCIONES
+# Función para validar el tipo de archivo
+def allowed_file(filename):
+    ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
 @usuario_bp.route("/GetData_Usuarios", methods=["GET"])
 def get_usuarios():
     try:
@@ -55,8 +62,32 @@ def GetTiposUsuarios():
 @usuario_bp.route("/RegistrarUsuario", methods=["POST"])
 def registrar_usuario():
     try:
-        data = request.json
-        mensajes = Usuario.registrar(data["nombre"], data["email"], data["password"], data["idTipoUsuario"], session['usuario'].get('email', 'SIN USUARIO').strip())
+        UPLOAD_FOLDER = "Static/img/trabajadores/"
+        nombre = request.form.get("nombre").strip()
+        email = request.form.get("email").strip()
+        password = request.form.get("password")
+        idTipoUsuario = request.form.get("idTipoUsuario")
+        usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
+
+        if not nombre or not email or not password or not idTipoUsuario:
+            return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
+
+        ruta_imagen = "/Static/img/trabajadores/default-user.png"
+
+        if 'imagen' in request.files:
+            imagen = request.files['imagen']
+
+            if imagen and allowed_file(imagen.filename):
+                extension = imagen.filename.rsplit(".", 1)[1].lower()
+                
+                filename = f"{email}.{extension}"
+                
+                filepath = os.path.join(UPLOAD_FOLDER, filename)
+                imagen.save(filepath)
+                
+                ruta_imagen = f"/{UPLOAD_FOLDER}{filename}"
+
+        mensajes = Usuario.registrar(nombre, email, password, ruta_imagen, idTipoUsuario, usuario_actual)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 
@@ -64,8 +95,9 @@ def registrar_usuario():
             return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
         elif msj2:
             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
-        else:  # Fallback
+        else:
             return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar usuario'})
+
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
@@ -88,12 +120,32 @@ def eliminar_usuario(id):  # Recibe el ID de la URL
 @usuario_bp.route("/EditarUsuario/<int:id>", methods=['GET', 'POST'])
 def editar_usuario(id):
     try:
+        UPLOAD_FOLDER = "Static/img/trabajadores/"
         usuario = Usuario.obtener_por_id(id)
+
         if request.method == 'POST':
-            data = request.json
+            nombre = request.form.get("nombre")
+            email = request.form.get("email").strip()
+            idTipoUsuario = request.form.get("idTipoUsuario")
 
-            mensajes = Usuario.editar(id, data["nombre"], data["email"], data["idTipoUsuario"])
+            if not nombre or not email or not idTipoUsuario:
+                return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
 
+            ruta_imagen = usuario['imagen'] if usuario and 'imagen' in usuario else "/Static/img/trabajadores/default-user.png"
+
+            if 'imagen' in request.files:
+                imagen = request.files['imagen']
+                
+                if imagen and allowed_file(imagen.filename):
+                    extension = imagen.filename.rsplit(".", 1)[1].lower()
+                    filename = f"{email}.{extension}"
+                    
+                    filepath = os.path.join(UPLOAD_FOLDER, filename)
+                    imagen.save(filepath)
+                    
+                    ruta_imagen = f"/{UPLOAD_FOLDER}{filename}"
+
+            mensajes = Usuario.editar(id, nombre, email, ruta_imagen, idTipoUsuario)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
@@ -103,11 +155,38 @@ def editar_usuario(id):
                 return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
             else:
                 return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar usuario'})
-    
+
         if usuario:
-            return render_template('usuario/usuarioEditar.html', active_page="usuarios", usuario=usuario)
-        return render_template('usuario/usuarioEditar.html', active_page="usuarios", usuario={})
+            return render_template('usuario/usuarioEditar.html', active_page="usuarios", active_menu='mUsuarios', usuario=usuario)
+        return render_template('usuario/usuarioEditar.html', active_page="usuarios", active_menu='mUsuarios', usuario={})
+
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+    
+@usuario_bp.route("/VerUsuario/<int:id>", methods=['GET'])
+def ver_usuario(id):
+    try:
+        usuario = Usuario.obtener_por_id(id)
+        if usuario:
+            return render_template('usuario/usuarioVer.html', active_page="usuarios", active_menu='mUsuarios', usuario=usuario)
+        return render_template('usuario/usuarioVer.html', active_page="usuarios", active_menu='mUsuarios', usuario={})
         
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+    
+@usuario_bp.route("/DarBajaUsuario/<int:id>", methods=['POST'])
+def darBaja_usuario(id):  # Recibe el ID de la URL
+    try:
+        mensajes = Usuario.darBaja(id)  # Se usa el ID directamente
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja al usuario'})
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
     

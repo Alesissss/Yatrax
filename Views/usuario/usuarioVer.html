@@ -1,6 +1,6 @@
 {% extends "index.html" %}
 
-{% block title %}YATRAX - Editar usuario{% endblock %}
+{% block title %}YATRAX - Ver usuario{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -8,7 +8,7 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header bg-primary text-white">
-                    <h4 class="text-center mb-0">Editar usuario</h4>
+                    <h4 class="text-center mb-0">Ver usuario</h4>
                 </div>
                 <div class="card-body">
                     <div id= "data-usuario" class="container-fluid" type="hidden" data-usuario='{{ usuario | tojson | safe }}'></div>  <!-- si prefieres usar toda la data en un solo objeto escondido -->
@@ -16,7 +16,7 @@
                     <div class="mb-3">
                         <label for="txt_Nombre">Nombre completo</label>
                         <div class="input-group">
-                            <input type="text" id="txt_Nombre" class="form-control" placeholder="Nombre completo"
+                            <input type="text" id="txt_Nombre" class="form-control" placeholder="Nombre completo" disabled
                                 value="{{ usuario.nombre }}">
                             <div class="input-group-append">
                                 <div class="input-group-text"><i class="fas fa-user"></i></div>
@@ -26,7 +26,7 @@
                     <div class="mb-3">
                         <label for="txt_Email">Correo electrónico</label>
                         <div class="input-group">
-                            <input type="email" id="txt_Email" class="form-control" placeholder="Correo electrónico"
+                            <input type="email" id="txt_Email" class="form-control" placeholder="Correo electrónico" disabled
                                 value="{{ usuario.email }}">
                             <div class="input-group-append">
                                 <div class="input-group-text"><i class="fas fa-envelope"></i></div>
@@ -41,11 +41,11 @@
                                 <div class="input-group-text"><i class="fas fa-lock"></i></div>
                             </div>
                         </div>
-                    </div>                              
+                    </div>
                     <div class="mb-3">
                         <label for="cbx_TipoUsuario">Tipo de usuario</label>
                         <div class="input-group">
-                            <select id="cbx_TipoUsuario" class="form-control">
+                            <select id="cbx_TipoUsuario" class="form-control" disabled>
                             </select>
                             <!-- <div class="input-group-append">
                                 <button id="btn_TipoUsuario" type="button" class="btn btn-info"><i
@@ -53,18 +53,9 @@
                             </div> -->
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="file_Imagen">Imagen de perfil</label>
-                        <div class="input-group">
-                            <input type="file" id="file_Imagen" class="form-control" accept="image/*">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="bi bi-image"></i></div>
-                            </div>
-                        </div>
-                    </div>
                     <div class="text-center">
                         <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de usuarios</button>
-                        <button id="btn_Editar" type="button" class="btn btn-primary">Guardar cambios</button>
+                        <button id="btn_Aceptar" type="button" class="btn btn-primary">Aceptar</button>
                     </div>
                 </div>
             </div>
@@ -105,48 +96,8 @@
             loadMediumModal('/trabajadores/usuarios/TipoUsuarioNuevo', 'Registrar Tipo Usuario');
         });
 
-        $("#btn_Editar").click(function () {
-            let nombre = $("#txt_Nombre").val().trim();
-            let email = $("#txt_Email").val().trim();
-            let tipoUsuario = $('#cbx_TipoUsuario').val();
-
-            if (!nombre || !email || !tipoUsuario) {
-                toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
-                return;
-            }
-
-            let id = $('#idUsuario').val().trim();
-            let datos = {
-                nombre: nombre,
-                email: email,
-                idTipoUsuario: tipoUsuario
-            };
-
-            $.ajax({
-                url: `/trabajadores/usuarios/EditarUsuario/${id}`,
-                type: "POST",
-                contentType: "application/json",
-                data: JSON.stringify(datos),
-                success: function (response) {
-                    if (response.Status === "success") {
-                        if (response.Msj2 !== '' && response.Msj2 !== null) {
-                            toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                            return;
-                        }
-                        toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                        setTimeout(() => {
-                            window.location.href = "/trabajadores/usuarios/GestionarUsuarios";
-                        }, 500);
-                    } else {
-                        toastr.error(response.Msj, "MENSAJE DE SISTEMA");
-                        console.error('Error: ' + response.Msj);
-                    }
-                },
-                error: function (xhr, Status, error) {
-                    toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
-                    console.error('Error:' + error);
-                }
-            });
+        $("#btn_Aceptar").click(function () {
+            window.location.href = "/trabajadores/usuarios/GestionarUsuarios";
         });
 
         $("#btn_Volver").click(function () {

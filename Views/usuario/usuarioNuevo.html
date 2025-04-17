@@ -1,6 +1,6 @@
 {% extends "index.html" %}
 
-{% block title %}YATRAX - Registrar Usuario{% endblock %}
+{% block title %}YATRAX - Registrar usuario{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -8,11 +8,11 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header bg-primary text-white">
-                    <h4 class="text-center mb-0">Registro de Usuario</h4>
+                    <h4 class="text-center mb-0">Registrar usuario</h4>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
-                        <label for="txt_Nombre">Nombre Completo</label>
+                        <label for="txt_Nombre">Nombre completo</label>
                         <div class="input-group">
                             <input type="text" id="txt_Nombre" class="form-control" placeholder="Nombre completo">
                             <div class="input-group-append">
@@ -21,7 +21,7 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="txt_Email">Correo Electrónico</label>
+                        <label for="txt_Email">Correo electrónico</label>
                         <div class="input-group">
                             <input type="email" id="txt_Email" class="form-control" placeholder="Correo electrónico">
                             <div class="input-group-append">
@@ -39,18 +39,28 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="cbx_TipoUsuario">Tipo de Usuario</label>
+                        <label for="cbx_TipoUsuario">Tipo de usuario</label>
                         <div class="input-group">
                             <select id="cbx_TipoUsuario" class="form-control"></select>
-                            <div class="input-group-append">
+                            <!-- <div class="input-group-append">
                                 <button id="btn_TipoUsuario" type="button" class="btn btn-info"><i
                                         class="bi bi-plus"></i></button>
+                            </div> -->
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="file_Imagen">Imagen de perfil</label>
+                        <div class="input-group">
+                            <input type="file" id="file_Imagen" class="form-control" accept="image/*">
+                            <div class="input-group-append">
+                                <div class="input-group-text"><i class="bi bi-image"></i></div>
                             </div>
                         </div>
                     </div>
                     <div class="text-center">
-                        <button id="btn_Volver" type="button" class="btn btn-danger">Volver</button>
-                        <button id="btn_Registrar" type="button" class="btn btn-primary">Registrar</button>
+                        <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de
+                            usuarios</button>
+                        <button id="btn_Registrar" type="button" class="btn btn-primary">Registrar usuario</button>
                     </div>
                 </div>
             </div>
@@ -90,30 +100,27 @@
             let email = $("#txt_Email").val().trim();
             let password = $("#txt_Password").val().trim();
             let tipoUsuario = $('#cbx_TipoUsuario').val();
+            let imagen = $("#file_Imagen")[0].files[0];
 
-            if (!nombre || !email || !password || !tipoUsuario) {
+            if (!nombre || !email || !password || !tipoUsuario || !imagen) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
 
-            let datos = {
-                nombre: nombre,
-                email: email,
-                password: password,
-                idTipoUsuario: tipoUsuario
-            };
-
+            let formData = new FormData();
+            formData.append("nombre", nombre);
+            formData.append("email", email);
+            formData.append("password", password);
+            formData.append("idTipoUsuario", tipoUsuario);
+            formData.append("imagen", imagen);
             $.ajax({
                 url: "/trabajadores/usuarios/RegistrarUsuario",
                 type: "POST",
-                contentType: "application/json",
-                data: JSON.stringify(datos),
+                processData: false,
+                contentType: false,
+                data: formData,
                 success: function (response) {
                     if (response.Status === "success") {
-                        if (response.Msj2 !== '' && response.Msj2 !== null) {
-                            toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                            return;
-                        }
                         toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                         setTimeout(() => {
                             window.location.href = "/trabajadores/usuarios/GestionarUsuarios";

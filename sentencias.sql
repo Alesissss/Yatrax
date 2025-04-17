@@ -24,6 +24,7 @@ CREATE TABLE usuarios (
     nombre VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
+    imagen VARCHAR(255) NOT NULL,
     id_tipousuario INT not null,
     estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
     estado_registro INT not null DEFAULT 1,
@@ -35,7 +36,7 @@ CREATE TABLE usuarios (
 INSERT INTO tipo_usuario (id,nombre,estado_proceso,estado_registro,fecha_registro, usuario) VALUES (1,'ADMINISTRADOR','REGISTRADO',1,'2025-03-06 20:02:56','SYSTEM');
 
 -- Tabla Usuario
-INSERT INTO usuarios (id,nombre,email,password,id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (1,'Alexis','alexis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
+INSERT INTO usuarios (id,nombre,email,password, imagen, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (1,'Alexis','alexis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/alexis.jpeg',1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
 
 -- Crear procedimiento SP_REGISTRAR_USUARIO
 DELIMITER $$
@@ -43,6 +44,7 @@ CREATE PROCEDURE SP_REGISTRAR_USUARIO(
     IN P_NOMBRE VARCHAR(255),
     IN P_EMAIL VARCHAR(255),
     IN P_PASS VARCHAR(255),
+    IN P_IMAGEN VARCHAR(255),
     IN P_IDTIPOUSUARIO INT,
     IN P_USUARIO VARCHAR(255)
 )
@@ -61,8 +63,8 @@ BEGIN
     IF cEmail > 0 THEN
         SET @MSJ2 = 'El correo que intenta registrar ya está registrado';
     ELSE
-        INSERT INTO USUARIOS (NOMBRE, EMAIL, PASSWORD, ID_TIPOUSUARIO, USUARIO) 
-        VALUES (P_NOMBRE, P_EMAIL, P_PASS, P_IDTIPOUSUARIO, P_USUARIO);
+        INSERT INTO USUARIOS (NOMBRE, EMAIL, PASSWORD, IMAGEN, ID_TIPOUSUARIO, USUARIO) 
+        VALUES (P_NOMBRE, P_EMAIL, P_PASS, P_IMAGEN, P_IDTIPOUSUARIO, P_USUARIO);
 
         SET @MSJ = 'Se registró correctamente al usuario';
     END IF;
@@ -75,6 +77,7 @@ CREATE PROCEDURE SP_EDITAR_USUARIO(
     IN P_ID INT,
     IN P_NOMBRE VARCHAR(255),
     IN P_EMAIL VARCHAR(255),
+    IN P_IMAGEN VARCHAR(255),
     IN P_IDTIPOUSUARIO INT
 )
 BEGIN
@@ -98,7 +101,8 @@ BEGIN
     ELSE
         UPDATE USUARIOS 
         SET NOMBRE = P_NOMBRE, 
-            EMAIL = P_EMAIL, 
+            EMAIL = P_EMAIL,
+            IMAGEN = P_IMAGEN,
             ID_TIPOUSUARIO = P_IDTIPOUSUARIO, 
             estado_proceso = 'MODIFICADO' 
         WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
