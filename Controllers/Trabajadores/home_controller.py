@@ -41,7 +41,9 @@ def login():
             return jsonify({'Status': 'success', 'Msj': 'Inicio de sesión exitoso'})
 
         return jsonify({'Status': 'error', 'Msj': 'Credenciales incorrectas'})
-
+    
+    if 'usuario' in session:
+        return redirect(url_for('home.index'))
     return render_template('/home/auth/login.html')
 
 @home_bp.route('/logout', methods=['POST'])
