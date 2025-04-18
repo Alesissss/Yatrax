@@ -50,11 +50,12 @@
                     </div>
                     <div class="mb-3">
                         <label for="file_Imagen">Imagen de perfil</label>
-                        <div class="input-group">
-                            <input type="file" id="file_Imagen" class="form-control" accept="image/*">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="bi bi-image"></i></div>
-                            </div>
+                        <div class="col-12 text-right">
+                            <label class="btn btn-warning" for="fl_Acta"><i class="bi bi-file-earmark-arrow-up-fill"></i>Subir archivo</label>
+                            <input type="file" class="d-none form-asignacion" id="file_Imagen">
+                            <span id="checkIcon" class="d-none text-success ml-2">
+                                <i class="bi bi-check-circle-fill"></i> Archivo subido
+                            </span>
                         </div>
                     </div>
                     <div class="text-center">
@@ -139,6 +140,14 @@
 
         $("#btn_Volver").click(function () {
             window.location.href = "/trabajadores/usuarios/GestionarUsuarios";
+        });
+
+        $('#file_Imagen').on('change', function () {
+            if (this.files.length > 0) {
+                $('#checkIcon').removeClass('d-none');
+            } else {
+                $('#checkIcon').addClass('d-none');
+            }
         });
     });
 </script>
