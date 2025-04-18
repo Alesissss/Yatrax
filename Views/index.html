@@ -79,8 +79,8 @@
                         {% endif %}
                     </div>
                     <div class="info">
-                        {% if session.get('usuario') and 'email' in session.get('usuario') %}
-                        <a href="#" class="d-block">{{ session['usuario']['email'] }}</a>
+                        {% if session.get('usuario') and 'nombre' in session.get('usuario') %}
+                        <a href="#" class="d-block">{{ session['usuario']['nombre'] }}</a>
                         {% else %}
                         <a href="#" class="d-block">Usuario desconocido</a> <!-- Texto por defecto -->
                         {% endif %}
@@ -88,7 +88,7 @@
                 </div>
 
                 <!-- SidebarSearch Form -->
-                <div class="form-inline">
+                <!-- <div class="form-inline">
                     <div class="input-group" data-widget="sidebar-search">
                         <input class="form-control form-control-sidebar" type="search" placeholder="Buscar"
                             aria-label="Search">
@@ -99,21 +99,16 @@
                         </div>
                     </div>
                     <div class="sidebar-search-results">
-                        <div class="list-group"><a href="#" class="list-group-item">
-                                <div class="search-title"><strong class="text-light"></strong>N<strong
-                                        class="text-light"></strong>o<strong class="text-light"></strong> <strong
-                                        class="text-light"></strong>e<strong class="text-light"></strong>l<strong
-                                        class="text-light"></strong>e<strong class="text-light"></strong>m<strong
-                                        class="text-light"></strong>e<strong class="text-light"></strong>n<strong
-                                        class="text-light"></strong>t<strong class="text-light"></strong> <strong
-                                        class="text-light"></strong>f<strong class="text-light"></strong>o<strong
-                                        class="text-light"></strong>u<strong class="text-light"></strong>n<strong
-                                        class="text-light"></strong>d<strong class="text-light"></strong>!<strong
-                                        class="text-light"></strong></div>
+                        <div class="list-group">
+                            <a href="#" class="list-group-item">
+                                <div class="search-title">
+                                    <strong class="text-light"></strong>No se encontraron elementos<strong class="text-light"></strong>
+                                </div>
                                 <div class="search-path"></div>
-                            </a></div>
-                    </div>
-                </div>
+                            </a>
+                        </div>
+                    </div>                    
+                </div> -->
 
                 <!-- Sidebar Menu -->
                 <nav class="mt-2">

@@ -18,9 +18,8 @@ class Usuario:
     def obtener_todos(cls):
         conexion = bd.Conexion()
         try:
-            usuarios = conexion.obtener("SELECT usu.id, usu.nombre, usu.email, usu.imagen, usu.id_tipousuario, tu.nombre as tipousuario"
-            " FROM usuarios usu INNER JOIN tipo_usuario tu on usu.id_tipousuario = tu.id"
-            " where usu.estado_registro = 1")
+            usuarios = conexion.obtener("SELECT usu.id, usu.nombre, usu.email, usu.imagen, usu.estado_registro, usu.id_tipousuario, tu.nombre as tipousuario"
+            " FROM usuarios usu INNER JOIN tipo_usuario tu on usu.id_tipousuario = tu.id")
             return usuarios
         finally:
             conexion.cerrar()
@@ -30,7 +29,7 @@ class Usuario:
         conexion = bd.Conexion()
         try:
             usuario = conexion.obtener("SELECT usu.id, usu.nombre, usu.email, usu.imagen, usu.id_tipousuario, tu.nombre as tipousuario"
-            " FROM usuarios usu INNER JOIN tipo_usuario tu on usu.id_tipousuario = tu.id WHERE usu.estado_registro = 1 AND usu.id = %s", (usuario_id,))
+            " FROM usuarios usu INNER JOIN tipo_usuario tu on usu.id_tipousuario = tu.id WHERE usu.id = %s", (usuario_id,))
             return usuario[0] if usuario else None
         finally:
             conexion.cerrar()
@@ -70,7 +69,7 @@ class Usuario:
 
         try:
             # Llamar al procedimiento almacenado
-            conexion.ejecutar("CALL SP_EDITAR_USUARIO(%s, %s, %s, %s);", (id, nombre, email, imagen, idTipoUsuario))
+            conexion.ejecutar("CALL SP_EDITAR_USUARIO(%s, %s, %s, %s, %s);", (id, nombre, email, imagen, idTipoUsuario))
 
             # Obtener mensajes de salida
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
@@ -100,7 +99,7 @@ class Usuario:
 
         try:
             # Llamar al procedimiento almacenado
-            conexion.ejecutar("CALL SP_ELIMINAR_USUARIO(%s);", (id, ))
+            conexion.ejecutar("CALL SP_DARBAJA_USUARIO(%s);", (id, ))
 
             # Obtener mensajes de salida
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")

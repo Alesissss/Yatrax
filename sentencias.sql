@@ -1,5 +1,6 @@
 -- Primero eliminamos los procedimientos por si existen
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_USUARIO;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_USUARIO;
 DROP PROCEDURE IF EXISTS SP_EDITAR_USUARIO;
 DROP PROCEDURE IF EXISTS SP_REGISTRAR_USUARIO;
 DROP PROCEDURE IF EXISTS SP_REGISTRAR_TIPO_USUARIO;
@@ -112,9 +113,9 @@ BEGIN
 END $$
 DELIMITER ;
 
--- Crear procedimiento SP_ELIMINAR_USUARIO
+-- Crear procedimiento SP_DARBAJA_USUARIO
 DELIMITER $$
-CREATE PROCEDURE SP_ELIMINAR_USUARIO(
+CREATE PROCEDURE SP_DARBAJA_USUARIO(
     IN P_ID INT
 )
 BEGIN
@@ -130,9 +131,36 @@ BEGIN
     SELECT COUNT(*) INTO cUsuario FROM USUARIOS WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
 
     IF cUsuario <= 0 THEN
-        SET @MSJ2 = 'El usuario que intenta eliminar no existe';
+        SET @MSJ2 = 'El usuario que intenta dar de baja no existe';
     ELSE
         UPDATE USUARIOS SET ESTADO_REGISTRO = 2, ESTADO_PROCESO = 'ELIMINADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se dio de baja correctamente al usuario';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_USUARIO
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_USUARIO(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cUsuario INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado: ', (SELECT MESSAGE_TEXT FROM INFORMATION_SCHEMA.INNODB_TRX LIMIT 1));
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cUsuario FROM USUARIOS WHERE ID = P_ID;
+
+    IF cUsuario <= 0 THEN
+        SET @MSJ2 = 'El usuario que intenta eliminar no existe';
+    ELSE
+        DELETE FROM USUARIOS WHERE ID = P_ID;
 
         SET @MSJ = 'Se eliminó correctamente al usuario';
     END IF;

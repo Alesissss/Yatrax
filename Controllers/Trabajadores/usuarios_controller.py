@@ -79,12 +79,7 @@ def registrar_usuario():
 
             if imagen and allowed_file(imagen.filename):
                 extension = imagen.filename.rsplit(".", 1)[1].lower()
-                
                 filename = f"{email}.{extension}"
-                
-                filepath = os.path.join(UPLOAD_FOLDER, filename)
-                imagen.save(filepath)
-                
                 ruta_imagen = f"/{UPLOAD_FOLDER}{filename}"
 
         mensajes = Usuario.registrar(nombre, email, password, ruta_imagen, idTipoUsuario, usuario_actual)
@@ -92,6 +87,9 @@ def registrar_usuario():
         msj2 = mensajes.get('@MSJ2')
 
         if msj1:
+            if 'imagen' in request.files and imagen and allowed_file(imagen.filename):
+                filepath = os.path.join(UPLOAD_FOLDER, filename)
+                imagen.save(filepath)
             return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
         elif msj2:
             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
@@ -124,7 +122,7 @@ def editar_usuario(id):
         usuario = Usuario.obtener_por_id(id)
 
         if request.method == 'POST':
-            nombre = request.form.get("nombre")
+            nombre = request.form.get("nombre").strip()
             email = request.form.get("email").strip()
             idTipoUsuario = request.form.get("idTipoUsuario")
 
@@ -139,17 +137,18 @@ def editar_usuario(id):
                 if imagen and allowed_file(imagen.filename):
                     extension = imagen.filename.rsplit(".", 1)[1].lower()
                     filename = f"{email}.{extension}"
-                    
-                    filepath = os.path.join(UPLOAD_FOLDER, filename)
-                    imagen.save(filepath)
-                    
                     ruta_imagen = f"/{UPLOAD_FOLDER}{filename}"
 
+            print(f"Ruta de imagen procesada: {ruta_imagen}") 
+            
             mensajes = Usuario.editar(id, nombre, email, ruta_imagen, idTipoUsuario)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
             if msj1:
+                if 'imagen' in request.files and imagen and allowed_file(imagen.filename):
+                    filepath = os.path.join(UPLOAD_FOLDER, filename)
+                    imagen.save(filepath)
                 return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
             elif msj2:
                 return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
