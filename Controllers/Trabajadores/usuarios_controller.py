@@ -6,6 +6,27 @@ from Models.tipoUsuario import TipoUsuario
 
 usuario_bp = Blueprint('usuario', __name__, url_prefix='/trabajadores/usuarios')
 
+# ERRORES 
+# Manejar errores 401 (Página no autorizada)
+@usuario_bp.errorhandler(401)
+def error_401(error):
+    return render_template("error.html", error="Página no autorizada"), 401
+
+# Manejar errores 404 (Página no encontrada)
+@usuario_bp.errorhandler(404)
+def error_404(error):
+    return render_template("error.html", error="Página no encontrada"), 404
+
+# Manejar errores 500 (Error interno del servidor)
+@usuario_bp.errorhandler(500)
+def error_500(error):
+    return render_template("error.html", error="Error interno del servidor"), 500
+
+# Manejar cualquier otro error genérico
+@usuario_bp.errorhandler(Exception)
+def error_general(error):
+    return render_template("error.html", error="Ocurrió un error inesperado"), 500
+
 # RESTRICCIONES
 @usuario_bp.before_request
 def verificar_sesion():
