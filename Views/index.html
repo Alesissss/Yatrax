@@ -125,6 +125,7 @@
                                 </p>
                             </a>
                         </li>
+                        {% if session['menus'] | selectattr('nombre', 'equalto', 'M_USUARIOS') | list | length > 0 %}
                         <li class="nav-item">
                             <a href="#" class="nav-link {% if active_menu == 'mUsuarios' %}active{% endif %}">
                                 <i class="nav-icon fas fas fa-users"></i>
@@ -135,7 +136,7 @@
                             </a>
                             <ul class="nav nav-treeview" style="display: none;">
                                 <li class="nav-item">
-                                    <a href="{{ url_for('usuario.Modulo_Usuarios') }}"
+                                    <a href="{{ url_for('usuario.Menu_Usuarios') }}"
                                         class="nav-link {% if active_page == 'usuarios' %}active{% endif %}">
                                         <i class="bi bi-person-fill nav-icon"></i>
                                         <p>Gestionar usuarios</p>
@@ -143,21 +144,25 @@
                                 </li>
                             </ul>
                         </li>
+                        {% endif %}
+                        {% if session['menus'] | selectattr('nombre', 'equalto', 'M_CONFIGURACION') | list | length > 0 %}
                         <li class="nav-item">
-                            <a href="#" class="nav-link {% if active_page == 'configuracion' %}active{% endif %}">
+                            <a href="#" class="nav-link {% if active_menu == 'mConfiguracion' %}active{% endif %}">
                                 <i class="nav-icon fas fa-cogs"></i>
                                 <p>CONFIGRUACIÓN</p>
                                 <i class="right fas fa-angle-left"></i>
                             </a>
                             <ul class="nav nav-treeview" style="display: none;">
                                 <li class="nav-item">
-                                    <a href="#" class="nav-link">
+                                    <a href="{{ url_for('configuracion.Menu_Permisos') }}"
+                                        class="nav-link {% if active_page == 'permisos' %}active{% endif %}">
                                         <i class="bi bi-shield-check nav-icon"></i>
                                         <p>Gestionar permisos</p>
                                     </a>
                                 </li>
                             </ul>
                         </li>
+                        {% endif %}
                     </ul>
                 </nav>
                 <!-- /.sidebar-menu -->
@@ -180,7 +185,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url_for('usuario.Modulo_Usuarios') }}"
+                            <a href="{{ url_for('usuario.Menu_Usuarios') }}"
                                 class="nav-link {% if active_page == 'usuarios' %}active{% endif %}">
                                 <i class="nav-icon fas fa-users"></i>
                                 <p>Usuarios</p>

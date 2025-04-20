@@ -12,6 +12,11 @@ usuario_bp = Blueprint('usuario', __name__, url_prefix='/trabajadores/usuarios')
 def error_401(error):
     return render_template("error.html", error="Página no autorizada"), 401
 
+# Manejar errores 403 (Página no autorizada para este usuario)
+@usuario_bp.errorhandler(403)
+def error_403(error):
+    return render_template("error.html", error="Página restringida"), 403
+
 # Manejar errores 404 (Página no encontrada)
 @usuario_bp.errorhandler(404)
 def error_404(error):
@@ -32,18 +37,21 @@ def error_general(error):
 def verificar_sesion():
     rutas_permitidas = ['home.login', 'home.logout', 'static']  # Excluir login, logout y archivos estáticos
     usuario = session.get('usuario')
-    if (
-        (not usuario and request.endpoint not in rutas_permitidas)
-        or (usuario and usuario['tipousuario'].upper() == 'CLIENTE' and request.endpoint not in rutas_permitidas)
-    ):
+    menus = session.get('menus', [])
+
+    if not usuario and request.endpoint not in rutas_permitidas:
         session.clear()
-        if not usuario:
-            return redirect(url_for('home.login'))
-        abort(401)
+        return redirect(url_for('home.login'))  # No autenticado → redirigir
+
+    if usuario and usuario['tipousuario'].upper() == 'CLIENTE' and request.endpoint not in rutas_permitidas:
+        abort(401)  # Autenticado pero no autorizado para navegación general
+
+    if not any(menu['nombre'] == 'M_USUARIOS' for menu in menus) and request.endpoint not in rutas_permitidas:
+        abort(403)  # Autenticado, pero no tiene permiso para ese módulo
 
 # VIEWS
 @usuario_bp.route('/GestionarUsuarios')
-def Modulo_Usuarios():
+def Menu_Usuarios():
     return render_template('usuario/usuarios.html', active_page="usuarios", active_menu='mUsuarios')
 
 @usuario_bp.route('/UsuarioNuevo')

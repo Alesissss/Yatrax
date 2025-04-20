@@ -1,8 +1,14 @@
+import os
+
 from flask import Flask, render_template, request, redirect, flash, jsonify, session, url_for, abort
+
+# BLUEPRINTS TRABAJADORES
 from Controllers.Trabajadores.home_controller import home_bp
 from Controllers.Trabajadores.usuarios_controller import usuario_bp
+from Controllers.Trabajadores.configuracion_controller import configuracion_bp
+
+# BLUEPRINTS ECOMMERCE
 from Controllers.Ecommerce.homeClientes_controller import homeClientes_bp
-import os
 
 app = Flask(__name__, template_folder="Views", static_folder="Static")
 
@@ -32,6 +38,7 @@ app.secret_key = os.urandom(24)  # O usa una clave fija: app.secret_key = "mi_cl
 # Registrar blueprints
 app.register_blueprint(home_bp)
 app.register_blueprint(usuario_bp)
+app.register_blueprint(configuracion_bp)
 app.register_blueprint(homeClientes_bp)
 
 @app.route('/')

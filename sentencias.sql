@@ -1,4 +1,6 @@
 -- Primero eliminamos los procedimientos por si existen
+DROP PROCEDURE IF EXISTS SP_ASIGNAR_DMENU;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_DMENU;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_USUARIO;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_USUARIO;
 DROP PROCEDURE IF EXISTS SP_EDITAR_USUARIO;
@@ -6,6 +8,8 @@ DROP PROCEDURE IF EXISTS SP_REGISTRAR_USUARIO;
 DROP PROCEDURE IF EXISTS SP_REGISTRAR_TIPO_USUARIO;
 
 -- Luego eliminamos las tablas, primero la que depende de la otra
+DROP TABLE IF EXISTS conf_dmenus;
+DROP TABLE IF EXISTS conf_menus;
 DROP TABLE IF EXISTS usuarios;
 DROP TABLE IF EXISTS tipo_usuario;
 
@@ -26,11 +30,25 @@ CREATE TABLE usuarios (
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     imagen VARCHAR(255) NOT NULL,
-    id_tipousuario INT not null,
+    id_tipousuario INT not null REFERENCES tipo_usuario (id),
     estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
     estado_registro INT not null DEFAULT 1,
     fecha_registro DATETIME not null DEFAULT CURRENT_TIMESTAMP, 
     usuario VARCHAR(100) not null
+);
+
+-- Crear tabla menus
+CREATE TABLE conf_menus (
+    id INT AUTO_INCREMENT PRIMARY KEY,  
+    nombre VARCHAR(100) UNIQUE NOT NULL,
+    estado bit NOT NULL
+);
+
+-- Crear tabla detalle_menu
+CREATE TABLE conf_dmenus (
+    idMenu INT REFERENCES conf_menus (id),
+    idUsuario INT REFERENCES usuarios (id),
+    PRIMARY KEY (idMenu, idUsuario)
 );
 
 -- Tabla Tipo Usuario
@@ -38,6 +56,14 @@ INSERT INTO tipo_usuario (id,nombre,estado_proceso,estado_registro,fecha_registr
 
 -- Tabla Usuario
 INSERT INTO usuarios (id,nombre,email,password, imagen, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (1,'Alexis','alexis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/alexis.jpeg',1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
+
+-- Tabla menus
+INSERT INTO conf_menus (id, nombre, estado) VALUES (1, 'M_USUARIOS', 1);
+INSERT INTO conf_menus (id, nombre, estado) VALUES (2, 'M_CONFIGURACION', 1);
+
+-- Tabla dmenus
+INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (1, 1);
+INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (2, 1);
 
 -- Crear procedimiento SP_REGISTRAR_USUARIO
 DELIMITER $$
@@ -53,7 +79,7 @@ BEGIN
     DECLARE cEmail INT;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION 
     BEGIN
-        SET @MSJ2 = CONCAT('Error inesperado: ', (SELECT MESSAGE_TEXT FROM INFORMATION_SCHEMA.INNODB_TRX LIMIT 1));
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
     END;
 
     SET @MSJ = NULL;
@@ -86,7 +112,7 @@ BEGIN
     DECLARE cEmail INT;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
-        SET @MSJ2 = CONCAT('Error inesperado: ', (SELECT MESSAGE_TEXT FROM INFORMATION_SCHEMA.INNODB_TRX LIMIT 1));
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
     END;
 
     SET @MSJ = NULL;
@@ -122,7 +148,7 @@ BEGIN
     DECLARE cUsuario INT;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION 
     BEGIN
-        SET @MSJ2 = CONCAT('Error inesperado: ', (SELECT MESSAGE_TEXT FROM INFORMATION_SCHEMA.INNODB_TRX LIMIT 1));
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
     END;
 
     SET @MSJ = NULL;
@@ -149,7 +175,7 @@ BEGIN
     DECLARE cUsuario INT;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION 
     BEGIN
-        SET @MSJ2 = CONCAT('Error inesperado: ', (SELECT MESSAGE_TEXT FROM INFORMATION_SCHEMA.INNODB_TRX LIMIT 1));
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
     END;
 
     SET @MSJ = NULL;
@@ -177,7 +203,7 @@ BEGIN
     DECLARE cNombre INT;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION 
     BEGIN
-        SET @MSJ2 = CONCAT('Error inesperado: ', (SELECT MESSAGE_TEXT FROM INFORMATION_SCHEMA.INNODB_TRX LIMIT 1));
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
     END;
 
     SET @MSJ = NULL;
@@ -192,6 +218,62 @@ BEGIN
         VALUES (P_NOMBRE, P_USUARIO);
 
         SET @MSJ = 'Se registró correctamente el tipo de usuario';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ASIGNAR_DMENU
+DELIMITER $$
+CREATE PROCEDURE SP_ASIGNAR_DMENU(
+    IN P_IDMENU INT,
+    IN P_IDUSUARIO INT
+)
+BEGIN
+    DECLARE cMenus INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cMenus FROM CONF_DMENUS WHERE idMenu = P_IDMENU AND idUsuario = P_IDUSUARIO;
+
+    IF cMenus > 0 THEN
+        SET @MSJ2 = 'El permiso que intenta asignar, ya existe';
+    ELSE
+        INSERT INTO CONF_DMENUS (idMenu, idUsuario) 
+        VALUES (P_IDMENU, P_IDUSUARIO);
+
+        SET @MSJ = 'Se asignó correctamente el permiso';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_DMENU
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_DMENU(
+    IN P_IDMENU INT,
+    IN P_IDUSUARIO INT
+)
+BEGIN
+    DECLARE cMenus INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cMenus FROM CONF_DMENUS WHERE idMenu = P_IDMENU AND idUsuario = P_IDUSUARIO;
+
+    IF cMenus <= 0 THEN
+        SET @MSJ2 = 'El permiso que intenta eliminar, no existe';
+    ELSE
+        DELETE FROM CONF_DMENUS WHERE idMenu = P_IDMENU AND idUsuario = P_IDUSUARIO; 
+        SET @MSJ = 'Se eliminó correctamente el permiso';
     END IF;
 END $$
 DELIMITER ;

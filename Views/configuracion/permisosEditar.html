@@ -1,0 +1,101 @@
+{% extends "index.html" %}
+
+{% block title %}YATRAX - Editar permisos{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4">
+    <div class="panel-heading">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Editar permisos de {{ usuario.nombre if usuario else '' }}</h1>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-body">
+        <table class="table table-bordered table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Nombre del Módulo</th>
+                    <th>Permiso</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for menu in menus %}
+                {% set tiene_permiso = menu['nombre'] in dmnus | map(attribute='nombre') | list %}
+                <tr>
+                    <td>{{ menu['nombre'] }}</td>
+                    <td class="text-center">
+                        <input type="checkbox" class="permiso-checkbox" data-idmenu="{{ menu['id'] }}"
+                            data-idusuario="{{ usuario.id }}" {% if tiene_permiso %}checked{% endif %}>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        $('.permiso-checkbox').on('click', function (e) {
+            const checkbox = $(this);
+            const idMenu = checkbox.data('idmenu');
+            const idUsuario = checkbox.data('idusuario');
+            const isChecked = checkbox.is(':checked');
+            const accion = isChecked ? 1 : 0;
+            let texto = accion === 1 ? 'asignar' : 'eliminar';
+
+            e.preventDefault();
+
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción va a " + texto + " el permiso del usuario. ¿Deseas continuar?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, " + texto,
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const formData = new FormData();
+                    formData.append('idMenu', idMenu);
+                    formData.append('idUsuario', idUsuario);
+                    formData.append('accion', accion);
+
+                    $.ajax({
+                        url: `/trabajadores/configuracion/EditarPermisos/${idUsuario}`,
+                        method: "POST",
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function (response) {
+                            if (response.Status === "success") {
+                                if (response.Msj) {
+                                    toastr.success(response.Msj, 'MENSAJE DE SISTEMA');
+                                } else if (response.Msj2) {
+                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                }
+                            } else {
+                                toastr.error(response.Msj || "Error desconocido.", 'MENSAJE DE SISTEMA');
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("AJAX error:", error);
+                            toastr.error("Hubo un error al comunicarse con el servidor.", 'MENSAJE DE SISTEMA');
+                        }
+                    });
+
+                    checkbox.prop('checked', isChecked);
+                } else {
+                    checkbox.prop('checked', !isChecked);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

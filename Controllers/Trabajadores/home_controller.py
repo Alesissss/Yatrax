@@ -28,18 +28,16 @@ def error_general(error):
 # RESTRICCIONES
 @home_bp.before_request
 def verificar_sesion():
-    rutas_permitidas = ['home.login', 'home.logout', 'static']
+    rutas_permitidas = ['home.login', 'home.logout', 'static']  # Excluir login, logout y archivos estáticos
     usuario = session.get('usuario')
+    menus = session.get('menus', [])
 
-    if (
-        (not usuario and request.endpoint not in rutas_permitidas)
-        or (usuario and usuario['tipousuario'].upper() == 'CLIENTE' and request.endpoint not in rutas_permitidas)
-    ):
+    if not usuario and request.endpoint not in rutas_permitidas:
         session.clear()
-        if not usuario:
-            return redirect(url_for('home.login'))
-        abort(401)
+        return redirect(url_for('home.login'))  # No autenticado → redirigir
 
+    if usuario and usuario['tipousuario'].upper() == 'CLIENTE' and request.endpoint not in rutas_permitidas:
+        abort(401)  # Autenticado pero no autorizado para navegación general
 
 #Login
 @home_bp.route('/')
@@ -58,7 +56,9 @@ def login():
 
         usuario = Usuario.autenticar(email, password_hash)
         if usuario:
+            menus = Usuario.obtener_menus(usuario['id'])
             session['usuario'] = usuario
+            session['menus'] = menus
             return jsonify({'Status': 'success', 'Msj': 'Inicio de sesión exitoso'})
 
         return jsonify({'Status': 'error', 'Msj': 'Credenciales incorrectas'})
