@@ -31,7 +31,10 @@
 
 <body class="hold-transition sidebar-mini layout-footer-fixed">
     <div class="wrapper">
-
+        <!-- Preloader -->
+        <!-- <div class="preloader flex-column justify-content-center align-items-center">
+            <img class="animation__shake" src="/Static/img/yatrax_icon.ico" alt="YatraxLogo" height="60" width="60">
+        </div> -->
         <!-- Navbar -->
         <nav class="main-header navbar navbar-expand navbar-white navbar-light">
             <ul class="navbar-nav">
@@ -46,8 +49,13 @@
 
             <!-- Botón de Logout -->
             <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <form action="{{ url_for('home.logout') }}" method="post" style="display: inline;">
+                <li class="nav-item d-none d-sm-inline-block">
+                    <a class="nav-link" href="#" id="btn-darkmode" role="button">
+                        <i class="fas fa-moon"></i>
+                    </a>
+                </li>
+                <li class="nav-item d-none d-sm-inline-block">
+                    <form action="{{ url_for('home.logout') }}" method="post">
                         <button type="submit" class="btn btn-danger">
                             <i class="fas fa-sign-out-alt"></i> Cerrar sesión
                         </button>
@@ -145,7 +153,8 @@
                             </ul>
                         </li>
                         {% endif %}
-                        {% if session['menus'] | selectattr('nombre', 'equalto', 'M_CONFIGURACION') | list | length > 0 %}
+                        {% if session['menus'] | selectattr('nombre', 'equalto', 'M_CONFIGURACION') | list | length > 0
+                        %}
                         <li class="nav-item">
                             <a href="#" class="nav-link {% if active_menu == 'mConfiguracion' %}active{% endif %}">
                                 <i class="nav-icon fas fa-cogs"></i>
@@ -275,11 +284,45 @@
     <link rel="stylesheet" href="/Static/plugins/datatables-test/datatables.min.css">
     <script src="/Static/plugins/datatables-test/datatables.min.js"></script>
 
-    <!-- Dropzone -->
-    <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
-
     <script>
+        window.addEventListener('beforeunload', function () {
+            document.querySelector('.preloader').style.display = 'flex';
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const btnDarkMode = document.getElementById('btn-darkmode');
+            const icon = btnDarkMode.querySelector('i');
+            const navbar = document.querySelector('.main-header.navbar');
+
+            if (localStorage.getItem('dark-mode') === 'enabled') {
+                document.body.classList.add('dark-mode');
+                navbar.classList.remove('navbar-white', 'navbar-light');
+                navbar.classList.add('navbar-dark');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+
+            btnDarkMode.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                document.body.classList.toggle('dark-mode');
+
+                if (document.body.classList.contains('dark-mode')) {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                    navbar.classList.remove('navbar-white', 'navbar-light');
+                    navbar.classList.add('navbar-dark');
+                    localStorage.setItem('dark-mode', 'enabled');
+                } else {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                    navbar.classList.remove('navbar-dark');
+                    navbar.classList.add('navbar-white', 'navbar-light');
+                    localStorage.setItem('dark-mode', 'disabled');
+                }
+            });
+        });
+
         function loadBigModal(url, title) {
             $.ajax({
                 url: url,
@@ -429,6 +472,46 @@
 
 </html>
 <style>
+    .preloader {
+        display: -ms-flexbox;
+        display: flex;
+        background-color: #f4f6f9;
+        height: 100vh;
+        width: 100%;
+        transition: height .2s linear;
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: 9999;
+    }
+
+    .animation__shake {
+        -webkit-animation: shake 1.5s;
+        animation: shake 1.5s;
+    }
+
+    @keyframes shake {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        25% {
+            transform: rotate(15deg);
+        }
+
+        50% {
+            transform: rotate(0deg);
+        }
+
+        75% {
+            transform: rotate(-15deg);
+        }
+
+        100% {
+            transform: rotate(0deg);
+        }
+    }
+
     div.dts div.dt-length,
     div.dts div.dt-paging,
     div.dts div.dataTables_paginate,

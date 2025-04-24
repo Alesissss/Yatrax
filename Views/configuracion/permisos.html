@@ -42,7 +42,7 @@
         var windowHeight = $('body > div.os-padding.menu-open > div > div > div > div.content-wrapper').height() / 2;
         //CONFIGURACION POR DEFECTO DATATABLES
         $.extend($.fn.dataTable.defaults, {
-            dom: "<'row pb-1'<'col-sm-12 c1 d-flex justify-content-end'>>" + "<'row'<'col-sm-4'l><'col-sm-8 justify-content-start'f>>" + "<'row'<'col-sm-6'i><'col-sm-6 d-flex justify-content-end'p><'col-sm-12 justify-content-end d-flex'B>>" + "rt" + "<'row'<'col-sm-6'i><'col-sm-6 mt-1 d-flex justify-content-end'p>>",
+            dom: "<'row align-items-center'<'col-sm-8 justify-content-start'f><'col-sm-4'>>" + "<'row align-items-center'<'col-sm-4'l><'col-sm-4 my-3 justify-content-start d-flex'B><'col-sm-4 d-flex justify-content-end'p>>" + "rt" + "<'row'<'col-sm-6'i><'col-sm-6 mt-1 d-flex justify-content-end'p>>",
             // dom: "<'row pb-1'<'col-sm-9'B><'col-sm-3 c1 d-flex justify-content-end'>>" + "<'row'<'col-sm-10'l><'col-sm-2'f>>" + "<'row'<'col-sm-6'i><'col-sm-6'p>>" + "rt" + "<'row'<'col-sm-6'i><'col-sm-6'p>>",
             // dom: "<'row pb-1'<'col-sm-10'B><'col-sm-2 c1 d-flex justify-content-end'>>" + "<'row'<'col-sm-11'l><'col-sm-1'f>>" + "<'row'<'col-sm-10'i><'col-sm-2'p>>" + "rt" + "<'row'<'col-sm-10'i><'col-sm-2'p>>",
             paging: true,
@@ -194,7 +194,7 @@
                     data: null,
                     name: null,
                     render: function (data, type, row) {
-                        return `<button class="btn btn-xs btn-primary" onclick="fct_UsuarioEditar('${data.id}')" title="Editar permisos de usuario"><i class="bi bi-pencil-square"></i></button>`;
+                        return `<button class="btn btn-primary" onclick="fct_UsuarioEditar('${data.id}')" title="Editar permisos de usuario"><i class="bi bi-pencil-square"></i></button>`;
                     },
                     className: 'text-center',
                 }
@@ -207,6 +207,7 @@
                 {
                     targets: [5],
                     orderable: false,
+                    width: '15%',
                 }
             ],
             lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
@@ -219,7 +220,7 @@
                 $('.btn.btn-info').removeClass('dt-button btn-secondary buttons-print');
                 $('.btn.btn-warning').removeClass('dt-button btn-secondary buttons-collection buttons-colvis');
                 //Palabra exportar
-                $('.dt-buttons').parent().prepend('<h5 class="mr-2">Exportar</h5>');
+                // $('.dt-buttons').parent().prepend('<h5 class="mr-2">Exportar</h5>');
             },
         });
     }

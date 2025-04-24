@@ -56,7 +56,7 @@ def Menu_Usuarios():
 
 @usuario_bp.route('/UsuarioNuevo')
 def Usuario_Nuevo():
-    return render_template('usuario/usuarioNuevo.html', active_page="usuarios", active_menu='mUsuarios')
+    return render_template('usuario/usuarioCRUD.html', active_page="usuarios", active_menu='mUsuarios', usuario={}, tittle = 'Registrar usuario', btnId = 'btn_Registrar')
 
 @usuario_bp.route('TipoUsuarioNuevo')
 def TipoUsuario_Nuevo():
@@ -185,8 +185,8 @@ def editar_usuario(id):
                 return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar usuario'})
 
         if usuario:
-            return render_template('usuario/usuarioEditar.html', active_page="usuarios", active_menu='mUsuarios', usuario=usuario)
-        return render_template('usuario/usuarioEditar.html', active_page="usuarios", active_menu='mUsuarios', usuario={})
+            return render_template('usuario/usuarioCRUD.html', active_page="usuarios", active_menu='mUsuarios', usuario=usuario, tittle = 'Editar usuario', btnId = 'btn_Editar')
+        return render_template('usuario/usuarioCRUD.html', active_page="usuarios", active_menu='mUsuarios', usuario={}, tittle = 'Editar usuario', btnId = 'btn_Editar')
 
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
@@ -196,8 +196,8 @@ def ver_usuario(id):
     try:
         usuario = Usuario.obtener_por_id(id)
         if usuario:
-            return render_template('usuario/usuarioVer.html', active_page="usuarios", active_menu='mUsuarios', usuario=usuario)
-        return render_template('usuario/usuarioVer.html', active_page="usuarios", active_menu='mUsuarios', usuario={})
+            return render_template('usuario/usuarioCRUD.html', active_page="usuarios", active_menu='mUsuarios', usuario=usuario, tittle = 'Ver usuario', btnId = 'btn_Aceptar')
+        return render_template('usuario/usuarioCRUD.html', active_page="usuarios", active_menu='mUsuarios', usuario={}, tittle = 'Ver usuario', btnId = 'btn_Aceptar')
         
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
