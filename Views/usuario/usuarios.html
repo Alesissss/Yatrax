@@ -17,12 +17,6 @@
                 <table id="tbl_Usuarios" class="table table-bordered table-short-rows">
                     <thead class="bg-gray">
                         <tr>
-                            <!-- <th>ID</th>
-                            <th>NOMBRE</th>
-                            <th>EMAIL</th>
-                            <th>TIPO USUARIO</th>
-                            <th>ESTADO</th>
-                            <th>ACCIÓN</th> -->
                             <th class="text-center">ID</th>
                             <th class="text-center">APELLIDOS Y NOMBRES</th>
                             <th class="text-center">EMAIL</th>
@@ -194,14 +188,13 @@
                 },
             },
             columns: [
-                { data: "id", name: "id", class: 'bg-white align-middle' },
-                { data: "nombre", name: "nombre", class: 'bg-white align-middle' },
-                { data: "email", name: "email", class: 'bg-white align-middle' },
-                { data: "tipousuario", name: "tipousuario", class: 'bg-white align-middle' },
+                { data: "id", name: "id" },
+                { data: "nombre", name: "nombre" },
+                { data: "email", name: "email" },
+                { data: "tipousuario", name: "tipousuario" },
                 { 
                     data: "estado_registro", 
                     name: "estado_registro",
-                    class: 'bg-white align-middle',
                     render: function(data, type, row) {
                         return data === 1 ? 'Vigente' : 'No vigente'; 
                     },
@@ -226,6 +219,10 @@
                 {
                     targets: [0],
                     className: "text-center",
+                },
+                {
+                    targets: [0, 1, 2, 3, 4],
+                    className: 'align-middle',
                 },
                 {
                     targets: [5],

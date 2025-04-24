@@ -14,18 +14,18 @@
     <div class="panel-body">
         <div class="row">
             <div class="col-12">
-                <table id="tbl_Usuarios" class="table table-bordered table-striped">
-                    <thead>
+                <table id="tbl_Usuarios" class="table table-bordered table-short-rows">
+                    <thead class="bg-gray">
                         <tr>
-                            <th>ID</th>
-                            <th>NOMBRE</th>
-                            <th>EMAIL</th>
-                            <th>TIPO USUARIO</th>
-                            <th>ESTADO</th>
-                            <th>ACCIÓN</th>
+                            <th class="text-center">ID</th>
+                            <th class="text-center">APELLIDOS Y NOMBRES</th>
+                            <th class="text-center">EMAIL</th>
+                            <th class="text-center">TIPO USUARIO</th>
+                            <th class="text-center">ESTADO</th>
+                            <th class="text-center">ACCIÓN</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="bg-white table-short-rows">
                     </tbody>
                 </table>
             </div>
@@ -42,7 +42,7 @@
         var windowHeight = $('body > div.os-padding.menu-open > div > div > div > div.content-wrapper').height() / 2;
         //CONFIGURACION POR DEFECTO DATATABLES
         $.extend($.fn.dataTable.defaults, {
-            dom: "<'row align-items-center'<'col-sm-8 justify-content-start'f><'col-sm-4'>>" + "<'row align-items-center'<'col-sm-4'l><'col-sm-4 my-3 justify-content-start d-flex'B><'col-sm-4 d-flex justify-content-end'p>>" + "rt" + "<'row'<'col-sm-6'i><'col-sm-6 mt-1 d-flex justify-content-end'p>>",
+            dom: "<'row align-items-center'<'col-sm-8 justify-content-start'f><'col-sm-4 c1 d-flex justify-content-end'>>" + "<'row align-items-center'<'col-sm-4'l><'col-sm-4 my-3 justify-content-start d-flex'B><'col-sm-4 d-flex justify-content-end'p>>" + "rt" + "<'row'<'col-sm-6'i><'col-sm-6 mt-1 d-flex justify-content-end'p>>",
             // dom: "<'row pb-1'<'col-sm-9'B><'col-sm-3 c1 d-flex justify-content-end'>>" + "<'row'<'col-sm-10'l><'col-sm-2'f>>" + "<'row'<'col-sm-6'i><'col-sm-6'p>>" + "rt" + "<'row'<'col-sm-6'i><'col-sm-6'p>>",
             // dom: "<'row pb-1'<'col-sm-10'B><'col-sm-2 c1 d-flex justify-content-end'>>" + "<'row'<'col-sm-11'l><'col-sm-1'f>>" + "<'row'<'col-sm-10'i><'col-sm-2'p>>" + "rt" + "<'row'<'col-sm-10'i><'col-sm-2'p>>",
             paging: true,
@@ -194,7 +194,7 @@
                     data: null,
                     name: null,
                     render: function (data, type, row) {
-                        return `<button class="btn btn-primary" onclick="fct_UsuarioEditar('${data.id}')" title="Editar permisos de usuario"><i class="bi bi-pencil-square"></i></button>`;
+                        return `<button class="btn btn-xs m-1 btn-primary" onclick="fct_UsuarioEditar('${data.id}')" title="Editar permisos de usuario"><i class="bi bi-pencil-square"></i></button>`;
                     },
                     className: 'text-center',
                 }
@@ -203,6 +203,10 @@
                 {
                     targets: [0],
                     className: "text-center",
+                },
+                {
+                    targets: [0, 1, 2, 3, 4],
+                    className: 'align-middle',
                 },
                 {
                     targets: [5],
@@ -221,6 +225,12 @@
                 $('.btn.btn-warning').removeClass('dt-button btn-secondary buttons-collection buttons-colvis');
                 //Palabra exportar
                 // $('.dt-buttons').parent().prepend('<h5 class="mr-2">Exportar</h5>');
+                //TAMAÑO DE LOS BOTONES
+                $('.btn.btn-success.m-1').addClass('btn-xs');
+                $('.btn.btn-danger.m-1').addClass('btn-xs');
+                $('.btn.btn-primary.m-1').addClass('btn-xs');
+                $('.btn.btn-info.m-1').addClass('btn-xs');
+                $('.btn.btn-warning.m-1').addClass('btn-xs');
             },
         });
     }

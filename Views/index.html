@@ -193,6 +193,46 @@
                             </ul>
                         </li>
                         {% endif %}
+                        {% if session['menus'] | selectattr('nombre', 'equalto', 'M_PERSONAL') | list | length > 0
+                        %}
+                        <li class="nav-item">
+                            <a href="#" class="nav-link {% if active_menu == 'mPersonal' %}active{% endif %}">
+                                <i class="nav-icon bi bi-person-lines-fill"></i>
+                                <p>PERSONAL
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview" style="display: none;">
+                                <li class="nav-item">
+                                    <a href="{{ url_for('personal.Menu_Personal') }}"
+                                        class="nav-link {% if active_page == 'ejemplo' %}active{% endif %}">
+                                        <i class="bi bi-calendar-week nav-icon"></i>
+                                        <p>Ejemplo</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        {% endif %}
+                        {% if session['menus'] | selectattr('nombre', 'equalto', 'M_ATENCION') | list | length > 0
+                        %}
+                        <li class="nav-item">
+                            <a href="#" class="nav-link {% if active_menu == 'mAtencion' %}active{% endif %}">
+                                <i class="nav-icon fas fa-comments"></i>
+                                <p>ATENCIÓN AL CLIENTE
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview" style="display: none;">
+                                <li class="nav-item">
+                                    <a href="{{ url_for('atencion.Menu_Atencion') }}"
+                                        class="nav-link {% if active_page == 'ejemplo' %}active{% endif %}">
+                                        <i class="bi bi-calendar-week nav-icon"></i>
+                                        <p>Ejemplo</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        {% endif %}
                         {% if session['menus'] | selectattr('nombre', 'equalto', 'M_CONFIGURACION') | list | length > 0
                         %}
                         <li class="nav-item">

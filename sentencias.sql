@@ -62,12 +62,17 @@ INSERT INTO conf_menus (id, nombre, estado) VALUES (1, 'M_USUARIOS', 1);
 INSERT INTO conf_menus (id, nombre, estado) VALUES (2, 'M_CONFIGURACION', 1);
 INSERT INTO conf_menus (id, nombre, estado) VALUES (3, 'M_VENTAS', 1);
 INSERT INTO conf_menus (id, nombre, estado) VALUES (4, 'M_VIAJES', 1);
+INSERT INTO conf_menus (id, nombre, estado) VALUES (5, 'M_PERSONAL', 1);
+INSERT INTO conf_menus (id, nombre, estado) VALUES (6, 'M_ATENCION', 1);
 
 -- Tabla dmenus
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (1, 1);
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (2, 1);
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (3, 1);
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (4, 1);
+INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (5, 1);
+INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (6, 1);
+
 
 -- Crear procedimiento SP_REGISTRAR_USUARIO
 DELIMITER $$
