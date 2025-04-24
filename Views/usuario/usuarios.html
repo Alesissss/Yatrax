@@ -14,8 +14,8 @@
     <div class="panel-body">
         <div class="row">
             <div class="col-12">
-                <table id="tbl_Usuarios" class="table table-bordered table-striped">
-                    <thead>
+                <table id="tbl_Usuarios" class="table table-bordered table-short-rows">
+                    <thead class="bg-gray">
                         <tr>
                             <!-- <th>ID</th>
                             <th>NOMBRE</th>
@@ -24,14 +24,14 @@
                             <th>ESTADO</th>
                             <th>ACCIÓN</th> -->
                             <th class="text-center">ID</th>
-                            <th class="text-center">NOMBRE</th>
+                            <th class="text-center">APELLIDOS Y NOMBRES</th>
                             <th class="text-center">EMAIL</th>
                             <th class="text-center">TIPO USUARIO</th>
                             <th class="text-center">ESTADO</th>
                             <th class="text-center">ACCIÓN</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="bg-white table-short-rows">
                     </tbody>
                 </table>
             </div>
@@ -194,13 +194,14 @@
                 },
             },
             columns: [
-                { data: "id", name: "id" },
-                { data: "nombre", name: "nombre" },
-                { data: "email", name: "email" },
-                { data: "tipousuario", name: "tipousuario" },
+                { data: "id", name: "id", class: 'bg-white align-middle' },
+                { data: "nombre", name: "nombre", class: 'bg-white align-middle' },
+                { data: "email", name: "email", class: 'bg-white align-middle' },
+                { data: "tipousuario", name: "tipousuario", class: 'bg-white align-middle' },
                 { 
                     data: "estado_registro", 
                     name: "estado_registro",
+                    class: 'bg-white align-middle',
                     render: function(data, type, row) {
                         return data === 1 ? 'Vigente' : 'No vigente'; 
                     },
@@ -210,13 +211,15 @@
                     name: null,
                     render: function (data, type, row) {
                         return `
-                        <button class="btn btn-info" onclick="fct_UsuarioVer('${data.id}')" title="Ver usuario"><i class="bi bi-eye"></i></button>
-                        <button class="btn btn-primary" onclick="fct_UsuarioEditar('${data.id}')" title="Editar usuario"><i class="bi bi-pencil-square"></i></button>
-                        <button class="btn btn-warning" onclick="fct_UsuarioDarBaja('${data.id}')" title="Dar de baja usuario"><i class="bi bi-arrow-down-circle"></i></button>
-                        <button class="btn btn-danger" onclick = "fct_UsuarioEliminar('${data.id}')" title="Eliminar usuario"><i class="bi bi-trash"></i></button>
+                        <div class="flex-wrap btn-group">
+                            <button class="btn btn-xs m-1 btn-info" onclick="fct_UsuarioVer('${data.id}')" title="Ver usuario"><i class="bi bi-eye"></i></button>
+                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_UsuarioEditar('${data.id}')" title="Editar usuario"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_UsuarioDarBaja('${data.id}')" title="Dar de baja usuario"><i class="bi bi-arrow-down-circle"></i></button>
+                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_UsuarioEliminar('${data.id}')" title="Eliminar usuario"><i class="bi bi-trash"></i></button>
+                        </div>
                         `;
                     },
-                    className: 'text-center',
+                    className: 'text-center align-middle',
                 }
             ],
             columnDefs: [
@@ -227,7 +230,7 @@
                 {
                     targets: [5],
                     orderable: false,
-                    width: '15%',
+                    width: '10%',
                 },
             ],
             lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
@@ -236,9 +239,15 @@
                 $('.dt-button-collection').appendTo('.dt-buttons');
                 $('.btn.btn-success').removeClass('dt-button btn-secondary buttons-excel buttons-html5');
                 $('.btn.btn-danger').removeClass('dt-button btn-secondary buttons-pdf buttons-html5');
-                $('.btn.btn-primary').removeClass('dt-button btn-secondary buttons-copy buttons-html5 ');
+                $('.btn.btn-primary').removeClass('dt-button btn-secondary buttons-copy buttons-html5');
                 $('.btn.btn-info').removeClass('dt-button btn-secondary buttons-print');
                 $('.btn.btn-warning').removeClass('dt-button btn-secondary buttons-collection buttons-colvis');
+                //TAMAÑO DE LOS BOTONES
+                $('.btn.btn-success.m-1').addClass('btn-xs');
+                $('.btn.btn-danger.m-1').addClass('btn-xs');
+                $('.btn.btn-primary.m-1').addClass('btn-xs');
+                $('.btn.btn-info.m-1').addClass('btn-xs');
+                $('.btn.btn-warning.m-1').addClass('btn-xs');
                 //Palabra exportar
                 // $('.dt-buttons').parent().prepend('<h5 class="mr-2">Exportar</h5>');
                 //Botón Nuevo

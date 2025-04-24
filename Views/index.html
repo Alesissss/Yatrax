@@ -164,7 +164,27 @@
                             </a>
                             <ul class="nav nav-treeview" style="display: none;">
                                 <li class="nav-item">
-                                    <a href="{{ url_for('ventas.Menu_Horarios') }}"
+                                    <a href="{{ url_for('ventas.Menu_Pasajes') }}"
+                                        class="nav-link {% if active_page == 'pasajes' %}active{% endif %}">
+                                        <i class="fas fa-ticket-alt nav-icon"></i>
+                                        <p>Gestionar pasajes</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        {% endif %}
+                        {% if session['menus'] | selectattr('nombre', 'equalto', 'M_VIAJES') | list | length > 0
+                        %}
+                        <li class="nav-item">
+                            <a href="#" class="nav-link {% if active_menu == 'mViajes' %}active{% endif %}">
+                                <i class="nav-icon fas fa-bus"></i>
+                                <p>VIAJES
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview" style="display: none;">
+                                <li class="nav-item">
+                                    <a href="{{ url_for('viajes.Menu_Viajes') }}"
                                         class="nav-link {% if active_page == 'horarios' %}active{% endif %}">
                                         <i class="bi bi-calendar-week nav-icon"></i>
                                         <p>Gestionar horarios</p>
@@ -553,4 +573,22 @@
     div.dt-search input[type="search"]:focus {
         width: 100% !important;
     }
+
+    .page-item.disabled .page-link {
+        background-color: #ececec00 !important;
+    }
+
+    .table-short-rows td {
+        padding-top: 0.25rem;
+        padding-bottom: 0.25rem;
+    }
+
+    .table-short-rows th {
+        padding-top: 0.4rem;
+        padding-bottom: 0.4rem;
+    }
+
+    /* .page-link {
+        border: none ;
+    } */
 </style>

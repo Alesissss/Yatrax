@@ -7,6 +7,7 @@ from Controllers.Trabajadores.home_controller import home_bp
 from Controllers.Trabajadores.usuarios_controller import usuario_bp
 from Controllers.Trabajadores.configuracion_controller import configuracion_bp
 from Controllers.Trabajadores.ventas_controller import ventas_bp
+from Controllers.Trabajadores.viajes_controller import viajes_bp
 
 # BLUEPRINTS ECOMMERCE
 from Controllers.Ecommerce.homeClientes_controller import homeClientes_bp
@@ -41,6 +42,7 @@ app.register_blueprint(home_bp)
 app.register_blueprint(usuario_bp)
 app.register_blueprint(configuracion_bp)
 app.register_blueprint(ventas_bp)
+app.register_blueprint(viajes_bp)
 app.register_blueprint(homeClientes_bp)
 
 @app.route('/')
