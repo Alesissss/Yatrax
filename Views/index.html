@@ -153,6 +153,26 @@
                             </ul>
                         </li>
                         {% endif %}
+                        {% if session['menus'] | selectattr('nombre', 'equalto', 'M_VENTAS') | list | length > 0
+                        %}
+                        <li class="nav-item">
+                            <a href="#" class="nav-link {% if active_menu == 'mVentas' %}active{% endif %}">
+                                <i class="nav-icon bi bi-cart3"></i>
+                                <p>VENTAS
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview" style="display: none;">
+                                <li class="nav-item">
+                                    <a href="{{ url_for('ventas.Menu_Horarios') }}"
+                                        class="nav-link {% if active_page == 'horarios' %}active{% endif %}">
+                                        <i class="bi bi-calendar-week nav-icon"></i>
+                                        <p>Gestionar horarios</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        {% endif %}
                         {% if session['menus'] | selectattr('nombre', 'equalto', 'M_CONFIGURACION') | list | length > 0
                         %}
                         <li class="nav-item">

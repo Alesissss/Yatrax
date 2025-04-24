@@ -60,10 +60,12 @@ INSERT INTO usuarios (id,nombre,email,password, imagen, id_tipousuario,estado_pr
 -- Tabla menus
 INSERT INTO conf_menus (id, nombre, estado) VALUES (1, 'M_USUARIOS', 1);
 INSERT INTO conf_menus (id, nombre, estado) VALUES (2, 'M_CONFIGURACION', 1);
+INSERT INTO conf_menus (id, nombre, estado) VALUES (3, 'M_VENTAS', 1);
 
 -- Tabla dmenus
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (1, 1);
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (2, 1);
+INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (3, 1);
 
 -- Crear procedimiento SP_REGISTRAR_USUARIO
 DELIMITER $$
