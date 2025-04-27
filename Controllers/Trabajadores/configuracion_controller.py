@@ -236,6 +236,22 @@ def ver_plantilla(id):
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
+@configuracion_bp.route("/ActivarPlantilla/<int:id>", methods=['POST'])
+def activar_plantilla(id):  # Recibe el ID de la URL
+    try:
+        mensajes = Conf_Plantillas.activar(id)  # Se usa el ID directamente
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al activar plantilla'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
 # END REGION PLANTILLAS    
 
 # END FUNCIONES

@@ -9,7 +9,7 @@ DROP PROCEDURE IF EXISTS SP_REGISTRAR_TIPO_USUARIO;
 DROP PROCEDURE IF EXISTS SP_REGISTRAR_PLANTILLA;
 DROP PROCEDURE IF EXISTS SP_EDITAR_PLANTILLA;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_PLANTILLA;
-
+DROP PROCEDURE IF EXISTS SP_ACTIVAR_PLANTILLA;
 
 -- Luego eliminamos las tablas, primero la que depende de la otra
 DROP TABLE IF EXISTS conf_plantillas;
@@ -384,6 +384,37 @@ CREATE PROCEDURE SP_ELIMINAR_PLANTILLA(
 )
 BEGIN
     DECLARE cPlantilla INT;
+    DECLARE flagPlantilla BOOLEAN;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cPlantilla FROM CONF_PLANTILLAS WHERE ID = P_ID;
+    SELECT ESTADO INTO flagPlantilla FROM CONF_PLANTILLAS WHERE ID = P_ID;
+
+    IF cPlantilla <= 0 THEN
+        SET @MSJ2 = 'La plantilla que intenta eliminar no existe';
+    ELSEIF flagPlantilla = 1 THEN
+        SET @MSJ2 = 'La plantilla que está activa no puede ser eliminada';
+    ELSE
+        DELETE FROM CONF_PLANTILLAS WHERE ID = P_ID;
+
+        SET @MSJ = 'Se eliminó correctamente la plantilla';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ACTIVAR_PLANTILLA
+DELIMITER $$
+CREATE PROCEDURE SP_ACTIVAR_PLANTILLA(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cPlantilla INT;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION 
     BEGIN
         SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
@@ -395,11 +426,12 @@ BEGIN
     SELECT COUNT(*) INTO cPlantilla FROM CONF_PLANTILLAS WHERE ID = P_ID;
 
     IF cPlantilla <= 0 THEN
-        SET @MSJ2 = 'La plantilla que intenta eliminar no existe';
+        SET @MSJ2 = 'La plantilla que intenta activar no existe';
     ELSE
-        DELETE FROM CONF_PLANTILLAS WHERE ID = P_ID;
+        UPDATE CONF_PLANTILLAS SET ESTADO = 0;
+        UPDATE CONF_PLANTILLAS SET ESTADO = 1 WHERE ID = P_ID;
 
-        SET @MSJ = 'Se eliminó correctamente la plantilla';
+        SET @MSJ = 'Se activó correctamente la plantilla';
     END IF;
 END $$
 DELIMITER ;

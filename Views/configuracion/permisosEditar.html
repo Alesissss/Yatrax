@@ -76,6 +76,7 @@
                             if (response.Status === "success") {
                                 if (response.Msj) {
                                     toastr.success(response.Msj, 'MENSAJE DE SISTEMA');
+                                    checkbox.prop('checked', isChecked);
                                 } else if (response.Msj2) {
                                     toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
                                 }
@@ -88,8 +89,6 @@
                             toastr.error("Hubo un error al comunicarse con el servidor.", 'MENSAJE DE SISTEMA');
                         }
                     });
-
-                    checkbox.prop('checked', isChecked);
                 } else {
                     checkbox.prop('checked', !isChecked);
                 }

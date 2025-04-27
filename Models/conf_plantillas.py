@@ -79,3 +79,18 @@ class Conf_Plantillas:
             return resultado[0]  # Retorna un diccionario con los mensajes
         finally:
             conexion.cerrar()
+
+    #ACTIVAR
+    @classmethod
+    def activar(cls, id):
+        conexion = bd.Conexion()
+
+        try:
+            # Llamar al procedimiento almacenado
+            conexion.ejecutar("CALL SP_ACTIVAR_PLANTILLA(%s);", (id, ))
+
+            # Obtener mensajes de salida
+            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
+            return resultado[0]  # Retorna un diccionario con los mensajes
+        finally:
+            conexion.cerrar()
