@@ -1,6 +1,8 @@
+import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort
 from Models.usuario import Usuario
 from Models.conf_menus import Conf_Menus
+from Models.conf_plantillas import Conf_Plantillas
 
 configuracion_bp = Blueprint('configuracion', __name__, url_prefix='/trabajadores/configuracion')
 
@@ -52,9 +54,19 @@ def verificar_sesion():
 def Menu_Permisos():
     return render_template('configuracion/permisos.html', active_page="permisos", active_menu='mConfiguracion')
 
+@configuracion_bp.route('/GestionarPlantillas')
+def Menu_Plantillas():
+    return render_template('configuracion/plantillas.html', active_page="plantillas", active_menu='mConfiguracion')
+
+@configuracion_bp.route('/PlantillaNuevo')
+def Plantilla_Nuevo():
+    return render_template('configuracion/plantillaCRUD.html', active_page="plantillas", active_menu='mConfiguracion', plantilla={}, tittle = 'Registrar plantilla', btnId = 'btn_Registrar')
+
 # END VIEWS
 
 # FUNCIONES
+
+# REGION PERMISOS
 @configuracion_bp.route("/GetData_Usuarios", methods=["GET"])
 def get_usuarios():
     try:
@@ -97,5 +109,133 @@ def Editar_Permisos(id):
 
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+# END REGION PERMISOS
+
+# REGION PLANTILLAS
+# Función para validar el tipo de archivo
+def allowed_file(filename):
+    ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@configuracion_bp.route("/GetData_Plantillas", methods=["GET"])
+def get_plantillas():
+    try:
+        plantillas = Conf_Plantillas.obtener_Plantillas()
+        return jsonify({'data': plantillas, 'Status': 'success', 'Msj': 'Listado de plantillas retornado exitosamene'})
+    except Exception as e:
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar plantillas: + {repr(e)}'})
+    
+@configuracion_bp.route("/RegistrarPlantilla", methods=["POST"])
+def registrar_plantilla():
+    try:
+        UPLOAD_FOLDER = "Static/img/plantillas/"
+        nombre = request.form.get("nombre").strip()
+        color_header = request.form.get("colorHeader").strip()
+        color_footer = request.form.get("colorFooter").strip()
+        usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
+
+        if not nombre or not color_header or not color_footer:
+            return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
+
+        ruta_logo = "/Static/img/plantillas/logo_yatusa.png"
+
+        if 'logo' in request.files:
+            logo = request.files['logo']
+
+            if logo and allowed_file(logo.filename):
+                extension = logo.filename.rsplit(".", 1)[1].lower()
+                filename = f"{nombre}.{extension}"
+                ruta_logo = f"/{UPLOAD_FOLDER}{filename}"
+
+        mensajes = Conf_Plantillas.registrar(nombre, color_header, color_footer, ruta_logo, usuario_actual)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            if 'logo' in request.files and logo and allowed_file(logo.filename):
+                filepath = os.path.join(UPLOAD_FOLDER, filename)
+                logo.save(filepath)
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar plantilla'})
+
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@configuracion_bp.route("/EliminarPlantilla/<int:id>", methods=['POST'])
+def eliminar_plantilla(id):  # Recibe el ID de la URL
+    try:
+        mensajes = Conf_Plantillas.eliminar(id)  # Se usa el ID directamente
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al eliminar plantilla'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@configuracion_bp.route('/EditarPlantilla/<int:id>', methods=['GET', 'POST'])
+def editar_plantilla(id):
+    try:
+        UPLOAD_FOLDER = "Static/img/plantillas/"
+        conf_plantilla = Conf_Plantillas.obtener_PlantillaPorId(id)
+        if request.method == 'POST':
+            nombre = request.form.get("nombre").strip()
+            color_header = request.form.get("colorHeader").strip()
+            color_footer = request.form.get("colorFooter").strip()
+
+            if not nombre or not color_header or not color_footer:
+                return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
+
+            ruta_logo = conf_plantilla['logo'] if conf_plantilla and 'logo' in conf_plantilla else "/Static/img/plantillas/logo_yatusa.png"
+
+            if 'logo' in request.files:
+                logo = request.files['logo']
+                
+                if logo and allowed_file(logo.filename):
+                    extension = logo.filename.rsplit(".", 1)[1].lower()
+                    filename = f"{nombre}.{extension}"
+                    ruta_logo = f"/{UPLOAD_FOLDER}{filename}"
+            
+            mensajes = Conf_Plantillas.editar(id, nombre, color_header, color_footer, ruta_logo)
+            msj1 = mensajes.get('@MSJ')
+            msj2 = mensajes.get('@MSJ2')
+
+            if msj1:
+                if 'logo' in request.files and logo and allowed_file(logo.filename):
+                    filepath = os.path.join(UPLOAD_FOLDER, filename)
+                    logo.save(filepath)
+                return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+            elif msj2:
+                return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+            else:
+                return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar plantilla'})
+
+        if conf_plantilla:
+            return render_template('configuracion/plantillaCRUD.html', active_page="plantillas", active_menu='mConfiguracion', plantilla=conf_plantilla, tittle = 'Editar plantilla', btnId = 'btn_Editar')
+        return render_template('configuracion/plantillaCRUD.html', active_page="plantillas", active_menu='mConfiguracion', plantilla={}, tittle = 'Editar plantilla', btnId = 'btn_Editar')
+
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+    
+@configuracion_bp.route("/VerPlantilla/<int:id>", methods=['GET'])
+def ver_plantilla(id):
+    try:
+        conf_plantilla = Conf_Plantillas.obtener_PlantillaPorId(id)
+        if conf_plantilla:
+            return render_template('configuracion/plantillaCRUD.html', active_page="plantillas", active_menu='mConfiguracion', plantilla=conf_plantilla, tittle = 'Ver plantilla', btnId = 'btn_Aceptar')
+        return render_template('configuracion/plantillaCRUD.html', active_page="plantillas", active_menu='mConfiguracion', plantilla={}, tittle = 'Ver plantilla', btnId = 'btn_Aceptar')
+        
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+# END REGION PLANTILLAS    
 
 # END FUNCIONES

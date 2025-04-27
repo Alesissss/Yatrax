@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,14 +13,15 @@
   <link rel="icon" href="{{url_for('static',filename='img/yatrax_icon.ico')}}">
   <title>{% block titulo %}{% endblock %}</title>
 </head>
+
 <body>
-  <nav>
-    <img src="{{url_for('static',filename='img/logo_yatusa.png')}}" alt="logo_yatrax">
+  <nav id="maestra_header">
+    <img src="" alt="logo_yatrax" id="maestra_logo">
     <ul>
       <li><a href="">Inicio</a></li>
       <li><a href="">Servicios</a></li>
       <li><a href="">Contacto</a></li>
-      <li><a href="">Iniciar Sesión</a></li>
+      <li><a href="">Iniciar sesión</a></li>
     </ul>
   </nav>
   <header>
@@ -37,104 +39,127 @@
       </select>
       <input type="date" placeholder="Fecha Ida">
       <input type="date" placeholder="Fecha Retorno">
-        <option value=""></option>
+      <option value=""></option>
       </select>
       <input type="submit" value="Buscar" id="buscar">
     </form>
     <section>
-        {% block contenido %}
-        {% endblock %}
+      {% block contenido %}
+      {% endblock %}
     </section>
     <section id="ctn_beneficios">
       <div>
         <h2>Compra segura</h2>
         <br>
-        <p>Comprar pasajes de bus para tu viaje de turismo no tiene que ser estresante o inseguro. De hecho, ahora existe la posibilidad de comprarlos desde el lugar en que te encuentres y en el momento que desees gracias al método en línea de compra de pasajes. Además, nuestra plataforma garantiza total transparencia y seguridad en las transacciones con el fin de que compres tu pasajes de bus con la tranquilidad que necesitas.</p>
+        <p>Comprar pasajes de bus para tu viaje de turismo no tiene que ser estresante o inseguro. De hecho, ahora
+          existe la posibilidad de comprarlos desde el lugar en que te encuentres y en el momento que desees gracias al
+          método en línea de compra de pasajes. Además, nuestra plataforma garantiza total transparencia y seguridad en
+          las transacciones con el fin de que compres tu pasajes de bus con la tranquilidad que necesitas.</p>
       </div>
       <div>
         <h2>Medios de pago de confianza</h2>
         <br>
-        <p>El cumplimiento de los estándares de seguridad de datos (DSS) de las industrias de tarjeta de pago es un requisito para todas las entidades que almacenan, procesan o transmiten información de tarjetahabientes, incluidas las instituciones financieras, los comercios y los proveedores de servicios. Los programas de Visa administran el cumplimiento de los DSS de PCI al requerir que los participantes demuestren el cumplimiento regularmente.</p>
+        <p>El cumplimiento de los estándares de seguridad de datos (DSS) de las industrias de tarjeta de pago es un
+          requisito para todas las entidades que almacenan, procesan o transmiten información de tarjetahabientes,
+          incluidas las instituciones financieras, los comercios y los proveedores de servicios. Los programas de Visa
+          administran el cumplimiento de los DSS de PCI al requerir que los participantes demuestren el cumplimiento
+          regularmente.</p>
       </div>
       <div>
         <h2>Facilidad</h2>
         <br>
-        <p>El sistema de ventas por internet trabaja en línea con nuestros diferentes sistemas de venta, puede consultar los turnos y precios para posteriormente realiza su compra en un entorno amigable y que le permite realizar compras de forma rápida y sencilla, tenemos varias opciones de pago y si desea ser asesorado puede llamar al número que figura en nuestra página web.</p>
+        <p>El sistema de ventas por internet trabaja en línea con nuestros diferentes sistemas de venta, puede consultar
+          los turnos y precios para posteriormente realiza su compra en un entorno amigable y que le permite realizar
+          compras de forma rápida y sencilla, tenemos varias opciones de pago y si desea ser asesorado puede llamar al
+          número que figura en nuestra página web.</p>
       </div>
     </section>
     <section id="consultas">
-        <h2>Preguntas frecuentes</h2>
-        <br>
-        <!-- Pregunta 1 -->
-        <details>
-            <summary>¿Cómo puedo comprar un pasaje de turismo terrestre?</summary>
-            <p>
-            Puedes comprar tus pasajes directamente en nuestra página web, a través de nuestra aplicación móvil o visitando nuestras oficinas físicas. Aceptamos pagos con tarjeta de crédito, débito y transferencias bancarias.
-            </p>
-        </details>
+      <h2>Preguntas frecuentes</h2>
+      <br>
+      <!-- Pregunta 1 -->
+      <details>
+        <summary>¿Cómo puedo comprar un pasaje de turismo terrestre?</summary>
+        <p>
+          Puedes comprar tus pasajes directamente en nuestra página web, a través de nuestra aplicación móvil o
+          visitando nuestras oficinas físicas. Aceptamos pagos con tarjeta de crédito, débito y transferencias
+          bancarias.
+        </p>
+      </details>
 
-        <!-- Pregunta 2 -->
-        <details>
-            <summary>¿Qué rutas de turismo terrestre ofrecen?</summary>
-            <p>
-            Ofrecemos rutas a los principales destinos turísticos del país, incluyendo ciudades históricas, playas y parques naturales. Puedes consultar todas nuestras rutas disponibles en la sección "Destinos" de nuestra página web.
-            </p>
-        </details>
+      <!-- Pregunta 2 -->
+      <details>
+        <summary>¿Qué rutas de turismo terrestre ofrecen?</summary>
+        <p>
+          Ofrecemos rutas a los principales destinos turísticos del país, incluyendo ciudades históricas, playas y
+          parques naturales. Puedes consultar todas nuestras rutas disponibles en la sección "Destinos" de nuestra
+          página web.
+        </p>
+      </details>
 
-        <!-- Pregunta 3 -->
-        <details>
-            <summary>¿Cuánto tiempo tarda el envío de paquetes?</summary>
-            <p>
-            El tiempo de envío depende de la distancia y el destino. Para envíos locales, el tiempo estimado es de 1 a 2 días hábiles. Para envíos nacionales, puede tardar entre 3 y 5 días hábiles. Te proporcionaremos un número de seguimiento para que puedas monitorear tu paquete.
-            </p>
-        </details>
+      <!-- Pregunta 3 -->
+      <details>
+        <summary>¿Cuánto tiempo tarda el envío de paquetes?</summary>
+        <p>
+          El tiempo de envío depende de la distancia y el destino. Para envíos locales, el tiempo estimado es de 1 a 2
+          días hábiles. Para envíos nacionales, puede tardar entre 3 y 5 días hábiles. Te proporcionaremos un número de
+          seguimiento para que puedas monitorear tu paquete.
+        </p>
+      </details>
 
-        <!-- Pregunta 4 -->
-        <details>
-            <summary>¿Qué tipo de paquetes puedo enviar?</summary>
-            <p>
-            Aceptamos paquetes de diversos tamaños y pesos, desde documentos hasta mercancías de tamaño mediano. Sin embargo, no transportamos materiales peligrosos o ilegales. Para más detalles, consulta nuestra política de envíos.
-            </p>
-        </details>
+      <!-- Pregunta 4 -->
+      <details>
+        <summary>¿Qué tipo de paquetes puedo enviar?</summary>
+        <p>
+          Aceptamos paquetes de diversos tamaños y pesos, desde documentos hasta mercancías de tamaño mediano. Sin
+          embargo, no transportamos materiales peligrosos o ilegales. Para más detalles, consulta nuestra política de
+          envíos.
+        </p>
+      </details>
 
-        <!-- Pregunta 5 -->
-        <details>
-            <summary>¿Ofrecen servicios de turismo para grupos?</summary>
-            <p>
-            Sí, ofrecemos servicios especializados para grupos, incluyendo transporte privado y paquetes personalizados. Contáctanos directamente para obtener más información y un presupuesto adaptado a tus necesidades.
-            </p>
-        </details>
+      <!-- Pregunta 5 -->
+      <details>
+        <summary>¿Ofrecen servicios de turismo para grupos?</summary>
+        <p>
+          Sí, ofrecemos servicios especializados para grupos, incluyendo transporte privado y paquetes personalizados.
+          Contáctanos directamente para obtener más información y un presupuesto adaptado a tus necesidades.
+        </p>
+      </details>
 
-        <!-- Pregunta 6 -->
-        <details>
-            <summary>¿Qué debo hacer si mi paquete no llega a tiempo?</summary>
-            <p>
-            Si tu paquete no llega dentro del tiempo estimado, contáctanos inmediatamente a través de nuestro servicio de atención al cliente. Te ayudaremos a rastrear el paquete y resolver cualquier inconveniente.
-            </p>
-        </details>
+      <!-- Pregunta 6 -->
+      <details>
+        <summary>¿Qué debo hacer si mi paquete no llega a tiempo?</summary>
+        <p>
+          Si tu paquete no llega dentro del tiempo estimado, contáctanos inmediatamente a través de nuestro servicio de
+          atención al cliente. Te ayudaremos a rastrear el paquete y resolver cualquier inconveniente.
+        </p>
+      </details>
 
-        <!-- Pregunta 7 -->
-        <details>
-            <summary>¿Puedo cancelar o cambiar mi pasaje?</summary>
-            <p>
-            Sí, puedes cancelar o cambiar tu pasaje, pero esto está sujeto a nuestras políticas de cancelación y cambio. Te recomendamos revisar los términos y condiciones al momento de la compra o contactarnos para más detalles.
-            </p>
-        </details>
+      <!-- Pregunta 7 -->
+      <details>
+        <summary>¿Puedo cancelar o cambiar mi pasaje?</summary>
+        <p>
+          Sí, puedes cancelar o cambiar tu pasaje, pero esto está sujeto a nuestras políticas de cancelación y cambio.
+          Te recomendamos revisar los términos y condiciones al momento de la compra o contactarnos para más detalles.
+        </p>
+      </details>
 
-        <!-- Pregunta 8 -->
-        <details>
-            <summary>¿Qué medidas de seguridad tienen para el transporte de pasajeros?</summary>
-            <p>
-            La seguridad de nuestros pasajeros es nuestra prioridad. Nuestros vehículos cumplen con todos los estándares de seguridad, y nuestros conductores están altamente capacitados. Además, contamos con seguros de viaje para mayor tranquilidad.
-            </p>
-        </details>
+      <!-- Pregunta 8 -->
+      <details>
+        <summary>¿Qué medidas de seguridad tienen para el transporte de pasajeros?</summary>
+        <p>
+          La seguridad de nuestros pasajeros es nuestra prioridad. Nuestros vehículos cumplen con todos los estándares
+          de seguridad, y nuestros conductores están altamente capacitados. Además, contamos con seguros de viaje para
+          mayor tranquilidad.
+        </p>
+      </details>
     </section>
   </main>
   <footer>
-    <div class="container-fluid bg-black py-3 py-md-6 py-xl-9 py-xxl-10">
+    <div class="container-fluid bg-black py-3 py-md-6 py-xl-9 py-xxl-10" id="maestra_footer">
       <div class="row justify-content-center">
         <div class="col-11">
-  
+
           <!-- Widgets - Bootstrap Brain Component -->
           <section class="mb-4 mb-md-5 mb-xl-9 mb-xxl-10">
             <div class="row gy-4 gy-md-0 justify-content-around">
@@ -227,7 +252,7 @@
                         class="link-opacity-75 link-underline-opacity-0 link-opacity-100-hover link-underline-opacity-100-hover link-offset-1 link-light">
                         Preguntas frecuentes
                       </a>
-                    </li>   
+                    </li>
                   </ul>
                 </div>
               </div>
@@ -270,7 +295,7 @@
               </div>
             </div>
           </section>
-  
+
           <!-- Link - Bootstrap Brain Component -->
           <div class="mb-3">
             <div class="row">
@@ -300,7 +325,7 @@
               </div>
             </div>
           </div>
-  
+
           <!-- Copyright - Bootstrap Brain Component -->
           <div class="border-top border-dark-subtle pt-3">
             <div class="row gy-3 align-items-center">
@@ -365,6 +390,36 @@
         </div>
       </div>
     </div>
-  </footer>  
+  </footer>
+  <!-- jQuery -->
+  <script src="/Static/js/jquery.min.js"></script>
+  <!-- Bootstrap JS -->
+  <script src="/Static/js/bootstrap.bundle.min.js"></script>
+  <!-- AdminLTE JS -->
+  <script src="/Static/js/adminlte.min.js"></script>
+  <script>
+    $.ajax({
+      url: '/ecommerce/home/GetConfApariencia',
+      type: 'GET',
+      dataType: 'json',
+      success: function (response) {
+        if (response.Status === 'success') {
+          const config = response.data;
+
+          $('#maestra_header')[0].style.setProperty('background-color', config.color_header, 'important');
+          $('#maestra_footer')[0].style.setProperty('background-color', config.color_footer, 'important');
+
+          $('#maestra_logo').attr('src', config.logo);
+        } else {
+          console.error('Error al obtener la configuración:', response.Msj);
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error('Error en la solicitud AJAX:', error);
+      }
+    });
+
+  </script>
 </body>
+
 </html>

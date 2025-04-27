@@ -249,6 +249,13 @@
                                         <p>Gestionar permisos</p>
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a href="{{ url_for('configuracion.Menu_Plantillas') }}"
+                                        class="nav-link {% if active_page == 'plantillas' %}active{% endif %}">
+                                        <i class="bi bi-palette nav-icon"></i>
+                                        <p>Gestionar plantillas</p>
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                         {% endif %}
@@ -519,31 +526,6 @@
                         $(this).DataTable().columns.adjust().draw();
                     });
                 }, 300); // Ajusta este valor según la animación de tu sidebar
-            });
-
-            // Inicializar Select2
-            $(".select2").select2();
-
-            // Aplicar InputMask
-            $("[data-mask]").inputmask();
-
-            // Inicializar DateTimePicker
-            $('#datetimepicker1').datetimepicker({
-                format: 'YYYY-MM-DD HH:mm'
-            });
-
-            // Mostrar alertas con SweetAlert2
-            $("#testButton").click(function () {
-                Swal.fire({
-                    title: "¡Bien!",
-                    text: "SweetAlert2 está funcionando correctamente.",
-                    icon: "success"
-                });
-                toastr.success("¡Toastr también funciona!", 'MENSAJE DE SISTEMA');
-            });
-
-            $('#datetimepicker1').datetimepicker({
-                format: 'YYYY-MM-DD HH:mm'
             });
         });
     </script>

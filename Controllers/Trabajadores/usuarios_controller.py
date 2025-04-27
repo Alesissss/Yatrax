@@ -65,6 +65,8 @@ def TipoUsuario_Nuevo():
 # END VIEWS
 
 # FUNCIONES
+
+# REGION USUARIOS
 # Función para validar el tipo de archivo
 def allowed_file(filename):
     ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
@@ -167,8 +169,6 @@ def editar_usuario(id):
                     extension = imagen.filename.rsplit(".", 1)[1].lower()
                     filename = f"{email}.{extension}"
                     ruta_imagen = f"/{UPLOAD_FOLDER}{filename}"
-
-            print(f"Ruta de imagen procesada: {ruta_imagen}") 
             
             mensajes = Usuario.editar(id, nombre, email, ruta_imagen, idTipoUsuario)
             msj1 = mensajes.get('@MSJ')
@@ -234,5 +234,7 @@ def registrar_tipoUsuario():
             return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar tipo de usuario'})
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+# END REGION USUARIO
 
 # END FUNCIONES

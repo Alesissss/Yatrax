@@ -11,15 +11,11 @@
                     <h4 class="text-center mb-0">{{ tittle }}</h4>
                 </div>
                 <div class="card-body">
-                    <div id="data-usuario" class="container-fluid" type="hidden"
-                        data-usuario='{{ usuario | tojson | safe }}'></div>
-                    <!-- si prefieres usar toda la data en un solo objeto escondido -->
-                    <input type="hidden" id="idUsuario" value="{{ usuario.id }}"> <!-- ID oculto -->
                     <div class="mb-3">
                         <label for="txt_Nombre">Nombre completo</label>
                         <div class="input-group">
-                            <input type="text" id="txt_Nombre" class="form-control" placeholder="Nombre completo" {% if btnId == 'btn_Aceptar' %}disabled{% endif %}
-                                value="{{ usuario.nombre }}">
+                            <input type="text" id="txt_Nombre" class="form-control" placeholder="Nombre completo" {% if
+                                btnId=='btn_Aceptar' %}disabled{% endif %} value="{{ usuario.nombre }}">
                             <div class="input-group-append">
                                 <div class="input-group-text"><i class="fas fa-user"></i></div>
                             </div>
@@ -28,8 +24,8 @@
                     <div class="mb-3">
                         <label for="txt_Email">Correo electrónico</label>
                         <div class="input-group">
-                            <input type="email" id="txt_Email" class="form-control" placeholder="Correo electrónico" {% if btnId == 'btn_Aceptar' %}disabled{% endif %}
-                                value="{{ usuario.email }}">
+                            <input type="email" id="txt_Email" class="form-control" placeholder="Correo electrónico" {%
+                                if btnId=='btn_Aceptar' %}disabled{% endif %} value="{{ usuario.email }}">
                             <div class="input-group-append">
                                 <div class="input-group-text"><i class="fas fa-envelope"></i></div>
                             </div>
@@ -38,8 +34,8 @@
                     <div class="mb-3">
                         <label for="txt_Password">Contraseña</label>
                         <div class="input-group">
-                            <input type="password" id="txt_Password" class="form-control" {% if btnId != 'btn_Registrar' %}disabled{% endif %}
-                                placeholder="Contraseña" value="********">
+                            <input type="password" id="txt_Password" class="form-control" {% if btnId !='btn_Registrar'
+                                %}disabled{% endif %} placeholder="Contraseña" value="********">
                             <div class="input-group-append">
                                 <div class="input-group-text"><i class="fas fa-lock"></i></div>
                             </div>
@@ -48,17 +44,20 @@
                     <div class="mb-3">
                         <label for="cbx_TipoUsuario">Tipo de usuario</label>
                         <div class="input-group">
-                            <select id="cbx_TipoUsuario" class="form-control" {% if btnId == 'btn_Aceptar' %}disabled{% endif %}>
+                            <select id="cbx_TipoUsuario" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{%
+                                endif %}>
                             </select>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label for="file_Imagen">Imagen de perfil</label>
                         <div class="col-12 text-left">
-                            <label class="btn btn-warning {% if btnId == 'btn_Aceptar' %}disabled{% endif %}" for="file_Imagen">
+                            <label class="btn btn-warning {% if btnId == 'btn_Aceptar' %}disabled{% endif %}"
+                                for="file_Imagen">
                                 <i class="bi bi-file-earmark-arrow-up-fill"></i> Subir archivo
                             </label>
-                            <input type="file" class="d-none" id="file_Imagen" accept=".jpg, .jpeg, .png" {% if btnId == 'btn_Aceptar' %}disabled{% endif %}>
+                            <input type="file" class="d-none" id="file_Imagen" accept=".jpg, .jpeg, .png" {% if
+                                btnId=='btn_Aceptar' %}disabled{% endif %}>
                             <span id="checkIcon" class="d-none text-success ml-2">
                                 <i class="bi bi-check-circle-fill"></i> Archivo subido
                             </span>
@@ -79,15 +78,13 @@
 
 {% block scripts %}
 <script>
-    const usuario = JSON.parse($('#data-usuario').attr('data-usuario'));
-
     function fct_GetTiposUsuarios() {
         $.getJSON('/trabajadores/usuarios/GetTiposUsuarios', function (response) {
             if (response.Status === 'success') {
                 let items = '<option disabled>--SELECCIONAR--</option>';
 
                 $.each(response.data, function (index, item) {
-                    if (item.id === usuario.id_tipousuario) {
+                    if (item.id === Number("{{ usuario.id_tipousuario }}")) {
                         items += `<option selected value="${item.id}">${item.nombre}</option>`;
                     } else {
                         items += `<option value="${item.id}">${item.nombre}</option>`;
@@ -182,7 +179,7 @@
         });
 
         $("#btn_Editar").click(function () {
-            const id = usuario['id'];
+            const id = Number("{{ usuario.id }}");
 
             let nombre = $("#txt_Nombre").val().trim();
             let email = $("#txt_Email").val().trim();

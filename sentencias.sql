@@ -6,8 +6,13 @@ DROP PROCEDURE IF EXISTS SP_DARBAJA_USUARIO;
 DROP PROCEDURE IF EXISTS SP_EDITAR_USUARIO;
 DROP PROCEDURE IF EXISTS SP_REGISTRAR_USUARIO;
 DROP PROCEDURE IF EXISTS SP_REGISTRAR_TIPO_USUARIO;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_PLANTILLA;
+DROP PROCEDURE IF EXISTS SP_EDITAR_PLANTILLA;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_PLANTILLA;
+
 
 -- Luego eliminamos las tablas, primero la que depende de la otra
+DROP TABLE IF EXISTS conf_plantillas;
 DROP TABLE IF EXISTS conf_dmenus;
 DROP TABLE IF EXISTS conf_menus;
 DROP TABLE IF EXISTS usuarios;
@@ -41,7 +46,7 @@ CREATE TABLE usuarios (
 CREATE TABLE conf_menus (
     id INT AUTO_INCREMENT PRIMARY KEY,  
     nombre VARCHAR(100) UNIQUE NOT NULL,
-    estado bit NOT NULL
+    estado BOOLEAN NOT NULL
 );
 
 -- Crear tabla detalle_menu
@@ -49,6 +54,17 @@ CREATE TABLE conf_dmenus (
     idMenu INT REFERENCES conf_menus (id),
     idUsuario INT REFERENCES usuarios (id),
     PRIMARY KEY (idMenu, idUsuario)
+);
+
+-- Crear tabla conf_plantillas
+CREATE TABLE conf_plantillas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL UNIQUE,
+    color_header VARCHAR(255) NOT NULL,
+    color_footer VARCHAR(255) NOT NULL,
+    logo VARCHAR(255) NOT NULL,
+    estado BOOLEAN NOT NULL,
+    usuario VARCHAR(100) NOT NULL
 );
 
 -- Tabla Tipo Usuario
@@ -73,6 +89,8 @@ INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (4, 1);
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (5, 1);
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (6, 1);
 
+-- Tabla apariencia
+INSERT INTO conf_plantillas (id, nombre, color_header, color_footer, logo, estado, usuario) VALUES (1, 'YATRAX', '#0c336e', '#000000', '/Static/img/plantillas/logo_yatusa.png', 1, 'SYSTEM');
 
 -- Crear procedimiento SP_REGISTRAR_USUARIO
 DELIMITER $$
@@ -283,6 +301,105 @@ BEGIN
     ELSE
         DELETE FROM CONF_DMENUS WHERE idMenu = P_IDMENU AND idUsuario = P_IDUSUARIO; 
         SET @MSJ = 'Se eliminó correctamente el permiso';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_REGISTRAR_PLANTILLA
+DELIMITER $$
+CREATE PROCEDURE SP_REGISTRAR_PLANTILLA(
+    IN P_NOMBRE VARCHAR(255),
+    IN P_COLORH VARCHAR(255),
+    IN P_COLORF VARCHAR(255),
+    IN P_LOGO VARCHAR(255),
+    IN P_USUARIO VARCHAR(255)
+)
+BEGIN
+    DECLARE cNombre INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cNombre FROM CONF_PLANTILLAS WHERE NOMBRE = P_NOMBRE;
+
+    IF cNombre > 0 THEN
+        SET @MSJ2 = 'El nombre que intenta registrar ya está registrado';
+    ELSE
+        INSERT INTO CONF_PLANTILLAS (NOMBRE, COLOR_HEADER, COLOR_FOOTER, LOGO, ESTADO, USUARIO) 
+        VALUES (P_NOMBRE, P_COLORH, P_COLORF, P_LOGO, 0, P_USUARIO);
+
+        SET @MSJ = 'Se registró correctamente la plantilla';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_EDITAR_PLANTILLA
+DELIMITER $$
+CREATE PROCEDURE SP_EDITAR_PLANTILLA(
+    IN P_ID INT,
+    IN P_NOMBRE VARCHAR(255),
+    IN P_COLORH VARCHAR(255),
+    IN P_COLORF VARCHAR(255),
+    IN P_LOGO VARCHAR(255)
+)
+BEGIN
+    DECLARE cPlantilla INT;
+    DECLARE cNombre INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cPlantilla FROM CONF_PLANTILLAS WHERE ID = P_ID;
+    SELECT COUNT(*) INTO cNombre FROM CONF_PLANTILLAS WHERE NOMBRE = P_NOMBRE AND ID != P_ID;
+
+    IF cPlantilla <= 0 THEN
+        SET @MSJ2 = 'La plantilla que intenta editar no existe';
+    ELSEIF cNombre != 0 THEN
+        SET @MSJ2 = 'El nombre ingresado ya existe';
+    ELSE
+        UPDATE CONF_PLANTILLAS 
+        SET NOMBRE = P_NOMBRE, 
+            COLOR_HEADER = P_COLORH,
+            COLOR_FOOTER = P_COLORF,
+            LOGO = P_LOGO
+        WHERE ID = P_ID;
+
+        SET @MSJ = 'Se modificó correctamente la plantilla';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_PLANTILLA
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_PLANTILLA(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cPlantilla INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cPlantilla FROM CONF_PLANTILLAS WHERE ID = P_ID;
+
+    IF cPlantilla <= 0 THEN
+        SET @MSJ2 = 'La plantilla que intenta eliminar no existe';
+    ELSE
+        DELETE FROM CONF_PLANTILLAS WHERE ID = P_ID;
+
+        SET @MSJ = 'Se eliminó correctamente la plantilla';
     END IF;
 END $$
 DELIMITER ;
