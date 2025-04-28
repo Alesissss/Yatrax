@@ -74,7 +74,8 @@ CREATE TABLE tipo_vehiculo(
     ancho numeric(9,2) not null,
     capcidad int not null,
     combustible varchar(50) not null,
-    consumo numeric(9,2) not null
+    consumo numeric(9,2) not null,
+    estado bit not null
 );
 
 -- Tabla Tipo Usuario
