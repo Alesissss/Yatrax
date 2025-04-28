@@ -17,6 +17,7 @@ DROP TABLE IF EXISTS conf_dmenus;
 DROP TABLE IF EXISTS conf_menus;
 DROP TABLE IF EXISTS usuarios;
 DROP TABLE IF EXISTS tipo_usuario;
+DROP TABLE IF EXISTS tipo_vehiculo;
 
 -- Crear tabla tipo_usuario
 CREATE TABLE tipo_usuario (
@@ -65,6 +66,15 @@ CREATE TABLE conf_plantillas (
     logo VARCHAR(255) NOT NULL,
     estado BOOLEAN NOT NULL,
     usuario VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE tipo_vehiculo(
+	idTipoVehiculo int AUTO_INCREMENT primary key,
+    largo numeric(9,2) not null,
+    ancho numeric(9,2) not null,
+    capcidad int not null,
+    combustible varchar(50) not null,
+    consumo numeric(9,2) not null
 );
 
 -- Tabla Tipo Usuario
