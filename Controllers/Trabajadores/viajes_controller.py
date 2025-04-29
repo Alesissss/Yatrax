@@ -54,7 +54,7 @@ def Menu_Viajes():
 
 @viajes_bp.route('/GestionarTipoVehiculo')
 def Menu_TipoVehiculo():
-    return render_template('viajes/tipoVehiculo.html', active_page="horarios", active_menu='mViajes')
+    return render_template('viajes/tipoVehiculo.html', active_page="tipoVehiculo", active_menu='mViajes')
 
 
 @viajes_bp.route('/nuevoTipoVehiculo')
@@ -72,12 +72,16 @@ def nuevoTipoVehiculo():
             "consumo": 3.2,
             "estado": "activo"
         },
-        btnId="btn_Registrar"
+        btnId="btn_Registrar",
+        active_page="tipoVehiculo", 
+        active_menu='mViajes'
     )
 
 # END VIEWS
 
 # FUNCIONES
+
+# REGION TIPO VEHICULO
 @viajes_bp.route("/registrarTipoVehiculo",methods=["POST"])
 def registrarTipoVehiculo():
     try:
@@ -125,6 +129,11 @@ def verTipoVehiculo(idVehiculo):
         "viajes/tipoVehiculoCRUD.html",
         tittle="Nuevo Tipo de Vehículo",
         tipoVehiculo = TipoVehiculo.obtenerUno(idVehiculo),
-        btnId="btn_Regresar"
+        btnId="btn_Regresar",
+        active_page="tipoVehiculo", 
+        active_menu='mViajes'
     )
+
+# END REGION TIPO VEHICULO
+
 # END FUNCIONES
