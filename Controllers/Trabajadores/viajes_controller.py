@@ -123,8 +123,36 @@ def darBajaTipovehiculo(id):
 def verTipoVehiculo(idVehiculo):
     return render_template(
         "viajes/tipoVehiculoCRUD.html",
-        tittle="Nuevo Tipo de Vehículo",
+        tittle="Ver Tipo de Vehículo",
         tipoVehiculo = TipoVehiculo.obtenerUno(idVehiculo),
         btnId="btn_Regresar"
     )
-# END FUNCIONES
+
+@viajes_bp.route("/EditarTipoVehiculo/<int:idTipoVehiculo>")
+def editarTipoVehiculo(idTipoVehiculo):
+    return render_template(
+        "viajes/tipoVehiculoCRUD.html",
+        tittle="Editar Tipo de Vehículo",
+        tipoVehiculo = TipoVehiculo.obtenerUno(idTipoVehiculo),
+        btnId="btn_Actualizar"
+    )
+
+@viajes_bp.route("/guardarCambiosTipoVehiculo",methods=["POST"])
+def guardarCambiosTipoVehiculo():
+    try:
+        nombre= request.form["txt_nombre"]
+        largo= request.form["txt_largo"]
+        ancho= request.form["txt_ancho"]
+        capacidad = request.form["txt_capacidad"]
+        combustible= request.form["txt_combustible"]
+        consumo= request.form["txt_consumo"]
+        estado= request.form["txt_estado"]
+        
+        TipoVehiculo.actualizarTipoVehiculo(nombre, largo, ancho, capacidad, combustible, consumo,estado)
+        return jsonify({
+            "Status": "success",
+            "Msj": "Tipo de vehículo registrado correctamente."
+        })
+    
+    except Exception as e:
+        return jsonify({'Status': 'error', 'Msj': f'Ocurrió un error al listar los tipos de vehiculo: + {repr(e)}'})

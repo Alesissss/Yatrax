@@ -517,38 +517,46 @@ BEGIN
     );
 END$$
 
--- Procedimiento para actualizar tipo de vehículo
+--Procedimiento almacenado para actualizar
+DELIMITER $$
+
 CREATE PROCEDURE SP_ACTUALIZAR_TIPO_VEHICULO(
     IN p_id INT,
     IN p_nombre VARCHAR(50),
-    IN p_largo NUMERIC(9,2),
-    IN p_ancho NUMERIC(9,2),
+    IN p_largo DECIMAL(9,2),
+    IN p_ancho DECIMAL(9,2),
     IN p_capacidad INT,
     IN p_combustible VARCHAR(50),
-    IN p_consumo NUMERIC(9,2)
+    IN p_consumo DECIMAL(9,2),
+    IN p_estado BIT
 )
 BEGIN
-    -- Validación de valores
+    -- Validaciones
     IF p_largo <= 0 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Largo debe ser mayor a 0';
     END IF;
-    
+
     IF p_ancho <= 0 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Ancho debe ser mayor a 0';
     END IF;
-    
+
     IF p_capacidad <= 0 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Capacidad debe ser mayor a 0';
     END IF;
-    
+
     IF p_consumo <= 0 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Consumo debe ser mayor a 0';
     END IF;
-    
+
     IF p_nombre IS NULL OR p_nombre = '' THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Nombre es obligatorio';
     END IF;
-    
+
+    IF p_estado NOT IN (0, 1) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Estado debe ser 0 o 1';
+    END IF;
+
+    -- Actualización
     UPDATE tipo_vehiculo
     SET 
         nombre = p_nombre,
@@ -556,10 +564,13 @@ BEGIN
         ancho = p_ancho,
         capacidad = p_capacidad,
         combustible = p_combustible,
-        consumo = p_consumo
+        consumo = p_consumo,
+        estado = p_estado
     WHERE 
         idTipoVehiculo = p_id;
 END$$
+
+DELIMITER ;
 
 -- Procedimiento para baja lógica
 CREATE PROCEDURE SP_ELIMINAR_TIPO_VEHICULO(

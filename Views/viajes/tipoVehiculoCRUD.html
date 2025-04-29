@@ -12,7 +12,8 @@
                 </div>
                 <div class="card-body" autocomplete="off">
                     <!-- Formulario para registrar el tipo de vehículo -->
-                    <form action="/trabajadores/viajes/registrarTipoVehiculo" method="POST" id="formTipoVehiculo">
+                    <form action="{% if title == 'Nuevo Tipo de Vehículo' %}/trabajadores/viajes/registrarTipoVehiculo{% else %}/trabajadores/viajes/guardarCambiosTipoVehiculo{% endif %}"
+                    method="POST" id="formTipoVehiculo">
                         <div class="mb-3">
                             <label for="txt_Nombre">Nombre del tipo de vehículo</label>
                             <input type="text" name="txt_nombre" id="txt_Nombre" class="form-control" placeholder="Nombre del tipo de vehículo" value="{{ tipoVehiculo.nombre }}">
@@ -78,11 +79,32 @@
             window.location.href="/trabajadores/viajes/GestionarTipoVehiculo"
         })
 
+        $("#btn_Actualizar").click(()=>{
+            $.ajax({
+                url: '/trabajadores/viajes/guardarCambiosTipoVehiculo',
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function(response) {
+                    // Mostrar toastr de éxito
+                    toastr.success(response.Msj, 'Éxito');
+                    
+                    // Redirigir después de 2 segundos (opcional)
+                    setTimeout(function() {
+                        window.location.href = "/trabajadores/viajes/GestionarTipoVehiculo";
+                    }, 1000);
+                },
+                error: function(xhr) {
+                    // Mostrar toastr de error
+                    let errorMsg = xhr.responseJSON ? xhr.responseJSON.Msj : 'Error desconocido';
+                    toastr.error(errorMsg, 'Error');
+                }
+            });
+        })
+
         $("#btn_Regresar").click(()=>{
             window.location.href="/trabajadores/viajes/GestionarTipoVehiculo"
         })
 
-        // En tu archivo JavaScript que maneja el formulario
         $('#formTipoVehiculo').on('submit', function(e) {
             e.preventDefault();
             

@@ -75,11 +75,11 @@ class TipoVehiculo:
                 conexion.cerrar()
 
     @classmethod
-    def actualizarTipoVehiculo(cls,id,nombre,largo,ancho,capacidad,combustible,consumo):
+    def actualizarTipoVehiculo(cls,id,nombre,largo,ancho,capacidad,combustible,consumo,estado):
         conexion = None
         try:
             conexion = bd.Conexion()
-            conexion = conexion.ejecutar("CALL SP_ACTUALIZAR_TIPO_VEHICULO(%s,%s,%s,%s,%s,%s,%s);",(id,nombre,largo,ancho,capacidad,combustible,consumo))
+            conexion = conexion.ejecutar("CALL SP_ACTUALIZAR_TIPO_VEHICULO(%s,%s,%s,%s,%s,%s,%s,%s);",(id,nombre,largo,ancho,capacidad,combustible,consumo,estado))
         finally:
             if conexion:
                 conexion.cerrar()
