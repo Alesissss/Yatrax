@@ -190,6 +190,13 @@
                                         <p>Gestionar horarios</p>
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a href="{{ url_for('viajes.Menu_TipoVehiculo') }}"
+                                        class="nav-link {% if active_page == 'tipoVehiculo' %}active{% endif %}">
+                                        <i class="bi bi-bus-front nav-icon"></i>
+                                        <p>Gestionar tipo vehículo</p>
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                         {% endif %}

@@ -1,0 +1,112 @@
+{% extends "index.html" %}
+
+{% block title %}YATRAX - {{ tittle }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="text-center mb-0">{{ tittle }}</h4>
+                </div>
+                <div class="card-body" autocomplete="off">
+                    <!-- Formulario para registrar el tipo de vehículo -->
+                    <form action="/trabajadores/viajes/registrarTipoVehiculo" method="POST" id="formTipoVehiculo">
+                        <div class="mb-3">
+                            <label for="txt_Nombre">Nombre del tipo de vehículo</label>
+                            <input type="text" name="txt_nombre" id="txt_Nombre" class="form-control" placeholder="Nombre del tipo de vehículo" value="{{ tipoVehiculo.nombre }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="txt_Largo">Largo</label>
+                            <input type="number" name="txt_largo" step="0.01" id="txt_Largo" class="form-control" placeholder="Largo de la unidad de transporte" value="{{ tipoVehiculo.largo }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="txt_Ancho">Ancho</label>
+                            <input type="number" name="txt_ancho" step="0.01" id="txt_Ancho" class="form-control" placeholder="Ancho de la unidad de transporte" value="{{ tipoVehiculo.ancho }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="txt_Capacidad">Capacidad</label>
+                            <input type="number" name="txt_capacidad" id="txt_Capacidad" class="form-control" placeholder="Cantidad de pasajeros" value="{{ tipoVehiculo.capacidad }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="txt_Combustible">Tipo de combustible:</label>
+                            <select id="txt_Combustible" name="txt_combustible" class="form-control">
+                                <option value="regular" {% if tipoVehiculo.combustible == 'regular' %}selected{% endif %}>Gasolina Regular (87 octanos EEUU)</option>
+                                <option value="premium" {% if tipoVehiculo.combustible == 'premium' %}selected{% endif %}>Gasolina Premium (91-93 octanos EEUU)</option>
+                                <option value="super-premium" {% if tipoVehiculo.combustible == 'super-premium' %}selected{% endif %}>Gasolina Super Premium (+93 octanos EEUU)</option>
+                                <option value="gasohol" {% if tipoVehiculo.combustible == 'gasohol' %}selected{% endif %}>Gasohol</option>
+                                <option value="diesel" {% if tipoVehiculo.combustible == 'diesel' %}selected{% endif %}>Diésel</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="txt_Consumo">Consumo</label>
+                            <input type="number" name="txt_consumo" step="0.01" id="txt_Consumo" class="form-control" placeholder="Consumo por km" value="{{ tipoVehiculo.consumo }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="txt_Estado">Estado</label>
+                            <select id="txt_Estado" name="txt_estado" class="form-control">
+                                <option value="activo" {% if tipoVehiculo.estado == 'activo' %}selected{% endif %}>Activo</option>
+                                <option value="inactivo" {% if tipoVehiculo.estado == 'inactivo' %}selected{% endif %}>Inactivo</option>
+                            </select>
+                        </div>
+
+                        <div class="text-center">
+                            <button id="btn_Listado" type="button" class="btn btn-danger">Volver al listado de
+                                tipo de usuarios</button>
+                            <button id="{{ btnId }}" type="submit" class="btn btn-primary">Aceptar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Aquí puedes agregar cualquier script que necesites
+    $(document).ready(function () {
+        $("#btn_Listado").click(()=>{
+            window.location.href="/trabajadores/viajes/GestionarTipoVehiculo"
+        })
+
+        $("#btn_Regresar").click(()=>{
+            window.location.href="/trabajadores/viajes/GestionarTipoVehiculo"
+        })
+
+        // En tu archivo JavaScript que maneja el formulario
+        $('#formTipoVehiculo').on('submit', function(e) {
+            e.preventDefault();
+            
+            $.ajax({
+                url: '/trabajadores/viajes/registrarTipoVehiculo',
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function(response) {
+                    // Mostrar toastr de éxito
+                    toastr.success(response.Msj, 'Éxito');
+                    
+                    // Redirigir después de 2 segundos (opcional)
+                    setTimeout(function() {
+                        window.location.href = "/trabajadores/viajes/GestionarTipoVehiculo";
+                    }, 1000);
+                },
+                error: function(xhr) {
+                    // Mostrar toastr de error
+                    let errorMsg = xhr.responseJSON ? xhr.responseJSON.Msj : 'Error desconocido';
+                    toastr.error(errorMsg, 'Error');
+                }
+            });
+        });
+
+    });
+</script>
+{% endblock %}

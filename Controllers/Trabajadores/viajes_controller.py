@@ -1,5 +1,6 @@
 import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort
+from Models.tipoVehiculo import TipoVehiculo
 
 viajes_bp = Blueprint('viajes', __name__, url_prefix='/trabajadores/viajes')
 
@@ -51,8 +52,88 @@ def verificar_sesion():
 def Menu_Viajes():
     return render_template('viajes/horarios.html', active_page="horarios", active_menu='mViajes')
 
+@viajes_bp.route('/GestionarTipoVehiculo')
+def Menu_TipoVehiculo():
+    return render_template('viajes/tipoVehiculo.html', active_page="tipoVehiculo", active_menu='mViajes')
+
+
+@viajes_bp.route('/nuevoTipoVehiculo')
+def nuevoTipoVehiculo():
+    return render_template(
+        "viajes/tipoVehiculoCRUD.html",
+        tittle="Nuevo Tipo de Vehículo",
+        tipoVehiculo={
+            "id": "15",
+            "nombre": "Autobús estandar",
+            "largo": 12.5,
+            "ancho": 2.8,
+            "capacidad": 45,
+            "combustible": "diesel",
+            "consumo": 3.2,
+            "estado": "activo"
+        },
+        btnId="btn_Registrar",
+        active_page="tipoVehiculo", 
+        active_menu='mViajes'
+    )
+
 # END VIEWS
 
 # FUNCIONES
+
+# REGION TIPO VEHICULO
+@viajes_bp.route("/registrarTipoVehiculo",methods=["POST"])
+def registrarTipoVehiculo():
+    try:
+        nombre= request.form["txt_nombre"]
+        largo= request.form["txt_largo"]
+        ancho= request.form["txt_ancho"]
+        capacidad = request.form["txt_capacidad"]
+        combustible= request.form["txt_combustible"]
+        consumo= request.form["txt_consumo"]
+        estado= request.form["txt_estado"]
+
+        TipoVehiculo.insertarTipoVehiculo(nombre,largo,ancho,capacidad,combustible,consumo)
+        return jsonify({
+            "Status": "success",
+            "Msj": "Tipo de vehículo registrado correctamente."
+        })
+    except Exception as e:
+        return jsonify({'Status': 'error', 'Msj': f'Ocurrió un error al listar los tipos de vehiculo: + {repr(e)}'})
+
+@viajes_bp.route("/GetData_TipoVehiculo", methods=["GET"])
+def get_tipoVehiculo():
+    try:
+        tipoVehiculo = TipoVehiculo.obtener_todos()
+        return jsonify({'data': tipoVehiculo, 'Status': 'success', 'Msj': 'Listado de tipos de vehiculo retornado exitosamente'})
+    except Exception as e:
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar los tipos de vehiculo: + {repr(e)}'})
+    
+@viajes_bp.route("/DarBajaTipoVehiculo/<int:id>", methods=["POST"])
+def darBajaTipovehiculo(id):
+    try:
+        TipoVehiculo.darBajaTipoVehiculo(id)
+        return jsonify({
+            "Status": "success",
+            "Msj": f"Tipo de vehículo {id} dado de baja",
+        })
+    except Exception as e:
+        return jsonify({
+            "Status": "error",
+            "Msj": "Error al dar de baja el tipo de vehiculo =>"+repr(e),
+        })  
+
+@viajes_bp.route("/verTipoVehiculo/<int:idVehiculo>")
+def verTipoVehiculo(idVehiculo):
+    return render_template(
+        "viajes/tipoVehiculoCRUD.html",
+        tittle="Nuevo Tipo de Vehículo",
+        tipoVehiculo = TipoVehiculo.obtenerUno(idVehiculo),
+        btnId="btn_Regresar",
+        active_page="tipoVehiculo", 
+        active_menu='mViajes'
+    )
+
+# END REGION TIPO VEHICULO
 
 # END FUNCIONES
