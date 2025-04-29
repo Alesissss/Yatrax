@@ -55,9 +55,48 @@ def Menu_Viajes():
 @viajes_bp.route('/GestionarTipoVehiculo')
 def Menu_TipoVehiculo():
     return render_template('viajes/tipoVehiculo.html', active_page="horarios", active_menu='mViajes')
+
+
+@viajes_bp.route('/nuevoTipoVehiculo')
+def nuevoTipoVehiculo():
+    return render_template(
+        "viajes/tipoVehiculoCRUD.html",
+        tittle="Nuevo Tipo de Vehículo",
+        tipoVehiculo={
+            "id": "15",
+            "nombre": "Autobús estandar",
+            "largo": 12.5,
+            "ancho": 2.8,
+            "capacidad": 45,
+            "combustible": "diesel",
+            "consumo": 3.2,
+            "estado": "activo"
+        },
+        btnId="btn_Registrar"
+    )
+
 # END VIEWS
 
 # FUNCIONES
+@viajes_bp.route("/registrarTipoVehiculo",methods=["POST"])
+def registrarTipoVehiculo():
+    try:
+        nombre= request.form["txt_nombre"]
+        largo= request.form["txt_largo"]
+        ancho= request.form["txt_ancho"]
+        capacidad = request.form["txt_capacidad"]
+        combustible= request.form["txt_combustible"]
+        consumo= request.form["txt_consumo"]
+        estado= request.form["txt_estado"]
+
+        TipoVehiculo.insertarTipoVehiculo(nombre,largo,ancho,capacidad,combustible,consumo)
+        return jsonify({
+            "Status": "success",
+            "Msj": "Tipo de vehículo registrado correctamente."
+        })
+    except Exception as e:
+        return jsonify({'Status': 'error', 'Msj': f'Ocurrió un error al listar los tipos de vehiculo: + {repr(e)}'})
+
 @viajes_bp.route("/GetData_TipoVehiculo", methods=["GET"])
 def get_tipoVehiculo():
     try:
@@ -80,5 +119,12 @@ def darBajaTipovehiculo(id):
             "Msj": "Error al dar de baja el tipo de vehiculo =>"+repr(e),
         })  
 
-  
+@viajes_bp.route("/verTipoVehiculo/<int:idVehiculo>")
+def verTipoVehiculo(idVehiculo):
+    return render_template(
+        "viajes/tipoVehiculoCRUD.html",
+        tittle="Nuevo Tipo de Vehículo",
+        tipoVehiculo = TipoVehiculo.obtenerUno(idVehiculo),
+        btnId="btn_Regresar"
+    )
 # END FUNCIONES

@@ -211,7 +211,7 @@
                     render: function (data, type, row) {
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_UsuarioVer('${data.id}')" title="Ver tipo vehiculo"><i class="bi bi-eye"></i></button>
+                            <button class="btn btn-xs m-1 btn-info" onclick="fct_VerTipoVehiculo('${data.id}')" title="Ver tipo vehiculo"><i class="bi bi-eye"></i></button>
                             <button class="btn btn-xs m-1 btn-primary" onclick="fct_tipoVehiculoEditar('${data.id}')" title="Editar tipo vehiculo"><i class="bi bi-pencil-square"></i></button>
                             <button class="btn btn-xs m-1 btn-warning" onclick="fct_tipoVehiculoDarBaja('${data.id}')" title="Dar de baja tipo vehiculo"><i class="bi bi-arrow-down-circle"></i></button>
                             <button class="btn btn-xs m-1 btn-danger" onclick = "fct_UsuarioEliminar('${data.id}')" title="Eliminar tipo vehiculo"><i class="bi bi-trash"></i></button>
@@ -269,8 +269,8 @@
         window.location.href = `/trabajadores/usuarios/EditarUsuario/${Id}`;
     }
 
-    function fct_UsuarioVer(Id) {
-        window.location.href = `/trabajadores/usuarios/VerUsuario/${Id}`;
+    function fct_VerTipoVehiculo(Id) {
+        window.location.href = `/trabajadores/viajes/verTipoVehiculo/${Id}`;
     }
 
     function fct_UsuarioEliminar(Id) {
