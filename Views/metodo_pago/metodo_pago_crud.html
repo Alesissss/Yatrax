@@ -1,0 +1,82 @@
+{% extends "index.html" %}
+
+{% block title %}YATRAX - {{ tittle }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="text-center mb-0">{{ tittle }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data" id="formMetodoPago">
+                        <div class="mb-3">
+                            <label for="txt_Nombre">Nombre</label>
+                            <input type="text" id="txt_Nombre" name="nombre" class="form-control" placeholder="Nombre" 
+                                   {% if ver %}disabled{% endif %} value="{{ metodo_pago.nombre }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="txt_Estado">Estado</label>
+                            <select id="txt_Estado" name="estado" class="form-control" {% if ver %}disabled{% endif %}>
+                                <option value="Activo" {% if metodo_pago.estado == 'Activo' %}selected{% endif %}>Activo</option>
+                                <option value="Inactivo" {% if metodo_pago.estado == 'Inactivo' %}selected{% endif %}>Inactivo</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="txt_Logo">Logo</label>
+                            <input type="file" id="txt_Logo" name="logo" class="form-control" {% if ver %}disabled{% endif %}>
+                            {% if metodo_pago.logo %}
+                                <img src="{{ metodo_pago.logo }}" class="img-thumbnail mt-2" style="width: 100px;">
+                            {% endif %}
+                        </div>
+                        <div class="text-center">
+                            <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de métodos de pago</button>
+                            {% if ver %}
+                            {% else %}
+                            <button id="{{ btnId }}" type="submit" class="btn btn-primary">
+                                {% if btnId == 'btn_Registrar' %}Registrar{% elif btnId == 'btn_Editar' %}Actualizar{% else %}Ver{% endif %}
+                            </button>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        // Volver al listado de métodos de pago
+        $("#btn_Volver").click(function () {
+            window.location.href = '/trabajadores/metodos_pago/GestionarMetodosPago';
+        });
+
+        // Validaciones al enviar el formulario
+        $("#formMetodoPago").submit(function (e) {
+            e.preventDefault(); // Evitar el envío del formulario por defecto
+
+            // Obtener los valores de los campos
+            var nombre = $("#txt_Nombre").val().trim();
+            var estado = $("#txt_Estado").val();
+
+            // Validaciones de campos
+            if (!nombre) {
+                toastr.warning("El nombre es obligatorio", "MENSAJE DE SISTEMA");
+                return;
+            }
+            if (!estado) {
+                toastr.warning("El estado es obligatorio", "MENSAJE DE SISTEMA");
+                return;
+            }
+
+            // Si todo está bien, se envía el formulario
+            $(this).unbind("submit").submit(); // Permite que se envíe el formulario
+        });
+    });
+</script>
+{% endblock %}
