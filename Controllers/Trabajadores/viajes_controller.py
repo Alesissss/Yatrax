@@ -140,6 +140,7 @@ def editarTipoVehiculo(idTipoVehiculo):
 @viajes_bp.route("/guardarCambiosTipoVehiculo",methods=["POST"])
 def guardarCambiosTipoVehiculo():
     try:
+        idTipVehiculo = request.form["txt_id"]
         nombre= request.form["txt_nombre"]
         largo= request.form["txt_largo"]
         ancho= request.form["txt_ancho"]
@@ -148,7 +149,8 @@ def guardarCambiosTipoVehiculo():
         consumo= request.form["txt_consumo"]
         estado= request.form["txt_estado"]
         
-        TipoVehiculo.actualizarTipoVehiculo(nombre, largo, ancho, capacidad, combustible, consumo,estado)
+        TipoVehiculo.actualizarTipoVehiculo(idTipVehiculo,nombre, largo, ancho, capacidad, combustible, consumo,estado)
+
         return jsonify({
             "Status": "success",
             "Msj": "Tipo de vehículo registrado correctamente."

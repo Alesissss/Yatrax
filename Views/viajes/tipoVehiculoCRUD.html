@@ -12,8 +12,11 @@
                 </div>
                 <div class="card-body" autocomplete="off">
                     <!-- Formulario para registrar el tipo de vehículo -->
-                    <form action="{% if title == 'Nuevo Tipo de Vehículo' %}/trabajadores/viajes/registrarTipoVehiculo{% else %}/trabajadores/viajes/guardarCambiosTipoVehiculo{% endif %}"
+                    <!-- /trabajadores/viajes/registrarTipoVehiculo -->
+                    <form action=""
                     method="POST" id="formTipoVehiculo">
+                        <!-- Dentro del formulario, antes de los botones -->
+                        <input type="hidden" name="txt_id" value="{{ tipoVehiculo.id }}">
                         <div class="mb-3">
                             <label for="txt_Nombre">Nombre del tipo de vehículo</label>
                             <input type="text" name="txt_nombre" id="txt_Nombre" class="form-control" placeholder="Nombre del tipo de vehículo" value="{{ tipoVehiculo.nombre }}">
@@ -75,30 +78,11 @@
 <script>
     // Aquí puedes agregar cualquier script que necesites
     $(document).ready(function () {
+
+        console.log(' {{ tipoVehiculo }}')
+
         $("#btn_Listado").click(()=>{
             window.location.href="/trabajadores/viajes/GestionarTipoVehiculo"
-        })
-
-        $("#btn_Actualizar").click(()=>{
-            $.ajax({
-                url: '/trabajadores/viajes/guardarCambiosTipoVehiculo',
-                type: 'POST',
-                data: $(this).serialize(),
-                success: function(response) {
-                    // Mostrar toastr de éxito
-                    toastr.success(response.Msj, 'Éxito');
-                    
-                    // Redirigir después de 2 segundos (opcional)
-                    setTimeout(function() {
-                        window.location.href = "/trabajadores/viajes/GestionarTipoVehiculo";
-                    }, 1000);
-                },
-                error: function(xhr) {
-                    // Mostrar toastr de error
-                    let errorMsg = xhr.responseJSON ? xhr.responseJSON.Msj : 'Error desconocido';
-                    toastr.error(errorMsg, 'Error');
-                }
-            });
         })
 
         $("#btn_Regresar").click(()=>{
@@ -107,26 +91,51 @@
 
         $('#formTipoVehiculo').on('submit', function(e) {
             e.preventDefault();
+
+            $("#btn_Actualizar").click(()=>{
+                $.ajax({
+                    url: '/trabajadores/viajes/guardarCambiosTipoVehiculo',
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        // Mostrar toastr de éxito
+                        toastr.success(response.Msj, 'Éxito');
+                        
+                        // Redirigir después de 2 segundos (opcional)
+                        setTimeout(function() {
+                            window.location.href = "/trabajadores/viajes/GestionarTipoVehiculo";
+                        }, 1000);
+                    },
+                    error: function(xhr) {
+                        // Mostrar toastr de error
+                        let errorMsg = xhr.responseJSON ? xhr.responseJSON.Msj : 'Error desconocido';
+                        toastr.error(errorMsg, 'Error');
+                    }
+                });
+            })
+
+            $("#btn_Registrar").click(()=>{
+                $.ajax({
+                    url: '/trabajadores/viajes/registrarTipoVehiculo',
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        // Mostrar toastr de éxito
+                        toastr.success(response.Msj, 'Éxito');
+                        
+                        // Redirigir después de 2 segundos (opcional)
+                        setTimeout(function() {
+                            window.location.href = "/trabajadores/viajes/GestionarTipoVehiculo";
+                        }, 1000);
+                    },
+                    error: function(xhr) {
+                        // Mostrar toastr de error
+                        let errorMsg = xhr.responseJSON ? xhr.responseJSON.Msj : 'Error desconocido';
+                        toastr.error(errorMsg, 'Error');
+                    }
+                });
+            })
             
-            $.ajax({
-                url: '/trabajadores/viajes/registrarTipoVehiculo',
-                type: 'POST',
-                data: $(this).serialize(),
-                success: function(response) {
-                    // Mostrar toastr de éxito
-                    toastr.success(response.Msj, 'Éxito');
-                    
-                    // Redirigir después de 2 segundos (opcional)
-                    setTimeout(function() {
-                        window.location.href = "/trabajadores/viajes/GestionarTipoVehiculo";
-                    }, 1000);
-                },
-                error: function(xhr) {
-                    // Mostrar toastr de error
-                    let errorMsg = xhr.responseJSON ? xhr.responseJSON.Msj : 'Error desconocido';
-                    toastr.error(errorMsg, 'Error');
-                }
-            });
         });
 
     });
