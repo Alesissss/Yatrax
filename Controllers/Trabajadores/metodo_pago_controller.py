@@ -51,8 +51,8 @@ def registrar_metodo_pago():
 
         if logo:
             logo_filename = secure_filename(logo.filename)
-            logo_path = f"/Static/img/trabajadores/{logo_filename}"
-            logo.save(os.path.join("Static/img/trabajadores", logo_filename))
+            logo_path = f"/Static/img/metodos_pago/{logo_filename}"
+            logo.save(os.path.join("Static/img/metodos_pago", logo_filename))
         else:
             logo_path = "/Static/img/trabajadores/default-logo.png"  # Logo por defecto
 
@@ -81,8 +81,8 @@ def editar_metodo_pago(id):
 
         if logo:
             logo_filename = secure_filename(logo.filename)
-            logo_path = f"/Static/img/trabajadores/{logo_filename}"
-            logo.save(os.path.join("Static/img/trabajadores", logo_filename))
+            logo_path = f"/Static/img/metodos_pago/{logo_filename}"
+            logo.save(os.path.join("Static/img/metodos_pago", logo_filename))
         else:
             logo_path = metodo_pago['logo']
 
