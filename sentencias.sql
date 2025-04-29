@@ -457,7 +457,7 @@ BEGIN
     END IF;
 END $$
 DELIMITER ;
---tipo vehiculo
+-- tipo vehiculo
 
 -- Eliminar procedimientos existentes (si los hay)
 DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPO_VEHICULO;
