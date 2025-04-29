@@ -1,5 +1,6 @@
 import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort
+from Models.tipoVehiculo import TipoVehiculo
 
 viajes_bp = Blueprint('viajes', __name__, url_prefix='/trabajadores/viajes')
 
@@ -51,8 +52,33 @@ def verificar_sesion():
 def Menu_Viajes():
     return render_template('viajes/horarios.html', active_page="horarios", active_menu='mViajes')
 
+@viajes_bp.route('/GestionarTipoVehiculo')
+def Menu_TipoVehiculo():
+    return render_template('viajes/tipoVehiculo.html', active_page="horarios", active_menu='mViajes')
 # END VIEWS
 
 # FUNCIONES
+@viajes_bp.route("/GetData_TipoVehiculo", methods=["GET"])
+def get_tipoVehiculo():
+    try:
+        tipoVehiculo = TipoVehiculo.obtener_todos()
+        return jsonify({'data': tipoVehiculo, 'Status': 'success', 'Msj': 'Listado de tipos de vehiculo retornado exitosamente'})
+    except Exception as e:
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar los tipos de vehiculo: + {repr(e)}'})
+    
+@viajes_bp.route("/DarBajaTipoVehiculo/<int:id>", methods=["POST"])
+def darBajaTipovehiculo(id):
+    try:
+        TipoVehiculo.darBajaTipoVehiculo(id)
+        return jsonify({
+            "Status": "success",
+            "Msj": f"Tipo de vehículo {id} dado de baja",
+        })
+    except Exception as e:
+        return jsonify({
+            "Status": "error",
+            "Msj": "Error al dar de baja el tipo de vehiculo =>"+repr(e),
+        })  
 
+  
 # END FUNCIONES
