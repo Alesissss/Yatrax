@@ -192,8 +192,8 @@
                                 </li>
                                 <li class="nav-item">
                                     <a href="{{ url_for('viajes.Menu_TipoVehiculo') }}"
-                                        class="nav-link {% if active_page == 'horarios' %}active{% endif %}">
-                                        <i class="bi bi-calendar-week nav-icon"></i>
+                                        class="nav-link {% if active_page == 'tipoVehiculo' %}active{% endif %}">
+                                        <i class="bi bi-bus-front nav-icon"></i>
                                         <p>Gestionar tipo vehículo</p>
                                     </a>
                                 </li>
@@ -261,6 +261,13 @@
                                         class="nav-link {% if active_page == 'plantillas' %}active{% endif %}">
                                         <i class="bi bi-palette nav-icon"></i>
                                         <p>Gestionar plantillas</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ url_for('metodo_pago.Menu_MetodosPago') }}"
+                                        class="nav-link {% if active_page == 'plantillas' %}active{% endif %}">
+                                        <i class="bi bi-palette nav-icon"></i>
+                                        <p>Gestionar metodosPago</p>
                                     </a>
                                 </li>
                             </ul>

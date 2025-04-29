@@ -19,6 +19,14 @@ DROP TABLE IF EXISTS usuarios;
 DROP TABLE IF EXISTS tipo_usuario;
 DROP TABLE IF EXISTS tipo_vehiculo;
 
+--Crear tabla metodo_pago
+CREATE TABLE metodo_pago (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    logo VARCHAR(255) NOT NULL,
+    estado VARCHAR(50) NOT NULL
+);
+
 -- Crear tabla tipo_usuario
 CREATE TABLE tipo_usuario (
     id int AUTO_INCREMENT PRIMARY key,
