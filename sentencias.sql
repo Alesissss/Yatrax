@@ -18,8 +18,9 @@ DROP TABLE IF EXISTS conf_menus;
 DROP TABLE IF EXISTS usuarios;
 DROP TABLE IF EXISTS tipo_usuario;
 DROP TABLE IF EXISTS tipo_vehiculo;
+DROP TABLE IF EXISTS metodo_pago;
 
---Crear tabla metodo_pago
+-- Crear tabla metodo_pago
 CREATE TABLE metodo_pago (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
@@ -525,7 +526,7 @@ BEGIN
     );
 END$$
 
---Procedimiento almacenado para actualizar
+-- Procedimiento almacenado para actualizar
 DELIMITER $$
 
 CREATE PROCEDURE SP_ACTUALIZAR_TIPO_VEHICULO(
@@ -578,9 +579,8 @@ BEGIN
         idTipoVehiculo = p_id;
 END$$
 
-DELIMITER ;
-
 -- Procedimiento para baja lógica
+DELIMITER $$
 CREATE PROCEDURE SP_ELIMINAR_TIPO_VEHICULO(
     IN p_id INT
 )
@@ -589,6 +589,3 @@ BEGIN
     SET estado = 0
     WHERE idTipoVehiculo = p_id;
 END$$
-
--- Restaurar delimitador por defecto
-DELIMITER ;
