@@ -10,9 +10,9 @@ DROP PROCEDURE IF EXISTS SP_REGISTRAR_PLANTILLA;
 DROP PROCEDURE IF EXISTS SP_EDITAR_PLANTILLA;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_PLANTILLA;
 DROP PROCEDURE IF EXISTS SP_ACTIVAR_PLANTILLA;
-DROP PROCEDURE IF EXISTS sp_InsertarTipoVehiculo;
-DROP PROCEDURE IF EXISTS sp_ActualizarTipoVehiculo;
-DROP PROCEDURE IF EXISTS sp_EliminarTipoVehiculo;
+DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPOVEHICULO;
+DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPOVEHICULO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPO_CLIENTE;
 DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPO_CLIENTE;
 DROP PROCEDURE IF EXISTS SP_DAR_BAJA_TIPO_CLIENTE;
@@ -87,7 +87,7 @@ CREATE TABLE tipo_vehiculo(
 	idTipoVehiculo int AUTO_INCREMENT primary key,
     nombre varchar(50) not null,
     capacidad int not null,
-    estado bit not null
+    estado tinyint not null
 );
 
 -- Crear tabla tipo_cliente
@@ -477,38 +477,83 @@ DELIMITER ;
 
 DELIMITER $$
 
-CREATE PROCEDURE sp_InsertarTipoVehiculo(
+-- Procedimiento INSERTAR con transacciones y manejo de errores
+CREATE PROCEDURE SP_INSERTAR_TIPOVEHICULO(
     IN p_nombre VARCHAR(50),
     IN p_capacidad INT,
-    IN p_estado BIT
+    IN p_estado TINYINT
 )
 BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    
+    START TRANSACTION;
     INSERT INTO tipo_vehiculo (nombre, capacidad, estado)
     VALUES (p_nombre, p_capacidad, p_estado);
+    COMMIT;
 END$$
 
-CREATE PROCEDURE sp_ActualizarTipoVehiculo(
+-- Procedimiento ACTUALIZAR con validación de existencia
+CREATE PROCEDURE SP_ACTUALIZAR_TIPOVEHICULO(
     IN p_idTipoVehiculo INT,
     IN p_nombre VARCHAR(50),
     IN p_capacidad INT,
-    IN p_estado BIT
+    IN p_estado TINYINT
 )
 BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    
+    START TRANSACTION;
+    
+    -- Validación de existencia del registro
+    IF NOT EXISTS (SELECT 1 FROM tipo_vehiculo WHERE idTipoVehiculo = p_idTipoVehiculo) THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'El tipo de vehículo no existe';
+    END IF;
+    
     UPDATE tipo_vehiculo
     SET 
         nombre = p_nombre,
         capacidad = p_capacidad,
         estado = p_estado
     WHERE idTipoVehiculo = p_idTipoVehiculo;
+    
+    COMMIT;
 END$$
 
-CREATE PROCEDURE sp_EliminarTipoVehiculo(
+-- Procedimiento ELIMINAR con validación de existencia
+CREATE PROCEDURE SP_ELIMINAR_TIPOVEHICULO(
     IN p_idTipoVehiculo INT
 )
 BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    
+    START TRANSACTION;
+    
+    -- Validación de existencia del registro
+    IF NOT EXISTS (SELECT 1 FROM tipo_vehiculo WHERE idTipoVehiculo = p_idTipoVehiculo) THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'El tipo de vehículo no existe';
+    END IF;
+    
     DELETE FROM tipo_vehiculo
     WHERE idTipoVehiculo = p_idTipoVehiculo;
+    
+    COMMIT;
 END$$
+
+DELIMITER ;
 
 -- Crear procedimiento SP_INSERTAR_TIPO_CLIENTE
 
