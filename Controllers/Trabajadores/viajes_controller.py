@@ -57,50 +57,11 @@ def Menu_Viajes():
 def Menu_TipoVehiculo():
     return render_template('viajes/tipoVehiculo.html', active_page="tipoVehiculo", active_menu='mViajes')
 
-
-@viajes_bp.route('/nuevoTipoVehiculo')
-def nuevoTipoVehiculo():
-    return render_template(
-        "viajes/tipoVehiculoCRUD.html",
-        tittle="Nuevo Tipo de Vehículo",
-        tipoVehiculo={
-            "id": "15",
-            "nombre": "Autobús estandar",
-            "largo": 12.5,
-            "ancho": 2.8,
-            "capacidad": 45,
-            "combustible": "diesel",
-            "consumo": 3.2,
-            "estado": "activo"
-        },
-        btnId="btn_Registrar",
-        active_page="tipoVehiculo", 
-        active_menu='mViajes'
-    )
-
 # END VIEWS
 
 # FUNCIONES
 
 # REGION TIPO VEHICULO
-@viajes_bp.route("/registrarTipoVehiculo",methods=["POST"])
-def registrarTipoVehiculo():
-    try:
-        nombre= request.form["txt_nombre"]
-        largo= request.form["txt_largo"]
-        ancho= request.form["txt_ancho"]
-        capacidad = request.form["txt_capacidad"]
-        combustible= request.form["txt_combustible"]
-        consumo= request.form["txt_consumo"]
-        estado= request.form["txt_estado"]
-
-        TipoVehiculo.insertarTipoVehiculo(nombre,largo,ancho,capacidad,combustible,consumo)
-        return jsonify({
-            "Status": "success",
-            "Msj": "Tipo de vehículo registrado correctamente."
-        })
-    except Exception as e:
-        return jsonify({'Status': 'error', 'Msj': f'Ocurrió un error al listar los tipos de vehiculo: + {repr(e)}'})
 
 @viajes_bp.route("/GetData_TipoVehiculo", methods=["GET"])
 def get_tipoVehiculo():
@@ -109,20 +70,40 @@ def get_tipoVehiculo():
         return jsonify({'data': tipoVehiculo, 'Status': 'success', 'Msj': 'Listado de tipos de vehiculo retornado exitosamente'})
     except Exception as e:
         return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar los tipos de vehiculo: + {repr(e)}'})
-    
-@viajes_bp.route("/DarBajaTipoVehiculo/<int:id>", methods=["POST"])
-def darBajaTipovehiculo(id):
-    try:
-        TipoVehiculo.darBajaTipoVehiculo(id)
-        return jsonify({
-            "Status": "success",
-            "Msj": f"Tipo de vehículo {id} dado de baja",
-        })
-    except Exception as e:
-        return jsonify({
-            "Status": "error",
-            "Msj": "Error al dar de baja el tipo de vehiculo =>"+repr(e),
-        })  
+
+@viajes_bp.route('/registrarTipoVehiculo',methods=["GET","POST"])
+def nuevoTipoVehiculo():
+    if request.method == "GET":
+        return render_template(
+            "viajes/tipoVehiculoCRUD.html",
+            tittle="Nuevo Tipo de Vehículo",
+            tipoVehiculo={
+                "id": "15",
+                "nombre": "Autobús estandar",
+                "capacidad": 45,
+                "estado": "activo"
+            },
+            btnId="btn_Registrar",
+            active_page="tipoVehiculo", 
+            active_menu='mViajes'
+        )
+    else:
+        try:
+            nombre= request.form["txt_nombre"]
+            capacidad = request.form["txt_capacidad"]
+
+            mensajes = TipoVehiculo.insertarTipoVehiculo(nombre,capacidad)
+            msj1 = mensajes.get('@MSJ')
+            msj2 = mensajes.get('@MSJ2')
+
+            if msj1:
+                return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+            elif msj2:
+                return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+            else:
+                return jsonify({"Status": "error", 'Msj': 'Error desconocido al insertar tipo vehiculo'})
+        except Exception as e:
+            return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
 @viajes_bp.route("/verTipoVehiculo/<int:idVehiculo>")
 def verTipoVehiculo(idVehiculo):
@@ -135,36 +116,68 @@ def verTipoVehiculo(idVehiculo):
         active_menu='mViajes'
     )
 
-@viajes_bp.route("/EditarTipoVehiculo/<int:idTipoVehiculo>")
+@viajes_bp.route("/editarTipoVehiculo/<int:idTipoVehiculo>",methods=["GET","POST"])
 def editarTipoVehiculo(idTipoVehiculo):
-    return render_template(
-        "viajes/tipoVehiculoCRUD.html",
-        tittle="Editar Tipo de Vehículo",
-        tipoVehiculo = TipoVehiculo.obtenerUno(idTipoVehiculo),
-        btnId="btn_Actualizar"
-    )
+    if request.method == "GET":
+        return render_template(
+            "viajes/tipoVehiculoCRUD.html",
+            tittle="Editar Tipo de Vehículo",
+            tipoVehiculo = TipoVehiculo.obtenerUno(idTipoVehiculo),
+            btnId="btn_Actualizar"
+        )
+    else:
+        try:
+            nombre= request.form["txt_nombre"]
+            capacidad = request.form["txt_capacidad"]
+            estado = int(request.form["txt_estado"])
 
-@viajes_bp.route("/guardarCambiosTipoVehiculo",methods=["POST"])
-def guardarCambiosTipoVehiculo():
+            mensajes = TipoVehiculo.actualizarTipoVehiculo(idTipoVehiculo,nombre,capacidad,estado)
+
+            msj1 = mensajes.get('@MSJ')
+            msj2 = mensajes.get('@MSJ2')
+
+            if msj1:
+                return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+            elif msj2:
+                return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+            else:
+                return jsonify({"Status": "error", 'Msj': 'Error desconocido al insertar tipo vehiculo'})
+
+        except Exception as e:
+            return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@viajes_bp.route("/DarBajaTipoVehiculo/<int:idTipVehiculo>",methods=["POST"])
+def darBajaTipoVehiculo(idTipVehiculo):
     try:
-        idTipVehiculo = request.form["txt_id"]
-        nombre= request.form["txt_nombre"]
-        largo= request.form["txt_largo"]
-        ancho= request.form["txt_ancho"]
-        capacidad = request.form["txt_capacidad"]
-        combustible= request.form["txt_combustible"]
-        consumo= request.form["txt_consumo"]
-        estado= request.form["txt_estado"]
-        
-        TipoVehiculo.actualizarTipoVehiculo(idTipVehiculo,nombre, largo, ancho, capacidad, combustible, consumo,estado)
+        mensajes = TipoVehiculo.darBajaTipoVehiculo(idTipVehiculo)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
 
-        return jsonify({
-            "Status": "success",
-            "Msj": "Tipo de vehículo registrado correctamente."
-        })
-    
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al insertar tipo vehiculo'})
     except Exception as e:
-        return jsonify({'Status': 'error', 'Msj': f'Ocurrió un error al listar los tipos de vehiculo: + {repr(e)}'})
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@viajes_bp.route("/eliminarTipoVehiculo/<int:idTipoVehiculo>", methods=["POST"])
+def eliminarTipoVehiculo(idTipoVehiculo):
+    try:
+        mensajes = TipoVehiculo.eliminarTipoVehiculo(idTipoVehiculo)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al insertar tipo vehiculo'})
+        
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
 # END REGION TIPO VEHICULO
 

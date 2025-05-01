@@ -15,21 +15,10 @@
                     <!-- /trabajadores/viajes/registrarTipoVehiculo -->
                     <form action=""
                     method="POST" id="formTipoVehiculo">
-                        <!-- Dentro del formulario, antes de los botones -->
-                        <input type="hidden" name="txt_id" value="{{ tipoVehiculo.id }}">
+
                         <div class="mb-3">
                             <label for="txt_Nombre">Nombre del tipo de vehículo</label>
                             <input type="text" name="txt_nombre" id="txt_Nombre" class="form-control" placeholder="Nombre del tipo de vehículo" value="{{ tipoVehiculo.nombre }}">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="txt_Largo">Largo</label>
-                            <input type="number" name="txt_largo" step="0.01" id="txt_Largo" class="form-control" placeholder="Largo de la unidad de transporte" value="{{ tipoVehiculo.largo }}">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="txt_Ancho">Ancho</label>
-                            <input type="number" name="txt_ancho" step="0.01" id="txt_Ancho" class="form-control" placeholder="Ancho de la unidad de transporte" value="{{ tipoVehiculo.ancho }}">
                         </div>
 
                         <div class="mb-3">
@@ -38,26 +27,10 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="txt_Combustible">Tipo de combustible:</label>
-                            <select id="txt_Combustible" name="txt_combustible" class="form-control">
-                                <option value="regular" {% if tipoVehiculo.combustible == 'regular' %}selected{% endif %}>Gasolina Regular (87 octanos EEUU)</option>
-                                <option value="premium" {% if tipoVehiculo.combustible == 'premium' %}selected{% endif %}>Gasolina Premium (91-93 octanos EEUU)</option>
-                                <option value="super-premium" {% if tipoVehiculo.combustible == 'super-premium' %}selected{% endif %}>Gasolina Super Premium (+93 octanos EEUU)</option>
-                                <option value="gasohol" {% if tipoVehiculo.combustible == 'gasohol' %}selected{% endif %}>Gasohol</option>
-                                <option value="diesel" {% if tipoVehiculo.combustible == 'diesel' %}selected{% endif %}>Diésel</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="txt_Consumo">Consumo</label>
-                            <input type="number" name="txt_consumo" step="0.01" id="txt_Consumo" class="form-control" placeholder="Consumo por km" value="{{ tipoVehiculo.consumo }}">
-                        </div>
-
-                        <div class="mb-3">
                             <label for="txt_Estado">Estado</label>
                             <select id="txt_Estado" name="txt_estado" class="form-control">
-                                <option value="activo" {% if tipoVehiculo.estado == 'activo' %}selected{% endif %}>Activo</option>
-                                <option value="inactivo" {% if tipoVehiculo.estado == 'inactivo' %}selected{% endif %}>Inactivo</option>
+                                <option value="1" {% if tipoVehiculo.estado == 1 %}selected{% endif %}>Activo</option>
+                                <option value="0" {% if tipoVehiculo.estado == 0 %}selected{% endif %}>Inactivo</option>
                             </select>
                         </div>
 
@@ -79,7 +52,7 @@
     // Aquí puedes agregar cualquier script que necesites
     $(document).ready(function () {
 
-        console.log(' {{ tipoVehiculo }}')
+        let idTipoVehiculo = "{{ tipoVehiculo.id }}"
 
         $("#btn_Listado").click(()=>{
             window.location.href="/trabajadores/viajes/GestionarTipoVehiculo"
@@ -94,7 +67,7 @@
 
             $("#btn_Actualizar").click(()=>{
                 $.ajax({
-                    url: '/trabajadores/viajes/guardarCambiosTipoVehiculo',
+                    url: `/trabajadores/viajes/editarTipoVehiculo/${idTipoVehiculo}`,
                     type: 'POST',
                     data: $(this).serialize(),
                     success: function(response) {
