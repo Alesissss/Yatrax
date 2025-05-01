@@ -99,7 +99,6 @@ def SetModulo():
 
         if menu:
             session['moduloSelected'] = menuSelected
-            print(session)
             return jsonify({'Status': 'success', 'Msj': 'Módulo escogido exitosamente'})
 
     return jsonify({'Status': 'error', 'Msj': 'El módulo seleccionado no existe'})

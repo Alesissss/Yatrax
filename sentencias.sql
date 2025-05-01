@@ -13,7 +13,9 @@ DROP PROCEDURE IF EXISTS SP_ACTIVAR_PLANTILLA;
 DROP PROCEDURE IF EXISTS sp_InsertarTipoVehiculo;
 DROP PROCEDURE IF EXISTS sp_ActualizarTipoVehiculo;
 DROP PROCEDURE IF EXISTS sp_EliminarTipoVehiculo;
-
+DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPO_CLIENTE;
+DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPO_CLIENTE;
+DROP PROCEDURE IF EXISTS SP_DAR_BAJA_TIPO_CLIENTE;
 -- Luego eliminamos las tablas, primero la que depende de la otra
 DROP TABLE IF EXISTS conf_plantillas;
 DROP TABLE IF EXISTS conf_dmenus;
@@ -22,6 +24,7 @@ DROP TABLE IF EXISTS usuarios;
 DROP TABLE IF EXISTS tipo_usuario;
 DROP TABLE IF EXISTS tipo_vehiculo;
 DROP TABLE IF EXISTS metodo_pago;
+DROP TABLE IF EXISTS tipo_cliente;
 
 -- Crear tabla metodo_pago
 CREATE TABLE metodo_pago (
@@ -59,9 +62,7 @@ CREATE TABLE usuarios (
 CREATE TABLE conf_menus (
     id INT AUTO_INCREMENT PRIMARY KEY,  
     nombre VARCHAR(100) UNIQUE NOT NULL,
-    estado BOOLEAN NOT NULL,
-    esPadre BOOLEAN NOT NULL,
-    idPadre INT NULL
+    estado BOOLEAN NOT NULL
 );
 
 -- Crear tabla detalle_menu
@@ -87,6 +88,13 @@ CREATE TABLE tipo_vehiculo(
     nombre varchar(50) not null,
     capacidad int not null,
     estado bit not null
+);
+
+-- Crear tabla tipo_cliente
+CREATE TABLE tipo_cliente (
+    idTipoCliente INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL UNIQUE,
+    estado BIT NOT NULL
 );
 
 INSERT INTO tipo_vehiculo (nombre, capacidad, estado) 
@@ -501,5 +509,103 @@ BEGIN
     DELETE FROM tipo_vehiculo
     WHERE idTipoVehiculo = p_idTipoVehiculo;
 END$$
+
+-- Crear procedimiento SP_INSERTAR_TIPO_CLIENTE
+
+DELIMITER $$
+CREATE PROCEDURE SP_INSERTAR_TIPO_CLIENTE(
+    IN P_NOMBRE VARCHAR(50),
+    IN P_ESTADO BIT
+)
+BEGIN
+    DECLARE cExiste INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar SP_INSERTAR_TIPO_CLIENTE';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cExiste 
+    FROM tipo_cliente 
+    WHERE nombre = P_NOMBRE;
+
+    IF cExiste > 0 THEN
+        SET @MSJ2 = 'Ya existe un tipo de cliente con ese nombre';
+    ELSE
+        INSERT INTO tipo_cliente (nombre, estado)
+        VALUES (P_NOMBRE, P_ESTADO);
+
+        SET @MSJ = 'Se registró correctamente el tipo de cliente';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ACTUALIZAR_TIPO_CLIENTE
+
+DELIMITER $$
+CREATE PROCEDURE SP_ACTUALIZAR_TIPO_CLIENTE(
+    IN P_ID INT,
+    IN P_NOMBRE VARCHAR(50),
+    IN P_ESTADO BIT
+)
+BEGIN
+    DECLARE cExiste INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar SP_ACTUALIZAR_TIPO_CLIENTE';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cExiste 
+    FROM tipo_cliente 
+    WHERE idTipoCliente = P_ID;
+
+    IF cExiste = 0 THEN
+        SET @MSJ2 = 'No se encontró el tipo de cliente que desea actualizar';
+    ELSE
+        UPDATE tipo_cliente 
+        SET nombre = P_NOMBRE, estado = P_ESTADO
+        WHERE idTipoCliente = P_ID;
+
+        SET @MSJ = 'Se actualizó correctamente el tipo de cliente';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_DAR_BAJA_CLIENTE
+
+DELIMITER $$
+CREATE PROCEDURE SP_DAR_BAJA_TIPO_CLIENTE(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cExiste INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar SP_DAR_BAJA_TIPO_CLIENTE';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cExiste 
+    FROM tipo_cliente 
+    WHERE idTipoCliente = P_ID;
+
+    IF cExiste = 0 THEN
+        SET @MSJ2 = 'No se encontró el tipo de cliente para dar de baja';
+    ELSE
+        UPDATE tipo_cliente 
+        SET estado = 0
+        WHERE idTipoCliente = P_ID;
+
+        SET @MSJ = 'Se dio de baja correctamente al tipo de cliente';
+    END IF;
+END $$
+DELIMITER ;
 
 DELIMITER ;
