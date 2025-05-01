@@ -10,6 +10,11 @@ DROP PROCEDURE IF EXISTS SP_REGISTRAR_PLANTILLA;
 DROP PROCEDURE IF EXISTS SP_EDITAR_PLANTILLA;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_PLANTILLA;
 DROP PROCEDURE IF EXISTS SP_ACTIVAR_PLANTILLA;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_HORARO;
+DROP PROCEDURE IF EXISTS SP_EDITAR_HORARIO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_HORARIO;
+DROP PROCEDURE IF EXISTS SP_ACTIVAR_HORARIO;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_USUARIO;
 
 -- Luego eliminamos las tablas, primero la que depende de la otra
 DROP TABLE IF EXISTS conf_plantillas;
@@ -18,6 +23,7 @@ DROP TABLE IF EXISTS conf_menus;
 DROP TABLE IF EXISTS usuarios;
 DROP TABLE IF EXISTS tipo_usuario;
 DROP TABLE IF EXISTS tipo_vehiculo;
+DROP TABLE IF EXISTS horario;
 
 -- Crear tabla tipo_usuario
 CREATE TABLE tipo_usuario (
@@ -41,6 +47,16 @@ CREATE TABLE usuarios (
     estado_registro INT not null DEFAULT 1,
     fecha_registro DATETIME not null DEFAULT CURRENT_TIMESTAMP, 
     usuario VARCHAR(100) not null
+);
+
+CREATE TABLE horario (
+    id int(11) NOT NULL,
+    horario_entrada time NOT NULL,
+    horario_salida time NOT NULL,
+    estado char(1) NOT NULL,
+    estado_proceso varchar(100) NOT NULL DEFAULT 'REGISTRADO',
+    estado_registro int(11) NOT NULL,
+    fecha_registro datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Crear tabla menus
@@ -573,3 +589,122 @@ END$$
 
 -- Restaurar delimitador por defecto
 DELIMITER ;
+
+
+-- Crear procedimiento SP_REGISTRAR_HORARIO
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `SP_REGISTRAR_HORARIO`(
+    IN P_HORARIO_ENTRADA TIME,
+    IN P_HORARIO_SALIDA TIME,
+    IN P_ESTADO VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    IF P_HORARIO_ENTRADA >= P_HORARIO_SALIDA THEN
+        SET @MSJ2 = 'El horario de entrada es mayor que el de salida';
+    ELSE
+        INSERT INTO horario (horario_entrada, horario_salida, estado, estado_registro) 
+        VALUES (P_HORARIO_ENTRADA, P_HORARIO_SALIDA, P_ESTADO, 1);
+        SET @MSJ = 'Se registró correctamente el horario';
+    END IF;
+END$$
+DELIMITER ;
+
+-- Crear procedimiento SP_EDITAR_HORARIO
+DELIMITER $$
+CREATE PROCEDURE SP_EDITAR_HORARIO(
+    IN P_ID INT,
+    IN P_HORARIO_ENTRADA TIME,
+    IN P_HORARIO_SALIDA TIME,
+    IN P_ESTADO VARCHAR(255)
+)
+BEGIN
+    DECLARE cHorarios INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cHorarios FROM horario WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cHorarios <= 0 THEN
+        SET @MSJ2 = 'El horario que intenta editar no existe';
+    ELSEIF P_HORARIO_ENTRADA >= P_HORARIO_SALIDA THEN
+        SET @MSJ2 = 'El horario de entrada es mayor que el de la salida';
+    ELSE
+        UPDATE horario
+        SET horario_entrada = P_HORARIO_ENTRADA, 
+            horario_salida = P_HORARIO_SALIDA,
+            estado = P_ESTADO,
+            estado_proceso = 'MODIFICADO' 
+        WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se modificó correctamente al horario';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_DARBAJA_USUARIO
+DELIMITER $$
+CREATE PROCEDURE SP_DARBAJA_HORARIO(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cHorarios INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cHorarios FROM horario WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cHorarios <= 0 THEN
+        SET @MSJ2 = 'El horario que intenta dar de baja no existe';
+    ELSE
+        UPDATE horario SET ESTADO_REGISTRO = 2, ESTADO_PROCESO = 'ELIMINADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se dio de baja correctamente el horario';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_HORARIO
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_HORARIO(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cHorarios INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cHorarios FROM horario WHERE ID = P_ID;
+
+    IF cHorarios <= 0 THEN
+        SET @MSJ2 = 'El horario que intenta eliminar no existe';
+    ELSE
+        DELETE FROM horario WHERE ID = P_ID;
+
+        SET @MSJ = 'Se eliminó correctamente el horario';
+    END IF;
+END $$
+DELIMITER ;
+
