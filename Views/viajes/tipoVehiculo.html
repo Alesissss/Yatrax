@@ -19,11 +19,7 @@
                         <tr>
                             <th class="text-center">ID</th>
                             <th class="text-center">NOMBRE</th>
-                            <th class="text-center">LARGO</th>
-                            <th class="text-center">ANCHO</th>
                             <th class="text-center">CAPACIDAD</th>
-                            <th class="text-center">TIPO COMBUSTIBLE</th>
-                            <th class="text-center">CONSUMO</th>
                             <th class="text-center">ESTADO</th>
                             <th class="text-center">ACCIÓN</th>
                         </tr>
@@ -193,11 +189,7 @@
             columns: [
                 { data: "id", name: "id" },
                 { data: "nombre", name: "nombre" },
-                { data: "largo", name: "largo" },
-                { data: "ancho", name: "ancho" },
                 { data: "capacidad", name: "capacidad" },
-                { data: "combustible", name: "combustible"},
-                { data: "consumo", name: "consumo"},
                 { 
                     data: "estado", 
                     name: "estado",
@@ -214,7 +206,7 @@
                             <button class="btn btn-xs m-1 btn-info" onclick="fct_VerTipoVehiculo('${data.id}')" title="Ver tipo vehiculo"><i class="bi bi-eye"></i></button>
                             <button class="btn btn-xs m-1 btn-primary" onclick="fct_tipoVehiculoEditar('${data.id}')" title="Editar tipo vehiculo"><i class="bi bi-pencil-square"></i></button>
                             <button class="btn btn-xs m-1 btn-warning" onclick="fct_tipoVehiculoDarBaja('${data.id}')" title="Dar de baja tipo vehiculo"><i class="bi bi-arrow-down-circle"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_UsuarioEliminar('${data.id}')" title="Eliminar tipo vehiculo"><i class="bi bi-trash"></i></button>
+                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_tipoVehiculoEliminar('${data.id}')" title="Eliminar tipo vehiculo"><i class="bi bi-trash"></i></button>
                         </div>
                         `;
                     },
@@ -227,11 +219,11 @@
                     className: "text-center align-middle",
                 },
                 {
-                    targets: [1, 2, 3, 4, 5, 6],
+                    targets: [1, 2],
                     className: 'align-middle',
                 },
                 {
-                    targets: [7],
+                    targets: [3],
                     orderable: false,
                     width: '10%',
                 },
@@ -262,21 +254,21 @@
     }
 
     function fct_NuevoTipoVehiculo() {
-        window.location.href = '/trabajadores/viajes/nuevoTipoVehiculo';
+        window.location.href = '/trabajadores/viajes/registrarTipoVehiculo';
     }
 
     function fct_tipoVehiculoEditar(Id) {
-        window.location.href = `/trabajadores/viajes/EditarTipoVehiculo/${Id}`;
+        window.location.href = `/trabajadores/viajes/editarTipoVehiculo/${Id}`;
     }
 
     function fct_VerTipoVehiculo(Id) {
         window.location.href = `/trabajadores/viajes/verTipoVehiculo/${Id}`;
     }
 
-    function fct_UsuarioEliminar(Id) {
+    function fct_tipoVehiculoEliminar(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción eliminará al usuario. ¿Deseas continuar?",
+            text: "Esta acción eliminará el tipo de vehiculo. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -287,7 +279,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/usuarios/EliminarUsuario/${Id}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/viajes/eliminarTipoVehiculo/${Id}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {

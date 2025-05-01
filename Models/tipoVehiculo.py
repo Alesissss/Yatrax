@@ -49,20 +49,17 @@ class TipoVehiculo:
                 conexion.cerrar()
 
     @classmethod
-    def insertarTipoVehiculo(cls, nombre, capacidad, estado):
+    def insertarTipoVehiculo(cls, nombre, capacidad):
         conexion = None
-        cursor = None
         try:
             conexion = bd.Conexion()
-            cursor = conexion.conn.cursor()
-            cursor.ejecutar('SP_INSERTAR_TIPOVEHICULO(%s,%s,%s)', (nombre,capacidad,estado))
-            conexion.conn.commit()
+            conexion.ejecutar('CALL SP_INSERTAR_TIPOVEHICULO(%s,%s,@MSJ, @MSJ2)', (nombre,capacidad))
+            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
+            return resultado[0]        
         except Exception as e:
             print(f"Error en insertarTipoVehiculo: {str(e)}")
             raise
         finally:
-            if cursor:
-                cursor.close()
             if conexion:
                 conexion.cerrar()
 
@@ -71,8 +68,9 @@ class TipoVehiculo:
         conexion = None
         try:
             conexion = bd.Conexion()
-            cursor = conexion.conn.cursor()
-            cursor.ejecutar("CALL SP_ACTUALIZAR_TIPOVEHICULO(%s,%s,%s,%s)",(id,nombre,capacidad,estado))
+            conexion.ejecutar("CALL SP_ACTUALIZAR_TIPOVEHICULO(%s,%s,%s,%s,@MSJ, @MSJ2)",(id,nombre,capacidad,estado))
+            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
+            return resultado[0]
         finally:
             if conexion:
                 conexion.cerrar()
@@ -82,8 +80,9 @@ class TipoVehiculo:
         conexion = None
         try:
             conexion = bd.Conexion()
-            cursor = conexion.conn.cursor()
-            cursor.ejecutar("CALL SP_DARBAJA_TIPOVEHICULO(%s);", (idTipoVehiculo,))
+            conexion.ejecutar("CALL SP_DARBAJA_TIPOVEHICULO(%s,@MSJ, @MSJ2)", (idTipoVehiculo,))
+            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
+            return resultado[0]
         finally:
             if conexion:
                 conexion.cerrar()
@@ -93,8 +92,9 @@ class TipoVehiculo:
         conexion = None
         try:
             conexion = bd.Conexion()
-            cursor = conexion.conn.cursor()
-            cursor.ejecutar("CALL SP_ELIMINAR_TIPOVEHICULO(%s)", (idTipoVehiculo,))
+            conexion.ejecutar("CALL SP_ELIMINAR_TIPOVEHICULO(%s,@MSJ, @MSJ2)", (idTipoVehiculo,))
+            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
+            return resultado[0]
         finally:
             if conexion:
                 conexion.cerrar()
