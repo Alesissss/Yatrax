@@ -56,9 +56,7 @@ CREATE TABLE usuarios (
 CREATE TABLE conf_menus (
     id INT AUTO_INCREMENT PRIMARY KEY,  
     nombre VARCHAR(100) UNIQUE NOT NULL,
-    estado BOOLEAN NOT NULL,
-    esPadre BOOLEAN NOT NULL,
-    idPadre INT NULL
+    estado BOOLEAN NOT NULL
 );
 
 -- Crear tabla detalle_menu
