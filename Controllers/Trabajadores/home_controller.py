@@ -1,6 +1,7 @@
 import hashlib
 from flask import Blueprint, request, jsonify, render_template, session, redirect, url_for, abort
 from Models.usuario import Usuario
+from Models.conf_menus import Conf_Menus
 
 home_bp = Blueprint('home', __name__, url_prefix='/trabajadores/home')
 
@@ -70,7 +71,7 @@ def login():
 @home_bp.route('/logout', methods=['POST'])
 def logout():
     if session.get('usuario'):
-        session.pop('usuario')
+        session.clear()
         return redirect(url_for('home.login'))
     else:
         return redirect(url_for('home.index'))
@@ -85,3 +86,19 @@ def index():
 @home_bp.route('/error')
 def error():
     return render_template('error.html')
+
+@home_bp.route('/SetModulo', methods=['POST'])
+def SetModulo():
+    data = request.json
+    menuSelected = data.get('modulo', '').strip()
+
+    menus = Conf_Menus.obtener_todos()
+
+    if menuSelected:
+        menu = next((menu for menu in menus if menu['nombre'] == menuSelected), None)
+
+        if menu:
+            session['moduloSelected'] = menuSelected
+            return jsonify({'Status': 'success', 'Msj': 'Módulo escogido exitosamente'})
+
+    return jsonify({'Status': 'error', 'Msj': 'El módulo seleccionado no existe'})

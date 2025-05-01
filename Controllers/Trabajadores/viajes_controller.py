@@ -54,7 +54,7 @@ def Menu_Viajes():
 
 @viajes_bp.route('/GestionarTipoVehiculo')
 def Menu_TipoVehiculo():
-    return render_template('viajes/tipoVehiculo.html', active_page="horarios", active_menu='mViajes')
+    return render_template('viajes/tipoVehiculo.html', active_page="tipoVehiculo", active_menu='mViajes')
 
 
 @viajes_bp.route('/nuevoTipoVehiculo')
@@ -72,12 +72,16 @@ def nuevoTipoVehiculo():
             "consumo": 3.2,
             "estado": "activo"
         },
-        btnId="btn_Registrar"
+        btnId="btn_Registrar",
+        active_page="tipoVehiculo", 
+        active_menu='mViajes'
     )
 
 # END VIEWS
 
 # FUNCIONES
+
+# REGION TIPO VEHICULO
 @viajes_bp.route("/registrarTipoVehiculo",methods=["POST"])
 def registrarTipoVehiculo():
     try:
@@ -123,8 +127,44 @@ def darBajaTipovehiculo(id):
 def verTipoVehiculo(idVehiculo):
     return render_template(
         "viajes/tipoVehiculoCRUD.html",
-        tittle="Nuevo Tipo de Vehículo",
+        tittle="Ver Tipo de Vehículo",
         tipoVehiculo = TipoVehiculo.obtenerUno(idVehiculo),
-        btnId="btn_Regresar"
+        btnId="btn_Regresar",
+        active_page="tipoVehiculo", 
+        active_menu='mViajes'
     )
+
+@viajes_bp.route("/EditarTipoVehiculo/<int:idTipoVehiculo>")
+def editarTipoVehiculo(idTipoVehiculo):
+    return render_template(
+        "viajes/tipoVehiculoCRUD.html",
+        tittle="Editar Tipo de Vehículo",
+        tipoVehiculo = TipoVehiculo.obtenerUno(idTipoVehiculo),
+        btnId="btn_Actualizar"
+    )
+
+@viajes_bp.route("/guardarCambiosTipoVehiculo",methods=["POST"])
+def guardarCambiosTipoVehiculo():
+    try:
+        idTipVehiculo = request.form["txt_id"]
+        nombre= request.form["txt_nombre"]
+        largo= request.form["txt_largo"]
+        ancho= request.form["txt_ancho"]
+        capacidad = request.form["txt_capacidad"]
+        combustible= request.form["txt_combustible"]
+        consumo= request.form["txt_consumo"]
+        estado= request.form["txt_estado"]
+        
+        TipoVehiculo.actualizarTipoVehiculo(idTipVehiculo,nombre, largo, ancho, capacidad, combustible, consumo,estado)
+
+        return jsonify({
+            "Status": "success",
+            "Msj": "Tipo de vehículo registrado correctamente."
+        })
+    
+    except Exception as e:
+        return jsonify({'Status': 'error', 'Msj': f'Ocurrió un error al listar los tipos de vehiculo: + {repr(e)}'})
+
+# END REGION TIPO VEHICULO
+
 # END FUNCIONES

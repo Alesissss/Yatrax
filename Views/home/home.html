@@ -2,6 +2,144 @@
 
 {% block content %}
 <div class="container-fluid p-4">
-    <h1>Bienvenido al Dashboard</h1>
+    <div class="panel-heading">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Bienvenido al dashboard, selecciona un módulo:</h1>
+            </div>
+        </div>
+    </div>
+    <div class="panel-body">
+        <div class="row m-5">
+            {% if session['menus'] | selectattr('nombre', 'equalto', 'M_USUARIOS') | list | length > 0 %}
+            <div class="col-sm-6 col-md-4 d-flex justify-content-center align-items-center">
+                <div class="small-box {% if session['moduloSelected'] == 'M_USUARIOS' %} bg-primary {% else %} bg-dark {% endif %} pt-3 w-75 modulo" id="M_USUARIOS">
+                    <div class="inner text-center">
+                        <!-- <i class="fas fa-users fa-3x mb-2"></i> -->
+                        <img src="/Static/img/icons/usuarios.png" alt="USUARIOS" class="img-fluid mb-2"
+                            style="max-width: 50px; max-height: 50px;">
+                        <p class="text-lg">USUARIOS</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% if session['menus'] | selectattr('nombre', 'equalto', 'M_PERSONAL') | list | length > 0 %}
+            <div class="col-sm-6 col-md-4 d-flex justify-content-center align-items-center">
+                <div class="small-box {% if session['moduloSelected'] == 'M_PERSONAL' %} bg-primary {% else %} bg-dark {% endif %} pt-3 w-75 modulo" id="M_PERSONAL">
+                    <div class="inner text-center">
+                        <!-- <i class="fas fa-user-circle fa-3x mb-2"></i> -->
+                        <img src="/Static/img/icons/personal.png" alt="PERSONAL" class="img-fluid mb-2"
+                            style="max-width: 50px; max-height: 50px;">
+                        <p class="text-lg">PERSONAL</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% if session['menus'] | selectattr('nombre', 'equalto', 'M_VIAJES') | list | length > 0 %}
+            <div class="col-sm-6 col-md-4 d-flex justify-content-center align-items-center">
+                <div class="small-box {% if session['moduloSelected'] == 'M_VIAJES' %} bg-primary {% else %} bg-dark {% endif %} pt-3 w-75 modulo" id="M_VIAJES">
+                    <div class="inner text-center">
+                        <!-- <i class="fas fa-bus-alt fa-3x mb-2"></i> -->
+                        <img src="/Static/img/icons/viajes.png" alt="VIAJES" class="img-fluid mb-2"
+                            style="max-width: 50px; max-height: 50px;">
+                        <p class="text-lg">VIAJES</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% if session['menus'] | selectattr('nombre', 'equalto', 'M_PROMOCIONES') | list | length > 0 %}
+            <div class="col-sm-6 col-md-4 d-flex justify-content-center align-items-center">
+                <div class="small-box {% if session['moduloSelected'] == 'M_PROMOCIONES' %} bg-primary {% else %} bg-dark {% endif %} pt-3 w-75 modulo" id="M_PROMOCIONES">
+                    <div class="inner text-center">
+                        <!-- <i class="fas fa-percentage fa-3x mb-2"></i> -->
+                        <img src="/Static/img/icons/promociones.png" alt="PROMOCIONES" class="img-fluid mb-2"
+                            style="max-width: 50px; max-height: 50px;">
+                        <p class="text-lg">PROMOCIONES</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% if session['menus'] | selectattr('nombre', 'equalto', 'M_VENTAS') | list | length > 0 %}
+            <div class="col-sm-6 col-md-4 d-flex justify-content-center align-items-center">
+                <div class="small-box {% if session['moduloSelected'] == 'M_VENTAS' %} bg-primary {% else %} bg-dark {% endif %} pt-3 w-75 modulo" id="M_VENTAS">
+                    <div class="inner text-center">
+                        <!-- <i class="fas fa-shopping-cart fa-3x mb-2"></i> -->
+                        <img src="/Static/img/icons/ventas.png" alt="VENTAS" class="img-fluid mb-2"
+                            style="max-width: 50px; max-height: 50px;">
+                        <p class="text-lg">VENTAS</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% if session['menus'] | selectattr('nombre', 'equalto', 'M_ATENCION') | list | length > 0 %}
+            <div class="col-sm-6 col-md-4 d-flex justify-content-center align-items-center">
+                <div class="small-box {% if session['moduloSelected'] == 'M_ATENCION' %} bg-primary {% else %} bg-dark {% endif %} pt-3 w-75 modulo" id="M_ATENCION">
+                    <div class="inner text-center">
+                        <!-- <i class="fas fa-headset fa-3x mb-2"></i> -->
+                        <img src="/Static/img/icons/atencion2.png" alt="ATENCIÓN" class="img-fluid mb-2"
+                            style="max-width: 50px; max-height: 50px;">
+                        <p class="text-lg">ATENCIÓN AL CLIENTE</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% if session['menus'] | selectattr('nombre', 'equalto', 'M_CONFIGURACION') | list | length > 0 %}
+            <div class="col-sm-6 col-md-4 d-flex justify-content-center align-items-center">
+                <div class="small-box {% if session['moduloSelected'] == 'M_CONFIGURACION' %} bg-primary {% else %} bg-dark {% endif %} pt-3 w-75 modulo" id="M_CONFIGURACION">
+                    <div class="inner text-center">
+                        <!-- <i class="fas fa-cogs fa-3x mb-2"></i> -->
+                        <img src="/Static/img/icons/configuracion.png" alt="CONFIGURACIÓN" class="img-fluid mb-2"
+                            style="max-width: 50px; max-height: 50px;">
+                        <p class="text-lg">CONFIGURACIÓN</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
+{% endblock %}
+{% block styles %}
+<style>
+    .modulo {
+        cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .modulo:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+</style>
+{% endblock %}
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        $('.modulo').on('click', function () {
+            const idModulo = $(this).attr('id');
+            console.log(idModulo);
+
+            $.ajax({
+                url: '/trabajadores/home/SetModulo',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    modulo: idModulo
+                }),
+                success: function (response) {
+                    if (response.Status === 'success') {
+                        toastr.success(response.Msj, 'MENSAJE DE SISTEMA');
+                        window.location.reload();
+                    } else {
+                        toastr.error(response.Msj, 'MENSAJE DE SISTEMA');
+                    }
+                },
+                error: function (xhr, Status, error) {
+                    toastr.error('Error en el servidor', 'MENSAJE DE SISTEMA');
+                    console.error('Error en el servidor: ' + error);
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}
