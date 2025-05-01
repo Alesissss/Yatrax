@@ -55,7 +55,7 @@ class TipoVehiculo:
         try:
             conexion = bd.Conexion()
             cursor = conexion.conn.cursor()
-            cursor.callproc('SP_INSERTAR_TIPOVEHICULO', (nombre,capacidad,estado))
+            cursor.ejecutar('SP_INSERTAR_TIPOVEHICULO(%s,%s,%s)', (nombre,capacidad,estado))
             conexion.conn.commit()
         except Exception as e:
             print(f"Error en insertarTipoVehiculo: {str(e)}")
@@ -71,7 +71,8 @@ class TipoVehiculo:
         conexion = None
         try:
             conexion = bd.Conexion()
-            conexion = conexion.ejecutar("CALL SP_ACTUALIZAR_TIPOVEHICULO(%s,%s,%s,%s);",(id,nombre,capacidad,estado))
+            cursor = conexion.conn.cursor()
+            cursor.ejecutar("CALL SP_ACTUALIZAR_TIPOVEHICULO(%s,%s,%s,%s)",(id,nombre,capacidad,estado))
         finally:
             if conexion:
                 conexion.cerrar()
@@ -80,9 +81,9 @@ class TipoVehiculo:
     def darBajaTipoVehiculo(cls, idTipoVehiculo):
         conexion = None
         try:
-            conexion = bd.Conexion()  # Creas la conexión
-            resultado = conexion.ejecutar("CALL SP_ELIMINAR_TIPO_VEHICULO(%s);", (idTipoVehiculo,))
-            # No sobrescribes 'conexion', todo bien
+            conexion = bd.Conexion()
+            cursor = conexion.conn.cursor()
+            cursor.ejecutar("CALL SP_DARBAJA_TIPOVEHICULO(%s);", (idTipoVehiculo,))
         finally:
             if conexion:
                 conexion.cerrar()
@@ -91,9 +92,9 @@ class TipoVehiculo:
     def eliminarTipoVehiculo(cls, idTipoVehiculo):
         conexion = None
         try:
-            conexion = bd.Conexion()  # Creas la conexión
-            resultado = conexion.ejecutar("CALL SP_ELIMINAR_TIPOVEHICULO(%s);", (idTipoVehiculo,))
-            # No sobrescribes 'conexion', todo bien
+            conexion = bd.Conexion()
+            cursor = conexion.conn.cursor()
+            cursor.ejecutar("CALL SP_ELIMINAR_TIPOVEHICULO(%s)", (idTipoVehiculo,))
         finally:
             if conexion:
                 conexion.cerrar()
