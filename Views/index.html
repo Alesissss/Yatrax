@@ -49,12 +49,12 @@
 
             <!-- Botón de Logout -->
             <ul class="navbar-nav ml-auto">
-                <li class="nav-item d-none d-sm-inline-block">
+                <li class="nav-item">
                     <a class="nav-link" href="#" id="btn-darkmode" role="button">
                         <i class="fas fa-moon"></i>
                     </a>
                 </li>
-                <li class="nav-item d-none d-sm-inline-block">
+                <li class="nav-item">
                     <form action="{{ url_for('home.logout') }}" method="post">
                         <button type="submit" class="btn btn-danger">
                             <i class="fas fa-sign-out-alt"></i> Cerrar sesión
@@ -95,29 +95,6 @@
                     </div>
                 </div>
 
-                <!-- SidebarSearch Form -->
-                <!-- <div class="form-inline">
-                    <div class="input-group" data-widget="sidebar-search">
-                        <input class="form-control form-control-sidebar" type="search" placeholder="Buscar"
-                            aria-label="Search">
-                        <div class="input-group-append">
-                            <button class="btn btn-sidebar">
-                                <i class="fas fa-fw fa-search"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="sidebar-search-results">
-                        <div class="list-group">
-                            <a href="#" class="list-group-item">
-                                <div class="search-title">
-                                    <strong class="text-light"></strong>No se encontraron elementos<strong class="text-light"></strong>
-                                </div>
-                                <div class="search-path"></div>
-                            </a>
-                        </div>
-                    </div>                    
-                </div> -->
-
                 <!-- Sidebar Menu -->
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
@@ -133,6 +110,8 @@
                                 </p>
                             </a>
                         </li>
+                        {% if session.get('moduloSelected') %}
+                        {% if session['moduloSelected'] == 'M_USUARIOS' %}
                         {% if session['menus'] | selectattr('nombre', 'equalto', 'M_USUARIOS') | list | length > 0 %}
                         <li class="nav-item">
                             <a href="#" class="nav-link {% if active_menu == 'mUsuarios' %}active{% endif %}">
@@ -153,8 +132,10 @@
                             </ul>
                         </li>
                         {% endif %}
-                        {% if session['menus'] | selectattr('nombre', 'equalto', 'M_VENTAS') | list | length > 0
-                        %}
+                        {% endif %}
+
+                        {% if session['moduloSelected'] == 'M_VENTAS' %}
+                        {% if session['menus'] | selectattr('nombre', 'equalto', 'M_VENTAS') | list | length > 0 %}
                         <li class="nav-item">
                             <a href="#" class="nav-link {% if active_menu == 'mVentas' %}active{% endif %}">
                                 <i class="nav-icon bi bi-cart3"></i>
@@ -173,8 +154,10 @@
                             </ul>
                         </li>
                         {% endif %}
-                        {% if session['menus'] | selectattr('nombre', 'equalto', 'M_VIAJES') | list | length > 0
-                        %}
+                        {% endif %}
+
+                        {% if session['moduloSelected'] == 'M_VIAJES' %}
+                        {% if session['menus'] | selectattr('nombre', 'equalto', 'M_VIAJES') | list | length > 0 %}
                         <li class="nav-item">
                             <a href="#" class="nav-link {% if active_menu == 'mViajes' %}active{% endif %}">
                                 <i class="nav-icon fas fa-bus"></i>
@@ -200,8 +183,10 @@
                             </ul>
                         </li>
                         {% endif %}
-                        {% if session['menus'] | selectattr('nombre', 'equalto', 'M_PERSONAL') | list | length > 0
-                        %}
+                        {% endif %}
+
+                        {% if session['moduloSelected'] == 'M_PERSONAL' %}
+                        {% if session['menus'] | selectattr('nombre', 'equalto', 'M_PERSONAL') | list | length > 0 %}
                         <li class="nav-item">
                             <a href="#" class="nav-link {% if active_menu == 'mPersonal' %}active{% endif %}">
                                 <i class="nav-icon bi bi-person-lines-fill"></i>
@@ -220,8 +205,10 @@
                             </ul>
                         </li>
                         {% endif %}
-                        {% if session['menus'] | selectattr('nombre', 'equalto', 'M_ATENCION') | list | length > 0
-                        %}
+                        {% endif %}
+
+                        {% if session['moduloSelected'] == 'M_ATENCION' %}
+                        {% if session['menus'] | selectattr('nombre', 'equalto', 'M_ATENCION') | list | length > 0 %}
                         <li class="nav-item">
                             <a href="#" class="nav-link {% if active_menu == 'mAtencion' %}active{% endif %}">
                                 <i class="nav-icon fas fa-comments"></i>
@@ -240,6 +227,9 @@
                             </ul>
                         </li>
                         {% endif %}
+                        {% endif %}
+
+                        {% if session['moduloSelected'] == 'M_CONFIGURACION' %}
                         {% if session['menus'] | selectattr('nombre', 'equalto', 'M_CONFIGURACION') | list | length > 0
                         %}
                         <li class="nav-item">
@@ -265,13 +255,15 @@
                                 </li>
                                 <li class="nav-item">
                                     <a href="{{ url_for('metodo_pago.Menu_MetodosPago') }}"
-                                        class="nav-link {% if active_page == 'plantillas' %}active{% endif %}">
-                                        <i class="bi bi-palette nav-icon"></i>
+                                        class="nav-link {% if active_page == 'metodosPago' %}active{% endif %}">
+                                        <i class="bi bi-credit-card nav-icon"></i>
                                         <p>Gestionar métodos de pago</p>
                                     </a>
                                 </li>
                             </ul>
                         </li>
+                        {% endif %}
+                        {% endif %}
                         {% endif %}
                     </ul>
                 </nav>
@@ -280,57 +272,9 @@
             <!-- /.sidebar -->
         </aside>
 
-        <!-- <aside class="main-sidebar sidebar-dark-primary elevation-4">
-            <a href="#" class="brand-link">
-                <span class="brand-text font-weight-light">YATRAX</span>
-            </a>
-            <div class="sidebar">
-                <nav class="mt-2">
-                    <ul class="nav nav-pills nav-sidebar flex-column">
-                        <li class="nav-item">
-                            <a href="{{ url_for('home.index') }}"
-                                class="nav-link {% if active_page == 'home' %}active{% endif %}">
-                                <i class="nav-icon fas fa-home"></i>
-                                <p>Dashboard</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ url_for('usuario.Menu_Usuarios') }}"
-                                class="nav-link {% if active_page == 'usuarios' %}active{% endif %}">
-                                <i class="nav-icon fas fa-users"></i>
-                                <p>Usuarios</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link {% if active_page == 'configuracion' %}active{% endif %}">
-                                <i class="nav-icon fas fa-cogs"></i>
-                                <p>Configuración</p>
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
-        </aside> -->
         <!-- Contenido principal -->
         <div class="content-wrapper">
             {% block content %}{% endblock %}
-            <!-- <section class="content">
-                <div class="container-fluid">
-                    <h1>Bienvenido al Dashboard</h1>
-                    <p>Esta es una plantilla optimizada con más plugins.</p>
-                    <button id="testButton" class="btn btn-primary">Haz clic aquí</button>
-                    <div class="form-group">
-                        <label>Fecha y Hora:</label>
-                        <div class="input-group date" id="datetimepicker1" data-target-input="nearest">
-                            <input type="text" class="form-control datetimepicker-input"
-                                data-target="#datetimepicker1" />
-                            <div class="input-group-append" data-target="#datetimepicker1" data-toggle="datetimepicker">
-                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section> -->
         </div>
         <footer class="main-footer">
             <div class="float-right d-none d-sm-block">
@@ -523,6 +467,8 @@
         }
 
         $(document).ready(function () {
+            console.log(" {{ session['moduloSelected'] }}");
+
             // $('body').addClass('sidebar-collapse');
             var windowHeight = $('body > div.os-padding.menu-open > div > div > div > div.content-wrapper').height() / 2;
 
