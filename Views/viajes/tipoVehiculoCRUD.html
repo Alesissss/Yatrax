@@ -29,8 +29,8 @@
                         <div class="mb-3">
                             <label for="txt_Estado">Estado</label>
                             <select id="txt_Estado" name="txt_estado" class="form-control">
-                                <option value="activo" {% if tipoVehiculo.estado == 'activo' %}selected{% endif %}>Activo</option>
-                                <option value="inactivo" {% if tipoVehiculo.estado == 'inactivo' %}selected{% endif %}>Inactivo</option>
+                                <option value="1" {% if tipoVehiculo.estado == 1 %}selected{% endif %}>Activo</option>
+                                <option value="0" {% if tipoVehiculo.estado == 0 %}selected{% endif %}>Inactivo</option>
                             </select>
                         </div>
 
@@ -52,7 +52,7 @@
     // Aquí puedes agregar cualquier script que necesites
     $(document).ready(function () {
 
-        console.log(' {{ tipoVehiculo }}')
+        let idTipoVehiculo = "{{ tipoVehiculo.id }}"
 
         $("#btn_Listado").click(()=>{
             window.location.href="/trabajadores/viajes/GestionarTipoVehiculo"
@@ -67,7 +67,7 @@
 
             $("#btn_Actualizar").click(()=>{
                 $.ajax({
-                    url: `/trabajadores/viajes/editarTipoVehiculo/${tipoVehiculo.id}`,
+                    url: `/trabajadores/viajes/editarTipoVehiculo/${idTipoVehiculo}`,
                     type: 'POST',
                     data: $(this).serialize(),
                     success: function(response) {

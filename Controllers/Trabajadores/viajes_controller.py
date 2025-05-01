@@ -129,8 +129,10 @@ def editarTipoVehiculo(idTipoVehiculo):
         try:
             nombre= request.form["txt_nombre"]
             capacidad = request.form["txt_capacidad"]
+            estado = int(request.form["txt_estado"])
 
-            mensajes = TipoVehiculo.actualizarTipoVehiculo(idTipoVehiculo,nombre,capacidad)
+            mensajes = TipoVehiculo.actualizarTipoVehiculo(idTipoVehiculo,nombre,capacidad,estado)
+
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
