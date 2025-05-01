@@ -20,12 +20,8 @@ class TipoVehiculo:
                 SELECT 
                     idTipoVehiculo AS id,
                     nombre,
-                    largo,
-                    ancho,
                     capacidad,
-                    combustible,
-                    consumo,
-                    CAST(estado AS UNSIGNED) AS estado  -- Convertir BIT a entero
+                    estado
                 FROM tipo_vehiculo
             """)
             return listado
@@ -40,12 +36,8 @@ class TipoVehiculo:
                 SELECT 
                     idTipoVehiculo AS id,
                     nombre,
-                    largo,
-                    ancho,
                     capacidad,
-                    combustible,
-                    consumo,
-                    CAST(estado AS UNSIGNED) AS estado  -- Convertir BIT a entero
+                    estado
                 FROM tipo_vehiculo where idTipoVehiculo=%s
             """,(idTipoVehiculo,))
             return listado[0] if listado else None
@@ -57,13 +49,13 @@ class TipoVehiculo:
                 conexion.cerrar()
 
     @classmethod
-    def insertarTipoVehiculo(cls, nombre, largo, ancho, capacidad, combustible, consumo):
+    def insertarTipoVehiculo(cls, nombre, capacidad, estado):
         conexion = None
         cursor = None
         try:
             conexion = bd.Conexion()
             cursor = conexion.conn.cursor()
-            cursor.callproc('SP_INSERTAR_TIPO_VEHICULO', (nombre, largo, ancho, capacidad, combustible, consumo))
+            cursor.callproc('SP_INSERTAR_TIPOVEHICULO', (nombre,capacidad,estado))
             conexion.conn.commit()
         except Exception as e:
             print(f"Error en insertarTipoVehiculo: {str(e)}")
@@ -75,11 +67,11 @@ class TipoVehiculo:
                 conexion.cerrar()
 
     @classmethod
-    def actualizarTipoVehiculo(cls,id,nombre,largo,ancho,capacidad,combustible,consumo,estado):
+    def actualizarTipoVehiculo(cls,id,nombre,capacidad,estado):
         conexion = None
         try:
             conexion = bd.Conexion()
-            conexion = conexion.ejecutar("CALL SP_ACTUALIZAR_TIPO_VEHICULO(%s,%s,%s,%s,%s,%s,%s,%s);",(id,nombre,largo,ancho,capacidad,combustible,consumo,estado))
+            conexion = conexion.ejecutar("CALL SP_ACTUALIZAR_TIPOVEHICULO(%s,%s,%s,%s);",(id,nombre,capacidad,estado))
         finally:
             if conexion:
                 conexion.cerrar()
@@ -90,6 +82,17 @@ class TipoVehiculo:
         try:
             conexion = bd.Conexion()  # Creas la conexión
             resultado = conexion.ejecutar("CALL SP_ELIMINAR_TIPO_VEHICULO(%s);", (idTipoVehiculo,))
+            # No sobrescribes 'conexion', todo bien
+        finally:
+            if conexion:
+                conexion.cerrar()
+
+    @classmethod
+    def eliminarTipoVehiculo(cls, idTipoVehiculo):
+        conexion = None
+        try:
+            conexion = bd.Conexion()  # Creas la conexión
+            resultado = conexion.ejecutar("CALL SP_ELIMINAR_TIPOVEHICULO(%s);", (idTipoVehiculo,))
             # No sobrescribes 'conexion', todo bien
         finally:
             if conexion:

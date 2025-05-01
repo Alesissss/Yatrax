@@ -16,6 +16,7 @@ DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPO_CLIENTE;
 DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPO_CLIENTE;
 DROP PROCEDURE IF EXISTS SP_DAR_BAJA_TIPO_CLIENTE;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPOVEHICULO;
 -- Luego eliminamos las tablas, primero la que depende de la otra
 DROP TABLE IF EXISTS conf_plantillas;
 DROP TABLE IF EXISTS conf_dmenus;
@@ -548,6 +549,35 @@ BEGIN
     END IF;
     
     DELETE FROM tipo_vehiculo
+    WHERE idTipoVehiculo = p_idTipoVehiculo;
+    
+    COMMIT;
+END$$
+
+CREATE PROCEDURE SP_DARBAJA_TIPOVEHICULO(
+    IN p_idTipoVehiculo INT -- Corregido: se eliminó la coma sobrante
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    
+    START TRANSACTION;
+    
+    -- Validación de existencia del registro
+    IF NOT EXISTS (
+        SELECT 1 FROM tipo_vehiculo 
+        WHERE idTipoVehiculo = p_idTipoVehiculo
+    ) THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Error: El tipo de vehículo no existe';
+    END IF;
+    
+    -- Actualiza solo el estado (asumiendo 0 = inactivo)
+    UPDATE tipo_vehiculo
+    SET estado = 0 -- O el valor que uses para baja lógica
     WHERE idTipoVehiculo = p_idTipoVehiculo;
     
     COMMIT;
