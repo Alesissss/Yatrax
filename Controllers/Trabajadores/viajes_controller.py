@@ -171,14 +171,24 @@ def guardarCambiosTipoVehiculo():
 # REGIÓN HORARIO #
 
 @viajes_bp.route("/GetData_Horario", methods=["GET"])
-def get_usuarios():
+def get_horarios():
     try:
         horarios = horario.obtener_todos()
         return jsonify({'data': horarios, 'Status': 'success', 'Msj': 'Listado de horarios retornado exitosamene'})
     except Exception as e:
         return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar horarios: + {repr(e)}'})
 
-@viajes_bp.route("/RegistrarUsuario", methods=["POST"])
+@viajes_bp.route('/HorarioNuevo')
+def horario_Nuevo():
+    return render_template(
+        'viajes/horarioCRUD.html', 
+        active_page="usuarios", 
+        active_menu='mUsuarios', 
+        usuario={},
+        tittle = 'Registrar usuario',
+        btnId = 'btn_Registrar')
+
+@viajes_bp.route("/RegistrarHorario", methods=["POST"])
 def registrar_usuario():
     try:
         UPLOAD_FOLDER = "Static/img/trabajadores/"

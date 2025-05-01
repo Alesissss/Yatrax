@@ -14,7 +14,7 @@
     <div class="panel-body">
         <div class="row">
             <div class="col-12">
-                <table id="tbl_Usuarios" class="table table-bordered table-short-rows">
+                <table id="tbl_Horarios" class="table table-bordered table-short-rows">
                     <thead class="bg-gray">
                         <tr>
                             <th class="text-center">ID</th>
@@ -99,7 +99,7 @@
             lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
         });
 
-        fct_IniciarTablaHorarios('#tbl_Usuarios');
+        fct_IniciarTablaHorarios('#tbl_Horarios');
     });
 
     function fct_IniciarTablaHorarios(IdTabla) {
@@ -117,7 +117,7 @@
                     text: '<i class="bi bi-file-earmark-excel"></i>',
                     titleAttr: 'Exportar a Excel',
                     className: 'btn btn-success',
-                    filename: 'Usuarios' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Horarios' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     footer: true,
                     exportOptions:
                     {
@@ -130,7 +130,7 @@
                     text: '<i class="bi bi-file-earmark-pdf"></i>',
                     titleAttr: 'Exportar a PDF',
                     className: 'btn btn-danger',
-                    filename: 'Usuarios' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Horarios' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     exportOptions:
                     {
                         stripHtml: true,
@@ -158,16 +158,16 @@
                     columns: ':not(.noVis)',
                 },
                 {
-                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo usuario',
+                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo horario',
                     className: 'btn bg-success m-1',
                     titleAttr: 'Nuevo',
                     action: function (e, dt, node, config) {
-                        fct_UsuarioNuevo();
+                        fct_HorarioNuevo();
                     },
                 },
             ],
             ajax: {
-                url: "/trabajadores/usuarios/GetData_Usuarios",
+                url: "/trabajadores/viajes/GetData_Horario",
                 type: "GET",
                 datatype: "json",
                 data: function (d) {
@@ -187,9 +187,13 @@
             },
             columns: [
                 { data: "id", name: "id" },
-                { data: "nombre", name: "nombre" },
-                { data: "email", name: "email" },
-                { data: "tipousuario", name: "tipousuario" },
+                { data: "hora_entrada", name: "hora_entrada" },
+                { data: "hora_salida", name: "hora_salida" },
+                { data: "estado", name: "estado",
+                render: function(data, type, row) {
+                        return data === 'A' ? 'Sí' : 'No'; 
+                    }, 
+                },
                 { 
                     data: "estado_registro", 
                     name: "estado_registro",
@@ -203,10 +207,10 @@
                     render: function (data, type, row) {
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_UsuarioVer('${data.id}')" title="Ver usuario"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_UsuarioEditar('${data.id}')" title="Editar usuario"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_UsuarioDarBaja('${data.id}')" title="Dar de baja usuario"><i class="bi bi-arrow-down-circle"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_UsuarioEliminar('${data.id}')" title="Eliminar usuario"><i class="bi bi-trash"></i></button>
+                            <button class="btn btn-xs m-1 btn-info" onclick="fct_HorarioVer('${data.id}')" title="Ver horario"><i class="bi bi-eye"></i></button>
+                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_HorarioEditar('${data.id}')" title="Editar horario"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_HorarioDarBaja('${data.id}')" title="Dar de baja horario"><i class="bi bi-arrow-down-circle"></i></button>
+                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_HorarioEliminar('${data.id}')" title="Eliminar horario"><i class="bi bi-trash"></i></button>
                         </div>
                         `;
                     },
@@ -253,22 +257,22 @@
         });
     }
 
-    function fct_UsuarioNuevo() {
-        window.location.href = '/trabajadores/usuarios/UsuarioNuevo';
+    function fct_HorarioNuevo() {
+        window.location.href = '/trabajadores/viajes/HorarioNuevo';
     }
 
-    function fct_UsuarioEditar(Id) {
-        window.location.href = `/trabajadores/usuarios/EditarUsuario/${Id}`;
+    function fct_HorarioEditar(Id) {
+        window.location.href = `/trabajadores/viajes/EditarHorario/${Id}`;
     }
 
-    function fct_UsuarioVer(Id) {
-        window.location.href = `/trabajadores/usuarios/VerUsuario/${Id}`;
+    function fct_HorarioVer(Id) {
+        window.location.href = `/trabajadores/viajes/VerHorario/${Id}`;
     }
 
-    function fct_UsuarioEliminar(Id) {
+    function fct_HorarioEliminar(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción eliminará al usuario. ¿Deseas continuar?",
+            text: "Esta acción eliminará el horario. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -279,7 +283,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/usuarios/EliminarUsuario/${Id}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/viajes/EliminarHorario/${Id}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
@@ -288,7 +292,7 @@
                                 toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
                                 return;
                             }
-                            fct_IniciarTablaHorarios('#tbl_Usuarios');
+                            fct_IniciarTablaHorarios('#tbl_Horarios');
                             toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                         } else {
                             toastr.error(response.Msj, "MENSAJE DE SISTEMA");
@@ -304,10 +308,10 @@
         });
     }
 
-    function fct_UsuarioDarBaja(Id) {
+    function fct_HorarioDarBaja(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción le dará de baja al usuario. ¿Deseas continuar?",
+            text: "Esta acción le dará de baja el horario. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -318,7 +322,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/usuarios/DarBajaUsuario/${Id}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/viajes/DarBajaHorario/${Id}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
@@ -327,7 +331,7 @@
                                 toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
                                 return;
                             }
-                            fct_IniciarTablaHorarios('#tbl_Usuarios');
+                            fct_IniciarTablaHorarios('#tbl_Horarios');
                             toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                         } else {
                             toastr.error(response.Msj, "MENSAJE DE SISTEMA");
