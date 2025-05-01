@@ -103,7 +103,7 @@ CREATE TABLE tipo_vehiculo(
 	idTipoVehiculo int AUTO_INCREMENT primary key,
     nombre varchar(50) not null,
     capacidad int not null,
-    estado bit not null
+    estado TINYINT not null
 );
 
 INSERT INTO tipo_vehiculo (nombre,capacidad, estado) 
