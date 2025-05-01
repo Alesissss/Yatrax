@@ -165,7 +165,6 @@ def guardarCambiosTipoVehiculo():
     except Exception as e:
         return jsonify({'Status': 'error', 'Msj': f'Ocurrió un error al listar los tipos de vehiculo: + {repr(e)}'})
 
-
 # END REGION TIPO VEHICULO
 
 # END FUNCIONES
