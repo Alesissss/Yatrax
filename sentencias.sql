@@ -10,6 +10,10 @@ DROP PROCEDURE IF EXISTS SP_REGISTRAR_PLANTILLA;
 DROP PROCEDURE IF EXISTS SP_EDITAR_PLANTILLA;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_PLANTILLA;
 DROP PROCEDURE IF EXISTS SP_ACTIVAR_PLANTILLA;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_SUCURSAL;
+DROP PROCEDURE IF EXISTS SP_EDITAR_SUCURSAL;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_SUCURSAL;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_SUCURSAL;
 
 -- Luego eliminamos las tablas, primero la que depende de la otra
 DROP TABLE IF EXISTS conf_plantillas;
@@ -18,6 +22,7 @@ DROP TABLE IF EXISTS conf_menus;
 DROP TABLE IF EXISTS usuarios;
 DROP TABLE IF EXISTS tipo_usuario;
 DROP TABLE IF EXISTS tipo_vehiculo;
+DROP TABLE IF EXISTS sucursal;
 
 -- Crear tabla tipo_usuario
 CREATE TABLE tipo_usuario (
@@ -41,6 +46,21 @@ CREATE TABLE usuarios (
     estado_registro INT not null DEFAULT 1,
     fecha_registro DATETIME not null DEFAULT CURRENT_TIMESTAMP, 
     usuario VARCHAR(100) not null
+);
+
+-- Crear tabla sucursal
+CREATE TABLE sucursal (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ubigeo CHAR(6) NOT NULL,
+    nombre VARCHAR(50) UNIQUE NOT NULL,
+    direccion VARCHAR(255) NOT NULL,
+    latitud DECIMAL(8,6) NOT NULL,
+    longitud DECIMAL(9,6) NOT NULL,
+    estado TINYINT NOT NULL DEFAULT 1,
+    estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
+    estado_registro INT NOT NULL DEFAULT 1,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL
 );
 
 -- Crear tabla menus
@@ -238,6 +258,146 @@ BEGIN
         DELETE FROM USUARIOS WHERE ID = P_ID;
 
         SET @MSJ = 'Se eliminó correctamente al usuario';
+    END IF;
+END $$
+DELIMITER ;
+
+DELIMITER $$
+CREATE PROCEDURE SP_REGISTRAR_SUCURSAL(
+    IN P_UBIGEO CHAR(6),
+    IN P_NOMBRE VARCHAR(50),
+    IN P_DIRECCION VARCHAR(255),
+    IN P_LATITUD DECIMAL(8,6),
+    IN P_LONGITUD DECIMAL(9,6),
+    IN P_USUARIO VARCHAR(100)
+)
+BEGIN
+    DECLARE cSucursal INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cSucursal 
+    FROM sucursal 
+    WHERE nombre = P_NOMBRE AND estado_registro = 1;
+
+    IF cSucursal > 0 THEN
+        SET @MSJ2 = 'Ya existe una sucursal con ese nombre';
+    ELSE
+        INSERT INTO sucursal (ubigeo, nombre, direccion, latitud, longitud, usuario) 
+        VALUES (P_UBIGEO, P_NOMBRE, P_DIRECCION, P_LATITUD, P_LONGITUD, P_USUARIO);
+
+        SET @MSJ = 'Se registró correctamente la sucursal';
+    END IF;
+END $$
+DELIMITER ;
+
+DELIMITER $$
+CREATE PROCEDURE SP_EDITAR_SUCURSAL(
+    IN P_ID INT,
+    IN P_UBIGEO CHAR(6),
+    IN P_NOMBRE VARCHAR(50),
+    IN P_DIRECCION VARCHAR(255),
+    IN P_LATITUD DECIMAL(8,6),
+    IN P_LONGITUD DECIMAL(9,6)
+)
+BEGIN
+    DECLARE cSucursal INT;
+    DECLARE cNombre INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cSucursal 
+    FROM sucursal 
+    WHERE id = P_ID AND estado_registro = 1;
+
+    SELECT COUNT(*) INTO cNombre 
+    FROM sucursal 
+    WHERE nombre = P_NOMBRE AND id != P_ID AND estado_registro = 1;
+
+    IF cSucursal <= 0 THEN
+        SET @MSJ2 = 'La sucursal que intenta editar no existe';
+    ELSEIF cNombre > 0 THEN
+        SET @MSJ2 = 'El nombre de la sucursal ya está en uso';
+    ELSE
+        UPDATE sucursal 
+        SET ubigeo = P_UBIGEO,
+            nombre = P_NOMBRE,
+            direccion = P_DIRECCION,
+            latitud = P_LATITUD,
+            longitud = P_LONGITUD,
+            estado_proceso = 'MODIFICADO'
+        WHERE id = P_ID AND estado_registro = 1;
+
+        SET @MSJ = 'Se modificó correctamente la sucursal';
+    END IF;
+END $$
+DELIMITER ;
+
+DELIMITER $$
+CREATE PROCEDURE SP_DARBAJA_SUCURSAL(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cSucursal INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cSucursal 
+    FROM sucursal 
+    WHERE id = P_ID AND estado_registro = 1;
+
+    IF cSucursal <= 0 THEN
+        SET @MSJ2 = 'La sucursal que intenta dar de baja no existe';
+    ELSE
+        UPDATE sucursal 
+        SET estado_registro = 2,
+            estado_proceso = 'ELIMINADO'
+        WHERE id = P_ID AND estado_registro = 1;
+
+        SET @MSJ = 'Se dio de baja correctamente la sucursal';
+    END IF;
+END $$
+DELIMITER ;
+
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_SUCURSAL(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cSucursal INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cSucursal 
+    FROM sucursal 
+    WHERE id = P_ID;
+
+    IF cSucursal <= 0 THEN
+        SET @MSJ2 = 'La sucursal que intenta eliminar no existe';
+    ELSE
+        DELETE FROM sucursal WHERE id = P_ID;
+
+        SET @MSJ = 'Se eliminó correctamente la sucursal';
     END IF;
 END $$
 DELIMITER ;
@@ -457,9 +617,11 @@ BEGIN
     END IF;
 END $$
 DELIMITER ;
---tipo vehiculo
+
+-- tipo vehiculo
 
 -- Eliminar procedimientos existentes (si los hay)
+
 DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPO_VEHICULO;
 DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPO_VEHICULO;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_VEHICULO;

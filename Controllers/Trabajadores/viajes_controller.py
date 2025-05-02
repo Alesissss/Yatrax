@@ -1,6 +1,7 @@
 import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort
 from Models.tipoVehiculo import TipoVehiculo
+from Models.sucursal import Sucursal
 
 viajes_bp = Blueprint('viajes', __name__, url_prefix='/trabajadores/viajes')
 
@@ -55,6 +56,11 @@ def Menu_Viajes():
 @viajes_bp.route('/GestionarTipoVehiculo')
 def Menu_TipoVehiculo():
     return render_template('viajes/tipoVehiculo.html', active_page="horarios", active_menu='mViajes')
+
+@viajes_bp.route('/GestionarSucursal')
+def Menu_Sucursal():
+    return render_template('viajes/sucursal.html', active_page="sucursal", active_menu='mViajes')
+
 # END VIEWS
 
 # FUNCIONES
@@ -80,5 +86,33 @@ def darBajaTipovehiculo(id):
             "Msj": "Error al dar de baja el tipo de vehiculo =>"+repr(e),
         })  
 
-  
+@viajes_bp.route("/GetData_Sucursal", methods=["GET"])
+def get_sucursal():
+    try:
+        sucursales = Sucursal.obtener_todos()
+        return jsonify({
+            'data': sucursales,
+            'Status': 'success',
+            'Msj': 'Listado de sucursales retornado exitosamente'
+        })
+    except Exception as e:
+        return jsonify({
+            'data': [],
+            'Status': 'error',
+            'Msj': f'Ocurrió un error al listar las sucursales: {repr(e)}'
+        })
+
+@viajes_bp.route("/DarBajaSucursal/<int:id>", methods=["POST"])
+def dar_baja_sucursal(id):
+    try:
+        Sucursal.dar_baja(id)
+        return jsonify({
+            "Status": "success",
+            "Msj": f"Sucursal {id} dada de baja exitosamente",
+        })
+    except Exception as e:
+        return jsonify({
+            "Status": "error",
+            "Msj": f"Error al dar de baja la sucursal => {repr(e)}",
+        })
 # END FUNCIONES
