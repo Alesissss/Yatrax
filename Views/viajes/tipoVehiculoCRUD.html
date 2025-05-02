@@ -1,251 +1,3 @@
-<!-- {% extends "index.html" %}
-
-{% block title %}YATRAX - {{ tittle }}{% endblock %}
-
-{% block content %}
-<div class="container-fluid">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="text-center mb-0">{{ tittle }}</h4>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <label for="txt_Nombre">Nombre del tipo de vehículo</label>
-                        <div class="input-group">
-                            <input type="text" id="txt_Nombre" class="form-control" placeholder="Nombre completo" {% if
-                                btnId=='btn_Aceptar' %}disabled{% endif %} value="{{ usuario.nombre }}">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-user"></i></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="txt_Email">Largo</label>
-                        <div class="input-group">
-                            <input type="email" id="txt_Email" class="form-control" placeholder="Correo electrónico" {%
-                                if btnId=='btn_Aceptar' %}disabled{% endif %} value="{{ usuario.email }}">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-envelope"></i></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="txt_Password">Ancho</label>
-                        <div class="input-group">
-                            <input type="password" id="txt_Password" class="form-control" {% if btnId !='btn_Registrar'
-                                %}disabled{% endif %} placeholder="Contraseña" value="********">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-lock"></i></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="cbx_TipoUsuario">Capacidad</label>
-                        <div class="input-group">
-                            <select id="cbx_TipoUsuario" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{%
-                                endif %}>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="file_Imagen">Tipo de combustible</label>
-                        <div class="col-12 text-left">
-                            <label class="btn btn-warning {% if btnId == 'btn_Aceptar' %}disabled{% endif %}"
-                                for="file_Imagen">
-                                <i class="bi bi-file-earmark-arrow-up-fill"></i> Subir archivo
-                            </label>
-                            <input type="file" class="d-none" id="file_Imagen" accept=".jpg, .jpeg, .png" {% if
-                                btnId=='btn_Aceptar' %}disabled{% endif %}>
-                            <span id="checkIcon" class="d-none text-success ml-2">
-                                <i class="bi bi-check-circle-fill"></i> Archivo subido
-                            </span>
-                        </div>
-                    </div>
-                    <div class="text-center">
-                        <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de
-                            tipos de vehiculos</button>
-                        <button id="{{ btnId }}" type="button" class="btn btn-primary">Aceptar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-{% endblock %}
-
-{% block scripts %}
-<script>
-    function fct_GetTiposUsuarios() {
-        $.getJSON('/trabajadores/usuarios/GetTiposUsuarios', function (response) {
-            if (response.Status === 'success') {
-                let items = '<option disabled>--SELECCIONAR--</option>';
-
-                $.each(response.data, function (index, item) {
-                    if (item.id === Number("{{ usuario.id_tipousuario }}")) {
-                        items += `<option selected value="${item.id}">${item.nombre}</option>`;
-                    } else {
-                        items += `<option value="${item.id}">${item.nombre}</option>`;
-                    }
-                });
-
-                $('#cbx_TipoUsuario').html(items);
-            } else {
-                console.error('Error al obtener los tipos de usuario:', response.Msj);
-            }
-        });
-    }
-
-    $(document).ready(function () {
-        fct_GetTiposUsuarios();
-
-        $('#file_Imagen').on('change', function () {
-            if (this.files.length > 0) {
-                $('#checkIcon').removeClass('d-none');
-                const fileType = this.files[0].type;
-                const validTypes = ["image/jpeg", "image/png", "image/jpg"];
-
-                if (!validTypes.includes(fileType)) {
-                    this.value = "";
-                    toastr.warning('Solo puede subir archivos que sean imágenes (JPG, PNG, JPEG)', 'MENSAJE DE SISTEMA');
-                    $('#checkIcon').addClass('d-none');
-                }
-            } else {
-                $('#checkIcon').addClass('d-none');
-            }
-        });
-
-        $("#btn_Registrar").click(function () {
-            let nombre = $("#txt_Nombre").val().trim();
-            let email = $("#txt_Email").val().trim();
-            let password = $("#txt_Password").val().trim();
-            let tipoUsuario = $('#cbx_TipoUsuario').val();
-            let imagen = $("#file_Imagen")[0].files[0];
-
-            if (!nombre || !email || !password || !tipoUsuario || !imagen) {
-                toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
-                return;
-            }
-
-            Swal.fire({
-                title: "¿Estás seguro?",
-                text: "Esta acción registrará al usuario. ¿Deseas continuar?",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Sí, registrar usuario",
-                cancelButtonText: "Cancelar",
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    let formData = new FormData();
-                    formData.append("nombre", nombre);
-                    formData.append("email", email);
-                    formData.append("password", password);
-                    formData.append("idTipoUsuario", tipoUsuario);
-                    formData.append("imagen", imagen);
-                    $.ajax({
-                        url: "/trabajadores/usuarios/RegistrarUsuario",
-                        type: "POST",
-                        processData: false,
-                        contentType: false,
-                        data: formData,
-                        success: function (response) {
-                            if (response.Status === "success") {
-                                if (response.Msj2 !== '' && response.Msj2 !== null) {
-                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                                    return;
-                                } else {
-                                    toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                                    setTimeout(() => {
-                                        window.location.href = "/trabajadores/usuarios/GestionarUsuarios";
-                                    }, 500);
-                                }
-                            } else {
-                                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
-                                console.error('Error: ' + response.Msj);
-                            }
-                        },
-                        error: function (xhr, Status, error) {
-                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
-                            console.error('Error:' + error);
-                        }
-                    });
-                }
-            });
-        });
-
-        $("#btn_Editar").click(function () {
-            const id = Number("{{ usuario.id }}");
-
-            let nombre = $("#txt_Nombre").val().trim();
-            let email = $("#txt_Email").val().trim();
-            let tipoUsuario = $('#cbx_TipoUsuario').val();
-            let imagen = $("#file_Imagen")[0].files[0];
-
-            if (!nombre || !email || !tipoUsuario) {
-                toastr.warning("Todos los campos son obligatorios, excepto la imagen.", "MENSAJE DE SISTEMA");
-                return;
-            }
-
-            Swal.fire({
-                title: "¿Estás seguro?",
-                text: "Esta acción modificará al usuario. ¿Deseas continuar?",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Sí, editar usuario",
-                cancelButtonText: "Cancelar",
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    let formData = new FormData();
-                    formData.append("nombre", nombre);
-                    formData.append("email", email);
-                    formData.append("idTipoUsuario", tipoUsuario);
-
-                    if (imagen) {
-                        formData.append("imagen", imagen);
-                    }
-
-                    $.ajax({
-                        url: `/trabajadores/usuarios/EditarUsuario/${id}`,
-                        type: "POST",
-                        processData: false,
-                        contentType: false,
-                        data: formData,
-                        success: function (response) {
-                            if (response.Status === "success") {
-                                toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                                setTimeout(() => {
-                                    window.location.href = "/trabajadores/usuarios/GestionarUsuarios";
-                                }, 500);
-                            } else {
-                                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
-                            }
-                        },
-                        error: function (xhr, Status, error) {
-                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
-                        }
-                    });
-                }
-            });
-        });
-
-        $("#btn_Aceptar").click(function () {
-            window.location.href = "/trabajadores/usuarios/GestionarUsuarios";
-        });
-
-        $("#btn_Volver").click(function () {
-            window.location.href = "/trabajadores/usuarios/GestionarUsuarios";
-        });
-    });
-</script>
-{% endblock %} -->
 {% extends "index.html" %}
 
 {% block title %}YATRAX - {{ tittle }}{% endblock %}
@@ -258,107 +10,107 @@
                 <div class="card-header bg-primary text-white">
                     <h4 class="text-center mb-0">{{ tittle }}</h4>
                 </div>
-                <div class="card-body">
-                    <!-- Nombre -->
-                    <div class="mb-3">
-                        <label for="txt_nombre">Nombre del tipo de vehículo</label>
-                        <div class="input-group">
-                            <input type="text" id="txt_nombre" name="txt_nombre" class="form-control"
-                                placeholder="Ej: Camión, Furgoneta"
-                                {% if btnId=='btn_Aceptar' %}disabled{% endif %}
-                                value="{{ tipoVehiculo.nombre }}">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-truck"></i></div>
-                            </div>
+                <div class="card-body" autocomplete="off">
+                    <!-- Formulario para registrar el tipo de vehículo -->
+                    <!-- /trabajadores/viajes/registrarTipoVehiculo -->
+                    <form action=""
+                    method="POST" id="formTipoVehiculo">
+
+                        <div class="mb-3">
+                            <label for="txt_Nombre">Nombre del tipo de vehículo</label>
+                            <input type="text" name="txt_nombre" id="txt_Nombre" class="form-control" placeholder="Nombre del tipo de vehículo" value="{{ tipoVehiculo.nombre }}">
                         </div>
-                    </div>
-                    <!-- Largo -->
-                    <div class="mb-3">
-                        <label for="txt_largo">Largo (m)</label>
-                        <div class="input-group">
-                            <input type="number" step="0.01" min="0" id="txt_largo" name="txt_largo" class="form-control"
-                                placeholder="Ej: 12.50"
-                                {% if btnId=='btn_Aceptar' %}disabled{% endif %}
-                                value="{{ tipoVehiculo.largo }}">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-ruler-horizontal"></i></div>
-                            </div>
+
+                        <div class="mb-3">
+                            <label for="txt_Capacidad">Capacidad</label>
+                            <input type="number" name="txt_capacidad" id="txt_Capacidad" class="form-control" placeholder="Cantidad de pasajeros" value="{{ tipoVehiculo.capacidad }}">
                         </div>
-                    </div>
-                    <!-- Ancho -->
-                    <div class="mb-3">
-                        <label for="txt_ancho">Ancho (m)</label>
-                        <div class="input-group">
-                            <input type="number" step="0.01" min="0" id="txt_ancho" name="txt_ancho" class="form-control"
-                                placeholder="Ej: 2.55"
-                                {% if btnId=='btn_Aceptar' %}disabled{% endif %}
-                                value="{{ tipoVehiculo.ancho }}">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-ruler-combined"></i></div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Capacidad -->
-                    <div class="mb-3">
-                        <label for="txt_capacidad">Capacidad (kg)</label>
-                        <div class="input-group">
-                            <input type="number" min="0" id="txt_capacidad" name="txt_capacidad" class="form-control"
-                                placeholder="Ej: 25000"
-                                {% if btnId=='btn_Aceptar' %}disabled{% endif %}
-                                value="{{ tipoVehiculo.capacidad }}">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-weight-hanging"></i></div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Combustible -->
-                    <div class="mb-3">
-                        <label for="txt_combustible">Tipo de combustible</label>
-                        <div class="input-group">
-                            <input type="text" id="txt_combustible" name="txt_combustible" class="form-control"
-                                placeholder="Ej: Diesel, Gasolina"
-                                {% if btnId=='btn_Aceptar' %}disabled{% endif %}
-                                value="{{ tipoVehiculo.combustible }}">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-gas-pump"></i></div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Consumo -->
-                    <div class="mb-3">
-                        <label for="txt_consumo">Consumo (L/100km)</label>
-                        <div class="input-group">
-                            <input type="number" step="0.01" min="0" id="txt_consumo" name="txt_consumo" class="form-control"
-                                placeholder="Ej: 28.5"
-                                {% if btnId=='btn_Aceptar' %}disabled{% endif %}
-                                value="{{ tipoVehiculo.consumo }}">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-tachometer-alt"></i></div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Estado -->
-                    <div class="mb-3">
-                        <label for="txt_estado">Estado</label>
-                        <div class="input-group">
-                            <select id="txt_estado" name="txt_estado" class="form-control"
-                                {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
-                                <option value="1" {% if tipoVehiculo.estado %}selected{% endif %}>Activo</option>
-                                <option value="0" {% if not tipoVehiculo.estado %}selected{% endif %}>Inactivo</option>
+
+                        <div class="mb-3">
+                            <label for="txt_Estado">Estado</label>
+                            <select id="txt_Estado" name="txt_estado" class="form-control">
+                                <option value="1" {% if tipoVehiculo.estado == 1 %}selected{% endif %}>Activo</option>
+                                <option value="0" {% if tipoVehiculo.estado == 0 %}selected{% endif %}>Inactivo</option>
                             </select>
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-toggle-on"></i></div>
-                            </div>
                         </div>
-                    </div>
-                    <!-- Botones -->
-                    <div class="text-center">
-                        <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de tipos de vehículos</button>
-                        <button id="{{ btnId }}" type="button" class="btn btn-primary">Aceptar</button>
-                    </div>
+
+                        <div class="text-center">
+                            <button id="btn_Listado" type="button" class="btn btn-danger">Volver al listado de
+                                tipo de usuarios</button>
+                            <button id="{{ btnId }}" type="submit" class="btn btn-primary">Aceptar</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Aquí puedes agregar cualquier script que necesites
+    $(document).ready(function () {
+
+        let idTipoVehiculo = "{{ tipoVehiculo.id }}"
+
+        $("#btn_Listado").click(()=>{
+            window.location.href="/trabajadores/viajes/GestionarTipoVehiculo"
+        })
+
+        $("#btn_Regresar").click(()=>{
+            window.location.href="/trabajadores/viajes/GestionarTipoVehiculo"
+        })
+
+        $('#formTipoVehiculo').on('submit', function(e) {
+            e.preventDefault();
+
+            $("#btn_Actualizar").click(()=>{
+                $.ajax({
+                    url: `/trabajadores/viajes/editarTipoVehiculo/${idTipoVehiculo}`,
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        // Mostrar toastr de éxito
+                        toastr.success(response.Msj, 'Éxito');
+                        
+                        // Redirigir después de 2 segundos (opcional)
+                        setTimeout(function() {
+                            window.location.href = "/trabajadores/viajes/GestionarTipoVehiculo";
+                        }, 1000);
+                    },
+                    error: function(xhr) {
+                        // Mostrar toastr de error
+                        let errorMsg = xhr.responseJSON ? xhr.responseJSON.Msj : 'Error desconocido';
+                        toastr.error(errorMsg, 'Error');
+                    }
+                });
+            })
+
+            $("#btn_Registrar").click(()=>{
+                $.ajax({
+                    url: '/trabajadores/viajes/registrarTipoVehiculo',
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        // Mostrar toastr de éxito
+                        toastr.success(response.Msj, 'Éxito');
+                        
+                        // Redirigir después de 2 segundos (opcional)
+                        setTimeout(function() {
+                            window.location.href = "/trabajadores/viajes/GestionarTipoVehiculo";
+                        }, 1000);
+                    },
+                    error: function(xhr) {
+                        // Mostrar toastr de error
+                        let errorMsg = xhr.responseJSON ? xhr.responseJSON.Msj : 'Error desconocido';
+                        toastr.error(errorMsg, 'Error');
+                    }
+                });
+            })
+            
+        });
+
+    });
+</script>
 {% endblock %}

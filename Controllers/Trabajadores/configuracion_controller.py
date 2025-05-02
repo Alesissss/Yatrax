@@ -46,8 +46,11 @@ def verificar_sesion():
     if usuario and usuario['tipousuario'].upper() == 'CLIENTE' and request.endpoint not in rutas_permitidas:
         abort(401)  # Autenticado pero no autorizado para navegación general
 
-    if not any(menu['nombre'] == 'M_CONFIGURACION' for menu in menus) and request.endpoint not in rutas_permitidas:
+    if 2 not in menus and request.endpoint not in rutas_permitidas:
         abort(403)  # Autenticado, pero no tiene permiso para ese módulo
+
+    # if not any(menu['nombre'] == 'M_CONFIGURACION' for menu in menus) and request.endpoint not in rutas_permitidas:
+    #     abort(403)  # Autenticado, pero no tiene permiso para ese módulo
 
 # VIEWS
 @configuracion_bp.route('/GestionarPermisos')
@@ -75,12 +78,25 @@ def get_usuarios():
     except Exception as e:
         return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar usuarios: + {repr(e)}'})
 
-@configuracion_bp.route('/EditarPermisos/<int:id>', methods= ['GET', 'POST'])
+@configuracion_bp.route('/EditarPermisos/<int:id>', methods=['GET', 'POST'])
 def Editar_Permisos(id):
     try:
         usuario = Usuario.obtener_por_id(id)
         dmnus = Usuario.obtener_menus(id)
         menus = Conf_Menus.obtener_todos()
+        dmnus_ids = [menu['id'] for menu in dmnus]
+
+        menus_jerarquicos = []
+        for menu in menus:
+            # Menú principal
+            if menu['idPadre'] is None:
+                menu['submenus'] = []
+                menus_jerarquicos.append(menu)
+            else:
+                # Submenú
+                parent_menu = next((m for m in menus_jerarquicos if m['id'] == menu['idPadre']), None)
+                if parent_menu:
+                    parent_menu['submenus'].append(menu)
 
         if request.method == 'POST':
             idMenu = int(request.form.get('idMenu').strip())
@@ -104,8 +120,8 @@ def Editar_Permisos(id):
                 return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar permisos'})
 
         if usuario:
-            return render_template('configuracion/permisosEditar.html', active_page="permisos", active_menu='mConfiguracion', usuario = usuario, dmnus = dmnus, menus = menus)
-        return render_template('configuracion/permisosEditar.html', active_page="permisos", active_menu='mConfiguracion', usuario = {}, dmnus = [], menus = [])
+            return render_template('configuracion/permisosEditar.html', active_page="permisos", active_menu='mConfiguracion', usuario=usuario, dmnus=dmnus, dmnus_ids=dmnus_ids, menus=menus_jerarquicos)
+        return render_template('configuracion/permisosEditar.html', active_page="permisos", active_menu='mConfiguracion', usuario={}, dmnus=[], dmnus_ids=[], menus=[])
 
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})

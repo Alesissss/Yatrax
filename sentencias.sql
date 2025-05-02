@@ -14,7 +14,19 @@ DROP PROCEDURE IF EXISTS SP_REGISTRAR_SUCURSAL;
 DROP PROCEDURE IF EXISTS SP_EDITAR_SUCURSAL;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_SUCURSAL;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_SUCURSAL;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_HORARIO;
+DROP PROCEDURE IF EXISTS SP_EDITAR_HORARIO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_HORARIO;
+DROP PROCEDURE IF EXISTS SP_ACTIVAR_HORARIO;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_HORARIO;
+DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPO_CLIENTE;
+DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPO_CLIENTE;
+DROP PROCEDURE IF EXISTS SP_DAR_BAJA_TIPO_CLIENTE;
 
+DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPOVEHICULO;
+DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPOVEHICULO;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPOVEHICULO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPOVEHICULO;
 -- Luego eliminamos las tablas, primero la que depende de la otra
 DROP TABLE IF EXISTS conf_plantillas;
 DROP TABLE IF EXISTS conf_dmenus;
@@ -23,6 +35,15 @@ DROP TABLE IF EXISTS usuarios;
 DROP TABLE IF EXISTS tipo_usuario;
 DROP TABLE IF EXISTS tipo_vehiculo;
 DROP TABLE IF EXISTS sucursal;
+DROP TABLE IF EXISTS horario;
+DROP TABLE IF EXISTS tipo_cliente;
+
+-- Crear tabla tipo_cliente
+CREATE TABLE tipo_cliente (
+    idTipoCliente INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL UNIQUE,
+    estado BOOLEAN NOT NULL
+);
 
 -- Crear tabla tipo_usuario
 CREATE TABLE tipo_usuario (
@@ -65,9 +86,11 @@ CREATE TABLE sucursal (
 
 -- Crear tabla menus
 CREATE TABLE conf_menus (
-    id INT AUTO_INCREMENT PRIMARY KEY,  
-    nombre VARCHAR(100) UNIQUE NOT NULL,
-    estado BOOLEAN NOT NULL
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    estado BOOLEAN NOT NULL,
+    idPadre INT NULL,
+    FOREIGN KEY (idPadre) REFERENCES conf_menus(id)
 );
 
 -- Crear tabla detalle_menu
@@ -91,23 +114,19 @@ CREATE TABLE conf_plantillas (
 CREATE TABLE tipo_vehiculo(
 	idTipoVehiculo int AUTO_INCREMENT primary key,
     nombre varchar(50) not null,
-    largo numeric(9,2) not null,
-    ancho numeric(9,2) not null,
     capacidad int not null,
-    combustible varchar(50) not null,
-    consumo numeric(9,2) not null,
-    estado bit not null
+    estado TINYINT not null
 );
 
-INSERT INTO tipo_vehiculo (nombre, largo, ancho, capacidad, combustible, consumo, estado) 
-VALUES ('MetroRapid X12', 18.50, 2.60, 120, 'Eléctrico', 0.0, 1);  -- Bus articulado eléctrico
+INSERT INTO tipo_vehiculo (nombre,capacidad, estado) 
+VALUES ('MetroRapid X12', 120, 1);  -- Bus articulado eléctrico
 
 -- Vehículos especializados
-INSERT INTO tipo_vehiculo (nombre, largo, ancho, capacidad, combustible, consumo, estado) 
-VALUES ('CargoMaster Pro', 6.80, 2.45, 3, 'Diésel', 12.8, 1);  -- Camión de carga mediana
+INSERT INTO tipo_vehiculo (nombre, capacidad, estado) 
+VALUES ('CargoMaster Pro',  40, 1);  -- Camión de carga mediana
 
-INSERT INTO tipo_vehiculo (nombre, largo, ancho, capacidad, combustible, consumo, estado) 
-VALUES ('EcoGlider Prime', 4.30, 1.82, 5, 'Híbrido', 3.9, 1);
+INSERT INTO tipo_vehiculo (nombre, capacidad, estado) 
+VALUES ('EcoGlider Prime', 54, 1);
 
 -- Tabla Tipo Usuario
 INSERT INTO tipo_usuario (id,nombre,estado_proceso,estado_registro,fecha_registro, usuario) VALUES (1,'ADMINISTRADOR','REGISTRADO',1,'2025-03-06 20:02:56','SYSTEM');
@@ -122,6 +141,21 @@ INSERT INTO conf_menus (id, nombre, estado) VALUES (3, 'M_VENTAS', 1);
 INSERT INTO conf_menus (id, nombre, estado) VALUES (4, 'M_VIAJES', 1);
 INSERT INTO conf_menus (id, nombre, estado) VALUES (5, 'M_PERSONAL', 1);
 INSERT INTO conf_menus (id, nombre, estado) VALUES (6, 'M_ATENCION', 1);
+-- Submenús de USUARIOS
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (10, 'Gestionar usuarios', 1, 1);
+-- Submenús de CONFIGURACIÓN
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (20, 'Gestionar permisos', 1, 2);
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (21, 'Gestionar plantillas', 1, 2);
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (22, 'Gestionar métodos de pago', 1, 2);
+-- Submenús de VENTAS
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (30, 'Gestionar pasajes', 1, 3);
+-- Submenús de VIAJES
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (40, 'Gestionar horarios', 1, 4);
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (41, 'Gestionar tipo vehículo', 1, 4);
+-- Submenús de PERSONAL
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (50, 'Ejemplo', 1, 5);
+-- Submenús de ATENCIÓN AL CLIENTE
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (60, 'Ejemplo', 1, 6);
 
 -- Tabla dmenus
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (1, 1);
@@ -130,6 +164,21 @@ INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (3, 1);
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (4, 1);
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (5, 1);
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (6, 1);
+-- Submenús de "USUARIOS"
+INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (10, 1);
+-- Submenús de "CONFIGURACIÓN"
+INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (20, 1);
+INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (21, 1);
+INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (22, 1);
+-- Submenús de "VENTAS"
+INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (30, 1);
+-- Submenús de "VIAJES"
+INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (40, 1);
+INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (41, 1);
+-- Submenús de "PERSONAL"
+INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (50, 1);
+-- Submenús de "ATENCIÓN AL CLIENTE"
+INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (60, 1);
 
 -- Tabla apariencia
 INSERT INTO conf_plantillas (id, nombre, color_header, color_footer, logo, estado, usuario) VALUES (1, 'YATRAX', '#0c336e', '#000000', '/Static/img/plantillas/logo_yatusa.png', 1, 'SYSTEM');
@@ -618,7 +667,7 @@ BEGIN
 END $$
 DELIMITER ;
 
--- tipo vehiculo
+--  tipo vehiculo
 
 -- Eliminar procedimientos existentes (si los hay)
 
@@ -630,108 +679,369 @@ DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_VEHICULO;
 DELIMITER $$
 
 -- Procedimiento para insertar tipo de vehículo
-CREATE PROCEDURE SP_INSERTAR_TIPO_VEHICULO(
+CREATE PROCEDURE SP_INSERTAR_TIPOVEHICULO(
     IN p_nombre VARCHAR(50),
-    IN p_largo NUMERIC(9,2),
-    IN p_ancho NUMERIC(9,2),
     IN p_capacidad INT,
-    IN p_combustible VARCHAR(50),
-    IN p_consumo NUMERIC(9,2)
+    OUT MSJ VARCHAR(255),
+    OUT MSJ2 VARCHAR(255)
 )
 BEGIN
-    -- Validación de valores
-    IF p_largo <= 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Largo debe ser mayor a 0';
-    END IF;
-    
-    IF p_ancho <= 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Ancho debe ser mayor a 0';
-    END IF;
-    
-    IF p_capacidad <= 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Capacidad debe ser mayor a 0';
-    END IF;
-    
-    IF p_consumo <= 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Consumo debe ser mayor a 0';
-    END IF;
-    
+    DECLARE v_existe INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET MSJ2 = 'Error inesperado al insertar el tipo de vehículo';
+    END;
+
+    SET MSJ = NULL;
+    SET MSJ2 = NULL;
+
+    -- Validaciones
     IF p_nombre IS NULL OR p_nombre = '' THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Nombre es obligatorio';
+        SET MSJ2 = 'El nombre es obligatorio';
+    ELSEIF p_capacidad <= 0 THEN
+        SET MSJ2 = 'La capacidad debe ser mayor a 0';
+    ELSE
+        SELECT COUNT(*) INTO v_existe FROM tipo_vehiculo WHERE nombre = p_nombre;
+
+        IF v_existe > 0 THEN
+            SET MSJ2 = 'Ya existe un tipo de vehículo con ese nombre';
+        ELSE
+            INSERT INTO tipo_vehiculo (nombre, capacidad, estado)
+            VALUES (p_nombre, p_capacidad, 1);
+
+            SET MSJ = 'Se registró correctamente el tipo de vehículo';
+        END IF;
     END IF;
-    
-    INSERT INTO tipo_vehiculo (
-        nombre,
-        largo, 
-        ancho, 
-        capacidad, 
-        combustible, 
-        consumo, 
-        estado
-    ) VALUES (
-        p_nombre,
-        p_largo,
-        p_ancho,
-        p_capacidad,
-        p_combustible,
-        p_consumo,
-        1
-    );
 END$$
 
 -- Procedimiento para actualizar tipo de vehículo
-CREATE PROCEDURE SP_ACTUALIZAR_TIPO_VEHICULO(
+CREATE PROCEDURE SP_ACTUALIZAR_TIPOVEHICULO(
     IN p_id INT,
     IN p_nombre VARCHAR(50),
-    IN p_largo NUMERIC(9,2),
-    IN p_ancho NUMERIC(9,2),
     IN p_capacidad INT,
-    IN p_combustible VARCHAR(50),
-    IN p_consumo NUMERIC(9,2)
+    IN p_estado TINYINT,
+    OUT MSJ VARCHAR(255),
+    OUT MSJ2 VARCHAR(255)
 )
 BEGIN
-    -- Validación de valores
-    IF p_largo <= 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Largo debe ser mayor a 0';
-    END IF;
-    
-    IF p_ancho <= 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Ancho debe ser mayor a 0';
-    END IF;
-    
-    IF p_capacidad <= 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Capacidad debe ser mayor a 0';
-    END IF;
-    
-    IF p_consumo <= 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Consumo debe ser mayor a 0';
-    END IF;
-    
+    DECLARE v_existe INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET MSJ2 = 'Error inesperado al actualizar el tipo de vehículo';
+    END;
+
+    SET MSJ = NULL;
+    SET MSJ2 = NULL;
+
+    -- Validaciones
     IF p_nombre IS NULL OR p_nombre = '' THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Nombre es obligatorio';
+        SET MSJ2 = 'El nombre es obligatorio';
+    ELSEIF p_capacidad <= 0 THEN
+        SET MSJ2 = 'La capacidad debe ser mayor a 0';
+    ELSEIF p_estado NOT IN (0, 1) THEN
+        SET MSJ2 = 'El estado debe ser 0 o 1';
+    ELSE
+        SELECT COUNT(*) INTO v_existe FROM tipo_vehiculo WHERE idTipoVehiculo = p_id;
+
+        IF v_existe = 0 THEN
+            SET MSJ2 = 'El tipo de vehículo no existe';
+        ELSE
+            UPDATE tipo_vehiculo
+            SET nombre = p_nombre,
+                capacidad = p_capacidad,
+                estado = p_estado
+            WHERE idTipoVehiculo = p_id;
+
+            SET MSJ = 'Se actualizó correctamente el tipo de vehículo';
+        END IF;
     END IF;
-    
-    UPDATE tipo_vehiculo
-    SET 
-        nombre = p_nombre,
-        largo = p_largo,
-        ancho = p_ancho,
-        capacidad = p_capacidad,
-        combustible = p_combustible,
-        consumo = p_consumo
-    WHERE 
-        idTipoVehiculo = p_id;
 END$$
 
--- Procedimiento para baja lógica
-CREATE PROCEDURE SP_ELIMINAR_TIPO_VEHICULO(
-    IN p_id INT
+-- Procedimiento para dar de baja (baja lógica)
+CREATE PROCEDURE SP_DARBAJA_TIPOVEHICULO(
+    IN p_id INT,
+    OUT MSJ VARCHAR(255),
+    OUT MSJ2 VARCHAR(255)
 )
 BEGIN
-    UPDATE tipo_vehiculo
-    SET estado = 0
+    DECLARE v_existe INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SET MSJ2 = 'Error inesperado al dar de baja el tipo de vehículo';
+    END;
+
+    SET MSJ = NULL;
+    SET MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO v_existe 
+    FROM tipo_vehiculo 
     WHERE idTipoVehiculo = p_id;
+
+    IF v_existe = 0 THEN
+        SET MSJ2 = 'El tipo de vehículo no existe';
+    ELSE
+        START TRANSACTION;
+        UPDATE tipo_vehiculo
+        SET estado = 0
+        WHERE idTipoVehiculo = p_id;
+        COMMIT;
+
+        SET MSJ = 'Tipo de vehículo dado de baja correctamente';
+    END IF;
 END$$
 
--- Restaurar delimitador por defecto
+-- Procedimiento para eliminar físicamente
+CREATE PROCEDURE SP_ELIMINAR_TIPOVEHICULO(
+    IN p_id INT,
+    OUT MSJ VARCHAR(255),
+    OUT MSJ2 VARCHAR(255)
+)
+BEGIN
+    DECLARE v_existe INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SET MSJ2 = 'Error inesperado al eliminar físicamente el tipo de vehículo';
+    END;
+
+    SET MSJ = NULL;
+    SET MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO v_existe 
+    FROM tipo_vehiculo 
+    WHERE idTipoVehiculo = p_id;
+
+    IF v_existe = 0 THEN
+        SET MSJ2 = 'El tipo de vehículo no existe';
+    ELSE
+        START TRANSACTION;
+        DELETE FROM tipo_vehiculo
+        WHERE idTipoVehiculo = p_id;
+        COMMIT;
+
+        SET MSJ = 'Tipo de vehículo eliminado correctamente';
+    END IF;
+END$$
+
+DELIMITER ;
+
+-- Crear procedimiento SP_REGISTRAR_HORARIO
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `SP_REGISTRAR_HORARIO`(
+    IN P_HORARIO_ENTRADA TIME,
+    IN P_HORARIO_SALIDA TIME,
+    IN P_ESTADO VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    IF P_HORARIO_ENTRADA >= P_HORARIO_SALIDA THEN
+        SET @MSJ2 = 'El horario de entrada es mayor que el de salida';
+    ELSE
+        INSERT INTO horario (horario_entrada, horario_salida, estado, estado_registro) 
+        VALUES (P_HORARIO_ENTRADA, P_HORARIO_SALIDA, P_ESTADO, 1);
+        SET @MSJ = 'Se registró correctamente el horario';
+    END IF;
+END$$
+
+DELIMITER ;
+
+-- Crear procedimiento SP_EDITAR_HORARIO
+DELIMITER $$
+CREATE PROCEDURE SP_EDITAR_HORARIO(
+    IN P_ID INT,
+    IN P_HORARIO_ENTRADA TIME,
+    IN P_HORARIO_SALIDA TIME,
+    IN P_ESTADO VARCHAR(255)
+)
+BEGIN
+    DECLARE cHorarios INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cHorarios FROM horario WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cHorarios <= 0 THEN
+        SET @MSJ2 = 'El horario que intenta editar no existe';
+    ELSEIF P_HORARIO_ENTRADA >= P_HORARIO_SALIDA THEN
+        SET @MSJ2 = 'El horario de entrada es mayor que el de la salida';
+    ELSE
+        UPDATE horario
+        SET horario_entrada = P_HORARIO_ENTRADA, 
+            horario_salida = P_HORARIO_SALIDA,
+            estado = P_ESTADO,
+            estado_proceso = 'MODIFICADO' 
+        WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se modificó correctamente al horario';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_DARBAJA_USUARIO
+DELIMITER $$
+CREATE PROCEDURE SP_DARBAJA_HORARIO(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cHorarios INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cHorarios FROM horario WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cHorarios <= 0 THEN
+        SET @MSJ2 = 'El horario que intenta dar de baja no existe';
+    ELSE
+        UPDATE horario SET ESTADO_REGISTRO = 2, ESTADO_PROCESO = 'ELIMINADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se dio de baja correctamente el horario';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_HORARIO
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_HORARIO(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cHorarios INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cHorarios FROM horario WHERE ID = P_ID;
+
+    IF cHorarios <= 0 THEN
+        SET @MSJ2 = 'El horario que intenta eliminar no existe';
+    ELSE
+        DELETE FROM horario WHERE ID = P_ID;
+
+        SET @MSJ = 'Se eliminó correctamente el horario';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_INSERTAR_TIPO_CLIENTE
+
+DELIMITER $$
+CREATE PROCEDURE SP_INSERTAR_TIPO_CLIENTE(
+    IN P_NOMBRE VARCHAR(50),
+    IN P_ESTADO BIT
+)
+BEGIN
+    DECLARE cExiste INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar SP_INSERTAR_TIPO_CLIENTE';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cExiste 
+    FROM tipo_cliente 
+    WHERE nombre = P_NOMBRE;
+
+    IF cExiste > 0 THEN
+        SET @MSJ2 = 'Ya existe un tipo de cliente con ese nombre';
+    ELSE
+        INSERT INTO tipo_cliente (nombre, estado)
+        VALUES (P_NOMBRE, P_ESTADO);
+
+        SET @MSJ = 'Se registró correctamente el tipo de cliente';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ACTUALIZAR_TIPO_CLIENTE
+
+DELIMITER $$
+CREATE PROCEDURE SP_ACTUALIZAR_TIPO_CLIENTE(
+    IN P_ID INT,
+    IN P_NOMBRE VARCHAR(50),
+    IN P_ESTADO BIT
+)
+BEGIN
+    DECLARE cExiste INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar SP_ACTUALIZAR_TIPO_CLIENTE';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cExiste 
+    FROM tipo_cliente 
+    WHERE idTipoCliente = P_ID;
+
+    IF cExiste = 0 THEN
+        SET @MSJ2 = 'No se encontró el tipo de cliente que desea actualizar';
+    ELSE
+        UPDATE tipo_cliente 
+        SET nombre = P_NOMBRE, estado = P_ESTADO
+        WHERE idTipoCliente = P_ID;
+
+        SET @MSJ = 'Se actualizó correctamente el tipo de cliente';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_DAR_BAJA_CLIENTE
+
+DELIMITER $$
+CREATE PROCEDURE SP_DAR_BAJA_TIPO_CLIENTE(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cExiste INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar SP_DAR_BAJA_TIPO_CLIENTE';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cExiste 
+    FROM tipo_cliente 
+    WHERE idTipoCliente = P_ID;
+
+    IF cExiste = 0 THEN
+        SET @MSJ2 = 'No se encontró el tipo de cliente para dar de baja';
+    ELSE
+        UPDATE tipo_cliente 
+        SET estado = 0
+        WHERE idTipoCliente = P_ID;
+
+        SET @MSJ = 'Se dio de baja correctamente al tipo de cliente';
+    END IF;
+END $$
 DELIMITER ;

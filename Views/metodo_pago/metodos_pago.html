@@ -1,25 +1,25 @@
 {% extends "index.html" %}
 
-{% block title %}YATRAX - Gestión de tipo vehiculo{% endblock %}
+{% block title %}YATRAX - Gestión de métodos de pago{% endblock %}
 
 {% block content %}
 <div class="container-fluid p-4">
     <div class="panel-heading">
         <div class="row">
             <div class="col-md-12">
-                <h1>Gestionar tipo vehículo</h1>
+                <h1>Gestionar métodos de pago</h1>
             </div>
         </div>
     </div>
     <div class="panel-body">
         <div class="row">
             <div class="col-12">
-                <table id="tbl_tipoVehiculo" class="table table-bordered table-short-rows">
+                <table id="tbl_MetodosPago" class="table table-bordered table-short-rows">
                     <thead class="bg-gray">
                         <tr>
                             <th class="text-center">ID</th>
                             <th class="text-center">NOMBRE</th>
-                            <th class="text-center">CAPACIDAD</th>
+                            <th class="text-center">LOGO</th>
                             <th class="text-center">ESTADO</th>
                             <th class="text-center">ACCIÓN</th>
                         </tr>
@@ -32,19 +32,24 @@
     </div>
 </div>
 {% endblock %}
+
 {% block scripts %}
 <script>
-    var dtUsuarios;
+    var dtMetodosPago;
 
     $(document).ready(function () {
-        // $('body').addClass('sidebar-collapse');
+        // Mensaje Toastr si hay uno
+        {% if msg %}
+        toastr.success("{{ msg }}", "MENSAJE DE SISTEMA");
+        {% endif %}
+            
         var windowHeight = $('body > div.os-padding.menu-open > div > div > div > div.content-wrapper').height() / 2;
-        //CONFIGURACION POR DEFECTO DATATABLES
+
+        // Configuración por defecto para DataTables
         $.extend($.fn.dataTable.defaults, {
-            dom: "<'row align-items-center'<'col-sm-8 justify-content-start'f><'col-sm-4 c1 d-flex justify-content-end'>>" + "<'row align-items-center'<'col-sm-4'l><'col-sm-4 my-3 justify-content-start d-flex'B><'col-sm-4 d-flex justify-content-end'p>>" + "rt" + "<'row'<'col-sm-6'i><'col-sm-6 mt-1 d-flex justify-content-end'p>>",
-            // dom: "<'row pb-1'<'col-sm-9 d-flex'B><'col-sm-3 c1 d-flex justify-content-end'>>" + "<'row'<'col-sm-4'l><'col-sm-8 justify-content-start'f>>" + "<'row'<'col-sm-6'i><'col-sm-6 d-flex justify-content-end'p>>" + "rt" + "<'row'<'col-sm-6'i><'col-sm-6 mt-1 d-flex justify-content-end'p>>",
-            // dom: "<'row pb-1'<'col-sm-9'B><'col-sm-3 c1 d-flex justify-content-end'>>" + "<'row'<'col-sm-10'l><'col-sm-2'f>>" + "<'row'<'col-sm-6'i><'col-sm-6'p>>" + "rt" + "<'row'<'col-sm-6'i><'col-sm-6'p>>",
-            // dom: "<'row pb-1'<'col-sm-10'B><'col-sm-2 c1 d-flex justify-content-end'>>" + "<'row'<'col-sm-11'l><'col-sm-1'f>>" + "<'row'<'col-sm-10'i><'col-sm-2'p>>" + "rt" + "<'row'<'col-sm-10'i><'col-sm-2'p>>",
+            dom: "<'row align-items-center'<'col-sm-8 justify-content-start'f><'col-sm-4 c1 d-flex justify-content-end'>>" + 
+                "<'row align-items-center'<'col-sm-4'l><'col-sm-4 my-3 justify-content-start d-flex'B><'col-sm-4 d-flex justify-content-end'p>>" + 
+                "rt" + "<'row'<'col-sm-6'i><'col-sm-6 mt-1 d-flex justify-content-end'p>>",
             paging: true,
             select: true,
             scroller: false,
@@ -100,12 +105,8 @@
             lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
         });
 
-        fct_IniciarTablaUsuarios('#tbl_tipoVehiculo');
-    });
-
-    function fct_IniciarTablaUsuarios(IdTabla) {
-        // Inicializar DataTables con botones
-        dtUsuarios = $(IdTabla).DataTable({
+        // Inicialización de la tabla
+        dtMetodosPago = $("#tbl_MetodosPago").DataTable({
             buttons: [
                 {
                     extend: 'copy',
@@ -118,22 +119,20 @@
                     text: '<i class="bi bi-file-earmark-excel"></i>',
                     titleAttr: 'Exportar a Excel',
                     className: 'btn btn-success',
-                    filename: 'Usuarios' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Métodos de pago' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     footer: true,
-                    exportOptions:
-                    {
+                    exportOptions: {
                         stripHtml: true,
                         columns: ':not(:last-child)'
-                    },
+                    }
                 },
                 {
                     extend: 'pdf',
                     text: '<i class="bi bi-file-earmark-pdf"></i>',
                     titleAttr: 'Exportar a PDF',
                     className: 'btn btn-danger',
-                    filename: 'Usuarios' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
-                    exportOptions:
-                    {
+                    filename: 'Métodos de pago' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    exportOptions: {
                         stripHtml: true,
                         columns: ':not(:last-child)'
                     },
@@ -145,8 +144,7 @@
                     text: '<i class="bi bi-printer-fill"></i>',
                     titleAttr: 'Imprimir',
                     className: 'btn btn-info',
-                    exportOptions:
-                    {
+                    exportOptions: {
                         stripHtml: true,
                         columns: ':not(:last-child)'
                     },
@@ -159,71 +157,74 @@
                     columns: ':not(.noVis)',
                 },
                 {
-                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo tipo vehiculo',
+                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo método de pago',
                     className: 'btn bg-success m-1',
                     titleAttr: 'Nuevo',
                     action: function (e, dt, node, config) {
-                        fct_NuevoTipoVehiculo();
+                        window.location.href = '/trabajadores/metodos_pago/MetodoPagoNuevo';
                     },
-                },
+                }
             ],
             ajax: {
-                url: "/trabajadores/viajes/GetData_TipoVehiculo",
+                url: "/trabajadores/metodos_pago/GetData_MetodosPago",
                 type: "GET",
-                datatype: "json",
-                data: function (d) {
-                },
                 dataSrc: function (json) {
                     if (json.Status === "error") {
-                        toastr.error('Ocurrió un error inesperado al intentar listar la tabla');
-                        console.error(json.Msj);
+                        toastr.error('Ocurrió un error al intentar listar los métodos de pago');
                         return [];
                     }
                     return json.data;
                 },
-                error: function (xhr, error, thrown) {
-                    toastr.error('Ocurrió un error inesperado al intentar listar la tabla');
-                    console.error('Error en la solicitud Ajax: ' + error + xhr.Msj + thrown);
+                error: function () {
+                    toastr.error("Error en la solicitud AJAX", "MENSAJE DE SISTEMA");
                 },
             },
             columns: [
                 { data: "id", name: "id" },
                 { data: "nombre", name: "nombre" },
-                { data: "capacidad", name: "capacidad" },
-                { 
-                    data: "estado", 
-                    name: "estado",
-                    render: function(data, type, row) {
-                        return data === 1 ? 'Activo' : 'No activo'; 
-                    },
-                },
+                { data: "logo", name: "logo", render: function(data) { return `
+                    <div class="d-flex justify-content-center align-items-center">
+                        <img src="${data}" class="img-thumbnail" style="width: 50px;">
+                    </div>
+                    `; }},
+                { data: "estado", name: "estado" },
                 {
                     data: null,
-                    name: null,
-                    render: function (data, type, row) {
+                    render: function (data) {
                         return `
-                        <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_VerTipoVehiculo('${data.id}')" title="Ver tipo vehiculo"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_tipoVehiculoEditar('${data.id}')" title="Editar tipo vehiculo"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_tipoVehiculoDarBaja('${data.id}')" title="Dar de baja tipo vehiculo"><i class="bi bi-arrow-down-circle"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_tipoVehiculoEliminar('${data.id}')" title="Eliminar tipo vehiculo"><i class="bi bi-trash"></i></button>
-                        </div>
+                            <div class="flex-wrap btn-group">
+                                <button class="btn btn-xs m-1 btn-info" onclick="fct_VerMetodoPago('${data.id}')"><i class="bi bi-eye"></i></button>
+                                <button class="btn btn-xs m-1 btn-primary" onclick="fct_EditarMetodoPago('${data.id}')"><i class="bi bi-pencil-square"></i></button>
+                                <button class="btn btn-xs m-1 btn-danger" onclick="fct_EliminarMetodoPago('${data.id}')"><i class="bi bi-trash"></i></button>
+                            </div>
                         `;
                     },
-                    className: 'text-center align-middle',
+                    className: 'text-center align-middle'
                 }
             ],
             columnDefs: [
                 {
                     targets: [0],
                     className: "text-center align-middle",
+                    orderable:false,
+                    width: "5%",
                 },
                 {
-                    targets: [1, 2],
+                    targets: [1, 2, 3, 4],
                     className: 'align-middle',
                 },
                 {
+                    targets: [2],
+                    orderable: false,
+                    width: '10%',
+                },
+                {
                     targets: [3],
+                    width: '10%',
+                    className: 'text-center',
+                },
+                {
+                    targets: [4],
                     orderable: false,
                     width: '10%',
                 },
@@ -251,94 +252,48 @@
                 $('#btn_Nuevo').appendTo('div.col-sm-4.c1.d-flex.justify-content-end');
             },
         });
-    }
 
-    function fct_NuevoTipoVehiculo() {
-        window.location.href = '/trabajadores/viajes/registrarTipoVehiculo';
-    }
+        // Funciones de acción
+        window.fct_VerMetodoPago = function(id) {
+            window.location.href = `/trabajadores/metodos_pago/MetodoPagoNuevo/${id}?ver=true`;
+        };
 
-    function fct_tipoVehiculoEditar(Id) {
-        window.location.href = `/trabajadores/viajes/editarTipoVehiculo/${Id}`;
-    }
+        window.fct_EditarMetodoPago = function(id) {
+            window.location.href = `/trabajadores/metodos_pago/EditarMetodoPago/${id}`;
+        };
 
-    function fct_VerTipoVehiculo(Id) {
-        window.location.href = `/trabajadores/viajes/verTipoVehiculo/${Id}`;
-    }
-
-    function fct_tipoVehiculoEliminar(Id) {
-        Swal.fire({
-            title: "¿Estás seguro?",
-            text: "Esta acción eliminará el tipo de vehiculo. ¿Deseas continuar?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Sí, eliminar",
-            cancelButtonText: "Cancelar",
-            reverseButtons: true // Invertir el orden de los botones
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `/trabajadores/viajes/eliminarTipoVehiculo/${Id}`,  // Pasamos el ID en la URL
-                    type: "POST",
-                    contentType: "application/json",
-                    success: function (response) {
-                        if (response.Status === "success") {
-                            if (response.Msj2 !== '' && response.Msj2 !== null) {
-                                toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                                return;
+        window.fct_EliminarMetodoPago = function(id) {
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción eliminará el método de pago. ¿Deseas continuar?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, eliminar",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `/trabajadores/metodos_pago/EliminarMetodoPago/${id}`,
+                        type: "POST",
+                        success: function (response) {
+                            if (response.Status === "success") {
+                                toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                                dtMetodosPago.ajax.reload();
+                            } else {
+                                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
                             }
-                            fct_IniciarTablaUsuarios('#tbl_tipoVehiculo');
-                            toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                        } else {
-                            toastr.error(response.Msj, "MENSAJE DE SISTEMA");
-                            console.error('Error: ' + response.Msj);
+                        },
+                        error: function () {
+                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
                         }
-                    },
-                    error: function (xhr, Status, error) {
-                        toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
-                        console.error('Error:' + error);
-                    }
-                });
-            }
-        });
-    }
-
-    function fct_tipoVehiculoDarBaja(Id) {
-        Swal.fire({
-            title: "¿Estás seguro?",
-            text: "Esta acción le dará de baja al tipo de vehiculo. ¿Deseas continuar?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Sí, dar de baja",
-            cancelButtonText: "Cancelar",
-            reverseButtons: true // Invertir el orden de los botones
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `/trabajadores/viajes/DarBajaTipoVehiculo/${Id}`,  // Pasamos el ID en la URL
-                    type: "POST",
-                    contentType: "application/json",
-                    success: function (response) {
-                        if (response && response.Status === "success") {
-                            fct_IniciarTablaUsuarios('#tbl_tipoVehiculo');
-                            toastr.success(response.Msj || "Operación exitosa", "MENSAJE DE SISTEMA");
-                        } else {
-                            toastr.error((response && response.Msj) || "Error desconocido", "MENSAJE DE SISTEMA");
-                            console.error('Error: ' + (response ? response.Msj : "No hay respuesta"));
-                        }
-                    },
-
-                    error: function (xhr, Status, error) {
-                        toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
-                        console.error('Error:' + error);
-                    }
-                });
-            }
-        });
-    }
+                    });
+                }
+            });
+        };
+    });
 
     function newexportaction(e, dt, button, config) {
         // Guardar el contenido original del botón
