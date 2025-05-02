@@ -62,6 +62,7 @@ CREATE TABLE usuarios (
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     imagen VARCHAR(255) NOT NULL,
+    estado BOOLEAN NOT NULL,
     id_tipousuario INT not null REFERENCES tipo_usuario (id),
     estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
     estado_registro INT not null DEFAULT 1,
@@ -132,7 +133,7 @@ VALUES ('EcoGlider Prime', 54, 1);
 INSERT INTO tipo_usuario (id,nombre,estado_proceso,estado_registro,fecha_registro, usuario) VALUES (1,'ADMINISTRADOR','REGISTRADO',1,'2025-03-06 20:02:56','SYSTEM');
 
 -- Tabla Usuario
-INSERT INTO usuarios (id,nombre,email,password, imagen, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (1,'Alexis','alexis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/alexis.jpeg',1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
+INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (1,'Alexis','alexis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/alexis.jpeg', 1, 1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
 
 -- Tabla menus
 INSERT INTO conf_menus (id, nombre, estado) VALUES (1, 'M_USUARIOS', 1);
@@ -190,6 +191,7 @@ CREATE PROCEDURE SP_REGISTRAR_USUARIO(
     IN P_EMAIL VARCHAR(255),
     IN P_PASS VARCHAR(255),
     IN P_IMAGEN VARCHAR(255),
+    IN P_ESTADO BOOLEAN,
     IN P_IDTIPOUSUARIO INT,
     IN P_USUARIO VARCHAR(255)
 )
@@ -208,8 +210,8 @@ BEGIN
     IF cEmail > 0 THEN
         SET @MSJ2 = 'El correo que intenta registrar ya está registrado';
     ELSE
-        INSERT INTO USUARIOS (NOMBRE, EMAIL, PASSWORD, IMAGEN, ID_TIPOUSUARIO, USUARIO) 
-        VALUES (P_NOMBRE, P_EMAIL, P_PASS, P_IMAGEN, P_IDTIPOUSUARIO, P_USUARIO);
+        INSERT INTO USUARIOS (NOMBRE, EMAIL, PASSWORD, IMAGEN, ESTADO, ID_TIPOUSUARIO, USUARIO) 
+        VALUES (P_NOMBRE, P_EMAIL, P_PASS, P_IMAGEN, P_ESTADO, P_IDTIPOUSUARIO, P_USUARIO);
 
         SET @MSJ = 'Se registró correctamente al usuario';
     END IF;
@@ -223,6 +225,7 @@ CREATE PROCEDURE SP_EDITAR_USUARIO(
     IN P_NOMBRE VARCHAR(255),
     IN P_EMAIL VARCHAR(255),
     IN P_IMAGEN VARCHAR(255),
+    IN P_ESTADO BOOLEAN,
     IN P_IDTIPOUSUARIO INT
 )
 BEGIN
@@ -248,6 +251,7 @@ BEGIN
         SET NOMBRE = P_NOMBRE, 
             EMAIL = P_EMAIL,
             IMAGEN = P_IMAGEN,
+            ESTADO = P_ESTADO,
             ID_TIPOUSUARIO = P_IDTIPOUSUARIO, 
             estado_proceso = 'MODIFICADO' 
         WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
@@ -277,7 +281,7 @@ BEGIN
     IF cUsuario <= 0 THEN
         SET @MSJ2 = 'El usuario que intenta dar de baja no existe';
     ELSE
-        UPDATE USUARIOS SET ESTADO_REGISTRO = 2, ESTADO_PROCESO = 'ELIMINADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+        UPDATE USUARIOS SET ESTADO = 0, ESTADO_PROCESO = 'MODIFICADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
 
         SET @MSJ = 'Se dio de baja correctamente al usuario';
     END IF;
@@ -299,12 +303,12 @@ BEGIN
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
-    SELECT COUNT(*) INTO cUsuario FROM USUARIOS WHERE ID = P_ID;
+    SELECT COUNT(*) INTO cUsuario FROM USUARIOS WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
 
     IF cUsuario <= 0 THEN
         SET @MSJ2 = 'El usuario que intenta eliminar no existe';
     ELSE
-        DELETE FROM USUARIOS WHERE ID = P_ID;
+        UPDATE USUARIOS SET ESTADO_REGISTRO = 2, ESTADO_PROCESO = 'ELIMINADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
 
         SET @MSJ = 'Se eliminó correctamente al usuario';
     END IF;

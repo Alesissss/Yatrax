@@ -18,8 +18,8 @@ class Usuario:
     def obtener_todos(cls):
         conexion = bd.Conexion()
         try:
-            usuarios = conexion.obtener("SELECT usu.id, usu.nombre, usu.email, usu.imagen, usu.estado_registro, usu.id_tipousuario, tu.nombre as tipousuario"
-            " FROM usuarios usu INNER JOIN tipo_usuario tu on usu.id_tipousuario = tu.id")
+            usuarios = conexion.obtener("SELECT usu.id, usu.nombre, usu.email, usu.imagen, usu.estado, usu.id_tipousuario, tu.nombre as tipousuario"
+            " FROM usuarios usu INNER JOIN tipo_usuario tu on usu.id_tipousuario = tu.id WHERE usu.estado_registro = 1")
             return usuarios
         finally:
             conexion.cerrar()
@@ -28,8 +28,8 @@ class Usuario:
     def obtener_por_id(cls, usuario_id):
         conexion = bd.Conexion()
         try:
-            usuario = conexion.obtener("SELECT usu.id, usu.nombre, usu.email, usu.imagen, usu.id_tipousuario, tu.nombre as tipousuario"
-            " FROM usuarios usu INNER JOIN tipo_usuario tu on usu.id_tipousuario = tu.id WHERE usu.id = %s", (usuario_id,))
+            usuario = conexion.obtener("SELECT usu.id, usu.nombre, usu.email, usu.imagen, usu.estado, usu.id_tipousuario, tu.nombre as tipousuario"
+            " FROM usuarios usu INNER JOIN tipo_usuario tu on usu.id_tipousuario = tu.id WHERE usu.estado_registro = 1 AND usu.id = %s", (usuario_id,))
             return usuario[0] if usuario else None
         finally:
             conexion.cerrar()
@@ -39,8 +39,8 @@ class Usuario:
     def autenticar(cls, email, password):
         conexion = bd.Conexion()
         try:
-            usuario = conexion.obtener("SELECT usu.id, usu.nombre, usu.email, usu.imagen, usu.id_tipousuario, tu.nombre as tipousuario"
-            " FROM usuarios usu INNER JOIN tipo_usuario tu on usu.id_tipousuario = tu.id WHERE usu.estado_registro = 1 AND usu.email = %s AND usu.password = %s", (email, password))
+            usuario = conexion.obtener("SELECT usu.id, usu.nombre, usu.email, usu.imagen, usu.estado, usu.id_tipousuario, tu.nombre as tipousuario"
+            " FROM usuarios usu INNER JOIN tipo_usuario tu on usu.id_tipousuario = tu.id WHERE usu.estado_registro = 1 AND usu.estado = 1 AND usu.email = %s AND usu.password = %s", (email, password))
             return usuario[0] if usuario else None
         finally:
             conexion.cerrar()
@@ -88,14 +88,14 @@ class Usuario:
 
     #REGISTRAR
     @classmethod
-    def registrar(cls, nombre, email, password, imagen, idTipoUsuario, usuario):
+    def registrar(cls, nombre, email, password, imagen, estado, idTipoUsuario, usuario):
         conexion = bd.Conexion()
 
         try:
             password_hash = hashlib.sha256(password.encode()).hexdigest()
 
             # Llamar al procedimiento almacenado
-            conexion.ejecutar("CALL SP_REGISTRAR_USUARIO(%s, %s, %s, %s, %s, %s);", (nombre, email, password_hash, imagen, idTipoUsuario, usuario))
+            conexion.ejecutar("CALL SP_REGISTRAR_USUARIO(%s, %s, %s, %s, %s, %s, %s);", (nombre, email, password_hash, imagen, estado, idTipoUsuario, usuario))
 
             # Obtener mensajes de salida
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
@@ -105,12 +105,12 @@ class Usuario:
 
     #EDITAR
     @classmethod
-    def editar(cls, id, nombre, email, imagen, idTipoUsuario):
+    def editar(cls, id, nombre, email, imagen, estado, idTipoUsuario):
         conexion = bd.Conexion()
 
         try:
             # Llamar al procedimiento almacenado
-            conexion.ejecutar("CALL SP_EDITAR_USUARIO(%s, %s, %s, %s, %s);", (id, nombre, email, imagen, idTipoUsuario))
+            conexion.ejecutar("CALL SP_EDITAR_USUARIO(%s, %s, %s, %s, %s, %s);", (id, nombre, email, imagen, estado, idTipoUsuario))
 
             # Obtener mensajes de salida
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")

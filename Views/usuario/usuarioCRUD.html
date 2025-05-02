@@ -42,6 +42,17 @@
                         </div>
                     </div>
                     <div class="mb-3">
+                        <label for="cbx_TipoUsuario">Estado</label>
+                        <div class="input-group">
+                            <select id="cbx_Estado" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{%
+                                endif %}>
+                                <option disabled>--SELECCIONAR--</option>
+                                <option {% if usuario.estado  == 1 %}selected{% endif %} value="1">Vigente</option>
+                                <option {% if usuario.estado  == 0 %}selected{% endif %} value="0">No vigente</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
                         <label for="cbx_TipoUsuario">Tipo de usuario</label>
                         <div class="input-group">
                             <select id="cbx_TipoUsuario" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{%
@@ -121,10 +132,11 @@
             let nombre = $("#txt_Nombre").val().trim();
             let email = $("#txt_Email").val().trim();
             let password = $("#txt_Password").val().trim();
+            let estado = $('#cbx_Estado').val();
             let tipoUsuario = $('#cbx_TipoUsuario').val();
             let imagen = $("#file_Imagen")[0].files[0];
 
-            if (!nombre || !email || !password || !tipoUsuario || !imagen) {
+            if (!nombre || !email || !password || !estado || !tipoUsuario || !imagen) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
@@ -145,6 +157,7 @@
                     formData.append("nombre", nombre);
                     formData.append("email", email);
                     formData.append("password", password);
+                    formData.append("estado", estado);
                     formData.append("idTipoUsuario", tipoUsuario);
                     formData.append("imagen", imagen);
                     $.ajax({
@@ -183,10 +196,11 @@
 
             let nombre = $("#txt_Nombre").val().trim();
             let email = $("#txt_Email").val().trim();
+            let estado = $('#cbx_Estado').val();
             let tipoUsuario = $('#cbx_TipoUsuario').val();
             let imagen = $("#file_Imagen")[0].files[0];
 
-            if (!nombre || !email || !tipoUsuario) {
+            if (!nombre || !email || !estado || !tipoUsuario) {
                 toastr.warning("Todos los campos son obligatorios, excepto la imagen.", "MENSAJE DE SISTEMA");
                 return;
             }
@@ -206,6 +220,7 @@
                     let formData = new FormData();
                     formData.append("nombre", nombre);
                     formData.append("email", email);
+                    formData.append("estado", estado);
                     formData.append("idTipoUsuario", tipoUsuario);
 
                     if (imagen) {
