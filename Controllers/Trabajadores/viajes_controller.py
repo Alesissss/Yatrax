@@ -1,6 +1,7 @@
 import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort
 from Models.tipoVehiculo import TipoVehiculo
+from Models.sucursal import Sucursal
 from Models.horario import horario
 
 viajes_bp = Blueprint('viajes', __name__, url_prefix='/trabajadores/viajes')
@@ -59,6 +60,11 @@ def Menu_Viajes():
 @viajes_bp.route('/GestionarTipoVehiculo')
 def Menu_TipoVehiculo():
     return render_template('viajes/tipoVehiculo.html', active_page="tipoVehiculo", active_menu='mViajes')
+
+@viajes_bp.route('/GestionarSucursal')
+def Menu_Sucursal():
+    return render_template('viajes/sucursal.html', active_page="sucursal", active_menu='mViajes')
+
 
 # END VIEWS
 
