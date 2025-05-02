@@ -44,8 +44,11 @@ def verificar_sesion():
     if usuario and usuario['tipousuario'].upper() == 'CLIENTE' and request.endpoint not in rutas_permitidas:
         abort(401)  # Autenticado pero no autorizado para navegación general
 
-    if not any(menu['nombre'] == 'M_VENTAS' for menu in menus) and request.endpoint not in rutas_permitidas:
+    if 3 not in menus and request.endpoint not in rutas_permitidas:
         abort(403)  # Autenticado, pero no tiene permiso para ese módulo
+
+    # if not any(menu['nombre'] == 'M_VENTAS' for menu in menus) and request.endpoint not in rutas_permitidas:
+    #     abort(403)  # Autenticado, pero no tiene permiso para ese módulo
 
 # VIEWS
 @ventas_bp.route('/GestionarPasajes')
@@ -59,7 +62,6 @@ def Tipo_Clientes():
 @ventas_bp.route('/TipoClienteNuevo')
 def TipoCliente_Nuevo():
     return render_template('ventas/tipoclienteCRUD.html', active_page="tipocliente", active_menu='mVentas')
-
 
 # END VIEWS
 

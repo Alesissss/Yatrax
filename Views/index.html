@@ -111,8 +111,8 @@
                             </a>
                         </li>
                         {% if session.get('moduloSelected') %}
-                        {% if session['moduloSelected'] == 'M_USUARIOS' %}
-                        {% if session['menus'] | selectattr('nombre', 'equalto', 'M_USUARIOS') | list | length > 0 %}
+                        {% if session['moduloSelected'] == 1 %}
+                        {% if 1 in session['menus'] %}
                         <li class="nav-item">
                             <a href="#" class="nav-link {% if active_menu == 'mUsuarios' %}active{% endif %}">
                                 <i class="nav-icon fas fas fa-users"></i>
@@ -122,6 +122,7 @@
                                 </p>
                             </a>
                             <ul class="nav nav-treeview" style="display: none;">
+                                {% if 10 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('usuario.Menu_Usuarios') }}"
                                         class="nav-link {% if active_page == 'usuarios' %}active{% endif %}">
@@ -129,13 +130,13 @@
                                         <p>Gestionar usuarios</p>
                                     </a>
                                 </li>
+                                {% endif %}
                             </ul>
                         </li>
                         {% endif %}
                         {% endif %}
-
-                        {% if session['moduloSelected'] == 'M_VENTAS' %}
-                        {% if session['menus'] | selectattr('nombre', 'equalto', 'M_VENTAS') | list | length > 0 %}
+                        {% if session['moduloSelected'] == 3 %}
+                        {% if 3 in session['menus'] %}
                         <li class="nav-item">
                             <a href="#" class="nav-link {% if active_menu == 'mVentas' %}active{% endif %}">
                                 <i class="nav-icon bi bi-cart3"></i>
@@ -144,6 +145,7 @@
                                 </p>
                             </a>
                             <ul class="nav nav-treeview" style="display: none;">
+                                {% if 30 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('ventas.Menu_Pasajes') }}"
                                         class="nav-link {% if active_page == 'pasajes' %}active{% endif %}">
@@ -151,13 +153,13 @@
                                         <p>Gestionar pasajes</p>
                                     </a>
                                 </li>
+                                {% endif %}
                             </ul>
                         </li>
                         {% endif %}
                         {% endif %}
-
-                        {% if session['moduloSelected'] == 'M_VIAJES' %}
-                        {% if session['menus'] | selectattr('nombre', 'equalto', 'M_VIAJES') | list | length > 0 %}
+                        {% if session['moduloSelected'] == 4 %}
+                        {% if 4 in session['menus'] %}
                         <li class="nav-item">
                             <a href="#" class="nav-link {% if active_menu == 'mViajes' %}active{% endif %}">
                                 <i class="nav-icon fas fa-bus"></i>
@@ -166,13 +168,16 @@
                                 </p>
                             </a>
                             <ul class="nav nav-treeview" style="display: none;">
+                                {% if 40 in session['menus'] %}
                                 <li class="nav-item">
-                                    <a href="{{ url_for('viajes.Menu_Viajes') }}"
+                                    <a href="{{ url_for('viajes.Menu_Horarios') }}"
                                         class="nav-link {% if active_page == 'horarios' %}active{% endif %}">
                                         <i class="bi bi-calendar-week nav-icon"></i>
                                         <p>Gestionar horarios</p>
                                     </a>
                                 </li>
+                                {% endif %}
+                                {% if 41 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('viajes.Menu_TipoVehiculo') }}"
                                         class="nav-link {% if active_page == 'tipoVehiculo' %}active{% endif %}">
@@ -180,13 +185,13 @@
                                         <p>Gestionar tipo vehículo</p>
                                     </a>
                                 </li>
+                                {% endif %}
                             </ul>
                         </li>
                         {% endif %}
                         {% endif %}
-
-                        {% if session['moduloSelected'] == 'M_PERSONAL' %}
-                        {% if session['menus'] | selectattr('nombre', 'equalto', 'M_PERSONAL') | list | length > 0 %}
+                        {% if session['moduloSelected'] == 5 %}
+                        {% if 5 in session['menus'] %}
                         <li class="nav-item">
                             <a href="#" class="nav-link {% if active_menu == 'mPersonal' %}active{% endif %}">
                                 <i class="nav-icon bi bi-person-lines-fill"></i>
@@ -195,6 +200,7 @@
                                 </p>
                             </a>
                             <ul class="nav nav-treeview" style="display: none;">
+                                {% if 50 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('personal.Menu_Personal') }}"
                                         class="nav-link {% if active_page == 'ejemplo' %}active{% endif %}">
@@ -202,13 +208,13 @@
                                         <p>Ejemplo</p>
                                     </a>
                                 </li>
+                                {% endif %}
                             </ul>
                         </li>
                         {% endif %}
                         {% endif %}
-
-                        {% if session['moduloSelected'] == 'M_ATENCION' %}
-                        {% if session['menus'] | selectattr('nombre', 'equalto', 'M_ATENCION') | list | length > 0 %}
+                        {% if session['moduloSelected'] == 6 %}
+                        {% if 6 in session['menus'] %}
                         <li class="nav-item">
                             <a href="#" class="nav-link {% if active_menu == 'mAtencion' %}active{% endif %}">
                                 <i class="nav-icon fas fa-comments"></i>
@@ -217,6 +223,7 @@
                                 </p>
                             </a>
                             <ul class="nav nav-treeview" style="display: none;">
+                                {% if 60 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('atencion.Menu_Atencion') }}"
                                         class="nav-link {% if active_page == 'ejemplo' %}active{% endif %}">
@@ -224,14 +231,13 @@
                                         <p>Ejemplo</p>
                                     </a>
                                 </li>
+                                {% endif %}
                             </ul>
                         </li>
                         {% endif %}
                         {% endif %}
-
-                        {% if session['moduloSelected'] == 'M_CONFIGURACION' %}
-                        {% if session['menus'] | selectattr('nombre', 'equalto', 'M_CONFIGURACION') | list | length > 0
-                        %}
+                        {% if session['moduloSelected'] == 2 %}
+                        {% if 2 in session['menus'] %}
                         <li class="nav-item">
                             <a href="#" class="nav-link {% if active_menu == 'mConfiguracion' %}active{% endif %}">
                                 <i class="nav-icon fas fa-cogs"></i>
@@ -239,6 +245,7 @@
                                 <i class="right fas fa-angle-left"></i>
                             </a>
                             <ul class="nav nav-treeview" style="display: none;">
+                                {% if 20 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('configuracion.Menu_Permisos') }}"
                                         class="nav-link {% if active_page == 'permisos' %}active{% endif %}">
@@ -246,6 +253,8 @@
                                         <p>Gestionar permisos</p>
                                     </a>
                                 </li>
+                                {% endif %}
+                                {% if 21 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('configuracion.Menu_Plantillas') }}"
                                         class="nav-link {% if active_page == 'plantillas' %}active{% endif %}">
@@ -253,6 +262,8 @@
                                         <p>Gestionar plantillas</p>
                                     </a>
                                 </li>
+                                {% endif %}
+                                {% if 22 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('metodo_pago.Menu_MetodosPago') }}"
                                         class="nav-link {% if active_page == 'metodosPago' %}active{% endif %}">
@@ -260,6 +271,7 @@
                                         <p>Gestionar métodos de pago</p>
                                     </a>
                                 </li>
+                                {% endif %}
                             </ul>
                         </li>
                         {% endif %}

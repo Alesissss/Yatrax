@@ -11,9 +11,10 @@
     </div>
     <div class="panel-body">
         <div class="row m-5">
-            {% if session['menus'] | selectattr('nombre', 'equalto', 'M_USUARIOS') | list | length > 0 %}
+            {% if session['menus'] and 1 in session['menus'] %}
             <div class="col-sm-6 col-md-4 d-flex justify-content-center align-items-center">
-                <div class="small-box {% if session['moduloSelected'] == 'M_USUARIOS' %} bg-primary {% else %} bg-dark {% endif %} pt-3 w-75 modulo" id="M_USUARIOS">
+                <div class="small-box {% if session['moduloSelected'] == 1 %} bg-primary {% else %} bg-dark {% endif %} pt-3 w-75 modulo"
+                    id="1">
                     <div class="inner text-center">
                         <!-- <i class="fas fa-users fa-3x mb-2"></i> -->
                         <img src="/Static/img/icons/usuarios.png" alt="USUARIOS" class="img-fluid mb-2"
@@ -23,9 +24,10 @@
                 </div>
             </div>
             {% endif %}
-            {% if session['menus'] | selectattr('nombre', 'equalto', 'M_PERSONAL') | list | length > 0 %}
+            {% if session['menus'] and 5 in session['menus'] %}
             <div class="col-sm-6 col-md-4 d-flex justify-content-center align-items-center">
-                <div class="small-box {% if session['moduloSelected'] == 'M_PERSONAL' %} bg-primary {% else %} bg-dark {% endif %} pt-3 w-75 modulo" id="M_PERSONAL">
+                <div class="small-box {% if session['moduloSelected'] == 5 %} bg-primary {% else %} bg-dark {% endif %} pt-3 w-75 modulo"
+                    id="5">
                     <div class="inner text-center">
                         <!-- <i class="fas fa-user-circle fa-3x mb-2"></i> -->
                         <img src="/Static/img/icons/personal.png" alt="PERSONAL" class="img-fluid mb-2"
@@ -35,9 +37,10 @@
                 </div>
             </div>
             {% endif %}
-            {% if session['menus'] | selectattr('nombre', 'equalto', 'M_VIAJES') | list | length > 0 %}
+            {% if session['menus'] and 4 in session['menus'] %}
             <div class="col-sm-6 col-md-4 d-flex justify-content-center align-items-center">
-                <div class="small-box {% if session['moduloSelected'] == 'M_VIAJES' %} bg-primary {% else %} bg-dark {% endif %} pt-3 w-75 modulo" id="M_VIAJES">
+                <div class="small-box {% if session['moduloSelected'] == 4 %} bg-primary {% else %} bg-dark {% endif %} pt-3 w-75 modulo"
+                    id="4">
                     <div class="inner text-center">
                         <!-- <i class="fas fa-bus-alt fa-3x mb-2"></i> -->
                         <img src="/Static/img/icons/viajes.png" alt="VIAJES" class="img-fluid mb-2"
@@ -47,9 +50,10 @@
                 </div>
             </div>
             {% endif %}
-            {% if session['menus'] | selectattr('nombre', 'equalto', 'M_PROMOCIONES') | list | length > 0 %}
+            {% if session['menus'] and 7 in session['menus'] %}
             <div class="col-sm-6 col-md-4 d-flex justify-content-center align-items-center">
-                <div class="small-box {% if session['moduloSelected'] == 'M_PROMOCIONES' %} bg-primary {% else %} bg-dark {% endif %} pt-3 w-75 modulo" id="M_PROMOCIONES">
+                <div class="small-box {% if session['moduloSelected'] == 7 %} bg-primary {% else %} bg-dark {% endif %} pt-3 w-75 modulo"
+                    id="7">
                     <div class="inner text-center">
                         <!-- <i class="fas fa-percentage fa-3x mb-2"></i> -->
                         <img src="/Static/img/icons/promociones.png" alt="PROMOCIONES" class="img-fluid mb-2"
@@ -59,9 +63,10 @@
                 </div>
             </div>
             {% endif %}
-            {% if session['menus'] | selectattr('nombre', 'equalto', 'M_VENTAS') | list | length > 0 %}
+            {% if session['menus'] and 3 in session['menus'] %}
             <div class="col-sm-6 col-md-4 d-flex justify-content-center align-items-center">
-                <div class="small-box {% if session['moduloSelected'] == 'M_VENTAS' %} bg-primary {% else %} bg-dark {% endif %} pt-3 w-75 modulo" id="M_VENTAS">
+                <div class="small-box {% if session['moduloSelected'] == 3 %} bg-primary {% else %} bg-dark {% endif %} pt-3 w-75 modulo"
+                    id="3">
                     <div class="inner text-center">
                         <!-- <i class="fas fa-shopping-cart fa-3x mb-2"></i> -->
                         <img src="/Static/img/icons/ventas.png" alt="VENTAS" class="img-fluid mb-2"
@@ -71,9 +76,10 @@
                 </div>
             </div>
             {% endif %}
-            {% if session['menus'] | selectattr('nombre', 'equalto', 'M_ATENCION') | list | length > 0 %}
+            {% if session['menus'] and 6 in session['menus'] %}
             <div class="col-sm-6 col-md-4 d-flex justify-content-center align-items-center">
-                <div class="small-box {% if session['moduloSelected'] == 'M_ATENCION' %} bg-primary {% else %} bg-dark {% endif %} pt-3 w-75 modulo" id="M_ATENCION">
+                <div class="small-box {% if session['moduloSelected'] == 6 %} bg-primary {% else %} bg-dark {% endif %} pt-3 w-75 modulo"
+                    id="6">
                     <div class="inner text-center">
                         <!-- <i class="fas fa-headset fa-3x mb-2"></i> -->
                         <img src="/Static/img/icons/atencion2.png" alt="ATENCIÓN" class="img-fluid mb-2"
@@ -83,9 +89,10 @@
                 </div>
             </div>
             {% endif %}
-            {% if session['menus'] | selectattr('nombre', 'equalto', 'M_CONFIGURACION') | list | length > 0 %}
+            {% if session['menus'] and 2 in session['menus'] %}
             <div class="col-sm-6 col-md-4 d-flex justify-content-center align-items-center">
-                <div class="small-box {% if session['moduloSelected'] == 'M_CONFIGURACION' %} bg-primary {% else %} bg-dark {% endif %} pt-3 w-75 modulo" id="M_CONFIGURACION">
+                <div class="small-box {% if session['moduloSelected'] == 2 %} bg-primary {% else %} bg-dark {% endif %} pt-3 w-75 modulo"
+                    id="2">
                     <div class="inner text-center">
                         <!-- <i class="fas fa-cogs fa-3x mb-2"></i> -->
                         <img src="/Static/img/icons/configuracion.png" alt="CONFIGURACIÓN" class="img-fluid mb-2"
@@ -115,6 +122,7 @@
 {% block scripts %}
 <script>
     $(document).ready(function () {
+        console.log(' {{ session["menus"]}} ');
         $('.modulo').on('click', function () {
             const idModulo = $(this).attr('id');
             console.log(idModulo);

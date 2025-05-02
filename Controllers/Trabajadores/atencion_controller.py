@@ -43,8 +43,11 @@ def verificar_sesion():
     if usuario and usuario['tipousuario'].upper() == 'CLIENTE' and request.endpoint not in rutas_permitidas:
         abort(401)  # Autenticado pero no autorizado para navegación general
 
-    if not any(menu['nombre'] == 'M_ATENCION' for menu in menus) and request.endpoint not in rutas_permitidas:
+    if 6 not in menus and request.endpoint not in rutas_permitidas:
         abort(403)  # Autenticado, pero no tiene permiso para ese módulo
+
+    # if not any(menu['nombre'] == 'M_ATENCION' for menu in menus) and request.endpoint not in rutas_permitidas:
+    #     abort(403)  # Autenticado, pero no tiene permiso para ese módulo
 
 # VIEWS
 @atencion_bp.route('/GestionarEjemplo')

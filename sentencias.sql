@@ -74,11 +74,12 @@ CREATE TABLE horario (
     fecha_registro datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Crear tabla menus
 CREATE TABLE conf_menus (
-    id INT AUTO_INCREMENT PRIMARY KEY,  
-    nombre VARCHAR(100) UNIQUE NOT NULL,
-    estado BOOLEAN NOT NULL
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    estado BOOLEAN NOT NULL,
+    idPadre INT NULL,
+    FOREIGN KEY (idPadre) REFERENCES conf_menus(id)
 );
 
 -- Crear tabla detalle_menu
@@ -129,6 +130,21 @@ INSERT INTO conf_menus (id, nombre, estado) VALUES (3, 'M_VENTAS', 1);
 INSERT INTO conf_menus (id, nombre, estado) VALUES (4, 'M_VIAJES', 1);
 INSERT INTO conf_menus (id, nombre, estado) VALUES (5, 'M_PERSONAL', 1);
 INSERT INTO conf_menus (id, nombre, estado) VALUES (6, 'M_ATENCION', 1);
+-- Submenús de USUARIOS
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (10, 'Gestionar usuarios', 1, 1);
+-- Submenús de CONFIGURACIÓN
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (20, 'Gestionar permisos', 1, 2);
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (21, 'Gestionar plantillas', 1, 2);
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (22, 'Gestionar métodos de pago', 1, 2);
+-- Submenús de VENTAS
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (30, 'Gestionar pasajes', 1, 3);
+-- Submenús de VIAJES
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (40, 'Gestionar horarios', 1, 4);
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (41, 'Gestionar tipo vehículo', 1, 4);
+-- Submenús de PERSONAL
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (50, 'Ejemplo', 1, 5);
+-- Submenús de ATENCIÓN AL CLIENTE
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (60, 'Ejemplo', 1, 6);
 
 -- Tabla dmenus
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (1, 1);
@@ -137,6 +153,21 @@ INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (3, 1);
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (4, 1);
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (5, 1);
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (6, 1);
+-- Submenús de "USUARIOS"
+INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (10, 1);
+-- Submenús de "CONFIGURACIÓN"
+INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (20, 1);
+INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (21, 1);
+INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (22, 1);
+-- Submenús de "VENTAS"
+INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (30, 1);
+-- Submenús de "VIAJES"
+INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (40, 1);
+INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (41, 1);
+-- Submenús de "PERSONAL"
+INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (50, 1);
+-- Submenús de "ATENCIÓN AL CLIENTE"
+INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (60, 1);
 
 -- Tabla apariencia
 INSERT INTO conf_plantillas (id, nombre, color_header, color_footer, logo, estado, usuario) VALUES (1, 'YATRAX', '#0c336e', '#000000', '/Static/img/plantillas/logo_yatusa.png', 1, 'SYSTEM');

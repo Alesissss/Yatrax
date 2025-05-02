@@ -21,12 +21,37 @@
             </thead>
             <tbody>
                 {% for menu in menus %}
-                {% set tiene_permiso = menu['nombre'] in dmnus | map(attribute='nombre') | list %}
+                <tr class="bg-primary text-white">
+                    <td colspan="2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button class="btn btn-sm btn-light" data-toggle="collapse"
+                                data-target="#collapseMenu{{ loop.index }}" aria-expanded="false"
+                                aria-controls="collapseMenu{{ loop.index }}">
+                                <i class="fas fa-chevron-down"></i> {{ menu['nombre'] }}
+                            </button>
+                            <input type="checkbox" class="permiso-checkbox" data-idmenu="{{ menu['id'] }}"
+                                data-idusuario="{{ usuario.id }}" {% if menu['id'] in dmnus_ids %}checked{% endif %}>
+                        </div>
+                    </td>
+                </tr>
                 <tr>
-                    <td>{{ menu['nombre'] }}</td>
-                    <td class="text-center">
-                        <input type="checkbox" class="permiso-checkbox" data-idmenu="{{ menu['id'] }}"
-                            data-idusuario="{{ usuario.id }}" {% if tiene_permiso %}checked{% endif %}>
+                    <td colspan="2" class="p-0">
+                        <div id="collapseMenu{{ loop.index }}" class="collapse">
+                            <table class="table table-sm mb-0">
+                                <tbody>
+                                    {% for submenu in menu['submenus'] %}
+                                    <tr>
+                                        <td class="pl-4">- {{ submenu['nombre'] }}</td>
+                                        <td class="text-center">
+                                            <input type="checkbox" class="permiso-checkbox"
+                                                data-idmenu="{{ submenu['id'] }}" data-idusuario="{{ usuario.id }}" {%
+                                                if submenu['id'] in dmnus_ids %}checked{% endif %}>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </td>
                 </tr>
                 {% endfor %}
@@ -42,7 +67,7 @@
         $('.permiso-checkbox').on('click', function (e) {
             const checkbox = $(this);
             const idMenu = checkbox.data('idmenu');
-            const idUsuario = checkbox.data('idusuario');
+            const idUsuario = Number("{{ usuario.id }}");
             const isChecked = checkbox.is(':checked');
             const accion = isChecked ? 1 : 0;
             let texto = accion === 1 ? 'asignar' : 'eliminar';

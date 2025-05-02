@@ -44,29 +44,34 @@ def verificar_sesion():
 @home_bp.route('/')
 @home_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        data = request.json
-        email = data.get('email', '').strip()
-        password = data.get('password', '').strip()
+    try:
+        if request.method == 'POST':
+            data = request.json
+            email = data.get('email', '').strip()
+            password = data.get('password', '').strip()
 
-        # Para usar FormData
-        # email = request.form.get('email', '').strip()
-        # password = request.form.get('password', '').strip()
+            # Para usar FormData
+            # email = request.form.get('email', '').strip()
+            # password = request.form.get('password', '').strip()
 
-        password_hash = hashlib.sha256(password.encode()).hexdigest()
+            password_hash = hashlib.sha256(password.encode()).hexdigest()
 
-        usuario = Usuario.autenticar(email, password_hash)
-        if usuario:
-            menus = Usuario.obtener_menus(usuario['id'])
-            session['usuario'] = usuario
-            session['menus'] = menus
-            return jsonify({'Status': 'success', 'Msj': 'Inicio de sesión exitoso'})
+            usuario = Usuario.autenticar(email, password_hash)
+            if usuario:
+                menus = Usuario.obtener_menus(usuario['id'])
+                menu_ids = [menu['id'] for menu in menus]  # List comprehension para obtener solo los IDs
+                session['usuario'] = usuario
+                session['menus'] = menu_ids
+                return jsonify({'Status': 'success', 'Msj': 'Inicio de sesión exitoso'})
 
-        return jsonify({'Status': 'error', 'Msj': 'Credenciales incorrectas'})
+            return jsonify({'Status': 'error', 'Msj': 'Credenciales incorrectas'})
+        
+        if 'usuario' in session:
+            return redirect(url_for('home.index'))
+        return render_template('/home/auth/login.html')
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
     
-    if 'usuario' in session:
-        return redirect(url_for('home.index'))
-    return render_template('/home/auth/login.html')
 
 @home_bp.route('/logout', methods=['POST'])
 def logout():
@@ -89,16 +94,19 @@ def error():
 
 @home_bp.route('/SetModulo', methods=['POST'])
 def SetModulo():
-    data = request.json
-    menuSelected = data.get('modulo', '').strip()
+    try:
+        data = request.json
+        menuSelected = int(data.get('modulo', '').strip())
 
-    menus = Conf_Menus.obtener_todos()
+        menus = Conf_Menus.obtener_todos()
 
-    if menuSelected:
-        menu = next((menu for menu in menus if menu['nombre'] == menuSelected), None)
+        if menuSelected:
+            menu = next((menu for menu in menus if menu['id'] == menuSelected), None)
 
-        if menu:
-            session['moduloSelected'] = menuSelected
-            return jsonify({'Status': 'success', 'Msj': 'Módulo escogido exitosamente'})
+            if menu:
+                session['moduloSelected'] = menuSelected
+                return jsonify({'Status': 'success', 'Msj': 'Módulo escogido exitosamente'})
 
-    return jsonify({'Status': 'error', 'Msj': 'El módulo seleccionado no existe'})
+        return jsonify({'Status': 'error', 'Msj': 'El módulo seleccionado no existe'})
+    except Exception as e:
+            return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
