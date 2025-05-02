@@ -39,6 +39,10 @@ def index():
 def error():
     return render_template('Ecommerce/error.html')
 
+@homeClientes_bp.route('/login')
+def login_cliente():
+    return render_template('Ecommerce/home/modalLogin.html')
+
 # END VIEWS
 
 # FUNCIONES
