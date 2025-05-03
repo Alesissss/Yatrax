@@ -74,6 +74,16 @@ CREATE TABLE usuarios (
     usuario VARCHAR(100) not null
 );
 
+CREATE TABLE `horario` (
+    id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    horario_entrada time NOT NULL,
+    horario_salida time NOT NULL,
+    estado char(1) NOT NULL,
+    estado_proceso varchar(100) NOT NULL DEFAULT 'REGISTRADO',
+    estado_registro int(11) NOT NULL,
+    fecha_registro datetime NOT NULL DEFAULT current_timestamp()
+)
+
 -- Crear tabla sucursal
 CREATE TABLE sucursal (
     id INT AUTO_INCREMENT PRIMARY KEY,
