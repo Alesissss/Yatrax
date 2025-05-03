@@ -51,7 +51,7 @@ CREATE TABLE tipo_cliente (
 -- Crear tabla tipo_usuario
 CREATE TABLE tipo_usuario (
     id int AUTO_INCREMENT PRIMARY key,
-    nombre varchar(100) NOT NULL UNIQUE,
+    nombre varchar(100) NOT NULL,
     estado BOOLEAN NOT NULL,
     estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
     estado_registro INT not null DEFAULT 1,
@@ -63,7 +63,7 @@ CREATE TABLE tipo_usuario (
 CREATE TABLE usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL,
     password VARCHAR(255) NOT NULL,
     imagen VARCHAR(255) NOT NULL,
     estado BOOLEAN NOT NULL,
