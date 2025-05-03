@@ -1,8 +1,10 @@
 import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort
 from Models.usuario import Usuario
+from Models.metodo_pago import MetodoPago
 from Models.conf_menus import Conf_Menus
 from Models.conf_plantillas import Conf_Plantillas
+from werkzeug.utils import secure_filename
 
 configuracion_bp = Blueprint('configuracion', __name__, url_prefix='/trabajadores/configuracion')
 
@@ -269,5 +271,138 @@ def activar_plantilla(id):  # Recibe el ID de la URL
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
 # END REGION PLANTILLAS    
+
+#REGION METODOS DE PAGO
+@configuracion_bp.route('/GestionarMetodosPago')
+def Menu_MetodosPago():
+    # Captura el mensaje de la URL, si existe
+    msg = request.args.get('msg', '')
+    return render_template('configuracion/metodos_pago.html', active_page="metodos_pago", active_menu='mMetodosPago', msg=msg)
+
+# Ruta para registrar un nuevo método de pago
+@configuracion_bp.route('/MetodoPagoNuevo', methods=['GET', 'POST'])
+def MetodoPago_Nuevo():
+    if request.method == 'POST':
+        return registrar_metodo_pago()
+    
+    return render_template('configuracion/metodo_pago_crud.html', 
+                           tittle="Registrar método de pago", 
+                           btnId="btn_Registrar", 
+                           metodo_pago=None)
+
+# Ruta para editar y ver un método de pago (con id)
+@configuracion_bp.route("/MetodoPagoNuevo/<int:id>", methods=['GET', 'POST'])
+def MetodoPago_Editar_Ver(id):
+    metodo_pago = MetodoPago.obtener_por_id(id)
+    if metodo_pago is None:
+        return jsonify({"Status": "error", "Msj": "Método de pago no encontrado"})
+    
+    ver = request.args.get('ver', False)  # Verificar si el acceso es solo para ver
+    return render_template('configuracion/metodo_pago_crud.html', 
+                           metodo_pago=metodo_pago, 
+                           tittle="Ver método de pago" if ver else "Editar método de pago", 
+                           btnId="btn_Editar" if not ver else "btn_Ver", 
+                           ver=ver)
+
+# Función para registrar el nuevo método de pago
+@configuracion_bp.route('/RegistrarMetodoPago', methods=["POST"])
+def registrar_metodo_pago():
+    try:
+        nombre = request.form.get("nombre")
+        estado = request.form.get("estado")
+        logo = request.files.get("logo")
+
+        if not nombre or not nombre.strip():
+            return jsonify({"Status": "error", "Msj": "El nombre es obligatorio."})
+        if not estado or not estado.strip():
+            return jsonify({"Status": "error", "Msj": "El estado es obligatorio."})
+
+        if logo:
+            logo_filename = secure_filename(logo.filename)
+            logo_path = f"/Static/img/metodos_pago/{logo_filename}"
+            logo.save(os.path.join("Static/img/metodos_pago", logo_filename))
+        else:
+            logo_path = "/Static/img/trabajadores/default-logo.png"  # Logo por defecto
+
+        mensajes = MetodoPago.registrar(nombre.strip(), logo_path, estado.strip(), session.get('usuario', {}).get('email', 'SIN USUARIO').strip())
+        
+        # Redirigir con un mensaje de éxito
+        return redirect(url_for('configuracion.Menu_MetodosPago', msg="Método de pago registrado exitosamente"))
+
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Error: {repr(e)}"})
+
+# Ruta para editar un método de pago
+@configuracion_bp.route("/EditarMetodoPago/<int:id>", methods=['GET', 'POST'])
+def editar_metodo_pago(id):
+    metodo_pago = MetodoPago.obtener_por_id(id)
+    if metodo_pago is None:
+        return jsonify({"Status": "error", "Msj": "Método de pago no encontrado"})
+    
+    if request.method == 'POST':
+        nombre = request.form.get("nombre").strip()
+        estado = request.form.get("estado").strip()
+        logo = request.files.get("logo")
+
+        if not nombre or not estado:
+            return jsonify({"Status": "error", "Msj": "Nombre y estado son obligatorios"})
+
+        if logo:
+            logo_filename = secure_filename(logo.filename)
+            logo_path = f"/Static/img/metodos_pago/{logo_filename}"
+            logo.save(os.path.join("Static/img/metodos_pago", logo_filename))
+        else:
+            logo_path = metodo_pago['logo']
+
+        mensajes = MetodoPago.editar(id, nombre, logo_path, estado)
+        
+        # Redirigir con un mensaje de éxito
+        return redirect(url_for('configuracion.Menu_MetodosPago', msg="Método de pago editado exitosamente"))
+
+    return render_template('configuracion/metodo_pago_crud.html', metodo_pago=metodo_pago, tittle="Editar método de pago", btnId="btn_Editar")
+
+# Ruta para eliminar un método de pago
+@configuracion_bp.route("/EliminarMetodoPago/<int:id>", methods=['POST'])
+def eliminar_metodo_pago(id):
+    try:
+        mensajes = MetodoPago.eliminar(id)
+        return jsonify(mensajes)
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Error: {repr(e)}"})
+
+# Ruta para obtener todos los métodos de pago
+@configuracion_bp.route("/GetData_MetodosPago", methods=['GET'])
+def get_metodos_pago():
+    try:
+        metodos_pago = MetodoPago.obtener_todos()
+        if metodos_pago:
+            return jsonify({"Status": "success", "data": metodos_pago})
+        return jsonify({"Status": "error", "Msj": "No se encontraron métodos de pago."})
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Error al obtener los métodos de pago: {repr(e)}"})
+
+
+@configuracion_bp.route("/dar_baja_metodo_pago/<int:id>", methods=["POST"])
+def dar_baja_metodo_pago(id):
+    try:
+        # Ejecutar el procedimiento almacenado
+        result = MetodoPago.darBaja(id)  # Asegúrate de que esta función esté llamando al SP correctamente
+
+        # Si el resultado es un mensaje de éxito
+        if result.get("MSJ"):
+            return jsonify({"Status": "success", "Msj": result.get("MSJ")})
+
+        # Si el resultado es un mensaje de error
+        if result.get("MSJ2"):
+            return jsonify({"Status": "error", "Msj": result.get("MSJ2")})
+
+        # Si no se devuelve ningún mensaje
+        return jsonify({"Status": "error", "Msj": "Error desconocido"})
+
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
+
+# ENG REGION METODOS DE PAGO
+
 
 # END FUNCIONES

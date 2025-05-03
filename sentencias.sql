@@ -119,6 +119,18 @@ CREATE TABLE tipo_vehiculo(
     estado TINYINT not null
 );
 
+-- Crear tabla metodo_pago
+CREATE TABLE metodo_pago (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    logo VARCHAR(255) NOT NULL,
+    estado BOOLEAN NOT NULL,
+    estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
+    estado_registro INT not null DEFAULT 1,
+    fecha_registro DATETIME not null DEFAULT CURRENT_TIMESTAMP, 
+    usuario VARCHAR(100) not null
+);
+
 INSERT INTO tipo_vehiculo (nombre,capacidad, estado) 
 VALUES ('MetroRapid X12', 120, 1);  -- Bus articulado eléctrico
 
@@ -1048,4 +1060,141 @@ BEGIN
         SET @MSJ = 'Se dio de baja correctamente al tipo de cliente';
     END IF;
 END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_REGISTRAR_METODO_PAGO
+DELIMITER $$ 
+CREATE PROCEDURE SP_REGISTRAR_METODO_PAGO(
+    IN P_NOMBRE VARCHAR(100),
+    IN P_LOGO VARCHAR(255),
+    IN P_ESTADO BOOLEAN,
+    IN P_USUARIO VARCHAR(100)
+)
+BEGIN
+    DECLARE cNombre INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cNombre FROM metodo_pago WHERE NOMBRE = P_NOMBRE;
+
+    IF cNombre > 0 THEN
+        SET @MSJ2 = 'El método de pago que intenta registrar ya está registrado';
+    ELSE
+        INSERT INTO metodo_pago (NOMBRE, LOGO, ESTADO, ESTADO_PROCESO, ESTADO_REGISTRO, FECHA_REGISTRO, USUARIO) 
+        VALUES (P_NOMBRE, P_LOGO, P_ESTADO, DEFAULT, DEFAULT, CURRENT_TIMESTAMP, P_USUARIO);
+
+        SET @MSJ = 'Se registró correctamente el método de pago';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_EDITAR_METODO_PAGO
+DELIMITER $$ 
+CREATE PROCEDURE SP_EDITAR_METODO_PAGO(
+    IN P_ID INT,
+    IN P_NOMBRE VARCHAR(100),
+    IN P_LOGO VARCHAR(255),
+    IN P_ESTADO BOOLEAN
+)
+BEGIN
+    DECLARE cMetodoPago INT;
+    DECLARE cNombre INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    -- Verificar si el método de pago existe
+    SELECT COUNT(*) INTO cMetodoPago FROM metodo_pago WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+    
+    -- Verificar si el nombre del método de pago ya está registrado (excluyendo el registro actual)
+    SELECT COUNT(*) INTO cNombre FROM metodo_pago WHERE NOMBRE = P_NOMBRE AND ID != P_ID;
+
+    IF cMetodoPago <= 0 THEN
+        SET @MSJ2 = 'El método de pago que intenta editar no existe';
+    ELSEIF cNombre != 0 THEN
+        SET @MSJ2 = 'El nombre del método de pago ingresado ya existe';
+    ELSE
+        -- Actualizar los datos del método de pago, con el estado de registro siempre igual a 1 y el estado de proceso modificado
+        UPDATE metodo_pago 
+        SET NOMBRE = P_NOMBRE, 
+            LOGO = P_LOGO,
+            ESTADO = P_ESTADO,
+            ESTADO_PROCESO = 'MODIFICADO',
+            ESTADO_REGISTRO = 1 -- El estado de registro permanece en 1
+        WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se modificó correctamente el método de pago';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_DARBAJA_METODO_PAGO
+
+DELIMITER $$ 
+CREATE PROCEDURE SP_DARBAJA_METODO_PAGO(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cMetodoPago INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cMetodoPago FROM metodo_pago WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cMetodoPago <= 0 THEN
+        SET @MSJ2 = 'El método de pago que intenta dar de baja no existe';
+    ELSE
+        UPDATE metodo_pago 
+        SET ESTADO = 0, 
+            ESTADO_PROCESO = 'DADO DE BAJA' 
+        WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se dio de baja correctamente el método de pago';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_METODO_PAGO
+DELIMITER $$ 
+CREATE PROCEDURE SP_ELIMINAR_METODO_PAGO(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cMetodoPago INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cMetodoPago FROM metodo_pago WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cMetodoPago <= 0 THEN
+        SET @MSJ2 = 'El método de pago que intenta eliminar no existe';
+    ELSE
+        UPDATE metodo_pago 
+        SET ESTADO_REGISTRO = 2, 
+            ESTADO_PROCESO = 'ELIMINADO' 
+        WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se eliminó correctamente el método de pago';
+    END IF;
+END $$
+
 DELIMITER ;

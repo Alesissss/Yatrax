@@ -20,9 +20,18 @@
                         <div class="mb-3">
                             <label for="txt_Estado">Estado</label>
                             <select id="txt_Estado" name="estado" class="form-control" {% if ver %}disabled{% endif %}>
-                                <option value="Activo" {% if metodo_pago.estado == 'Activo' %}selected{% endif %}>Activo</option>
-                                <option value="Inactivo" {% if metodo_pago.estado == 'Inactivo' %}selected{% endif %}>Inactivo</option>
+                                <option value="1" {% if metodo_pago.estado == 1 %}selected{% endif %}>Activo</option>
+                                <option value="0" {% if metodo_pago.estado == 0 %}selected{% endif %}>Inactivo</option>
                             </select>
+                            <!-- <label>
+                                <input type="checkbox" name="estado" class="form-control" 
+                                {% if metodo_pago.estado==1 %} 
+                                checked value="1" 
+                                {% else %}
+                                value="0"
+                                {% endif %}  
+                                {% if ver %}disabled{% endif %}> Activar/Desactivar
+                            </label> -->
                         </div>
                         <div class="mb-3">
                             <label for="txt_Logo">Logo</label>
@@ -53,7 +62,7 @@
     $(document).ready(function () {
         // Volver al listado de métodos de pago
         $("#btn_Volver").click(function () {
-            window.location.href = '/trabajadores/metodos_pago/GestionarMetodosPago';
+            window.location.href = '/trabajadores/configuracion/GestionarMetodosPago';
         });
 
         // Validaciones al enviar el formulario
@@ -62,17 +71,17 @@
 
             // Obtener los valores de los campos
             var nombre = $("#txt_Nombre").val().trim();
-            var estado = $("#txt_Estado").val();
+            // var estado = $("#txt_Estado").val();
 
             // Validaciones de campos
             if (!nombre) {
                 toastr.warning("El nombre es obligatorio", "MENSAJE DE SISTEMA");
                 return;
             }
-            if (!estado) {
-                toastr.warning("El estado es obligatorio", "MENSAJE DE SISTEMA");
-                return;
-            }
+            // if (!estado) {
+            //     toastr.warning("El estado es obligatorio", "MENSAJE DE SISTEMA");
+            //     return;
+            // }
 
             // Si todo está bien, se envía el formulario
             $(this).unbind("submit").submit(); // Permite que se envíe el formulario
