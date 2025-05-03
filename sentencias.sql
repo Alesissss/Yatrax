@@ -82,7 +82,7 @@ CREATE TABLE `horario` (
     estado_proceso varchar(100) NOT NULL DEFAULT 'REGISTRADO',
     estado_registro int(11) NOT NULL,
     fecha_registro datetime NOT NULL DEFAULT current_timestamp()
-)
+);
 
 -- Crear tabla sucursal
 CREATE TABLE sucursal (
