@@ -61,9 +61,13 @@ def Menu_Usuarios():
 def Usuario_Nuevo():
     return render_template('usuario/usuarioCRUD.html', active_page="usuarios", active_menu='mUsuarios', usuario={}, tittle = 'Registrar usuario', btnId = 'btn_Registrar')
 
-@usuario_bp.route('TipoUsuarioNuevo')
+@usuario_bp.route('/GestionarTipoUsuario')
+def Menu_TipoUsuario():
+    return render_template('usuario/tipoUsuario.html', active_page="tipoUsuario", active_menu='mUsuarios')
+
+@usuario_bp.route('/TipoUsuarioNuevo')
 def TipoUsuario_Nuevo():
-    return render_template('usuario/modalTipoUsuarioNuevo.html')
+    return render_template('usuario/tipoUsuarioCRUD.html', active_page="tipoUsuario", active_menu='mUsuarios', tipoUsuario={}, tittle = 'Registrar tipo usuario', btnId = 'btn_Registrar')
 
 # END VIEWS
 
@@ -222,12 +226,27 @@ def darBaja_usuario(id):  # Recibe el ID de la URL
             return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja al usuario'})
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
-    
+
+# END REGION USUARIO
+
+# REGION TIPO USUARIO
+
+@usuario_bp.route("/GetData_TipoUsuario", methods=["GET"])
+def get_tiposUsuarios():
+    try:
+        tiposUsuarios = TipoUsuario.obtener_todos()
+        return jsonify({'data': tiposUsuarios, 'Status': 'success', 'Msj': 'Listado de tipos de usuarios retornado exitosamene'})
+    except Exception as e:
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar tipos de usuarios: + {repr(e)}'})
+
 @usuario_bp.route("/RegistrarTipoUsuario", methods=["POST"])
 def registrar_tipoUsuario():
     try:
-        data = request.json
-        mensajes = TipoUsuario.registrar(data["nombre"], session['usuario'].get('email', 'SIN USUARIO').strip())
+        nombre = request.form.get("nombre").strip()
+        estado = request.form.get("estado")
+        usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
+
+        mensajes = TipoUsuario.registrar(nombre, estado, usuario_actual)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 
@@ -235,11 +254,82 @@ def registrar_tipoUsuario():
             return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
         elif msj2:
             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
-        else:  # Fallback
+        else:
             return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar tipo de usuario'})
+
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
-# END REGION USUARIO
+@usuario_bp.route("/EliminarTipoUsuario/<int:id>", methods=['POST'])
+def eliminar_tipoUsuario(id):  # Recibe el ID de la URL
+    try:
+        mensajes = TipoUsuario.eliminar(id)  # Se usa el ID directamente
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al eliminar tipo de usuario'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@usuario_bp.route("/EditarTipoUsuario/<int:id>", methods=['GET', 'POST'])
+def editar_tipoUsuario(id):
+    try:
+        tipoUsuario = TipoUsuario.obtener_por_id(id)
+
+        if request.method == 'POST':
+            nombre = request.form.get("nombre").strip()
+            estado = request.form.get("estado")
+            
+            mensajes = TipoUsuario.editar(id, nombre, estado)
+            msj1 = mensajes.get('@MSJ')
+            msj2 = mensajes.get('@MSJ2')
+
+            if msj1:
+                return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+            elif msj2:
+                return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+            else:
+                return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar tipo de usuario'})
+
+        if tipoUsuario:
+            return render_template('usuario/tipoUsuarioCRUD.html', active_page="tipoUsuario", active_menu='mUsuarios', tipoUsuario=tipoUsuario, tittle = 'Editar tipo usuario', btnId = 'btn_Editar')
+        return render_template('usuario/tipoUsuarioCRUD.html', active_page="tipoUsuario", active_menu='mUsuarios', tipoUsuario={}, tittle = 'Editar tipo usuario', btnId = 'btn_Editar')
+
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+    
+@usuario_bp.route("/VerTipoUsuario/<int:id>", methods=['GET'])
+def ver_tipoUsuario(id):
+    try:
+        tipoUsuario = TipoUsuario.obtener_por_id(id)
+        if tipoUsuario:
+            return render_template('usuario/tipoUsuarioCRUD.html', active_page="tipoUsuario", active_menu='mUsuarios', tipoUsuario=tipoUsuario, tittle = 'Ver tipo usuario', btnId = 'btn_Aceptar')
+        return render_template('usuario/tipoUsuarioCRUD.html', active_page="tipoUsuario", active_menu='mUsuarios', tipoUsuario={}, tittle = 'Ver tipo usuario', btnId = 'btn_Aceptar')
+        
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+    
+@usuario_bp.route("/DarBajaTipoUsuario/<int:id>", methods=['POST'])
+def darBaja_tipoUsuario(id):  # Recibe el ID de la URL
+    try:
+        mensajes = TipoUsuario.darBaja(id)  # Se usa el ID directamente
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja al tipo de usuario'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+# END REGION TIPO USUARIO
 
 # END FUNCIONES

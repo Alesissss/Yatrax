@@ -131,6 +131,15 @@
                                     </a>
                                 </li>
                                 {% endif %}
+                                {% if 11 in session['menus'] %}
+                                <li class="nav-item">
+                                    <a href="{{ url_for('usuario.Menu_TipoUsuario') }}"
+                                        class="nav-link {% if active_page == 'tipoUsuario' %}active{% endif %}">
+                                        <i class="bi bi-person-lines-fill nav-icon"></i>
+                                        <p>Gestionar tipos de usuario</p>
+                                    </a>
+                                </li>
+                                {% endif %}
                             </ul>
                         </li>
                         {% endif %}

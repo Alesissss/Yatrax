@@ -18,6 +18,7 @@
   /* Contenedor principal del modal */
   .container {
     box-sizing: border-box;
+    padding: 0;
     font-family: "Segoe UI", sans-serif;
     display: flex;
     background: white;
@@ -33,7 +34,10 @@
 
   .left {
     flex: 1;
-    background: linear-gradient(to bottom, #0066cc, #66b2ff);
+    background-image: url("{{url_for('static',filename='img/login_pc.jpg')}}");
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -145,10 +149,19 @@
       /* Ocupa un porcentaje del ancho */
       max-width: 400px;
       /* Limita el ancho máximo en móviles */
-      height: auto;
+      height: 90%;
       /* Ajusta la altura al contenido */
       margin: 30px auto;
       /* Centra horizontalmente y añade margen vertical */
+    }
+
+
+    .left {
+      background-image: url("{{url_for('static',filename='img/login_celular.jpg')}}");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
     }
 
     .left,
@@ -186,6 +199,10 @@
     .illustration {
       max-width: 150px;
     }
+
+    .left {
+      height: 400px;
+    }
   }
 
   /* Estilos adicionales para el overlay del modal (si no los tenías) */
@@ -212,7 +229,7 @@
       transform: scale(0.95);
     }
 
-    to {  
+    to {
       opacity: 1;
       transform: scale(1);
     }
@@ -221,7 +238,7 @@
 <div class="container">
 
   <div class="left">
-    <img src="{{ url_for('static', filename='img/login_imagen.png') }}" alt="Autobús y persona" class="illustration" />
+    <!-- <img src="{{ url_for('static', filename='img/login_imagen.png') }}" alt="Autobús y persona" class="illustration" /> -->
   </div>
   <div class="right">
     <button type="button" id="closeModal" class="close" data-dismiss="modal" aria-label="Close">
