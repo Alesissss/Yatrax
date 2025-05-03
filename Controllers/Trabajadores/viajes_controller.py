@@ -54,7 +54,7 @@ def verificar_sesion():
 
 # VIEWS
 @viajes_bp.route('/GestionarHorarios')
-def Menu_Viajes():
+def Menu_Horarios():
     return render_template('viajes/horarios.html', active_page="horarios", active_menu='mViajes')
 
 @viajes_bp.route('/GestionarTipoVehiculo')
@@ -64,7 +64,6 @@ def Menu_TipoVehiculo():
 @viajes_bp.route('/GestionarSucursal')
 def Menu_Sucursal():
     return render_template('viajes/sucursal.html', active_page="sucursal", active_menu='mViajes')
-
 
 # END VIEWS
 

@@ -100,6 +100,7 @@ def registrar_usuario():
         nombre = request.form.get("nombre").strip()
         email = request.form.get("email").strip()
         password = request.form.get("password")
+        estado = request.form.get("estado")
         idTipoUsuario = request.form.get("idTipoUsuario")
         usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
 
@@ -116,7 +117,7 @@ def registrar_usuario():
                 filename = f"{email}.{extension}"
                 ruta_imagen = f"/{UPLOAD_FOLDER}{filename}"
 
-        mensajes = Usuario.registrar(nombre, email, password, ruta_imagen, idTipoUsuario, usuario_actual)
+        mensajes = Usuario.registrar(nombre, email, password, ruta_imagen, estado, idTipoUsuario, usuario_actual)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 
@@ -158,6 +159,7 @@ def editar_usuario(id):
         if request.method == 'POST':
             nombre = request.form.get("nombre").strip()
             email = request.form.get("email").strip()
+            estado = request.form.get("estado")
             idTipoUsuario = request.form.get("idTipoUsuario")
 
             if not nombre or not email or not idTipoUsuario:
@@ -173,7 +175,7 @@ def editar_usuario(id):
                     filename = f"{email}.{extension}"
                     ruta_imagen = f"/{UPLOAD_FOLDER}{filename}"
             
-            mensajes = Usuario.editar(id, nombre, email, ruta_imagen, idTipoUsuario)
+            mensajes = Usuario.editar(id, nombre, email, ruta_imagen, estado, idTipoUsuario)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 

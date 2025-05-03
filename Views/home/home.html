@@ -122,11 +122,8 @@
 {% block scripts %}
 <script>
     $(document).ready(function () {
-        console.log(' {{ session["menus"]}} ');
         $('.modulo').on('click', function () {
             const idModulo = $(this).attr('id');
-            console.log(idModulo);
-
             $.ajax({
                 url: '/trabajadores/home/SetModulo',
                 type: 'POST',
