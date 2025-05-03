@@ -25,6 +25,7 @@ DROP PROCEDURE IF EXISTS SP_DARBAJA_HORARIO;
 DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPO_CLIENTE;
 DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPO_CLIENTE;
 DROP PROCEDURE IF EXISTS SP_DAR_BAJA_TIPO_CLIENTE;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_CLIENTE;
 DROP PROCEDURE IF EXISTS SP_REGISTRAR_METODO_PAGO;
 DROP PROCEDURE IF EXISTS SP_EDITAR_METODO_PAGO;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_METODO_PAGO;
@@ -50,7 +51,11 @@ DROP TABLE IF EXISTS metodo_pago;
 CREATE TABLE tipo_cliente (
     idTipoCliente INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL UNIQUE,
-    estado BOOLEAN NOT NULL
+    estado BOOLEAN NOT NULL,
+    estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
+    estado_registro INT NOT NULL DEFAULT 1,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) not null
 );
 
 -- Crear tabla tipo_usuario
@@ -1082,13 +1087,14 @@ DELIMITER ;
 DELIMITER $$
 CREATE PROCEDURE SP_INSERTAR_TIPO_CLIENTE(
     IN P_NOMBRE VARCHAR(50),
-    IN P_ESTADO BIT
+    IN P_ESTADO BOOLEAN,
+    IN P_USUARIO VARCHAR(255)
 )
 BEGIN
     DECLARE cExiste INT;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION 
     BEGIN
-        SET @MSJ2 = 'Error inesperado al ejecutar SP_INSERTAR_TIPO_CLIENTE';
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar procedimiento almacenado');
     END;
 
     SET @MSJ = NULL;
@@ -1096,13 +1102,13 @@ BEGIN
 
     SELECT COUNT(*) INTO cExiste 
     FROM tipo_cliente 
-    WHERE nombre = P_NOMBRE;
+    WHERE nombre = P_NOMBRE AND ESTADO_REGISTRO = 1;
 
     IF cExiste > 0 THEN
         SET @MSJ2 = 'Ya existe un tipo de cliente con ese nombre';
     ELSE
-        INSERT INTO tipo_cliente (nombre, estado)
-        VALUES (P_NOMBRE, P_ESTADO);
+        INSERT INTO tipo_cliente (nombre, estado, usuario)
+        VALUES (P_NOMBRE, P_ESTADO, P_USUARIO);
 
         SET @MSJ = 'Se registró correctamente el tipo de cliente';
     END IF;
@@ -1115,28 +1121,30 @@ DELIMITER $$
 CREATE PROCEDURE SP_ACTUALIZAR_TIPO_CLIENTE(
     IN P_ID INT,
     IN P_NOMBRE VARCHAR(50),
-    IN P_ESTADO BIT
+    IN P_ESTADO BOOLEAN
 )
 BEGIN
     DECLARE cExiste INT;
+    DECLARE cNombre INT;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION 
     BEGIN
-        SET @MSJ2 = 'Error inesperado al ejecutar SP_ACTUALIZAR_TIPO_CLIENTE';
+        SET @MSJ2 = 'Error inesperado al ejecutar procedimiento almacenado';
     END;
 
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
-    SELECT COUNT(*) INTO cExiste 
-    FROM tipo_cliente 
-    WHERE idTipoCliente = P_ID;
+    SELECT COUNT(*) INTO cExiste FROM tipo_cliente WHERE idTipoCliente = P_ID AND ESTADO_REGISTRO = 1;
+    SELECT COUNT(*) INTO cNombre FROM tipo_cliente WHERE NOMBRE = P_NOMBRE AND idTipoCliente != P_ID AND ESTADO_REGISTRO = 1;
 
     IF cExiste = 0 THEN
         SET @MSJ2 = 'No se encontró el tipo de cliente que desea actualizar';
+    ELSEIF cNombre != 0 THEN
+        SET @MS2J = 'El nombre ingresado ya existe';
     ELSE
         UPDATE tipo_cliente 
-        SET nombre = P_NOMBRE, estado = P_ESTADO
-        WHERE idTipoCliente = P_ID;
+        SET nombre = P_NOMBRE, estado = P_ESTADO, estado_proceso = 'MODIFICADO'
+        WHERE idTipoCliente = P_ID AND ESTADO_REGISTRO = 1;
 
         SET @MSJ = 'Se actualizó correctamente el tipo de cliente';
     END IF;
@@ -1153,28 +1161,52 @@ BEGIN
     DECLARE cExiste INT;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION 
     BEGIN
-        SET @MSJ2 = 'Error inesperado al ejecutar SP_DAR_BAJA_TIPO_CLIENTE';
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar SP_DAR_BAJA_TIPO_CLIENTE');
     END;
 
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
-    SELECT COUNT(*) INTO cExiste 
-    FROM tipo_cliente 
-    WHERE idTipoCliente = P_ID;
+    SELECT COUNT(*) INTO cExiste FROM tipo_cliente WHERE idTipoCliente = P_ID AND ESTADO_REGISTRO = 1;
 
     IF cExiste = 0 THEN
-        SET @MSJ2 = 'No se encontró el tipo de cliente para dar de baja';
+        SET @MSJ2 = 'El tipo de cliente que intenta dar de baja no existe';
     ELSE
         UPDATE tipo_cliente 
-        SET estado = 0
-        WHERE idTipoCliente = P_ID;
+        SET estado = 0, ESTADO_PROCESO = 'MODIFICADO'
+        WHERE idTipoCliente = P_ID AND ESTADO_REGISTRO = 1;
 
         SET @MSJ = 'Se dio de baja correctamente al tipo de cliente';
     END IF;
 END $$
 DELIMITER ;
 
+-- Crear procedimiento SP_ELIMINAR_TIPO_CLIENTE
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_TIPO_CLIENTE(
+    IN P_ID INT
+)
+BEGIN 
+    DECLARE cUsuario INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cUsuario FROM tipo_cliente where idTipoCliente = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cUsuario <= 0 THEN
+        SET @MS2J = 'El tipo de cliente que intenta eliminar no existe';
+    ELSE
+        UPDATE tipo_cliente SET ESTADO_REGISTRO =2, ESTADO_PROCESO = 'ELIMINADO' WHERE idTipoCliente = P_ID  AND ESTADO_REGISTRO = 1;
+        SET @MSJ = 'Se eliminó correctamente al usuario';
+    END IF;
+END $$
+
+DELIMITER ;
 
 -- Crear procedimiento SP_REGISTRAR_METODO_PAGO
 DELIMITER $$ 
