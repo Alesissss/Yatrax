@@ -2,90 +2,71 @@ import bd
 import hashlib
 
 class TipoCliente:
-    def __init__(self, idTipoCliente = None, nombre = None, estado = None):
+    def __init__(self, idTipoCliente = None, nombre = None, estado = None, estadoProceso = None, estadoRegistro = None, fechaRegistro = None, usuario = None):
         self.idTipoCliente = idTipoCliente
         self.nombre = nombre
         self.estado = estado
+        #Auditoría
+        self.estadoProceso = estadoProceso
+        self.estadoRegistro = estadoRegistro
+        self.fechaRegistro = fechaRegistro
+        self.usuario = usuario
 
     @classmethod
-    def obtener_datos(cls):
+    def obtener_todos(cls):
         try:
             conexion = bd.Conexion()
-            listado = conexion.obtener("""
-            SELECT 
-                idTipoCliente AS id,
-                nombre as tipo,
-                CAST(estado AS UNSIGNED) AS ESTADO
-            FROM tipo_cliente
-            """)
-            return listado
+            tipos_cliente = conexion.obtener("Select idTipoCliente as ID, nombre as TIPO, estado from tipo_cliente where estado_registro = 1")
+            return tipos_cliente
         finally:
-            if conexion:
+            conexion.cerrar()
+
+    @classmethod
+    def obtener_por_id(cls, idTipoCliente):
+        try:
+            conexion = bd.Conexion()
+            tipo_cliente = conexion.obtener("Select idTipoCliente as ID, nombre, estado from tipo_cliente where estado_registro = 1 and idTipoCliente =  %s", (idTipoCliente,))
+            return tipo_cliente[0] if tipo_cliente else None
+        finally:
                 conexion.cerrar()
 
     @classmethod
-    def obtenerUno(cls, idTipoCliente):
+    def eliminar_tipo_cliente(cls, idTipoCliente):
+        conexion = bd.Conexion()
         try:
-            conexion = bd.Conexion()
-            listado = conexion.obtener("""
-            SELECT 
-                idTipoCliente AS id,
-                nombre,
-                CAST(estado AS UNSIGNED) AS ESTADO
-            FROM tipo_cliente where idTipoCliente = %s
-            """,(idTipoCliente,))
-            return listado[0] if listado else None
-        except Exception as e:
-            print(f"Error en obtener uno: {str(e)}")
-            raise
+            conexion.ejecutar("CALL SP_ELIMINAR_TIPO_CLIENTE(%s);", (idTipoCliente,))
+            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
+            return resultado[0]
         finally:
-            if conexion:
-                conexion.cerrar()
+            conexion.cerrar()
     
     @classmethod
-    def insertarTipoCliente(cls, nombre):
+    def registrar(cls, nombre, estado, usuario):
+        conexion = bd.Conexion()
         try:
-            conexion = bd.Conexion()
-            cursor = conexion.conn.cursor()
-            cursor.callproc('SP_INSERTAR_TIPO_CLIENTE', (nombre, 1))
-            conexion.conn.commit()
-        except Exception as e:
-            print(f"Error al insertar tipo cliente: {str(e)}")
-            raise
+            conexion.ejecutar("CALL SP_INSERTAR_TIPO_CLIENTE(%s, %s, %s);", (nombre, estado, usuario))
+            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
+            return resultado[0]
         finally:
-            if cursor:
-                cursor.close()
-            if conexion:
-                conexion.close()
+            conexion.cerrar()
 
     @classmethod
-    def actualizarTipoCliente(cls, idTipoCliente, nombre, estado):
+    def editar(cls, idTipoCliente, nombre, estado):
+        conexion = bd.Conexion()
         try:
-            conexion = bd.Conexion()
-            cursor = conexion.conn.cursor()
-            cursor.callproc('SP_ACTUALIZAR_TIPO_CLIENTE', (idTipoCliente, nombre, estado))
-            conexion.conn.commit()
-        except Exception as e:
-            print(f"Error al actualizar tipo cliente: {str(e)}")
-            raise
+            conexion.ejecutar("CALL SP_ACTUALIZAR_TIPO_CLIENTE(%s, %s, %s)", (idTipoCliente, nombre, estado))
+            resultado = conexion.obtener("SELECT @MSJ, @MS2J;")
+            return resultado[0]
         finally:
-            if cursor:
-                cursor.close()
-            if conexion:
-                conexion.close()
+            conexion.cerrar()
     
     @classmethod
-    def darBajaTipoCliente(cls, idTipoCliente):
+    def darBaja(cls, idTipoCliente):
+        conexion = bd.Conexion()
         try:
-            conexion = bd.Conexion()
-            cursor = conexion.conn.cursor()
-            cursor.callproc('SP_DAR_BAJA_TIPO_CLIENTE', (idTipoCliente,))
-            conexion.conn.commit()
-        except Exception as e:
-            print(f"Error al dar de baja tipo cliente: {str(e)}")
-            raise
+            conexion.ejecutar("CALL SP_DAR_BAJA_TIPO_CLIENTE(%s)", (idTipoCliente,))
+            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
+            return resultado[0]
         finally:
-            if cursor:
-                cursor.close()
-            if conexion:
-                conexion.close()
+            conexion.cerrar()
+            

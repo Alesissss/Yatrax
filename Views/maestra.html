@@ -395,6 +395,9 @@
   
   <div id="modal" class="modal">
   </div>
+
+
+
   <div id="dynamic-modal" class="modal fade" style="display: none;">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -466,7 +469,7 @@
         url: "/ecommerce/home/login",
         type: 'GET',
         success: function (html) {
-          // Inyecta el HTML dentro del .modal-content
+        
           $('#modal').html(html);
 
           // Muestra el modal

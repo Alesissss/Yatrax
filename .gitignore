@@ -6,3 +6,4 @@ config.py
 __pycache__/
 Models/__pycache__/
 Controllers/__pycache__/
+.vscode

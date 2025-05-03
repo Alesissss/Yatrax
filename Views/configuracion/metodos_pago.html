@@ -161,12 +161,12 @@
                     className: 'btn bg-success m-1',
                     titleAttr: 'Nuevo',
                     action: function (e, dt, node, config) {
-                        window.location.href = '/trabajadores/metodos_pago/MetodoPagoNuevo';
+                        window.location.href = '/trabajadores/configuracion/MetodoPagoNuevo';
                     },
                 }
             ],
             ajax: {
-                url: "/trabajadores/metodos_pago/GetData_MetodosPago",
+                url: "/trabajadores/configuracion/GetData_MetodosPago",
                 type: "GET",
                 dataSrc: function (json) {
                     if (json.Status === "error") {
@@ -195,6 +195,7 @@
                             <div class="flex-wrap btn-group">
                                 <button class="btn btn-xs m-1 btn-info" onclick="fct_VerMetodoPago('${data.id}')"><i class="bi bi-eye"></i></button>
                                 <button class="btn btn-xs m-1 btn-primary" onclick="fct_EditarMetodoPago('${data.id}')"><i class="bi bi-pencil-square"></i></button>
+                                <button class="btn btn-xs m-1 btn-warning" onclick="fct_DarBajaMetodoPago('${data.id}')"<i class="bi bi-arrow"></i></button>
                                 <button class="btn btn-xs m-1 btn-danger" onclick="fct_EliminarMetodoPago('${data.id}')"><i class="bi bi-trash"></i></button>
                             </div>
                         `;
@@ -255,11 +256,11 @@
 
         // Funciones de acción
         window.fct_VerMetodoPago = function(id) {
-            window.location.href = `/trabajadores/metodos_pago/MetodoPagoNuevo/${id}?ver=true`;
+            window.location.href = `/trabajadores/configuracion/MetodoPagoNuevo/${id}?ver=true`;
         };
 
         window.fct_EditarMetodoPago = function(id) {
-            window.location.href = `/trabajadores/metodos_pago/EditarMetodoPago/${id}`;
+            window.location.href = `/trabajadores/configuracion/EditarMetodoPago/${id}`;
         };
 
         window.fct_EliminarMetodoPago = function(id) {
@@ -276,7 +277,7 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: `/trabajadores/metodos_pago/EliminarMetodoPago/${id}`,
+                        url: `/trabajadores/configuracion/EliminarMetodoPago/${id}`,
                         type: "POST",
                         success: function (response) {
                             if (response.Status === "success") {
@@ -293,6 +294,40 @@
                 }
             });
         };
+
+
+        window.fct_DarBajaMetodoPago = function(id) {
+    Swal.fire({
+        title: "¿Estás seguro?",
+        text: "Esta acción dará de baja el método de pago. ¿Deseas continuar?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: "Cancelar",
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: `/trabajadores/configuracion/dar_baja_metodo_pago/${id}`,
+                type: "POST",
+                success: function(response) {
+                    if (response.Status === "success") {
+                        toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                        dtMetodosPago.ajax.reload(); // Recargar la tabla después de dar de baja
+                    } else {
+                        toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                    }
+                },
+                error: function() {
+                    toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                }
+            });
+        }
+    });
+};
+
     });
 
     function newexportaction(e, dt, button, config) {

@@ -11,7 +11,7 @@ class MetodoPago:
     def obtener_todos(cls):
         conexion = bd.Conexion()
         try:
-            return conexion.obtener("SELECT id, nombre, logo, estado FROM metodo_pago")
+            return conexion.obtener("SELECT id, nombre, logo, estado FROM metodo_pago where estado_registro = 1")
         finally:
             conexion.cerrar()
 
@@ -25,10 +25,10 @@ class MetodoPago:
             conexion.cerrar()
 
     @classmethod
-    def registrar(cls, nombre, logo, estado):
+    def registrar(cls, nombre, logo, estado, usuario):
         conexion = bd.Conexion()
         try:
-            conexion.ejecutar("INSERT INTO metodo_pago (nombre, logo, estado) VALUES (%s, %s, %s)", (nombre, logo, estado))
+            conexion.ejecutar("CALL SP_REGISTRAR_METODO_PAGO(%s, %s, %s, %s)", (nombre, logo, estado, usuario))
             return {"Status": "success", "Msj": "Método de pago registrado exitosamente"}
         finally:
             conexion.cerrar()
@@ -37,7 +37,7 @@ class MetodoPago:
     def editar(cls, id, nombre, logo, estado):
         conexion = bd.Conexion()
         try:
-            conexion.ejecutar("UPDATE metodo_pago SET nombre = %s, logo = %s, estado = %s WHERE id = %s", (nombre, logo, estado, id))
+            conexion.ejecutar("CALL SP_EDITAR_METODO_PAGO(%s, %s, %s, %s)", (id,nombre, logo, estado))
             return {"Status": "success", "Msj": "Método de pago editado exitosamente"}
         finally:
             conexion.cerrar()
@@ -46,7 +46,17 @@ class MetodoPago:
     def eliminar(cls, id):
         conexion = bd.Conexion()
         try:
-            conexion.ejecutar("DELETE FROM metodo_pago WHERE id = %s", (id,))
+            conexion.ejecutar("CALL SP_ELIMINAR_METODO_PAGO(%s)", (id,))
             return {"Status": "success", "Msj": "Método de pago eliminado exitosamente"}
+        finally:
+            conexion.cerrar()
+
+    @classmethod
+    def darBaja(cls, id):
+        conexion = bd.Conexion()
+        try:
+            # Usamos el procedimiento almacenado para dar de baja el método de pago
+            conexion.ejecutar("CALL SP_DARBAJA_METODO_PAGO(%s)", (id,))
+            return {"Status": "success", "Msj": "Método de pago dado de baja exitosamente"}
         finally:
             conexion.cerrar()
