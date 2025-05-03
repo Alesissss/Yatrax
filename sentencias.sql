@@ -158,6 +158,7 @@ INSERT INTO conf_menus (id, nombre, estado) VALUES (5, 'M_PERSONAL', 1);
 INSERT INTO conf_menus (id, nombre, estado) VALUES (6, 'M_ATENCION', 1);
 -- Submenús de USUARIOS
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (10, 'Gestionar usuarios', 1, 1);
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (11, 'Gestionar tipos de usuarios', 1, 1);
 -- Submenús de CONFIGURACIÓN
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (20, 'Gestionar permisos', 1, 2);
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (21, 'Gestionar plantillas', 1, 2);
@@ -181,6 +182,7 @@ INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (5, 1);
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (6, 1);
 -- Submenús de "USUARIOS"
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (10, 1);
+INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (11, 1);
 -- Submenús de "CONFIGURACIÓN"
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (20, 1);
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (21, 1);
@@ -558,7 +560,7 @@ BEGIN
     ELSE
         UPDATE TIPO_USUARIO SET ESTADO = 0, ESTADO_PROCESO = 'MODIFICADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
 
-        SET @MSJ = 'Se dio de baja correctamente al usuario';
+        SET @MSJ = 'Se dio de baja correctamente al tipo de usuario';
     END IF;
 END $$
 DELIMITER ;
