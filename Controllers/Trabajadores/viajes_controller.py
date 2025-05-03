@@ -340,4 +340,15 @@ def darBaja_usuario(id):  # Recibe el ID de la URL
 
 # END REGIÓN HORARIO #
 
+# INICIO REGIÓN SUCURSAL #
+@viajes_bp.route("/GetData_Sucursal", methods=["GET"])
+def get_sucursal():
+    try:
+        sucursal = Sucursal.obtener_todos()
+        return jsonify({'data': sucursal, 'Status': 'success', 'Msj': 'Listado de sucursales retornado exitosamente'})
+    except Exception as e:
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar las sucursales: + {repr(e)}'})
+    
+# END REGIÓN SUCURSAL #
+
 # END FUNCIONES
