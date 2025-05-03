@@ -54,7 +54,7 @@ def verificar_sesion():
 
 # VIEWS
 @viajes_bp.route('/GestionarHorarios')
-def Menu_Viajes():
+def Menu_Horarios():
     return render_template('viajes/horarios.html', active_page="horarios", active_menu='mViajes')
 
 @viajes_bp.route('/GestionarTipoVehiculo')
@@ -64,7 +64,6 @@ def Menu_TipoVehiculo():
 @viajes_bp.route('/GestionarSucursal')
 def Menu_Sucursal():
     return render_template('viajes/sucursal.html', active_page="sucursal", active_menu='mViajes')
-
 
 # END VIEWS
 
@@ -339,5 +338,16 @@ def darBaja_usuario(id):  # Recibe el ID de la URL
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
 # END REGIÓN HORARIO #
+
+# INICIO REGIÓN SUCURSAL #
+@viajes_bp.route("/GetData_Sucursal", methods=["GET"])
+def get_sucursal():
+    try:
+        sucursal = Sucursal.obtener_todos()
+        return jsonify({'data': sucursal, 'Status': 'success', 'Msj': 'Listado de sucursales retornado exitosamente'})
+    except Exception as e:
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar las sucursales: + {repr(e)}'})
+    
+# END REGIÓN SUCURSAL #
 
 # END FUNCIONES
