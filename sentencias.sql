@@ -37,6 +37,15 @@ DROP TABLE IF EXISTS tipo_vehiculo;
 DROP TABLE IF EXISTS sucursal;
 DROP TABLE IF EXISTS horario;
 DROP TABLE IF EXISTS tipo_cliente;
+DROP TABLE IF EXISTS ubigeo;
+
+-- crear tabla ubigeo
+create table ubigeo(
+	ubigeo char(6) PRIMARY KEY,
+    departamento varchar(50) NOT NULL,
+    provincia varchar(50) NOT NULL,
+    distrito varchar(50) NOT NULL
+);
 
 -- Crear tabla tipo_cliente
 CREATE TABLE tipo_cliente (
@@ -356,7 +365,8 @@ CREATE PROCEDURE SP_EDITAR_SUCURSAL(
     IN P_NOMBRE VARCHAR(50),
     IN P_DIRECCION VARCHAR(255),
     IN P_LATITUD DECIMAL(8,6),
-    IN P_LONGITUD DECIMAL(9,6)
+    IN P_LONGITUD DECIMAL(9,6),
+    IN P_USUARIO VARCHAR(100)
 )
 BEGIN
     DECLARE cSucursal INT;
@@ -388,6 +398,7 @@ BEGIN
             direccion = P_DIRECCION,
             latitud = P_LATITUD,
             longitud = P_LONGITUD,
+            usuario = P_USUARIO,
             estado_proceso = 'MODIFICADO'
         WHERE id = P_ID AND estado_registro = 1;
 
@@ -398,7 +409,8 @@ DELIMITER ;
 
 DELIMITER $$
 CREATE PROCEDURE SP_DARBAJA_SUCURSAL(
-    IN P_ID INT
+    IN P_ID INT,
+    IN P_USUARIO VARCHAR(100)
 )
 BEGIN
     DECLARE cSucursal INT;
@@ -418,8 +430,8 @@ BEGIN
         SET @MSJ2 = 'La sucursal que intenta dar de baja no existe';
     ELSE
         UPDATE sucursal 
-        SET estado_registro = 2,
-            estado_proceso = 'ELIMINADO'
+        SET estado = 0, usuario = P_USUARIO,
+            estado_proceso = 'MODIFICADO'
         WHERE id = P_ID AND estado_registro = 1;
 
         SET @MSJ = 'Se dio de baja correctamente la sucursal';
@@ -429,7 +441,8 @@ DELIMITER ;
 
 DELIMITER $$
 CREATE PROCEDURE SP_ELIMINAR_SUCURSAL(
-    IN P_ID INT
+    IN P_ID INT,
+    IN P_USUARIO VARCHAR(100)
 )
 BEGIN
     DECLARE cSucursal INT;
@@ -448,7 +461,9 @@ BEGIN
     IF cSucursal <= 0 THEN
         SET @MSJ2 = 'La sucursal que intenta eliminar no existe';
     ELSE
-        DELETE FROM sucursal WHERE id = P_ID;
+        UPDATE sucursal 
+        SET ESTADO_REGISTRO = 2, ESTADO_PROCESO = 'ELIMINADO', usuario = P_USUARIO
+        WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
 
         SET @MSJ = 'Se eliminó correctamente la sucursal';
     END IF;

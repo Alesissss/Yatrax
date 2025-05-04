@@ -1,15 +1,15 @@
 import bd
 
 class Sucursal:
-    def __init__(self, id=None, ubigeo=None, nombre=None, latitud=None, longitud=None,
-                 estado='A', estado_proceso='REGISTRADO', estado_registro=1, 
-                 fecha_registro=None, usuario=None):
+    def __init__(self, id=None, ubigeo=None, nombre=None, direccion=None, latitud=None, longitud=None, estado=1, estado_proceso='REGISTRADO', estado_registro=1, fecha_registro=None, usuario=None):
         self.id = id
         self.ubigeo = ubigeo
         self.nombre = nombre
+        self.direccion = direccion
         self.latitud = latitud
         self.longitud = longitud
         self.estado = estado
+        #Auditoría
         self.estado_proceso = estado_proceso
         self.estado_registro = estado_registro
         self.fecha_registro = fecha_registro
@@ -42,13 +42,23 @@ class Sucursal:
         finally:
             conexion.cerrar()
 
+    #LOGIN
+    def autenticar(cls, email, password):
+            conexion = bd.Conexion()
+            try:
+                usuario = conexion.obtener("SELECT usu.id, usu.nombre, usu.email, usu.imagen, usu.estado, usu.id_tipousuario, tu.nombre as tipousuario"
+                " FROM usuarios usu INNER JOIN tipo_usuario tu on usu.id_tipousuario = tu.id WHERE usu.estado_registro = 1 AND usu.estado = 1 AND usu.email = %s AND usu.password = %s", (email, password))
+                return usuario[0] if usuario else None
+            finally:
+                conexion.cerrar()
+
     @classmethod
-    def registrar(cls, ubigeo, nombre, latitud, longitud, usuario):
+    def registrar(cls, ubigeo, nombre, direccion, latitud, longitud, usuario):
         conexion = bd.Conexion()
         try:
             conexion.ejecutar(
-                "CALL SP_REGISTRAR_SUCURSAL(%s, %s, %s, %s, %s);",
-                (ubigeo, nombre, latitud, longitud, usuario)
+                "CALL SP_REGISTRAR_SUCURSAL(%s, %s, %s, %s, %s, %s);",
+                (ubigeo, nombre, direccion, latitud, longitud, usuario)
             )
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
             return resultado[0]
@@ -56,12 +66,12 @@ class Sucursal:
             conexion.cerrar()
 
     @classmethod
-    def editar(cls, id, ubigeo, nombre, latitud, longitud):
+    def editar(cls, id, ubigeo, direccion, nombre, latitud, longitud, usuario):
         conexion = bd.Conexion()
         try:
             conexion.ejecutar(
-                "CALL SP_EDITAR_SUCURSAL(%s, %s, %s, %s, %s);",
-                (id, ubigeo, nombre, latitud, longitud)
+                "CALL SP_EDITAR_SUCURSAL(%s, %s, %s, %s, %s, %s, %s);",
+                (id, ubigeo, nombre, direccion, latitud, longitud, usuario)
             )
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
             return resultado[0]
@@ -69,20 +79,20 @@ class Sucursal:
             conexion.cerrar()
 
     @classmethod
-    def eliminar(cls, id):
+    def eliminar(cls, id, usuario):
         conexion = bd.Conexion()
         try:
-            conexion.ejecutar("CALL SP_ELIMINAR_SUCURSAL(%s);", (id,))
+            conexion.ejecutar("CALL SP_ELIMINAR_SUCURSAL(%s);", (id, usuario,))
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
             return resultado[0]
         finally:
             conexion.cerrar()
 
     @classmethod
-    def dar_baja(cls, id):
+    def dar_baja(cls, id, usuario):
         conexion = bd.Conexion()
         try:
-            conexion.ejecutar("CALL SP_DARBAJA_SUCURSAL(%s);", (id,))
+            conexion.ejecutar("CALL SP_DARBAJA_SUCURSAL(%s);", (id, usuario,))
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
             return resultado[0]
         finally:
