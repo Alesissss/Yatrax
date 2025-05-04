@@ -1050,7 +1050,7 @@ BEGIN
     IF cHorarios <= 0 THEN
         SET @MSJ2 = 'El horario que intenta dar de baja no existe';
     ELSE
-        UPDATE horario SET ESTADO_REGISTRO = 2, ESTADO_PROCESO = 'ELIMINADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+        UPDATE horario SET ESTADO = 'I' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
 
         SET @MSJ = 'Se dio de baja correctamente el horario';
     END IF;

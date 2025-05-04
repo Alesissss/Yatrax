@@ -12,60 +12,40 @@
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
-                        <label for="txt_inicio">Inicio</label>
+                        <label for="txt_hora_entrada">Hora de entrada:</label>
                         <div class="input-group">
-                            <input type="text" id="txt_inicio" class="form-control" placeholder="Nombre completo" {% if
-                                btnId=='btn_Aceptar' %}disabled{% endif %} value="{{ usuario.nombre }}">
+                            <input type="time" id="txt_hora_entrada" class="form-control" placeholder="HH:mm:SS" {% if
+                                btnId=='btn_Aceptar' %}disabled{% endif %} value="{{ horario.horario_entrada }}">
                             <div class="input-group-append">
                                 <div class="input-group-text"><i class="fas fa-user"></i></div>
                             </div>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="txt_Email">Correo electrónico</label>
+                        <label for="txt_hora_salida">Hora de salida:</label>
                         <div class="input-group">
-                            <input type="email" id="txt_Email" class="form-control" placeholder="Correo electrónico" {%
-                                if btnId=='btn_Aceptar' %}disabled{% endif %} value="{{ usuario.email }}">
+                            <input type="time" id="txt_hora_salida" class="form-control" placeholder="HH:mm:SS" {%
+                                if btnId=='btn_Aceptar' %}disabled{% endif %} value="{{ horario.horario_salida }}">
                             <div class="input-group-append">
                                 <div class="input-group-text"><i class="fas fa-envelope"></i></div>
                             </div>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="txt_Password">Contraseña</label>
+                        <label for="cbx_Estado">Estado</label>
                         <div class="input-group">
-                            <input type="password" id="txt_Password" class="form-control" {% if btnId !='btn_Registrar'
-                                %}disabled{% endif %} placeholder="Contraseña" value="********">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-lock"></i></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="cbx_TipoUsuario">Tipo de usuario</label>
-                        <div class="input-group">
-                            <select id="cbx_TipoUsuario" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{%
+                            <select id="cbx_Estado" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{%
                                 endif %}>
+                                <option disabled>--SELECCIONAR--</option>
+                                <option {% if horario.estado  == 'A' %}selected{% endif %} value="A">Vigente</option>
+                                <option {% if horario.estado  == 'I' %}selected{% endif %} value="0">No vigente</option>
                             </select>
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="file_Imagen">Imagen de perfil</label>
-                        <div class="col-12 text-left">
-                            <label class="btn btn-warning {% if btnId == 'btn_Aceptar' %}disabled{% endif %}"
-                                for="file_Imagen">
-                                <i class="bi bi-file-earmark-arrow-up-fill"></i> Subir archivo
-                            </label>
-                            <input type="file" class="d-none" id="file_Imagen" accept=".jpg, .jpeg, .png" {% if
-                                btnId=='btn_Aceptar' %}disabled{% endif %}>
-                            <span id="checkIcon" class="d-none text-success ml-2">
-                                <i class="bi bi-check-circle-fill"></i> Archivo subido
-                            </span>
-                        </div>
-                    </div>
+                    
                     <div class="text-center">
                         <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de
-                            usuarios</button>
+                            horarios</button>
                         <button id="{{ btnId }}" type="button" class="btn btn-primary">Aceptar</button>
                     </div>
                 </div>
@@ -78,77 +58,35 @@
 
 {% block scripts %}
 <script>
-    function fct_GetTiposUsuarios() {
-        $.getJSON('/trabajadores/usuarios/GetTiposUsuarios', function (response) {
-            if (response.Status === 'success') {
-                let items = '<option disabled>--SELECCIONAR--</option>';
-
-                $.each(response.data, function (index, item) {
-                    if (item.id === Number("{{ usuario.id_tipousuario }}")) {
-                        items += `<option selected value="${item.id}">${item.nombre}</option>`;
-                    } else {
-                        items += `<option value="${item.id}">${item.nombre}</option>`;
-                    }
-                });
-
-                $('#cbx_TipoUsuario').html(items);
-            } else {
-                console.error('Error al obtener los tipos de usuario:', response.Msj);
-            }
-        });
-    }
-
     $(document).ready(function () {
-        fct_GetTiposUsuarios();
-
-        $('#file_Imagen').on('change', function () {
-            if (this.files.length > 0) {
-                $('#checkIcon').removeClass('d-none');
-                const fileType = this.files[0].type;
-                const validTypes = ["image/jpeg", "image/png", "image/jpg"];
-
-                if (!validTypes.includes(fileType)) {
-                    this.value = "";
-                    toastr.warning('Solo puede subir archivos que sean imágenes (JPG, PNG, JPEG)', 'MENSAJE DE SISTEMA');
-                    $('#checkIcon').addClass('d-none');
-                }
-            } else {
-                $('#checkIcon').addClass('d-none');
-            }
-        });
-
         $("#btn_Registrar").click(function () {
-            let nombre = $("#txt_Nombre").val().trim();
-            let email = $("#txt_Email").val().trim();
-            let password = $("#txt_Password").val().trim();
-            let tipoUsuario = $('#cbx_TipoUsuario').val();
-            let imagen = $("#file_Imagen")[0].files[0];
+            let hora_entrada = $("#txt_hora_entrada").val().trim();
+            let hora_salida = $("#txt_hora_salida").val().trim();
+            let estado = $('#cbx_Estado').val();
 
-            if (!nombre || !email || !password || !tipoUsuario || !imagen) {
+            if (!hora_entrada || !hora_salida || !estado) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
 
             Swal.fire({
                 title: "¿Estás seguro?",
-                text: "Esta acción registrará al usuario. ¿Deseas continuar?",
+                text: "Esta acción registrará al horario. ¿Deseas continuar?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
                 cancelButtonColor: "#d33",
-                confirmButtonText: "Sí, registrar usuario",
+                confirmButtonText: "Sí, registrar horario",
                 cancelButtonText: "Cancelar",
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
                     let formData = new FormData();
-                    formData.append("nombre", nombre);
-                    formData.append("email", email);
-                    formData.append("password", password);
-                    formData.append("idTipoUsuario", tipoUsuario);
-                    formData.append("imagen", imagen);
+                    formData.append("hora_entrada", hora_entrada);
+                    formData.append("hora_salida", hora_salida);
+                    formData.append("estado", estado);
                     $.ajax({
-                        url: "/trabajadores/usuarios/RegistrarUsuario",
+                        url: "/trabajadores/viajes/RegistrarHorario",
                         type: "POST",
                         processData: false,
                         contentType: false,
@@ -161,7 +99,7 @@
                                 } else {
                                     toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                                     setTimeout(() => {
-                                        window.location.href = "/trabajadores/usuarios/GestionarUsuarios";
+                                        window.location.href = "/trabajadores/viajes/GestionarHorarios";
                                     }, 500);
                                 }
                             } else {
@@ -179,41 +117,36 @@
         });
 
         $("#btn_Editar").click(function () {
-            const id = Number("{{ usuario.id }}");
+            const id = Number("{{ horario.id }}");
 
-            let nombre = $("#txt_Nombre").val().trim();
-            let email = $("#txt_Email").val().trim();
-            let tipoUsuario = $('#cbx_TipoUsuario').val();
-            let imagen = $("#file_Imagen")[0].files[0];
+            let hora_entrada = $("#txt_hora_entrada").val().trim();
+            let hora_salida = $("#txt_hora_salida").val().trim();
+            let estado = $('#cbx_Estado').val();
 
-            if (!nombre || !email || !tipoUsuario) {
-                toastr.warning("Todos los campos son obligatorios, excepto la imagen.", "MENSAJE DE SISTEMA");
+            if (!hora_entrada || !hora_salida || !estado) {
+                toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
 
             Swal.fire({
                 title: "¿Estás seguro?",
-                text: "Esta acción modificará al usuario. ¿Deseas continuar?",
+                text: "Esta acción modificará al horario. ¿Deseas continuar?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
                 cancelButtonColor: "#d33",
-                confirmButtonText: "Sí, editar usuario",
+                confirmButtonText: "Sí, editar horario",
                 cancelButtonText: "Cancelar",
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
                     let formData = new FormData();
-                    formData.append("nombre", nombre);
-                    formData.append("email", email);
-                    formData.append("idTipoUsuario", tipoUsuario);
-
-                    if (imagen) {
-                        formData.append("imagen", imagen);
-                    }
+                    formData.append("hora_entrada", hora_entrada);
+                    formData.append("hora_salida", hora_salida);
+                    formData.append("estado", estado);
 
                     $.ajax({
-                        url: `/trabajadores/usuarios/EditarUsuario/${id}`,
+                        url: `/trabajadores/viajes/EditarHorario/${id}`,
                         type: "POST",
                         processData: false,
                         contentType: false,
@@ -222,7 +155,7 @@
                             if (response.Status === "success") {
                                 toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                                 setTimeout(() => {
-                                    window.location.href = "/trabajadores/usuarios/GestionarUsuarios";
+                                    window.location.href = "/trabajadores/viajes/GestionarHorarios";
                                 }, 500);
                             } else {
                                 toastr.error(response.Msj, "MENSAJE DE SISTEMA");
@@ -237,11 +170,11 @@
         });
 
         $("#btn_Aceptar").click(function () {
-            window.location.href = "/trabajadores/usuarios/GestionarUsuarios";
+            window.location.href = "/trabajadores/viajes/GestionarHorarios";
         });
 
         $("#btn_Volver").click(function () {
-            window.location.href = "/trabajadores/usuarios/GestionarUsuarios";
+            window.location.href = "/trabajadores/viajes/GestionarHorarios";
         });
     });
 </script>

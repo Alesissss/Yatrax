@@ -203,56 +203,40 @@ def get_horarios():
 def horario_Nuevo():
     return render_template(
         'viajes/horarioCRUD.html', 
-        active_page="usuarios", 
-        active_menu='mUsuarios', 
-        usuario={},
-        tittle = 'Registrar usuario',
+        active_page="horario", 
+        active_menu='mViajes', 
+        horario={},
+        tittle = 'Registrar horario',
         btnId = 'btn_Registrar')
 
 @viajes_bp.route("/RegistrarHorario", methods=["POST"])
-def registrar_usuario():
+def registrar_horario():
     try:
-        UPLOAD_FOLDER = "Static/img/trabajadores/"
-        nombre = request.form.get("nombre").strip()
-        email = request.form.get("email").strip()
-        password = request.form.get("password")
-        idTipoUsuario = request.form.get("idTipoUsuario")
-        usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
+        hora_entrada = request.form.get("hora_entrada").strip()
+        hora_salida = request.form.get("hora_salida").strip()
+        estado = request.form.get("estado")
 
-        if not nombre or not email or not password or not idTipoUsuario:
+        if not hora_entrada or not hora_salida or not estado:
             return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
 
-        ruta_imagen = "/Static/img/trabajadores/default-user.png"
-
-        if 'imagen' in request.files:
-            imagen = request.files['imagen']
-
-            if imagen and allowed_file(imagen.filename):
-                extension = imagen.filename.rsplit(".", 1)[1].lower()
-                filename = f"{email}.{extension}"
-                ruta_imagen = f"/{UPLOAD_FOLDER}{filename}"
-
-        mensajes = Usuario.registrar(nombre, email, password, ruta_imagen, idTipoUsuario, usuario_actual)
+        mensajes = horario.registrar(hora_entrada, hora_salida, estado)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 
         if msj1:
-            if 'imagen' in request.files and imagen and allowed_file(imagen.filename):
-                filepath = os.path.join(UPLOAD_FOLDER, filename)
-                imagen.save(filepath)
             return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
         elif msj2:
             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
         else:
-            return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar usuario'})
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar horario'})
 
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
-@viajes_bp.route("/EliminarUsuario/<int:id>", methods=['POST'])
-def eliminar_usuario(id):  # Recibe el ID de la URL
+@viajes_bp.route("/EliminarHorario/<int:id>", methods=['POST'])
+def eliminar_horario(id):  # Recibe el ID de la URL
     try:
-        mensajes = Usuario.eliminar(id)  # Se usa el ID directamente
+        mensajes = horario.eliminar(id)  # Se usa el ID directamente
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 
@@ -261,70 +245,56 @@ def eliminar_usuario(id):  # Recibe el ID de la URL
         elif msj2:
             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
         else:
-            return jsonify({"Status": "error", 'Msj': 'Error desconocido al eliminar usuario'})
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al eliminar horario'})
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
-@viajes_bp.route("/EditarUsuario/<int:id>", methods=['GET', 'POST'])
+@viajes_bp.route("/EditarHorario/<int:id>", methods=['GET', 'POST'])
 def editar_usuario(id):
     try:
-        UPLOAD_FOLDER = "Static/img/trabajadores/"
-        usuario = Usuario.obtener_por_id(id)
+        horario_data = horario.obtener_por_id(id)
 
         if request.method == 'POST':
-            nombre = request.form.get("nombre").strip()
-            email = request.form.get("email").strip()
-            idTipoUsuario = request.form.get("idTipoUsuario")
+            hora_entrada = request.form.get("hora_entrada").strip()
+            hora_salida = request.form.get("hora_salida").strip()
+            estado = request.form.get("estado")
 
-            if not nombre or not email or not idTipoUsuario:
+            if not hora_entrada or not hora_salida or not estado:
                 return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
 
-            ruta_imagen = usuario['imagen'] if usuario and 'imagen' in usuario else "/Static/img/trabajadores/default-user.png"
-
-            if 'imagen' in request.files:
-                imagen = request.files['imagen']
-                
-                if imagen and allowed_file(imagen.filename):
-                    extension = imagen.filename.rsplit(".", 1)[1].lower()
-                    filename = f"{email}.{extension}"
-                    ruta_imagen = f"/{UPLOAD_FOLDER}{filename}"
             
-            mensajes = Usuario.editar(id, nombre, email, ruta_imagen, idTipoUsuario)
+            mensajes = horario.editar(id, hora_entrada, hora_salida, estado)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
             if msj1:
-                if 'imagen' in request.files and imagen and allowed_file(imagen.filename):
-                    filepath = os.path.join(UPLOAD_FOLDER, filename)
-                    imagen.save(filepath)
                 return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
             elif msj2:
                 return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
             else:
-                return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar usuario'})
-
-        if usuario:
-            return render_template('usuario/usuarioCRUD.html', active_page="usuarios", active_menu='mUsuarios', usuario=usuario, tittle = 'Editar usuario', btnId = 'btn_Editar')
-        return render_template('usuario/usuarioCRUD.html', active_page="usuarios", active_menu='mUsuarios', usuario={}, tittle = 'Editar usuario', btnId = 'btn_Editar')
+                return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar horario'})
+        if horario_data:
+            return render_template('viajes/horarioCRUD.html', active_page="horarios", active_menu='mViajes', horario=horario_data, tittle = 'Editar horario', btnId = 'btn_Editar')
+        return render_template('viajes/horarioCRUD.html', active_page="horarios", active_menu='mViajes', horario={}, tittle = 'Editar horario', btnId = 'btn_Editar')
 
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
     
-@viajes_bp.route("/VerUsuario/<int:id>", methods=['GET'])
+@viajes_bp.route("/VerHorario/<int:id>", methods=['GET'])
 def ver_usuario(id):
     try:
-        usuario = Usuario.obtener_por_id(id)
-        if usuario:
-            return render_template('usuario/usuarioCRUD.html', active_page="usuarios", active_menu='mUsuarios', usuario=usuario, tittle = 'Ver usuario', btnId = 'btn_Aceptar')
-        return render_template('usuario/usuarioCRUD.html', active_page="usuarios", active_menu='mUsuarios', usuario={}, tittle = 'Ver usuario', btnId = 'btn_Aceptar')
+        horario_data = horario.obtener_por_id(id)
+        if horario_data:
+            return render_template('viajes/horarioCRUD.html', active_page="horarios", active_menu='mViajes', horario=horario_data, tittle = 'Ver horario', btnId = 'btn_Aceptar')
+        return render_template('viajes/horarioCRUD.html', active_page="usuarios", active_menu='mUsuarios', usuario={}, tittle = 'Ver usuario', btnId = 'btn_Aceptar')
         
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
     
-@viajes_bp.route("/DarBajaUsuario/<int:id>", methods=['POST'])
-def darBaja_usuario(id):  # Recibe el ID de la URL
+@viajes_bp.route("/DarBajaHorario/<int:id>", methods=['POST'])
+def darBaja_horario(id):  # Recibe el ID de la URL
     try:
-        mensajes = Usuario.darBaja(id)  # Se usa el ID directamente
+        mensajes = horario.darBaja(id)  # Se usa el ID directamente
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 
@@ -333,7 +303,7 @@ def darBaja_usuario(id):  # Recibe el ID de la URL
         elif msj2:
             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
         else:
-            return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja al usuario'})
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja al horario'})
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
