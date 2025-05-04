@@ -56,12 +56,12 @@ def Menu_Pasajes():
     return render_template('ventas/pasajes.html', active_page="pasajes", active_menu='mVentas')
 
 @ventas_bp.route('/GestionarTipoCliente')
-def Tipo_Clientes():
-    return render_template('ventas/tipocliente.html', active_page="tipocliente", active_menu='mVentas')
+def Menu_TipoClientes():
+    return render_template('ventas/tipocliente.html', active_page="tipoCliente", active_menu='mVentas')
 
 @ventas_bp.route('/TipoClienteNuevo')
 def TipoCliente_Nuevo():
-    return render_template('ventas/tipoclienteCRUD.html', active_page="tipocliente", active_menu='mVentas', tipocliente = {}, tittle = 'Registrar Tipo Cliente', btnId = 'btn_Registrar')
+    return render_template('ventas/tipoclienteCRUD.html', active_page="tipoCliente", active_menu='mVentas', tipocliente = {}, tittle = 'Registrar Tipo Cliente', btnId = 'btn_Registrar')
 
 # END VIEWS
 
@@ -145,8 +145,8 @@ def ver_tipo_cliente(id):
     try:
         tipo_cliente = TipoCliente.obtener_por_id(id)
         if tipo_cliente:
-            return render_template("tipoCliente/tipoClienteCRUD.html", tipo_cliente=tipo_cliente, tittle='Ver tipo cliente', btnId='btn_Aceptar')
-        return render_template("tipoCliente/tipoClienteCRUD.html", tipo_cliente={}, tittle='Ver tipo cliente', btnId='btn_Aceptar')
+            return render_template("tipoCliente/tipoClienteCRUD.html", active_page="tipoCliente", active_menu='mVentas', tipo_cliente=tipo_cliente, tittle='Ver tipo cliente', btnId='btn_Aceptar')
+        return render_template("tipoCliente/tipoClienteCRUD.html", active_page="tipoCliente", active_menu='mVentas', tipo_cliente={}, tittle='Ver tipo cliente', btnId='btn_Aceptar')
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
 

@@ -163,6 +163,15 @@
                                     </a>
                                 </li>
                                 {% endif %}
+                                {% if 31 in session['menus'] %}
+                                <li class="nav-item">
+                                    <a href="{{ url_for('ventas.Menu_TipoClientes') }}"
+                                        class="nav-link {% if active_page == 'tipoCliente' %}active{% endif %}">
+                                        <i class="bi bi-person-lines-fill nav-icon"></i>
+                                        <p>Gestionar tipos de cliente</p>
+                                    </a>
+                                </li>
+                                {% endif %}
                             </ul>
                         </li>
                         {% endif %}
