@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   {% block estilos %}{% endblock %}
-  <link rel="stylesheet" href="{{url_for('static',filename='css/main.css')}}">
+  <link rel="stylesheet" href="{{url_for('static',filename='css/sobreNosotros.css')}}">
   <link rel="stylesheet" href="https://unpkg.com/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://unpkg.com/bs-brain@2.0.4/utilities/font-size/font-size.css">
   <link rel="stylesheet" href="https://unpkg.com/bs-brain@2.0.4/utilities/margin/margin.css">
@@ -24,135 +24,55 @@
       <li><a href="" id="abrirModal">Iniciar sesión</a></li>
     </ul>
   </nav>
-  <header>
-    <h1>{% block tematica %}{% endblock %}</h1>
-  </header>
   <main>
-    <form id="datos_viaje">
-      <select name="origen" id="">
-        <option value="" disabled selected>Seleccione Origen</option>
-        <option value=""></option>
-      </select>
-      <select name="destino" id="">
-        <option value="" disabled selected>Seleccione Destino</option>
-        <option value=""></option>
-      </select>
-      <input type="date" placeholder="Fecha Ida">
-      <input type="date" placeholder="Fecha Retorno">
-      <option value=""></option>
-      </select>
-      <input type="submit" value="Buscar" id="buscar">
-    </form>
+    <section id="ctn_informativo">
+        <div>
+            <h2>Mision</h2>
+            <p>Brindar servicios de transporte terrestre de pasajeros y envío de encomiendas interdepartamentales en el Perú, asegurando la máxima seguridad, puntualidad y calidad en cada trayecto y entrega, fortaleciendo la conexión entre regiones y contribuyendo al desarrollo social y económico del país.</p>
+        </div>
+        <div>
+            <h2>Vision</h2>
+            <p>Ser la empresa líder en transporte y logística terrestre interdepartamental en los distritos peruanos, reconocida por su compromiso con la excelencia operativa, la innovación tecnológica y la satisfacción plena de nuestros clientes, contribuyendo al progreso regional y nacional.</p>
+        </div>
+        <div>
+            <h2>Servicios</h2>
+            <ul>
+                <li>Transporte terrestre de pasajeros entre diferentes departamentos del Perú, con rutas que conectan las principales ciudades y provincias.</li>
+                <li>Envío seguro y eficiente de encomiendas interdepartamentales, asegurando entregas rápidas y confiables.</li>
+                <li>Flota moderna equipada con tecnología GPS para monitoreo en tiempo real y control de seguridad.</li>
+                <li>Atención personalizada y soporte continuo para optimizar la experiencia del usuario.</li>
+            </ul>
+        </div>
+    </section>
+    <section id="contactanos">
+        <h2>Contactanos</h2>
+        <p>En Yatrax, estamos comprometidos a ofrecerte el mejor servicio de transporte terrestre. Si tienes alguna pregunta, necesitas cotizar un servicio o deseas recibir asesoría personalizada, no dudes en ponerte en contacto con nosotros al número telefonico +51 915 854 123</p>
+    </section>
+    <section id="fundadores">
+        <div>
+            <h2>Anderson</h2>
+            <p>Product Manager del equipo de desarrollo Yatrax</p>
+        </div>
+        <div>
+            <h2>Edgar</h2>
+            <p>Scrum Master del equipo Yatrax</p>
+        </div>
+        <div>
+            <h2>Luis</h2>
+            <p>Desarrollador y Arquitecto del equipo Yatrax</p>
+        </div>
+        <div>
+            <h2>Alexis</h2>
+            <p>Desarrollador fullstack del equipo Yatrax</p>
+        </div>
+        <div>
+            <h2>Christian</h2>
+            <p>Desarrollador fullstack del equipo Yatrax</p>
+        </div>
+    </section>
     <section>
-      {% block contenido %}
-      {% endblock %}
-    </section>
-    <section id="ctn_beneficios">
-      <div>
-        <h2>Compra segura</h2>
-        <br>
-        <p>Comprar pasajes de bus para tu viaje de turismo no tiene que ser estresante o inseguro. De hecho, ahora
-          existe la posibilidad de comprarlos desde el lugar en que te encuentres y en el momento que desees gracias al
-          método en línea de compra de pasajes. Además, nuestra plataforma garantiza total transparencia y seguridad en
-          las transacciones con el fin de que compres tu pasajes de bus con la tranquilidad que necesitas.</p>
-      </div>
-      <div>
-        <h2>Medios de pago de confianza</h2>
-        <br>
-        <p>El cumplimiento de los estándares de seguridad de datos (DSS) de las industrias de tarjeta de pago es un
-          requisito para todas las entidades que almacenan, procesan o transmiten información de tarjetahabientes,
-          incluidas las instituciones financieras, los comercios y los proveedores de servicios. Los programas de Visa
-          administran el cumplimiento de los DSS de PCI al requerir que los participantes demuestren el cumplimiento
-          regularmente.</p>
-      </div>
-      <div>
-        <h2>Facilidad</h2>
-        <br>
-        <p>El sistema de ventas por internet trabaja en línea con nuestros diferentes sistemas de venta, puede consultar
-          los turnos y precios para posteriormente realiza su compra en un entorno amigable y que le permite realizar
-          compras de forma rápida y sencilla, tenemos varias opciones de pago y si desea ser asesorado puede llamar al
-          número que figura en nuestra página web.</p>
-      </div>
-    </section>
-    <section id="consultas">
-      <h2>Preguntas frecuentes</h2>
-      <br>
-      <!-- Pregunta 1 -->
-      <details>
-        <summary>¿Cómo puedo comprar un pasaje de turismo terrestre?</summary>
-        <p>
-          Puedes comprar tus pasajes directamente en nuestra página web, a través de nuestra aplicación móvil o
-          visitando nuestras oficinas físicas. Aceptamos pagos con tarjeta de crédito, débito y transferencias
-          bancarias.
-        </p>
-      </details>
-
-      <!-- Pregunta 2 -->
-      <details>
-        <summary>¿Qué rutas de turismo terrestre ofrecen?</summary>
-        <p>
-          Ofrecemos rutas a los principales destinos turísticos del país, incluyendo ciudades históricas, playas y
-          parques naturales. Puedes consultar todas nuestras rutas disponibles en la sección "Destinos" de nuestra
-          página web.
-        </p>
-      </details>
-
-      <!-- Pregunta 3 -->
-      <details>
-        <summary>¿Cuánto tiempo tarda el envío de paquetes?</summary>
-        <p>
-          El tiempo de envío depende de la distancia y el destino. Para envíos locales, el tiempo estimado es de 1 a 2
-          días hábiles. Para envíos nacionales, puede tardar entre 3 y 5 días hábiles. Te proporcionaremos un número de
-          seguimiento para que puedas monitorear tu paquete.
-        </p>
-      </details>
-
-      <!-- Pregunta 4 -->
-      <details>
-        <summary>¿Qué tipo de paquetes puedo enviar?</summary>
-        <p>
-          Aceptamos paquetes de diversos tamaños y pesos, desde documentos hasta mercancías de tamaño mediano. Sin
-          embargo, no transportamos materiales peligrosos o ilegales. Para más detalles, consulta nuestra política de
-          envíos.
-        </p>
-      </details>
-
-      <!-- Pregunta 5 -->
-      <details>
-        <summary>¿Ofrecen servicios de turismo para grupos?</summary>
-        <p>
-          Sí, ofrecemos servicios especializados para grupos, incluyendo transporte privado y paquetes personalizados.
-          Contáctanos directamente para obtener más información y un presupuesto adaptado a tus necesidades.
-        </p>
-      </details>
-
-      <!-- Pregunta 6 -->
-      <details>
-        <summary>¿Qué debo hacer si mi paquete no llega a tiempo?</summary>
-        <p>
-          Si tu paquete no llega dentro del tiempo estimado, contáctanos inmediatamente a través de nuestro servicio de
-          atención al cliente. Te ayudaremos a rastrear el paquete y resolver cualquier inconveniente.
-        </p>
-      </details>
-
-      <!-- Pregunta 7 -->
-      <details>
-        <summary>¿Puedo cancelar o cambiar mi pasaje?</summary>
-        <p>
-          Sí, puedes cancelar o cambiar tu pasaje, pero esto está sujeto a nuestras políticas de cancelación y cambio.
-          Te recomendamos revisar los términos y condiciones al momento de la compra o contactarnos para más detalles.
-        </p>
-      </details>
-
-      <!-- Pregunta 8 -->
-      <details>
-        <summary>¿Qué medidas de seguridad tienen para el transporte de pasajeros?</summary>
-        <p>
-          La seguridad de nuestros pasajeros es nuestra prioridad. Nuestros vehículos cumplen con todos los estándares
-          de seguridad, y nuestros conductores están altamente capacitados. Además, contamos con seguros de viaje para
-          mayor tranquilidad.
-        </p>
-      </details>
+        <h2>Unete</h2>
+        <p>Se parte del equipo Yatrax postula a nuestros múltiples puestos de trabajo.</p>
     </section>
   </main>
   <footer>
@@ -391,31 +311,9 @@
       </div>
     </div>
   </footer>
-  
-  
-  <div id="modal" class="modal">
-  </div>
-
-
-
-  <div id="dynamic-modal" class="modal fade" style="display: none;">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h4 id="modal-title" class="modal-title">Default Modal</h4>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span>×</span>
-          </button>
-        </div>
-        <div id="modal-body" class="modal-body">
-          <p>One fine body…</p>
-        </div>
-      </div>
-      <!-- /.modal-content -->
-    </div>
-    <!-- /.modal-dialog -->
-  </div>
-
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+  <script></script>
   <!-- jQuery -->
   <script src="/Static/js/jquery.min.js"></script>
   <!-- Bootstrap JS -->
@@ -423,26 +321,6 @@
   <!-- AdminLTE JS -->
   <script src="/Static/js/adminlte.min.js"></script>
   <script>
-    // function loadInicioSesion() {
-    //   $.ajax({
-    //     url: "/ecommerce/home/login",
-    //     type: 'GET',
-    //     success: function (html) {
-    //       // Cambiar el contenido del modal
-    //       $('#dynamic-modal .modal-dialog').attr('class', 'modal-dialog modal-lg');
-    //       // Oculta el encabezado del modal
-    //       $('#dynamic-modal .modal-header').hide();
-    //       // Actualiza solo el cuerpo
-    //       $('#modal-body').html(html);
-    //       // Muestra el modal
-    //       $('#dynamic-modal').modal('show');
-    //     },
-    //     error: function (xhr, status, error) {
-    //       console.error('Error al cargar el contenido del modal:', error);
-    //     }
-    //   });
-    // }
-
     $.ajax({
       url: '/ecommerce/home/GetConfApariencia',
       type: 'GET',
@@ -463,86 +341,6 @@
         console.error('Error en la solicitud AJAX:', error);
       }
     });
-
-    function loadInicioSesion() {
-      $.ajax({
-        url: "/ecommerce/home/login",
-        type: 'GET',
-        success: function (html) {
-        
-          $('#modal').html(html);
-
-          // Muestra el modal
-          $('#modal').css('display', 'flex'); // Usamos flex para centrar el modal si el CSS lo requiere
-
-          // Asigna el evento para cerrar el modal al botón que viene en el HTML inyectado
-          document.getElementById("closeModal").addEventListener("click", function (event) {
-            $('#modal').css('display', 'none');
-          });
-        },
-        error: function (xhr, status, error) {
-          console.error('Error al cargar el contenido del modal:', error);
-        }
-      });
-    }
-
-
-    document.getElementById("abrirModal").addEventListener("click", function (event) {
-      event.preventDefault();
-      loadInicioSesion();
-    });
-
-    function loadBigModal(url, title) {
-      $.ajax({
-        url: url,
-        type: 'GET',
-        success: function (html) {
-          // Cambiar el contenido del modal
-          $('#dynamic-modal .modal-dialog').attr('class', 'modal-dialog modal-xl');
-          $('#modal-body').html(html);
-          $('#modal-title').text(title);
-          $('#dynamic-modal').modal('show');
-        },
-        error: function (xhr, status, error) {
-          console.error('Error al cargar el contenido del modal:', error);
-        }
-      });
-    }
-
-    function loadMediumModal(url, title) {
-      $.ajax({
-        url: url,
-        type: 'GET',
-        success: function (html) {
-          $('#dynamic-modal .modal-dialog').attr('class', 'modal-dialog modal-lg');
-          $('#modal-body').html(html);
-          $('#modal-title').text(title);
-          $('#dynamic-modal').modal('show');
-        },
-        error: function (xhr, status, error) {
-          console.error('Error al cargar el contenido del modal:', error);
-        }
-      });
-    }
-
-    function loadShortModal(url, title) {
-      $.ajax({
-        url: url,
-        type: 'GET',
-        success: function (html) {
-          $('#dynamic-modal .modal-dialog').attr('class', 'modal-dialog modal-sm');
-          $('#modal-body').html(html);
-          $('#modal-title').text(title);
-          $('#dynamic-modal').modal('show');
-        },
-        error: function (xhr, status, error) {
-          console.error('Error al cargar el contenido del modal:', error);
-        }
-      });
-    }
-
   </script>
-
 </body>
-
 </html>

@@ -35,6 +35,10 @@ def error_general(error):
 def index():
     return render_template('Ecommerce/home/home.html', active_page="home")
 
+@homeClientes_bp.route("/sobreNosotros")
+def sobreNosotros():
+    return render_template('Ecommerce/home/sobreNosotros.html')
+
 @homeClientes_bp.route('/error')
 def error():
     return render_template('Ecommerce/error.html')
