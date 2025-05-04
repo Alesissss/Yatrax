@@ -1,33 +1,33 @@
-window.addEventListener("DOMContentLoaded", () => {
-  $.ajax({
-    url: "/ecommerce/home/GetConfApariencia",
-    type: "GET",
-    dataType: "json",
-    success: function (response) {
-      if (response.Status === "success") {
-        const config = response.data;
+// window.addEventListener("DOMContentLoaded", () => {
+//   $.ajax({
+//     url: "/ecommerce/home/GetConfApariencia",
+//     type: "GET",
+//     dataType: "json",
+//     success: function (response) {
+//       if (response.Status === "success") {
+//         const config = response.data;
 
-        $("#maestra_header")[0].style.setProperty(
-          "background-color",
-          config.color_header,
-          "important"
-        );
-        $("#maestra_footer")[0].style.setProperty(
-          "background-color",
-          config.color_footer,
-          "important"
-        );
+//         $("#maestra_header")[0].style.setProperty(
+//           "background-color",
+//           config.color_header,
+//           "important"
+//         );
+//         $("#maestra_footer")[0].style.setProperty(
+//           "background-color",
+//           config.color_footer,
+//           "important"
+//         );
 
-        $("#maestra_logo").attr("src", config.logo);
-      } else {
-        console.error("Error al obtener la configuración:", response.Msj);
-      }
-    },
-    error: function (xhr, status, error) {
-      console.error("Error en la solicitud AJAX:", error);
-    },
-  });
-});
+//         $("#maestra_logo").attr("src", config.logo);
+//       } else {
+//         console.error("Error al obtener la configuración:", response.Msj);
+//       }
+//     },
+//     error: function (xhr, status, error) {
+//       console.error("Error en la solicitud AJAX:", error);
+//     },
+//   });
+// });
 
 gsap.registerPlugin(ScrollTrigger);
 
