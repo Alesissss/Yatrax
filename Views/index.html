@@ -131,6 +131,15 @@
                                     </a>
                                 </li>
                                 {% endif %}
+                                {% if 11 in session['menus'] %}
+                                <li class="nav-item">
+                                    <a href="{{ url_for('usuario.Menu_TipoUsuario') }}"
+                                        class="nav-link {% if active_page == 'tipoUsuario' %}active{% endif %}">
+                                        <i class="bi bi-person-lines-fill nav-icon"></i>
+                                        <p>Gestionar tipos de usuario</p>
+                                    </a>
+                                </li>
+                                {% endif %}
                             </ul>
                         </li>
                         {% endif %}
@@ -151,6 +160,15 @@
                                         class="nav-link {% if active_page == 'pasajes' %}active{% endif %}">
                                         <i class="fas fa-ticket-alt nav-icon"></i>
                                         <p>Gestionar pasajes</p>
+                                    </a>
+                                </li>
+                                {% endif %}
+                                {% if 31 in session['menus'] %}
+                                <li class="nav-item">
+                                    <a href="{{ url_for('ventas.Menu_TipoClientes') }}"
+                                        class="nav-link {% if active_page == 'tipoCliente' %}active{% endif %}">
+                                        <i class="bi bi-person-lines-fill nav-icon"></i>
+                                        <p>Gestionar tipos de cliente</p>
                                     </a>
                                 </li>
                                 {% endif %}
@@ -265,7 +283,7 @@
                                 {% endif %}
                                 {% if 22 in session['menus'] %}
                                 <li class="nav-item">
-                                    <a href="{{ url_for('metodo_pago.Menu_MetodosPago') }}"
+                                    <a href="{{ url_for('configuracion.Menu_MetodosPago') }}"
                                         class="nav-link {% if active_page == 'metodosPago' %}active{% endif %}">
                                         <i class="bi bi-credit-card nav-icon"></i>
                                         <p>Gestionar métodos de pago</p>

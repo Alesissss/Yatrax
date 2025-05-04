@@ -6,6 +6,9 @@ DROP PROCEDURE IF EXISTS SP_DARBAJA_USUARIO;
 DROP PROCEDURE IF EXISTS SP_EDITAR_USUARIO;
 DROP PROCEDURE IF EXISTS SP_REGISTRAR_USUARIO;
 DROP PROCEDURE IF EXISTS SP_REGISTRAR_TIPO_USUARIO;
+DROP PROCEDURE IF EXISTS SP_EDITAR_TIPO_USUARIO;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPO_USUARIO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_USUARIO;
 DROP PROCEDURE IF EXISTS SP_REGISTRAR_PLANTILLA;
 DROP PROCEDURE IF EXISTS SP_EDITAR_PLANTILLA;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_PLANTILLA;
@@ -22,6 +25,11 @@ DROP PROCEDURE IF EXISTS SP_DARBAJA_HORARIO;
 DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPO_CLIENTE;
 DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPO_CLIENTE;
 DROP PROCEDURE IF EXISTS SP_DAR_BAJA_TIPO_CLIENTE;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_CLIENTE;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_METODO_PAGO;
+DROP PROCEDURE IF EXISTS SP_EDITAR_METODO_PAGO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_METODO_PAGO;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_METODO_PAGO;
 
 DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPOVEHICULO;
@@ -46,18 +54,24 @@ create table ubigeo(
     provincia varchar(50) NOT NULL,
     distrito varchar(50) NOT NULL
 );
+DROP TABLE IF EXISTS metodo_pago;
 
 -- Crear tabla tipo_cliente
 CREATE TABLE tipo_cliente (
     idTipoCliente INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL UNIQUE,
-    estado BOOLEAN NOT NULL
+    estado BOOLEAN NOT NULL,
+    estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
+    estado_registro INT NOT NULL DEFAULT 1,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) not null
 );
 
 -- Crear tabla tipo_usuario
 CREATE TABLE tipo_usuario (
     id int AUTO_INCREMENT PRIMARY key,
-    nombre varchar(100) NOT NULL UNIQUE,
+    nombre varchar(100) NOT NULL,
+    estado BOOLEAN NOT NULL,
     estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
     estado_registro INT not null DEFAULT 1,
     fecha_registro DATETIME not null DEFAULT CURRENT_TIMESTAMP, 
@@ -68,7 +82,7 @@ CREATE TABLE tipo_usuario (
 CREATE TABLE usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL,
     password VARCHAR(255) NOT NULL,
     imagen VARCHAR(255) NOT NULL,
     estado BOOLEAN NOT NULL,
@@ -77,6 +91,16 @@ CREATE TABLE usuarios (
     estado_registro INT not null DEFAULT 1,
     fecha_registro DATETIME not null DEFAULT CURRENT_TIMESTAMP, 
     usuario VARCHAR(100) not null
+);
+
+CREATE TABLE horario (
+    id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    horario_entrada time NOT NULL,
+    horario_salida time NOT NULL,
+    estado char(1) NOT NULL,
+    estado_proceso varchar(100) NOT NULL DEFAULT 'REGISTRADO',
+    estado_registro int(11) NOT NULL,
+    fecha_registro datetime NOT NULL DEFAULT current_timestamp()
 );
 
 -- Crear tabla sucursal
@@ -128,6 +152,18 @@ CREATE TABLE tipo_vehiculo(
     estado TINYINT not null
 );
 
+-- Crear tabla metodo_pago
+CREATE TABLE metodo_pago (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    logo VARCHAR(255) NOT NULL,
+    estado BOOLEAN NOT NULL,
+    estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
+    estado_registro INT not null DEFAULT 1,
+    fecha_registro DATETIME not null DEFAULT CURRENT_TIMESTAMP, 
+    usuario VARCHAR(100) not null
+);
+
 INSERT INTO tipo_vehiculo (nombre,capacidad, estado) 
 VALUES ('MetroRapid X12', 120, 1);  -- Bus articulado eléctrico
 
@@ -139,7 +175,7 @@ INSERT INTO tipo_vehiculo (nombre, capacidad, estado)
 VALUES ('EcoGlider Prime', 54, 1);
 
 -- Tabla Tipo Usuario
-INSERT INTO tipo_usuario (id,nombre,estado_proceso,estado_registro,fecha_registro, usuario) VALUES (1,'ADMINISTRADOR','REGISTRADO',1,'2025-03-06 20:02:56','SYSTEM');
+INSERT INTO tipo_usuario (id,nombre, estado, estado_proceso,estado_registro,fecha_registro, usuario) VALUES (1,'ADMINISTRADOR', 1, 'REGISTRADO',1,'2025-03-06 20:02:56','SYSTEM');
 
 -- Tabla Usuario
 INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (1,'Alexis','alexis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/alexis.jpeg', 1, 1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
@@ -153,12 +189,14 @@ INSERT INTO conf_menus (id, nombre, estado) VALUES (5, 'M_PERSONAL', 1);
 INSERT INTO conf_menus (id, nombre, estado) VALUES (6, 'M_ATENCION', 1);
 -- Submenús de USUARIOS
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (10, 'Gestionar usuarios', 1, 1);
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (11, 'Gestionar tipos de usuarios', 1, 1);
 -- Submenús de CONFIGURACIÓN
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (20, 'Gestionar permisos', 1, 2);
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (21, 'Gestionar plantillas', 1, 2);
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (22, 'Gestionar métodos de pago', 1, 2);
 -- Submenús de VENTAS
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (30, 'Gestionar pasajes', 1, 3);
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (31, 'Gestionar tipo cliente', 1, 3);
 -- Submenús de VIAJES
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (40, 'Gestionar horarios', 1, 4);
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (41, 'Gestionar tipo vehículo', 1, 4);
@@ -176,12 +214,14 @@ INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (5, 1);
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (6, 1);
 -- Submenús de "USUARIOS"
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (10, 1);
+INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (11, 1);
 -- Submenús de "CONFIGURACIÓN"
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (20, 1);
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (21, 1);
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (22, 1);
 -- Submenús de "VENTAS"
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (30, 1);
+INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (31, 1);
 -- Submenús de "VIAJES"
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (40, 1);
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (41, 1);
@@ -214,7 +254,7 @@ BEGIN
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
-    SELECT COUNT(*) INTO cEmail FROM USUARIOS WHERE EMAIL = P_EMAIL;
+    SELECT COUNT(*) INTO cEmail FROM USUARIOS WHERE EMAIL = P_EMAIL AND ESTADO_REGISTRO = 1;
 
     IF cEmail > 0 THEN
         SET @MSJ2 = 'El correo que intenta registrar ya está registrado';
@@ -249,7 +289,7 @@ BEGIN
     SET @MSJ2 = NULL;
 
     SELECT COUNT(*) INTO cUsuario FROM USUARIOS WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
-    SELECT COUNT(*) INTO cEmail FROM USUARIOS WHERE EMAIL = P_EMAIL AND ID != P_ID;
+    SELECT COUNT(*) INTO cEmail FROM USUARIOS WHERE EMAIL = P_EMAIL AND ID != P_ID AND ESTADO_REGISTRO = 1;
 
     IF cUsuario <= 0 THEN
         SET @MSJ2 = 'El usuario que intenta editar no existe';
@@ -474,6 +514,7 @@ DELIMITER ;
 DELIMITER $$
 CREATE PROCEDURE SP_REGISTRAR_TIPO_USUARIO(
     IN P_NOMBRE VARCHAR(255),
+    IN P_ESTADO BOOLEAN,
     IN P_USUARIO VARCHAR(255)
 )
 BEGIN
@@ -486,15 +527,106 @@ BEGIN
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
-    SELECT COUNT(*) INTO cNombre FROM TIPO_USUARIO WHERE nombre = P_NOMBRE;
+    SELECT COUNT(*) INTO cNombre FROM TIPO_USUARIO WHERE nombre = P_NOMBRE AND ESTADO_REGISTRO = 1;
 
     IF cNombre > 0 THEN
         SET @MSJ2 = 'El tipo de usuario que intenta registrar ya está registrado';
     ELSE
-        INSERT INTO TIPO_USUARIO (NOMBRE, USUARIO) 
-        VALUES (P_NOMBRE, P_USUARIO);
+        INSERT INTO TIPO_USUARIO (NOMBRE, ESTADO, USUARIO) 
+        VALUES (P_NOMBRE, P_ESTADO, P_USUARIO);
 
         SET @MSJ = 'Se registró correctamente el tipo de usuario';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_EDITAR_TIPO_USUARIO
+DELIMITER $$
+CREATE PROCEDURE SP_EDITAR_TIPO_USUARIO(
+    IN P_ID INT,
+    IN P_NOMBRE VARCHAR(255),
+    IN P_ESTADO BOOLEAN
+)
+BEGIN
+    DECLARE cTipoUsuario INT;
+    DECLARE cNombre INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cTipoUsuario FROM TIPO_USUARIO WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+    SELECT COUNT(*) INTO cNombre FROM TIPO_USUARIO WHERE NOMBRE = P_NOMBRE AND ID != P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cTipoUsuario <= 0 THEN
+        SET @MSJ2 = 'El tipo de usuario que intenta editar no existe';
+    ELSEIF cNombre != 0 THEN
+        SET @MSJ2 = 'El nombre ingresado ya existe';
+    ELSE
+        UPDATE TIPO_USUARIO 
+        SET NOMBRE = P_NOMBRE, 
+            ESTADO = P_ESTADO, 
+            estado_proceso = 'MODIFICADO' 
+        WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se modificó correctamente al tipo de usuario';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_DARBAJA_TIPO_USUARIO
+DELIMITER $$
+CREATE PROCEDURE SP_DARBAJA_TIPO_USUARIO(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cTipoUsuario INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cTipoUsuario FROM TIPO_USUARIO WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cTipoUsuario <= 0 THEN
+        SET @MSJ2 = 'El tipo de usuario que intenta dar de baja no existe';
+    ELSE
+        UPDATE TIPO_USUARIO SET ESTADO = 0, ESTADO_PROCESO = 'MODIFICADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se dio de baja correctamente al tipo de usuario';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_TIPO_USUARIO
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_TIPO_USUARIO(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cTipoUsuario INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cTipoUsuario FROM TIPO_USUARIO WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cTipoUsuario <= 0 THEN
+        SET @MSJ2 = 'El tipo de usuario que intenta eliminar no existe';
+    ELSE
+        UPDATE TIPO_USUARIO SET ESTADO_REGISTRO = 2, ESTADO_PROCESO = 'ELIMINADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se eliminó correctamente al tipo de usuario';
     END IF;
 END $$
 DELIMITER ;
@@ -972,13 +1104,14 @@ DELIMITER ;
 DELIMITER $$
 CREATE PROCEDURE SP_INSERTAR_TIPO_CLIENTE(
     IN P_NOMBRE VARCHAR(50),
-    IN P_ESTADO BIT
+    IN P_ESTADO BOOLEAN,
+    IN P_USUARIO VARCHAR(255)
 )
 BEGIN
     DECLARE cExiste INT;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION 
     BEGIN
-        SET @MSJ2 = 'Error inesperado al ejecutar SP_INSERTAR_TIPO_CLIENTE';
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar procedimiento almacenado');
     END;
 
     SET @MSJ = NULL;
@@ -986,13 +1119,13 @@ BEGIN
 
     SELECT COUNT(*) INTO cExiste 
     FROM tipo_cliente 
-    WHERE nombre = P_NOMBRE;
+    WHERE nombre = P_NOMBRE AND ESTADO_REGISTRO = 1;
 
     IF cExiste > 0 THEN
         SET @MSJ2 = 'Ya existe un tipo de cliente con ese nombre';
     ELSE
-        INSERT INTO tipo_cliente (nombre, estado)
-        VALUES (P_NOMBRE, P_ESTADO);
+        INSERT INTO tipo_cliente (nombre, estado, usuario)
+        VALUES (P_NOMBRE, P_ESTADO, P_USUARIO);
 
         SET @MSJ = 'Se registró correctamente el tipo de cliente';
     END IF;
@@ -1005,28 +1138,30 @@ DELIMITER $$
 CREATE PROCEDURE SP_ACTUALIZAR_TIPO_CLIENTE(
     IN P_ID INT,
     IN P_NOMBRE VARCHAR(50),
-    IN P_ESTADO BIT
+    IN P_ESTADO BOOLEAN
 )
 BEGIN
     DECLARE cExiste INT;
+    DECLARE cNombre INT;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION 
     BEGIN
-        SET @MSJ2 = 'Error inesperado al ejecutar SP_ACTUALIZAR_TIPO_CLIENTE';
+        SET @MSJ2 = 'Error inesperado al ejecutar procedimiento almacenado';
     END;
 
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
-    SELECT COUNT(*) INTO cExiste 
-    FROM tipo_cliente 
-    WHERE idTipoCliente = P_ID;
+    SELECT COUNT(*) INTO cExiste FROM tipo_cliente WHERE idTipoCliente = P_ID AND ESTADO_REGISTRO = 1;
+    SELECT COUNT(*) INTO cNombre FROM tipo_cliente WHERE NOMBRE = P_NOMBRE AND idTipoCliente != P_ID AND ESTADO_REGISTRO = 1;
 
     IF cExiste = 0 THEN
         SET @MSJ2 = 'No se encontró el tipo de cliente que desea actualizar';
+    ELSEIF cNombre != 0 THEN
+        SET @MS2J = 'El nombre ingresado ya existe';
     ELSE
         UPDATE tipo_cliente 
-        SET nombre = P_NOMBRE, estado = P_ESTADO
-        WHERE idTipoCliente = P_ID;
+        SET nombre = P_NOMBRE, estado = P_ESTADO, estado_proceso = 'MODIFICADO'
+        WHERE idTipoCliente = P_ID AND ESTADO_REGISTRO = 1;
 
         SET @MSJ = 'Se actualizó correctamente el tipo de cliente';
     END IF;
@@ -1043,24 +1178,186 @@ BEGIN
     DECLARE cExiste INT;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION 
     BEGIN
-        SET @MSJ2 = 'Error inesperado al ejecutar SP_DAR_BAJA_TIPO_CLIENTE';
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar SP_DAR_BAJA_TIPO_CLIENTE');
     END;
 
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
-    SELECT COUNT(*) INTO cExiste 
-    FROM tipo_cliente 
-    WHERE idTipoCliente = P_ID;
+    SELECT COUNT(*) INTO cExiste FROM tipo_cliente WHERE idTipoCliente = P_ID AND ESTADO_REGISTRO = 1;
 
     IF cExiste = 0 THEN
-        SET @MSJ2 = 'No se encontró el tipo de cliente para dar de baja';
+        SET @MSJ2 = 'El tipo de cliente que intenta dar de baja no existe';
     ELSE
         UPDATE tipo_cliente 
-        SET estado = 0
-        WHERE idTipoCliente = P_ID;
+        SET estado = 0, ESTADO_PROCESO = 'MODIFICADO'
+        WHERE idTipoCliente = P_ID AND ESTADO_REGISTRO = 1;
 
         SET @MSJ = 'Se dio de baja correctamente al tipo de cliente';
     END IF;
 END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_TIPO_CLIENTE
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_TIPO_CLIENTE(
+    IN P_ID INT
+)
+BEGIN 
+    DECLARE cUsuario INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cUsuario FROM tipo_cliente where idTipoCliente = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cUsuario <= 0 THEN
+        SET @MS2J = 'El tipo de cliente que intenta eliminar no existe';
+    ELSE
+        UPDATE tipo_cliente SET ESTADO_REGISTRO =2, ESTADO_PROCESO = 'ELIMINADO' WHERE idTipoCliente = P_ID  AND ESTADO_REGISTRO = 1;
+        SET @MSJ = 'Se eliminó correctamente al usuario';
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Crear procedimiento SP_REGISTRAR_METODO_PAGO
+DELIMITER $$ 
+CREATE PROCEDURE SP_REGISTRAR_METODO_PAGO(
+    IN P_NOMBRE VARCHAR(100),
+    IN P_LOGO VARCHAR(255),
+    IN P_ESTADO BOOLEAN,
+    IN P_USUARIO VARCHAR(100)
+)
+BEGIN
+    DECLARE cNombre INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cNombre FROM metodo_pago WHERE NOMBRE = P_NOMBRE;
+
+    IF cNombre > 0 THEN
+        SET @MSJ2 = 'El método de pago que intenta registrar ya está registrado';
+    ELSE
+        INSERT INTO metodo_pago (NOMBRE, LOGO, ESTADO, ESTADO_PROCESO, ESTADO_REGISTRO, FECHA_REGISTRO, USUARIO) 
+        VALUES (P_NOMBRE, P_LOGO, P_ESTADO, DEFAULT, DEFAULT, CURRENT_TIMESTAMP, P_USUARIO);
+
+        SET @MSJ = 'Se registró correctamente el método de pago';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_EDITAR_METODO_PAGO
+DELIMITER $$ 
+CREATE PROCEDURE SP_EDITAR_METODO_PAGO(
+    IN P_ID INT,
+    IN P_NOMBRE VARCHAR(100),
+    IN P_LOGO VARCHAR(255),
+    IN P_ESTADO BOOLEAN
+)
+BEGIN
+    DECLARE cMetodoPago INT;
+    DECLARE cNombre INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    -- Verificar si el método de pago existe
+    SELECT COUNT(*) INTO cMetodoPago FROM metodo_pago WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+    
+    -- Verificar si el nombre del método de pago ya está registrado (excluyendo el registro actual)
+    SELECT COUNT(*) INTO cNombre FROM metodo_pago WHERE NOMBRE = P_NOMBRE AND ID != P_ID;
+
+    IF cMetodoPago <= 0 THEN
+        SET @MSJ2 = 'El método de pago que intenta editar no existe';
+    ELSEIF cNombre != 0 THEN
+        SET @MSJ2 = 'El nombre del método de pago ingresado ya existe';
+    ELSE
+        -- Actualizar los datos del método de pago, con el estado de registro siempre igual a 1 y el estado de proceso modificado
+        UPDATE metodo_pago 
+        SET NOMBRE = P_NOMBRE, 
+            LOGO = P_LOGO,
+            ESTADO = P_ESTADO,
+            ESTADO_PROCESO = 'MODIFICADO',
+            ESTADO_REGISTRO = 1 -- El estado de registro permanece en 1
+        WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se modificó correctamente el método de pago';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_DARBAJA_METODO_PAGO
+
+DELIMITER $$ 
+CREATE PROCEDURE SP_DARBAJA_METODO_PAGO(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cMetodoPago INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cMetodoPago FROM metodo_pago WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cMetodoPago <= 0 THEN
+        SET @MSJ2 = 'El método de pago que intenta dar de baja no existe';
+    ELSE
+        UPDATE metodo_pago 
+        SET ESTADO = 0, 
+            ESTADO_PROCESO = 'DADO DE BAJA' 
+        WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se dio de baja correctamente el método de pago';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_METODO_PAGO
+DELIMITER $$ 
+CREATE PROCEDURE SP_ELIMINAR_METODO_PAGO(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cMetodoPago INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cMetodoPago FROM metodo_pago WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cMetodoPago <= 0 THEN
+        SET @MSJ2 = 'El método de pago que intenta eliminar no existe';
+    ELSE
+        UPDATE metodo_pago 
+        SET ESTADO_REGISTRO = 2, 
+            ESTADO_PROCESO = 'ELIMINADO' 
+        WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se eliminó correctamente el método de pago';
+    END IF;
+END $$
+
 DELIMITER ;

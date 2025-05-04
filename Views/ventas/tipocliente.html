@@ -14,11 +14,11 @@
     <div class="panel-body">
         <div class="row">
             <div class="col-12">
-                <table id="tbl_tipoCliente" class="table table-bordered table-short-rows">
+                <table id="tbl_TipoCliente" class="table table-bordered table-short-rows">
                     <thead class="bg-gray">
                         <tr>
                             <th class="text-center">ID</th>
-                            <th class="text-center">TIPO</th>
+                            <th class="text-center">NOMBRE</th>
                             <th class="text-center">ESTADO</th>
                             <th class="text-center">ACCIÓN</th>
                         </tr>
@@ -33,7 +33,7 @@
 {% endblock %}
 {% block scripts %}
 <script>
-    var dtTipoCliente;
+    var dtCliente;
 
     $(document).ready(function () {
         // $('body').addClass('sidebar-collapse');
@@ -99,12 +99,12 @@
             lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
         });
 
-        fct_IniciarTipoCliente('#tbl_tipoCliente');
+        fct_IniciarTablaTipoCliente('#tbl_TipoCliente');
     });
 
-    function fct_IniciarTipoCliente(IdTabla) {
+    function fct_IniciarTablaTipoCliente(IdTabla) {
         // Inicializar DataTables con botones
-        dtTipoCliente = $(IdTabla).DataTable({
+        dtCliente = $(IdTabla).DataTable({
             buttons: [
                 {
                     extend: 'copy',
@@ -117,7 +117,7 @@
                     text: '<i class="bi bi-file-earmark-excel"></i>',
                     titleAttr: 'Exportar a Excel',
                     className: 'btn btn-success',
-                    filename: 'Tipos de cliente' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Tipo Cliente' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     footer: true,
                     exportOptions:
                     {
@@ -130,7 +130,7 @@
                     text: '<i class="bi bi-file-earmark-pdf"></i>',
                     titleAttr: 'Exportar a PDF',
                     className: 'btn btn-danger',
-                    filename: 'Tipos de cliente' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Tipo Cliente' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     exportOptions:
                     {
                         stripHtml: true,
@@ -158,7 +158,7 @@
                     columns: ':not(.noVis)',
                 },
                 {
-                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo Tipo Cliente',
+                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo tipo Cliente',
                     className: 'btn bg-success m-1',
                     titleAttr: 'Nuevo',
                     action: function (e, dt, node, config) {
@@ -186,11 +186,11 @@
                 },
             },
             columns: [
-                { data: "id", name: "id" },
-                { data: "tipo", name: "tipo" },
+                { data: "ID", name: "ID" },
+                { data: "TIPO", name: "TIPO" },
                 { 
-                    data: "ESTADO", 
-                    name: "ESTADO",
+                    data: "estado", 
+                    name: "estado",
                     render: function(data, type, row) {
                         return data === 1 ? 'Vigente' : 'No vigente'; 
                     },
@@ -201,9 +201,10 @@
                     render: function (data, type, row) {
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_TipoClienteVer('${data.id}')" title="Ver Tipo cliente"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_TipoClienteEditar('${data.id}')" title="Editar Tipo cliente"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_TipoClienteDarBaja('${data.id}')" title="Dar de baja Tipo cliente"><i class="bi bi-arrow-down-circle"></i></button>
+                            <button class="btn btn-xs m-1 btn-info" onclick="fct_TipoClienteVer('${data.ID}')" title="Ver tipo cliente"><i class="bi bi-eye"></i></button>
+                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_TipoClienteEditar('${data.ID}')" title="Editar tipo cliente"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_TipoClienteDarBaja('${data.ID}')" title="Dar de baja tipo cliente"><i class="bi bi-arrow-down-circle"></i></button>
+                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_TipoClienteEliminar('${data.ID}')" title="Eliminar tipo cliente"><i class="bi bi-trash"></i></button>
                         </div>
                         `;
                     },
@@ -211,17 +212,20 @@
                 }
             ],
             columnDefs: [
-            {
-                targets: [0, 1, 2],
-                className: 'text-center align-middle',
-            },
-            {
-                targets: [3],
-                orderable: false,
-                className: 'text-center align-middle',
-                width: '10%',
-            },
-        ],
+                {
+                    targets: [0],
+                    className: "text-center align-middle",
+                },
+                {
+                    targets: [1, 2, 3],
+                    className: 'align-middle',
+                },
+                {
+                    targets: [3],
+                    orderable: false,
+                    width: '10%',
+                },
+            ],
             lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
             initComplete: function (data, row, cell, start, end, display) {
                 $('.dt-buttons button').addClass('m-1');
@@ -252,17 +256,56 @@
     }
 
     function fct_TipoClienteEditar(Id) {
-        window.location.href = `/trabajadores/ventas/ActualizarTipoCliente/${Id}`;
+        window.location.href = `/trabajadores/ventas/EditarTipoCliente/${Id}`;
     }
 
     function fct_TipoClienteVer(Id) {
-        window.location.href = `/trabajadores/ventas/ObtenerTipoCliente/${Id}`;
+        window.location.href = `/trabajadores/ventas/VerTipoCliente/${Id}`;
+    }
+
+    function fct_TipoClienteEliminar(Id) {
+        Swal.fire({
+            title: "¿Estás seguro?",
+            text: "Esta acción eliminará al tipo usuario. ¿Deseas continuar?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sí, eliminar",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true // Invertir el orden de los botones
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/trabajadores/ventas/EliminarTipoCliente/${Id}`,  // Pasamos el ID en la URL
+                    type: "POST",
+                    contentType: "application/json",
+                    success: function (response) {
+                        if (response.Status === "success") {
+                            if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                return;
+                            }
+                            fct_IniciarTablaTipoCliente('#tbl_TipoCliente');
+                            toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                        } else {
+                            toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                            console.error('Error: ' + response.Msj);
+                        }
+                    },
+                    error: function (xhr, Status, error) {
+                        toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                        console.error('Error:' + error);
+                    }
+                });
+            }
+        });
     }
 
     function fct_TipoClienteDarBaja(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción le dará de baja al tipo de cliente. ¿Deseas continuar?",
+            text: "Esta acción le dará de baja al tipo usuario. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -282,7 +325,7 @@
                                 toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
                                 return;
                             }
-                            fct_IniciarTablaTipoCliente('#tbl_tipoCliente');
+                            fct_IniciarTablaTipoCliente('#tbl_TipoCliente');
                             toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                         } else {
                             toastr.error(response.Msj, "MENSAJE DE SISTEMA");
