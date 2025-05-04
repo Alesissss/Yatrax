@@ -377,7 +377,7 @@ def get_metodos_pago():
         metodos_pago = MetodoPago.obtener_todos()
         if metodos_pago:
             return jsonify({"Status": "success", "data": metodos_pago})
-        return jsonify({"Status": "error", "Msj": "No se encontraron métodos de pago."})
+        return jsonify({"Status": "info", "Msj": "Aun no hay metodos de pago registrados"})
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Error al obtener los métodos de pago: {repr(e)}"})
 
@@ -386,18 +386,16 @@ def get_metodos_pago():
 def dar_baja_metodo_pago(id):
     try:
         # Ejecutar el procedimiento almacenado
-        result = MetodoPago.darBaja(id)  # Asegúrate de que esta función esté llamando al SP correctamente
+        mensajes = MetodoPago.darBaja(id)  # Asegúrate de que esta función esté llamando al SP correctamente
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
 
-        # Si el resultado es un mensaje de éxito
-        if result.get("MSJ"):
-            return jsonify({"Status": "success", "Msj": result.get("MSJ")})
-
-        # Si el resultado es un mensaje de error
-        if result.get("MSJ2"):
-            return jsonify({"Status": "error", "Msj": result.get("MSJ2")})
-
-        # Si no se devuelve ningún mensaje
-        return jsonify({"Status": "error", "Msj": "Error desconocido"})
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja al metodo de pago'})
 
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
