@@ -106,7 +106,7 @@ CREATE TABLE horario (
 -- Crear tabla sucursal
 CREATE TABLE sucursal (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    ubigeo CHAR(6) NOT NULL,
+    ubigeo CHAR(6) NOT NULL REFERENCES ubigeo(ubigeo),
     nombre VARCHAR(50) UNIQUE NOT NULL,
     direccion VARCHAR(255) NOT NULL,
     latitud DECIMAL(8,6) NOT NULL,
