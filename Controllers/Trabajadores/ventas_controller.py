@@ -61,7 +61,7 @@ def Tipo_Clientes():
 
 @ventas_bp.route('/TipoClienteNuevo')
 def TipoCliente_Nuevo():
-    return render_template('ventas/tipoclienteCRUD.html', active_page="tipocliente", active_menu='mVentas')
+    return render_template('ventas/tipoclienteCRUD.html', active_page="tipocliente", active_menu='mVentas', tipocliente = {}, tittle = 'Registrar Tipo Cliente', btnId = 'btn_Registrar')
 
 # END VIEWS
 
@@ -70,7 +70,7 @@ def TipoCliente_Nuevo():
 @ventas_bp.route("/GetData_TipoCliente", methods=["GET"])
 def get_tipo_cliente():
     try:
-        tipos = TipoCliente.obtener_datos()
+        tipos = TipoCliente.obtener_todos()
         return jsonify({'data': tipos, 'Status': 'success', 'Msj': 'Listado de tipos de cliente retornado exitosamente'})
     except Exception as e:
         return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar tipos de cliente: {repr(e)}'})
@@ -78,12 +78,12 @@ def get_tipo_cliente():
 @ventas_bp.route("/RegistrarTipoCliente", methods=["POST"])
 def registrar_tipo_cliente():
     try:
-        nombre = request.form.get("nombre", "").strip()
+        nombre = request.form.get("nombre").strip()
 
         if not nombre:
             return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
 
-        mensajes = TipoCliente.insertarTipoCliente(nombre)
+        mensajes = TipoCliente.registrar(nombre)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 
@@ -101,13 +101,13 @@ def registrar_tipo_cliente():
 @ventas_bp.route("/EditarTipoCliente/<int:id>", methods=["POST"])
 def editar_tipo_cliente(id):
     try:
-        nombre = request.form.get("nombre", "").strip()
-        estado = request.form.get("estado", "").strip()
+        nombre = request.form.get("nombre").strip()
+        estado = request.form.get("estado").strip()
 
         if not nombre or estado not in ["0", "1"]:
             return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios y válidos"})
 
-        mensajes = TipoCliente.actualizarTipoCliente(id, nombre, int(estado))
+        mensajes = TipoCliente.editar(id, nombre, estado)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 
@@ -125,7 +125,7 @@ def editar_tipo_cliente(id):
 @ventas_bp.route("/DarBajaTipoCliente/<int:id>", methods=["POST"])
 def dar_baja_tipo_cliente(id):
     try:
-        mensajes = TipoCliente.darBajaTipoCliente(id)
+        mensajes = TipoCliente.darBaja(id)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 
@@ -143,21 +143,26 @@ def dar_baja_tipo_cliente(id):
 @ventas_bp.route("/VerTipoCliente/<int:id>", methods=["GET"])
 def ver_tipo_cliente(id):
     try:
-        tipo_cliente = TipoCliente.obtenerUno(id)
+        tipo_cliente = TipoCliente.obtener_por_id(id)
         if tipo_cliente:
-            return render_template("cliente/tipoClienteCRUD.html", tipo_cliente=tipo_cliente, tittle='Ver tipo cliente', btnId='btn_Aceptar')
-        return render_template("cliente/tipoClienteCRUD.html", tipo_cliente={}, tittle='Ver tipo cliente', btnId='btn_Aceptar')
+            return render_template("tipoCliente/tipoClienteCRUD.html", tipo_cliente=tipo_cliente, tittle='Ver tipo cliente', btnId='btn_Aceptar')
+        return render_template("tipoCliente/tipoClienteCRUD.html", tipo_cliente={}, tittle='Ver tipo cliente', btnId='btn_Aceptar')
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
 
-
-@ventas_bp.route("/ObtenerTiposClientes", methods=["GET"])
-def obtener_tipos_clientes():
+@ventas_bp.route("/EliminarTipoCliente/<int:id>", methods=['POST'])
+def eliminar_tipo_cliente(id):
     try:
-        datos = TipoCliente.obtener_datos()
-        return jsonify(datos)
+        mensajes = TipoCliente.eliminar_tipo_cliente(id)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "Success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "Success", 'Msj': msj1, 'Msj2': ''})
     except Exception as e:
-        return jsonify({"Status": "error", "Msj": f"Error al obtener tipos de cliente: {repr(e)}"})
+        return jsonify({"Status": "Error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
 # END REGION TIPO CLIENTE #
 
