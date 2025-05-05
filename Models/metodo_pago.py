@@ -57,6 +57,7 @@ class MetodoPago:
         try:
             # Usamos el procedimiento almacenado para dar de baja el método de pago
             conexion.ejecutar("CALL SP_DARBAJA_METODO_PAGO(%s)", (id,))
-            return {"Status": "success", "Msj": "Método de pago dado de baja exitosamente"}
+            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
+            return resultado[0]  # Retorna un diccionario con los mensajes
         finally:
             conexion.cerrar()

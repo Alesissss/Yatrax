@@ -19,7 +19,7 @@ nav {
   height: 10vh;
   border: var(--negro) 1px solid;
   position: fixed;
-  z-index: +1;
+  z-index: +2;
   overflow: hidden;
   display: flex;
   flex-direction: row;
@@ -48,3 +48,203 @@ nav {
   }
 }
 
+#ctn_informativo {
+  width: 100vw;
+  min-height: 300vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--blanco);
+  position: relative;
+  overflow: visible;
+  gap: 0;
+}
+
+.card {
+  width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: var(--blanco);
+  z-index: 1;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.05);
+  margin: 0;
+  padding: 3rem 0;
+  position: relative;
+
+  p {
+    width: 40vw;
+    text-align: center;
+  }
+}
+
+#mision{
+  background-image: url("../img/sobreNosotros/sobreNosotros_1.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-color: rgb(80, 80, 80);
+  background-attachment: fixed;
+  background-blend-mode: soft-light;
+  color: var(--blanco);
+  font-size: 1.3em;
+}
+
+#vision{
+  background-image: url("../img/sobreNosotros/sobreNosotros_2.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-color: rgb(80, 80, 80);
+  background-attachment: fixed;
+  background-blend-mode: soft-light;
+  color: var(--blanco);
+  font-size: 1.3em;
+}
+
+#servicios{
+  background-image: url("../img/sobreNosotros/sobreNosotros_3.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-color: rgb(80, 80, 80);
+  background-attachment: fixed;
+  background-blend-mode: soft-light;
+  color: var(--blanco);
+  font-size: 1.3em;
+}
+
+#contactanos {
+  width: 100vw;
+  height: 100vh;
+  background: var(--azul_oscuro);
+  color: var(--blanco);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  p {
+    width: 50vw;
+    text-wrap: balance;
+    text-align: center;
+    font-size: 1.3em;
+  }
+}
+
+#encabezado_fundadores{
+  padding: 30px 0 0 30px;
+}
+
+#fundadores {
+  width: 600vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Cada tarjeta de fundador ocupa su ancho natural y dejamos un pequeño margen */
+#fundadores > div {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 10vw;
+  
+  div{
+    width: 30vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0;
+  }
+
+  img{
+    width: 240px;
+    height: 300px;
+  }
+}
+
+/* Opcional: si quieres centrar verticalmente los elementos */
+#fundadores {
+  align-items: center;
+}
+
+#unete {
+  width: 100vw;
+  height: 100vh;
+  background-image: url("../img/sobreNosotros/unete.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: bottom;
+  background-color: rgb(80, 80, 80);
+  background-blend-mode: soft-light;
+  color: var(--blanco);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  p {
+    width: 50vw;
+    text-wrap: balance;
+    text-align: center;
+    font-size: 1.3em;
+  }
+}
+
+@media screen and (width<800px) {
+  #mision,#vision,#servicio,#contactanos{
+    font-size: 1.1rem;
+    p{
+      width: 50vw;
+    }
+  }
+
+  #fundadores > div{
+    width: 100vw;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: top;
+    align-items: center;
+    gap: 5px;
+
+    p{
+      width: 100%;
+    }
+
+    div{
+      width: 80%;
+      text-align: center;
+      height: max-content;
+    }
+  }
+
+  .fundadores-scroll {
+    display: flex;
+    overflow-x: auto;
+    gap: 2rem;
+    padding: 2rem;
+    scroll-snap-type: x mandatory;
+  }
+  
+  .fundadores-scroll > div {
+    min-width: 300px;
+    background: white;
+    border-radius: 1rem;
+    padding: 1rem;
+    scroll-snap-align: start;
+  }
+  
+}

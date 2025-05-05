@@ -1,3 +1,4 @@
+import os
 import pymysql, config
 
 class Conexion:
@@ -7,6 +8,7 @@ class Conexion:
                                 user=config.DB_USER,
                                 password=config.DB_PASSWORD,
                                 db=config.DB_NAME,
+                                local_infile=True,
             cursorclass=pymysql.cursors.DictCursor
         )
         self.cursor = self.conn.cursor()
@@ -29,4 +31,23 @@ def obtener_conexion():
                                 port=config.DB_PORT,
                                 user=config.DB_USER,
                                 password=config.DB_PASSWORD,
-                                db=config.DB_NAME)
+                                db=config.DB_NAME,
+)
+    
+# def cargar_csv_ubigeo_mysql(csv_file, ubigeo):
+#     conexion = Conexion()
+    
+#     # Asegúrate de que el archivo CSV esté accesible desde MySQL
+#     query = f"""
+#     LOAD DATA LOCAL INFILE '{os.path.abspath(csv_file)}'
+#     INTO TABLE {ubigeo}
+#     FIELDS TERMINATED BY ';' 
+#     ENCLOSED BY ''
+#     LINES TERMINATED BY '\\n'
+#     IGNORE 1 LINES;
+#     """
+    
+#     conexion.ejecutar(query)
+#     conexion.cerrar()
+
+# cargar_csv_ubigeo_mysql('/geodir-ubigeo-inei.csv', 'ubigeo')

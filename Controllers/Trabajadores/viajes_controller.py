@@ -317,7 +317,107 @@ def get_sucursal():
         return jsonify({'data': sucursal, 'Status': 'success', 'Msj': 'Listado de sucursales retornado exitosamente'})
     except Exception as e:
         return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar las sucursales: + {repr(e)}'})
+
+@viajes_bp.route('/RegistrarSucursal',methods=["GET","POST"])
+def registrar_sucursal():
+    try:
+        ubigeo = request.form.get("txt_ubigeo").strip()
+        nombre = request.form.get("txt_nombre").strip()
+        direccion = request.form.get("txt_direccion").strip()
+        latitud = request.form.get("txt_latitud").strip()
+        longitud = request.form.get("txt_longitud").strip()
+        usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
+        
+        mensajes = Sucursal.registrar(ubigeo, nombre, direccion, latitud, longitud, usuario_actual)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+        
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar sucursal'})
     
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@viajes_bp.route("/EliminarSucursal/<int:idSucursal>", methods=['GET'])
+def eliminar_sucursal(idSucursal, usuario_actual):
+    try:
+        usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
+        mensajes = Sucursal.eliminar(idSucursal, usuario_actual)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al eliminar sucursal'})
+        
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@viajes_bp.route("/EditarSucursal/<int:idSucursal>",methods=["GET","POST"])
+def editar_sucursal(idSucursal, usuario_actual):
+    try:
+        sucursal = Sucursal.obtener_por_id(idSucursal)
+        
+        if request.method == "POST":
+            ubigeo = request.form.get("txt_ubigeo").strip()
+            nombre = request.form.get("txt_nombre").strip()
+            direccion = request.form.get("txt_direccion").strip()
+            latitud = request.form.get("txt_latitud").strip()
+            longitud = request.form.get("txt_longitud").strip()
+            usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
+
+            mensajes = Sucursal.editar(idSucursal, ubigeo, nombre, direccion, latitud, longitud, usuario_actual)
+            msj1 = mensajes.get('@MSJ')
+            msj2 = mensajes.get('@MSJ2')
+
+            if msj1:
+                return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+            elif msj2:
+                return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+            else:
+                return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar sucursal'})
+        if sucursal:
+            return render_template('viajes/sucursalCRUD.html', active_page="sucursal", active_menu='mViajes', sucursal=sucursal, tittle = 'Editar sucursal', btnId = 'btn_Editar')
+        return render_template('viajes/sucursalCRUD.html', active_page="sucursal", active_menu='mViajes', sucursal={}, tittle = 'Editar sucursal', btnId = 'btn_Editar')
+    
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+    
+@viajes_bp.route("/VerSucursal/<int:idSucursal>", methods=['GET'])
+def ver_sucursal(idSucursal):
+    try:
+        sucursal = Sucursal.obtener_por_id(idSucursal)
+        if sucursal:
+            return render_template('viajes/sucursalCRUD.html', active_page="sucursal", active_menu='mViajes', sucursal=sucursal, tittle = 'Ver sucursal', btnId = 'btn_Aceptar')
+        return render_template('viajes/sucursalCRUD.html', active_page="sucursal", active_menu='mViajes', sucursal={}, tittle = 'Ver sucursal', btnId = 'btn_Aceptar')
+        
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+    
+@viajes_bp.route("/DarBajaSucursal/<int:idSucursal>", methods=['POST'])
+def darBaja_sucursal(idSucursal):
+    try:
+        usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
+        mensajes = Sucursal.darBaja(idSucursal, usuario_actual)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja la sucursal'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
 # END REGIÓN SUCURSAL #
 
 # END FUNCIONES
