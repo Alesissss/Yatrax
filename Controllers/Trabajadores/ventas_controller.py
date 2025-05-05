@@ -51,13 +51,17 @@ def verificar_sesion():
     #     abort(403)  # Autenticado, pero no tiene permiso para ese módulo
 
 # VIEWS
-@ventas_bp.route('/GestionarPasajes')
-def Menu_Pasajes():
-    return render_template('ventas/pasajes.html', active_page="pasajes", active_menu='mVentas')
+@ventas_bp.route('/GestionarTipoComprobante')
+def Menu_TipoComprobante():
+    return render_template('ventas/tipoComprobante.html', active_page="tipoComprobante", active_menu='mVentas')
 
 @ventas_bp.route('/GestionarTipoCliente')
 def Menu_TipoClientes():
     return render_template('ventas/tipocliente.html', active_page="tipoCliente", active_menu='mVentas')
+
+@ventas_bp.route('/GestionarTipoServicio')
+def Menu_TipoServicio():
+    return render_template('ventas/tipoServicio.html', active_page="tipoServicio", active_menu='mVentas')
 
 @ventas_bp.route('/TipoClienteNuevo')
 def TipoCliente_Nuevo():
