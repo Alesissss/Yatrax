@@ -58,10 +58,6 @@ def verificar_sesion():
 def Menu_TipoClientes():
     return render_template('ventas/tipocliente.html', active_page="tipoCliente", active_menu='mVentas')
 
-@ventas_bp.route('/GestionarTipoServicio')
-def Menu_TipoServicio():
-    return render_template('ventas/tipoServicio.html', active_page="tipoServicio", active_menu='mVentas')
-
 @ventas_bp.route('/TipoClienteNuevo')
 def TipoCliente_Nuevo():
     return render_template('ventas/tipoclienteCRUD.html', active_page="tipoCliente", active_menu='mVentas', tipocliente = {}, tittle = 'Registrar Tipo Cliente', btnId = 'btn_Registrar')
@@ -70,7 +66,7 @@ def TipoCliente_Nuevo():
 def Menu_TipoComprobante():
     return render_template('ventas/tipocomprobante.html', active_page="tipoComprobante", active_menu='mVentas')
 
-@ventas_bp.route('TipoComprobanteNuevo')
+@ventas_bp.route('/TipoComprobanteNuevo')
 def TipoComprobante_Nuevo():
     return render_template('ventas/tipoComprobanteCRUD.html', active_page="tipoComprobante", active_menu='mVentas', tipocomprobante = {}, tittle = 'Registrar Tipo Comprobante', btnId = 'btn_Registrar')
 
