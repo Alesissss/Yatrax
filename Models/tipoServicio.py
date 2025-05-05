@@ -1,10 +1,11 @@
 import bd
 import hashlib
 
-class TipoCliente:
-    def __init__(self, idTipoServicio = None, nombre = None, estado = None, estadoProceso = None, estadoRegistro = None, fechaRegistro = None, usuario = None):
+class TipoServicio:
+    def __init__(self, idTipoServicio = None, nombre = None, descripcion = None, estado = None, estadoProceso = None, estadoRegistro = None, fechaRegistro = None, usuario = None):
         self.idTipoCliente = idTipoServicio
         self.nombre = nombre
+        self.descripcion = descripcion
         self.estado = estado
         #Auditoría
         self.estadoProceso = estadoProceso
@@ -16,8 +17,8 @@ class TipoCliente:
     def obtener_todos(cls):
         try:
             conexion = bd.Conexion()
-            tipos_cliente = conexion.obtener("Select idTipoServicio as ID, nombre as TIPO, estado from tipo_cliente where estado_registro = 1")
-            return tipos_cliente
+            tipos_servicio = conexion.obtener("Select idTipoServicio as ID, nombre as TIPO, descripcion, estado from tipo_servicio where estado_registro = 1")
+            return tipos_servicio
         finally:
             conexion.cerrar()
 
@@ -25,16 +26,16 @@ class TipoCliente:
     def obtener_por_id(cls, idTipoServicio):
         try:
             conexion = bd.Conexion()
-            tipo_cliente = conexion.obtener("Select idTipoServicio as ID, nombre, estado from tipo_cliente where estado_registro = 1 and idTipoCliente =  %s", (idTipoServicio,))
-            return tipo_cliente[0] if tipo_cliente else None
+            tipo_servicio = conexion.obtener("Select idTipoServicio as ID, nombre, descripcion, estado from tipo_servicio where estado_registro = 1 and idTipoServicio =  %s", (idTipoServicio,))
+            return tipo_servicio[0] if tipo_servicio else None
         finally:
                 conexion.cerrar()
 
     @classmethod
-    def eliminar_tipo_cliente(cls, idTipoServicio):
+    def eliminar_tipo_servicio(cls, idTipoServicio):
         conexion = bd.Conexion()
         try:
-            conexion.ejecutar("CALL SP_ELIMINAR_TIPO_CLIENTE(%s);", (idTipoServicio,))
+            conexion.ejecutar("CALL SP_ELIMINAR_TIPO_SERVICIO(%s);", (idTipoServicio,))
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
             return resultado[0]
         finally:
@@ -44,17 +45,17 @@ class TipoCliente:
     def registrar(cls, nombre, estado, usuario):
         conexion = bd.Conexion()
         try:
-            conexion.ejecutar("CALL SP_INSERTAR_TIPO_CLIENTE(%s, %s, %s);", (nombre, estado, usuario))
+            conexion.ejecutar("CALL SP_INSERTAR_TIPO_SERVICIO(%s, %s, %s);", (nombre, estado, usuario))
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
             return resultado[0]
         finally:
             conexion.cerrar()
 
     @classmethod
-    def editar(cls, idTipoServicio, nombre, estado):
+    def editar(cls, idTipoServicio, nombre, descripcion, estado):
         conexion = bd.Conexion()
         try:
-            conexion.ejecutar("CALL SP_ACTUALIZAR_TIPO_CLIENTE(%s, %s, %s)", (idTipoServicio, nombre, estado))
+            conexion.ejecutar("CALL SP_ACTUALIZAR_TIPO_SERVICIO(%s, %s, %s)", (idTipoServicio, nombre, descripcion, estado))
             resultado = conexion.obtener("SELECT @MSJ, @MS2J;")
             return resultado[0]
         finally:
@@ -64,7 +65,7 @@ class TipoCliente:
     def darBaja(cls, idTipoServicio):
         conexion = bd.Conexion()
         try:
-            conexion.ejecutar("CALL SP_DAR_BAJA_TIPO_CLIENTE(%s)", (idTipoServicio,))
+            conexion.ejecutar("CALL SP_DAR_BAJA_TIPO_SERVICIO(%s)", (idTipoServicio,))
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
             return resultado[0]
         finally:
