@@ -46,6 +46,7 @@ DROP TABLE IF EXISTS sucursal;
 DROP TABLE IF EXISTS horario;
 DROP TABLE IF EXISTS tipo_cliente;
 DROP TABLE IF EXISTS ubigeo;
+DROP TABLE IF EXISTS metodo_pago;
 
 -- crear tabla ubigeo
 create table ubigeo(
@@ -54,7 +55,6 @@ create table ubigeo(
     provincia varchar(50) NOT NULL,
     distrito varchar(50) NOT NULL
 );
-DROP TABLE IF EXISTS metodo_pago;
 
 -- Crear tabla tipo_cliente
 CREATE TABLE tipo_cliente (

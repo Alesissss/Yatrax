@@ -1,0 +1,335 @@
+{% extends "index.html" %}
+
+{% block title %}YATRAX - {{ tittle }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="text-center mb-0">{{ tittle }}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="txt_nombre">Nombre</label>
+                        <div class="input-group">
+                            <input type="text" id="txt_nombre" class="form-control" placeholder="Nombre"
+                                value="{{ sucursal.nombre }}" oninput="this.value = this.value.toUpperCase();">
+                            <div class="input-group-append">
+                                <div class="input-group-text"><i class="fas fa-user"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="txt_nombre">Dirección</label>
+                        <div class="input-group">
+                            <input type="text" id="txt_nombre" class="form-control" placeholder="Nombre"
+                                value="{{ sucursal.nombre }}" oninput="this.value = this.value.toUpperCase();">
+                            <div class="input-group-append">
+                                <div class="input-group-text"><i class="fas fa-user"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="txt_ubigeo">Ubigeo</label>
+                        <div class="input-group">
+                            <input type="text" id="txt_ubigeo" class="form-control" placeholder="Ubigeo" editable="false"
+                                value="{{ sucursal.ubigeo }}" oninput="this.value = this.value.toUpperCase();">
+                            <div class="input-group-append">
+                                <div class="input-group-text"><i class="fas fa-user"></i></div>
+                            </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cbx_Estado">Estado</label>
+                        <div class="input-group">
+                            <select id="cbx_Estado" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{% endif
+                                %}>
+                                <option disabled>--SELECCIONAR--</option>
+                                <option {% if sucursal.estado==1 %}selected{% endif %} value="1">Vigente</option>
+                                <option {% if sucursal.estado==0 %}selected{% endif %} value="0">No vigente</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <h2>Buscar ubicaciones</h2>
+                    <input type="text" id="searchBox" placeholder="Escribe una ubicación de Perú (ej. Lambayeque)" size="40">
+                    <button onclick="searchLocation()">Buscar</button>
+
+                    <div id="map"></div>
+                    <div id="info">
+                        <p><strong>Latitud:</strong> <span id="lat">-</span></p>
+                        <p><strong>Longitud:</strong> <span id="lng">-</span></p>
+                        <p><strong>Nombre de referencia:</strong> <input type="text" id="refName"></p>
+                    </div>
+
+                    <div class="text-center">
+                        <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de sucursales</button>
+                        <button id="{{ btnId }}" type="button" class="btn btn-primary">Aceptar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    #map { height: 500px; width: 100%; }
+    #info { margin-top: 10px; }
+
+    /* Asegúrate de que el cuadro de búsqueda del geocoder esté expandido siempre */
+    .leaflet-control-geocoder {
+        display: block !important;
+        width: 100% !important;
+    }
+
+    .leaflet-control-geocoder .leaflet-control-geocoder-form {
+        display: block !important;
+        width: 100% !important;
+        align-content: center !important;
+    }
+
+    .leaflet-control-geocoder .leaflet-control-geocoder-icon {
+        display: none !important; /* Oculta el ícono de la lupa */
+    }
+
+    #map > div.leaflet-control-container > div.leaflet-top.leaflet-right > div {
+        align-content: center;
+    }
+
+</style>
+
+{% endblock %}
+{% block scripts %}
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+<script>
+// Variables globales
+    let marker;
+    const geocoder = L.Control.Geocoder.nominatim();
+
+    // Configuración mejorada del mapa
+    const map = L.map('map').setView([-9.19, -75.0152], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Manejador de clics en el mapa
+    map.on('click', async function(e) {
+        const lat = e.latlng.lat.toFixed(6);
+        const lng = e.latlng.lng.toFixed(6);
+        
+        // Actualizar UI
+        updateMarkerPosition(e.latlng);
+        document.getElementById('lat').textContent = lat;
+        document.getElementById('lng').textContent = lng;
+        
+        try {
+            // Obtener UBIGEO desde tu backend
+            const response = await fetch(`/api/ubigeo/por-coordenadas?lat=${lat}&lon=${lng}`);
+            const data = await response.json();
+            
+            if (data.ubigeo) {
+                document.getElementById('txt_ubigeo').value = data.ubigeo;
+                toastr.success("UBIGEO encontrado: " + data.ubigeo);
+            } else {
+                document.getElementById('txt_ubigeo').value = '';
+                toastr.warning(data.error || "No se encontró UBIGEO para esta ubicación");
+            }
+        } catch (error) {
+            console.error("Error al obtener UBIGEO:", error);
+            toastr.error("Error al comunicarse con el servidor");
+        }
+        
+        // Obtener nombre de referencia (opcional)
+        updateLocationName(e.latlng);
+    });
+
+    // Funciones auxiliares
+    function updateMarkerPosition(latlng) {
+        if (!marker) {
+            marker = L.marker(latlng).addTo(map);
+        } else {
+            marker.setLatLng(latlng);
+        }
+    }
+
+    function updateLocationName(latlng) {
+        geocoder.reverse(latlng, map.getZoom(), function(results) {
+            const name = results[0]?.name || "Ubicación sin nombre";
+            document.getElementById('refName').value = name;
+            if (marker) {
+                marker.bindPopup(name).openPopup();
+            }
+        });
+    }
+
+    // Configuración del buscador
+    const searchControl = L.Control.geocoder({
+        position: 'topright',
+        defaultMarkGeocode: false,
+        geocoder: L.Control.Geocoder.nominatim({
+            geocodingQueryParams: { countrycodes: 'pe' }
+        })
+    }).on('markgeocode', function(e) {
+        const latlng = e.geocode.center;
+        map.setView(latlng, 16);
+        updateMarkerPosition(latlng);
+        document.getElementById('lat').textContent = latlng.lat.toFixed(6);
+        document.getElementById('lng').textContent = latlng.lng.toFixed(6);
+        document.getElementById('refName').value = e.geocode.name;
+    }).addTo(map);
+
+    // Asegúrate de que el control de geocodificación esté en su lugar y expandido
+    setTimeout(() => {
+        const geocoderContainer = document.querySelector('.leaflet-control-geocoder');
+        if (geocoderContainer) {
+            geocoderContainer.classList.add('leaflet-geocoder-expanded'); // Asegura que esté expandido
+        }
+        document.querySelector(".leaflet-control-geocoder input[type=search]").placeholder = "Buscar";
+
+    }, 100);
+
+    // Mostrar las sedes existentes
+
+
+
+    $(document).ready(function () {
+        $("#btn_Registrar").click(function () {
+            let nombre = $("#txt_nombre").val().trim();
+            let direccion = $("#txt_direccion").val().trim();
+            let ubigeo = $("#txt_ubigeo").val().trim();
+            let latitud = $("#lat").text().trim();
+            let longitud = $("#lng").text().trim();
+            let estado = $('#cbx_Estado').val();
+
+            if (!nombre || !estado) {
+                toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                return;
+            }
+
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción registrará una surcursal. ¿Deseas continuar?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, registrar sucursal",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    let formData = new FormData();
+                    formData.append("nombre", nombre);
+                    formData.append("direccion", direccion);
+                    formData.append("ubigeo", ubigeo);
+                    formData.append("latitud", latitud);
+                    formData.append("longitud", longitud);
+                    formData.append("estado", estado);
+
+                    $.ajax({
+                        url: "/trabajadores/viajes/RegistrarSucursal",
+                        type: "POST",
+                        processData: false,
+                        contentType: false,
+                        data: formData,
+                        success: function (response) {
+                            if (response.Status === "success") {
+                                if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                    return;
+                                } else {
+                                    toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                                    setTimeout(() => {
+                                        window.location.href = "/trabajadores/viajes/GestionarSucursal";
+                                    }, 500);
+                                }
+                            } else {
+                                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                                console.error('Error: ' + response.Msj);
+                            }
+                        },
+                        error: function (xhr, Status, error) {
+                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                            console.error('Error:' + error);
+                        }
+                    });
+                }
+            });
+        });
+
+        $("#btn_Editar").click(function () {
+            const id = Number("{{ sucursal.id }}");
+
+            let nombre = $("#txt_nombre").val().trim();
+            let direccion = $("#txt_direccion").val().trim();
+            let ubigeo = $("#txt_ubigeo").val().trim();
+            let latitud = $("#lat").text().trim();
+            let longitud = $("#lng").text().trim();
+            let estado = $('#cbx_Estado').val();
+
+            if (!nombre || !estado) {
+                toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                return;
+            }
+
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción modificará la sucursal. ¿Deseas continuar?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, editar sucursal",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    let formData = new FormData();
+                    formData.append("nombre", nombre);
+                    formData.append("direccion", direccion);
+                    formData.append("ubigeo", ubigeo);
+                    formData.append("latitud", latitud);
+                    formData.append("longitud", longitud);
+                    formData.append("estado", estado);
+
+                    $.ajax({
+                        url: `/trabajadores/viajes/EditarSucursal/${id}`,
+                        type: "POST",
+                        processData: false,
+                        contentType: false,
+                        data: formData,
+                        success: function (response) {
+                            if (response.Status === "success") {
+                                toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                                setTimeout(() => {
+                                    window.location.href = "/trabajadores/viajes/GestionarSucursal";
+                                }, 500);
+                            } else {
+                                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                            }
+                        },
+                        error: function (xhr, Status, error) {
+                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                        }
+                    });
+                }
+            });
+        });
+
+        $("#btn_Aceptar").click(function () {
+            window.location.href = "/trabajadores/usuarios/GestionarSucursal";
+        });
+
+        $("#btn_Volver").click(function () {
+            window.location.href = "/trabajadores/usuarios/GestionarSucursal";
+        });
+    });
+</script>
+{% endblock %}
