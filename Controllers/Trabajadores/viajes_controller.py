@@ -317,8 +317,18 @@ def get_sucursal():
         return jsonify({'data': sucursal, 'Status': 'success', 'Msj': 'Listado de sucursales retornado exitosamente'})
     except Exception as e:
         return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar las sucursales: + {repr(e)}'})
+    
+@viajes_bp.route('/SucursalNuevo')
+def sucursal_Nuevo():
+    return render_template(
+        'viajes/sucursalCRUD.html', 
+        active_page="sucursal", 
+        active_menu='mViajes', 
+        sucursal={},
+        tittle = 'Registrar sucursal',
+        btnId = 'btn_Registrar')
 
-@viajes_bp.route('/RegistrarSucursal',methods=["GET","POST"])
+@viajes_bp.route('/RegistrarSucursal',methods=["POST"])
 def registrar_sucursal():
     try:
         ubigeo = request.form.get("txt_ubigeo").strip()
@@ -343,7 +353,7 @@ def registrar_sucursal():
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
 @viajes_bp.route("/EliminarSucursal/<int:idSucursal>", methods=['GET'])
-def eliminar_sucursal(idSucursal, usuario_actual):
+def eliminar_sucursal(idSucursal):
     try:
         usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
         mensajes = Sucursal.eliminar(idSucursal, usuario_actual)
@@ -361,7 +371,7 @@ def eliminar_sucursal(idSucursal, usuario_actual):
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
 @viajes_bp.route("/EditarSucursal/<int:idSucursal>",methods=["GET","POST"])
-def editar_sucursal(idSucursal, usuario_actual):
+def editar_sucursal(idSucursal):
     try:
         sucursal = Sucursal.obtener_por_id(idSucursal)
         

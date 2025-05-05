@@ -64,3 +64,17 @@ class Ubigeo:
         except Exception as e:
             print(f"Error en geocodificación: {e}")
             return None
+    
+    @classmethod
+    def obtener_direccion(cls, lat, lon):
+        url = f"https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lon}&format=jsonv2"
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        try:
+            response = requests.get(url, headers=headers, timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                return data.get("display_name", "")
+        except Exception as e:
+            print(f"Error en geocodificación: {e}")
+            return None
+    
