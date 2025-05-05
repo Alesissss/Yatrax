@@ -53,9 +53,6 @@ def verificar_sesion():
     #     abort(403)  # Autenticado, pero no tiene permiso para ese módulo
 
 # VIEWS
-@ventas_bp.route('/GestionarTipoComprobante')
-def Menu_TipoComprobante():
-    return render_template('ventas/tipoComprobante.html', active_page="tipoComprobante", active_menu='mVentas')
 
 @ventas_bp.route('/GestionarTipoCliente')
 def Menu_TipoClientes():
@@ -79,11 +76,11 @@ def TipoComprobante_Nuevo():
 
 @ventas_bp.route('/GestionarTipoServicio')
 def Menu_TipoServicio():
-    return render_template('ventas/tiposervicio.html', active_page="tipoServicio", active_page = 'mVentas')
+    return render_template('ventas/tiposervicio.html', active_page="tipoServicio", active_menu = 'mVentas')
 
 @ventas_bp.route('/TipoServicioNuevo')
 def Menu_TipoServicioNuevo():
-    return render_template('ventas/tiposervicioCRUD.html', active_page="tipoServicio", active_page = 'mVentas', tiposervicio = {}, tittle = 'Registrar Tipo Servicio', btnId = 'btn_Registrar')
+    return render_template('ventas/tiposervicioCRUD.html', active_page="tipoServicio", active_menu = 'mVentas', tiposervicio = {}, tittle = 'Registrar Tipo Servicio', btnId = 'btn_Registrar')
 
 # END VIEWS
 
