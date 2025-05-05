@@ -21,6 +21,7 @@
                             <th class="text-center">HORA SALIDA</th>
                             <th class="text-center">HORA LLEGADA</th>
                             <th class="text-center">ESTADO</th>
+                            <th class="text-center">ACCIÓN</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white table-short-rows">
@@ -187,19 +188,12 @@
             },
             columns: [
                 { data: "id", name: "id" },
-                { data: "hora_entrada", name: "hora_entrada" },
-                { data: "hora_salida", name: "hora_salida" },
+                { data: "horario_entrada", name: "horario_entrada" },
+                { data: "horario_salida", name: "horario_salida" },
                 { data: "estado", name: "estado",
                 render: function(data, type, row) {
-                        return data === 'A' ? 'Sí' : 'No'; 
+                        return data === 'A' ? 'Activo' : 'Inactivo'; 
                     }, 
-                },
-                { 
-                    data: "estado_registro", 
-                    name: "estado_registro",
-                    render: function(data, type, row) {
-                        return data === 1 ? 'Vigente' : 'No vigente'; 
-                    },
                 },
                 {
                     data: null,
@@ -223,11 +217,11 @@
                     className: "text-center align-middle",
                 },
                 {
-                    targets: [1, 2, 3, 4],
+                    targets: [1, 2, 3],
                     className: 'align-middle',
                 },
                 {
-                    targets: [5],
+                    targets: [4],
                     orderable: false,
                     width: '10%',
                 },

@@ -34,20 +34,20 @@ def obtener_conexion():
                                 db=config.DB_NAME,
 )
     
-def cargar_csv_ubigeo_mysql(csv_file, ubigeo):
-    conexion = Conexion()
+# def cargar_csv_ubigeo_mysql(csv_file, ubigeo):
+#     conexion = Conexion()
     
-    # Asegúrate de que el archivo CSV esté accesible desde MySQL
-    query = f"""
-    LOAD DATA LOCAL INFILE '{os.path.abspath(csv_file)}'
-    INTO TABLE {ubigeo}
-    FIELDS TERMINATED BY ';' 
-    ENCLOSED BY ''
-    LINES TERMINATED BY '\\n'
-    IGNORE 1 LINES;
-    """
+#     # Asegúrate de que el archivo CSV esté accesible desde MySQL
+#     query = f"""
+#     LOAD DATA LOCAL INFILE '{os.path.abspath(csv_file)}'
+#     INTO TABLE {ubigeo}
+#     FIELDS TERMINATED BY ';' 
+#     ENCLOSED BY ''
+#     LINES TERMINATED BY '\\n'
+#     IGNORE 1 LINES;
+#     """
     
-    conexion.ejecutar(query)
-    conexion.cerrar()
+#     conexion.ejecutar(query)
+#     conexion.cerrar()
 
-cargar_csv_ubigeo_mysql('/geodir-ubigeo-inei.csv', 'ubigeo')
+# cargar_csv_ubigeo_mysql('/geodir-ubigeo-inei.csv', 'ubigeo')
