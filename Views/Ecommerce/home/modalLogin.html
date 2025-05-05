@@ -252,7 +252,7 @@
       <div class="input-group">
         <input class="entrada" type="password" placeholder="Contraseña" required />
       </div>
-      <a href="#" class="forgot">¿Olvidaste tu contraseña?</a>
+      <a href="#" class="forgot" onclick="fct_forgotPass(event)">¿Olvidaste tu contraseña?</a>
       <button type="submit" class="login-btn">Iniciar Sesión</button>
     </form>
     <div class="social-login">
@@ -266,4 +266,11 @@
     </div>
   </div>
 </div>
+
+<script>
+  function fct_forgotPass(event) {
+    event.preventDefault(); // Previene el salto o recarga por el href="#"
+    window.location.href = '/ecommerce/home/forgotPass';
+  }
+</script>
 <!--  -->

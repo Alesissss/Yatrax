@@ -47,6 +47,9 @@ def error():
 def login_cliente():
     return render_template('Ecommerce/home/modalLogin.html')
 
+@homeClientes_bp.route('/forgotPass')
+def forgot_password():
+    return render_template('Ecommerce/home/forgotPassword.html')
 # END VIEWS
 
 # FUNCIONES
