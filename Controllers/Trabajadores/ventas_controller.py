@@ -1,6 +1,8 @@
 import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort
 from Models.tipoCliente import TipoCliente
+from Models.tipoServicio import TipoServicio
+from Models.tipoComprobante import TipoComprobante
 
 ventas_bp = Blueprint('ventas', __name__, url_prefix='/trabajadores/ventas')
 
@@ -66,6 +68,22 @@ def Menu_TipoServicio():
 @ventas_bp.route('/TipoClienteNuevo')
 def TipoCliente_Nuevo():
     return render_template('ventas/tipoclienteCRUD.html', active_page="tipoCliente", active_menu='mVentas', tipocliente = {}, tittle = 'Registrar Tipo Cliente', btnId = 'btn_Registrar')
+
+@ventas_bp.route('/GestionarTipoComprobante')
+def Menu_TipoComprobante():
+    return render_template('ventas/tipocomprobante.html', active_page="tipoComprobante", active_menu='mVentas')
+
+@ventas_bp.route('TipoComprobanteNuevo')
+def TipoComprobante_Nuevo():
+    return render_template('ventas/tipoComprobanteCRUD.html', active_page="tipoComprobante", active_menu='mVentas', tipocomprobante = {}, tittle = 'Registrar Tipo Comprobante', btnId = 'btn_Registrar')
+
+@ventas_bp.route('/GestionarTipoServicio')
+def Menu_TipoServicio():
+    return render_template('ventas/tiposervicio.html', active_page="tipoServicio", active_page = 'mVentas')
+
+@ventas_bp.route('/TipoServicioNuevo')
+def Menu_TipoServicioNuevo():
+    return render_template('ventas/tiposervicioCRUD.html', active_page="tipoServicio", active_page = 'mVentas', tiposervicio = {}, tittle = 'Registrar Tipo Servicio', btnId = 'btn_Registrar')
 
 # END VIEWS
 
@@ -176,6 +194,225 @@ def eliminar_tipo_cliente(id):
         return jsonify({"Status": "Error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
 # END REGION TIPO CLIENTE #
+
+# REGION TIPO COMPROBANTE #
+
+@ventas_bp.route("/GetData_TipoComprobante", methods=["GET"])
+def get_tipo_comprobante():
+    try:
+        tipos = TipoComprobante.obtener_todos()
+        return jsonify({'data': tipos, 'Status': 'success', 'Msj': 'Listado de tipos de comprobante retornado exitosamente'})
+    except Exception as e:
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar tipos de comprobante: {repr(e)}'})
+    
+@ventas_bp.route("/RegistrarTipoComprobante", methods=["POST"])
+def registrar_tipo_comprobante():
+    try:
+        nombre = request.form.get("nombre").strip()
+        estado = request.form.get("estado")
+        usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
+
+
+        if not nombre:
+            return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
+
+        mensajes = TipoComprobante.registrar(nombre, estado, usuario_actual)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", "Msj": msj1, "Msj2": ""})
+        elif msj2:
+            return jsonify({"Status": "success", "Msj": "", "Msj2": msj2})
+        else:
+            return jsonify({"Status": "error", "Msj": "Error desconocido al registrar tipo de comprobante"})
+
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
+
+
+@ventas_bp.route("/EditarTipoComprobante/<int:id>", methods=['GET','POST'])
+def editar_tipo_comprobante(id):
+    try:
+        tipoComprobante =  TipoComprobante.obtener_por_id(id)
+        if request.method == 'POST':
+            nombre = request.form.get("nombre").strip()
+            estado = request.form.get("estado").strip()
+
+            if not nombre or estado not in ["0", "1"]:
+                return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios y válidos"})
+
+            mensajes = TipoComprobante.editar(id, nombre, estado)
+            msj1 = mensajes.get('@MSJ')
+            msj2 = mensajes.get('@MSJ2')
+
+            if msj1:
+                return jsonify({"Status": "success", "Msj": msj1, "Msj2": ""})
+            elif msj2:
+                return jsonify({"Status": "success", "Msj": "", "Msj2": msj2})
+            else:
+                return jsonify({"Status": "error", "Msj": "Error desconocido al actualizar tipo de comprobante"})
+        if TipoCliente:
+            return render_template('ventas/tipocomprobanteCRUD.html', active_page = 'tipoComprobante', active_menu = 'mVentas', tipoComprobante = tipoComprobante, tittle = 'Editar tipo comprobante', btnId = 'btn_Editar')
+        return render_template('ventas/tipocomprobante.html', active_page = 'tipoComprobante', active_menu = 'mVentas', tipoComprobante = {}, tittle = 'Editar tipo comprobante', btnId = 'btn_Editar')
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
+
+
+@ventas_bp.route("/DarBajaTipoComprobante/<int:id>", methods=["POST"])
+def dar_baja_tipo_comprobante(id):
+    try:
+        mensajes = TipoComprobante.darBaja(id)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", "Msj": msj1, "Msj2": ""})
+        elif msj2:
+            return jsonify({"Status": "success", "Msj": "", "Msj2": msj2})
+        else:
+            return jsonify({"Status": "error", "Msj": "Error desconocido al dar de baja tipo de comprobante"})
+
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
+
+
+@ventas_bp.route("/VerTipoComprobante/<int:id>", methods=["GET"])
+def ver_tipo_comprobante(id):
+    try:
+        tipo_comprobante = TipoComprobante.obtener_por_id(id)
+        if tipo_comprobante:
+            return render_template("ventas/tipocomprobanteCRUD.html", active_page="tipoComprobante", active_menu='mVentas', tipo_comprobante=tipo_comprobante, tittle='Ver tipo comprobante', btnId='btn_Aceptar')
+        return render_template("ventas/tipocomprobanteCRUD.html", active_page="tipoComprobante", active_menu='mVentas', tipo_comprobante={}, tittle='Ver tipo comprobante', btnId='btn_Aceptar')
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
+
+@ventas_bp.route("/EliminarTipoComprobante/<int:id>", methods=['POST'])
+def eliminar_tipo_comprobante(id):
+    try:
+        mensajes = TipoComprobante.eliminar_tipo_comprobante(id)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+    except Exception as e:
+        return jsonify({"Status": "Error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+# END REGION TIPO COMPROBANTE #
+
+# REGION TIPO SERVICIO #
+
+@ventas_bp.route("/GetData_TipoServicio", methods=["GET"])
+def get_tipo_servicio():
+    try:
+        tipos = TipoServicio.obtener_todos()
+        return jsonify({'data': tipos, 'Status': 'success', 'Msj': 'Listado de tipos de servicios retornado exitosamente'})
+    except Exception as e:
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar tipos de servicio: {repr(e)}'})
+    
+@ventas_bp.route("/RegistrarTipoServicio", methods=["POST"])
+def registrar_tipo_servicio():
+    try:
+        nombre = request.form.get("nombre").strip()
+        estado = request.form.get("estado")
+        descripcion = request.form.get("descripcion").strip()
+        usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
+
+
+        if not nombre:
+            return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
+
+        mensajes = TipoServicio.registrar(nombre, descripcion, estado, usuario_actual)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", "Msj": msj1, "Msj2": ""})
+        elif msj2:
+            return jsonify({"Status": "success", "Msj": "", "Msj2": msj2})
+        else:
+            return jsonify({"Status": "error", "Msj": "Error desconocido al registrar tipo de servicio"})
+
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
+
+
+@ventas_bp.route("/EditarTipoServicio/<int:id>", methods=['GET','POST'])
+def editar_tipo_servicio(id):
+    try:
+        tipoServicio =  TipoServicio.obtener_por_id(id)
+        if request.method == 'POST':
+            nombre = request.form.get("nombre").strip()
+            descripcion = request.form.get("descripcion").strip()
+            estado = request.form.get("estado").strip()
+
+            if not nombre or descripcion or estado not in ["0", "1"]:
+                return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios y válidos"})
+
+            mensajes = TipoServicio.editar(id, nombre, descripcion, estado)
+            msj1 = mensajes.get('@MSJ')
+            msj2 = mensajes.get('@MSJ2')
+
+            if msj1:
+                return jsonify({"Status": "success", "Msj": msj1, "Msj2": ""})
+            elif msj2:
+                return jsonify({"Status": "success", "Msj": "", "Msj2": msj2})
+            else:
+                return jsonify({"Status": "error", "Msj": "Error desconocido al actualizar tipo de servicio"})
+        if TipoCliente:
+            return render_template('ventas/tipoServicioCRUD.html', active_page = 'tipoServicio', active_menu = 'mVentas', tipoServicio = tipoServicio, tittle = 'Editar tipo servicio', btnId = 'btn_Editar')
+        return render_template('ventas/tipoServicio.html', active_page = 'tipoServicio', active_menu = 'mVentas', tipoServicio = {}, tittle = 'Editar tipo servicio', btnId = 'btn_Editar')
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
+
+
+@ventas_bp.route("/DarBajaTipoServicio/<int:id>", methods=["POST"])
+def dar_baja_tipo_servicio(id):
+    try:
+        mensajes = TipoServicio.darBaja(id)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", "Msj": msj1, "Msj2": ""})
+        elif msj2:
+            return jsonify({"Status": "success", "Msj": "", "Msj2": msj2})
+        else:
+            return jsonify({"Status": "error", "Msj": "Error desconocido al dar de baja tipo de servicio"})
+
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
+
+
+@ventas_bp.route("/VerTipoServicio/<int:id>", methods=["GET"])
+def ver_tipo_servicio(id):
+    try:
+        tipo_servicio = TipoServicio.obtener_por_id(id)
+        if tipo_servicio:
+            return render_template("ventas/tipoServicioCRUD.html", active_page="tipoServicio", active_menu='mVentas', tipo_servicio=tipo_servicio, tittle='Ver tipo servicio', btnId='btn_Aceptar')
+        return render_template("ventas/tipoServicioCRUD.html", active_page="tipoServicio", active_menu='mVentas', tipo_servicio={}, tittle='Ver tipo servicio', btnId='btn_Aceptar')
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
+
+@ventas_bp.route("/EliminarTipoServicio/<int:id>", methods=['POST'])
+def eliminar_tipo_servicio(id):
+    try:
+        mensajes = TipoServicio.eliminar_tipo_servicio(id)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+    except Exception as e:
+        return jsonify({"Status": "Error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+# END REGION TIPO SERVICIO #
+
 
 # FUNCIONES
 
