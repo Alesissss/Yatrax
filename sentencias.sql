@@ -35,6 +35,17 @@ DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPOVEHICULO;
+
+DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPO_COMPROBANTE;
+DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPO_COMPROBANTE;
+DROP PROCEDURE IF EXISTS SP_DAR_BAJA_TIPO_COMPROBANTE;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_COMPROBANTE;
+
+DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPO_SERVICIO;
+DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPO_SERVICIO;
+DROP PROCEDURE IF EXISTS SP_DAR_BAJA_TIPO_SERVICIO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_SERVICIO;
+
 -- Luego eliminamos las tablas, primero la que depende de la otra
 DROP TABLE IF EXISTS conf_plantillas;
 DROP TABLE IF EXISTS conf_dmenus;
@@ -47,6 +58,33 @@ DROP TABLE IF EXISTS horario;
 DROP TABLE IF EXISTS tipo_cliente;
 DROP TABLE IF EXISTS ubigeo;
 DROP TABLE IF EXISTS metodo_pago;
+DROP TABLE IF EXISTS tipo_servicio;
+DROP TABLE IF EXISTS tipo_comprobante;
+
+
+-- Crear tabla tipo_servicio
+CREATE TABLE tipo_servicio (
+    idTipoServicio INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    descripcion VARCHAR (255) NOT NULL,
+    estado BOOLEAN NOT NULL,
+    estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
+    estado_registro INT NOT NULL DEFAULT 1,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) not null
+);
+
+
+-- Crear tabla tipo_comprobante
+CREATE TABLE tipo_comprobante (
+    idTipoComprobante INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    estado BOOLEAN NOT NULL,
+    estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
+    estado_registro INT NOT NULL DEFAULT 1,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) not null
+);
 
 -- Crear tabla ubigeo
 create table ubigeo(
@@ -59,7 +97,7 @@ create table ubigeo(
 -- Crear tabla tipo_cliente
 CREATE TABLE tipo_cliente (
     idTipoCliente INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(50) NOT NULL UNIQUE,
+    nombre VARCHAR(50) NOT NULL,
     estado BOOLEAN NOT NULL,
     estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
     estado_registro INT NOT NULL DEFAULT 1,
@@ -3098,6 +3136,261 @@ BEGIN
     ELSE
         UPDATE tipo_cliente SET ESTADO_REGISTRO =2, ESTADO_PROCESO = 'ELIMINADO' WHERE idTipoCliente = P_ID  AND ESTADO_REGISTRO = 1;
         SET @MSJ = 'Se eliminó correctamente al usuario';
+    END IF;
+END $$
+
+DELIMITER ;
+
+
+-- Crear procedimiento SP_INSERTAR_TIPO_COMPROBANTE
+
+DELIMITER $$
+CREATE PROCEDURE SP_INSERTAR_TIPO_COMPROBANTE(
+    IN P_NOMBRE VARCHAR(50),
+    IN P_ESTADO BOOLEAN,
+    IN P_USUARIO VARCHAR(255)
+)
+BEGIN
+    DECLARE cExiste INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cExiste 
+    FROM tipo_comprobante
+    WHERE nombre = P_NOMBRE AND ESTADO_REGISTRO = 1;
+
+    IF cExiste > 0 THEN
+        SET @MSJ2 = 'Ya existe un tipo de comprobante con ese nombre';
+    ELSE
+        INSERT INTO tipo_comprobante (nombre, estado, usuario)
+        VALUES (P_NOMBRE, P_ESTADO, P_USUARIO);
+
+        SET @MSJ = 'Se registró correctamente el tipo de comprobante';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ACTUALIZAR_TIPO_COMPROBANTE
+
+DELIMITER $$
+CREATE PROCEDURE SP_ACTUALIZAR_TIPO_COMPROBANTE(
+    IN P_ID INT,
+    IN P_NOMBRE VARCHAR(50),
+    IN P_ESTADO BOOLEAN
+)
+BEGIN
+    DECLARE cExiste INT;
+    DECLARE cNombre INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cExiste FROM tipo_comprobante WHERE idTipoComprobante = P_ID AND ESTADO_REGISTRO = 1;
+    SELECT COUNT(*) INTO cNombre FROM tipo_comprobante WHERE NOMBRE = P_NOMBRE AND idTipoComprobante != P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cExiste = 0 THEN
+        SET @MSJ2 = 'No se encontró el tipo de comprobante que desea actualizar';
+    ELSEIF cNombre != 0 THEN
+        SET @MS2J = 'El nombre ingresado ya existe';
+    ELSE
+        UPDATE tipo_comprobante 
+        SET nombre = P_NOMBRE, estado = P_ESTADO, estado_proceso = 'MODIFICADO'
+        WHERE idTipoComprobante = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se actualizó correctamente el tipo de comprobante';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_DAR_BAJA_COMPROBANTE
+
+DELIMITER $$
+CREATE PROCEDURE SP_DAR_BAJA_TIPO_COMPROBANTE(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cExiste INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cExiste FROM tipo_comprobante WHERE idTipoComprobante = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cExiste = 0 THEN
+        SET @MSJ2 = 'El tipo de comprobante que intenta dar de baja no existe';
+    ELSE
+        UPDATE tipo_comprobante 
+        SET estado = 0, ESTADO_PROCESO = 'MODIFICADO'
+        WHERE idTipoComprobante = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se dio de baja correctamente al tipo de comprobante';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_TIPO_COMPROBANTE
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_TIPO_COMPROBANTE(
+    IN P_ID INT
+)
+BEGIN 
+    DECLARE cUsuario INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cUsuario FROM tipo_comprobante where idTipoComprobante = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cUsuario <= 0 THEN
+        SET @MS2J = 'El tipo de comprobante que intenta eliminar no existe';
+    ELSE
+        UPDATE tipo_comprobante SET ESTADO_REGISTRO =2, ESTADO_PROCESO = 'ELIMINADO' WHERE idTipoComprobante = P_ID  AND ESTADO_REGISTRO = 1;
+        SET @MSJ = 'Se eliminó correctamente el tipo de comprobante';
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Crear procedimiento SP_INSERTAR_TIPO_SERVICIO
+
+DELIMITER $$
+CREATE PROCEDURE SP_INSERTAR_TIPO_SERVICIO(
+    IN P_NOMBRE VARCHAR(50),
+    IN P_ESTADO BOOLEAN,
+    IN P_DESP VARCHAR (255),
+    IN P_USUARIO VARCHAR(255)
+)
+BEGIN
+    DECLARE cExiste INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cExiste 
+    FROM tipo_servicio
+    WHERE nombre = P_NOMBRE AND ESTADO_REGISTRO = 1;
+
+    IF cExiste > 0 THEN
+        SET @MSJ2 = 'Ya existe un tipo de servicio con ese nombre';
+    ELSE
+        INSERT INTO tipo_servicio (nombre, descripcion, estado, usuario)
+        VALUES (P_NOMBRE, P_DESP, P_ESTADO, P_USUARIO);
+
+        SET @MSJ = 'Se registró correctamente el tipo de servicio';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ACTUALIZAR_TIPO_SERVICIO
+
+DELIMITER $$
+CREATE PROCEDURE SP_ACTUALIZAR_TIPO_SERVICIO(
+    IN P_ID INT,
+    IN P_NOMBRE VARCHAR(50),
+    IN P_ESTADO BOOLEAN,
+    IN P_DESP VARCHAR(255)
+)
+BEGIN
+    DECLARE cExiste INT;
+    DECLARE cNombre INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cExiste FROM tipo_servicio WHERE idTipoServicio = P_ID AND ESTADO_REGISTRO = 1;
+    SELECT COUNT(*) INTO cNombre FROM tipo_servicio WHERE NOMBRE = P_NOMBRE AND idTipoServicio != P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cExiste = 0 THEN
+        SET @MSJ2 = 'No se encontró el tipo de servicio que desea actualizar';
+    ELSEIF cNombre != 0 THEN
+        SET @MS2J = 'El tipo de servicio ingresado ya existe';
+    ELSE
+        UPDATE tipo_servicio 
+        SET nombre = P_NOMBRE, descripcion = P_DESP, estado = P_ESTADO, estado_proceso = 'MODIFICADO'
+        WHERE idTipoServicio = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se actualizó correctamente el tipo de servicio';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_DAR_BAJA_SERVICIO
+
+DELIMITER $$
+CREATE PROCEDURE SP_DAR_BAJA_TIPO_SERVICIO(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cExiste INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cExiste FROM tipo_servicio WHERE idTipoServicio = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cExiste = 0 THEN
+        SET @MSJ2 = 'El tipo de servicio que intenta dar de baja no existe';
+    ELSE
+        UPDATE tipo_servicio 
+        SET estado = 0, ESTADO_PROCESO = 'MODIFICADO'
+        WHERE idTipoServicio = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se dio de baja correctamente al tipo de servicio';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_TIPO_SERVICIO
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_TIPO_SERVICIO(
+    IN P_ID INT
+)
+BEGIN 
+    DECLARE cUsuario INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cUsuario FROM tipo_servicio where idTipoServicio = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cUsuario <= 0 THEN
+        SET @MS2J = 'El tipo de servicio que intenta eliminar no existe';
+    ELSE
+        UPDATE tipo_servicio SET ESTADO_REGISTRO =2, ESTADO_PROCESO = 'ELIMINADO' WHERE idTipoServicio = P_ID  AND ESTADO_REGISTRO = 1;
+        SET @MSJ = 'Se eliminó correctamente el tipo de servicio|';
     END IF;
 END $$
 
