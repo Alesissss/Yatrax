@@ -207,3 +207,77 @@ header {
   content: "−"; /* Ícono de menos */
   transform: rotate(0deg);
 }
+
+/* DROP DOWN BOOTSTRAP */
+/* Estilos para el botón del menú */
+.boton-menu {
+  background-color: #6c757d;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  position: relative;
+}
+
+.boton-menu:hover {
+  background-color: #5a6268;
+}
+
+.boton-menu::after {
+  content: "▼";
+  margin-left: 5px;
+  font-size: 0.8em;
+}
+
+/* Estilos para la lista desplegable */
+
+.lista-desplegable {
+  display: none;
+  position: fixed;          /* del bloque de más abajo */
+  background-color: #f9f9f9;
+  min-width: 180px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 10;              /* corregido: no uses +10, solo 10 */
+  border-radius: 4px;
+  padding: 0;
+  margin-top: 5px;
+  justify-content: center;  /* del bloque de más abajo */
+  align-items: center;      /* del bloque de más abajo */
+  width: 15px;              /* del bloque de más abajo */
+  height: auto;             /* del bloque de más abajo */
+  gap: 5px;                 /* del bloque de más abajo */
+}
+
+
+/* Mostrar la lista cuando está activa */
+.lista-desplegable.mostrar {
+  display: block;
+}
+
+/* Estilos para los elementos de la lista */
+.item-lista {
+  list-style: none;
+}
+
+.enlace-item {
+  color: #333;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  transition: background-color 0.3s;
+}
+
+.enlace-item:hover {
+  background-color: #e9ecef;
+  color: #000;
+}
+
+/* Estilos para el botón de iniciar sesión */
+.enlace-iniciar-sesion {
+  background-color: #e9ecef;
+  font-weight: bold;
+}
+  

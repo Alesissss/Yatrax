@@ -35,8 +35,10 @@
 
       $(document).ready(function () {
           // Mensaje Toastr si hay uno
-          {% if msg %}
+          {% if msg and tipotoast=='success' %}
           toastr.success("{{ msg }}", "MENSAJE DE SISTEMA");
+          {% elif msg and tipotoast=='error' %}
+          toastr.error("{{ msg }}", "MENSAJE DE SISTEMA");
           {% endif %}
 
           var windowHeight = $('body > div.os-padding.menu-open > div > div > div > div.content-wrapper').height() / 2;
@@ -166,7 +168,7 @@
                   type: "GET",
                   dataSrc: function (json) {
                       if (json.Status === "info") {
-                          toastr.info('Aun no hay metodos de pago registrados', 'MENSAJE DE SISTEMA');
+                          toastr.info('Aun no hay marcas registradas', 'MENSAJE DE SISTEMA');
                           return [];
                       }
                       return json.data;
@@ -195,10 +197,10 @@
           render: function (data) {
               return `
                   <div class="flex-wrap btn-group">
-                      <button class="btn btn-xs m-1 btn-info" onclick="fct_VerMetodoPago('${data.id}')"><i class="bi bi-eye"></i></button>
-                      <button class="btn btn-xs m-1 btn-primary" onclick="fct_EditarMetodoPago('${data.id}')"><i class="bi bi-pencil-square"></i></button>
-                      <button class="btn btn-xs m-1 btn-warning" onclick="fct_DarBajaMetodoPago('${data.id}')"><i class="bi bi-arrow-down-circle"></i></button>
-                      <button class="btn btn-xs m-1 btn-danger" onclick="fct_EliminarMetodoPago('${data.id}')"><i class="bi bi-trash"></i></button>
+                      <button class="btn btn-xs m-1 btn-info" onclick="fct_VerMarca('${data.id}')"><i class="bi bi-eye"></i></button>
+                      <button class="btn btn-xs m-1 btn-primary" onclick="fct_EditarMarca('${data.id}')"><i class="bi bi-pencil-square"></i></button>
+                      <button class="btn btn-xs m-1 btn-warning" onclick="fct_DarBajaMarca('${data.id}')"><i class="bi bi-arrow-down-circle"></i></button>
+                      <button class="btn btn-xs m-1 btn-danger" onclick="fct_EliminarMarca('${data.id}')"><i class="bi bi-trash"></i></button>
                   </div>
               `;
           },
@@ -258,15 +260,15 @@
           });
 
           // Funciones de acción
-          window.fct_VerMetodoPago = function(id) {
+          window.fct_VerMarca = function(id) {
               window.location.href = `/trabajadores/viajes/MarcaNuevo/${id}?ver=true`;
           };
 
-          window.fct_EditarMetodoPago = function(id) {
+          window.fct_EditarMarca = function(id) {
               window.location.href = `/trabajadores/viajes/EditarMarca/${id}`;
           };
 
-          window.fct_EliminarMetodoPago = function(id) {
+          window.fct_EliminarMarca = function(id) {
               Swal.fire({
                   title: "¿Estás seguro?",
                   text: "Esta acción eliminará la marca. ¿Deseas continuar?",
@@ -299,7 +301,7 @@
           };
 
 
-          window.fct_DarBajaMetodoPago = function(id) {
+          window.fct_DarBajaMarca = function(id) {
       Swal.fire({
           title: "¿Estás seguro?",
           text: "Esta acción dará de baja la marca. ¿Deseas continuar?",

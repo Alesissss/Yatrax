@@ -28,7 +28,8 @@ class Marca:
         conexion = bd.Conexion()
         try:
             conexion.ejecutar("CALL SP_REGISTRAR_MARCA(%s, %s,%s, %s)", (nombre, logo, estado, usuario))
-            return {"Status": "success", "Msj": "Marca registrada exitosamente"}
+            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
+            return resultado[0]
         finally:
             conexion.cerrar()
 
@@ -37,7 +38,8 @@ class Marca:
         conexion = bd.Conexion()
         try:
             conexion.ejecutar("CALL SP_EDITAR_MARCA(%s, %s, %s, %s)", (id, nombre, estado, logo))
-            return {"Status": "success", "Msj": "Marca editada exitosamente"}
+            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
+            return resultado[0]
         finally:
             conexion.cerrar()
 

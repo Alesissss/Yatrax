@@ -61,7 +61,7 @@ def Menu_TipoClientes():
 
 @ventas_bp.route('/TipoClienteNuevo')
 def TipoCliente_Nuevo():
-    return render_template('ventas/tipoclienteCRUD.html', active_page="tipoCliente", active_menu='mVentas', tipocliente = {}, tittle = 'Registrar Tipo Cliente', btnId = 'btn_Registrar')
+    return render_template('ventas/tipoclienteCRUD.html', active_page="tipoCliente", active_menu='mVentas', tipocliente = {}, tittle = 'Registrar tipo cliente', btnId = 'btn_Registrar')
 
 @ventas_bp.route('/GestionarTipoComprobante')
 def Menu_TipoComprobante():
@@ -69,7 +69,7 @@ def Menu_TipoComprobante():
 
 @ventas_bp.route('/TipoComprobanteNuevo')
 def TipoComprobante_Nuevo():
-    return render_template('ventas/tipoComprobanteCRUD.html', active_page="tipoComprobante", active_menu='mVentas', tipocomprobante = {}, tittle = 'Registrar Tipo Comprobante', btnId = 'btn_Registrar')
+    return render_template('ventas/tipoComprobanteCRUD.html', active_page="tipoComprobante", active_menu='mVentas', tipocomprobante = {}, tittle = 'Registrar tipo comprobante', btnId = 'btn_Registrar')
 
 @ventas_bp.route('/GestionarTipoServicio')
 def Menu_TipoServicio():
@@ -77,7 +77,7 @@ def Menu_TipoServicio():
 
 @ventas_bp.route('/TipoServicioNuevo')
 def Menu_TipoServicioNuevo():
-    return render_template('ventas/tipoServicioCRUD.html', active_page="tipoServicio", active_menu = 'mVentas', tiposervicio = {}, tittle = 'Registrar Tipo Servicio', btnId = 'btn_Registrar')
+    return render_template('ventas/tipoServicioCRUD.html', active_page="tipoServicio", active_menu = 'mVentas', tiposervicio = {}, tittle = 'Registrar tipo servicio', btnId = 'btn_Registrar')
 
 @ventas_bp.route('/GestionarTipoDocumento')
 def Menu_TipoDocumento():
@@ -85,7 +85,7 @@ def Menu_TipoDocumento():
 
 @ventas_bp.route('/TipoDocumentoNuevo')
 def TipoDocumento_Nuevo():
-    return render_template('ventas/tipoDocumentoCRUD.html', active_page="tipoDocumento", active_menu = 'mVentas', tipoDocumento = {}, tittle = 'Registrar Tipo Documento', btnId = 'btn_Registrar')
+    return render_template('ventas/tipoDocumentoCRUD.html', active_page="tipoDocumento", active_menu = 'mVentas', tipoDocumento = {}, tittle = 'Registrar tipo documento', btnId = 'btn_Registrar')
 # END VIEWS
 
 # FUNCIONES

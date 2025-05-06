@@ -29,7 +29,8 @@ class MetodoPago:
         conexion = bd.Conexion()
         try:
             conexion.ejecutar("CALL SP_REGISTRAR_METODO_PAGO(%s, %s, %s, %s)", (nombre, logo, estado, usuario))
-            return {"Status": "success", "Msj": "Método de pago registrado exitosamente"}
+            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
+            return resultado[0]
         finally:
             conexion.cerrar()
 
@@ -38,7 +39,8 @@ class MetodoPago:
         conexion = bd.Conexion()
         try:
             conexion.ejecutar("CALL SP_EDITAR_METODO_PAGO(%s, %s, %s, %s)", (id,nombre, logo, estado))
-            return {"Status": "success", "Msj": "Método de pago editado exitosamente"}
+            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
+            return resultado[0]
         finally:
             conexion.cerrar()
 
