@@ -247,10 +247,10 @@
                             <ul class="nav nav-treeview" style="display: none;">
                                 {% if 50 in session['menus'] %}
                                 <li class="nav-item">
-                                    <a href="{{ url_for('personal.Menu_Personal') }}"
-                                        class="nav-link {% if active_page == 'ejemplo' %}active{% endif %}">
+                                    <a href="{{ url_for('personal.Menu_TipoPersonal') }}"
+                                        class="nav-link {% if active_page == 'tipoPersonal' %}active{% endif %}">
                                         <i class="bi bi-calendar-week nav-icon"></i>
-                                        <p>Ejemplo</p>
+                                        <p>Gestionar tipo personal</p>
                                     </a>
                                 </li>
                                 {% endif %}
