@@ -1,0 +1,526 @@
+{% extends "maestra.html" %}
+
+{% block titulo %}Ventana de Pago{% endblock %}
+
+{% block contenido %}
+<!-- Incluye el CDN de Font Awesome para los iconos -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+<style>
+    /* Estilo general del contenedor de pago */
+    .payment-container {
+        background-color: #f7f8fc;
+        padding: 40px;
+        border-radius: 12px;
+        margin-top: 200px;
+        margin-bottom: 100px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        width: 950px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        font-family: 'Arial', sans-serif;
+    }
+
+    /* Panel izquierdo */
+    .payment-left-panel {
+        width: 48%;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Panel derecho */
+    .payment-right-panel {
+        width: 48%;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Título */
+    .payment-title, .title-pasajescomprados {
+        text-align: center;
+        font-size: 24px;
+        color: #1253df;
+        font-weight: bold;
+    }
+
+    /* Estilo de las etapas */
+    .payment-step {
+        display: none;
+    }
+
+    .payment-step.active {
+        display: block;
+    }
+
+    /* Estilo de los formularios */
+    .payment-form-group {
+        margin-bottom: 20px;
+    }
+
+    .payment-form-group label {
+        font-size: 14px;
+        color: #333;
+    }
+
+    .payment-form-group input, .payment-form-group select {
+        width: 100%;
+        padding: 12px;
+        margin-top: 6px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    /* Botones */
+    .payment-btn {
+        width: 100%;
+        padding: 12px;
+        background-color: #1253df;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    .payment-btn:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+    }
+
+    /* Barra de progreso */
+    .payment-progress-bar {
+        width: 100%;
+        height: 6px;
+        background-color: #e0e0e0;
+        margin: 20px 0;
+        border-radius: 5px;
+    }
+
+    .payment-progress {
+        height: 100%;
+        background-color: #1253df;
+        width: 0;
+        border-radius: 5px;
+    }
+
+    /* Previsualización de la compra */
+    .payment-preview {
+        margin-top: 20px;
+    }
+
+    .payment-preview p {
+        margin: 10px 0;
+    }
+
+    .payment-preview .item {
+        font-weight: bold;
+    }
+
+    /* Estilo de la lista de pasajes */
+    .ticket-list {
+        border: 1px solid #ddd;
+        padding: 20px;
+        margin-top: 20px;
+        background-color: #fafafa;
+        border-radius: 12px;
+        height: auto;
+        overflow-y: auto;
+    }
+
+    /* Estilo individual para cada pasaje (más estilo de ticket) */
+    .ticket {
+        background-color: #fff;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 10px 0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        position: relative;
+    }
+
+    /* Icono de eliminar, puede añadir algo de estilo */
+    .ticket i {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        cursor: pointer;
+        color: #1253df;
+        font-size: 20px;
+    }
+
+    .ticket p {
+        margin: 5px 0;
+        font-size: 16px;
+    }
+
+    /* Estilo para las flechas con iconos de FontAwesome */
+    .arrow {
+        cursor: pointer;
+        font-size: 24px;
+        color: #1253df;
+    }
+
+    .ticket-navigation {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    .arrow-left, .arrow-right {
+        font-size: 24px;
+    }
+
+    /* Estilo para los subtítulos de los campos */
+    .card-subtitle {
+        font-size: 13px;
+        color: #777;
+        margin-top: 5px;
+    }
+
+    /* Ocultar y mostrar campos */
+    .hidden {
+        display: none;
+    }
+
+    .visible {
+        display: block;
+    }
+
+    .payment-image {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+    /* Estilo de la imagen del método de pago */
+    .payment-image img {
+        max-width: 150px;
+    }
+
+    /* Notificaciones Toast */
+    .toast {
+        background-color: #f44336;
+        color: white;
+        font-weight: bold;
+    }
+
+</style>
+
+<div class="payment-container container">
+    <!-- Panel izquierdo: Formulario de pago -->
+    <div class="payment-left-panel">
+        <h2 class="payment-title">Proceso de Pago</h2>
+
+        <!-- Barra de progreso -->
+        <div class="payment-progress-bar">
+            <div class="payment-progress" id="progress"></div>
+        </div>
+
+        <!-- Etapa 1: Datos del Cliente -->
+        <div class="payment-step active" id="step-1">
+            <h3>Datos del Cliente</h3>
+            <div class="payment-form-group">
+                <label for="name">Nombre</label>
+                <input type="text" id="name" placeholder="Ingresa tu nombre">
+            </div>
+            <div class="payment-form-group">
+                <label for="email">Correo Electrónico</label>
+                <input type="email" id="email" placeholder="Ingresa tu correo">
+            </div>
+            <button class="payment-btn" id="next-1" onclick="nextStep(1)">Siguiente</button>
+        </div>
+
+        <!-- Etapa 2: Datos del Método de Pago -->
+        <div class="payment-step" id="step-2">
+            <h3>Datos del Método de Pago</h3>
+            <div class="payment-form-group">
+                <label for="payment-method">Método de Pago</label>
+                <select id="payment-method" onchange="updatePaymentMethod()">
+                    <option value="">Selecciona un método de pago</option>
+                    <option value="wallet-yape">YAPE - Billetera Virtual</option>
+                    <option value="wallet-plin">PLIN - Billetera Virtual</option>
+                    <option value="debit-card">Tarjeta de Débito</option>
+                    <option value="credit-card">Tarjeta de Crédito</option>
+                </select>
+            </div>
+            <div class="payment-form-group" id="card-details" class="hidden">
+                <label for="card-number" class="hidden-label">Número de Tarjeta</label>
+                <label id="card-number-subtitle" class="card-subtitle hidden">Número de tu tarjeta</label>
+                <input type="text" id="card-number" placeholder="Ingresa el número de tu tarjeta">
+            </div>
+            <div class="payment-form-group" id="expiry-details" class="hidden">
+                <label for="expiry" class="hidden-label">Fecha de Expiración</label>
+                <label id="expiry-subtitle" class="card-subtitle hidden">Fecha de expiración de la tarjeta</label>
+                <input type="text" id="expiry" placeholder="MM/AA">
+            </div>
+            <div class="payment-image" id="payment-image"></div>
+            <button class="payment-btn" id="next-2" onclick="nextStep(2)">Siguiente</button>
+            <button class="payment-btn mt-3" id="prev-2" onclick="prevStep(2)">Volver</button>
+        </div>
+
+        <!-- Etapa 3: Resumen de la Compra -->
+        <div class="payment-step" id="step-3">
+            <h3>Resumen de la Compra</h3>
+            <div class="payment-preview">
+                <p><span class="item">Cliente:</span> <span id="preview-name"></span></p>
+                <p><span class="item">Correo:</span> <span id="preview-email"></span></p>
+                <p><span class="item">Método de Pago:</span> <span id="preview-payment-method"></span></p>
+                <p id="card-details-preview" class="hidden">
+                    <span class="item">Número de Tarjeta:</span> <span id="preview-card-number"></span><br>
+                    <span class="item">Fecha de Expiración:</span> <span id="preview-expiry"></span>
+                </p>
+                <p><span class="item">Total de Pasajes:</span> <span id="total-price"></span></p>
+            </div>
+            <button class="payment-btn" id="confirm" onclick="confirmPayment()">Confirmar Pago</button>
+            <button class="payment-btn mt-3" id="prev-3" onclick="prevStep(3)">Volver</button>
+        </div>
+    </div>
+
+    <!-- Panel derecho: Información de pasajes -->
+    <div class="payment-right-panel">
+        <h3 class="title-pasajescomprados">Pasajes Comprados</h3>
+
+        <!-- Total de los pasajes -->
+        <div class="payment-preview">
+            <p><strong>Total de Pasajes:</strong> <span id="total-ticket-price"></span></p>
+        </div>
+
+        <!-- Lista de pasajes -->
+        <div class="ticket-list" id="ticket-list">
+            <!-- Un solo pasaje mostrado inicialmente -->
+        </div>
+
+        <!-- Índice de navegación entre los pasajes -->
+        <div class="ticket-navigation">
+            <span id="ticket-index" class="ticket-index">1 de 3</span>
+            <span class="arrow arrow-left" id="prev-ticket" onclick="changeTicket(-1)"><i class="fas fa-chevron-left"></i></span>
+            <span class="arrow arrow-right" id="next-ticket" onclick="changeTicket(1)"><i class="fas fa-chevron-right"></i></span>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notifications -->
+<div id="toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050">
+    <!-- Toast messages will appear here -->
+</div>
+
+<script>
+    let currentStep = 1;
+    let currentTicketIndex = 0;
+    let paymentMethod = "";
+
+    // Datos simulados de pasajes comprados
+    const tickets = [
+        { id: 1, origin: 'Lima', destination: 'Arequipa', date: '2025-06-15', price: 120 },
+        { id: 2, origin: 'Puno', destination: 'Cusco', date: '2025-06-20', price: 90 },
+        { id: 3, origin: 'Tacna', destination: 'Ica', date: '2025-06-25', price: 150 }
+    ];
+
+    // Función para actualizar el método de pago
+    function updatePaymentMethod() {
+        paymentMethod = document.getElementById('payment-method').value;
+        document.getElementById('preview-payment-method').innerText = paymentMethod;
+
+        const cardFields = document.querySelectorAll('#card-number, #expiry');
+        const paymentImage = document.getElementById('payment-image');
+        const cardDetailsPreview = document.getElementById('card-details-preview');
+        const cardLabels = document.querySelectorAll('.hidden-label');
+        const cardSubtitle = document.getElementById('card-number-subtitle');
+        const expirySubtitle = document.getElementById('expiry-subtitle');
+
+        // Mostrar los campos de tarjeta solo si se seleccionan tarjetas
+        if (paymentMethod === 'wallet-yape' || paymentMethod === 'wallet-plin') {
+            // Ocultar los campos de tarjeta
+            cardFields.forEach(field => field.classList.add('hidden'));
+            cardLabels.forEach(label => label.classList.add('hidden'));
+            paymentImage.innerHTML = `<img src="/Static/img/metodos_pago/qr${paymentMethod.split('-')[1].toUpperCase()}.png" alt="Billetera Virtual">`;
+            cardDetailsPreview.classList.add('hidden');
+            cardSubtitle.classList.add('hidden');
+            expirySubtitle.classList.add('hidden');
+        } else {
+            // Mostrar los campos de tarjeta
+            cardFields.forEach(field => field.classList.remove('hidden'));
+            cardLabels.forEach(label => label.classList.remove('hidden'));
+            cardSubtitle.classList.remove('hidden');
+            expirySubtitle.classList.remove('hidden');
+            paymentImage.innerHTML = '';
+            cardDetailsPreview.classList.remove('hidden');
+        }
+    }
+
+    // Función para mostrar la siguiente etapa
+    function nextStep(step) {
+        if (step === 1 && validateClientData()) {
+            setProgressBar(50);
+            currentStep++;
+            showStep(currentStep);
+        } else if (step === 2 && validatePaymentData()) {
+            setProgressBar(100);
+            currentStep++;
+            showStep(currentStep);
+        }
+    }
+
+    function prevStep(step) {
+        if (step === 2) {
+            setProgressBar(25);
+            currentStep--;
+        } else if (step === 3) {
+            setProgressBar(50);
+            currentStep--;
+        }
+        showStep(currentStep);
+    }
+
+    function validateClientData() {
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        if (!name || !email) {
+            showToast('Por favor, completa todos los campos.');
+            return false;
+        }
+        return true;
+    }
+
+    function validatePaymentData() {
+        const cardNumber = document.getElementById('card-number').value;
+        const expiry = document.getElementById('expiry').value;
+
+        if ((paymentMethod === 'wallet-yape' || paymentMethod === 'wallet-plin') && !cardNumber && !expiry) {
+            return true;
+        }
+
+        if (!cardNumber || !expiry) {
+            showToast('Por favor, completa todos los campos de tarjeta.');
+            return false;
+        }
+        return true;
+    }
+
+    function setProgressBar(progress) {
+        document.getElementById('progress').style.width = progress + '%';
+    }
+
+    function showStep(step) {
+        for (let i = 1; i <= 3; i++) {
+            const stepElement = document.getElementById('step-' + i);
+            if (i === step) {
+                stepElement.classList.add('active');
+            } else {
+                stepElement.classList.remove('active');
+            }
+        }
+
+        // Mostrar datos en el resumen de la compra
+        if (step === 2) {
+            document.getElementById('preview-name').innerText = document.getElementById('name').value;
+            document.getElementById('preview-email').innerText = document.getElementById('email').value;
+            document.getElementById('preview-payment-method').innerText = paymentMethod;
+        }
+        if (step === 3) {
+            document.getElementById('preview-card-number').innerText = document.getElementById('card-number').value;
+            document.getElementById('preview-expiry').innerText = document.getElementById('expiry').value;
+        }
+
+        // Calcular el total de los pasajes
+        const totalPrice = tickets.reduce((acc, ticket) => acc + ticket.price, 0);
+        document.getElementById('total-price').innerText = `S/. ${totalPrice}`;
+    }
+
+    function confirmPayment() {
+        showToastGreen('Pago Confirmado. ¡Gracias por tu compra!');
+        setTimeout(function() {
+            window.location.href = "http://127.0.0.1:5000/ecommerce/home/inicio"; // Cambia la URL de la página a la que deseas redirigir
+        }, 2000);
+    }
+
+    // Función para mostrar los toasts
+    function showToast(message) {
+        const toastId = `toast-${Date.now()}`;
+        const toastHTML = `
+            <div id="${toastId}" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        `;
+        document.getElementById('toast-container').innerHTML += toastHTML;
+        const toastElement = document.getElementById(toastId);
+        const toast = new bootstrap.Toast(toastElement, {
+            delay: 2000 // 10 segundos (puedes ajustarlo a tu necesidad)
+        });
+        toast.show();
+    }
+
+    function showToastGreen(message) {
+        const toastId = `toast-${Date.now()}`;
+        const toastHTML = `
+            <div id="${toastId}" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        `;
+        document.getElementById('toast-container').innerHTML += toastHTML;
+        const toastElement = document.getElementById(toastId);
+        const toast = new bootstrap.Toast(toastElement, {
+            delay: 2000 // 2 segundos (puedes ajustarlo según tu necesidad)
+        });
+        toast.show();
+    }
+
+    // Función para cargar un pasaje basado en el índice
+    function loadTicket(index) {
+        const ticket = tickets[index];
+        const ticketListDiv = document.getElementById('ticket-list');
+        ticketListDiv.innerHTML = `
+            <div class="ticket">
+                <p><strong>Origen:</strong> ${ticket.origin}</p>
+                <p><strong>Destino:</strong> ${ticket.destination}</p>
+                <p><strong>Fecha:</strong> ${ticket.date}</p>
+                <p><strong>Precio:</strong> S/. ${ticket.price}</p>
+            </div>
+        `;
+
+        // Actualizar el índice de navegación
+        const ticketIndex = document.getElementById('ticket-index');
+        ticketIndex.innerText = `${index + 1} de ${tickets.length}`;
+
+        // Calcular el total de los pasajes
+        const totalPrice = tickets.reduce((acc, ticket) => acc + ticket.price, 0);
+        document.getElementById('total-ticket-price').innerText = `S/. ${totalPrice}`;
+    }
+
+    // Función para cambiar entre pasajes
+    function changeTicket(direction) {
+        currentTicketIndex += direction;
+        if (currentTicketIndex < 0) {
+            currentTicketIndex = tickets.length - 1;
+        } else if (currentTicketIndex >= tickets.length) {
+            currentTicketIndex = 0;
+        }
+        loadTicket(currentTicketIndex);
+    }
+
+    // Cargar el primer pasaje al inicio
+    window.onload = loadTicket(currentTicketIndex);
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+{% endblock %}

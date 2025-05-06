@@ -54,6 +54,10 @@ DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPO_SERVICIO;
 DROP PROCEDURE IF EXISTS SP_DAR_BAJA_TIPO_SERVICIO;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_SERVICIO;
 
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_MARCA;
+DROP PROCEDURE IF EXISTS SP_EDITAR_MARCA;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_MARCA;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_MARCA;
 -- Luego eliminamos las tablas, primero la que depende de la otra
 DROP TABLE IF EXISTS conf_plantillas;
 DROP TABLE IF EXISTS conf_dmenus;
@@ -70,6 +74,7 @@ DROP TABLE IF EXISTS tipo_personal;
 DROP TABLE IF EXISTS tipo_servicio;
 DROP TABLE IF EXISTS tipo_comprobante;
 DROP TABLE IF EXISTS tipo_documento;
+DROP TABLE IF EXISTS marca;
 
 -- Crear tabla tipo_servicio
 CREATE TABLE tipo_servicio (
@@ -214,11 +219,32 @@ CREATE TABLE conf_plantillas (
     usuario VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE tipo_vehiculo(
-	idTipoVehiculo int AUTO_INCREMENT primary key,
-    nombre varchar(50) not null,
-    capacidad int not null,
+CREATE TABLE nivel(
+    idNivel int AUTO_INCREMENT primary key,
+    nroPiso int not null,
+    tipo_vehiculo int not null,
+    cantidad int not null,
     estado TINYINT not null
+);
+
+CREATE TABLE marca (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    logo VARCHAR(255) NOT NULL,
+    estado BOOLEAN NOT NULL,
+    estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
+    estado_registro INT NOT NULL DEFAULT 1,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL
+);
+
+
+CREATE TABLE tipo_vehiculo (
+    idTipoVehiculo INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    idMarca INT NULL,
+    estado TINYINT NOT NULL,
+    CONSTRAINT fk_tipo_vehiculo_marca FOREIGN KEY (idMarca) REFERENCES marca(id)
 );
 
 -- Crear tabla metodo_pago
@@ -2109,16 +2135,6 @@ insert into ubigeo (ubigeo, departamento, provincia, distrito) values ('250304',
 insert into ubigeo (ubigeo, departamento, provincia, distrito) values ('250305','Ucayali','Padre Abad','Alexander von Humboldt');
 insert into ubigeo (ubigeo, departamento, provincia, distrito) values ('250401','Ucayali','Purus','Purus');
 
-INSERT INTO tipo_vehiculo (nombre,capacidad, estado) 
-VALUES ('MetroRapid X12', 120, 1);  -- Bus articulado eléctrico
-
--- Vehículos especializados
-INSERT INTO tipo_vehiculo (nombre, capacidad, estado) 
-VALUES ('CargoMaster Pro',  40, 1);  -- Camión de carga mediana
-
-INSERT INTO tipo_vehiculo (nombre, capacidad, estado) 
-VALUES ('EcoGlider Prime', 54, 1);
-
 -- Tabla Tipo Usuario
 INSERT INTO tipo_usuario (id,nombre, estado, estado_proceso,estado_registro,fecha_registro, usuario) VALUES (1,'ADMINISTRADOR', 1, 'REGISTRADO',1,'2025-03-06 20:02:56','SYSTEM');
 
@@ -2893,10 +2909,10 @@ DELIMITER ;
 --  tipo vehiculo
 
 -- Eliminar procedimientos existentes (si los hay)
-
-DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPO_VEHICULO;
-DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPO_VEHICULO;
-DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_VEHICULO;
+DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPOVEHICULO;
+DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPOVEHICULO;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPOVEHICULO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPOVEHICULO;
 
 -- Cambiar delimitador para creación de procedimientos
 DELIMITER $$
@@ -2904,36 +2920,53 @@ DELIMITER $$
 -- Procedimiento para insertar tipo de vehículo
 CREATE PROCEDURE SP_INSERTAR_TIPOVEHICULO(
     IN p_nombre VARCHAR(50),
-    IN p_capacidad INT,
+    IN p_idMarca INT,
     OUT MSJ VARCHAR(255),
     OUT MSJ2 VARCHAR(255)
 )
 BEGIN
     DECLARE v_existe INT;
+    DECLARE v_existeMarca INT;
 
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
+        ROLLBACK;
         SET MSJ2 = 'Error inesperado al insertar el tipo de vehículo';
     END;
 
     SET MSJ = NULL;
     SET MSJ2 = NULL;
 
-    -- Validaciones
+    -- Validaciones básicas
     IF p_nombre IS NULL OR p_nombre = '' THEN
         SET MSJ2 = 'El nombre es obligatorio';
-    ELSEIF p_capacidad <= 0 THEN
-        SET MSJ2 = 'La capacidad debe ser mayor a 0';
+    ELSEIF p_idMarca IS NULL OR p_idMarca <= 0 THEN
+        SET MSJ2 = 'Debe indicar una marca válida';
     ELSE
-        SELECT COUNT(*) INTO v_existe FROM tipo_vehiculo WHERE nombre = p_nombre;
-
-        IF v_existe > 0 THEN
-            SET MSJ2 = 'Ya existe un tipo de vehículo con ese nombre';
+        -- Mejora 1: Verificar existencia de la marca
+        SELECT COUNT(*) INTO v_existeMarca
+        FROM marca
+        WHERE idMarca = p_idMarca;
+        
+        IF v_existeMarca = 0 THEN
+            SET MSJ2 = 'La marca indicada no existe';
         ELSE
-            INSERT INTO tipo_vehiculo (nombre, capacidad, estado)
-            VALUES (p_nombre, p_capacidad, 1);
+            -- Verificar duplicados en tipo_vehiculo
+            SELECT COUNT(*) INTO v_existe
+            FROM tipo_vehiculo
+            WHERE nombre = p_nombre
+              AND idMarca = p_idMarca;
 
-            SET MSJ = 'Se registró correctamente el tipo de vehículo';
+            IF v_existe > 0 THEN
+                SET MSJ2 = 'Ya existe un tipo de vehículo con ese nombre y marca';
+            ELSE
+                START TRANSACTION;
+                INSERT INTO tipo_vehiculo (nombre, idMarca, estado)
+                VALUES (p_nombre, p_idMarca, 1);
+                COMMIT;
+
+                SET MSJ = 'Se registró correctamente el tipo de vehículo';
+            END IF;
         END IF;
     END IF;
 END$$
@@ -2942,42 +2975,58 @@ END$$
 CREATE PROCEDURE SP_ACTUALIZAR_TIPOVEHICULO(
     IN p_id INT,
     IN p_nombre VARCHAR(50),
-    IN p_capacidad INT,
+    IN p_idMarca INT,
     IN p_estado TINYINT,
     OUT MSJ VARCHAR(255),
     OUT MSJ2 VARCHAR(255)
 )
 BEGIN
     DECLARE v_existe INT;
+    DECLARE v_existeMarca INT;
 
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
+        ROLLBACK;
         SET MSJ2 = 'Error inesperado al actualizar el tipo de vehículo';
     END;
 
     SET MSJ = NULL;
     SET MSJ2 = NULL;
 
-    -- Validaciones
+    -- Validaciones básicas
     IF p_nombre IS NULL OR p_nombre = '' THEN
         SET MSJ2 = 'El nombre es obligatorio';
-    ELSEIF p_capacidad <= 0 THEN
-        SET MSJ2 = 'La capacidad debe ser mayor a 0';
+    ELSEIF p_idMarca IS NULL OR p_idMarca <= 0 THEN
+        SET MSJ2 = 'Debe indicar una marca válida';
     ELSEIF p_estado NOT IN (0, 1) THEN
         SET MSJ2 = 'El estado debe ser 0 o 1';
     ELSE
-        SELECT COUNT(*) INTO v_existe FROM tipo_vehiculo WHERE idTipoVehiculo = p_id;
+        -- Mejora 1: Verificar existencia de la marca
+        SELECT COUNT(*) INTO v_existeMarca
+        FROM marca
+        WHERE idMarca = p_idMarca;
 
-        IF v_existe = 0 THEN
-            SET MSJ2 = 'El tipo de vehículo no existe';
+        IF v_existeMarca = 0 THEN
+            SET MSJ2 = 'La marca indicada no existe';
         ELSE
-            UPDATE tipo_vehiculo
-            SET nombre = p_nombre,
-                capacidad = p_capacidad,
-                estado = p_estado
+            -- Verificar existencia del tipo
+            SELECT COUNT(*) INTO v_existe
+            FROM tipo_vehiculo
             WHERE idTipoVehiculo = p_id;
 
-            SET MSJ = 'Se actualizó correctamente el tipo de vehículo';
+            IF v_existe = 0 THEN
+                SET MSJ2 = 'El tipo de vehículo no existe';
+            ELSE
+                START TRANSACTION;
+                UPDATE tipo_vehiculo
+                SET nombre   = p_nombre,
+                    idMarca  = p_idMarca,
+                    estado   = p_estado
+                WHERE idTipoVehiculo = p_id;
+                COMMIT;
+
+                SET MSJ = 'Se actualizó correctamente el tipo de vehículo';
+            END IF;
         END IF;
     END IF;
 END$$
@@ -3000,8 +3049,8 @@ BEGIN
     SET MSJ = NULL;
     SET MSJ2 = NULL;
 
-    SELECT COUNT(*) INTO v_existe 
-    FROM tipo_vehiculo 
+    SELECT COUNT(*) INTO v_existe
+    FROM tipo_vehiculo
     WHERE idTipoVehiculo = p_id;
 
     IF v_existe = 0 THEN
@@ -3035,8 +3084,8 @@ BEGIN
     SET MSJ = NULL;
     SET MSJ2 = NULL;
 
-    SELECT COUNT(*) INTO v_existe 
-    FROM tipo_vehiculo 
+    SELECT COUNT(*) INTO v_existe
+    FROM tipo_vehiculo
     WHERE idTipoVehiculo = p_id;
 
     IF v_existe = 0 THEN
@@ -3048,6 +3097,161 @@ BEGIN
         COMMIT;
 
         SET MSJ = 'Tipo de vehículo eliminado correctamente';
+    END IF;
+END$$
+
+-- Restaurar delimitador
+DELIMITER ;
+
+-- Eliminar procedimientos si existen
+DROP PROCEDURE IF EXISTS SP_INSERTAR_NIVEL;
+DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_NIVEL;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_PISO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_NIVEL;
+
+DELIMITER $$
+
+CREATE PROCEDURE SP_INSERTAR_NIVEL(
+    IN p_tipo_vehiculo INT,
+    IN p_cantidad       INT
+)
+BEGIN
+    DECLARE nuevo_nroPiso INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al insertar nivel';
+        SET @MSJ  = NULL;
+    END;
+
+    SET @MSJ  = NULL;
+    SET @MSJ2 = NULL;
+
+    IF p_cantidad > 0 THEN
+        SELECT COUNT(*) + 1
+          INTO nuevo_nroPiso
+        FROM nivel
+        WHERE tipo_vehiculo = p_tipo_vehiculo;
+
+        INSERT INTO nivel (nroPiso, tipo_vehiculo, cantidad, estado)
+        VALUES (nuevo_nroPiso, p_tipo_vehiculo, p_cantidad, 1);
+
+        SET @MSJ = CONCAT(
+            'Nivel insertado correctamente con nroPiso ',
+            nuevo_nroPiso
+        );
+    ELSE
+        SET @MSJ2 = 'La cantidad debe ser mayor a 0';
+    END IF;
+END$$
+
+CREATE PROCEDURE SP_ACTUALIZAR_NIVEL(
+    IN p_idNivel        INT,
+    IN p_nroPiso        INT,
+    IN p_tipo_vehiculo  INT,
+    IN p_cantidad       INT,
+    IN p_estado         TINYINT
+)
+BEGIN
+    DECLARE max_piso INT DEFAULT 0;
+
+    -- Handler para errores inesperados
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al actualizar nivel';
+        SET @MSJ  = NULL;
+    END;
+
+    -- Inicialización de mensajes
+    SET @MSJ  = NULL;
+    SET @MSJ2 = NULL;
+
+    -- Validaciones básicas
+    IF p_cantidad <= 0 THEN
+        SET @MSJ2 = 'La cantidad debe ser mayor a 0';
+    ELSEIF p_nroPiso <= 0 THEN
+        SET @MSJ2 = 'El número de piso debe ser mayor a 0';
+    ELSE
+        -- Obtengo el mayor piso actual para este tipo de vehículo
+        SELECT COALESCE(MAX(nroPiso), 0)
+          INTO max_piso
+        FROM nivel
+        WHERE tipo_vehiculo = p_tipo_vehiculo;
+
+        IF p_nroPiso > max_piso + 1 THEN
+            SET @MSJ2 = 'No puede actualizar a un piso mayor que el siguiente consecutivo';
+        ELSE
+            -- Realizo el UPDATE
+            UPDATE nivel
+            SET nroPiso       = p_nroPiso,
+                tipo_vehiculo = p_tipo_vehiculo,
+                cantidad      = p_cantidad,
+                estado        = p_estado
+            WHERE idNivel = p_idNivel;
+
+            IF ROW_COUNT() = 0 THEN
+                SET @MSJ2 = 'No se encontró el nivel especificado';
+            ELSE
+                SET @MSJ = 'Nivel actualizado correctamente';
+            END IF;
+        END IF;
+    END IF;
+END$$
+
+CREATE PROCEDURE SP_DARBAJA_PISO(
+    IN p_idNivel INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al dar de baja el piso';
+        SET @MSJ  = NULL;
+    END;
+
+    SET @MSJ  = NULL;
+    SET @MSJ2 = NULL;
+
+    UPDATE nivel
+    SET estado = 0
+    WHERE idNivel = p_idNivel;
+
+    SET @MSJ = 'Piso dado de baja correctamente';
+END$$
+
+
+CREATE PROCEDURE SP_ELIMINAR_NIVEL(
+    IN p_idNivel INT
+)
+BEGIN
+    DECLARE piso_actual         INT;
+    DECLARE tipo_vehiculo_act   INT;
+    DECLARE max_piso            INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al eliminar nivel';
+        SET @MSJ  = NULL;
+    END;
+
+    SET @MSJ  = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT nroPiso, tipo_vehiculo
+      INTO piso_actual, tipo_vehiculo_act
+    FROM nivel
+    WHERE idNivel = p_idNivel;
+
+    SELECT MAX(nroPiso)
+      INTO max_piso
+    FROM nivel
+    WHERE tipo_vehiculo = tipo_vehiculo_act;
+
+    IF piso_actual < max_piso THEN
+        SET @MSJ2 = 'Solo se puede eliminar el piso más alto para evitar inconsistencias';
+    ELSE
+        DELETE FROM nivel
+        WHERE idNivel = p_idNivel;
+        SET @MSJ = 'Nivel eliminado correctamente';
     END IF;
 END$$
 
@@ -3817,3 +4021,132 @@ BEGIN
 END $$
 
 DELIMITER ;
+
+-- Crear procedimiento SP_REGISTRAR_MARCA
+DELIMITER $$ 
+CREATE PROCEDURE SP_REGISTRAR_MARCA(
+    IN P_NOMBRE VARCHAR(100),
+    IN P_ESTADO BOOLEAN,
+    IN P_USUARIO VARCHAR(100),
+    IN P_LOGO VARCHAR(255) -- Parámetro para el logo
+)
+BEGIN
+    DECLARE cNombre INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cNombre FROM marca WHERE NOMBRE = P_NOMBRE;
+
+    IF cNombre > 0 THEN
+        SET @MSJ2 = 'La marca ya está registrada';
+    ELSE
+        INSERT INTO marca (NOMBRE, ESTADO, ESTADO_PROCESO, ESTADO_REGISTRO, FECHA_REGISTRO, USUARIO, LOGO) 
+        VALUES (P_NOMBRE, P_ESTADO, DEFAULT, DEFAULT, CURRENT_TIMESTAMP, P_USUARIO, P_LOGO); -- Incluir logo
+
+        SET @MSJ = 'Marca registrada correctamente';
+    END IF;
+END $$ 
+
+-- Crear procedimiento SP_EDITAR_MARCA
+DELIMITER $$ 
+CREATE PROCEDURE SP_EDITAR_MARCA(
+    IN P_ID INT,
+    IN P_NOMBRE VARCHAR(100),
+    IN P_ESTADO BOOLEAN,
+    IN P_LOGO VARCHAR(255) -- Parámetro para el logo
+)
+BEGIN
+    DECLARE cMarca INT;
+    DECLARE cNombre INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cMarca FROM marca WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+    SELECT COUNT(*) INTO cNombre FROM marca WHERE NOMBRE = P_NOMBRE AND ID != P_ID;
+
+    IF cMarca <= 0 THEN
+        SET @MSJ2 = 'Marca no encontrada';
+    ELSEIF cNombre != 0 THEN
+        SET @MSJ2 = 'El nombre de la marca ya existe';
+    ELSE
+        UPDATE marca 
+        SET NOMBRE = P_NOMBRE, 
+            ESTADO = P_ESTADO,
+            LOGO = P_LOGO, -- Actualizar logo
+            ESTADO_PROCESO = 'MODIFICADO',
+            ESTADO_REGISTRO = 1 
+        WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Marca modificada correctamente';
+    END IF;
+END $$ 
+
+-- Crear procedimiento SP_DARBAJA_MARCA
+DELIMITER $$ 
+CREATE PROCEDURE SP_DARBAJA_MARCA(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cMarca INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cMarca FROM marca WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cMarca <= 0 THEN
+        SET @MSJ2 = 'Marca no encontrada';
+    ELSE
+        UPDATE marca 
+        SET ESTADO = 0, 
+            ESTADO_PROCESO = 'DADO DE BAJA' 
+        WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Marca dada de baja correctamente';
+    END IF;
+END $$ 
+
+-- Crear procedimiento SP_ELIMINAR_MARCA
+DELIMITER $$ 
+CREATE PROCEDURE SP_ELIMINAR_MARCA(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cMarca INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cMarca FROM marca WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cMarca <= 0 THEN
+        SET @MSJ2 = 'Marca no encontrada';
+    ELSE
+        UPDATE marca 
+        SET ESTADO_REGISTRO = 2, 
+            ESTADO_PROCESO = 'ELIMINADA' 
+        WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Marca eliminada correctamente';
+    END IF;
+END $$ 
+
+
