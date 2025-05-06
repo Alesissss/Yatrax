@@ -1,0 +1,107 @@
+{% extends "index.html" %}
+
+{% block title %}YATRAX - {{ tittle }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="text-center mb-0">{{ tittle }}</h4>
+                </div>
+                <div class="card-body" autocomplete="off">
+                    <form action="" method="POST" id="formNivel">
+                        <div class="mb-3">
+                            <label for="txt_nroPiso">Nro Piso</label>
+                            <input type="number" name="txt_nroPiso" id="txt_nroPiso" class="form-control"
+                                placeholder="Número de piso"
+                                value="{{ nivel.nroPiso }}"
+                                {% if btnId == "btn_Regresar" %} disabled {% endif %}>
+                        </div>
+                        <div class="mb-3">
+                            <label for="txt_tipoVehiculo">Tipo de Vehículo</label>
+                            <input type="text" name="txt_tipoVehiculo" id="txt_tipoVehiculo" class="form-control"
+                                placeholder="Tipo de vehículo"
+                                value="{{ nivel.tipo_vehiculo}}"
+                                {% if btnId == "btn_Regresar" %} disabled {% endif %}>
+                        </div>
+                        <div class="mb-3">
+                            <label for="txt_cantidad">Cantidad</label>
+                            <input type="number" name="txt_cantidad" id="txt_cantidad" class="form-control"
+                                placeholder="Cantidad de espacios"
+                                value="{{ nivel.cantidad }}"
+                                {% if btnId == "btn_Regresar" %} disabled {% endif %}>
+                        </div>
+                        <div class="mb-3">
+                            <label for="txt_estado">Estado</label>
+                            <select id="txt_estado" name="txt_estado" class="form-control"
+                                {% if btnId == "btn_Regresar" %} disabled {% endif %}>
+                                <option value="1" {% if nivel.estado == 1 or nivel.estado == "activo" %}selected{% endif %}>Activo</option>
+                                <option value="0" {% if nivel.estado == 0 or nivel.estado == "inactivo" %}selected{% endif %}>Inactivo</option>
+                            </select>
+                        </div>
+                        <div class="text-center">
+                            <button id="btn_Listado" type="button" class="btn btn-danger">Volver al listado de niveles</button>
+                            {% if btnId != "btn_Regresar" %}
+                                <button id="{{ btnId }}" type="submit" class="btn btn-primary">Aceptar</button>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    console.log("{{nivel}}")
+    $(document).ready(function () {
+        // ID del nivel para editar/ver
+        let idNivel = "{{ nivel.idNivel if nivel.idNivel is not none else '' }}";
+
+        // Volver al listado
+        $("#btn_Listado, #btn_Regresar").click(function(){
+            window.location.href = "/trabajadores/viajes/GestionarNivel";
+        });
+
+        // Manejo del formulario
+        $('#formNivel').on('submit', function(e) {
+            e.preventDefault();
+
+            let url, tipo;
+            if ($("#btn_Actualizar").length) {
+                url = `/trabajadores/viajes/editarNivel/${idNivel}`;
+                tipo = 'POST';
+            } else if ($("#btn_Registrar").length) {
+                url = '/trabajadores/viajes/registrarNivel';
+                tipo = 'POST';
+            } else {
+                return;
+            }
+
+            $.ajax({
+                url: url,
+                type: tipo,
+                data: $(this).serialize(),
+                success: function(response) {
+                    if(response.Status === "success"){
+                        toastr.success(response.Msj || "Operación exitosa", 'Éxito');
+                        setTimeout(function() {
+                            window.location.href = "/trabajadores/viajes/GestionarNivel";
+                        }, 1000);
+                    } else {
+                        toastr.error(response.Msj || "Ocurrió un error", 'Error');
+                    }
+                },
+                error: function(xhr) {
+                    let errorMsg = xhr.responseJSON ? xhr.responseJSON.Msj : 'Error desconocido';
+                    toastr.error(errorMsg, 'Error');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
