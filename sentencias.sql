@@ -211,12 +211,24 @@ CREATE TABLE nivel(
     estado TINYINT not null
 );
 
-CREATE TABLE tipo_vehiculo(
-	idTipoVehiculo int AUTO_INCREMENT primary key,
-    nombre varchar(50) not null,
-    idMarca int not null,
-    estado TINYINT not null,
-    foreign key idMarca references marca
+CREATE TABLE marca (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    logo VARCHAR(255) NOT NULL,
+    estado BOOLEAN NOT NULL,
+    estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
+    estado_registro INT NOT NULL DEFAULT 1,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL
+);
+
+
+CREATE TABLE tipo_vehiculo (
+    idTipoVehiculo INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    idMarca INT NULL,
+    estado TINYINT NOT NULL,
+    CONSTRAINT fk_tipo_vehiculo_marca FOREIGN KEY (idMarca) REFERENCES marca(id)
 );
 
 -- Crear tabla metodo_pago
@@ -230,18 +242,6 @@ CREATE TABLE metodo_pago (
     fecha_registro DATETIME not null DEFAULT CURRENT_TIMESTAMP, 
     usuario VARCHAR(100) not null
 );
-
-CREATE TABLE marca (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    logo VARCHAR(255) NOT NULL,
-    estado BOOLEAN NOT NULL,
-    estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
-    estado_registro INT NOT NULL DEFAULT 1,
-    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    usuario VARCHAR(100) NOT NULL
-);
-
 
 -- INSERTS DE UBIGEO
 insert into ubigeo (ubigeo, departamento, provincia, distrito) values ('010101','Amazonas','Chachapoyas','Chachapoyas');
@@ -2118,16 +2118,6 @@ insert into ubigeo (ubigeo, departamento, provincia, distrito) values ('250303',
 insert into ubigeo (ubigeo, departamento, provincia, distrito) values ('250304','Ucayali','Padre Abad','Neshuya');
 insert into ubigeo (ubigeo, departamento, provincia, distrito) values ('250305','Ucayali','Padre Abad','Alexander von Humboldt');
 insert into ubigeo (ubigeo, departamento, provincia, distrito) values ('250401','Ucayali','Purus','Purus');
-
-INSERT INTO tipo_vehiculo (nombre,capacidad, estado) 
-VALUES ('MetroRapid X12', 120, 1);  -- Bus articulado eléctrico
-
--- Vehículos especializados
-INSERT INTO tipo_vehiculo (nombre, capacidad, estado) 
-VALUES ('CargoMaster Pro',  40, 1);  -- Camión de carga mediana
-
-INSERT INTO tipo_vehiculo (nombre, capacidad, estado) 
-VALUES ('EcoGlider Prime', 54, 1);
 
 -- Tabla Tipo Usuario
 INSERT INTO tipo_usuario (id,nombre, estado, estado_proceso,estado_registro,fecha_registro, usuario) VALUES (1,'ADMINISTRADOR', 1, 'REGISTRADO',1,'2025-03-06 20:02:56','SYSTEM');
