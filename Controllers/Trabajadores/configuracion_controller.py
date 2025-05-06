@@ -277,7 +277,7 @@ def activar_plantilla(id):  # Recibe el ID de la URL
 def Menu_MetodosPago():
     # Captura el mensaje de la URL, si existe
     msg = request.args.get('msg', '')
-    return render_template('configuracion/metodos_pago.html', active_page="metodos_pago", active_menu='mMetodosPago', msg=msg)
+    return render_template('configuracion/metodos_pago.html', active_page="metodos_pago", active_menu='mConfiguracion', msg=msg)
 
 # Ruta para registrar un nuevo método de pago
 @configuracion_bp.route('/MetodoPagoNuevo', methods=['GET', 'POST'])
@@ -401,6 +401,5 @@ def dar_baja_metodo_pago(id):
         return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
 
 # ENG REGION METODOS DE PAGO
-
 
 # END FUNCIONES

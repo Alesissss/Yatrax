@@ -31,8 +31,14 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
     <style>
-        #map { height: 500px; width: 100%; }
-        #info { margin-top: 10px; }
+        #map {
+            height: 500px;
+            width: 100%;
+        }
+
+        #info {
+            margin-top: 10px;
+        }
     </style>
 
     {% block styles %}{% endblock %}
@@ -224,13 +230,6 @@
                                 {% endif %}
                                 {% if 41 in session['menus'] %}
                                 <li class="nav-item">
-                                    <a href="{{ url_for('viajes.Menu_Nivel') }}"
-                                        class="nav-link {% if active_page == 'nivel' %}active{% endif %}">
-                                        <i class="bi bi-bus-front nav-icon"></i>
-                                        <p>Gestionar Nivel</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
                                     <a href="{{ url_for('viajes.Menu_TipoVehiculo') }}"
                                         class="nav-link {% if active_page == 'tipoVehiculo' %}active{% endif %}">
                                         <i class="bi bi-bus-front nav-icon"></i>
@@ -240,6 +239,15 @@
                                 {% endif %}
                                 {% if 42 in session['menus'] %}
                                 <li class="nav-item">
+                                    <a href="{{ url_for('viajes.Menu_Nivel') }}"
+                                        class="nav-link {% if active_page == 'nivel' %}active{% endif %}">
+                                        <i class="bi bi-bus-front nav-icon"></i>
+                                        <p>Gestionar niveles</p>
+                                    </a>
+                                </li>
+                                {% endif %}
+                                {% if 43 in session['menus'] %}
+                                <li class="nav-item">
                                     <a href="{{ url_for('viajes.Menu_Sucursal') }}"
                                         class="nav-link {% if active_page == 'sucursal' %}active{% endif %}">
                                         <i class="bi bi-building nav-icon"></i>
@@ -247,13 +255,24 @@
                                     </a>
                                 </li>
                                 {% endif %}
+                                {% if 44 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('viajes.Menu_Marcas') }}"
-                                        class="nav-link {% if active_page == 'sucursal' %}active{% endif %}">
+                                        class="nav-link {% if active_page == 'marcas' %}active{% endif %}">
                                         <i class="bi bi-building nav-icon"></i>
-                                        <p>Gestionar Marcas</p>
+                                        <p>Gestionar marcas</p>
                                     </a>
                                 </li>
+                                {% endif %}
+                                {% if 45 in session['menus'] %}
+                                <li class="nav-item">
+                                    <a href="{{ url_for('viajes.Menu_Rutas') }}"
+                                        class="nav-link {% if active_page == 'ruta' %}active{% endif %}">
+                                        <i class="bi bi-map nav-icon"></i>
+                                        <p>Gestionar rutas</p>
+                                    </a>
+                                </li>
+                                {% endif %}
                             </ul>
                         </li>
                         {% endif %}
@@ -410,9 +429,9 @@
     <script src="/Static/plugins/datatables-test/datatables.min.js"></script>
 
     <script>
-        window.addEventListener('beforeunload', function () {
-            document.querySelector('.preloader').style.display = 'flex';
-        });
+        // window.addEventListener('beforeunload', function () {
+        //     document.querySelector('.preloader').style.display = 'flex';
+        // });
 
         document.addEventListener('DOMContentLoaded', function () {
             const btnDarkMode = document.getElementById('btn-darkmode');
@@ -425,6 +444,24 @@
                 navbar.classList.add('navbar-dark');
                 icon.classList.remove('fa-moon');
                 icon.classList.add('fa-sun');
+
+                document.querySelectorAll('.select2-container--bootstrap4 .select2-selection').forEach(el => {
+                    el.style.backgroundColor = '#1f2d3d';
+                    el.style.color = '#fff';
+                });
+
+                document.querySelectorAll('.select2-container--bootstrap4 .select2-selection__rendered').forEach(el => {
+                    el.style.color = '#fff';
+                });
+
+                document.querySelectorAll('.select2-container--bootstrap4 .select2-selection__placeholder').forEach(el => {
+                    el.style.color = '#ccc';
+                });
+
+                document.querySelectorAll('.select2-dropdown').forEach(el => {
+                    el.style.backgroundColor = '#1f2d3d';
+                    el.style.color = '#fff';
+                });
             }
 
             btnDarkMode.addEventListener('click', function (e) {
@@ -447,6 +484,39 @@
                 }
             });
         });
+
+        function actualizarEstiloSelect2DarkMode() {
+            const esModoOscuro = document.body.classList.contains('dark-mode');
+
+            if (esModoOscuro) {
+                $('.select2-container--bootstrap4 .select2-selection').css({
+                    'background-color': '#1f2d3d',
+                    'color': '#fff'
+                });
+
+                $('.select2-container--bootstrap4 .select2-selection__rendered').css('color', '#fff');
+                $('.select2-container--bootstrap4 .select2-selection__placeholder').css('color', '#ccc');
+                $('.select2-dropdown').css({
+                    'background-color': '#1f2d3d',
+                    'color': '#fff'
+                });
+            } else {
+                $('.select2-container--bootstrap4 .select2-selection').css({
+                    'background-color': '',
+                    'color': ''
+                });
+
+                $('.select2-container--bootstrap4 .select2-selection__rendered').css('color', '');
+                $('.select2-container--bootstrap4 .select2-selection__placeholder').css('color', '');
+                $('.select2-dropdown').css({
+                    'background-color': '',
+                    'color': ''
+                });
+            }
+        }
+
+        const observer = new MutationObserver(actualizarEstiloSelect2DarkMode);
+        observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
         function loadBigModal(url, title) {
             $.ajax({

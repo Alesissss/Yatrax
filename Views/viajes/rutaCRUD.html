@@ -13,14 +13,27 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-12 mb-3">
-                            <label for="txt_TipoUsuario">Nombre</label>
+                            <label for="txt_Ruta">Nombre</label>
                             <div class="input-group">
-                                <input type="text" id="txt_TipoUsuario" class="form-control" placeholder="Nombre"
-                                    value="{{ tipoUsuario.nombre }}" oninput="this.value = this.value.toUpperCase();" {%
-                                    if btnId=='btn_Aceptar' %}disabled{% endif %}>
-                                <div class="input-group-append">
-                                    <div class="input-group-text"><i class="fas fa-user"></i></div>
-                                </div>
+                                <input type="text" id="txt_Ruta" class="form-control" placeholder="Nombre"
+                                    value="{{ ruta.nombre }}" oninput="this.value = this.value.toUpperCase();" {% if
+                                    btnId=='btn_Aceptar' %}disabled{% endif %}>
+                            </div>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label for="cbx_Origen">Sucursal origen</label>
+                            <div class="input-group">
+                                <select id="cbx_Origen" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{%
+                                    endif %}>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label for="cbx_Destino">Sucursal destino</label>
+                            <div class="input-group">
+                                <select id="cbx_Destino" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{%
+                                    endif %}>
+                                </select>
                             </div>
                         </div>
                         <div class="col-md-12 mb-3">
@@ -29,15 +42,14 @@
                                 <select id="cbx_Estado" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{%
                                     endif %}>
                                     <option disabled>--SELECCIONAR--</option>
-                                    <option {% if tipoUsuario.estado==1 %}selected{% endif %} value="1">Vigente</option>
-                                    <option {% if tipoUsuario.estado==0 %}selected{% endif %} value="0">No vigente
-                                    </option>
+                                    <option {% if ruta.estado==1 %}selected{% endif %} value="1">Vigente</option>
+                                    <option {% if ruta.estado==0 %}selected{% endif %} value="0">No vigente</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-12 text-center">
                             <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de
-                                tipos de usuarios</button>
+                                rutas</button>
                             <button id="{{ btnId }}" type="button" class="btn btn-primary">Aceptar</button>
                         </div>
                     </div>
@@ -49,24 +61,90 @@
 {% endblock %}
 {% block scripts %}
 <script>
+    function fct_GetSucursales() {
+        $.getJSON('/trabajadores/viajes/GetSucursales', function (response) {
+            if (response.Status === 'success') {
+                let itemsOrigen = [];
+                let itemsDestino = [];
+
+                $.each(response.data, function (index, item) {
+                    itemsOrigen.push({
+                        id: item.id,
+                        text: item.id + " - " + item.nombre
+                    });
+
+                    itemsDestino.push({
+                        id: item.id,
+                        text: item.id + " - " + item.nombre
+                    });
+                });
+
+                $('#cbx_Origen').select2({
+                    theme: 'bootstrap4',
+                    containerCss: {
+                        'background-color': '#1f2d3d',
+                    },
+                    placeholder: "Buscar...",
+                    data: itemsOrigen,
+                    language: {
+                        noResults: function () {
+                            return "No se encontraron resultados";
+                        }
+                    },
+                    allowClear: true
+                });
+
+                $('#cbx_Destino').select2({
+                    theme: 'bootstrap4',
+                    containerCss: {
+                        'background-color': '#1f2d3d',
+                    },
+                    placeholder: "Buscar...",
+                    data: itemsDestino,
+                    language: {
+                        noResults: function () {
+                            return "No se encontraron resultados";
+                        }
+                    },
+                    allowClear: true
+                });
+
+                $('#cbx_Origen').val("{{ ruta.idOrigen }}").trigger('change');
+                $('#cbx_Destino').val("{{ ruta.idDestino }}").trigger('change');
+
+            } else {
+                console.error('Error al obtener las sucursales:', response.Msj);
+            }
+        });
+    }
+
     $(document).ready(function () {
+        fct_GetSucursales();
+
         $("#btn_Registrar").click(function () {
-            let nombre = $("#txt_TipoUsuario").val().trim();
+            let nombre = $("#txt_Ruta").val().trim();
+            let idOrigen = $('#cbx_Origen').val();
+            let idDestino = $('#cbx_Destino').val();
             let estado = $('#cbx_Estado').val();
 
-            if (!nombre || !estado) {
+            if (!nombre || !idOrigen || !idDestino || !estado) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                return;
+            }
+
+            if (idOrigen === idDestino){
+                toastr.warning("La sucursal de origen no puede ser la misma que la de destino", "MENSAJE DE SISTEMA");
                 return;
             }
 
             Swal.fire({
                 title: "¿Estás seguro?",
-                text: "Esta acción registrará al tipo usuario. ¿Deseas continuar?",
+                text: "Esta acción registrará a la ruta. ¿Deseas continuar?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
                 cancelButtonColor: "#d33",
-                confirmButtonText: "Sí, registrar tipo usuario",
+                confirmButtonText: "Sí, registrar ruta",
                 cancelButtonText: "Cancelar",
                 reverseButtons: true
             }).then((result) => {
@@ -74,10 +152,12 @@
 
                     let formData = new FormData();
                     formData.append("nombre", nombre);
+                    formData.append("origen", idOrigen);
+                    formData.append("destino", idDestino);
                     formData.append("estado", estado);
 
                     $.ajax({
-                        url: "/trabajadores/usuarios/RegistrarTipoUsuario",
+                        url: "/trabajadores/viajes/RegistrarRuta",
                         type: "POST",
                         processData: false,
                         contentType: false,
@@ -90,7 +170,7 @@
                                 } else {
                                     toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                                     setTimeout(() => {
-                                        window.location.href = "/trabajadores/usuarios/GestionarTipoUsuario";
+                                        window.location.href = "/trabajadores/viajes/GestionarRutas";
                                     }, 500);
                                 }
                             } else {
@@ -108,24 +188,31 @@
         });
 
         $("#btn_Editar").click(function () {
-            const id = Number("{{ tipoUsuario.id }}");
+            const id = Number("{{ ruta.id }}");
 
-            let nombre = $("#txt_TipoUsuario").val().trim();
+            let nombre = $("#txt_Ruta").val().trim();
+            let idOrigen = $('#cbx_Origen').val();
+            let idDestino = $('#cbx_Destino').val();
             let estado = $('#cbx_Estado').val();
 
-            if (!nombre || !estado) {
+            if (!nombre || !idOrigen || !idDestino || !estado) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                return;
+            }
+
+            if (idOrigen === idDestino){
+                toastr.warning("La sucursal de origen no puede ser la misma que la de destino", "MENSAJE DE SISTEMA");
                 return;
             }
 
             Swal.fire({
                 title: "¿Estás seguro?",
-                text: "Esta acción modificará al usuario. ¿Deseas continuar?",
+                text: "Esta acción modificará a la ruta. ¿Deseas continuar?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
                 cancelButtonColor: "#d33",
-                confirmButtonText: "Sí, editar tipo usuario",
+                confirmButtonText: "Sí, editar ruta",
                 cancelButtonText: "Cancelar",
                 reverseButtons: true
             }).then((result) => {
@@ -133,10 +220,12 @@
 
                     let formData = new FormData();
                     formData.append("nombre", nombre);
+                    formData.append("origen", idOrigen);
+                    formData.append("destino", idDestino);
                     formData.append("estado", estado);
 
                     $.ajax({
-                        url: `/trabajadores/usuarios/EditarTipoUsuario/${id}`,
+                        url: `/trabajadores/viajes/EditarRuta/${id}`,
                         type: "POST",
                         processData: false,
                         contentType: false,
@@ -145,7 +234,7 @@
                             if (response.Status === "success") {
                                 toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                                 setTimeout(() => {
-                                    window.location.href = "/trabajadores/usuarios/GestionarTipoUsuario";
+                                    window.location.href = "/trabajadores/viajes/GestionarRutas";
                                 }, 500);
                             } else {
                                 toastr.error(response.Msj, "MENSAJE DE SISTEMA");
@@ -160,11 +249,11 @@
         });
 
         $("#btn_Aceptar").click(function () {
-            window.location.href = "/trabajadores/usuarios/GestionarTipoUsuario";
+            window.location.href = "/trabajadores/viajes/GestionarRutas";
         });
 
         $("#btn_Volver").click(function () {
-            window.location.href = "/trabajadores/usuarios/GestionarTipoUsuario";
+            window.location.href = "/trabajadores/viajes/GestionarRutas";
         });
     });
 </script>

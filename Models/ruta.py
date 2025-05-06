@@ -17,7 +17,9 @@ class Ruta:
     def obtener_todos(cls):
         conexion = bd.Conexion()
         try:
-            rutas = conexion.obtener("SELECT * FROM ruta where estado_registro = 1")
+            rutas = conexion.obtener(""" SELECT r.id, r.nombre, r.sucursalOrigen as idOrigen, so.nombre AS nombreOrigen, r.sucursalDestino as idDestino, 
+                                     sd.nombre AS nombreDestino, r.estado FROM ruta r INNER JOIN sucursal so ON r.sucursalOrigen = so.id INNER JOIN 
+                                     sucursal sd ON r.sucursalDestino = sd.id WHERE r.estado_registro = 1 """)
             return rutas
         finally:
             conexion.cerrar()
@@ -26,7 +28,9 @@ class Ruta:
     def obtener_por_id(cls, ruta_id):
         conexion = bd.Conexion()
         try:
-            ruta = conexion.obtener("SELECT * FROM ruta WHERE estado_registro = 1 AND id = %s", (ruta_id,))
+            ruta = conexion.obtener("SELECT r.id, r.nombre, r.sucursalOrigen as idOrigen, so.nombre AS nombreOrigen, r.sucursalDestino as idDestino, r.estado FROM ruta r INNER JOIN " 
+                                     "sucursal so ON r.sucursalOrigen = so.id INNER JOIN sucursal sd ON r.sucursalDestino = sd.id WHERE "
+                                     "r.estado_registro = 1 AND r.id = %s", (ruta_id,))
             return ruta[0] if ruta else None
         finally:
             conexion.cerrar()

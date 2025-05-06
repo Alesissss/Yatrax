@@ -22,7 +22,7 @@ class Sucursal:
             query = """
                 SELECT id, ubigeo, nombre, direccion, latitud, longitud, estado, 
                        estado_proceso, estado_registro, fecha_registro, usuario
-                FROM sucursal
+                FROM sucursal WHERE estado_registro = 1
             """
             return conexion.obtener(query)
         finally:
@@ -35,7 +35,7 @@ class Sucursal:
             query = """
                 SELECT id, ubigeo, nombre, direccion, latitud, longitud, estado, 
                        estado_proceso, estado_registro, fecha_registro, usuario
-                FROM sucursal WHERE id = %s
+                FROM sucursal WHERE estado_registro = 1 AND id = %s 
             """
             resultado = conexion.obtener(query, (id,))
             return resultado[0] if resultado else None
