@@ -236,15 +236,21 @@ header {
 
 .lista-desplegable {
   display: none;
-  position: absolute;
+  position: fixed;          /* del bloque de más abajo */
   background-color: #f9f9f9;
   min-width: 180px;
   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  z-index: +10;
+  z-index: 10;              /* corregido: no uses +10, solo 10 */
   border-radius: 4px;
   padding: 0;
   margin-top: 5px;
+  justify-content: center;  /* del bloque de más abajo */
+  align-items: center;      /* del bloque de más abajo */
+  width: 15px;              /* del bloque de más abajo */
+  height: auto;             /* del bloque de más abajo */
+  gap: 5px;                 /* del bloque de más abajo */
 }
+
 
 /* Mostrar la lista cuando está activa */
 .lista-desplegable.mostrar {
