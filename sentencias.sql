@@ -203,6 +203,14 @@ CREATE TABLE conf_plantillas (
     usuario VARCHAR(100) NOT NULL
 );
 
+CREATE TABLE nivel(
+    idNivel int AUTO_INCREMENT primary key,
+    nroPiso int not null,
+    tipo_vehiculo int not null,
+    cantidad int not null,
+    estado TINYINT not null
+);
+
 CREATE TABLE tipo_vehiculo(
 	idTipoVehiculo int AUTO_INCREMENT primary key,
     nombre varchar(50) not null,
@@ -3047,6 +3055,151 @@ BEGIN
         COMMIT;
 
         SET MSJ = 'Tipo de vehículo eliminado correctamente';
+    END IF;
+END$$
+
+-- Eliminar procedimientos si existen
+DROP PROCEDURE IF EXISTS SP_INSERTAR_NIVEL;
+DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_NIVEL;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_PISO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_NIVEL;
+
+DELIMITER $$
+
+CREATE PROCEDURE SP_INSERTAR_NIVEL(
+    IN p_tipo_vehiculo INT,
+    IN p_cantidad       INT
+)
+BEGIN
+    DECLARE nuevo_nroPiso INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al insertar nivel';
+        SET @MSJ  = NULL;
+    END;
+
+    SET @MSJ  = NULL;
+    SET @MSJ2 = NULL;
+
+    IF p_cantidad > 0 THEN
+        SELECT COUNT(*) + 1
+          INTO nuevo_nroPiso
+        FROM nivel
+        WHERE tipo_vehiculo = p_tipo_vehiculo;
+
+        INSERT INTO nivel (nroPiso, tipo_vehiculo, cantidad, estado)
+        VALUES (nuevo_nroPiso, p_tipo_vehiculo, p_cantidad, 1);
+
+        SET @MSJ = CONCAT(
+            'Nivel insertado correctamente con nroPiso ',
+            nuevo_nroPiso
+        );
+    ELSE
+        SET @MSJ2 = 'La cantidad debe ser mayor a 0';
+    END IF;
+END$$
+
+
+CREATE PROCEDURE SP_ACTUALIZAR_NIVEL(
+    IN p_idNivel        INT,
+    IN p_nroPiso        INT,
+    IN p_tipo_vehiculo  INT,
+    IN p_cantidad       INT
+)
+BEGIN
+    DECLARE max_piso INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al actualizar nivel';
+        SET @MSJ  = NULL;
+    END;
+
+    SET @MSJ  = NULL;
+    SET @MSJ2 = NULL;
+
+    IF p_cantidad <= 0 THEN
+        -- Abortamos si la cantidad no es válida
+        SET @MSJ2 = 'La cantidad debe ser mayor a 0';
+    ELSE
+        -- Obtenemos el mayor piso existente para el tipo de vehículo
+        SELECT MAX(nroPiso)
+          INTO max_piso
+        FROM nivel
+        WHERE tipo_vehiculo = p_tipo_vehiculo;
+
+        IF p_nroPiso > max_piso + 1 THEN
+            SET @MSJ2 = 'No puede actualizar a un piso mayor que el siguiente consecutivo';
+        ELSE
+            -- Actualizamos el registro
+            UPDATE nivel
+            SET nroPiso       = p_nroPiso,
+                tipo_vehiculo = p_tipo_vehiculo,
+                cantidad      = p_cantidad,
+                estado        = 1
+            WHERE idNivel = p_idNivel;
+
+            SET @MSJ = 'Nivel actualizado correctamente';
+        END IF;
+    END IF;
+END$$
+
+
+CREATE PROCEDURE SP_DARBAJA_PISO(
+    IN p_idNivel INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al dar de baja el piso';
+        SET @MSJ  = NULL;
+    END;
+
+    SET @MSJ  = NULL;
+    SET @MSJ2 = NULL;
+
+    UPDATE nivel
+    SET estado = 0
+    WHERE idNivel = p_idNivel;
+
+    SET @MSJ = 'Piso dado de baja correctamente';
+END$$
+
+
+CREATE PROCEDURE SP_ELIMINAR_NIVEL(
+    IN p_idNivel INT
+)
+BEGIN
+    DECLARE piso_actual         INT;
+    DECLARE tipo_vehiculo_act   INT;
+    DECLARE max_piso            INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al eliminar nivel';
+        SET @MSJ  = NULL;
+    END;
+
+    SET @MSJ  = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT nroPiso, tipo_vehiculo
+      INTO piso_actual, tipo_vehiculo_act
+    FROM nivel
+    WHERE idNivel = p_idNivel;
+
+    SELECT MAX(nroPiso)
+      INTO max_piso
+    FROM nivel
+    WHERE tipo_vehiculo = tipo_vehiculo_act;
+
+    IF piso_actual < max_piso THEN
+        SET @MSJ2 = 'Solo se puede eliminar el piso más alto para evitar inconsistencias';
+    ELSE
+        DELETE FROM nivel
+        WHERE idNivel = p_idNivel;
+        SET @MSJ = 'Nivel eliminado correctamente';
     END IF;
 END$$
 
