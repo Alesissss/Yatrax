@@ -3,6 +3,7 @@ from flask import Blueprint, request, jsonify, render_template, session, flash, 
 from Models.tipoCliente import TipoCliente
 from Models.tipoServicio import TipoServicio
 from Models.tipoComprobante import TipoComprobante
+from Models.tipoDocumento import TipoDocumento
 
 ventas_bp = Blueprint('ventas', __name__, url_prefix='/trabajadores/ventas')
 
@@ -78,7 +79,16 @@ def Menu_TipoServicio():
 def Menu_TipoServicioNuevo():
     return render_template('ventas/tipoServicioCRUD.html', active_page="tipoServicio", active_menu = 'mVentas', tiposervicio = {}, tittle = 'Registrar Tipo Servicio', btnId = 'btn_Registrar')
 
+@ventas_bp.route('/GestionarTipoDocumento')
+def Menu_TipoDocumento():
+    return render_template('ventas/tipoDocumento.html', active_page="tipoDocumento", active_menu = 'mVentas')
+
+@ventas_bp.route('/TipoDocumentoNuevo')
+def Menu_TipoDocumentoNuevo():
+    return render_template('ventas/tipoDocumentoCRUD.html', active_page="tipoDocumento", active_menu = 'mVentas', tipoDocumento = {}, tittle = 'Registrar Tipo Documento', btnId = 'btn_Registrar')
 # END VIEWS
+
+# FUNCIONES
 
 # REGION TIPO CLIENTE #
 
@@ -407,7 +417,110 @@ def eliminar_tipo_servicio(id):
 
 # END REGION TIPO SERVICIO #
 
+# REGION TIPO DOCUMENTO #
+@ventas_bp.route("/GetData_TipoDocumento", methods=["GET"])
+def get_tipo_documento():
+    try:
+        tipos = TipoDocumento.obtener_todos()
+        return jsonify({'data': tipos, 'Status': 'success', 'Msj': 'Listado de tipos de documentos retornado exitosamente'})
+    except Exception as e:
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar tipos de documentos: {repr(e)}'})
 
-# FUNCIONES
+@ventas_bp.route("/RegistrarTipoDocumento", methods=["POST"])
+def registrar_tipo_documento():
+    try:
+        nombre = request.form.get("nombre").strip()
+        abreviatura = request.form.get("abreviatura").strip()
+        estado = request.form.get("estado")
+        usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
+
+
+        if not nombre or not abreviatura:
+            return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
+
+        mensajes = TipoDocumento.registrar(nombre, abreviatura, estado, usuario_actual)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", "Msj": msj1, "Msj2": ""})
+        elif msj2:
+            return jsonify({"Status": "success", "Msj": "", "Msj2": msj2})
+        else:
+            return jsonify({"Status": "error", "Msj": "Error desconocido al registrar tipo de documento"})
+
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
+    
+@ventas_bp.route("/EditarTipoDocumento/<int:id>", methods=['GET','POST'])
+def editar_tipo_documento(id):
+    try:
+        tipoDocumento =  TipoDocumento.obtener_por_id(id)
+        if request.method == 'POST':
+            nombre = request.form.get("nombre").strip()
+            abreviatura = request.form.get("abreviatura").strip()
+            estado = request.form.get("estado").strip()
+
+            if not nombre or  not abreviatura or estado not in ["0", "1"]:
+                return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios y válidos"})
+
+            mensajes = TipoDocumento.editar(id, nombre, abreviatura, estado)
+            msj1 = mensajes.get('@MSJ')
+            msj2 = mensajes.get('@MSJ2')
+
+            if msj1:
+                return jsonify({"Status": "success", "Msj": msj1, "Msj2": ""})
+            elif msj2:
+                return jsonify({"Status": "success", "Msj": "", "Msj2": msj2})
+            else:
+                return jsonify({"Status": "error", "Msj": "Error desconocido al actualizar tipo de documento"})
+        if tipoDocumento:
+            return render_template('ventas/tipoDocumentoCRUD.html', active_page = 'tipoDocumento', active_menu = 'mVentas', tipoDocumento = tipoDocumento, tittle = 'Editar tipo documento', btnId = 'btn_Editar')
+        return render_template('ventas/tipoDocumento.html', active_page = 'tipoDocumento', active_menu = 'mVentas', tipoDocumento = {}, tittle = 'Editar tipo documento', btnId = 'btn_Editar')
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
+    
+@ventas_bp.route("/DarBajaTipoDocumento/<int:id>", methods=["POST"])
+def dar_baja_tipo_documento(id):
+    try:
+        mensajes = TipoDocumento.darBaja(id)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", "Msj": msj1, "Msj2": ""})
+        elif msj2:
+            return jsonify({"Status": "success", "Msj": "", "Msj2": msj2})
+        else:
+            return jsonify({"Status": "error", "Msj": "Error desconocido al dar de baja tipo de documento"})
+
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
+    
+@ventas_bp.route("/VerTipoDocumento/<int:id>", methods=["GET"])
+def ver_tipo_documento(id):
+    try:
+        tipo_documento = TipoDocumento.obtener_por_id(id)
+        if tipo_documento:
+            return render_template("ventas/tipoDocumentoCRUD.html", active_page="tipo_documento", active_menu='mVentas', tipo_documento=tipo_documento, tittle='Ver tipo documento', btnId='btn_Aceptar')
+        return render_template("ventas/tipoDocumentoCRUD.html", active_page="tipo_documento", active_menu='mVentas', tipo_documento={}, tittle='Ver tipo documento', btnId='btn_Aceptar')
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
+    
+@ventas_bp.route("/EliminarTipoDocumento/<int:id>", methods=['POST'])
+def eliminar_tipo_documento(id):
+    try:
+        mensajes = TipoDocumento.eliminar_tipo_documento(id)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+    except Exception as e:
+        return jsonify({"Status": "Error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+# END REGION TIPO DOCUMENTO #
 
 # END FUNCIONES

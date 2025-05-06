@@ -34,6 +34,10 @@ DROP PROCEDURE IF EXISTS SP_REGISTRAR_TIPO_PERSONAL;
 DROP PROCEDURE IF EXISTS SP_EDITAR_TIPO_PERSONAL;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPO_PERSONAL;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_PERSONAL;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_TIPO_DOCUMENTO;
+DROP PROCEDURE IF EXISTS SP_EDITAR_TIPO_DOCUMENTO;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPO_DOCUMENTO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_DOCUMENTO;
 
 DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPOVEHICULO;
@@ -69,6 +73,7 @@ DROP TABLE IF EXISTS metodo_pago;
 DROP TABLE IF EXISTS tipo_personal;
 DROP TABLE IF EXISTS tipo_servicio;
 DROP TABLE IF EXISTS tipo_comprobante;
+DROP TABLE IF EXISTS tipo_documento;
 DROP TABLE IF EXISTS marca;
 
 -- Crear tabla tipo_servicio
@@ -107,6 +112,17 @@ create table ubigeo(
 CREATE TABLE tipo_personal (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL,
+    estado BOOLEAN NOT NULL,
+    estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
+    estado_registro INT NOT NULL DEFAULT 1,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) not null
+);
+
+CREATE TABLE tipo_documento(
+    id int AUTO_INCREMENT PRIMARY KEY,
+    nombre varchar(50) NOT NULL,
+    abreviatura varchar(10) NOT NULL,
     estado BOOLEAN NOT NULL,
     estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
     estado_registro INT NOT NULL DEFAULT 1,
@@ -170,6 +186,19 @@ CREATE TABLE sucursal (
     latitud DECIMAL(8,6) NOT NULL,
     longitud DECIMAL(9,6) NOT NULL,
     estado TINYINT NOT NULL DEFAULT 1,
+    estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
+    estado_registro INT NOT NULL DEFAULT 1,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL
+);
+
+-- Crear tabla sucursal
+CREATE TABLE ruta (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre CHAR(6) NOT NULL,
+    sucursalOrigen INT NOT NULL,    
+    sucursalOrigen INT NOT NULL,
+    estado BOOLEAN NOT NULL DEFAULT 1,
     estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
     estado_registro INT NOT NULL DEFAULT 1,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -2143,6 +2172,7 @@ INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (22, 'Gestionar mét
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (30, 'Gestionar tipo comprobante', 1, 3);
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (31, 'Gestionar tipo cliente', 1, 3);
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (32, 'Gestionar tipo servicio', 1, 3);
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (33, 'Gestionar tipo documento', 1, 3);
 -- Submenús de VIAJES
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (40, 'Gestionar horarios', 1, 4);
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (41, 'Gestionar tipo vehículo', 1, 4);
@@ -2170,6 +2200,7 @@ INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (22, 1);
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (30, 1);
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (31, 1);
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (32, 1);
+INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (33, 1);
 -- Submenús de "VIAJES"
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (40, 1);
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (41, 1);
@@ -3328,8 +3359,137 @@ BEGIN
 END $$
 DELIMITER ;
 
--- Crear procedimiento SP_INSERTAR_TIPO_CLIENTE
+-- Crear procedimiento SP_REGISTRAR_TIPO_DOCUMENTO
+DELIMITER $$
+CREATE PROCEDURE SP_REGISTRAR_TIPO_DOCUMENTO(
+    IN P_NOMBRE VARCHAR(50),
+    IN P_ABREVIATURA VARCHAR(10),
+    IN P_ESTADO BOOLEAN,
+    IN P_USUARIO VARCHAR(255)
+)
+BEGIN
+    DECLARE cNombre INT;
+    DECLARE cAbreviatura INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
 
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cNombre FROM tipo_documento WHERE NOMBRE = P_NOMBRE AND ESTADO_REGISTRO = 1;
+    SELECT COUNT(*) INTO cAbreviatura FROM tipo_documento WHERE ABREVIATURA = P_ABREVIATURA AND ESTADO_REGISTRO = 1;
+
+    IF cNombre > 0 THEN
+        SET @MSJ2 = 'El tipo de documento que intenta registrar ya está registrado';
+    ELSEIF cAbreviatura > 0 THEN
+        SET @MSJ2 = 'La abreviatura que intenta registrar ya está registrada';
+    ELSE
+        INSERT INTO tipo_documento (NOMBRE, ABREVIATURA, ESTADO, USUARIO) 
+        VALUES (P_NOMBRE, P_ABREVIATURA, P_ESTADO, P_USUARIO);
+
+        SET @MSJ = 'Se registró correctamente el tipo de documento';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_EDITAR_TIPO_DOCUMENTO
+DELIMITER $$
+CREATE PROCEDURE SP_EDITAR_TIPO_DOCUMENTO(
+    IN P_ID INT,
+    IN P_NOMBRE VARCHAR(50),
+    IN P_ABREVIATURA VARCHAR(10),
+    IN P_ESTADO BOOLEAN
+)
+BEGIN
+    DECLARE cExiste INT;
+    DECLARE cNombre INT;
+    DECLARE cAbreviatura INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cExiste FROM tipo_documento WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+    SELECT COUNT(*) INTO cNombre FROM tipo_documento WHERE NOMBRE = P_NOMBRE AND ID != P_ID AND ESTADO_REGISTRO = 1;
+    SELECT COUNT(*) INTO cAbreviatura FROM tipo_documento WHERE ABREVIATURA = P_ABREVIATURA AND ID != P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cExiste = 0 THEN
+        SET @MSJ2 = 'El tipo de documento que intenta actualizar no existe';
+    ELSEIF cNombre != 0 THEN
+        SET @MSJ2 = 'El nombre ingresado ya existe';
+    ELSEIF cAbreviatura != 0 THEN
+        SET @MSJ2 = 'La abreviatura ingresada ya existe';
+    ELSE
+        UPDATE tipo_documento 
+        SET NOMBRE = P_NOMBRE, 
+            ABREVIATURA = P_ABREVIATURA, 
+            ESTADO = P_ESTADO, 
+            ESTADO_PROCESO = 'MODIFICADO' 
+        WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se actualizó correctamente el tipo de documento';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_TIPO_DOCUMENTO
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_TIPO_DOCUMENTO(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cTipoDocumento INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cTipoDocumento FROM tipo_documento WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cTipoDocumento <= 0 THEN
+        SET @MSJ2 = 'El tipo de documento que intenta eliminar no existe';
+    ELSE
+        UPDATE tipo_documento SET ESTADO_REGISTRO = 2, ESTADO_PROCESO = 'ELIMINADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+        SET @MSJ = 'Se eliminó correctamente el tipo de documento';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_DARBAJA_TIPO_DOCUMENTO
+DELIMITER $$
+CREATE PROCEDURE SP_DARBAJA_TIPO_DOCUMENTO(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cTipoDocumento INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cTipoDocumento FROM tipo_documento WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cTipoDocumento = 0 THEN
+        SET @MSJ2 = 'El tipo de documento que intenta dar de baja no existe';
+    ELSE
+        UPDATE tipo_documento SET ESTADO = 0, ESTADO_PROCESO = 'MODIFICADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+        SET @MSJ = 'Se dio de baja correctamente el tipo de documento';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_INSERTAR_TIPO_CLIENTE
 DELIMITER $$
 CREATE PROCEDURE SP_INSERTAR_TIPO_CLIENTE(
     IN P_NOMBRE VARCHAR(50),
@@ -3386,7 +3546,7 @@ BEGIN
     IF cExiste = 0 THEN
         SET @MSJ2 = 'No se encontró el tipo de cliente que desea actualizar';
     ELSEIF cNombre != 0 THEN
-        SET @MS2J = 'El nombre ingresado ya existe';
+        SET @MSJ2 = 'El nombre ingresado ya existe';
     ELSE
         UPDATE tipo_cliente 
         SET nombre = P_NOMBRE, estado = P_ESTADO, estado_proceso = 'MODIFICADO'
