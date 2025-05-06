@@ -3100,31 +3100,35 @@ BEGIN
     END IF;
 END$$
 
-
 CREATE PROCEDURE SP_ACTUALIZAR_NIVEL(
     IN p_idNivel        INT,
     IN p_nroPiso        INT,
     IN p_tipo_vehiculo  INT,
-    IN p_cantidad       INT
+    IN p_cantidad       INT,
+    IN p_estado         TINYINT
 )
 BEGIN
-    DECLARE max_piso INT;
+    DECLARE max_piso INT DEFAULT 0;
 
+    -- Handler para errores inesperados
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         SET @MSJ2 = 'Error inesperado al actualizar nivel';
         SET @MSJ  = NULL;
     END;
 
+    -- Inicialización de mensajes
     SET @MSJ  = NULL;
     SET @MSJ2 = NULL;
 
+    -- Validaciones básicas
     IF p_cantidad <= 0 THEN
-        -- Abortamos si la cantidad no es válida
         SET @MSJ2 = 'La cantidad debe ser mayor a 0';
+    ELSEIF p_nroPiso <= 0 THEN
+        SET @MSJ2 = 'El número de piso debe ser mayor a 0';
     ELSE
-        -- Obtenemos el mayor piso existente para el tipo de vehículo
-        SELECT MAX(nroPiso)
+        -- Obtengo el mayor piso actual para este tipo de vehículo
+        SELECT COALESCE(MAX(nroPiso), 0)
           INTO max_piso
         FROM nivel
         WHERE tipo_vehiculo = p_tipo_vehiculo;
@@ -3132,19 +3136,22 @@ BEGIN
         IF p_nroPiso > max_piso + 1 THEN
             SET @MSJ2 = 'No puede actualizar a un piso mayor que el siguiente consecutivo';
         ELSE
-            -- Actualizamos el registro
+            -- Realizo el UPDATE
             UPDATE nivel
             SET nroPiso       = p_nroPiso,
                 tipo_vehiculo = p_tipo_vehiculo,
                 cantidad      = p_cantidad,
-                estado        = 1
+                estado        = p_estado
             WHERE idNivel = p_idNivel;
 
-            SET @MSJ = 'Nivel actualizado correctamente';
+            IF ROW_COUNT() = 0 THEN
+                SET @MSJ2 = 'No se encontró el nivel especificado';
+            ELSE
+                SET @MSJ = 'Nivel actualizado correctamente';
+            END IF;
         END IF;
     END IF;
 END$$
-
 
 CREATE PROCEDURE SP_DARBAJA_PISO(
     IN p_idNivel INT

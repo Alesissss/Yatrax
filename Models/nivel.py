@@ -14,8 +14,22 @@ class Nivel:
         conexion = None
         try:
             conexion = bd.Conexion()
-            listado = conexion.obtener("SELECT * FROM nivel")
+            listado = conexion.obtener("SELECT idNivel as id,nroPiso,tipo_vehiculo,cantidad,estado FROM nivel")
             return listado
+        finally:
+            if conexion:
+                conexion.cerrar()
+
+    @classmethod
+    def obtener_uno_por_idNivel(cls, idNivel):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            listado = conexion.obtener(
+                "SELECT * FROM nivel WHERE idNivel = %s",
+                (idNivel,)
+            )
+            return listado[0]
         finally:
             if conexion:
                 conexion.cerrar()
@@ -53,13 +67,13 @@ class Nivel:
                 conexion.cerrar()
 
     @classmethod
-    def actualizar_nivel(cls, idNivel, nroPiso, tipo_vehiculo, cantidad):
+    def actualizar_nivel(cls, idNivel, nroPiso, tipo_vehiculo, cantidad,estado):
         conexion = None
         try:
             conexion = bd.Conexion()
             conexion.ejecutar(
-                "CALL SP_ACTUALIZAR_NIVEL(%s, %s, %s, %s)",
-                (idNivel, nroPiso, tipo_vehiculo, cantidad)
+                "CALL SP_ACTUALIZAR_NIVEL(%s, %s, %s, %s,%s)",
+                (idNivel, nroPiso, tipo_vehiculo, cantidad,estado)
             )
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
             return resultado[0]

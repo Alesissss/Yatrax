@@ -1,5 +1,6 @@
 import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort
+from Models.nivel import Nivel
 from Models.tipoVehiculo import TipoVehiculo
 from Models.sucursal import Sucursal
 from Models.horario import Horario
@@ -67,6 +68,10 @@ def Menu_TipoVehiculo():
 def Menu_Sucursal():
     return render_template('viajes/sucursal.html', active_page="sucursal", active_menu='mViajes')
 
+@viajes_bp.route('/GestionarNivel')
+def Menu_Nivel():
+    return render_template('viajes/nivel/nivel.html', active_page="nivel", active_menu='mViajes')
+
 # @viajes_bp.route('/GestionarMarcas')
 # def Menu_Marcas():
 #     return render_template('viajes/marcas.html', active_page="marcas", active_menu='mMarcas')
@@ -74,6 +79,139 @@ def Menu_Sucursal():
 # END VIEWS
 
 # FUNCIONES
+
+# REGION NIVEL
+@viajes_bp.route("/GetData_Nivel", methods=["GET"])
+def get_niveles():
+    try:
+        niveles = Nivel.obtener_todos()
+        return jsonify({
+            'data': niveles,
+            'Status': 'success',
+            'Msj': 'Listado de niveles retornado exitosamente'
+        })
+    except Exception as e:
+        return jsonify({
+            'data': [],
+            'Status': 'error',
+            'Msj': f'Ocurrió un error al listar los niveles: {repr(e)}'
+        })
+
+@viajes_bp.route('/registrarNivel', methods=["GET", "POST"])
+def nuevo_nivel():
+    if request.method == "GET":
+        # Renderiza formulario para registrar un nuevo nivel
+        return render_template(
+            "viajes/nivel/nivelCRUD.html",  # Cambia el template a uno para nivel
+            title="Nuevo Nivel",
+            nivel={
+                "idNivel": None,
+                "nroPiso": None,
+                "tipoVehiculo": "",
+                "cantidad": None,
+                "estado": "activo"
+            },
+            btnId="btn_Registrar",
+            active_page="nivel",
+            active_menu='mViajes'
+        )
+    else:
+        try:
+            tipo_vehiculo = request.form["txt_tipoVehiculo"]
+            cantidad = int(request.form["txt_cantidad"])
+
+            msj1, msj2 = Nivel.insertar_nivel(tipo_vehiculo, cantidad)
+
+            if msj1:
+                return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+            elif msj2:
+                return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+            else:
+                return jsonify({"Status": "error", 'Msj': 'Error desconocido al insertar nivel'})
+        except Exception as e:
+            return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@viajes_bp.route("/verNivel/<int:idNivel>")
+def ver_nivel(idNivel):
+    try:
+        nivel = Nivel.obtener_uno_por_idNivel(idNivel)
+
+        return render_template(
+            "viajes/nivel/nivelCRUD.html",
+            tittle="Ver Nivel",
+            nivel=nivel,
+            btnId="btn_Regresar",
+            active_page="nivel",
+            active_menu='mViajes'
+        )
+    except Exception as e:
+        return f"Error al obtener nivel: {repr(e)}", 500
+
+@viajes_bp.route("/editarNivel/<int:idNivel>", methods=["GET", "POST"])
+def editar_nivel(idNivel):
+    if request.method == "GET":
+        try:
+            nivel = Nivel.obtener_uno_por_idNivel(idNivel)
+
+            return render_template(
+                "viajes/nivel/nivelCRUD.html",
+                tittle="Editar Nivel",
+                nivel=nivel,
+                btnId="btn_Actualizar",
+                active_page="nivel",
+                active_menu='mViajes'
+            )
+        except Exception as e:
+            return f"Error al obtener nivel: {repr(e)}", 500
+    else:
+        try:
+            nroPiso = int(request.form["txt_nroPiso"])
+            tipo_vehiculo = request.form["txt_tipoVehiculo"]
+            cantidad = int(request.form["txt_cantidad"])
+            estado = request.form["txt_estado"]
+
+            msj1, msj2 = Nivel.actualizar_nivel(idNivel, nroPiso, tipo_vehiculo, cantidad,estado)
+
+            if msj1:
+                return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+            elif msj2:
+                return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+            else:
+                return jsonify({"Status": "error", 'Msj': 'Error desconocido al actualizar nivel'})
+
+        except Exception as e:
+            return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@viajes_bp.route("/DarBajaNivel/<int:idNivel>", methods=["POST"])
+def dar_baja_nivel(idNivel):
+    try:
+        msj1, msj2 = Nivel.dar_baja_piso(idNivel)
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja el nivel'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@viajes_bp.route("/eliminarNivel/<int:idNivel>", methods=["POST"])
+def eliminar_nivel(idNivel):
+    try:
+        msj1, msj2 = Nivel.eliminar_nivel(idNivel)
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al eliminar nivel'})
+        
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+# END REGION
 
 # REGION TIPO VEHICULO
 
