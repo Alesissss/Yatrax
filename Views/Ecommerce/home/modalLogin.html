@@ -16,7 +16,7 @@
   }
 
   /* Contenedor principal del modal */
-  .container {
+  .container_log {
     box-sizing: border-box;
     padding: 0;
     font-family: "Segoe UI", sans-serif;
@@ -32,7 +32,7 @@
     /* Añade un poco de margen alrededor */
   }
 
-  .left {
+  .left_log {
     flex: 1;
     background-image: url("{{url_for('static',filename='img/login_pc.jpg')}}");
     background-size: 100% 100%;
@@ -49,7 +49,7 @@
     max-width: 400px;
   }
 
-  .right {
+  .right_log {
     flex: 1;
     padding: 40px;
     position: relative;
@@ -141,7 +141,7 @@
 
   /* Responsive Design */
   @media (max-width: 992px) {
-    .container {
+    .container_log {
       flex-direction: column;
       border-radius: 10px;
       /* Reduce un poco el radio en pantallas pequeñas */
@@ -156,7 +156,7 @@
     }
 
 
-    .left {
+    .left_log {
       background-image: url("{{url_for('static',filename='img/login_celular.jpg')}}");
       background-size: cover;
       background-position: center;
@@ -164,8 +164,8 @@
       background-attachment: fixed;
     }
 
-    .left,
-    .right {
+    .left_log,
+    .right_log {
       width: 100%;
       padding: 20px;
       /* Reduce el padding en móviles */
@@ -178,13 +178,13 @@
   }
 
   @media (max-width: 576px) {
-    .container {
+    .container_log {
       width: 95%;
       /* Ocupa aún más ancho en pantallas muy pequeñas */
       margin: 15px auto;
     }
 
-    .right {
+    .right_log {
       padding: 15px;
     }
 
@@ -200,7 +200,7 @@
       max-width: 150px;
     }
 
-    .left {
+    .left_log {
       height: 400px;
     }
   }
@@ -235,12 +235,12 @@
     }
   }
 </style>
-<div class="container">
+<div class="container_log">
 
-  <div class="left">
+  <div class="left_log">
     <!-- <img src="{{ url_for('static', filename='img/login_imagen.png') }}" alt="Autobús y persona" class="illustration" /> -->
   </div>
-  <div class="right">
+  <div class="right_log">
     <button type="button" id="closeModal" class="close" data-dismiss="modal" aria-label="Close">
       <span>×</span>
     </button>

@@ -3,28 +3,60 @@
 {% block contenido %}
 {% block styles %}
 <style>
-  .asiento {
+  .seat {
     width: 40px;
     height: 40px;
-    margin: 5px;
-    display: inline-block;
-    text-align: center;
-    line-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 5px;
-    color: white;
+    font-weight: bold;
     cursor: pointer;
+    transition: all 0.2s;
+    border: 2px solid transparent;
   }
-
-  .disponible {
-    background-color: gray;
+  
+  .available {
+    background-color: #e8f5e9;
+    border-color: #4caf50;
+    color: #2e7d32;
   }
-
-  .seleccionado {
-    background-color: #0c336e;
+  
+  .available:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
   }
-
-  .ocupado {
-    background-color: black;
+  
+  .selected {
+    background-color: #2196f3;
+    color: white;
+    border-color: #0d47a1;
+  }
+  
+  .occupied {
+    background-color: #ffcdd2;
+    color: #c62828;
+    border-color: #b71c1c;
+    cursor: not-allowed;
+  }
+  
+  .seat-map-container {
+    padding: 15px;
+  }
+  
+  .passenger-form {
+    border-left: 3px solid #2196f3;
+  }
+  
+  #asientos {
+    border-right: 1px solid #dee2e6;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+  }
+  
+  #formulariosPasajeros {
+    height: calc(100vh - 200px);
+    overflow-y: auto;
   }
 </style>
 {% endblock %}
@@ -32,37 +64,123 @@
   <h1>{% block tematica %}{% endblock %}</h1>
 </header>
 <main>
-  <div class="row">
+  <div class="container mb-5">
+    <!-- Header section -->
+    <div class="row mb-3 border-bottom pb-2">
+        <div class="col-md-3 fw-bold">Origen</div>
+        <div class="col-md-3 fw-bold">Destino</div>
+        <div class="col-md-3 fw-bold">Fecha Ida</div>
+        <div class="col-md-3 fw-bold">Fecha Regreso</div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-3">CAJAMARCA</div>
+        <div class="col-md-3">CHICLAYO</div>
+        <div class="col-md-3">
+            <input type="date" class="form-control" id="fechaIda" min="<?php echo date('Y-m-d'); ?>">
+        </div>
+        <div class="col-md-3">
+            <input type="date" class="form-control" id="fechaRegreso" disabled>
+        </div>
+    </div>
+
+    <!-- Search form -->
     <div id="datos_viaje" class="mb-4 col-md-12">
       <div class="row g-2">
         <div class="col-md-2">
           <select name="origen" class="form-control">
-            <option disabled selected>Origen</option>
-            <option value="CAJAMARCA">CAJAMARCA</option>
+            <option disabled>Origen</option>
+            <option value="CAJAMARCA" selected>CAJAMARCA</option>
+            <option value="LIMA">LIMA</option>
+            <option value="CUSCO">CUSCO</option>
           </select>
         </div>
         <div class="col-md-2">
           <select name="destino" class="form-control">
-            <option disabled selected>Destino</option>
-            <option value="CHICLAYO">CHICLAYO</option>
+            <option disabled>Destino</option>
+            <option value="CHICLAYO" selected>CHICLAYO</option>
+            <option value="TRUJILLO">TRUJILLO</option>
           </select>
         </div>
         <div class="col-md-2">
-          <input type="date" class="form-control">
+          <input type="date" class="form-control" id="fechaIdaSearch" min="<?php echo date('Y-m-d'); ?>">
         </div>
         <div class="col-md-2">
-          <input type="date" class="form-control" placeholder="Fecha Retorno">
+          <input type="date" class="form-control" id="fechaRegresoSearch" placeholder="Fecha Retorno" disabled>
         </div>
         <div class="col-md-2">
           <button class="btn btn-secondary w-100" id="buscarViajes">Buscar</button>
         </div>
       </div>
     </div>
-    <div id="resultados" class="col-md-12 d-none">
-      <h5 class="ps-3 mb-3">Viajes Disponibles</h5>
+
+    <!-- Results section -->
+    <div id="resultados" class="col-md-12">
+      <h5 class="ps-3 mb-3">Elige el itinerario para el viaje de IDA (CAJAMARCA A CHICLAYO)</h5>
       <div id="horarios" class="m-5">
+        <!-- Specific itinerary you requested -->
+        <div class="card mb-3">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-md-2">
+                <h6>10:40 PM Salida</h6>
+                <h6>04:40 AM Llegada estimada</h6>
+                <small class="text-muted">Viaje: 1053</small>
+              </div>
+              <div class="col-md-2">
+                <span>Servicio Nocturno</span>
+              </div>
+              <div class="col-md-1">
+                <span>Directo</span>
+              </div>
+              <div class="col-md-2">
+                <span>1º Nivel 2º Nivel</span>
+              </div>
+              <div class="col-md-1">
+                <span>18 Libres</span>
+              </div>
+              <div class="col-md-2">
+                <span>S/ 85 S/ 70</span>
+              </div>
+              <div class="col-md-2">
+                <button class="btn btn-primary btn-elegir" data-viaje="1053">ELEGIR</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Additional sample itineraries -->
+        <div class="card mb-3">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-md-2">
+                <h6>06:00 AM Salida</h6>
+                <h6>02:30 PM Llegada estimada</h6>
+              </div>
+              <div class="col-md-2">
+                <span>Servicio B - Andino</span>
+              </div>
+              <div class="col-md-1">
+                <span>2 Escalas</span>
+              </div>
+              <div class="col-md-2">
+                <span>1º Nivel 2º Nivel</span>
+              </div>
+              <div class="col-md-1">
+                <span>32 Libres</span>
+              </div>
+              <div class="col-md-2">
+                <span>S/ 90 S/ 75</span>
+              </div>
+              <div class="col-md-2">
+                <button class="btn btn-primary btn-elegir">ELEGIR</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+
+    <!-- Seat selection section (hidden by default) -->
     <div id="asientos_section" class="d-none mt-5 col-md-12">
       <div class="row mx-auto">
         <h5>Seleccione su(s) asiento(s)</h5>
@@ -73,7 +191,7 @@
         </div>
       </div>
     </div>
-  </div>
+</div>
   <section id="ctn_beneficios">
     <div>
       <h2>Compra segura</h2>
@@ -186,7 +304,6 @@
 {% block scripts %}
 <script>
   $(document).ready(function () {
-
     const viajes = [
       {
         numero: 1053,
@@ -195,81 +312,179 @@
         salida: '10:40PM',
         llegada: '4:40AM',
         duracion: '6h',
-        asientosLibres: 40
+        servicio: 'Servicio Nocturno Directo',
+        asientosLibres: 40,
+        precios: {
+          primerNivel: 85,
+          segundoNivel: 70
+        }
       }
     ];
 
-    $('#buscarViajes').click(function () {
+    let selectedSeats = {};
+
+    // Mostrar el viaje 1053 directamente sin necesidad de búsqueda
+    function mostrarViaje() {
       $('#resultados').removeClass('d-none');
       $('#horarios').empty();
-
+      
       viajes.forEach((viaje, i) => {
         $('#horarios').append(`
-      <div class="card mb-3">
-        <div class="card-body d-flex justify-content-between align-items-center">
-          <div>
-            <h6><strong>Viaje:</strong> ${viaje.numero}</h6>
-            <p>Salida: ${viaje.origen} - ${viaje.salida} <br> Llegada: ${viaje.destino} - ${viaje.llegada}</p>
+          <div class="card mb-3">
+            <div class="card-body">
+              <div class="row align-items-center">
+                <div class="col-md-3">
+                  <h6 class="mb-1"><strong>Viaje:</strong> ${viaje.numero}</h6>
+                  <p class="mb-1"><strong>Salida:</strong> ${viaje.origen} - ${viaje.salida}</p>
+                  <p class="mb-1"><strong>Llegada:</strong> ${viaje.destino} - ${viaje.llegada}</p>
+                </div>
+                <div class="col-md-2">
+                  <span>${viaje.servicio}</span>
+                </div>
+                <div class="col-md-2">
+                  <span>${viaje.duracion}</span>
+                </div>
+                <div class="col-md-2">
+                  <span>${viaje.asientosLibres} Libres</span>
+                </div>
+                <div class="col-md-2">
+                  <span>S/ ${viaje.precios.primerNivel} (1°N) <br> S/ ${viaje.precios.segundoNivel} (2°N)</span>
+                </div>
+                <div class="col-md-1">
+                  <button class="btn btn-primary elegirAsiento" data-index="${i}">Elegir</button>
+                </div>
+              </div>
+            </div>
           </div>
-          <button class="btn btn-outline-secondary elegirAsiento" data-index="${i}">Elegir Asiento</button>
-        </div>
-      </div>
-    `);
+        `);
       });
+    }
+
+    // Mostrar el viaje al cargar la página
+    mostrarViaje();
+
+    $(document).on('click', '.elegirAsiento', function() {
+      $('#resultados').addClass('d-none');
+      $('#asientos_section').removeClass('d-none');
+      renderSeatMap();
     });
 
-    $(document).on('click', '.elegirAsiento', function () {
-      $('#asientos_section').removeClass('d-none');
+    function renderSeatMap() {
       $('#asientos').empty();
       $('#formulariosPasajeros').empty();
+      selectedSeats = {};
+      
+      // Mapa de asientos con 20 en primer nivel y 20 en segundo nivel
+      const seatMap = `
+        <div class="seat-map-container">
+          <h6 class="text-center mb-3">1° Nivel - S/85</h6>
+          <div class="first-level mb-4">
+            ${renderSeatLevel(1, 20)}
+          </div>
+          <h6 class="text-center mb-3">2° Nivel - S/70</h6>
+          <div class="second-level">
+            ${renderSeatLevel(21, 40)}
+          </div>
+        </div>
+      `;
+      
+      $('#asientos').html(seatMap);
+    }
 
-      for (let i = 1; i <= 40; i++) {
-        let ocupado = [10, 27, 35].includes(i);
-        $('#asientos').append(`
-      <div class="asiento ${ocupado ? 'ocupado' : 'disponible'}" data-num="${i}" ${ocupado ? 'data-estado="ocupado"' : 'data-estado="disponible"'}>${i.toString().padStart(2, '0')}</div>
-    `);
+    function renderSeatLevel(start, end) {
+      let html = '<div class="d-flex flex-wrap justify-content-center">';
+      const occupiedSeats = [10, 27, 35]; // Asientos ocupados
+      
+      for (let i = start; i <= end; i++) {
+        const isOccupied = occupiedSeats.includes(i);
+        html += `
+          <div class="seat ${isOccupied ? 'occupied' : 'available'} mx-1 mb-2" 
+               data-num="${i}" 
+               data-level="${i <= 20 ? 1 : 2}"
+               data-price="${i <= 20 ? 85 : 70}">
+            ${i <= 20 ? i : i-20}
+          </div>
+        `;
+      }
+      
+      html += '</div>';
+      return html;
+    }
+
+    $(document).on('click', '.seat.available', function() {
+      const seatNum = $(this).data('num');
+      const seatLevel = $(this).data('level');
+      const seatPrice = $(this).data('price');
+      
+      if ($(this).hasClass('selected')) {
+        // Deseleccionar asiento
+        $(this).removeClass('selected').addClass('available');
+        $(`#passenger-form-${seatNum}`).remove();
+        delete selectedSeats[seatNum];
+      } else {
+        // Seleccionar asiento
+        $(this).removeClass('available').addClass('selected');
+        selectedSeats[seatNum] = true;
+        renderPassengerForm(seatNum, seatLevel, seatPrice);
       }
     });
 
-    $(document).on('click', '.asiento', function () {
-      if ($(this).attr('data-estado') !== 'disponible') return;
-
-      const num = $(this).data('num');
-      $(this).removeClass('disponible').addClass('seleccionado');
-      $(this).attr('data-estado', 'seleccionado');
-
+    function renderPassengerForm(seatNum, level, price) {
       $('#formulariosPasajeros').append(`
-    <div class="card mb-3">
-      <div class="card-header bg-dark text-white">
-        Datos del pasajero para asiento ${num}
-      </div>
-      <div class="card-body">
-        <div class="row g-2">
-          <div class="col-md-4">
-            <input type="text" class="form-control" placeholder="DNI">
+        <div class="card mb-3 passenger-form" id="passenger-form-${seatNum}">
+          <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <span>Asiento ${seatNum <= 20 ? seatNum : seatNum-20} - ${level}° Nivel (S/${price})</span>
+            <button type="button" class="btn btn-sm btn-light remove-seat" data-seat="${seatNum}">
+              <i class="fas fa-times"></i> Quitar
+            </button>
           </div>
-          <div class="col-md-4">
-            <input type="text" class="form-control" placeholder="Nombres">
-          </div>
-          <div class="col-md-4">
-            <input type="text" class="form-control" placeholder="Apellidos">
-          </div>
-          <div class="col-md-4">
-            <input type="date" class="form-control" placeholder="Fecha Nacimiento">
-          </div>
-          <div class="col-md-4">
-            <select class="form-control">
-              <option>Masculino</option>
-              <option>Femenino</option>
-            </select>
-          </div>
-          <div class="col-md-4">
-            <input type="email" class="form-control" placeholder="Correo">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Nombres completos</label>
+                <input type="text" class="form-control" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Apellidos completos</label>
+                <input type="text" class="form-control" required>
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">DNI</label>
+                <input type="text" class="form-control" required>
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Fecha Nacimiento</label>
+                <input type="date" class="form-control">
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Género</label>
+                <select class="form-select">
+                  <option>Masculino</option>
+                  <option>Femenino</option>
+                  <option>Otro</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Teléfono</label>
+                <input type="tel" class="form-control">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Correo electrónico</label>
+                <input type="email" class="form-control">
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-  `);
+      `);
+    }
+
+    $(document).on('click', '.remove-seat', function() {
+      const seatNum = $(this).data('seat');
+      $(`#passenger-form-${seatNum}`).remove();
+      $(`.seat[data-num="${seatNum}"]`)
+        .removeClass('selected')
+        .addClass('available');
+      delete selectedSeats[seatNum];
     });
   });
 </script>

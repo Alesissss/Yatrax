@@ -53,6 +53,7 @@ class Sucursal:
             )
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
             return resultado[0]  # Retorna un diccionario con los mensajes
+            
         finally:
             conexion.cerrar()
 

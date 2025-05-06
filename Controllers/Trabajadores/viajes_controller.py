@@ -589,7 +589,7 @@ def darBaja_sucursal(idSucursal):
         msj2 = mensajes.get('@MSJ2')
 
         if msj1:
-            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': '', "ActualizarMapa":True})
         elif msj2:
             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
         else:
@@ -597,6 +597,26 @@ def darBaja_sucursal(idSucursal):
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
+@viajes_bp.route("/ObtenerSucursalesMapa", methods=['GET'])
+def obtener_sucursales_mapa():
+    try:
+        sucursales = Sucursal.obtener_todos()
+        
+        # Convertir a formato JSON compatible
+        sucursales_json = []
+        for suc in sucursales:
+            sucursales_json.append({
+                'id': suc['id'],
+                'nombre': suc['nombre'],
+                'direccion': suc['direccion'],
+                'departamento': suc['departamento'],
+                'latitud': float(suc['latitud']) if suc['latitud'] else None,
+                'longitud': float(suc['longitud']) if suc['longitud'] else None
+            })
+        
+        return jsonify(sucursales_json)
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": str(e)}), 500
 
 @viajes_bp.route('/api/geocodificar', methods=['GET'])
 def geocodificar_coordenadas():
