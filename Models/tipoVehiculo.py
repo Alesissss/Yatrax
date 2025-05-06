@@ -14,14 +14,15 @@ class TipoVehiculo:
             conexion = bd.Conexion()
             listado = conexion.obtener("""
                 SELECT 
-                    tv.idTipoVehiculo AS id,
-                    tv.nombre AS nombre,
-                    COALESCE(SUM(n.cantidad),0) AS capacidad,
-                    tv.idMarca AS marca,
-                    tv.estado AS estado
-                FROM tipo_vehiculo tv
-                LEFT JOIN nivel n ON tv.idTipoVehiculo = n.tipo_vehiculo
-                GROUP BY tv.idTipoVehiculo, tv.nombre, tv.idMarca, tv.estado;
+                tv.idTipoVehiculo AS id,
+                tv.nombre AS nombre,
+                COALESCE(SUM(n.cantidad), 0) AS capacidad,
+                m.nombre AS marca,
+                tv.estado AS estado
+            FROM tipo_vehiculo tv
+            LEFT JOIN nivel n ON tv.idTipoVehiculo = n.tipo_vehiculo
+            LEFT JOIN marca m ON tv.idMarca = m.id
+            GROUP BY tv.idTipoVehiculo, tv.nombre, m.nombre, tv.estado;
             """)
             return listado
         finally:
