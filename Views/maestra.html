@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="https://unpkg.com/bs-brain@2.0.4/utilities/font-size/font-size.css">
   <link rel="stylesheet" href="https://unpkg.com/bs-brain@2.0.4/utilities/margin/margin.css">
   <link rel="stylesheet" href="https://unpkg.com/bs-brain@2.0.4/utilities/padding/padding.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   <link rel="icon" href="{{url_for('static',filename='img/yatrax_icon.ico')}}">
   {% block estilos %}{% endblock %}
   <title>{% block titulo %}{% endblock %}</title>
@@ -18,10 +19,19 @@
   <nav id="maestra_header">
     <img src="" alt="logo_yatrax" id="maestra_logo">
     <ul>
-      <li><a href="">Inicio</a></li>
+      <li><a href="{{url_for('homeClientes.index')}}">Inicio</a></li>
       <li><a href="">Servicios</a></li>
       <li><a href="">Contacto</a></li>
-      <li><a href="" id="abrirModal">Iniciar sesión</a></li>
+      <li>
+        <a href="#" class="boton-menu" id="botonMenu">Menú</a>
+        <ul class="lista-desplegable" id="menuDesplegable">
+          <li class="item-lista"><a class="enlace-item" href="#">Opción 1</a></li>
+          <li class="item-lista"><a class="enlace-item" href="#">Opción 2</a></li>
+          <li class="item-lista"><a class="enlace-item enlace-iniciar-sesion" id="botonIniciarSesion" href="#">Iniciar
+              sesión</a></li>
+        </ul>
+      </li>
+
     </ul>
   </nav>
   {% block contenido %}{% endblock %}
@@ -262,8 +272,8 @@
       </div>
     </div>
   </footer>
-  
-  
+
+
   <div id="modal" class="modal">
   </div>
 
@@ -340,7 +350,7 @@
         url: "/ecommerce/home/login",
         type: 'GET',
         success: function (html) {
-        
+
           $('#modal').html(html);
 
           // Muestra el modal
@@ -412,6 +422,25 @@
       });
     }
 
+  </script>
+  <script>
+    const botonMenu = document.getElementById('botonMenu');
+    const menuDesplegable = document.getElementById('menuDesplegable');
+    // Aplicar posición relativa al botón de menú para el posicionamiento correcto del desplegable
+    botonMenu.style.position = 'relative';
+
+    // Alternar el menú desplegable al hacer clic en el botón
+    botonMenu.addEventListener('click', function (e) {
+      e.preventDefault();
+      menuDesplegable.classList.toggle('mostrar');
+    });
+
+    // Cerrar el menú desplegable al hacer clic en cualquier parte fuera de él
+    document.addEventListener('click', function (e) {
+      if (!botonMenu.contains(e.target) && !menuDesplegable.contains(e.target)) {
+        menuDesplegable.classList.remove('mostrar');
+      }
+    });
   </script>
 
 </body>
