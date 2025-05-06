@@ -13,14 +13,14 @@
                 <div class="card-body" autocomplete="off">
                     <form action="" method="POST" id="formNivel">
                         <div class="mb-3">
-                            <label for="txt_nroPiso">Nro Piso</label>
+                            <label for="txt_nroPiso">Número de piso</label>
                             <input type="number" name="txt_nroPiso" id="txt_nroPiso" class="form-control"
                                 placeholder="Número de piso"
                                 value="{{ nivel.nroPiso }}"
                                 {% if btnId == "btn_Regresar" %} disabled {% endif %}>
                         </div>
                         <div class="mb-3">
-                            <label for="txt_tipoVehiculo">Tipo de Vehículo</label>
+                            <label for="txt_tipoVehiculo">Tipo de vehículo</label>
                             <input type="text" name="txt_tipoVehiculo" id="txt_tipoVehiculo" class="form-control"
                                 placeholder="Tipo de vehículo"
                                 value="{{ nivel.tipo_vehiculo}}"

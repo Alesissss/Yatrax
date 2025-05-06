@@ -190,10 +190,18 @@
                 { data: "id", name: "id" },
                 { data: "horario_entrada", name: "horario_entrada" },
                 { data: "horario_salida", name: "horario_salida" },
-                { data: "estado", name: "estado",
-                render: function(data, type, row) {
-                        return data === 'A' ? 'Vigente' : 'No vigente'; 
-                    }, 
+                {
+                    data: "estado", name: "estado",
+                    render: function (data, type, row) {
+                        let estado = data === 'A' ? 'Vigente' : 'No vigente';
+                        if (estado === "Vigente") {
+                            return `<span class="badge badge-success">${estado}</span>`;
+                        } else if (estado === "No vigente") {
+                            return `<span class="badge badge-danger">${estado}</span>`;
+                        } else {
+                            return `<span class="badge" style="background-color: #800080; color: white;">${estado}</span>`;
+                        }
+                    },
                 },
                 {
                     data: null,
@@ -213,7 +221,7 @@
             ],
             columnDefs: [
                 {
-                    targets: [0],
+                    targets: [0, 3],
                     className: "text-center align-middle",
                 },
                 {
