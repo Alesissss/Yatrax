@@ -35,8 +35,10 @@
 
       $(document).ready(function () {
           // Mensaje Toastr si hay uno
-          {% if msg %}
+          {% if msg and tipotoast=='success' %}
           toastr.success("{{ msg }}", "MENSAJE DE SISTEMA");
+          {% elif msg and tipotoast=='error' %}
+          toastr.error("{{ msg }}", "MENSAJE DE SISTEMA");
           {% endif %}
 
           var windowHeight = $('body > div.os-padding.menu-open > div > div > div > div.content-wrapper').height() / 2;
