@@ -20,6 +20,7 @@
                             <th class="text-center">ID</th>
                             <th class="text-center">NOMBRE</th>
                             <th class="text-center">CAPACIDAD</th>
+                            <th class="text-center">ID MARCA</th>
                             <th class="text-center">ESTADO</th>
                             <th class="text-center">ACCIÓN</th>
                         </tr>
@@ -190,6 +191,7 @@
                 { data: "id", name: "id" },
                 { data: "nombre", name: "nombre" },
                 { data: "capacidad", name: "capacidad" },
+                { data: "marca", name: "Marca" },
                 { 
                     data: "estado", 
                     name: "estado",
@@ -219,11 +221,11 @@
                     className: "text-center align-middle",
                 },
                 {
-                    targets: [1, 2],
+                    targets: [1, 2, 3],
                     className: 'align-middle',
                 },
                 {
-                    targets: [3],
+                    targets: [4],
                     orderable: false,
                     width: '10%',
                 },

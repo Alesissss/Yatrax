@@ -58,6 +58,11 @@ DROP PROCEDURE IF EXISTS SP_REGISTRAR_MARCA;
 DROP PROCEDURE IF EXISTS SP_EDITAR_MARCA;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_MARCA;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_MARCA;
+
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_RUTA;
+DROP PROCEDURE IF EXISTS SP_EDITAR_RUTA;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_RUTA;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_RUTA;
 -- Luego eliminamos las tablas, primero la que depende de la otra
 DROP TABLE IF EXISTS conf_plantillas;
 DROP TABLE IF EXISTS conf_dmenus;
@@ -75,6 +80,8 @@ DROP TABLE IF EXISTS tipo_servicio;
 DROP TABLE IF EXISTS tipo_comprobante;
 DROP TABLE IF EXISTS tipo_documento;
 DROP TABLE IF EXISTS marca;
+DROP TABLE IF EXISTS ruta;
+DROP TABLE IF EXISTS nivel;
 
 -- Crear tabla tipo_servicio
 CREATE TABLE tipo_servicio (
@@ -186,6 +193,19 @@ CREATE TABLE sucursal (
     latitud DECIMAL(8,6) NOT NULL,
     longitud DECIMAL(9,6) NOT NULL,
     estado TINYINT NOT NULL DEFAULT 1,
+    estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
+    estado_registro INT NOT NULL DEFAULT 1,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL
+);
+
+-- Crear tabla ruta
+CREATE TABLE ruta (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    sucursalOrigen INT NOT NULL,    
+    sucursalDestino INT NOT NULL,
+    estado BOOLEAN NOT NULL DEFAULT 1,
     estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
     estado_registro INT NOT NULL DEFAULT 1,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -2920,61 +2940,32 @@ DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPOVEHICULO;
+DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPOVEHICULO;
 
 -- Cambiar delimitador para creación de procedimientos
 DELIMITER $$
 
 -- Procedimiento para insertar tipo de vehículo
+
 CREATE PROCEDURE SP_INSERTAR_TIPOVEHICULO(
     IN p_nombre VARCHAR(50),
     IN p_idMarca INT,
-    OUT MSJ VARCHAR(255),
-    OUT MSJ2 VARCHAR(255)
+    OUT MSJ VARCHAR(255)
 )
 BEGIN
-    DECLARE v_existe INT;
-    DECLARE v_existeMarca INT;
+    DECLARE v_existeMarca INT DEFAULT 0;
 
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        ROLLBACK;
-        SET MSJ2 = 'Error inesperado al insertar el tipo de vehículo';
-    END;
+    -- Verificar si la marca existe
+    SELECT COUNT(*) INTO v_existeMarca
+    FROM marca
+    WHERE id = p_idMarca;
 
-    SET MSJ = NULL;
-    SET MSJ2 = NULL;
-
-    -- Validaciones básicas
-    IF p_nombre IS NULL OR p_nombre = '' THEN
-        SET MSJ2 = 'El nombre es obligatorio';
-    ELSEIF p_idMarca IS NULL OR p_idMarca <= 0 THEN
-        SET MSJ2 = 'Debe indicar una marca válida';
+    IF v_existeMarca = 0 THEN
+        SET MSJ = 'La marca no existe';
     ELSE
-        -- Mejora 1: Verificar existencia de la marca
-        SELECT COUNT(*) INTO v_existeMarca
-        FROM marca
-        WHERE idMarca = p_idMarca;
-        
-        IF v_existeMarca = 0 THEN
-            SET MSJ2 = 'La marca indicada no existe';
-        ELSE
-            -- Verificar duplicados en tipo_vehiculo
-            SELECT COUNT(*) INTO v_existe
-            FROM tipo_vehiculo
-            WHERE nombre = p_nombre
-              AND idMarca = p_idMarca;
-
-            IF v_existe > 0 THEN
-                SET MSJ2 = 'Ya existe un tipo de vehículo con ese nombre y marca';
-            ELSE
-                START TRANSACTION;
-                INSERT INTO tipo_vehiculo (nombre, idMarca, estado)
-                VALUES (p_nombre, p_idMarca, 1);
-                COMMIT;
-
-                SET MSJ = 'Se registró correctamente el tipo de vehículo';
-            END IF;
-        END IF;
+        INSERT INTO tipo_vehiculo (nombre, idMarca, estado)
+        VALUES (p_nombre, p_idMarca, 1);
+        SET MSJ = 'Tipo de vehículo insertado correctamente';
     END IF;
 END$$
 
@@ -2988,8 +2979,7 @@ CREATE PROCEDURE SP_ACTUALIZAR_TIPOVEHICULO(
     OUT MSJ2 VARCHAR(255)
 )
 BEGIN
-    DECLARE v_existe INT;
-    DECLARE v_existeMarca INT;
+    DECLARE v_existeMarca INT DEFAULT 0;
 
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -3000,41 +2990,24 @@ BEGIN
     SET MSJ = NULL;
     SET MSJ2 = NULL;
 
-    -- Validaciones básicas
-    IF p_nombre IS NULL OR p_nombre = '' THEN
-        SET MSJ2 = 'El nombre es obligatorio';
-    ELSEIF p_idMarca IS NULL OR p_idMarca <= 0 THEN
-        SET MSJ2 = 'Debe indicar una marca válida';
-    ELSEIF p_estado NOT IN (0, 1) THEN
-        SET MSJ2 = 'El estado debe ser 0 o 1';
+    -- Verificar existencia de la marca
+    SELECT COUNT(*) INTO v_existeMarca
+    FROM marca
+    WHERE id = p_idMarca;
+
+    IF v_existeMarca = 0 THEN
+        SET MSJ2 = 'La marca indicada no existe';
     ELSE
-        -- Mejora 1: Verificar existencia de la marca
-        SELECT COUNT(*) INTO v_existeMarca
-        FROM marca
-        WHERE idMarca = p_idMarca;
+        -- Actualizar el tipo de vehículo
+        START TRANSACTION;
+        UPDATE tipo_vehiculo
+        SET nombre  = p_nombre,
+            idMarca = p_idMarca,
+            estado  = p_estado
+        WHERE idTipoVehiculo = p_id;
+        COMMIT;
 
-        IF v_existeMarca = 0 THEN
-            SET MSJ2 = 'La marca indicada no existe';
-        ELSE
-            -- Verificar existencia del tipo
-            SELECT COUNT(*) INTO v_existe
-            FROM tipo_vehiculo
-            WHERE idTipoVehiculo = p_id;
-
-            IF v_existe = 0 THEN
-                SET MSJ2 = 'El tipo de vehículo no existe';
-            ELSE
-                START TRANSACTION;
-                UPDATE tipo_vehiculo
-                SET nombre   = p_nombre,
-                    idMarca  = p_idMarca,
-                    estado   = p_estado
-                WHERE idTipoVehiculo = p_id;
-                COMMIT;
-
-                SET MSJ = 'Se actualizó correctamente el tipo de vehículo';
-            END IF;
-        END IF;
+        SET MSJ = 'Se actualizó correctamente el tipo de vehículo';
     END IF;
 END$$
 
@@ -4156,4 +4129,137 @@ BEGIN
     END IF;
 END $$ 
 
+-- Crear procedimiento SP_REGISTRAR_RUTA
+DELIMITER $$
+CREATE PROCEDURE SP_REGISTRAR_RUTA(
+    IN P_NOMBRE VARCHAR(255),
+    IN P_ORIGEN INT,
+    IN P_DESTINO INT,
+    IN P_ESTADO BOOLEAN,
+    IN P_USUARIO VARCHAR(255)
+)
+BEGIN
+    DECLARE cNombre INT;
+    DECLARE cRepetido INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
 
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cNombre FROM ruta WHERE nombre = P_NOMBRE AND ESTADO_REGISTRO = 1;
+    SELECT COUNT(*) INTO cRepetido FROM ruta WHERE sucursalOrigen = P_ORIGEN AND sucursalDestino = P_DESTINO AND ESTADO_REGISTRO = 1;
+
+    IF cNombre > 0 THEN
+        SET @MSJ2 = 'El nombre de ruta que intenta registrar ya está registrado';
+    ELSEIF cRepetido != 0 THEN
+        SET @MSJ2 = 'Ya existe una ruta con esa sucursal origen y esa sucursal destino respectivamente';
+    ELSE
+        INSERT INTO ruta (NOMBRE, SUCURSALORIGEN, SUCURSALDESTINO, ESTADO, USUARIO) 
+        VALUES (P_NOMBRE, P_ORIGEN, P_DESTINO, P_ESTADO, P_USUARIO);
+
+        SET @MSJ = 'Se registró correctamente la ruta';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_EDITAR_RUTA
+DELIMITER $$
+CREATE PROCEDURE SP_EDITAR_RUTA(
+    IN P_ID INT,
+    IN P_NOMBRE VARCHAR(255),
+    IN P_ORIGEN INT,
+    IN P_DESTINO INT,
+    IN P_ESTADO BOOLEAN
+)
+BEGIN
+    DECLARE cNombre INT;
+    DECLARE cExiste INT;
+    DECLARE cRepetido INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cExiste FROM ruta WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+    SELECT COUNT(*) INTO cNombre FROM ruta WHERE NOMBRE = P_NOMBRE AND ID != P_ID AND ESTADO_REGISTRO = 1;
+    SELECT COUNT(*) INTO cRepetido FROM ruta WHERE ID != P_ID AND sucursalOrigen = P_ORIGEN AND sucursalDestino = P_DESTINO AND ESTADO_REGISTRO = 1;
+
+    IF cExiste <= 0 THEN
+        SET @MSJ2 = 'La ruta que intenta editar no existe';
+    ELSEIF cNombre != 0 THEN
+        SET @MSJ2 = 'El nombre ingresado ya existe';
+    ELSEIF cRepetido != 0 THEN
+        SET @MSJ2 = 'Ya existe una ruta con esa sucursal origen y esa sucursal destino respectivamente';
+    ELSE
+        UPDATE ruta 
+        SET NOMBRE = P_NOMBRE,
+            SUCURSALORIGEN = P_ORIGEN,
+            SUCURSALDESTINO = P_DESTINO, 
+            ESTADO = P_ESTADO, 
+            estado_proceso = 'MODIFICADO' 
+        WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se modificó correctamente la ruta';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_DARBAJA_RUTA
+DELIMITER $$
+CREATE PROCEDURE SP_DARBAJA_RUTA(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cExiste INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cExiste FROM ruta WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cExiste <= 0 THEN
+        SET @MSJ2 = 'La ruta que intenta dar de baja no existe';
+    ELSE
+        UPDATE ruta SET ESTADO = 0, ESTADO_PROCESO = 'MODIFICADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se dio de baja correctamente a la ruta';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_RUTA
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_RUTA(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cExiste INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cExiste FROM ruta WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cExiste <= 0 THEN
+        SET @MSJ2 = 'La ruta que intenta eliminar no existe';
+    ELSE
+        UPDATE ruta SET ESTADO_REGISTRO = 2, ESTADO_PROCESO = 'ELIMINADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se eliminó correctamente a la ruta';
+    END IF;
+END $$
+DELIMITER ;

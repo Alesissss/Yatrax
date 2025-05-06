@@ -1,9 +1,11 @@
 import bd
 
 class Ruta:
-    def __init__(self, id=None, nombre=None, estado=None, estadoProceso=None, estadoRegistro=None, fechaRegistro=None, usuario=None):
+    def __init__(self, id=None, nombre=None, sucursalOrigen=None, sucursalDestino=None, estado=None, estadoProceso=None, estadoRegistro=None, fechaRegistro=None, usuario=None):
         self.id = id
         self.nombre = nombre
+        self.sucursalOrigen = sucursalOrigen
+        self.sucursalDestino = sucursalDestino
         self.estado = estado
         #Auditoría
         self.estadoProceso = estadoProceso
@@ -15,27 +17,27 @@ class Ruta:
     def obtener_todos(cls):
         conexion = bd.Conexion()
         try:
-            tipo_usuarios = conexion.obtener("SELECT * FROM tipo_usuario where estado_registro = 1")
-            return tipo_usuarios
+            rutas = conexion.obtener("SELECT * FROM ruta where estado_registro = 1")
+            return rutas
         finally:
             conexion.cerrar()
 
     @classmethod
-    def obtener_por_id(cls, tipoUsuario_id):
+    def obtener_por_id(cls, ruta_id):
         conexion = bd.Conexion()
         try:
-            tipo_usuario = conexion.obtener("SELECT * FROM tipo_usuario WHERE estado_registro = 1 AND id = %s", (tipoUsuario_id,))
-            return tipo_usuario[0] if tipo_usuario else None
+            ruta = conexion.obtener("SELECT * FROM ruta WHERE estado_registro = 1 AND id = %s", (ruta_id,))
+            return ruta[0] if ruta else None
         finally:
             conexion.cerrar()
 
     #REGISTRAR
     @classmethod
-    def registrar(cls, nombre, estado, usuario):
+    def registrar(cls, nombre, origen, destino, estado, usuario):
         conexion = bd.Conexion()
         try:
             # Llamar al procedimiento almacenado
-            conexion.ejecutar("CALL SP_REGISTRAR_TIPO_USUARIO(%s, %s, %s);", (nombre, estado, usuario))
+            conexion.ejecutar("CALL SP_REGISTRAR_RUTA(%s, %s, %s, %s, %s);", (nombre, origen, destino, estado, usuario))
 
             # Obtener mensajes de salida
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
@@ -45,12 +47,12 @@ class Ruta:
 
     #EDITAR
     @classmethod
-    def editar(cls, id, nombre, estado):
+    def editar(cls, id, nombre, origen, destino, estado):
         conexion = bd.Conexion()
 
         try:
             # Llamar al procedimiento almacenado
-            conexion.ejecutar("CALL SP_EDITAR_TIPO_USUARIO(%s, %s, %s);", (id, nombre, estado))
+            conexion.ejecutar("CALL SP_EDITAR_RUTA(%s, %s, %s, %s, %s);", (id, nombre, origen, destino, estado))
 
             # Obtener mensajes de salida
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
@@ -65,7 +67,7 @@ class Ruta:
 
         try:
             # Llamar al procedimiento almacenado
-            conexion.ejecutar("CALL SP_ELIMINAR_TIPO_USUARIO(%s);", (id, ))
+            conexion.ejecutar("CALL SP_ELIMINAR_RUTA(%s);", (id, ))
 
             # Obtener mensajes de salida
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
@@ -80,7 +82,7 @@ class Ruta:
 
         try:
             # Llamar al procedimiento almacenado
-            conexion.ejecutar("CALL SP_DARBAJA_TIPO_USUARIO(%s);", (id, ))
+            conexion.ejecutar("CALL SP_DARBAJA_RUTA(%s);", (id, ))
 
             # Obtener mensajes de salida
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")

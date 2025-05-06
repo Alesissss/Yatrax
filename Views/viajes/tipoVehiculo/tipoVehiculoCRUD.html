@@ -22,8 +22,8 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="txt_Capacidad">Capacidad</label>
-                            <input type="number" name="txt_capacidad" id="txt_Capacidad" class="form-control" placeholder="Cantidad de pasajeros" value="{{ tipoVehiculo.capacidad }}" {% if btnId == "btn_Regresar" %} disabled {% endif %}>
+                            <label for="txt_marca">idMarca</label>
+                            <input type="number" name="txt_marca" id="txt_marca" class="form-control" placeholder="Id de la marca" value="{{ tipoVehiculo.idMarca }}" {% if btnId == "btn_Regresar" %} disabled {% endif %}>
                         </div>
 
                         <div class="mb-3">
@@ -36,7 +36,7 @@
 
                         <div class="text-center">
                             <button id="btn_Listado" type="button" class="btn btn-danger">Volver al listado de
-                                tipo de usuarios</button>
+                                tipo de vehiculo</button>
                             <button id="{{ btnId }}" type="submit" class="btn btn-primary">Aceptar</button>
                         </div>
                     </form>
