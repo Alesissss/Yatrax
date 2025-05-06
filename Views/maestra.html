@@ -35,7 +35,6 @@
     </ul>
   </nav>
   {% block contenido %}{% endblock %}
-  {% block scripts %}{% endblock %}
   <footer>
     <div class="container-fluid bg-black py-3 py-md-6 py-xl-9 py-xxl-10" id="maestra_footer">
       <div class="row justify-content-center">
@@ -274,6 +273,8 @@
   </footer>
 
 
+
+
   <div id="modal" class="modal">
   </div>
 
@@ -423,6 +424,7 @@
     }
 
   </script>
+{% block scripts %}{% endblock %}
   <script>
     const botonMenu = document.getElementById('botonMenu');
     const menuDesplegable = document.getElementById('menuDesplegable');

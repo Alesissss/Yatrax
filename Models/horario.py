@@ -2,7 +2,7 @@ import hashlib
 import bd
 from datetime import timedelta
 
-class horario:
+class Horario:
     def __init__(self, id=None, horario_entrada=None, horario_salida=None, estado=None, estado_proceso=None, estado_registro=None, fecha_registro=None):
         self.id = id
         self.horario_entrada = horario_entrada

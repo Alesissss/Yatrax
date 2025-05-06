@@ -1,26 +1,26 @@
 {% extends "index.html" %}
 
-{% block title %}YATRAX - Gestión de tipo vehiculo{% endblock %}
+{% block title %}YATRAX - Gestión de Nivel{% endblock %}
 
 {% block content %}
 <div class="container-fluid p-4">
     <div class="panel-heading">
         <div class="row">
             <div class="col-md-12">
-                <h1>Gestionar tipo vehículo</h1>
+                <h1>Gestionar Nivel</h1>
             </div>
         </div>
     </div>
     <div class="panel-body">
         <div class="row">
             <div class="col-12">
-                <table id="tbl_tipoVehiculo" class="table table-bordered table-short-rows">
+                <table id="tbl_Nivel" class="table table-bordered table-short-rows">
                     <thead class="bg-gray">
                         <tr>
                             <th class="text-center">ID</th>
-                            <th class="text-center">NOMBRE</th>
-                            <th class="text-center">CAPACIDAD</th>
-                            <th class="text-center">ID MARCA</th>
+                            <th class="text-center">NRO PISO</th>
+                            <th class="text-center">TIPO VEHICULO</th>
+                            <th class="text-center">CANTIDAD</th>
                             <th class="text-center">ESTADO</th>
                             <th class="text-center">ACCIÓN</th>
                         </tr>
@@ -101,7 +101,7 @@
             lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
         });
 
-        fct_IniciarTablaUsuarios('#tbl_tipoVehiculo');
+        fct_IniciarTablaUsuarios('#tbl_Nivel');
     });
 
     function fct_IniciarTablaUsuarios(IdTabla) {
@@ -160,16 +160,16 @@
                     columns: ':not(.noVis)',
                 },
                 {
-                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo tipo vehiculo',
+                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo nivel',
                     className: 'btn bg-success m-1',
                     titleAttr: 'Nuevo',
                     action: function (e, dt, node, config) {
-                        fct_NuevoTipoVehiculo();
+                        fct_NuevoNivel();
                     },
                 },
             ],
             ajax: {
-                url: "/trabajadores/viajes/GetData_TipoVehiculo",
+                url: "/trabajadores/viajes/GetData_Nivel",
                 type: "GET",
                 datatype: "json",
                 data: function (d) {
@@ -189,9 +189,9 @@
             },
             columns: [
                 { data: "id", name: "id" },
-                { data: "nombre", name: "nombre" },
-                { data: "capacidad", name: "capacidad" },
-                { data: "marca", name: "Marca" },
+                { data: "nroPiso", name: "Nro Piso" },
+                { data: "tipo_vehiculo", name: "Tipo Vehiculo" },
+                { data: "cantidad", name: "Cantidad" },
                 { 
                     data: "estado", 
                     name: "estado",
@@ -205,10 +205,10 @@
                     render: function (data, type, row) {
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_VerTipoVehiculo('${data.id}')" title="Ver tipo vehiculo"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_tipoVehiculoEditar('${data.id}')" title="Editar tipo vehiculo"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_tipoVehiculoDarBaja('${data.id}')" title="Dar de baja tipo vehiculo"><i class="bi bi-arrow-down-circle"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_tipoVehiculoEliminar('${data.id}')" title="Eliminar tipo vehiculo"><i class="bi bi-trash"></i></button>
+                            <button class="btn btn-xs m-1 btn-info" onclick="fct_VerNivel('${data.id}')" title="Ver Nivel"><i class="bi bi-eye"></i></button>
+                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_NivelEditar('${data.id}')" title="Editar Nivel"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_NivelDarBaja('${data.id}')" title="Dar de baja Nivel"><i class="bi bi-arrow-down-circle"></i></button>
+                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_NivelEliminar('${data.id}')" title="Eliminar Nivel"><i class="bi bi-trash"></i></button>
                         </div>
                         `;
                     },
@@ -255,19 +255,19 @@
         });
     }
 
-    function fct_NuevoTipoVehiculo() {
-        window.location.href = '/trabajadores/viajes/registrarTipoVehiculo';
+    function fct_NuevoNivel() {
+        window.location.href = '/trabajadores/viajes/registrarNivel';
     }
 
-    function fct_tipoVehiculoEditar(Id) {
-        window.location.href = `/trabajadores/viajes/editarTipoVehiculo/${Id}`;
+    function fct_NivelEditar(Id) {
+        window.location.href = `/trabajadores/viajes/editarNivel/${Id}`;
     }
 
-    function fct_VerTipoVehiculo(Id) {
-        window.location.href = `/trabajadores/viajes/verTipoVehiculo/${Id}`;
+    function fct_VerNivel(Id) {
+        window.location.href = `/trabajadores/viajes/verNivel/${Id}`;
     }
 
-    function fct_tipoVehiculoEliminar(Id) {
+    function fct_NivelEliminar(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
             text: "Esta acción eliminará el tipo de vehiculo. ¿Deseas continuar?",
@@ -281,7 +281,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/viajes/eliminarTipoVehiculo/${Id}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/viajes/eliminarNivel/${Id}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
@@ -290,7 +290,7 @@
                                 toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
                                 return;
                             }
-                            fct_IniciarTablaUsuarios('#tbl_tipoVehiculo');
+                            fct_IniciarTablaUsuarios('#tbl_Nivel');
                             toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                         } else {
                             toastr.error(response.Msj, "MENSAJE DE SISTEMA");
@@ -306,7 +306,7 @@
         });
     }
 
-    function fct_tipoVehiculoDarBaja(Id) {
+    function fct_NivelDarBaja(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
             text: "Esta acción le dará de baja al tipo de vehiculo. ¿Deseas continuar?",
@@ -320,12 +320,12 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/viajes/DarBajaTipoVehiculo/${Id}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/viajes/DarBajaNivel/${Id}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
                         if (response && response.Status === "success") {
-                            fct_IniciarTablaUsuarios('#tbl_tipoVehiculo');
+                            fct_IniciarTablaUsuarios('#tbl_Nivel');
                             toastr.success(response.Msj || "Operación exitosa", "MENSAJE DE SISTEMA");
                         } else {
                             toastr.error((response && response.Msj) || "Error desconocido", "MENSAJE DE SISTEMA");

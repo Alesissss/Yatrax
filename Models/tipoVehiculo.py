@@ -2,14 +2,10 @@ import bd
 import hashlib
 
 class TipoVehiculo:
-    def __init__(self,idTipoVehiculo=None,nombre=None,largo=None,ancho=None,capacidad=None,combustible=None,consumo=None,estado=None):
+    def __init__(self,idTipoVehiculo=None,nombre=None,idMarca=None,estado=None):
         self.idTipoVehiculo=idTipoVehiculo
         self.nombre=nombre
-        self.largo=largo
-        self.ancho=ancho
-        self.capacidad=capacidad
-        self.combustible=combustible
-        self.consumo=consumo
+        self.idMarca=idMarca
         self.estado=estado
 
     @classmethod
@@ -18,11 +14,14 @@ class TipoVehiculo:
             conexion = bd.Conexion()
             listado = conexion.obtener("""
                 SELECT 
-                    idTipoVehiculo AS id,
-                    nombre,
-                    capacidad,
-                    estado
-                FROM tipo_vehiculo
+                    tv.idTipoVehiculo AS id,
+                    tv.nombre AS nombre,
+                    COALESCE(SUM(n.cantidad),0) AS capacidad,
+                    tv.idMarca AS marca,
+                    tv.estado AS estado
+                FROM tipo_vehiculo tv
+                LEFT JOIN nivel n ON tv.idTipoVehiculo = n.tipo_vehiculo
+                GROUP BY tv.idTipoVehiculo, tv.nombre, tv.idMarca, tv.estado;
             """)
             return listado
         finally:
@@ -36,7 +35,7 @@ class TipoVehiculo:
                 SELECT 
                     idTipoVehiculo AS id,
                     nombre,
-                    capacidad,
+                    idMarca,
                     estado
                 FROM tipo_vehiculo where idTipoVehiculo=%s
             """,(idTipoVehiculo,))
@@ -49,12 +48,12 @@ class TipoVehiculo:
                 conexion.cerrar()
 
     @classmethod
-    def insertarTipoVehiculo(cls, nombre, capacidad):
+    def insertarTipoVehiculo(cls, nombre, idmarca):
         conexion = None
         try:
             conexion = bd.Conexion()
-            conexion.ejecutar('CALL SP_INSERTAR_TIPOVEHICULO(%s,%s,@MSJ, @MSJ2)', (nombre,capacidad))
-            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
+            conexion.ejecutar('CALL SP_INSERTAR_TIPOVEHICULO(%s,%s,@MSJ)', (nombre,idmarca))
+            resultado = conexion.obtener("SELECT @MSJ;")
             return resultado[0]        
         except Exception as e:
             print(f"Error en insertarTipoVehiculo: {str(e)}")
@@ -64,12 +63,12 @@ class TipoVehiculo:
                 conexion.cerrar()
 
     @classmethod
-    def actualizarTipoVehiculo(cls,id,nombre,capacidad,estado):
+    def actualizarTipoVehiculo(cls,id,nombre,marca,estado):
         conexion = None
         try:
             conexion = bd.Conexion()
-            conexion.ejecutar("CALL SP_ACTUALIZAR_TIPOVEHICULO(%s,%s,%s,%s,@MSJ, @MSJ2)",(id,nombre,capacidad,estado))
-            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
+            conexion.ejecutar("CALL SP_ACTUALIZAR_TIPOVEHICULO(%s,%s,%s,%s,@mensaje, @error)",(id,nombre,marca,estado))
+            resultado = conexion.obtener("SELECT @mensaje AS MSJ, @error AS MSJ2;")
             return resultado[0]
         finally:
             if conexion:

@@ -11,35 +11,33 @@
                     <h4 class="text-center mb-0">{{ tittle }}</h4>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label for="txt_TipoUsuario">Nombre</label>
-                            <div class="input-group">
-                                <input type="text" id="txt_TipoUsuario" class="form-control" placeholder="Nombre"
-                                    value="{{ tipoUsuario.nombre }}" oninput="this.value = this.value.toUpperCase();" {%
-                                    if btnId=='btn_Aceptar' %}disabled{% endif %}>
-                                <div class="input-group-append">
-                                    <div class="input-group-text"><i class="fas fa-user"></i></div>
-                                </div>
+                    <div class="mb-3">
+                        <label for="txt_Tipocomprobante">Nombre</label>
+                        <div class="input-group">
+                            <input type="text" id="txt_Tipocomprobante" class="form-control" placeholder="Nombre"
+                                value="{{ tipocomprobante.nombre }}" oninput="this.value = this.value.toUpperCase();"
+                                {% if btnId == 'btn_Aceptar' %}disabled{% endif %}>
+                                
+                            <div class="input-group-append">
+                                <div class="input-group-text"><i class="fas fa-user"></i></div>
                             </div>
                         </div>
-                        <div class="col-md-12 mb-3">
-                            <label for="cbx_Estado">Estado</label>
-                            <div class="input-group">
-                                <select id="cbx_Estado" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{%
-                                    endif %}>
-                                    <option disabled>--SELECCIONAR--</option>
-                                    <option {% if tipoUsuario.estado==1 %}selected{% endif %} value="1">Vigente</option>
-                                    <option {% if tipoUsuario.estado==0 %}selected{% endif %} value="0">No vigente
-                                    </option>
-                                </select>
-                            </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cbx_Estado">Estado</label>
+                        <div class="input-group">
+                            <select id="cbx_Estado" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{% endif
+                                %}>
+                                <option disabled>--SELECCIONAR--</option>
+                                <option {% if tipocomprobante.estado==1 %}selected{% endif %} value="1">Vigente</option>
+                                <option {% if tipocomprobante.estado==0 %}selected{% endif %} value="0">No vigente</option>
+                            </select>
                         </div>
-                        <div class="col-md-12 text-center">
-                            <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de
-                                tipos de usuarios</button>
-                            <button id="{{ btnId }}" type="button" class="btn btn-primary">Aceptar</button>
-                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de
+                            tipos de comprobantes</button>
+                        <button id="{{ btnId }}" type="button" class="btn btn-primary">Aceptar</button>
                     </div>
                 </div>
             </div>
@@ -51,7 +49,7 @@
 <script>
     $(document).ready(function () {
         $("#btn_Registrar").click(function () {
-            let nombre = $("#txt_TipoUsuario").val().trim();
+            let nombre = $("#txt_Tipocomprobante").val().trim();
             let estado = $('#cbx_Estado').val();
 
             if (!nombre || !estado) {
@@ -61,12 +59,12 @@
 
             Swal.fire({
                 title: "¿Estás seguro?",
-                text: "Esta acción registrará al tipo usuario. ¿Deseas continuar?",
+                text: "Esta acción registrará al tipo comprobante. ¿Deseas continuar?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
                 cancelButtonColor: "#d33",
-                confirmButtonText: "Sí, registrar tipo usuario",
+                confirmButtonText: "Sí, registrar tipo comprobante",
                 cancelButtonText: "Cancelar",
                 reverseButtons: true
             }).then((result) => {
@@ -77,7 +75,7 @@
                     formData.append("estado", estado);
 
                     $.ajax({
-                        url: "/trabajadores/usuarios/RegistrarTipoUsuario",
+                        url: "/trabajadores/ventas/RegistrarTipoComprobante",
                         type: "POST",
                         processData: false,
                         contentType: false,
@@ -90,7 +88,7 @@
                                 } else {
                                     toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                                     setTimeout(() => {
-                                        window.location.href = "/trabajadores/usuarios/GestionarTipoUsuario";
+                                        window.location.href = "/trabajadores/ventas/GestionarTipoComprobante";
                                     }, 500);
                                 }
                             } else {
@@ -108,9 +106,9 @@
         });
 
         $("#btn_Editar").click(function () {
-            const id = Number("{{ tipoUsuario.id }}");
+            const id = Number("{{ tipocomprobante.ID }}");
 
-            let nombre = $("#txt_TipoUsuario").val().trim();
+            let nombre = $("#txt_Tipocomprobante").val().trim();
             let estado = $('#cbx_Estado').val();
 
             if (!nombre || !estado) {
@@ -120,12 +118,12 @@
 
             Swal.fire({
                 title: "¿Estás seguro?",
-                text: "Esta acción modificará al usuario. ¿Deseas continuar?",
+                text: "Esta acción modificará al comprobante. ¿Deseas continuar?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
                 cancelButtonColor: "#d33",
-                confirmButtonText: "Sí, editar tipo usuario",
+                confirmButtonText: "Sí, editar tipo comprobante",
                 cancelButtonText: "Cancelar",
                 reverseButtons: true
             }).then((result) => {
@@ -136,7 +134,7 @@
                     formData.append("estado", estado);
 
                     $.ajax({
-                        url: `/trabajadores/usuarios/EditarTipoUsuario/${id}`,
+                        url: `/trabajadores/ventas/EditarTipoComprobante/${id}`,
                         type: "POST",
                         processData: false,
                         contentType: false,
@@ -145,7 +143,7 @@
                             if (response.Status === "success") {
                                 toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                                 setTimeout(() => {
-                                    window.location.href = "/trabajadores/usuarios/GestionarTipoUsuario";
+                                    window.location.href = "/trabajadores/ventas/GestionarTipoComprobante";
                                 }, 500);
                             } else {
                                 toastr.error(response.Msj, "MENSAJE DE SISTEMA");
@@ -160,11 +158,11 @@
         });
 
         $("#btn_Aceptar").click(function () {
-            window.location.href = "/trabajadores/usuarios/GestionarTipoUsuario";
+            window.location.href = "/trabajadores/ventas/GestionarTipoComprobante";
         });
 
         $("#btn_Volver").click(function () {
-            window.location.href = "/trabajadores/usuarios/GestionarTipoUsuario";
+            window.location.href = "/trabajadores/ventas/GestionarTipoComprobante";
         });
     });
 </script>

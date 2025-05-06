@@ -28,7 +28,7 @@ def error_500(error):
 # Manejar cualquier otro error genérico
 @homeClientes_bp.errorhandler(Exception)
 def error_general(error):
-    return render_template("Ecommerce/error.html", error="Ocurrió un error inesperado"), 500
+   return render_template("Ecommerce/error.html", error="Ocurrió un error inesperado"), 500
 
 # VIEWS
 @homeClientes_bp.route('/inicio')
@@ -50,6 +50,14 @@ def login_cliente():
 @homeClientes_bp.route('/forgotPass')
 def forgot_password():
     return render_template('Ecommerce/home/forgotPassword.html')
+
+@homeClientes_bp.route('/register')
+def register_cliente():
+    return render_template('Ecommerce/home/formRegistro.html')
+
+@homeClientes_bp.route('/pago')
+def pago_pasajes():
+    return render_template('Ecommerce/home/pago.html')
 # END VIEWS
 
 # FUNCIONES

@@ -1,26 +1,25 @@
 {% extends "index.html" %}
 
-{% block title %}YATRAX - Gestión de tipo vehiculo{% endblock %}
+{% block title %}YATRAX - Gestión de tipos de documento{% endblock %}
 
 {% block content %}
 <div class="container-fluid p-4">
     <div class="panel-heading">
         <div class="row">
             <div class="col-md-12">
-                <h1>Gestionar tipo vehículo</h1>
+                <h1>Gestionar tipos de documento</h1>
             </div>
         </div>
     </div>
     <div class="panel-body">
         <div class="row">
             <div class="col-12">
-                <table id="tbl_tipoVehiculo" class="table table-bordered table-short-rows">
+                <table id="tbl_TipoDocumento" class="table table-bordered table-short-rows">
                     <thead class="bg-gray">
                         <tr>
                             <th class="text-center">ID</th>
                             <th class="text-center">NOMBRE</th>
-                            <th class="text-center">CAPACIDAD</th>
-                            <th class="text-center">ID MARCA</th>
+                            <th class="text-center">ABREVIATURA</th>
                             <th class="text-center">ESTADO</th>
                             <th class="text-center">ACCIÓN</th>
                         </tr>
@@ -35,7 +34,7 @@
 {% endblock %}
 {% block scripts %}
 <script>
-    var dtUsuarios;
+    var dtTipoDocumento;
 
     $(document).ready(function () {
         // $('body').addClass('sidebar-collapse');
@@ -101,12 +100,12 @@
             lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
         });
 
-        fct_IniciarTablaUsuarios('#tbl_tipoVehiculo');
+        fct_IniciarTablaTipoDocumento('#tbl_TipoDocumento');
     });
 
-    function fct_IniciarTablaUsuarios(IdTabla) {
+    function fct_IniciarTablaTipoDocumento(IdTabla) {
         // Inicializar DataTables con botones
-        dtUsuarios = $(IdTabla).DataTable({
+        dtTipoDocumento = $(IdTabla).DataTable({
             buttons: [
                 {
                     extend: 'copy',
@@ -119,7 +118,7 @@
                     text: '<i class="bi bi-file-earmark-excel"></i>',
                     titleAttr: 'Exportar a Excel',
                     className: 'btn btn-success',
-                    filename: 'Usuarios' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Tipo Documento' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     footer: true,
                     exportOptions:
                     {
@@ -132,7 +131,7 @@
                     text: '<i class="bi bi-file-earmark-pdf"></i>',
                     titleAttr: 'Exportar a PDF',
                     className: 'btn btn-danger',
-                    filename: 'Usuarios' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Tipo Documento' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     exportOptions:
                     {
                         stripHtml: true,
@@ -160,16 +159,16 @@
                     columns: ':not(.noVis)',
                 },
                 {
-                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo tipo vehiculo',
+                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo tipo documento',
                     className: 'btn bg-success m-1',
                     titleAttr: 'Nuevo',
                     action: function (e, dt, node, config) {
-                        fct_NuevoTipoVehiculo();
+                        fct_TipoDocumentoNuevo();
                     },
                 },
             ],
             ajax: {
-                url: "/trabajadores/viajes/GetData_TipoVehiculo",
+                url: "/trabajadores/ventas/GetData_TipoDocumento",
                 type: "GET",
                 datatype: "json",
                 data: function (d) {
@@ -190,13 +189,12 @@
             columns: [
                 { data: "id", name: "id" },
                 { data: "nombre", name: "nombre" },
-                { data: "capacidad", name: "capacidad" },
-                { data: "marca", name: "Marca" },
+                { data: "abreviatura", name: "abreviatura" },
                 { 
                     data: "estado", 
                     name: "estado",
                     render: function(data, type, row) {
-                        return data === 1 ? 'Activo' : 'No activo'; 
+                        return data === 1 ? 'Vigente' : 'No vigente'; 
                     },
                 },
                 {
@@ -205,10 +203,10 @@
                     render: function (data, type, row) {
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_VerTipoVehiculo('${data.id}')" title="Ver tipo vehiculo"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_tipoVehiculoEditar('${data.id}')" title="Editar tipo vehiculo"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_tipoVehiculoDarBaja('${data.id}')" title="Dar de baja tipo vehiculo"><i class="bi bi-arrow-down-circle"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_tipoVehiculoEliminar('${data.id}')" title="Eliminar tipo vehiculo"><i class="bi bi-trash"></i></button>
+                            <button class="btn btn-xs m-1 btn-info" onclick="fct_TipoDocumentoVer('${data.id}')" title="Ver tipo documento"><i class="bi bi-eye"></i></button>
+                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_TipoDocumentoEditar('${data.id}')" title="Editar tipo documento"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_TipoDocumentoDarBaja('${data.id}')" title="Dar de baja tipo documento"><i class="bi bi-arrow-down-circle"></i></button>
+                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_TipoDocumentoEliminar('${data.id}')" title="Eliminar tipo documento"><i class="bi bi-trash"></i></button>
                         </div>
                         `;
                     },
@@ -221,7 +219,7 @@
                     className: "text-center align-middle",
                 },
                 {
-                    targets: [1, 2, 3],
+                    targets: [1, 2, 3, 4],
                     className: 'align-middle',
                 },
                 {
@@ -255,22 +253,22 @@
         });
     }
 
-    function fct_NuevoTipoVehiculo() {
-        window.location.href = '/trabajadores/viajes/registrarTipoVehiculo';
+    function fct_TipoDocumentoNuevo() {
+        window.location.href = '/trabajadores/ventas/TipoDocumentoNuevo';
     }
 
-    function fct_tipoVehiculoEditar(Id) {
-        window.location.href = `/trabajadores/viajes/editarTipoVehiculo/${Id}`;
+    function fct_TipoDocumentoEditar(Id) {
+        window.location.href = `/trabajadores/ventas/EditarTipoDocumento/${Id}`;
     }
 
-    function fct_VerTipoVehiculo(Id) {
-        window.location.href = `/trabajadores/viajes/verTipoVehiculo/${Id}`;
+    function fct_TipoDocumentoVer(Id) {
+        window.location.href = `/trabajadores/ventas/VerTipoDocumento/${Id}`;
     }
 
-    function fct_tipoVehiculoEliminar(Id) {
+    function fct_TipoDocumentoEliminar(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción eliminará el tipo de vehiculo. ¿Deseas continuar?",
+            text: "Esta acción eliminará al tipo documento. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -281,7 +279,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/viajes/eliminarTipoVehiculo/${Id}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/ventas/EliminarTipoDocumento/${Id}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
@@ -290,7 +288,7 @@
                                 toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
                                 return;
                             }
-                            fct_IniciarTablaUsuarios('#tbl_tipoVehiculo');
+                            fct_IniciarTablaTipoDocumento('#tbl_TipoDocumento');
                             toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                         } else {
                             toastr.error(response.Msj, "MENSAJE DE SISTEMA");
@@ -306,10 +304,10 @@
         });
     }
 
-    function fct_tipoVehiculoDarBaja(Id) {
+    function fct_TipoDocumentoDarBaja(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción le dará de baja al tipo de vehiculo. ¿Deseas continuar?",
+            text: "Esta acción le dará de baja al tipo documento. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -320,19 +318,22 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/viajes/DarBajaTipoVehiculo/${Id}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/ventas/DarBajaTipoDocumento/${Id}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
-                        if (response && response.Status === "success") {
-                            fct_IniciarTablaUsuarios('#tbl_tipoVehiculo');
-                            toastr.success(response.Msj || "Operación exitosa", "MENSAJE DE SISTEMA");
+                        if (response.Status === "success") {
+                            if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                return;
+                            }
+                            fct_IniciarTablaTipoDocumento('#tbl_TipoDocumento');
+                            toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                         } else {
-                            toastr.error((response && response.Msj) || "Error desconocido", "MENSAJE DE SISTEMA");
-                            console.error('Error: ' + (response ? response.Msj : "No hay respuesta"));
+                            toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                            console.error('Error: ' + response.Msj);
                         }
                     },
-
                     error: function (xhr, Status, error) {
                         toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
                         console.error('Error:' + error);
