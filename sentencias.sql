@@ -214,8 +214,9 @@ CREATE TABLE nivel(
 CREATE TABLE tipo_vehiculo(
 	idTipoVehiculo int AUTO_INCREMENT primary key,
     nombre varchar(50) not null,
-    capacidad int not null,
-    estado TINYINT not null
+    idMarca int not null,
+    estado TINYINT not null,
+    foreign key idMarca references marca
 );
 
 -- Crear tabla metodo_pago
@@ -2900,10 +2901,10 @@ DELIMITER ;
 --  tipo vehiculo
 
 -- Eliminar procedimientos existentes (si los hay)
-
-DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPO_VEHICULO;
-DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPO_VEHICULO;
-DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_VEHICULO;
+DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPOVEHICULO;
+DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPOVEHICULO;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPOVEHICULO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPOVEHICULO;
 
 -- Cambiar delimitador para creación de procedimientos
 DELIMITER $$
@@ -2911,36 +2912,53 @@ DELIMITER $$
 -- Procedimiento para insertar tipo de vehículo
 CREATE PROCEDURE SP_INSERTAR_TIPOVEHICULO(
     IN p_nombre VARCHAR(50),
-    IN p_capacidad INT,
+    IN p_idMarca INT,
     OUT MSJ VARCHAR(255),
     OUT MSJ2 VARCHAR(255)
 )
 BEGIN
     DECLARE v_existe INT;
+    DECLARE v_existeMarca INT;
 
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
+        ROLLBACK;
         SET MSJ2 = 'Error inesperado al insertar el tipo de vehículo';
     END;
 
     SET MSJ = NULL;
     SET MSJ2 = NULL;
 
-    -- Validaciones
+    -- Validaciones básicas
     IF p_nombre IS NULL OR p_nombre = '' THEN
         SET MSJ2 = 'El nombre es obligatorio';
-    ELSEIF p_capacidad <= 0 THEN
-        SET MSJ2 = 'La capacidad debe ser mayor a 0';
+    ELSEIF p_idMarca IS NULL OR p_idMarca <= 0 THEN
+        SET MSJ2 = 'Debe indicar una marca válida';
     ELSE
-        SELECT COUNT(*) INTO v_existe FROM tipo_vehiculo WHERE nombre = p_nombre;
-
-        IF v_existe > 0 THEN
-            SET MSJ2 = 'Ya existe un tipo de vehículo con ese nombre';
+        -- Mejora 1: Verificar existencia de la marca
+        SELECT COUNT(*) INTO v_existeMarca
+        FROM marca
+        WHERE idMarca = p_idMarca;
+        
+        IF v_existeMarca = 0 THEN
+            SET MSJ2 = 'La marca indicada no existe';
         ELSE
-            INSERT INTO tipo_vehiculo (nombre, capacidad, estado)
-            VALUES (p_nombre, p_capacidad, 1);
+            -- Verificar duplicados en tipo_vehiculo
+            SELECT COUNT(*) INTO v_existe
+            FROM tipo_vehiculo
+            WHERE nombre = p_nombre
+              AND idMarca = p_idMarca;
 
-            SET MSJ = 'Se registró correctamente el tipo de vehículo';
+            IF v_existe > 0 THEN
+                SET MSJ2 = 'Ya existe un tipo de vehículo con ese nombre y marca';
+            ELSE
+                START TRANSACTION;
+                INSERT INTO tipo_vehiculo (nombre, idMarca, estado)
+                VALUES (p_nombre, p_idMarca, 1);
+                COMMIT;
+
+                SET MSJ = 'Se registró correctamente el tipo de vehículo';
+            END IF;
         END IF;
     END IF;
 END$$
@@ -2949,42 +2967,58 @@ END$$
 CREATE PROCEDURE SP_ACTUALIZAR_TIPOVEHICULO(
     IN p_id INT,
     IN p_nombre VARCHAR(50),
-    IN p_capacidad INT,
+    IN p_idMarca INT,
     IN p_estado TINYINT,
     OUT MSJ VARCHAR(255),
     OUT MSJ2 VARCHAR(255)
 )
 BEGIN
     DECLARE v_existe INT;
+    DECLARE v_existeMarca INT;
 
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
+        ROLLBACK;
         SET MSJ2 = 'Error inesperado al actualizar el tipo de vehículo';
     END;
 
     SET MSJ = NULL;
     SET MSJ2 = NULL;
 
-    -- Validaciones
+    -- Validaciones básicas
     IF p_nombre IS NULL OR p_nombre = '' THEN
         SET MSJ2 = 'El nombre es obligatorio';
-    ELSEIF p_capacidad <= 0 THEN
-        SET MSJ2 = 'La capacidad debe ser mayor a 0';
+    ELSEIF p_idMarca IS NULL OR p_idMarca <= 0 THEN
+        SET MSJ2 = 'Debe indicar una marca válida';
     ELSEIF p_estado NOT IN (0, 1) THEN
         SET MSJ2 = 'El estado debe ser 0 o 1';
     ELSE
-        SELECT COUNT(*) INTO v_existe FROM tipo_vehiculo WHERE idTipoVehiculo = p_id;
+        -- Mejora 1: Verificar existencia de la marca
+        SELECT COUNT(*) INTO v_existeMarca
+        FROM marca
+        WHERE idMarca = p_idMarca;
 
-        IF v_existe = 0 THEN
-            SET MSJ2 = 'El tipo de vehículo no existe';
+        IF v_existeMarca = 0 THEN
+            SET MSJ2 = 'La marca indicada no existe';
         ELSE
-            UPDATE tipo_vehiculo
-            SET nombre = p_nombre,
-                capacidad = p_capacidad,
-                estado = p_estado
+            -- Verificar existencia del tipo
+            SELECT COUNT(*) INTO v_existe
+            FROM tipo_vehiculo
             WHERE idTipoVehiculo = p_id;
 
-            SET MSJ = 'Se actualizó correctamente el tipo de vehículo';
+            IF v_existe = 0 THEN
+                SET MSJ2 = 'El tipo de vehículo no existe';
+            ELSE
+                START TRANSACTION;
+                UPDATE tipo_vehiculo
+                SET nombre   = p_nombre,
+                    idMarca  = p_idMarca,
+                    estado   = p_estado
+                WHERE idTipoVehiculo = p_id;
+                COMMIT;
+
+                SET MSJ = 'Se actualizó correctamente el tipo de vehículo';
+            END IF;
         END IF;
     END IF;
 END$$
@@ -3007,8 +3041,8 @@ BEGIN
     SET MSJ = NULL;
     SET MSJ2 = NULL;
 
-    SELECT COUNT(*) INTO v_existe 
-    FROM tipo_vehiculo 
+    SELECT COUNT(*) INTO v_existe
+    FROM tipo_vehiculo
     WHERE idTipoVehiculo = p_id;
 
     IF v_existe = 0 THEN
@@ -3042,8 +3076,8 @@ BEGIN
     SET MSJ = NULL;
     SET MSJ2 = NULL;
 
-    SELECT COUNT(*) INTO v_existe 
-    FROM tipo_vehiculo 
+    SELECT COUNT(*) INTO v_existe
+    FROM tipo_vehiculo
     WHERE idTipoVehiculo = p_id;
 
     IF v_existe = 0 THEN
@@ -3057,6 +3091,9 @@ BEGIN
         SET MSJ = 'Tipo de vehículo eliminado correctamente';
     END IF;
 END$$
+
+-- Restaurar delimitador
+DELIMITER ;
 
 -- Eliminar procedimientos si existen
 DROP PROCEDURE IF EXISTS SP_INSERTAR_NIVEL;
