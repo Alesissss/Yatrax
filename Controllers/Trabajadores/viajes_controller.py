@@ -2,7 +2,7 @@ import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort
 from Models.tipoVehiculo import TipoVehiculo
 from Models.sucursal import Sucursal
-from Models.horario import horario
+from Models.horario import Horario
 from Models.ubigeo import Ubigeo
 
 viajes_bp = Blueprint('viajes', __name__, url_prefix='/trabajadores/viajes')
@@ -195,7 +195,7 @@ def eliminarTipoVehiculo(idTipoVehiculo):
 @viajes_bp.route("/GetData_Horario", methods=["GET"])
 def get_horarios():
     try:
-        horarios = horario.obtener_todos()
+        horarios = Horario.obtener_todos()
         return jsonify({'data': horarios, 'Status': 'success', 'Msj': 'Listado de horarios retornado exitosamene'})
     except Exception as e:
         return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar horarios: + {repr(e)}'})
@@ -220,7 +220,7 @@ def registrar_horario():
         if not hora_entrada or not hora_salida or not estado:
             return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
 
-        mensajes = horario.registrar(hora_entrada, hora_salida, estado)
+        mensajes = Horario.registrar(hora_entrada, hora_salida, estado)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 
@@ -237,7 +237,7 @@ def registrar_horario():
 @viajes_bp.route("/EliminarHorario/<int:id>", methods=['POST'])
 def eliminar_horario(id):  # Recibe el ID de la URL
     try:
-        mensajes = horario.eliminar(id)  # Se usa el ID directamente
+        mensajes = Horario.eliminar(id)  # Se usa el ID directamente
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 
@@ -253,7 +253,7 @@ def eliminar_horario(id):  # Recibe el ID de la URL
 @viajes_bp.route("/EditarHorario/<int:id>", methods=['GET', 'POST'])
 def editar_usuario(id):
     try:
-        horario_data = horario.obtener_por_id(id)
+        horario_data = Horario.obtener_por_id(id)
 
         if request.method == 'POST':
             hora_entrada = request.form.get("hora_entrada").strip()
@@ -264,7 +264,7 @@ def editar_usuario(id):
                 return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
 
             
-            mensajes = horario.editar(id, hora_entrada, hora_salida, estado)
+            mensajes = Horario.editar(id, hora_entrada, hora_salida, estado)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
@@ -284,7 +284,7 @@ def editar_usuario(id):
 @viajes_bp.route("/VerHorario/<int:id>", methods=['GET'])
 def ver_usuario(id):
     try:
-        horario_data = horario.obtener_por_id(id)
+        horario_data = Horario.obtener_por_id(id)
         if horario_data:
             return render_template('viajes/horarioCRUD.html', active_page="horarios", active_menu='mViajes', horario=horario_data, tittle = 'Ver horario', btnId = 'btn_Aceptar')
         return render_template('viajes/horarioCRUD.html', active_page="usuarios", active_menu='mUsuarios', usuario={}, tittle = 'Ver usuario', btnId = 'btn_Aceptar')
@@ -295,7 +295,7 @@ def ver_usuario(id):
 @viajes_bp.route("/DarBajaHorario/<int:id>", methods=['POST'])
 def darBaja_horario(id):  # Recibe el ID de la URL
     try:
-        mensajes = horario.darBaja(id)  # Se usa el ID directamente
+        mensajes = Horario.darBaja(id)  # Se usa el ID directamente
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 

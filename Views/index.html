@@ -165,10 +165,10 @@
                             <ul class="nav nav-treeview" style="display: none;">
                                 {% if 30 in session['menus'] %}
                                 <li class="nav-item">
-                                    <a href="{{ url_for('ventas.Menu_Pasajes') }}"
-                                        class="nav-link {% if active_page == 'pasajes' %}active{% endif %}">
-                                        <i class="fas fa-ticket-alt nav-icon"></i>
-                                        <p>Gestionar pasajes</p>
+                                    <a href="{{ url_for('ventas.Menu_TipoComprobante') }}"
+                                        class="nav-link {% if active_page == 'tipoComprobante' %}active{% endif %}">
+                                        <i class="bi bi-file-earmark-text"></i>
+                                        <p>Gestionar tipo comprobante</p>
                                     </a>
                                 </li>
                                 {% endif %}
@@ -178,6 +178,15 @@
                                         class="nav-link {% if active_page == 'tipoCliente' %}active{% endif %}">
                                         <i class="bi bi-person-lines-fill nav-icon"></i>
                                         <p>Gestionar tipos de cliente</p>
+                                    </a>
+                                </li>
+                                {% endif %}
+                                {% if 32 in session['menus'] %}
+                                <li class="nav-item">
+                                    <a href="{{ url_for('ventas.Menu_TipoServicio') }}"
+                                        class="nav-link {% if active_page == 'tipoServicio' %}active{% endif %}">
+                                        <i class="bi bi-telephone nav-icon"></i>
+                                        <p>Gestionar tipos de servicio</p>
                                     </a>
                                 </li>
                                 {% endif %}
