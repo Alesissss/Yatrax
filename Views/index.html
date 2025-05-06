@@ -215,6 +215,13 @@
                                 {% endif %}
                                 {% if 41 in session['menus'] %}
                                 <li class="nav-item">
+                                    <a href="{{ url_for('viajes.Menu_Nivel') }}"
+                                        class="nav-link {% if active_page == 'nivel' %}active{% endif %}">
+                                        <i class="bi bi-bus-front nav-icon"></i>
+                                        <p>Gestionar Nivel</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
                                     <a href="{{ url_for('viajes.Menu_TipoVehiculo') }}"
                                         class="nav-link {% if active_page == 'tipoVehiculo' %}active{% endif %}">
                                         <i class="bi bi-bus-front nav-icon"></i>
