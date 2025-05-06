@@ -117,7 +117,7 @@ def nuevo_nivel():
         # Renderiza formulario para registrar un nuevo nivel
         return render_template(
             "viajes/nivelCRUD.html",  # Cambia el template a uno para nivel
-            title="Nuevo Nivel",
+            tittle="Nuevo nivel",
             nivel={
                 "idNivel": None,
                 "nroPiso": None,
@@ -152,7 +152,7 @@ def ver_nivel(idNivel):
 
         return render_template(
             "viajes/nivelCRUD.html",
-            tittle="Ver Nivel",
+            tittle="Ver nivel",
             nivel=nivel,
             btnId="btn_Regresar",
             active_page="nivel",
@@ -169,7 +169,7 @@ def editar_nivel(idNivel):
 
             return render_template(
                 "viajes/nivelCRUD.html",
-                tittle="Editar Nivel",
+                tittle="Editar nivel",
                 nivel=nivel,
                 btnId="btn_Actualizar",
                 active_page="nivel",
@@ -242,7 +242,7 @@ def nuevoTipoVehiculo():
     if request.method == "GET":
         return render_template(
             "viajes/tipoVehiculoCRUD.html",
-            tittle="Nuevo Tipo de Vehículo",
+            tittle="Nuevo tipo de vehículo",
             tipoVehiculo={},
             btnId="btn_Registrar",
             active_page="tipoVehiculo", 
@@ -270,7 +270,7 @@ def nuevoTipoVehiculo():
 def verTipoVehiculo(idVehiculo):
     return render_template(
         "viajes/tipoVehiculoCRUD.html",
-        tittle="Ver Tipo de Vehículo",
+        tittle="Ver tipo de vehículo",
         tipoVehiculo = TipoVehiculo.obtenerUno(idVehiculo),
         btnId="btn_Regresar",
         active_page="tipoVehiculo", 
@@ -282,7 +282,7 @@ def editarTipoVehiculo(idTipoVehiculo):
     if request.method == "GET":
         return render_template(
             "viajes/tipoVehiculoCRUD.html",
-            tittle="Editar Tipo de Vehículo",
+            tittle="Editar tipo de vehículo",
             tipoVehiculo = TipoVehiculo.obtenerUno(idTipoVehiculo),
             btnId="btn_Actualizar"
         )
