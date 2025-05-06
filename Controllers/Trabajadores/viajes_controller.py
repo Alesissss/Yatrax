@@ -730,8 +730,6 @@ def get_marcas():
 
 # REGION RUTA
 
-# END REGION RUTA
-
 @viajes_bp.route("/GetData_Ruta", methods=["GET"])
 def get_rutas():
     try:
@@ -849,5 +847,7 @@ def darBaja_ruta(id):  # Recibe el ID de la URL
             return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja a la ruta'})
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+# END REGION RUTA
 
 # END FUNCIONES
