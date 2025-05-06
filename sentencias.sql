@@ -2895,61 +2895,32 @@ DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPOVEHICULO;
+DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPOVEHICULO;
 
 -- Cambiar delimitador para creación de procedimientos
 DELIMITER $$
 
 -- Procedimiento para insertar tipo de vehículo
+
 CREATE PROCEDURE SP_INSERTAR_TIPOVEHICULO(
     IN p_nombre VARCHAR(50),
     IN p_idMarca INT,
-    OUT MSJ VARCHAR(255),
-    OUT MSJ2 VARCHAR(255)
+    OUT MSJ VARCHAR(255)
 )
 BEGIN
-    DECLARE v_existe INT;
-    DECLARE v_existeMarca INT;
+    DECLARE v_existeMarca INT DEFAULT 0;
 
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        ROLLBACK;
-        SET MSJ2 = 'Error inesperado al insertar el tipo de vehículo';
-    END;
+    -- Verificar si la marca existe
+    SELECT COUNT(*) INTO v_existeMarca
+    FROM marca
+    WHERE id = p_idMarca;
 
-    SET MSJ = NULL;
-    SET MSJ2 = NULL;
-
-    -- Validaciones básicas
-    IF p_nombre IS NULL OR p_nombre = '' THEN
-        SET MSJ2 = 'El nombre es obligatorio';
-    ELSEIF p_idMarca IS NULL OR p_idMarca <= 0 THEN
-        SET MSJ2 = 'Debe indicar una marca válida';
+    IF v_existeMarca = 0 THEN
+        SET MSJ = 'La marca no existe';
     ELSE
-        -- Mejora 1: Verificar existencia de la marca
-        SELECT COUNT(*) INTO v_existeMarca
-        FROM marca
-        WHERE idMarca = p_idMarca;
-        
-        IF v_existeMarca = 0 THEN
-            SET MSJ2 = 'La marca indicada no existe';
-        ELSE
-            -- Verificar duplicados en tipo_vehiculo
-            SELECT COUNT(*) INTO v_existe
-            FROM tipo_vehiculo
-            WHERE nombre = p_nombre
-              AND idMarca = p_idMarca;
-
-            IF v_existe > 0 THEN
-                SET MSJ2 = 'Ya existe un tipo de vehículo con ese nombre y marca';
-            ELSE
-                START TRANSACTION;
-                INSERT INTO tipo_vehiculo (nombre, idMarca, estado)
-                VALUES (p_nombre, p_idMarca, 1);
-                COMMIT;
-
-                SET MSJ = 'Se registró correctamente el tipo de vehículo';
-            END IF;
-        END IF;
+        INSERT INTO tipo_vehiculo (nombre, idMarca, estado)
+        VALUES (p_nombre, p_idMarca, 1);
+        SET MSJ = 'Tipo de vehículo insertado correctamente';
     END IF;
 END$$
 
