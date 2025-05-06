@@ -190,6 +190,15 @@
                                     </a>
                                 </li>
                                 {% endif %}
+                                {% if 33 in session['menus'] %}
+                                <li class="nav-item">
+                                    <a href="{{ url_for('ventas.Menu_TipoDocumento') }}"
+                                        class="nav-link {% if active_page == 'tipoDocumento' %}active{% endif %}">
+                                        <i class="bi bi-file-binary-fill"></i>
+                                        <p>Gestionar tipos de documentos</p>
+                                    </a>
+                                </li>
+                                {% endif %}
                             </ul>
                         </li>
                         {% endif %}
