@@ -62,7 +62,7 @@ def Menu_Horarios():
 
 @viajes_bp.route('/GestionarTipoVehiculo')
 def Menu_TipoVehiculo():
-    return render_template('viajes/tipoVehiculo.html', active_page="tipoVehiculo", active_menu='mViajes')
+    return render_template('viajes/tipoVehiculo/tipoVehiculo.html', active_page="tipoVehiculo", active_menu='mViajes')
 
 @viajes_bp.route('/GestionarSucursal')
 def Menu_Sucursal():
@@ -227,14 +227,9 @@ def get_tipoVehiculo():
 def nuevoTipoVehiculo():
     if request.method == "GET":
         return render_template(
-            "viajes/tipoVehiculoCRUD.html",
+            "viajes/tipoVehiculo/tipoVehiculoCRUD.html",
             tittle="Nuevo Tipo de Vehículo",
-            tipoVehiculo={
-                "id": "15",
-                "nombre": "Autobús estandar",
-                "capacidad": 45,
-                "estado": "activo"
-            },
+            tipoVehiculo={},
             btnId="btn_Registrar",
             active_page="tipoVehiculo", 
             active_menu='mViajes'
@@ -242,9 +237,9 @@ def nuevoTipoVehiculo():
     else:
         try:
             nombre= request.form["txt_nombre"]
-            capacidad = request.form["txt_capacidad"]
+            marca = request.form["txt_marca"]
 
-            mensajes = TipoVehiculo.insertarTipoVehiculo(nombre,capacidad)
+            mensajes = TipoVehiculo.insertarTipoVehiculo(nombre,marca)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
@@ -260,7 +255,7 @@ def nuevoTipoVehiculo():
 @viajes_bp.route("/verTipoVehiculo/<int:idVehiculo>")
 def verTipoVehiculo(idVehiculo):
     return render_template(
-        "viajes/tipoVehiculoCRUD.html",
+        "viajes/tipoVehiculo/tipoVehiculoCRUD.html",
         tittle="Ver Tipo de Vehículo",
         tipoVehiculo = TipoVehiculo.obtenerUno(idVehiculo),
         btnId="btn_Regresar",
@@ -272,7 +267,7 @@ def verTipoVehiculo(idVehiculo):
 def editarTipoVehiculo(idTipoVehiculo):
     if request.method == "GET":
         return render_template(
-            "viajes/tipoVehiculoCRUD.html",
+            "viajes/tipoVehiculo/tipoVehiculoCRUD.html",
             tittle="Editar Tipo de Vehículo",
             tipoVehiculo = TipoVehiculo.obtenerUno(idTipoVehiculo),
             btnId="btn_Actualizar"
