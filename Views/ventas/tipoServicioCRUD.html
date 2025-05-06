@@ -1,0 +1,167 @@
+{% extends "index.html" %}
+
+{% block title %}YATRAX - {{ tittle }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="text-center mb-0">{{ tittle }}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="txt_TipoCliente">Nombre</label>
+                        <div class="input-group">
+                            <input type="text" id="txt_TipoCliente" class="form-control" placeholder="Nombre"
+                                value="{{ tipocliente.nombre }}" oninput="this.value = this.value.toUpperCase();">
+                            <div class="input-group-append">
+                                <div class="input-group-text"><i class="fas fa-user"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cbx_Estado">Estado</label>
+                        <div class="input-group">
+                            <select id="cbx_Estado" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{% endif
+                                %}>
+                                <option disabled>--SELECCIONAR--</option>
+                                <option {% if tipocliente.estado==1 %}selected{% endif %} value="1">Vigente</option>
+                                <option {% if tipocliente.estado==0 %}selected{% endif %} value="0">No vigente</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de
+                            tipos de clientes</button>
+                        <button id="{{ btnId }}" type="button" class="btn btn-primary">Aceptar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        $("#btn_Registrar").click(function () {
+            let nombre = $("#txt_TipoCliente").val().trim();
+            let estado = $('#cbx_Estado').val();
+
+            if (!nombre || !estado) {
+                toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                return;
+            }
+
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción registrará al tipo cliente. ¿Deseas continuar?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, registrar tipo cliente",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    let formData = new FormData();
+                    formData.append("nombre", nombre);
+                    formData.append("estado", estado);
+
+                    $.ajax({
+                        url: "/trabajadores/ventas/RegistrarTipoCliente",
+                        type: "POST",
+                        processData: false,
+                        contentType: false,
+                        data: formData,
+                        success: function (response) {
+                            if (response.Status === "success") {
+                                if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                    return;
+                                } else {
+                                    toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                                    setTimeout(() => {
+                                        window.location.href = "/trabajadores/ventas/GestionarTipoCliente";
+                                    }, 500);
+                                }
+                            } else {
+                                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                                console.error('Error: ' + response.Msj);
+                            }
+                        },
+                        error: function (xhr, Status, error) {
+                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                            console.error('Error:' + error);
+                        }
+                    });
+                }
+            });
+        });
+
+        $("#btn_Editar").click(function () {
+            const id = Number("{{ tipocliente.ID }}");
+
+            let nombre = $("#txt_TipoCliente").val().trim();
+            let estado = $('#cbx_Estado').val();
+
+            if (!nombre || !estado) {
+                toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                return;
+            }
+
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción modificará al cliente. ¿Deseas continuar?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, editar tipo cliente",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    let formData = new FormData();
+                    formData.append("nombre", nombre);
+                    formData.append("estado", estado);
+
+                    $.ajax({
+                        url: `/trabajadores/ventas/EditarTipoCliente/${id}`,
+                        type: "POST",
+                        processData: false,
+                        contentType: false,
+                        data: formData,
+                        success: function (response) {
+                            if (response.Status === "success") {
+                                toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                                setTimeout(() => {
+                                    window.location.href = "/trabajadores/ventas/GestionarTipoCliente";
+                                }, 500);
+                            } else {
+                                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                            }
+                        },
+                        error: function (xhr, Status, error) {
+                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                        }
+                    });
+                }
+            });
+        });
+
+        $("#btn_Aceptar").click(function () {
+            window.location.href = "/trabajadores/ventas/GestionarTipoCliente";
+        });
+
+        $("#btn_Volver").click(function () {
+            window.location.href = "/trabajadores/ventas/GestionarTipoCliente";
+        });
+    });
+</script>
+{% endblock %}

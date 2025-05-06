@@ -25,7 +25,7 @@ class TipoComprobante:
     def obtener_por_id(cls, idTipoComprobante):
         try:
             conexion = bd.Conexion()
-            tipo_comprobante = conexion.obtener("Select idTipoComprobante as ID, nombre, estado from tipo_comprobante where estado_registro = 1 and idTipoCliente =  %s", (idTipoComprobante,))
+            tipo_comprobante = conexion.obtener("Select idTipoComprobante as ID, nombre, estado from tipo_comprobante where estado_registro = 1 and idTipoComprobante =  %s", (idTipoComprobante,))
             return tipo_comprobante[0] if tipo_comprobante else None
         finally:
                 conexion.cerrar()

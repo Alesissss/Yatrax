@@ -246,7 +246,7 @@ def editar_tipo_comprobante(id):
             else:
                 return jsonify({"Status": "error", "Msj": "Error desconocido al actualizar tipo de comprobante"})
         if TipoCliente:
-            return render_template('ventas/tipocomprobanteCRUD.html', active_page = 'tipoComprobante', active_menu = 'mVentas', tipoComprobante = tipoComprobante, tittle = 'Editar tipo comprobante', btnId = 'btn_Editar')
+            return render_template('ventas/tipocomprobanteCRUD.html', active_page = 'tipoComprobante', active_menu = 'mVentas', tipocomprobante = tipoComprobante, tittle = 'Editar tipo comprobante', btnId = 'btn_Editar')
         return render_template('ventas/tipocomprobante.html', active_page = 'tipoComprobante', active_menu = 'mVentas', tipoComprobante = {}, tittle = 'Editar tipo comprobante', btnId = 'btn_Editar')
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
@@ -275,8 +275,8 @@ def ver_tipo_comprobante(id):
     try:
         tipo_comprobante = TipoComprobante.obtener_por_id(id)
         if tipo_comprobante:
-            return render_template("ventas/tipocomprobanteCRUD.html", active_page="tipoComprobante", active_menu='mVentas', tipo_comprobante=tipo_comprobante, tittle='Ver tipo comprobante', btnId='btn_Aceptar')
-        return render_template("ventas/tipocomprobanteCRUD.html", active_page="tipoComprobante", active_menu='mVentas', tipo_comprobante={}, tittle='Ver tipo comprobante', btnId='btn_Aceptar')
+            return render_template("ventas/tipoComprobanteCRUD.html", active_page="tipoComprobante", active_menu='mVentas', tipocomprobante=tipo_comprobante, tittle='Ver tipo comprobante', btnId='btn_Aceptar')
+        return render_template("ventas/tipoComprobanteCRUD.html", active_page="tipoComprobante", active_menu='mVentas', tipo_comprobante={}, tittle='Ver tipo comprobante', btnId='btn_Aceptar')
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
 
