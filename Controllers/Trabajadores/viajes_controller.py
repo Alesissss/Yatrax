@@ -521,7 +521,7 @@ def registrar_sucursal():
             "Msj": f"Error inesperado al registrar sucursal: {str(e)}"
         })
 
-@viajes_bp.route("/EliminarSucursal/<int:idSucursal>", methods=['GET'])
+@viajes_bp.route("/EliminarSucursal/<int:idSucursal>", methods=['POST'])
 def eliminar_sucursal(idSucursal):
     try:
         usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
