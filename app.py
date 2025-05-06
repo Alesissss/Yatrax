@@ -10,7 +10,6 @@ from Controllers.Trabajadores.ventas_controller import ventas_bp
 from Controllers.Trabajadores.viajes_controller import viajes_bp
 from Controllers.Trabajadores.atencion_controller import atencion_bp
 from Controllers.Trabajadores.personal_controller import personal_bp
-from Controllers.Trabajadores.metodo_pago_controller import metodo_pago_bp
 
 # BLUEPRINTS ECOMMERCE
 from Controllers.Ecommerce.homeClientes_controller import homeClientes_bp
@@ -49,7 +48,6 @@ app.register_blueprint(viajes_bp)
 app.register_blueprint(atencion_bp)
 app.register_blueprint(personal_bp)
 app.register_blueprint(homeClientes_bp)
-app.register_blueprint(metodo_pago_bp)
 
 @app.route('/')
 def home():

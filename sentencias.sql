@@ -75,6 +75,7 @@ DROP TABLE IF EXISTS tipo_servicio;
 DROP TABLE IF EXISTS tipo_comprobante;
 DROP TABLE IF EXISTS tipo_documento;
 DROP TABLE IF EXISTS marca;
+DROP TABLE IF EXISTS ruta;
 
 -- Crear tabla tipo_servicio
 CREATE TABLE tipo_servicio (
@@ -192,12 +193,12 @@ CREATE TABLE sucursal (
     usuario VARCHAR(100) NOT NULL
 );
 
--- Crear tabla sucursal
+-- Crear tabla ruta
 CREATE TABLE ruta (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre CHAR(6) NOT NULL,
     sucursalOrigen INT NOT NULL,    
-    sucursalOrigen INT NOT NULL,
+    sucursalDestino INT NOT NULL,
     estado BOOLEAN NOT NULL DEFAULT 1,
     estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
     estado_registro INT NOT NULL DEFAULT 1,
