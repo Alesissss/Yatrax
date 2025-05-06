@@ -1,35 +1,79 @@
 {% extends "maestra.html" %}
 {% block titulo %}YATRAX - Inicio{% endblock %}
 {% block contenido %}
+{% block styles %}
+<style>
+  .asiento {
+    width: 40px;
+    height: 40px;
+    margin: 5px;
+    display: inline-block;
+    text-align: center;
+    line-height: 40px;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+  }
+
+  .disponible {
+    background-color: gray;
+  }
+
+  .seleccionado {
+    background-color: #0c336e;
+  }
+
+  .ocupado {
+    background-color: black;
+  }
+</style>
+{% endblock %}
 <header>
   <h1>{% block tematica %}{% endblock %}</h1>
 </header>
 <main>
-  <form id="datos_viaje">
-    <select name="origen" id="">
-      <option value="" disabled selected>Seleccione Origen</option>
-      <option value=""></option>
-    </select>
-    <select name="destino" id="">
-      <option value="" disabled selected>Seleccione Destino</option>
-      <option value=""></option>
-    </select>
-    <input type="date" placeholder="Fecha Ida">
-    <input type="date" placeholder="Fecha Retorno">
-    <option value=""></option>
-    </select>
-    <input type="submit" value="Buscar" id="buscar">
-  </form>
-  <section>
-    <form action="" method="post">
-      <div id="horarios">
+  <div class="row">
+    <div id="datos_viaje" class="mb-4 col-md-12">
+      <div class="row g-2">
+        <div class="col-md-2">
+          <select name="origen" class="form-control">
+            <option disabled selected>Origen</option>
+            <option value="CAJAMARCA">CAJAMARCA</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select name="destino" class="form-control">
+            <option disabled selected>Destino</option>
+            <option value="CHICLAYO">CHICLAYO</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <input type="date" class="form-control">
+        </div>
+        <div class="col-md-2">
+          <input type="date" class="form-control" placeholder="Fecha Retorno">
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-secondary w-100" id="buscarViajes">Buscar</button>
+        </div>
       </div>
-      <div id="asientos">
+    </div>
+    <div id="resultados" class="col-md-12 d-none">
+      <h5 class="ps-3 mb-3">Viajes Disponibles</h5>
+      <div id="horarios" class="m-5">
       </div>
-      <div id="pago">
+    </div>
+    <div id="asientos_section" class="d-none mt-5 col-md-12">
+      <div class="row mx-auto">
+        <h5>Seleccione su(s) asiento(s)</h5>
+        <div id="asientos" class="d-flex flex-wrap mb-3 col-md-6"></div>
+        <div class="col-md-6">
+          <div id="formulariosPasajeros" class="col-md-12">
+          </div>
+        </div>
       </div>
-    </form>
-  </section>
+    </div>
+  </div>
   <section id="ctn_beneficios">
     <div>
       <h2>Compra segura</h2>
@@ -138,4 +182,95 @@
     </details>
   </section>
 </main>
+{% endblock %}
+{% block scripts %}
+<script>
+  $(document).ready(function () {
+
+    const viajes = [
+      {
+        numero: 1053,
+        origen: 'CAJAMARCA',
+        destino: 'CHICLAYO',
+        salida: '10:40PM',
+        llegada: '4:40AM',
+        duracion: '6h',
+        asientosLibres: 40
+      }
+    ];
+
+    $('#buscarViajes').click(function () {
+      $('#resultados').removeClass('d-none');
+      $('#horarios').empty();
+
+      viajes.forEach((viaje, i) => {
+        $('#horarios').append(`
+      <div class="card mb-3">
+        <div class="card-body d-flex justify-content-between align-items-center">
+          <div>
+            <h6><strong>Viaje:</strong> ${viaje.numero}</h6>
+            <p>Salida: ${viaje.origen} - ${viaje.salida} <br> Llegada: ${viaje.destino} - ${viaje.llegada}</p>
+          </div>
+          <button class="btn btn-outline-secondary elegirAsiento" data-index="${i}">Elegir Asiento</button>
+        </div>
+      </div>
+    `);
+      });
+    });
+
+    $(document).on('click', '.elegirAsiento', function () {
+      $('#asientos_section').removeClass('d-none');
+      $('#asientos').empty();
+      $('#formulariosPasajeros').empty();
+
+      for (let i = 1; i <= 40; i++) {
+        let ocupado = [10, 27, 35].includes(i);
+        $('#asientos').append(`
+      <div class="asiento ${ocupado ? 'ocupado' : 'disponible'}" data-num="${i}" ${ocupado ? 'data-estado="ocupado"' : 'data-estado="disponible"'}>${i.toString().padStart(2, '0')}</div>
+    `);
+      }
+    });
+
+    $(document).on('click', '.asiento', function () {
+      if ($(this).attr('data-estado') !== 'disponible') return;
+
+      const num = $(this).data('num');
+      $(this).removeClass('disponible').addClass('seleccionado');
+      $(this).attr('data-estado', 'seleccionado');
+
+      $('#formulariosPasajeros').append(`
+    <div class="card mb-3">
+      <div class="card-header bg-dark text-white">
+        Datos del pasajero para asiento ${num}
+      </div>
+      <div class="card-body">
+        <div class="row g-2">
+          <div class="col-md-4">
+            <input type="text" class="form-control" placeholder="DNI">
+          </div>
+          <div class="col-md-4">
+            <input type="text" class="form-control" placeholder="Nombres">
+          </div>
+          <div class="col-md-4">
+            <input type="text" class="form-control" placeholder="Apellidos">
+          </div>
+          <div class="col-md-4">
+            <input type="date" class="form-control" placeholder="Fecha Nacimiento">
+          </div>
+          <div class="col-md-4">
+            <select class="form-control">
+              <option>Masculino</option>
+              <option>Femenino</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <input type="email" class="form-control" placeholder="Correo">
+          </div>
+        </div>
+      </div>
+    </div>
+  `);
+    });
+  });
+</script>
 {% endblock %}
