@@ -44,38 +44,16 @@ class Sucursal:
 
     @classmethod
     def registrar(cls, departamento, nombre, direccion, latitud, longitud, usuario_actual):
+        conexion = bd.Conexion()
         try:
-            conexion = bd.Conexion()
-            cursor = conexion.conexion.cursor()
-            
-            # Llamar al procedimiento almacenado actualizado
-            cursor.callproc('SP_REGISTRAR_SUCURSAL', [
-                departamento, 
-                nombre, 
-                direccion, 
-                latitud, 
-                longitud, 
-                usuario_actual
-            ])
-            
-            # Obtener los resultados
-            for resultado in cursor.stored_results():
-                fila = resultado.fetchone()
-                if fila:
-                    msj, msj2, error_code, error_msg = fila
-                    
-                    if error_code == 0:
-                        return {'Status': 'success', 'Msj': msj, 'Msj2': msj2}
-                    else:
-                        return {'Status': 'error', 'Msj': msj2, 'ErrorCode': error_code}
-            
-            return {'Status': 'error', 'Msj': 'No se recibió respuesta del procedimiento'}
-            
-        except Exception as e:
-            return {'Status': 'error', 'Msj': f'Error al registrar sucursal: {str(e)}'}
+            # Llamar al procedimiento almacenado
+            conexion.ejecutar(
+                "CALL SP_REGISTRAR_SUCURSAL(%s, %s, %s, %s, %s, %s);",
+                (departamento, nombre, direccion, latitud, longitud, usuario_actual)
+            )
+            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
+            return resultado[0]  # Retorna un diccionario con los mensajes
         finally:
-            if 'cursor' in locals():
-                cursor.close()
             conexion.cerrar()
 
     @classmethod
