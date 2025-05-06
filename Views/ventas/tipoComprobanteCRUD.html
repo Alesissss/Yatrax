@@ -15,7 +15,9 @@
                         <label for="txt_Tipocomprobante">Nombre</label>
                         <div class="input-group">
                             <input type="text" id="txt_Tipocomprobante" class="form-control" placeholder="Nombre"
-                                value="{{ tipocomprobante.nombre }}" oninput="this.value = this.value.toUpperCase();">
+                                value="{{ tipocomprobante.nombre }}" oninput="this.value = this.value.toUpperCase();"
+                                {% if btnId == 'btn_Aceptar' %}disabled{% endif %}>
+                                
                             <div class="input-group-append">
                                 <div class="input-group-text"><i class="fas fa-user"></i></div>
                             </div>

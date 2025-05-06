@@ -42,10 +42,10 @@ class TipoServicio:
             conexion.cerrar()
     
     @classmethod
-    def registrar(cls, nombre, estado, usuario):
+    def registrar(cls, nombre, descripcion, estado, usuario):
         conexion = bd.Conexion()
         try:
-            conexion.ejecutar("CALL SP_INSERTAR_TIPO_SERVICIO(%s, %s, %s);", (nombre, estado, usuario))
+            conexion.ejecutar("CALL SP_INSERTAR_TIPO_SERVICIO(%s, %s, %s, %s);", (nombre, estado, descripcion, usuario))
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
             return resultado[0]
         finally:
@@ -55,7 +55,7 @@ class TipoServicio:
     def editar(cls, idTipoServicio, nombre, descripcion, estado):
         conexion = bd.Conexion()
         try:
-            conexion.ejecutar("CALL SP_ACTUALIZAR_TIPO_SERVICIO(%s, %s, %s)", (idTipoServicio, nombre, descripcion, estado))
+            conexion.ejecutar("CALL SP_ACTUALIZAR_TIPO_SERVICIO(%s, %s, %s, %s)", (idTipoServicio, nombre, descripcion, estado))
             resultado = conexion.obtener("SELECT @MSJ, @MS2J;")
             return resultado[0]
         finally:

@@ -76,7 +76,7 @@ def Menu_TipoServicio():
 
 @ventas_bp.route('/TipoServicioNuevo')
 def Menu_TipoServicioNuevo():
-    return render_template('ventas/tiposervicioCRUD.html', active_page="tipoServicio", active_menu = 'mVentas', tiposervicio = {}, tittle = 'Registrar Tipo Servicio', btnId = 'btn_Registrar')
+    return render_template('ventas/tipoServicioCRUD.html', active_page="tipoServicio", active_menu = 'mVentas', tiposervicio = {}, tittle = 'Registrar Tipo Servicio', btnId = 'btn_Registrar')
 
 # END VIEWS
 
@@ -312,6 +312,7 @@ def registrar_tipo_servicio():
         nombre = request.form.get("nombre").strip()
         estado = request.form.get("estado")
         descripcion = request.form.get("descripcion").strip()
+        print(descripcion)
         usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
 
 
@@ -342,10 +343,10 @@ def editar_tipo_servicio(id):
             descripcion = request.form.get("descripcion").strip()
             estado = request.form.get("estado").strip()
 
-            if not nombre or descripcion or estado not in ["0", "1"]:
+            if not nombre or not descripcion or estado not in ["0", "1"]:
                 return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios y válidos"})
 
-            mensajes = TipoServicio.editar(id, nombre, descripcion, estado)
+            mensajes = TipoServicio.editar(id, nombre, estado, descripcion)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
@@ -356,7 +357,7 @@ def editar_tipo_servicio(id):
             else:
                 return jsonify({"Status": "error", "Msj": "Error desconocido al actualizar tipo de servicio"})
         if TipoCliente:
-            return render_template('ventas/tipoServicioCRUD.html', active_page = 'tipoServicio', active_menu = 'mVentas', tipoServicio = tipoServicio, tittle = 'Editar tipo servicio', btnId = 'btn_Editar')
+            return render_template('ventas/tipoServicioCRUD.html', active_page = 'tipoServicio', active_menu = 'mVentas', tiposervicio = tipoServicio, tittle = 'Editar tipo servicio', btnId = 'btn_Editar')
         return render_template('ventas/tipoServicio.html', active_page = 'tipoServicio', active_menu = 'mVentas', tipoServicio = {}, tittle = 'Editar tipo servicio', btnId = 'btn_Editar')
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
@@ -385,7 +386,7 @@ def ver_tipo_servicio(id):
     try:
         tipo_servicio = TipoServicio.obtener_por_id(id)
         if tipo_servicio:
-            return render_template("ventas/tipoServicioCRUD.html", active_page="tipoServicio", active_menu='mVentas', tipo_servicio=tipo_servicio, tittle='Ver tipo servicio', btnId='btn_Aceptar')
+            return render_template("ventas/tipoServicioCRUD.html", active_page="tipoServicio", active_menu='mVentas', tiposervicio=tipo_servicio, tittle='Ver tipo servicio', btnId='btn_Aceptar')
         return render_template("ventas/tipoServicioCRUD.html", active_page="tipoServicio", active_menu='mVentas', tipo_servicio={}, tittle='Ver tipo servicio', btnId='btn_Aceptar')
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
