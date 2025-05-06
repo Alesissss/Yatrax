@@ -492,7 +492,6 @@ def registrar_sucursal():
         if not all([nombre, latitud, longitud, departamento]):
             return jsonify({"Status": "error", "Msj": "Todos los campos son requeridos"})
 
-        # Registrar la sucursal (ahora con departamento en lugar de UBIGEO)
         resultado = Sucursal.registrar(
             departamento=departamento,
             nombre=nombre,
@@ -501,8 +500,16 @@ def registrar_sucursal():
             longitud=longitud,
             usuario_actual=usuario_actual
         )
-
-        return jsonify(resultado)
+        
+        msj1 = resultado.get('@MSJ')
+        msj2 = resultado.get('@MSJ2')
+        
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar sucursal'})
 
     except Exception as e:
         return jsonify({
