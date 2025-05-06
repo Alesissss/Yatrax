@@ -2972,8 +2972,7 @@ CREATE PROCEDURE SP_ACTUALIZAR_TIPOVEHICULO(
     OUT MSJ2 VARCHAR(255)
 )
 BEGIN
-    DECLARE v_existe INT;
-    DECLARE v_existeMarca INT;
+    DECLARE v_existeMarca INT DEFAULT 0;
 
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -2984,41 +2983,24 @@ BEGIN
     SET MSJ = NULL;
     SET MSJ2 = NULL;
 
-    -- Validaciones básicas
-    IF p_nombre IS NULL OR p_nombre = '' THEN
-        SET MSJ2 = 'El nombre es obligatorio';
-    ELSEIF p_idMarca IS NULL OR p_idMarca <= 0 THEN
-        SET MSJ2 = 'Debe indicar una marca válida';
-    ELSEIF p_estado NOT IN (0, 1) THEN
-        SET MSJ2 = 'El estado debe ser 0 o 1';
+    -- Verificar existencia de la marca
+    SELECT COUNT(*) INTO v_existeMarca
+    FROM marca
+    WHERE id = p_idMarca;
+
+    IF v_existeMarca = 0 THEN
+        SET MSJ2 = 'La marca indicada no existe';
     ELSE
-        -- Mejora 1: Verificar existencia de la marca
-        SELECT COUNT(*) INTO v_existeMarca
-        FROM marca
-        WHERE idMarca = p_idMarca;
+        -- Actualizar el tipo de vehículo
+        START TRANSACTION;
+        UPDATE tipo_vehiculo
+        SET nombre  = p_nombre,
+            idMarca = p_idMarca,
+            estado  = p_estado
+        WHERE idTipoVehiculo = p_id;
+        COMMIT;
 
-        IF v_existeMarca = 0 THEN
-            SET MSJ2 = 'La marca indicada no existe';
-        ELSE
-            -- Verificar existencia del tipo
-            SELECT COUNT(*) INTO v_existe
-            FROM tipo_vehiculo
-            WHERE idTipoVehiculo = p_id;
-
-            IF v_existe = 0 THEN
-                SET MSJ2 = 'El tipo de vehículo no existe';
-            ELSE
-                START TRANSACTION;
-                UPDATE tipo_vehiculo
-                SET nombre   = p_nombre,
-                    idMarca  = p_idMarca,
-                    estado   = p_estado
-                WHERE idTipoVehiculo = p_id;
-                COMMIT;
-
-                SET MSJ = 'Se actualizó correctamente el tipo de vehículo';
-            END IF;
-        END IF;
+        SET MSJ = 'Se actualizó correctamente el tipo de vehículo';
     END IF;
 END$$
 
