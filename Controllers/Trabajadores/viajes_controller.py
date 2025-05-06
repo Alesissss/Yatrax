@@ -3,34 +3,35 @@ from flask import Blueprint, request, jsonify, render_template, session, flash, 
 from Models.tipoVehiculo import TipoVehiculo
 from Models.sucursal import Sucursal
 from Models.horario import horario
-
+from Models.marca import Marca
+from werkzeug.utils import secure_filename
 viajes_bp = Blueprint('viajes', __name__, url_prefix='/trabajadores/viajes')
 
 # ERRORES 
-# Manejar errores 401 (Página no autorizada)
-@viajes_bp.errorhandler(401)
-def error_401(error):
-    return render_template("error.html", error="Página no autorizada"), 401
+# # Manejar errores 401 (Página no autorizada)
+# @viajes_bp.errorhandler(401)
+# def error_401(error):
+#     return render_template("error.html", error="Página no autorizada"), 401
 
-# Manejar errores 403 (Página no autorizada para este usuario)
-@viajes_bp.errorhandler(403)
-def error_403(error):
-    return render_template("error.html", error="Página restringida"), 403
+# # Manejar errores 403 (Página no autorizada para este usuario)
+# @viajes_bp.errorhandler(403)
+# def error_403(error):
+#     return render_template("error.html", error="Página restringida"), 403
 
-# Manejar errores 404 (Página no encontrada)
-@viajes_bp.errorhandler(404)
-def error_404(error):
-    return render_template("error.html", error="Página no encontrada"), 404
+# # Manejar errores 404 (Página no encontrada)
+# @viajes_bp.errorhandler(404)
+# def error_404(error):
+#     return render_template("error.html", error="Página no encontrada"), 404
 
-# Manejar errores 500 (Error interno del servidor)
-@viajes_bp.errorhandler(500)
-def error_500(error):
-    return render_template("error.html", error="Error interno del servidor"), 500
+# # Manejar errores 500 (Error interno del servidor)
+# @viajes_bp.errorhandler(500)
+# def error_500(error):
+#     return render_template("error.html", error="Error interno del servidor"), 500
 
-# Manejar cualquier otro error genérico
-@viajes_bp.errorhandler(Exception)
-def error_general(error):
-    return render_template("error.html", error="Ocurrió un error inesperado"), 500
+# # Manejar cualquier otro error genérico
+# @viajes_bp.errorhandler(Exception)
+# def error_general(error):
+#     return render_template("error.html", error="Ocurrió un error inesperado"), 500
 
 # RESTRICCIONES
 @viajes_bp.before_request
@@ -64,6 +65,10 @@ def Menu_TipoVehiculo():
 @viajes_bp.route('/GestionarSucursal')
 def Menu_Sucursal():
     return render_template('viajes/sucursal.html', active_page="sucursal", active_menu='mViajes')
+
+# @viajes_bp.route('/GestionarMarcas')
+# def Menu_Marcas():
+#     return render_template('viajes/marcas.html', active_page="marcas", active_menu='mMarcas')
 
 # END VIEWS
 
@@ -449,5 +454,118 @@ def darBaja_sucursal(idSucursal):
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
 # END REGIÓN SUCURSAL #
+
+#REGION MARCA
+
+# Ruta para gestionar las marcas
+@viajes_bp.route('/GestionarMarcas')
+def Menu_Marcas():
+    msg = request.args.get('msg', '')
+    return render_template('viajes/marca.html', active_page="marcas", active_menu='mMarcas', msg=msg)
+
+# Ruta para registrar una nueva marca
+@viajes_bp.route('/MarcaNuevo', methods=['GET', 'POST'])
+def Marca_Nueva():
+    if request.method == 'POST':
+        return registrar_marca()
+    return render_template('viajes/marcaCRUD.html', tittle="Registrar marca", btnId="btn_Registrar", marca=None)
+
+
+# Ruta para editar o ver una marca (con id)
+@viajes_bp.route("/MarcaNuevo/<int:id>", methods=['GET', 'POST'])
+def Marca_Editar_Ver(id):
+    marca = Marca.obtener_por_id(id)
+    if marca is None:
+        return jsonify({"Status": "error", "Msj": "Marca no encontrada"})
+    ver = request.args.get('ver', False)
+    return render_template('viajes/marcaCRUD.html', marca=marca, tittle="Ver marca" if ver else "Editar marca", btnId="btn_Editar" if not ver else "btn_Ver", ver=ver)
+
+# Función para registrar la nueva marca
+@viajes_bp.route('/RegistrarMarca', methods=["POST"])
+def registrar_marca():
+    try:
+        nombre = request.form.get("nombre")
+        estado = request.form.get("estado")
+        logo = request.files.get("logo")
+        if not nombre or not nombre.strip():
+            return jsonify({"Status": "error", "Msj": "El nombre es obligatorio."})
+        if not estado or not estado.strip():
+            return jsonify({"Status": "error", "Msj": "El estado es obligatorio."})
+        if logo:
+            logo_filename = secure_filename(logo.filename)
+            logo_path = f"/Static/img/marca/{logo_filename}"
+            logo.save(os.path.join("Static/img/marca", logo_filename))
+        else:
+            logo_path = "/Static/img/trabajadores/marca/logo.png"  # Logo por defecto
+        mensajes = Marca.registrar(nombre.strip(), estado.strip(),  session.get('usuario', {}).get('email', 'SIN USUARIO').strip(),logo_path)
+        
+        # Redirigir con un mensaje de éxito
+        return redirect(url_for('viajes.Menu_Marcas', msg="Marca registrado exitosamente"))
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Error: {repr(e)}"})
+
+# Ruta para editar una marca
+@viajes_bp.route("/EditarMarca/<int:id>", methods=['GET', 'POST'])
+def editar_marca(id):
+    marca = Marca.obtener_por_id(id)
+    if marca is None:
+        return jsonify({"Status": "error", "Msj": "Método de pago no encontrado"})
+    if request.method == 'POST':
+        nombre = request.form.get("nombre").strip()
+        estado = request.form.get("estado").strip()
+        logo = request.files.get("logo")
+        if not nombre or not estado:
+            return jsonify({"Status": "error", "Msj": "Nombre y estado son obligatorios"})
+        if logo:
+            logo_filename = secure_filename(logo.filename)
+            logo_path = f"/Static/img/marca/{logo_filename}"
+            logo.save(os.path.join("Static/img/marca", logo_filename))
+        else:
+            logo_path = marca['logo']
+        mensajes = Marca.editar(id, nombre, estado, logo_path)
+        # Redirigir con un mensaje de éxito
+        return redirect(url_for('viajes.Menu_Marcas', msg="Marca editado exitosamente"))
+    return render_template('viajes/marcaCRUD.html', marca=marca, tittle="Editar Marca", btnId="btn_Editar")
+
+# Ruta para eliminar una marca
+@viajes_bp.route("/EliminarMarca/<int:id>", methods=['POST'])
+def eliminar_marca(id):
+    try:
+        mensajes = Marca.eliminar(id)
+        return jsonify(mensajes)
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Error: {repr(e)}"})
+
+@viajes_bp.route("/dar_baja_marca/<int:id>", methods=["POST"])
+def dar_baja_marca(id):
+    try:
+        # Ejecutar el procedimiento almacenado
+        mensajes = Marca.darBaja(id)  # Asegúrate de que esta función esté llamando al SP correctamente
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja al metodo de pago'})
+
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
+
+
+# Ruta para obtener todas las marcas
+@viajes_bp.route("/GetData_Marcas", methods=['GET'])
+def get_marcas():
+    try:
+        marcas = Marca.obtener_todos()
+        if marcas:
+            return jsonify({"Status": "success", "data": marcas})
+        return jsonify({"Status": "info", "Msj": "No se encontraron marcas."})
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Error al obtener las marcas: {repr(e)}"})
+
+#END REGION MARCA
 
 # END FUNCIONES
