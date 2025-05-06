@@ -30,6 +30,10 @@ DROP PROCEDURE IF EXISTS SP_REGISTRAR_METODO_PAGO;
 DROP PROCEDURE IF EXISTS SP_EDITAR_METODO_PAGO;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_METODO_PAGO;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_METODO_PAGO;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_TIPO_PERSONAL;
+DROP PROCEDURE IF EXISTS SP_EDITAR_TIPO_PERSONAL;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPO_PERSONAL;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_PERSONAL;
 
 DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPOVEHICULO;
@@ -47,6 +51,7 @@ DROP TABLE IF EXISTS horario;
 DROP TABLE IF EXISTS tipo_cliente;
 DROP TABLE IF EXISTS ubigeo;
 DROP TABLE IF EXISTS metodo_pago;
+DROP TABLE IF EXISTS tipo_personal;
 
 -- Crear tabla ubigeo
 create table ubigeo(
@@ -54,6 +59,17 @@ create table ubigeo(
     departamento varchar(50) NOT NULL,
     provincia varchar(50) NOT NULL,
     distrito varchar(50) NOT NULL
+);
+
+-- Crear tabla tipo_personal
+CREATE TABLE tipo_personal (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    estado BOOLEAN NOT NULL,
+    estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
+    estado_registro INT NOT NULL DEFAULT 1,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) not null
 );
 
 -- Crear tabla tipo_cliente
@@ -107,7 +123,7 @@ CREATE TABLE horario (
 CREATE TABLE sucursal (
     id INT AUTO_INCREMENT PRIMARY KEY,
     ubigeo CHAR(6) NOT NULL REFERENCES ubigeo(ubigeo),
-    nombre VARCHAR(50) UNIQUE NOT NULL,
+    nombre VARCHAR(50) NOT NULL,
     direccion VARCHAR(255) NOT NULL,
     latitud DECIMAL(8,6) NOT NULL,
     longitud DECIMAL(9,6) NOT NULL,
@@ -2078,7 +2094,7 @@ INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (40, 'Gestionar hora
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (41, 'Gestionar tipo vehículo', 1, 4);
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (42, 'Gestionar sucursales', 1, 4);
 -- Submenús de PERSONAL
-INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (50, 'Ejemplo', 1, 5);
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (50, 'Gestionar tipo personal', 1, 5);
 -- Submenús de ATENCIÓN AL CLIENTE
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (60, 'Ejemplo', 1, 6);
 
@@ -2505,6 +2521,127 @@ BEGIN
         UPDATE tipo_usuario SET ESTADO_REGISTRO = 2, ESTADO_PROCESO = 'ELIMINADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
 
         SET @MSJ = 'Se eliminó correctamente al tipo de usuario';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_REGISTRAR_TIPO_PERSONAL
+DELIMITER $$
+CREATE PROCEDURE SP_REGISTRAR_TIPO_PERSONAL(
+    IN P_NOMBRE VARCHAR(255),
+    IN P_ESTADO BOOLEAN,
+    IN P_USUARIO VARCHAR(255)
+)
+BEGIN
+    DECLARE cNombre INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cNombre FROM tipo_personal WHERE NOMBRE = P_NOMBRE AND ESTADO_REGISTRO = 1;
+
+    IF cNombre > 0 THEN
+        SET @MSJ2 = 'El tipo de personal que intenta registrar ya está registrado';
+    ELSE
+        INSERT INTO tipo_personal (NOMBRE, ESTADO, USUARIO) 
+        VALUES (P_NOMBRE, P_ESTADO, P_USUARIO);
+
+        SET @MSJ = 'Se registró correctamente el tipo de personal';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_EDITAR_TIPO_PERSONAL
+DELIMITER $$
+CREATE PROCEDURE SP_EDITAR_TIPO_PERSONAL(
+    IN P_ID INT,
+    IN P_NOMBRE VARCHAR(255),
+    IN P_ESTADO BOOLEAN
+)
+BEGIN
+    DECLARE cTipoPersonal INT;
+    DECLARE cNombre INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cTipoPersonal FROM tipo_personal WHERE id = P_ID AND ESTADO_REGISTRO = 1;
+    SELECT COUNT(*) INTO cNombre FROM tipo_personal WHERE NOMBRE = P_NOMBRE AND id != P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cTipoPersonal <= 0 THEN
+        SET @MSJ2 = 'El tipo de personal que intenta editar no existe';
+    ELSEIF cNombre != 0 THEN
+        SET @MSJ2 = 'El nombre ingresado ya existe';
+    ELSE
+        UPDATE tipo_personal 
+        SET NOMBRE = P_NOMBRE, 
+            ESTADO = P_ESTADO, 
+            ESTADO_PROCESO = 'MODIFICADO' 
+        WHERE id = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se modificó correctamente al tipo de personal';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_DARBAJA_TIPO_PERSONAL
+DELIMITER $$
+CREATE PROCEDURE SP_DARBAJA_TIPO_PERSONAL(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cTipoPersonal INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cTipoPersonal FROM tipo_personal WHERE id = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cTipoPersonal <= 0 THEN
+        SET @MSJ2 = 'El tipo de personal que intenta dar de baja no existe';
+    ELSE
+        UPDATE tipo_personal SET ESTADO = 0, ESTADO_PROCESO = 'MODIFICADO' WHERE id = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se dio de baja correctamente al tipo de personal';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_TIPO_PERSONAL
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_TIPO_PERSONAL(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cTipoPersonal INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cTipoPersonal FROM tipo_personal WHERE id = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cTipoPersonal <= 0 THEN
+        SET @MSJ2 = 'El tipo de personal que intenta eliminar no existe';
+    ELSE
+        UPDATE tipo_personal SET ESTADO_REGISTRO = 2, ESTADO_PROCESO = 'ELIMINADO' WHERE id = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se eliminó correctamente al tipo de personal';
     END IF;
 END $$
 DELIMITER ;

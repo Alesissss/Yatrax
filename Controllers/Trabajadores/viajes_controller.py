@@ -3,6 +3,7 @@ from flask import Blueprint, request, jsonify, render_template, session, flash, 
 from Models.tipoVehiculo import TipoVehiculo
 from Models.sucursal import Sucursal
 from Models.horario import horario
+from Models.ubigeo import Ubigeo
 
 viajes_bp = Blueprint('viajes', __name__, url_prefix='/trabajadores/viajes')
 
@@ -331,14 +332,22 @@ def sucursal_Nuevo():
 @viajes_bp.route('/RegistrarSucursal',methods=["POST"])
 def registrar_sucursal():
     try:
-        ubigeo = request.form.get("txt_ubigeo").strip()
         nombre = request.form.get("txt_nombre").strip()
-        direccion = request.form.get("txt_direccion").strip()
         latitud = request.form.get("txt_latitud").strip()
         longitud = request.form.get("txt_longitud").strip()
         usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
         
-        mensajes = Sucursal.registrar(ubigeo, nombre, direccion, latitud, longitud, usuario_actual)
+        ubigeo = Ubigeo.obtener_por_lat_lon(latitud, longitud)
+        if not ubigeo or not ubigeo.get('ubigeo'):
+            return jsonify({"Status": "error", 
+                            'Msj': 'No se pudo obtener el ubigeo a partir de las coordenadas proporcionadas'})
+        
+        direccion = request.form.get("txt_direccion").strip()
+        if not direccion:
+            direccion = ubigeo.get('direccion', '')
+
+        
+        mensajes = Sucursal.registrar(ubigeo['ubigeo'], nombre, direccion, latitud, longitud, usuario_actual)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
         
@@ -376,14 +385,21 @@ def editar_sucursal(idSucursal):
         sucursal = Sucursal.obtener_por_id(idSucursal)
         
         if request.method == "POST":
-            ubigeo = request.form.get("txt_ubigeo").strip()
             nombre = request.form.get("txt_nombre").strip()
-            direccion = request.form.get("txt_direccion").strip()
             latitud = request.form.get("txt_latitud").strip()
             longitud = request.form.get("txt_longitud").strip()
             usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
 
-            mensajes = Sucursal.editar(idSucursal, ubigeo, nombre, direccion, latitud, longitud, usuario_actual)
+            ubigeo = Ubigeo.obtener_por_lat_lon(latitud, longitud)
+            if not ubigeo or not ubigeo.get('ubigeo'):
+                return jsonify({"Status": "error", 
+                                'Msj': 'No se pudo obtener el ubigeo a partir de las coordenadas proporcionadas'})
+            
+            direccion = request.form.get("txt_direccion").strip()
+            if not direccion:
+                direccion = ubigeo.get('direccion', '')
+            
+            mensajes = Sucursal.editar(idSucursal, ubigeo['ubigeo'], nombre, direccion, latitud, longitud, usuario_actual)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
@@ -427,6 +443,33 @@ def darBaja_sucursal(idSucursal):
             return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja la sucursal'})
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+
+@viajes_bp.route('/api/geocodificar', methods=['GET'])
+def geocodificar_coordenadas():
+    try:
+        lat = float(request.args.get('lat'))
+        lon = float(request.args.get('lon'))
+    except (TypeError, ValueError):
+        return jsonify({'error': 'Coordenadas inválidas'}), 400
+    
+    try:
+        resultado = Ubigeo.obtener_por_lat_lon(lat, lon)
+        if resultado:
+            return jsonify({
+                'status': 'success',
+                'data': resultado
+            })
+        return jsonify({
+            'status': 'error',
+            'message': 'No se pudo geocodificar las coordenadas'
+        }), 404
+    except Exception as e:
+        print(f"Error en geocodificar_coordenadas: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': 'Error interno del servidor'
+        }), 500
 
 # END REGIÓN SUCURSAL #
 
