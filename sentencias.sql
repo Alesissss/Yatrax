@@ -3885,7 +3885,7 @@ BEGIN
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
-    SELECT COUNT(*) INTO cNombre FROM metodo_pago WHERE NOMBRE = P_NOMBRE;
+    SELECT COUNT(*) INTO cNombre FROM metodo_pago WHERE NOMBRE = P_NOMBRE and ESTADO_REGISTRO = 1;
 
     IF cNombre > 0 THEN
         SET @MSJ2 = 'El método de pago que intenta registrar ya está registrado';
@@ -3921,7 +3921,7 @@ BEGIN
     SELECT COUNT(*) INTO cMetodoPago FROM metodo_pago WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
     
     -- Verificar si el nombre del método de pago ya está registrado (excluyendo el registro actual)
-    SELECT COUNT(*) INTO cNombre FROM metodo_pago WHERE NOMBRE = P_NOMBRE AND ID != P_ID;
+    SELECT COUNT(*) INTO cNombre FROM metodo_pago WHERE NOMBRE = P_NOMBRE AND ID != P_ID and ESTADO_REGISTRO = 1;
 
     IF cMetodoPago <= 0 THEN
         SET @MSJ2 = 'El método de pago que intenta editar no existe';
@@ -4022,7 +4022,7 @@ BEGIN
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
-    SELECT COUNT(*) INTO cNombre FROM marca WHERE NOMBRE = P_NOMBRE;
+    SELECT COUNT(*) INTO cNombre FROM marca WHERE NOMBRE = P_NOMBRE and ESTADO_REGISTRO = 1;
 
     IF cNombre > 0 THEN
         SET @MSJ2 = 'La marca ya está registrada';
@@ -4054,7 +4054,7 @@ BEGIN
     SET @MSJ2 = NULL;
 
     SELECT COUNT(*) INTO cMarca FROM marca WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
-    SELECT COUNT(*) INTO cNombre FROM marca WHERE NOMBRE = P_NOMBRE AND ID != P_ID;
+    SELECT COUNT(*) INTO cNombre FROM marca WHERE NOMBRE = P_NOMBRE AND ID != P_ID and ESTADO_REGISTRO = 1;
 
     IF cMarca <= 0 THEN
         SET @MSJ2 = 'Marca no encontrada';
