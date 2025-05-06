@@ -12,40 +12,41 @@
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
-                        <label for="txt_hora_entrada">Hora de entrada:</label>
+                        <label for="txt_TipoServicio">Nombre</label>
                         <div class="input-group">
-                            <input type="time" id="txt_hora_entrada" class="form-control" placeholder="HH:mm:SS" {% if
-                                btnId=='btn_Aceptar' %}disabled{% endif %} value="{{ horario.horario_entrada }}">
+                            <input type="text" id="txt_TipoServicio" class="form-control" placeholder="Nombre" 
+                                {% if btnId == 'btn_Aceptar' %}disabled{% endif %}
+                                value="{{ tiposervicio.nombre }}" oninput="this.value = this.value.toUpperCase();">
                             <div class="input-group-append">
                                 <div class="input-group-text"><i class="fas fa-user"></i></div>
                             </div>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="txt_hora_salida">Hora de salida:</label>
+                        <label for="txt_Descripcion">Descripción</label>
                         <div class="input-group">
-                            <input type="time" id="txt_hora_salida" class="form-control" placeholder="HH:mm:SS" {%
-                                if btnId=='btn_Aceptar' %}disabled{% endif %} value="{{ horario.horario_salida }}">
+                            <input type="text" id="txt_Descripcion" class="form-control" placeholder="Descripción"
+                            {% if btnId == 'btn_Aceptar' %}disabled{% endif %}
+                                value="{{ tiposervicio.descripcion }}" oninput="this.value = this.value.toUpperCase();">
                             <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-envelope"></i></div>
+                                <div class="input-group-text"><i class="fas fa-user"></i></div>
                             </div>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label for="cbx_Estado">Estado</label>
                         <div class="input-group">
-                            <select id="cbx_Estado" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{%
-                                endif %}>
+                            <select id="cbx_Estado" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{% endif
+                                %}>
                                 <option disabled>--SELECCIONAR--</option>
-                                <option {% if horario.estado  == 'A' %}selected{% endif %} value="A">Vigente</option>
-                                <option {% if horario.estado  == 'I' %}selected{% endif %} value="0">No vigente</option>
+                                <option {% if tiposervicio.estado==1 %}selected{% endif %} value="1">Vigente</option>
+                                <option {% if tiposervicio.estado==0 %}selected{% endif %} value="0">No vigente</option>
                             </select>
                         </div>
                     </div>
-                    
                     <div class="text-center">
                         <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de
-                            horarios</button>
+                            tipos de servicio</button>
                         <button id="{{ btnId }}" type="button" class="btn btn-primary">Aceptar</button>
                     </div>
                 </div>
@@ -53,40 +54,40 @@
         </div>
     </div>
 </div>
-
 {% endblock %}
-
 {% block scripts %}
 <script>
     $(document).ready(function () {
         $("#btn_Registrar").click(function () {
-            let hora_entrada = $("#txt_hora_entrada").val().trim();
-            let hora_salida = $("#txt_hora_salida").val().trim();
+            let nombre = $("#txt_TipoServicio").val().trim();
+            let descripcion = $('#txt_Descripcion').val().trim();
             let estado = $('#cbx_Estado').val();
 
-            if (!hora_entrada || !hora_salida || !estado) {
+            if (!nombre || !estado || !descripcion) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
 
             Swal.fire({
                 title: "¿Estás seguro?",
-                text: "Esta acción registrará al horario. ¿Deseas continuar?",
+                text: "Esta acción registrará al tipo cliente. ¿Deseas continuar?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
                 cancelButtonColor: "#d33",
-                confirmButtonText: "Sí, registrar horario",
+                confirmButtonText: "Sí, registrar tipo servicio",
                 cancelButtonText: "Cancelar",
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
+
                     let formData = new FormData();
-                    formData.append("hora_entrada", hora_entrada);
-                    formData.append("hora_salida", hora_salida);
+                    formData.append("nombre", nombre);
                     formData.append("estado", estado);
+                    formData.append("descripcion", descripcion);
+
                     $.ajax({
-                        url: "/trabajadores/viajes/RegistrarHorario",
+                        url: "/trabajadores/ventas/RegistrarTipoServicio",
                         type: "POST",
                         processData: false,
                         contentType: false,
@@ -99,7 +100,7 @@
                                 } else {
                                     toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                                     setTimeout(() => {
-                                        window.location.href = "/trabajadores/viajes/GestionarHorarios";
+                                        window.location.href = "/trabajadores/ventas/GestionarTipoServicio";
                                     }, 500);
                                 }
                             } else {
@@ -117,36 +118,36 @@
         });
 
         $("#btn_Editar").click(function () {
-            const id = Number("{{ horario.id }}");
-
-            let hora_entrada = $("#txt_hora_entrada").val().trim();
-            let hora_salida = $("#txt_hora_salida").val().trim();
+            const id = Number("{{ tiposervicio.ID }}");
+            let nombre = $("#txt_TipoServicio").val().trim();
+            let descripcion = $('#txt_Descripcion').val().trim();
             let estado = $('#cbx_Estado').val();
 
-            if (!hora_entrada || !hora_salida || !estado) {
+            if (!nombre || !estado || !descripcion) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
 
             Swal.fire({
                 title: "¿Estás seguro?",
-                text: "Esta acción modificará al horario. ¿Deseas continuar?",
+                text: "Esta acción modificará al servicio. ¿Deseas continuar?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
                 cancelButtonColor: "#d33",
-                confirmButtonText: "Sí, editar horario",
+                confirmButtonText: "Sí, editar tipo servicio",
                 cancelButtonText: "Cancelar",
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
+
                     let formData = new FormData();
-                    formData.append("hora_entrada", hora_entrada);
-                    formData.append("hora_salida", hora_salida);
+                    formData.append("nombre", nombre);
                     formData.append("estado", estado);
+                    formData.append("descripcion", descripcion)
 
                     $.ajax({
-                        url: `/trabajadores/viajes/EditarHorario/${id}`,
+                        url: `/trabajadores/ventas/EditarTipoServicio/${id}`,
                         type: "POST",
                         processData: false,
                         contentType: false,
@@ -155,7 +156,7 @@
                             if (response.Status === "success") {
                                 toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                                 setTimeout(() => {
-                                    window.location.href = "/trabajadores/viajes/GestionarHorarios";
+                                    window.location.href = "/trabajadores/ventas/GestionarTipoServicio";
                                 }, 500);
                             } else {
                                 toastr.error(response.Msj, "MENSAJE DE SISTEMA");
@@ -170,11 +171,11 @@
         });
 
         $("#btn_Aceptar").click(function () {
-            window.location.href = "/trabajadores/viajes/GestionarHorarios";
+            window.location.href = "/trabajadores/ventas/GestionarTipoServicio";
         });
 
         $("#btn_Volver").click(function () {
-            window.location.href = "/trabajadores/viajes/GestionarHorarios";
+            window.location.href = "/trabajadores/ventas/GestionarTipoServicio";
         });
     });
 </script>

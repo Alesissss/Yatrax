@@ -26,6 +26,15 @@
     <link rel="stylesheet" href="/Static/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <style>
+        #map { height: 500px; width: 100%; }
+        #info { margin-top: 10px; }
+    </style>
+
     {% block styles %}{% endblock %}
 </head>
 
@@ -156,10 +165,10 @@
                             <ul class="nav nav-treeview" style="display: none;">
                                 {% if 30 in session['menus'] %}
                                 <li class="nav-item">
-                                    <a href="{{ url_for('ventas.Menu_Pasajes') }}"
-                                        class="nav-link {% if active_page == 'pasajes' %}active{% endif %}">
-                                        <i class="fas fa-ticket-alt nav-icon"></i>
-                                        <p>Gestionar pasajes</p>
+                                    <a href="{{ url_for('ventas.Menu_TipoComprobante') }}"
+                                        class="nav-link {% if active_page == 'tipoComprobante' %}active{% endif %}">
+                                        <i class="bi bi-file-earmark-text"></i>
+                                        <p>Gestionar tipo comprobante</p>
                                     </a>
                                 </li>
                                 {% endif %}
@@ -169,6 +178,15 @@
                                         class="nav-link {% if active_page == 'tipoCliente' %}active{% endif %}">
                                         <i class="bi bi-person-lines-fill nav-icon"></i>
                                         <p>Gestionar tipos de cliente</p>
+                                    </a>
+                                </li>
+                                {% endif %}
+                                {% if 32 in session['menus'] %}
+                                <li class="nav-item">
+                                    <a href="{{ url_for('ventas.Menu_TipoServicio') }}"
+                                        class="nav-link {% if active_page == 'tipoServicio' %}active{% endif %}">
+                                        <i class="bi bi-telephone nav-icon"></i>
+                                        <p>Gestionar tipos de servicio</p>
                                     </a>
                                 </li>
                                 {% endif %}
@@ -236,10 +254,10 @@
                             <ul class="nav nav-treeview" style="display: none;">
                                 {% if 50 in session['menus'] %}
                                 <li class="nav-item">
-                                    <a href="{{ url_for('personal.Menu_Personal') }}"
-                                        class="nav-link {% if active_page == 'ejemplo' %}active{% endif %}">
+                                    <a href="{{ url_for('personal.Menu_TipoPersonal') }}"
+                                        class="nav-link {% if active_page == 'tipoPersonal' %}active{% endif %}">
                                         <i class="bi bi-calendar-week nav-icon"></i>
-                                        <p>Ejemplo</p>
+                                        <p>Gestionar tipo personal</p>
                                     </a>
                                 </li>
                                 {% endif %}

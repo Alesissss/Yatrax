@@ -15,7 +15,8 @@
                         <label for="txt_TipoCliente">Nombre</label>
                         <div class="input-group">
                             <input type="text" id="txt_TipoCliente" class="form-control" placeholder="Nombre"
-                                value="{{ tipocliente.nombre }}" oninput="this.value = this.value.toUpperCase();">
+                                value="{{ tipocliente.nombre }}" oninput="this.value = this.value.toUpperCase();"
+                                {% if btnId == 'btn_Aceptar' %}disabled{% endif %}>
                             <div class="input-group-append">
                                 <div class="input-group-text"><i class="fas fa-user"></i></div>
                             </div>

@@ -33,7 +33,7 @@ class Sucursal:
         conexion = bd.Conexion()
         try:
             query = """
-                SELECT id, ubigeo, nombre, direcion, latitud, longitud, estado, 
+                SELECT id, ubigeo, nombre, direccion, latitud, longitud, estado, 
                        estado_proceso, estado_registro, fecha_registro, usuario
                 FROM sucursal WHERE id = %s
             """
@@ -43,6 +43,7 @@ class Sucursal:
             conexion.cerrar()
 
     #LOGIN
+    @classmethod
     def autenticar(cls, email, password):
             conexion = bd.Conexion()
             try:
@@ -82,7 +83,7 @@ class Sucursal:
     def eliminar(cls, id, usuario):
         conexion = bd.Conexion()
         try:
-            conexion.ejecutar("CALL SP_ELIMINAR_SUCURSAL(%s);", (id, usuario,))
+            conexion.ejecutar("CALL SP_ELIMINAR_SUCURSAL(%s, %s);", (id, usuario,))
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
             return resultado[0]
         finally:

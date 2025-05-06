@@ -2,7 +2,8 @@ import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort
 from Models.tipoVehiculo import TipoVehiculo
 from Models.sucursal import Sucursal
-from Models.horario import horario
+from Models.horario import Horario
+from Models.ubigeo import Ubigeo
 from Models.marca import Marca
 from werkzeug.utils import secure_filename
 viajes_bp = Blueprint('viajes', __name__, url_prefix='/trabajadores/viajes')
@@ -199,7 +200,7 @@ def eliminarTipoVehiculo(idTipoVehiculo):
 @viajes_bp.route("/GetData_Horario", methods=["GET"])
 def get_horarios():
     try:
-        horarios = horario.obtener_todos()
+        horarios = Horario.obtener_todos()
         return jsonify({'data': horarios, 'Status': 'success', 'Msj': 'Listado de horarios retornado exitosamene'})
     except Exception as e:
         return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar horarios: + {repr(e)}'})
@@ -208,56 +209,40 @@ def get_horarios():
 def horario_Nuevo():
     return render_template(
         'viajes/horarioCRUD.html', 
-        active_page="usuarios", 
-        active_menu='mUsuarios', 
-        usuario={},
-        tittle = 'Registrar usuario',
+        active_page="horario", 
+        active_menu='mViajes', 
+        horario={},
+        tittle = 'Registrar horario',
         btnId = 'btn_Registrar')
 
 @viajes_bp.route("/RegistrarHorario", methods=["POST"])
-def registrar_usuario():
+def registrar_horario():
     try:
-        UPLOAD_FOLDER = "Static/img/trabajadores/"
-        nombre = request.form.get("nombre").strip()
-        email = request.form.get("email").strip()
-        password = request.form.get("password")
-        idTipoUsuario = request.form.get("idTipoUsuario")
-        usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
+        hora_entrada = request.form.get("hora_entrada").strip()
+        hora_salida = request.form.get("hora_salida").strip()
+        estado = request.form.get("estado")
 
-        if not nombre or not email or not password or not idTipoUsuario:
+        if not hora_entrada or not hora_salida or not estado:
             return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
 
-        ruta_imagen = "/Static/img/trabajadores/default-user.png"
-
-        if 'imagen' in request.files:
-            imagen = request.files['imagen']
-
-            if imagen and allowed_file(imagen.filename):
-                extension = imagen.filename.rsplit(".", 1)[1].lower()
-                filename = f"{email}.{extension}"
-                ruta_imagen = f"/{UPLOAD_FOLDER}{filename}"
-
-        mensajes = Usuario.registrar(nombre, email, password, ruta_imagen, idTipoUsuario, usuario_actual)
+        mensajes = Horario.registrar(hora_entrada, hora_salida, estado)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 
         if msj1:
-            if 'imagen' in request.files and imagen and allowed_file(imagen.filename):
-                filepath = os.path.join(UPLOAD_FOLDER, filename)
-                imagen.save(filepath)
             return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
         elif msj2:
             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
         else:
-            return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar usuario'})
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar horario'})
 
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
-@viajes_bp.route("/EliminarUsuario/<int:id>", methods=['POST'])
-def eliminar_usuario(id):  # Recibe el ID de la URL
+@viajes_bp.route("/EliminarHorario/<int:id>", methods=['POST'])
+def eliminar_horario(id):  # Recibe el ID de la URL
     try:
-        mensajes = Usuario.eliminar(id)  # Se usa el ID directamente
+        mensajes = Horario.eliminar(id)  # Se usa el ID directamente
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 
@@ -266,70 +251,56 @@ def eliminar_usuario(id):  # Recibe el ID de la URL
         elif msj2:
             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
         else:
-            return jsonify({"Status": "error", 'Msj': 'Error desconocido al eliminar usuario'})
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al eliminar horario'})
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
-@viajes_bp.route("/EditarUsuario/<int:id>", methods=['GET', 'POST'])
+@viajes_bp.route("/EditarHorario/<int:id>", methods=['GET', 'POST'])
 def editar_usuario(id):
     try:
-        UPLOAD_FOLDER = "Static/img/trabajadores/"
-        usuario = Usuario.obtener_por_id(id)
+        horario_data = Horario.obtener_por_id(id)
 
         if request.method == 'POST':
-            nombre = request.form.get("nombre").strip()
-            email = request.form.get("email").strip()
-            idTipoUsuario = request.form.get("idTipoUsuario")
+            hora_entrada = request.form.get("hora_entrada").strip()
+            hora_salida = request.form.get("hora_salida").strip()
+            estado = request.form.get("estado")
 
-            if not nombre or not email or not idTipoUsuario:
+            if not hora_entrada or not hora_salida or not estado:
                 return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
 
-            ruta_imagen = usuario['imagen'] if usuario and 'imagen' in usuario else "/Static/img/trabajadores/default-user.png"
-
-            if 'imagen' in request.files:
-                imagen = request.files['imagen']
-                
-                if imagen and allowed_file(imagen.filename):
-                    extension = imagen.filename.rsplit(".", 1)[1].lower()
-                    filename = f"{email}.{extension}"
-                    ruta_imagen = f"/{UPLOAD_FOLDER}{filename}"
             
-            mensajes = Usuario.editar(id, nombre, email, ruta_imagen, idTipoUsuario)
+            mensajes = Horario.editar(id, hora_entrada, hora_salida, estado)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
             if msj1:
-                if 'imagen' in request.files and imagen and allowed_file(imagen.filename):
-                    filepath = os.path.join(UPLOAD_FOLDER, filename)
-                    imagen.save(filepath)
                 return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
             elif msj2:
                 return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
             else:
-                return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar usuario'})
-
-        if usuario:
-            return render_template('usuario/usuarioCRUD.html', active_page="usuarios", active_menu='mUsuarios', usuario=usuario, tittle = 'Editar usuario', btnId = 'btn_Editar')
-        return render_template('usuario/usuarioCRUD.html', active_page="usuarios", active_menu='mUsuarios', usuario={}, tittle = 'Editar usuario', btnId = 'btn_Editar')
+                return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar horario'})
+        if horario_data:
+            return render_template('viajes/horarioCRUD.html', active_page="horarios", active_menu='mViajes', horario=horario_data, tittle = 'Editar horario', btnId = 'btn_Editar')
+        return render_template('viajes/horarioCRUD.html', active_page="horarios", active_menu='mViajes', horario={}, tittle = 'Editar horario', btnId = 'btn_Editar')
 
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
     
-@viajes_bp.route("/VerUsuario/<int:id>", methods=['GET'])
+@viajes_bp.route("/VerHorario/<int:id>", methods=['GET'])
 def ver_usuario(id):
     try:
-        usuario = Usuario.obtener_por_id(id)
-        if usuario:
-            return render_template('usuario/usuarioCRUD.html', active_page="usuarios", active_menu='mUsuarios', usuario=usuario, tittle = 'Ver usuario', btnId = 'btn_Aceptar')
-        return render_template('usuario/usuarioCRUD.html', active_page="usuarios", active_menu='mUsuarios', usuario={}, tittle = 'Ver usuario', btnId = 'btn_Aceptar')
+        horario_data = Horario.obtener_por_id(id)
+        if horario_data:
+            return render_template('viajes/horarioCRUD.html', active_page="horarios", active_menu='mViajes', horario=horario_data, tittle = 'Ver horario', btnId = 'btn_Aceptar')
+        return render_template('viajes/horarioCRUD.html', active_page="usuarios", active_menu='mUsuarios', usuario={}, tittle = 'Ver usuario', btnId = 'btn_Aceptar')
         
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
     
-@viajes_bp.route("/DarBajaUsuario/<int:id>", methods=['POST'])
-def darBaja_usuario(id):  # Recibe el ID de la URL
+@viajes_bp.route("/DarBajaHorario/<int:id>", methods=['POST'])
+def darBaja_horario(id):  # Recibe el ID de la URL
     try:
-        mensajes = Usuario.darBaja(id)  # Se usa el ID directamente
+        mensajes = Horario.darBaja(id)  # Se usa el ID directamente
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 
@@ -338,7 +309,7 @@ def darBaja_usuario(id):  # Recibe el ID de la URL
         elif msj2:
             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
         else:
-            return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja al usuario'})
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja al horario'})
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
@@ -352,18 +323,36 @@ def get_sucursal():
         return jsonify({'data': sucursal, 'Status': 'success', 'Msj': 'Listado de sucursales retornado exitosamente'})
     except Exception as e:
         return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar las sucursales: + {repr(e)}'})
+    
+@viajes_bp.route('/SucursalNuevo')
+def sucursal_Nuevo():
+    return render_template(
+        'viajes/sucursalCRUD.html', 
+        active_page="sucursal", 
+        active_menu='mViajes', 
+        sucursal={},
+        tittle = 'Registrar sucursal',
+        btnId = 'btn_Registrar')
 
-@viajes_bp.route('/RegistrarSucursal',methods=["GET","POST"])
+@viajes_bp.route('/RegistrarSucursal',methods=["POST"])
 def registrar_sucursal():
     try:
-        ubigeo = request.form.get("txt_ubigeo").strip()
         nombre = request.form.get("txt_nombre").strip()
-        direccion = request.form.get("txt_direccion").strip()
         latitud = request.form.get("txt_latitud").strip()
         longitud = request.form.get("txt_longitud").strip()
         usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
         
-        mensajes = Sucursal.registrar(ubigeo, nombre, direccion, latitud, longitud, usuario_actual)
+        ubigeo = Ubigeo.obtener_por_lat_lon(latitud, longitud)
+        if not ubigeo or not ubigeo.get('ubigeo'):
+            return jsonify({"Status": "error", 
+                            'Msj': 'No se pudo obtener el ubigeo a partir de las coordenadas proporcionadas'})
+        
+        direccion = request.form.get("txt_direccion").strip()
+        if not direccion:
+            direccion = ubigeo.get('direccion', '')
+
+        
+        mensajes = Sucursal.registrar(ubigeo['ubigeo'], nombre, direccion, latitud, longitud, usuario_actual)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
         
@@ -378,7 +367,7 @@ def registrar_sucursal():
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
 @viajes_bp.route("/EliminarSucursal/<int:idSucursal>", methods=['GET'])
-def eliminar_sucursal(idSucursal, usuario_actual):
+def eliminar_sucursal(idSucursal):
     try:
         usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
         mensajes = Sucursal.eliminar(idSucursal, usuario_actual)
@@ -396,19 +385,26 @@ def eliminar_sucursal(idSucursal, usuario_actual):
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
 @viajes_bp.route("/EditarSucursal/<int:idSucursal>",methods=["GET","POST"])
-def editar_sucursal(idSucursal, usuario_actual):
+def editar_sucursal(idSucursal):
     try:
         sucursal = Sucursal.obtener_por_id(idSucursal)
         
         if request.method == "POST":
-            ubigeo = request.form.get("txt_ubigeo").strip()
             nombre = request.form.get("txt_nombre").strip()
-            direccion = request.form.get("txt_direccion").strip()
             latitud = request.form.get("txt_latitud").strip()
             longitud = request.form.get("txt_longitud").strip()
             usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
 
-            mensajes = Sucursal.editar(idSucursal, ubigeo, nombre, direccion, latitud, longitud, usuario_actual)
+            ubigeo = Ubigeo.obtener_por_lat_lon(latitud, longitud)
+            if not ubigeo or not ubigeo.get('ubigeo'):
+                return jsonify({"Status": "error", 
+                                'Msj': 'No se pudo obtener el ubigeo a partir de las coordenadas proporcionadas'})
+            
+            direccion = request.form.get("txt_direccion").strip()
+            if not direccion:
+                direccion = ubigeo.get('direccion', '')
+            
+            mensajes = Sucursal.editar(idSucursal, ubigeo['ubigeo'], nombre, direccion, latitud, longitud, usuario_actual)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
@@ -452,6 +448,33 @@ def darBaja_sucursal(idSucursal):
             return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja la sucursal'})
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+
+@viajes_bp.route('/api/geocodificar', methods=['GET'])
+def geocodificar_coordenadas():
+    try:
+        lat = float(request.args.get('lat'))
+        lon = float(request.args.get('lon'))
+    except (TypeError, ValueError):
+        return jsonify({'error': 'Coordenadas inválidas'}), 400
+    
+    try:
+        resultado = Ubigeo.obtener_por_lat_lon(lat, lon)
+        if resultado:
+            return jsonify({
+                'status': 'success',
+                'data': resultado
+            })
+        return jsonify({
+            'status': 'error',
+            'message': 'No se pudo geocodificar las coordenadas'
+        }), 404
+    except Exception as e:
+        print(f"Error en geocodificar_coordenadas: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': 'Error interno del servidor'
+        }), 500
 
 # END REGIÓN SUCURSAL #
 
