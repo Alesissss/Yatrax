@@ -54,6 +54,10 @@ def forgot_password():
 @homeClientes_bp.route('/register')
 def register_cliente():
     return render_template('Ecommerce/home/formRegistro.html')
+
+@homeClientes_bp.route('/pago')
+def pago_pasajes():
+    return render_template('Ecommerce/home/pago.html')
 # END VIEWS
 
 # FUNCIONES
