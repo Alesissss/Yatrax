@@ -277,7 +277,8 @@ def activar_plantilla(id):  # Recibe el ID de la URL
 def Menu_MetodosPago():
     # Captura el mensaje de la URL, si existe
     msg = request.args.get('msg', '')
-    return render_template('configuracion/metodos_pago.html', active_page="metodos_pago", active_menu='mConfiguracion', msg=msg)
+    tipotoast = request.args.get('tipotoast', '')
+    return render_template('configuracion/metodos_pago.html', active_page="metodos_pago", active_menu='mConfiguracion', msg=msg, tipotoast=tipotoast)
 
 # Ruta para registrar un nuevo método de pago
 @configuracion_bp.route('/MetodoPagoNuevo', methods=['GET', 'POST'])
@@ -325,9 +326,16 @@ def registrar_metodo_pago():
             logo_path = "/Static/img/trabajadores/default-logo.png"  # Logo por defecto
 
         mensajes = MetodoPago.registrar(nombre.strip(), logo_path, estado.strip(), session.get('usuario', {}).get('email', 'SIN USUARIO').strip())
-        
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return redirect(url_for('configuracion.Menu_MetodosPago', msg=msj1 ,tipotoast='success'))
+        elif msj2:
+            return redirect(url_for('configuracion.Menu_MetodosPago', msg=msj2, tipotoast='error'))
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar el metodo de pago'})
         # Redirigir con un mensaje de éxito
-        return redirect(url_for('configuracion.Menu_MetodosPago', msg="Método de pago registrado exitosamente"))
 
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Error: {repr(e)}"})
@@ -355,9 +363,15 @@ def editar_metodo_pago(id):
             logo_path = metodo_pago['logo']
 
         mensajes = MetodoPago.editar(id, nombre, logo_path, estado)
-        
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+        if msj1:
+            return redirect(url_for('configuracion.Menu_MetodosPago', msg=msj1 ,tipotoast='success'))
+        elif msj2:
+            return redirect(url_for('configuracion.Menu_MetodosPago', msg=msj2, tipotoast='error'))
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar el metodo de pago'})
         # Redirigir con un mensaje de éxito
-        return redirect(url_for('configuracion.Menu_MetodosPago', msg="Método de pago editado exitosamente"))
 
     return render_template('configuracion/metodo_pago_crud.html', metodo_pago=metodo_pago, tittle="Editar método de pago", btnId="btn_Editar")
 
