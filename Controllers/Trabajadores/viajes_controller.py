@@ -70,6 +70,10 @@ def Menu_TipoVehiculo():
 def Menu_Sucursal():
     return render_template('viajes/sucursal.html', active_page="sucursal", active_menu='mViajes')
 
+@viajes_bp.route('/SucursalNueva')
+def SucursalNueva():
+    return render_template('viajes/sucursalCRUD.html', active_page="sucursal", active_menu='mViajes', sucursal={}, tittle = 'Registrar sucursal', btnId = 'btn_Registrar')
+
 @viajes_bp.route('/GestionarNivel')
 def Menu_Nivel():
     return render_template('viajes/nivel.html', active_page="nivel", active_menu='mViajes')
