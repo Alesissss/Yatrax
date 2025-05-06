@@ -176,6 +176,19 @@ CREATE TABLE sucursal (
     usuario VARCHAR(100) NOT NULL
 );
 
+-- Crear tabla sucursal
+CREATE TABLE ruta (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre CHAR(6) NOT NULL,
+    sucursalOrigen INT NOT NULL,    
+    sucursalOrigen INT NOT NULL,
+    estado BOOLEAN NOT NULL DEFAULT 1,
+    estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
+    estado_registro INT NOT NULL DEFAULT 1,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL
+);
+
 -- Crear tabla menus
 CREATE TABLE conf_menus (
     id INT AUTO_INCREMENT PRIMARY KEY,
