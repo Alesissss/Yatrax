@@ -58,6 +58,11 @@ DROP PROCEDURE IF EXISTS SP_REGISTRAR_MARCA;
 DROP PROCEDURE IF EXISTS SP_EDITAR_MARCA;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_MARCA;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_MARCA;
+
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_RUTA;
+DROP PROCEDURE IF EXISTS SP_EDITAR_RUTA;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_RUTA;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_RUTA;
 -- Luego eliminamos las tablas, primero la que depende de la otra
 DROP TABLE IF EXISTS conf_plantillas;
 DROP TABLE IF EXISTS conf_dmenus;
@@ -76,6 +81,7 @@ DROP TABLE IF EXISTS tipo_comprobante;
 DROP TABLE IF EXISTS tipo_documento;
 DROP TABLE IF EXISTS marca;
 DROP TABLE IF EXISTS ruta;
+DROP TABLE IF EXISTS nivel;
 
 -- Crear tabla tipo_servicio
 CREATE TABLE tipo_servicio (
@@ -196,7 +202,7 @@ CREATE TABLE sucursal (
 -- Crear tabla ruta
 CREATE TABLE ruta (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre CHAR(6) NOT NULL,
+    nombre VARCHAR(100) NOT NULL,
     sucursalOrigen INT NOT NULL,    
     sucursalDestino INT NOT NULL,
     estado BOOLEAN NOT NULL DEFAULT 1,
@@ -4134,4 +4140,137 @@ BEGIN
     END IF;
 END $$ 
 
+-- Crear procedimiento SP_REGISTRAR_RUTA
+DELIMITER $$
+CREATE PROCEDURE SP_REGISTRAR_RUTA(
+    IN P_NOMBRE VARCHAR(255),
+    IN P_ORIGEN INT,
+    IN P_DESTINO INT,
+    IN P_ESTADO BOOLEAN,
+    IN P_USUARIO VARCHAR(255)
+)
+BEGIN
+    DECLARE cNombre INT;
+    DECLARE cRepetido INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
 
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cNombre FROM ruta WHERE nombre = P_NOMBRE AND ESTADO_REGISTRO = 1;
+    SELECT COUNT(*) INTO cRepetido FROM ruta WHERE sucursalOrigen = P_ORIGEN AND sucursalDestino = P_DESTINO AND ESTADO_REGISTRO = 1;
+
+    IF cNombre > 0 THEN
+        SET @MSJ2 = 'El nombre de ruta que intenta registrar ya está registrado';
+    ELSEIF cRepetido != 0 THEN
+        SET @MSJ2 = 'Ya existe una ruta con esa sucursal origen y esa sucursal destino respectivamente';
+    ELSE
+        INSERT INTO ruta (NOMBRE, SUCURSALORIGEN, SUCURSALDESTINO, ESTADO, USUARIO) 
+        VALUES (P_NOMBRE, P_ORIGEN, P_DESTINO, P_ESTADO, P_USUARIO);
+
+        SET @MSJ = 'Se registró correctamente la ruta';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_EDITAR_RUTA
+DELIMITER $$
+CREATE PROCEDURE SP_EDITAR_RUTA(
+    IN P_ID INT,
+    IN P_NOMBRE VARCHAR(255),
+    IN P_ORIGEN INT,
+    IN P_DESTINO INT,
+    IN P_ESTADO BOOLEAN
+)
+BEGIN
+    DECLARE cNombre INT;
+    DECLARE cExiste INT;
+    DECLARE cRepetido INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cExiste FROM ruta WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+    SELECT COUNT(*) INTO cNombre FROM ruta WHERE NOMBRE = P_NOMBRE AND ID != P_ID AND ESTADO_REGISTRO = 1;
+    SELECT COUNT(*) INTO cRepetido FROM ruta WHERE ID != P_ID AND sucursalOrigen = P_ORIGEN AND sucursalDestino = P_DESTINO AND ESTADO_REGISTRO = 1;
+
+    IF cExiste <= 0 THEN
+        SET @MSJ2 = 'La ruta que intenta editar no existe';
+    ELSEIF cNombre != 0 THEN
+        SET @MSJ2 = 'El nombre ingresado ya existe';
+    ELSEIF cRepetido != 0 THEN
+        SET @MSJ2 = 'Ya existe una ruta con esa sucursal origen y esa sucursal destino respectivamente';
+    ELSE
+        UPDATE ruta 
+        SET NOMBRE = P_NOMBRE,
+            SUCURSALORIGEN = P_ORIGEN,
+            SUCURSALDESTINO = P_DESTINO, 
+            ESTADO = P_ESTADO, 
+            estado_proceso = 'MODIFICADO' 
+        WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se modificó correctamente la ruta';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_DARBAJA_RUTA
+DELIMITER $$
+CREATE PROCEDURE SP_DARBAJA_RUTA(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cExiste INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cExiste FROM ruta WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cExiste <= 0 THEN
+        SET @MSJ2 = 'La ruta que intenta dar de baja no existe';
+    ELSE
+        UPDATE ruta SET ESTADO = 0, ESTADO_PROCESO = 'MODIFICADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se dio de baja correctamente a la ruta';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_RUTA
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_RUTA(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cExiste INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cExiste FROM ruta WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cExiste <= 0 THEN
+        SET @MSJ2 = 'La ruta que intenta eliminar no existe';
+    ELSE
+        UPDATE ruta SET ESTADO_REGISTRO = 2, ESTADO_PROCESO = 'ELIMINADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se eliminó correctamente a la ruta';
+    END IF;
+END $$
+DELIMITER ;

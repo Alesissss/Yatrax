@@ -15,7 +15,7 @@
                         <label for="txt_TipoDocumento">Nombre</label>
                         <div class="input-group">
                             <input type="text" id="txt_TipoDocumento" class="form-control" placeholder="Nombre"
-                                value="{{ tipoDocumento.nombre }}" oninput="this.value = this.value.toUpperCase();">
+                                value="{{ tipoDocumento.nombre }}" oninput="this.value = this.value.toUpperCase();" {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
                             <div class="input-group-append">
                                 <div class="input-group-text"><i class="fas fa-user"></i></div>
                             </div>
@@ -25,7 +25,7 @@
                         <label for="txt_TipoDocumentoAbre">Abreviatura</label>
                         <div class="input-group">
                             <input type="text" id="txt_TipoDocumentoAbre" class="form-control" placeholder="Abreviatura"
-                                value="{{ tipoDocumento.abreviatura }}" oninput="this.value = this.value.toUpperCase();">
+                                value="{{ tipoDocumento.abreviatura }}" oninput="this.value = this.value.toUpperCase();" {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
                             <div class="input-group-append">
                                 <div class="input-group-text"><i class="fas fa-user"></i></div>
                             </div>

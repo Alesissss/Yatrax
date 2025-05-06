@@ -500,10 +500,10 @@ def dar_baja_tipo_documento(id):
 @ventas_bp.route("/VerTipoDocumento/<int:id>", methods=["GET"])
 def ver_tipo_documento(id):
     try:
-        tipo_documento = TipoDocumento.obtener_por_id(id)
-        if tipo_documento:
-            return render_template("ventas/tipoDocumentoCRUD.html", active_page="tipo_documento", active_menu='mVentas', tipo_documento=tipo_documento, tittle='Ver tipo documento', btnId='btn_Aceptar')
-        return render_template("ventas/tipoDocumentoCRUD.html", active_page="tipo_documento", active_menu='mVentas', tipo_documento={}, tittle='Ver tipo documento', btnId='btn_Aceptar')
+        tipoDocumento = TipoDocumento.obtener_por_id(id)
+        if tipoDocumento:
+            return render_template("ventas/tipoDocumentoCRUD.html", active_page="tipo_documento", active_menu='mVentas', tipoDocumento=tipoDocumento, tittle='Ver tipo documento', btnId='btn_Aceptar')
+        return render_template("ventas/tipoDocumentoCRUD.html", active_page="tipo_documento", active_menu='mVentas', tipoDocumento={}, tittle='Ver tipo documento', btnId='btn_Aceptar')
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
     
