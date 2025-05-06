@@ -14,7 +14,18 @@ class Nivel:
         conexion = None
         try:
             conexion = bd.Conexion()
-            listado = conexion.obtener("SELECT idNivel as id,nroPiso,tipo_vehiculo,cantidad,estado FROM nivel")
+            listado = conexion.obtener("""
+                SELECT 
+                n.idNivel AS id,
+                n.nroPiso,
+                tv.nombre AS tipo_vehiculo,
+                n.cantidad,
+                n.estado
+            FROM 
+                nivel n
+            INNER JOIN 
+                tipo_vehiculo tv ON n.tipo_vehiculo = tv.idTipoVehiculo;
+            """)
             return listado
         finally:
             if conexion:
