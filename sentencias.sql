@@ -75,6 +75,7 @@ DROP TABLE IF EXISTS tipo_servicio;
 DROP TABLE IF EXISTS tipo_comprobante;
 DROP TABLE IF EXISTS tipo_documento;
 DROP TABLE IF EXISTS marca;
+DROP TABLE IF EXISTS ruta;
 
 -- Crear tabla tipo_servicio
 CREATE TABLE tipo_servicio (
