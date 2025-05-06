@@ -6,34 +6,36 @@ from Models.sucursal import Sucursal
 from Models.horario import Horario
 from Models.ubigeo import Ubigeo
 from Models.marca import Marca
+from Models.ruta import Ruta
 from werkzeug.utils import secure_filename
+
 viajes_bp = Blueprint('viajes', __name__, url_prefix='/trabajadores/viajes')
 
 # ERRORES 
-# # Manejar errores 401 (Página no autorizada)
-# @viajes_bp.errorhandler(401)
-# def error_401(error):
-#     return render_template("error.html", error="Página no autorizada"), 401
+# Manejar errores 401 (Página no autorizada)
+@viajes_bp.errorhandler(401)
+def error_401(error):
+    return render_template("error.html", error="Página no autorizada"), 401
 
-# # Manejar errores 403 (Página no autorizada para este usuario)
-# @viajes_bp.errorhandler(403)
-# def error_403(error):
-#     return render_template("error.html", error="Página restringida"), 403
+# Manejar errores 403 (Página no autorizada para este usuario)
+@viajes_bp.errorhandler(403)
+def error_403(error):
+    return render_template("error.html", error="Página restringida"), 403
 
-# # Manejar errores 404 (Página no encontrada)
-# @viajes_bp.errorhandler(404)
-# def error_404(error):
-#     return render_template("error.html", error="Página no encontrada"), 404
+# Manejar errores 404 (Página no encontrada)
+@viajes_bp.errorhandler(404)
+def error_404(error):
+    return render_template("error.html", error="Página no encontrada"), 404
 
-# # Manejar errores 500 (Error interno del servidor)
-# @viajes_bp.errorhandler(500)
-# def error_500(error):
-#     return render_template("error.html", error="Error interno del servidor"), 500
+# Manejar errores 500 (Error interno del servidor)
+@viajes_bp.errorhandler(500)
+def error_500(error):
+    return render_template("error.html", error="Error interno del servidor"), 500
 
-# # Manejar cualquier otro error genérico
-# @viajes_bp.errorhandler(Exception)
-# def error_general(error):
-#     return render_template("error.html", error="Ocurrió un error inesperado"), 500
+# Manejar cualquier otro error genérico
+@viajes_bp.errorhandler(Exception)
+def error_general(error):
+    return render_template("error.html", error="Ocurrió un error inesperado"), 500
 
 # RESTRICCIONES
 @viajes_bp.before_request
@@ -62,7 +64,7 @@ def Menu_Horarios():
 
 @viajes_bp.route('/GestionarTipoVehiculo')
 def Menu_TipoVehiculo():
-    return render_template('viajes/tipoVehiculo/tipoVehiculo.html', active_page="tipoVehiculo", active_menu='mViajes')
+    return render_template('viajes/tipoVehiculo.html', active_page="tipoVehiculo", active_menu='mViajes')
 
 @viajes_bp.route('/GestionarSucursal')
 def Menu_Sucursal():
@@ -70,11 +72,19 @@ def Menu_Sucursal():
 
 @viajes_bp.route('/GestionarNivel')
 def Menu_Nivel():
-    return render_template('viajes/nivel/nivel.html', active_page="nivel", active_menu='mViajes')
+    return render_template('viajes/nivel.html', active_page="nivel", active_menu='mViajes')
+
+@viajes_bp.route('/GestionarRutas')
+def Menu_Rutas():
+    return render_template('viajes/ruta.html', active_page="ruta", active_menu='mViajes')
+
+@viajes_bp.route('/RutaNuevo')
+def TipoUsuario_Nuevo():
+    return render_template('viajes/rutaCRUD.html', active_page="ruta", active_menu='mViajes', ruta={}, tittle = 'Registrar ruta', btnId = 'btn_Registrar')
 
 # @viajes_bp.route('/GestionarMarcas')
 # def Menu_Marcas():
-#     return render_template('viajes/marcas.html', active_page="marcas", active_menu='mMarcas')
+#     return render_template('viajes/marcas.html', active_page="marcas", active_menu='mViajes')
 
 # END VIEWS
 
@@ -102,7 +112,7 @@ def nuevo_nivel():
     if request.method == "GET":
         # Renderiza formulario para registrar un nuevo nivel
         return render_template(
-            "viajes/nivel/nivelCRUD.html",  # Cambia el template a uno para nivel
+            "viajes/nivelCRUD.html",  # Cambia el template a uno para nivel
             title="Nuevo Nivel",
             nivel={
                 "idNivel": None,
@@ -137,7 +147,7 @@ def ver_nivel(idNivel):
         nivel = Nivel.obtener_uno_por_idNivel(idNivel)
 
         return render_template(
-            "viajes/nivel/nivelCRUD.html",
+            "viajes/nivelCRUD.html",
             tittle="Ver Nivel",
             nivel=nivel,
             btnId="btn_Regresar",
@@ -154,7 +164,7 @@ def editar_nivel(idNivel):
             nivel = Nivel.obtener_uno_por_idNivel(idNivel)
 
             return render_template(
-                "viajes/nivel/nivelCRUD.html",
+                "viajes/nivelCRUD.html",
                 tittle="Editar Nivel",
                 nivel=nivel,
                 btnId="btn_Actualizar",
@@ -227,7 +237,7 @@ def get_tipoVehiculo():
 def nuevoTipoVehiculo():
     if request.method == "GET":
         return render_template(
-            "viajes/tipoVehiculo/tipoVehiculoCRUD.html",
+            "viajes/tipoVehiculoCRUD.html",
             tittle="Nuevo Tipo de Vehículo",
             tipoVehiculo={},
             btnId="btn_Registrar",
@@ -255,7 +265,7 @@ def nuevoTipoVehiculo():
 @viajes_bp.route("/verTipoVehiculo/<int:idVehiculo>")
 def verTipoVehiculo(idVehiculo):
     return render_template(
-        "viajes/tipoVehiculo/tipoVehiculoCRUD.html",
+        "viajes/tipoVehiculoCRUD.html",
         tittle="Ver Tipo de Vehículo",
         tipoVehiculo = TipoVehiculo.obtenerUno(idVehiculo),
         btnId="btn_Regresar",
@@ -267,7 +277,7 @@ def verTipoVehiculo(idVehiculo):
 def editarTipoVehiculo(idTipoVehiculo):
     if request.method == "GET":
         return render_template(
-            "viajes/tipoVehiculo/tipoVehiculoCRUD.html",
+            "viajes/tipoVehiculoCRUD.html",
             tittle="Editar Tipo de Vehículo",
             tipoVehiculo = TipoVehiculo.obtenerUno(idTipoVehiculo),
             btnId="btn_Actualizar"
@@ -611,7 +621,7 @@ def geocodificar_coordenadas():
 @viajes_bp.route('/GestionarMarcas')
 def Menu_Marcas():
     msg = request.args.get('msg', '')
-    return render_template('viajes/marca.html', active_page="marcas", active_menu='mMarcas', msg=msg)
+    return render_template('viajes/marca.html', active_page="marcas", active_menu='mViajes', msg=msg)
 
 # Ruta para registrar una nueva marca
 @viajes_bp.route('/MarcaNuevo', methods=['GET', 'POST'])
@@ -717,5 +727,127 @@ def get_marcas():
         return jsonify({"Status": "error", "Msj": f"Error al obtener las marcas: {repr(e)}"})
 
 #END REGION MARCA
+
+# REGION RUTA
+
+# END REGION RUTA
+
+@viajes_bp.route("/GetData_Ruta", methods=["GET"])
+def get_rutas():
+    try:
+        tiposUsuarios = Ruta.obtener_todos()
+        return jsonify({'data': tiposUsuarios, 'Status': 'success', 'Msj': 'Listado de rutas retornado exitosamene'})
+    except Exception as e:
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar rutas: + {repr(e)}'})
+
+@viajes_bp.route("/GetSucursales", methods=["GET"])
+def get_rutaSucursal():
+    try:
+        sucursal = Sucursal.obtener_todos()
+
+        sucursal_filtrada = [
+            {k: v for k, v in s.items() if k in ['id', 'nombre', 'estado']} 
+            for s in sucursal if s.get('estado') == 1
+        ]
+
+        return jsonify({'data': sucursal_filtrada, 'Status': 'success', 'Msj': 'Listado de sucursales retornado exitosamente'})
+    except Exception as e:
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar las sucursales: + {repr(e)}'})
+
+
+@viajes_bp.route("/RegistrarRuta", methods=["POST"])
+def registrar_ruta():
+    try:
+        nombre = request.form.get("nombre").strip()
+        origen = int(request.form.get("origen").strip())
+        destino = int(request.form.get("destino").strip())
+        estado = request.form.get("estado")
+        usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
+
+        mensajes = Ruta.registrar(nombre, origen, destino, estado, usuario_actual)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar ruta'})
+
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@viajes_bp.route("/EliminarRuta/<int:id>", methods=['POST'])
+def eliminar_ruta(id):  # Recibe el ID de la URL
+    try:
+        mensajes = Ruta.eliminar(id)  # Se usa el ID directamente
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al eliminar ruta'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@viajes_bp.route("/EditarRuta/<int:id>", methods=['GET', 'POST'])
+def editar_ruta(id):
+    try:
+        ruta = Ruta.obtener_por_id(id)
+
+        if request.method == 'POST':
+            nombre = request.form.get("nombre").strip()
+            origen = int(request.form.get("origen").strip())
+            destino = int(request.form.get("destino").strip())
+            estado = request.form.get("estado")
+            
+            mensajes = Ruta.editar(id, nombre, origen, destino, estado)
+            msj1 = mensajes.get('@MSJ')
+            msj2 = mensajes.get('@MSJ2')
+
+            if msj1:
+                return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+            elif msj2:
+                return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+            else:
+                return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar ruta'})
+
+        if ruta:
+            return render_template('viajes/rutaCRUD.html', active_page="ruta", active_menu='mViajes', ruta=ruta, tittle = 'Editar ruta', btnId = 'btn_Editar')
+        return render_template('viajes/rutaCRUD.html', active_page="ruta", active_menu='mViajes', ruta={}, tittle = 'Editar ruta', btnId = 'btn_Editar')
+
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+    
+@viajes_bp.route("/VerRuta/<int:id>", methods=['GET'])
+def ver_ruta(id):
+    try:
+        ruta = Ruta.obtener_por_id(id)
+        if ruta:
+            return render_template('viajes/rutaCRUD.html', active_page="ruta", active_menu='mViajes', ruta=ruta, tittle = 'Ver ruta', btnId = 'btn_Aceptar')
+        return render_template('viajes/rutaCRUD.html', active_page="ruta", active_menu='mViajes', ruta={}, tittle = 'Ver ruta', btnId = 'btn_Aceptar')
+        
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+    
+@viajes_bp.route("/DarBajaRuta/<int:id>", methods=['POST'])
+def darBaja_ruta(id):  # Recibe el ID de la URL
+    try:
+        mensajes = Ruta.darBaja(id)  # Se usa el ID directamente
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja a la ruta'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
 # END FUNCIONES

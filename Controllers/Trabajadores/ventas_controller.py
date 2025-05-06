@@ -84,7 +84,7 @@ def Menu_TipoDocumento():
     return render_template('ventas/tipoDocumento.html', active_page="tipoDocumento", active_menu = 'mVentas')
 
 @ventas_bp.route('/TipoDocumentoNuevo')
-def Menu_TipoDocumentoNuevo():
+def TipoDocumento_Nuevo():
     return render_template('ventas/tipoDocumentoCRUD.html', active_page="tipoDocumento", active_menu = 'mVentas', tipoDocumento = {}, tittle = 'Registrar Tipo Documento', btnId = 'btn_Registrar')
 # END VIEWS
 
