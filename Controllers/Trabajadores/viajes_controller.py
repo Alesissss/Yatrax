@@ -472,37 +472,38 @@ def sucursal_Nuevo():
         tittle = 'Registrar sucursal',
         btnId = 'btn_Registrar')
 
-@viajes_bp.route('/RegistrarSucursal',methods=["POST"])
+@viajes_bp.route('/RegistrarSucursal', methods=["POST"])
 def registrar_sucursal():
     try:
-        nombre = request.form.get("txt_nombre").strip()
-        latitud = request.form.get("txt_latitud").strip()
-        longitud = request.form.get("txt_longitud").strip()
-        usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
-        
-        ubigeo = Ubigeo.obtener_por_lat_lon(latitud, longitud)
-        if not ubigeo or not ubigeo.get('ubigeo'):
-            return jsonify({"Status": "error", 
-                            'Msj': 'No se pudo obtener el ubigeo a partir de las coordenadas proporcionadas'})
-        
-        direccion = request.form.get("txt_direccion").strip()
-        if not direccion:
-            direccion = ubigeo.get('direccion', '')
+        # Obtener datos del formulario
+        nombre = request.form.get("txt_nombre", "").strip()
+        direccion = request.form.get("txt_direccion", "").strip()
+        latitud = request.form.get("txt_latitud")
+        longitud = request.form.get("txt_longitud")
+        departamento = request.form.get("txt_departamento", "").strip()
+        usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO')
 
-        
-        mensajes = Sucursal.registrar(ubigeo['ubigeo'], nombre, direccion, latitud, longitud, usuario_actual)
-        msj1 = mensajes.get('@MSJ')
-        msj2 = mensajes.get('@MSJ2')
-        
-        if msj1:
-            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
-        elif msj2:
-            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
-        else:
-            return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar sucursal'})
-    
+        # Validaciones básicas
+        if not all([nombre, latitud, longitud, departamento]):
+            return jsonify({"Status": "error", "Msj": "Todos los campos son requeridos"})
+
+        # Registrar la sucursal (ahora con departamento en lugar de UBIGEO)
+        resultado = Sucursal.registrar(
+            departamento=departamento,
+            nombre=nombre,
+            direccion=direccion,
+            latitud=latitud,
+            longitud=longitud,
+            usuario_actual=usuario_actual
+        )
+
+        return jsonify(resultado)
+
     except Exception as e:
-        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+        return jsonify({
+            "Status": "error",
+            "Msj": f"Error inesperado al registrar sucursal: {str(e)}"
+        })
 
 @viajes_bp.route("/EliminarSucursal/<int:idSucursal>", methods=['GET'])
 def eliminar_sucursal(idSucursal):
@@ -529,20 +530,13 @@ def editar_sucursal(idSucursal):
         
         if request.method == "POST":
             nombre = request.form.get("txt_nombre").strip()
+            direccion = request.form.get("txt_direccion").strip()
             latitud = request.form.get("txt_latitud").strip()
             longitud = request.form.get("txt_longitud").strip()
+            departamento = request.form.get("txt_departamento").strip()
             usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
-
-            ubigeo = Ubigeo.obtener_por_lat_lon(latitud, longitud)
-            if not ubigeo or not ubigeo.get('ubigeo'):
-                return jsonify({"Status": "error", 
-                                'Msj': 'No se pudo obtener el ubigeo a partir de las coordenadas proporcionadas'})
             
-            direccion = request.form.get("txt_direccion").strip()
-            if not direccion:
-                direccion = ubigeo.get('direccion', '')
-            
-            mensajes = Sucursal.editar(idSucursal, ubigeo['ubigeo'], nombre, direccion, latitud, longitud, usuario_actual)
+            mensajes = Sucursal.editar(idSucursal, departamento, direccion, nombre, latitud, longitud, usuario_actual)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 

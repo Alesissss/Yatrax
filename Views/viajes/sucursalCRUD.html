@@ -17,34 +17,34 @@
                             <input type="text" id="txt_nombre" class="form-control" placeholder="Nombre"
                                 value="{{ sucursal.nombre }}" oninput="this.value = this.value.toUpperCase();">
                             <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-map_market_alt"></i></div>
+                                <div class="input-group-text"><i class="fas fa-home"></i></div>
                             </div>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="txt_nombre">Dirección</label>
+                        <label for="txt_direccion">Dirección</label>
                         <div class="input-group">
-                            <input type="text" id="txt_nombre" class="form-control" placeholder="Nombre"
-                                value="{{ sucursal.nombre }}" oninput="this.value = this.value.toUpperCase();">
+                            <input type="text" id="txt_direccion" class="form-control" placeholder="Dirección"
+                                value="{{ sucursal.direccion }}" oninput="this.value = this.value.toUpperCase();">
                             <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-map_market_alt"></i></div>
+                                <div class="input-group-text"><i class="fa fa-map"></i></div>
                             </div>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="txt_ubicacion">Ubicacion</label>
+                        <label for="txt_ubicacion">Ubicación</label>
                         <div class="input-group">
                             <input type="text" id="txt_ubicacion" class="form-control" placeholder="Ubicación" readonly
                                 value="{{ ubicacion }}" oninput="this.value = this.value.toUpperCase();">
                             <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-map_pin"></i></div>
+                                <div class="input-group-text"><i class="fa fa-map"></i></div>
                             </div>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="cbx_Estado">Estado</label>
                         <div class="input-group">
-                            <select id="cbx_Estado" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{% endif
-                                %}>
+                            <select id="cbx_Estado" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
                                 <option disabled>--SELECCIONAR--</option>
                                 <option {% if sucursal.estado==1 %}selected{% endif %} value="1">Vigente</option>
                                 <option {% if sucursal.estado==0 %}selected{% endif %} value="0">No vigente</option>
@@ -64,6 +64,11 @@
                         <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de sucursales</button>
                         <button id="{{ btnId }}" type="button" class="btn btn-primary">Aceptar</button>
                     </div>
+
+                    <input type="hidden" id="txt_departamento" name="departamento">
+                    <input type="hidden" id="txt_provincia" name="provincia">
+                    <input type="hidden" id="txt_distrito" name="distrito">
+
                 </div>
             </div>
         </div>
@@ -71,7 +76,7 @@
 </div>
 
 <style>
-    #map { height: 500px; width: 100%; }
+    #map { height: 400px; width: 100%; }
     #info { margin-top: 10px; }
 
     /* Asegúrate de que el cuadro de búsqueda del geocoder esté expandido siempre */
@@ -93,20 +98,17 @@
     #map > div.leaflet-control-container > div.leaflet-top.leaflet-right > div {
         align-content: center;
     }
-
 </style>
 
 {% endblock %}
-{% block scripts %}
 
+{% block scripts %}
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
 <script>
-
     // Configuración del mapa
-
     const map = L.map('map').setView([-9.19, -75.0152], 6);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
@@ -115,64 +117,64 @@
     let marker;
     const geocoder = L.Control.Geocoder.nominatim();
 
-    // Función para actualizar el formulario
-    function actualizarFormulario({ ubigeo = '000000', direccion = 'Ubicación sin nombre' } = {}) {
-        document.getElementById('txt_ubigeo').value = ubigeo;
-        document.getElementById('txt_direccion').value = direccion;
-        
-        if (marker && direccion) {
-            marker.bindPopup(direccion).openPopup();
-        }
-    }
+    // Si estamos editando, centrar el mapa en la ubicación existente
+    {% if sucursal and sucursal.latitud and sucursal.longitud %}
+        const lat = parseFloat("{{ sucursal.latitud }}");
+        const lng = parseFloat("{{ sucursal.longitud }}");
+        map.setView([lat, lng], 16);
+        marker = L.marker([lat, lng]).addTo(map);
+        document.getElementById('lat').textContent = lat;
+        document.getElementById('lng').textContent = lng;
+    {% endif %}
 
-    // Manejador de clics en el mapa
     map.on('click', async function(e) {
         const lat = e.latlng.lat.toFixed(6);
         const lng = e.latlng.lng.toFixed(6);
         
-        // Actualizar coordenadas
         document.getElementById('lat').textContent = lat;
         document.getElementById('lng').textContent = lng;
-        
-        // Actualizar marcador
+
         if (!marker) {
             marker = L.marker(e.latlng).addTo(map);
         } else {
             marker.setLatLng(e.latlng);
         }
-        
+
         try {
-            // Mostrar carga
             toastr.info("Obteniendo información de la ubicación...", "", { timeOut: 1000 });
-            
-            // Consultar Nominatim directamente (sin pasar por tu backend)
+
             const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=geojson&lat=${lat}&lon=${lng}`, {
                 headers: { 'User-Agent': 'Mozilla/5.0' }
             });
-            
+
             if (!response.ok) throw new Error('Error en la consulta a Nominatim');
-            
+
             const data = await response.json();
-            const address = data.address || {};
-            
-            // Extraer datos de ubicación
+            const props = data.features[0].properties;
+            const address = props.address || {};
+
+            // Variables locales
             const departamento = address.state || '';
-            const provincia = address.region || '';
+            const provincia = address.region || address.suburb || '';
             const distrito = address.village || address.town || address.city || '';
-            const direccion = data.display_name || 'Dirección no disponible';
-            
-            
-            // Actualizar formulario
-            actualizarFormulario({
-                ubigeo: ubigeoData.ubigeo || '000000',
-                direccion: direccion
-            });
-            
+
+            const direccion = props.display_name || 'Dirección no disponible';
+
+            // Asignar a campos visibles
+            document.getElementById("txt_direccion").value = direccion;
+            document.getElementById("txt_ubicacion").value = `${departamento} - ${provincia} - ${distrito}`;
+
+            // Asignar a los inputs ocultos
+            document.getElementById("txt_departamento").value = departamento;
+            document.getElementById("txt_provincia").value = provincia;
+            document.getElementById("txt_distrito").value = distrito;
+
             toastr.success("Ubicación identificada correctamente");
-            
+
         } catch (error) {
-            toastr.error("Error al procesar la ubicación" + error.message);
-            actualizarFormulario();
+            toastr.error("Error al procesar la ubicación: " + error.message);
+            document.getElementById("txt_direccion").value = '';
+            document.getElementById("txt_ubicacion").value = '';
         }
     });
 
@@ -196,25 +198,39 @@
         document.getElementById('lat').textContent = latlng.lat.toFixed(6);
         document.getElementById('lng').textContent = latlng.lng.toFixed(6);
         
+        // Obtener información de la ubicación buscada
         try {
-            // Extraer datos del resultado de búsqueda
-            const direccion = e.geocode.name;
-            const address = e.geocode.properties.address;
-            
+            toastr.info("Obteniendo información de la ubicación...", "", { timeOut: 1000 });
+
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=geojson&lat=${latlng.lat}&lon=${latlng.lng}`, {
+                headers: { 'User-Agent': 'Mozilla/5.0' }
+            });
+
+            if (!response.ok) throw new Error('Error en la consulta a Nominatim');
+
+            const data = await response.json();
+            const props = data.features[0].properties;
+            const address = props.address || {};
+
             const departamento = address.state || '';
-            const provincia = address.region || '';
+            const provincia = address.region || address.suburb || '';
             const distrito = address.village || address.town || address.city || '';
 
-            
-            actualizarFormulario({
-                ubigeo: ubigeoData.ubigeo || '000000',
-                direccion: direccion
-            });
-            
+            const direccion = props.display_name || e.geocode.name || 'Dirección no disponible';
+
+            // Asignar a campos visibles
+            document.getElementById("txt_direccion").value = direccion;
+            document.getElementById("txt_ubicacion").value = `${departamento} - ${provincia} - ${distrito}`;
+
+            // Asignar a los inputs ocultos
+            document.getElementById("txt_departamento").value = departamento;
+            document.getElementById("txt_provincia").value = provincia;
+            document.getElementById("txt_distrito").value = distrito;
+
+            toastr.success("Ubicación identificada correctamente");
+
         } catch (error) {
-            console.error("Error:", error);
-            toastr.error("Error al procesar la búsqueda");
-            actualizarFormulario();
+            toastr.error("Error al procesar la ubicación: " + error.message);
         }
     }).addTo(map);
 
@@ -227,26 +243,31 @@
         }
     }, 300);
 
-    // Mostrar las sedes existentes
-
-
     $(document).ready(function () {
         $("#btn_Registrar").click(function () {
             let nombre = $("#txt_nombre").val().trim();
             let direccion = $("#txt_direccion").val().trim();
-            let ubigeo = $("#txt_ubigeo").val().trim();
             let latitud = $("#lat").text().trim();
             let longitud = $("#lng").text().trim();
+            let departamento = $("#txt_departamento").val().trim();
+            let provincia = $("#txt_provincia").val().trim();
+            let distrito = $("#txt_distrito").val().trim();
             let estado = $('#cbx_Estado').val();
 
-            if (!nombre || !estado) {
-                toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+            // Validación de campos obligatorios
+            if (!nombre) {
+                toastr.warning("El nombre de la sucursal es obligatorio", "MENSAJE DE SISTEMA");
+                return;
+            }
+            
+            if (latitud === '-' || longitud === '-') {
+                toastr.warning("Debe seleccionar una ubicación en el mapa", "MENSAJE DE SISTEMA");
                 return;
             }
 
             Swal.fire({
                 title: "¿Estás seguro?",
-                text: "Esta acción registrará una surcursal. ¿Deseas continuar?",
+                text: "Esta acción registrará una sucursal. ¿Deseas continuar?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
@@ -256,14 +277,14 @@
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
-
                     let formData = new FormData();
-                    formData.append("nombre", nombre);
-                    formData.append("direccion", direccion);
-                    formData.append("ubigeo", ubigeo);
-                    formData.append("latitud", latitud);
-                    formData.append("longitud", longitud);
-                    formData.append("estado", estado);
+                    formData.append("txt_nombre", nombre);
+                    formData.append("txt_direccion", direccion);
+                    formData.append("txt_latitud", latitud);
+                    formData.append("txt_longitud", longitud);
+                    formData.append("txt_departamento", departamento);
+                    formData.append("txt_provincia", provincia);
+                    formData.append("txt_distrito", distrito);
 
                     $.ajax({
                         url: "/trabajadores/viajes/RegistrarSucursal",
@@ -273,9 +294,8 @@
                         data: formData,
                         success: function (response) {
                             if (response.Status === "success") {
-                                if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                if (response.Msj2) {
                                     toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                                    return;
                                 } else {
                                     toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                                     setTimeout(() => {
@@ -301,9 +321,11 @@
 
             let nombre = $("#txt_nombre").val().trim();
             let direccion = $("#txt_direccion").val().trim();
-            let ubigeo = $("#txt_ubigeo").val().trim();
             let latitud = $("#lat").text().trim();
             let longitud = $("#lng").text().trim();
+            let departamento = $("#txt_departamento").val().trim();
+            let provincia = $("#txt_provincia").val().trim();
+            let distrito = $("#txt_distrito").val().trim();
             let estado = $('#cbx_Estado').val();
 
             if (!nombre || !estado) {
@@ -323,13 +345,14 @@
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
-
                     let formData = new FormData();
-                    formData.append("nombre", nombre);
-                    formData.append("direccion", direccion);
-                    formData.append("ubigeo", ubigeo);
-                    formData.append("latitud", latitud);
-                    formData.append("longitud", longitud);
+                    formData.append("txt_nombre", nombre);
+                    formData.append("txt_direccion", direccion);
+                    formData.append("txt_latitud", latitud);
+                    formData.append("txt_longitud", longitud);
+                    formData.append("txt_departamento", departamento);
+                    formData.append("txt_provincia", provincia);
+                    formData.append("txt_distrito", distrito);
                     formData.append("estado", estado);
 
                     $.ajax({

@@ -180,7 +180,7 @@ CREATE TABLE horario (
 -- Crear tabla sucursal
 CREATE TABLE sucursal (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    ubigeo CHAR(6) NOT NULL REFERENCES ubigeo(ubigeo),
+    departamento VARCHAR(50) NOT NULL,
     nombre VARCHAR(50) NOT NULL,
     direccion VARCHAR(255) NOT NULL,
     latitud DECIMAL(8,6) NOT NULL,
@@ -2333,16 +2333,17 @@ DELIMITER ;
 
 DELIMITER $$
 CREATE PROCEDURE SP_REGISTRAR_SUCURSAL(
-    IN P_UBIGEO CHAR(6),
+    IN P_DEPARTAMENTO VARCHAR(50),
     IN P_NOMBRE VARCHAR(50),
     IN P_DIRECCION VARCHAR(255),
     IN P_LATITUD DECIMAL(8,6),
     IN P_LONGITUD DECIMAL(9,6),
-    IN P_USUARIO VARCHAR(100)
+    IN P_USUARIO VARCHAR(100),
 )
 BEGIN
-    DECLARE cSucursal INT;
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    DECLARE cSucursal INT DEFAULT 0;
+    DECLARE cNombre INT DEFAULT 0;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
     END;
@@ -2350,15 +2351,21 @@ BEGIN
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
-    SELECT COUNT(*) INTO cSucursal 
-    FROM sucursal 
-    WHERE nombre = P_NOMBRE AND estado_registro = 1;
+    select COUNT(*) INTO cSucursal
+    from sucursal 
+    where nombre = P_NOMBRE and estado_registro = 1;
+
+    select COUNT(*) INTO cNombre
+    from sucursal 
+    where departamento = P_DEPARTAMENTO and nombre = P_NOMBRE AND id != P_ID and estado_registro = 1;
 
     IF cSucursal > 0 THEN
-        SET @MSJ2 = 'Ya existe una sucursal con ese nombre';
+        SET @MSJ2 = 'La sucursal que intenta registrar ya está registrada';
+    ELSEIF cNombre > 0 THEN
+        SET @MSJ2 = 'El nombre de la sucursal ya está en uso';
     ELSE
-        INSERT INTO sucursal (ubigeo, nombre, direccion, latitud, longitud, usuario) 
-        VALUES (P_UBIGEO, P_NOMBRE, P_DIRECCION, P_LATITUD, P_LONGITUD, P_USUARIO);
+        INSERT INTO sucursal (departamento, nombre, direccion, latitud, longitud, usuario) 
+        VALUES (P_DEPARTAMENTO, P_NOMBRE, P_DIRECCION, P_LATITUD, P_LONGITUD, P_USUARIO);
 
         SET @MSJ = 'Se registró correctamente la sucursal';
     END IF;
@@ -2368,7 +2375,7 @@ DELIMITER ;
 DELIMITER $$
 CREATE PROCEDURE SP_EDITAR_SUCURSAL(
     IN P_ID INT,
-    IN P_UBIGEO CHAR(6),
+    IN P_DEPARTAMENTO VARCHAR(50),
     IN P_NOMBRE VARCHAR(50),
     IN P_DIRECCION VARCHAR(255),
     IN P_LATITUD DECIMAL(8,6),
@@ -2400,7 +2407,7 @@ BEGIN
         SET @MSJ2 = 'El nombre de la sucursal ya está en uso';
     ELSE
         UPDATE sucursal 
-        SET ubigeo = P_UBIGEO,
+        SET departamento = P_DEPARTAMENTO,
             nombre = P_NOMBRE,
             direccion = P_DIRECCION,
             latitud = P_LATITUD,
