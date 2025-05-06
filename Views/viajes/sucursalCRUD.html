@@ -44,7 +44,8 @@
                     <div class="mb-3">
                         <label for="cbx_Estado">Estado</label>
                         <div class="input-group">
-                            <select id="cbx_Estado" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
+                            <select id="cbx_Estado" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{% endif
+                                %}>
                                 <option disabled>--SELECCIONAR--</option>
                                 <option {% if sucursal.estado==1 %}selected{% endif %} value="1">Vigente</option>
                                 <option {% if sucursal.estado==0 %}selected{% endif %} value="0">No vigente</option>
@@ -61,7 +62,8 @@
                     </div>
 
                     <div class="text-center">
-                        <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de sucursales</button>
+                        <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de
+                            sucursales</button>
                         <button id="{{ btnId }}" type="button" class="btn btn-primary">Aceptar</button>
                     </div>
 
@@ -76,8 +78,14 @@
 </div>
 
 <style>
-    #map { height: 400px; width: 100%; }
-    #info { margin-top: 10px; }
+    #map {
+        height: 400px;
+        width: 100%;
+    }
+
+    #info {
+        margin-top: 10px;
+    }
 
     /* Asegúrate de que el cuadro de búsqueda del geocoder esté expandido siempre */
     .leaflet-control-geocoder {
@@ -92,10 +100,11 @@
     }
 
     .leaflet-control-geocoder .leaflet-control-geocoder-icon {
-        display: none !important; /* Oculta el ícono de la lupa */
+        display: none !important;
+        /* Oculta el ícono de la lupa */
     }
 
-    #map > div.leaflet-control-container > div.leaflet-top.leaflet-right > div {
+    #map>div.leaflet-control-container>div.leaflet-top.leaflet-right>div {
         align-content: center;
     }
 </style>
@@ -119,18 +128,18 @@
 
     // Si estamos editando, centrar el mapa en la ubicación existente
     {% if sucursal and sucursal.latitud and sucursal.longitud %}
-        const lat = parseFloat("{{ sucursal.latitud }}");
-        const lng = parseFloat("{{ sucursal.longitud }}");
-        map.setView([lat, lng], 16);
-        marker = L.marker([lat, lng]).addTo(map);
-        document.getElementById('lat').textContent = lat;
-        document.getElementById('lng').textContent = lng;
+    const lat = parseFloat("{{ sucursal.latitud }}");
+    const lng = parseFloat("{{ sucursal.longitud }}");
+    map.setView([lat, lng], 16);
+    marker = L.marker([lat, lng]).addTo(map);
+    document.getElementById('lat').textContent = lat;
+    document.getElementById('lng').textContent = lng;
     {% endif %}
 
-    map.on('click', async function(e) {
+    map.on('click', async function (e) {
         const lat = e.latlng.lat.toFixed(6);
         const lng = e.latlng.lng.toFixed(6);
-        
+
         document.getElementById('lat').textContent = lat;
         document.getElementById('lng').textContent = lng;
 
@@ -185,19 +194,19 @@
         geocoder: L.Control.Geocoder.nominatim({
             geocodingQueryParams: { countrycodes: 'pe' }
         })
-    }).on('markgeocode', async function(e) {
+    }).on('markgeocode', async function (e) {
         const latlng = e.geocode.center;
         map.setView(latlng, 16);
-        
+
         if (!marker) {
             marker = L.marker(latlng).addTo(map);
         } else {
             marker.setLatLng(latlng);
         }
-        
+
         document.getElementById('lat').textContent = latlng.lat.toFixed(6);
         document.getElementById('lng').textContent = latlng.lng.toFixed(6);
-        
+
         // Obtener información de la ubicación buscada
         try {
             toastr.info("Obteniendo información de la ubicación...", "", { timeOut: 1000 });
@@ -259,7 +268,7 @@
                 toastr.warning("El nombre de la sucursal es obligatorio", "MENSAJE DE SISTEMA");
                 return;
             }
-            
+
             if (latitud === '-' || longitud === '-') {
                 toastr.warning("Debe seleccionar una ubicación en el mapa", "MENSAJE DE SISTEMA");
                 return;
@@ -294,8 +303,9 @@
                         data: formData,
                         success: function (response) {
                             if (response.Status === "success") {
-                                if (response.Msj2) {
+                                if (response.Msj2 !== '' && response.Msj2 !== null) {
                                     toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                    return;
                                 } else {
                                     toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                                     setTimeout(() => {
@@ -363,10 +373,15 @@
                         data: formData,
                         success: function (response) {
                             if (response.Status === "success") {
-                                toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                                setTimeout(() => {
-                                    window.location.href = "/trabajadores/viajes/GestionarSucursal";
-                                }, 500);
+                                if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                    return;
+                                } else {
+                                    toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                                    setTimeout(() => {
+                                        window.location.href = "/trabajadores/viajes/GestionarSucursal";
+                                    }, 500);
+                                }
                             } else {
                                 toastr.error(response.Msj, "MENSAJE DE SISTEMA");
                             }
