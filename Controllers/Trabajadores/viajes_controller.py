@@ -2,6 +2,7 @@ import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort
 from Models.nivel import Nivel
 from Models.tipoVehiculo import TipoVehiculo
+from Models.vehiculo import Vehiculo
 from Models.sucursal import Sucursal
 from Models.horario import Horario
 from Models.ubigeo import Ubigeo
@@ -65,6 +66,10 @@ def Menu_Horarios():
 @viajes_bp.route('/GestionarTipoVehiculo')
 def Menu_TipoVehiculo():
     return render_template('viajes/tipoVehiculo.html', active_page="tipoVehiculo", active_menu='mViajes')
+
+@viajes_bp.route('/GestionarVehiculo')
+def Menu_Vehiculo():
+    return render_template('viajes/vehiculo.html', active_page="tipoVehiculo", active_menu='mViajes')
 
 @viajes_bp.route('/GestionarSucursal')
 def Menu_Sucursal():
@@ -341,6 +346,124 @@ def eliminarTipoVehiculo(idTipoVehiculo):
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
 # END REGION TIPO VEHICULO
+
+# REGION VEHICULO
+@viajes_bp.route("/GetData_Vehiculo")
+def get_vehiculos():
+    try:
+        vehiculos = Vehiculo.obtenerVehiculos()
+        return jsonify({'data': vehiculos, 'Status': 'success', 'Msj': 'Listado de vehículos retornado exitosamente'})
+    except Exception as e:
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar los vehículos: {repr(e)}'})
+
+@viajes_bp.route('/registrarVehiculo', methods=["GET", "POST"])
+def nuevoVehiculo():
+    if request.method == "GET":
+        return render_template(
+            "viajes/vehiculoCRUD.html",
+            tittle="Nuevo vehículo",
+            vehiculo={},
+            btnId="btn_Registrar",
+            active_page="vehiculo",
+            active_menu='mViajes'
+        )
+    else:
+        try:
+            placa = request.form['txt_placa']
+            anio = int(request.form['txt_anio'])
+            color = request.form['txt_color']
+            idTipoVehiculo = int(request.form['txt_idTipoVehiculo'])
+
+            mensajes = Vehiculo.insertarVehiculo(placa, anio, color, idTipoVehiculo)
+            msj1 = mensajes.get('MSJ') or mensajes.get('@MSJ')
+            msj2 = mensajes.get('MSJ2') or mensajes.get('@MSJ2')
+
+            if msj1:
+                return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+            elif msj2:
+                return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+            else:
+                return jsonify({"Status": "error", 'Msj': 'Error desconocido al insertar vehículo'})
+        except Exception as e:
+            return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@viajes_bp.route("/verVehiculo/<string:idVehiculo>")
+def verVehiculo(idVehiculo):
+    vehiculo = Vehiculo.obtener_unVehiculo(idVehiculo)
+    return render_template(
+        "viajes/vehiculoCRUD.html",
+        tittle="Ver vehículo",
+        vehiculo=vehiculo,
+        btnId="btn_Regresar",
+        active_page="vehiculo",
+        active_menu='mViajes'
+    )
+
+@viajes_bp.route("/editarVehiculo/<int:idVehiculo>", methods=["GET", "POST"])
+def editarVehiculo(idVehiculo):
+    if request.method == "GET":
+        vehiculo = Vehiculo.obtener_unVehiculo(idVehiculo)
+        return render_template(
+            "viajes/vehiculoCRUD.html",
+            tittle="Editar vehículo",
+            vehiculo=vehiculo,
+            btnId="btn_Actualizar",
+            active_page="vehiculo",
+            active_menu='mViajes'
+        )
+    else:
+        try:
+            placa = request.form['txt_placa']
+            anio = int(request.form['txt_anio'])
+            color = request.form['txt_color']
+            idTipoVehiculo = int(request.form['txt_idTipoVehiculo'])
+            estado = int(request.form['txt_estado'])
+
+            mensajes = Vehiculo.actualizarVehiculo(idVehiculo, placa, anio, color, idTipoVehiculo, estado)
+            msj1 = mensajes.get('MSJ') or mensajes.get('@MSJ')
+            msj2 = mensajes.get('MSJ2') or mensajes.get('@MSJ2')
+
+            if msj1:
+                return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+            elif msj2:
+                return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+            else:
+                return jsonify({"Status": "error", 'Msj': 'Error desconocido al actualizar vehículo'})
+        except Exception as e:
+            return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@viajes_bp.route("/DarBajaVehiculo/<int:idVehiculo>", methods=["POST"])
+def darBajaVehiculo(idVehiculo):
+    try:
+        mensajes = Vehiculo.darBajaVehiculo(idVehiculo)
+        msj1 = mensajes.get('MSJ') or mensajes.get('@MSJ')
+        msj2 = mensajes.get('MSJ2') or mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja vehículo'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@viajes_bp.route("/eliminarVehiculo/<int:idVehiculo>", methods=["POST"])
+def eliminarVehiculo(idVehiculo):
+    try:
+        mensajes = Vehiculo.eliminarVehiculo(idVehiculo)
+        msj1 = mensajes.get('MSJ') or mensajes.get('@MSJ')
+        msj2 = mensajes.get('MSJ2') or mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al eliminar vehículo'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+# END REGION
 
 # REGIÓN HORARIO #
 

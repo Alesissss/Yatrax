@@ -1,0 +1,149 @@
+{% extends "index.html" %}
+
+{% block title %}YATRAX - {{ tittle }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="text-center mb-0">{{ tittle }}</ h4>
+                </div>
+                <div class="card-body" autocomplete="off">
+                    <!-- Formulario para registrar el tipo de vehículo -->
+                    <!-- /trabajadores/viajes/registrarvehiculo -->
+                    <form action=""
+                    method="POST" id="formvehiculo">
+
+                        <div class="mb-3">
+                            <label for="txt_placa">Placa</label>
+                            <input type="text" name="txt_placa" id="txt_placa" class="form-control" placeholder="Ingrese numero de placa" value="{{ vehiculo.placa }}" {% if btnId == "btn_Regresar" %} disabled {% endif %}>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="txt_anio">Año</label>
+                            <input type="text" name="txt_anio" id="txt_anio" class="form-control" placeholder="Ingrese el año del vehículo" value="{{ vehiculo.anio }}" {% if btnId == "btn_Regresar" %} disabled {% endif %}>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="txt_color">Color</label>
+                            <input type="text" name="txt_color" id="txt_color" class="form-control" placeholder="Ingrese el color del vehículo" value="{{ vehiculo.color }}" {% if btnId == "btn_Regresar" %} disabled {% endif %}>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="txt_idTipoVehiculo">Tipo Vehículo</label>
+                            <div class="input-group">
+                                <select id="cbx_vehiculo" name="txt_idTipoVehiculo" class="form-control" {% if btnId=='btn_Regresar'
+                                    %}disabled{% endif %}>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="txt_estado">Estado</label>
+                            <select id="txt_estado" name="txt_estado" class="form-control" {% if btnId == "btn_Regresar" %} disabled {% endif %}>
+                                <option value="1" {% if vehiculo.estado == 1 %}selected{% endif %}>Activo</option>
+                                <option value="0" {% if vehiculo.estado == 0 %}selected{% endif %}>Inactivo</option>
+                            </select>
+                        </div>
+
+                        <div class="text-center">
+                            <button id="btn_Listado" type="button" class="btn btn-danger">Volver al listado de
+                                tipo de vehiculo</button>
+                            <button id="{{ btnId }}" type="submit" class="btn btn-primary">Aceptar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function fct_GetMarcas() {
+        $.getJSON('/trabajadores/viajes/GetData_TipoVehiculo', function (response) {
+            if (response.Status === 'success') {
+                let items = '<option disabled>--SELECCIONAR--</option>';
+
+                $.each(response.data, function (index, item) {
+                    if (item.id === Number("{{ vehiculo.idTipoVehiculo }}")) {
+                        items += `<option selected value="${item.id}">${item.nombre}</option>`;
+                    } else {
+                        items += `<option value="${item.id}">${item.nombre}</option>`;
+                    }
+                });
+
+                $('#cbx_vehiculo').html(items);
+            } else {
+                console.error('Error al obtener los tipos de usuario:', response.Msj);
+            }
+        });
+    }
+    // Aquí puedes agregar cualquier script que necesites
+    $(document).ready(function () {
+        fct_GetMarcas()
+
+        let idvehiculo = "{{ vehiculo.idVehiculo }}"
+
+        $("#btn_Listado").click(()=>{
+            window.location.href="/trabajadores/viajes/GestionarVehiculo"
+        })
+
+        $("#btn_Regresar").click(()=>{
+            window.location.href="/trabajadores/viajes/Gestionarvehiculo"
+        })
+
+        $('#formvehiculo').on('submit', function(e) {
+            e.preventDefault();
+
+            $("#btn_Actualizar").click(()=>{
+                $.ajax({
+                    url: `/trabajadores/viajes/editarVehiculo/${idvehiculo}`,
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        // Mostrar toastr de éxito
+                        toastr.success(response.Msj, 'Éxito');
+                        
+                        // Redirigir después de 2 segundos (opcional)
+                        setTimeout(function() {
+                            window.location.href = "/trabajadores/viajes/GestionarVehiculo";
+                        }, 1000);
+                    },
+                    error: function(xhr) {
+                        // Mostrar toastr de error
+                        let errorMsg = xhr.responseJSON ? xhr.responseJSON.Msj : 'Error desconocido';
+                        toastr.error(errorMsg, 'Error');
+                    }
+                });
+            })
+
+            $("#btn_Registrar").click(()=>{
+                $.ajax({
+                    url: '/trabajadores/viajes/registrarVehiculo',
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        // Mostrar toastr de éxito
+                        toastr.success(response.Msj, 'Éxito');
+                        
+                        // Redirigir después de 2 segundos (opcional)
+                        setTimeout(function() {
+                            window.location.href = "/trabajadores/viajes/GestionarVehiculo";
+                        }, 1000);
+                    },
+                    error: function(xhr) {
+                        // Mostrar toastr de error
+                        let errorMsg = xhr.responseJSON ? xhr.responseJSON.Msj : 'Error desconocido';
+                        toastr.error(errorMsg, 'Error');
+                    }
+                });
+            })
+            
+        });
+
+    });
+</script>
+{% endblock %}

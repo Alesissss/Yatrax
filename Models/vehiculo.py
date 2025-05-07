@@ -16,13 +16,14 @@ class Vehiculo:
             conexion = bd.Conexion()
             listado = conexion.obtener("""
                 SELECT
-                    idVehiculo,
-                    placa,
-                    modelo,
-                    anio,
-                    color,
-                    idTipoVehiculo
-                FROM vehiculo;
+                    v.idVehiculo as id,
+                    v.placa as placa,
+                    v.anio as anio,
+                    v.color as color,
+                    tpve.nombre as tipoVehiculo,
+                    m.nombre as marca,
+                    v.estado as estado
+                FROM vehiculo v left join tipo_vehiculo tpve on v.idTipoVehiculo=tpve.idTipoVehiculo inner join marca m on tpve.idMarca=m.id;
             """)
             return listado
         except Exception as e:
@@ -33,21 +34,12 @@ class Vehiculo:
                 conexion.cerrar()
 
     @classmethod
-    def obtener_unVehiculo(cls, numplaca):
+    def obtener_unVehiculo(cls, idVehiculo):
         try:
             conexion = bd.Conexion()
-            vehiculo_encontrado = conexion.obtener("""
-                SELECT
-                    idVehiculo,
-                    placa,
-                    modelo,
-                    anio,
-                    color,
-                    idTipoVehiculo
-                FROM vehiculo
-                WHERE placa = %s;
-            """, (numplaca,))
-            return vehiculo_encontrado[0] if vehiculo_encontrado else None
+            listado = conexion.obtener("""SELECT * FROM vehiculo WHERE idVehiculo = %s;""", (idVehiculo,))
+
+            return listado[0] if listado else None
         except Exception as e:
             print(f"Error en obtener_unVehiculo: {str(e)}")
             raise
@@ -56,13 +48,13 @@ class Vehiculo:
                 conexion.cerrar()
 
     @classmethod
-    def insertarVehiculo(cls, placa, modelo, anio, color, idTipoVehiculo):
+    def insertarVehiculo(cls, placa, anio, color, idTipoVehiculo):
         try:
             conexion = bd.Conexion()
             # Llamada al SP que devuelve @MSJ y @MSJ2
             conexion.ejecutar(
-                "CALL SP_INSERTAR_VEHICULO(%s, %s, %s, %s, %s, @MSJ, @MSJ2);",
-                (placa, modelo, anio, color, idTipoVehiculo)
+                "CALL SP_INSERTAR_VEHICULO(%s, %s, %s, %s);",
+                (placa, anio, color, idTipoVehiculo)
             )
             resultado = conexion.obtener("SELECT @MSJ AS MSJ, @MSJ2 AS MSJ2;")
             return resultado[0]
@@ -74,13 +66,13 @@ class Vehiculo:
                 conexion.cerrar()
 
     @classmethod
-    def actualizarVehiculo(cls, idVehiculo, placa, modelo, anio, color, idTipoVehiculo, estado):
+    def actualizarVehiculo(cls, idVehiculo, placa, anio, color, idTipoVehiculo, estado):
         try:
             conexion = bd.Conexion()
             # Ahora pasamos también 'estado' al SP
             conexion.ejecutar(
-                "CALL SP_ACTUALIZAR_VEHICULO(%s, %s, %s, %s, %s, %s, %s, @MSJ, @MSJ2);",
-                (idVehiculo, placa, modelo, anio, color, idTipoVehiculo, estado)
+                "CALL SP_ACTUALIZAR_VEHICULO(%s, %s, %s, %s, %s, %s);",
+                (idVehiculo, placa, anio, color, idTipoVehiculo, estado)
             )
             resultado = conexion.obtener("SELECT @MSJ AS MSJ, @MSJ2 AS MSJ2;")
             return resultado[0]
@@ -96,7 +88,7 @@ class Vehiculo:
         try:
             conexion = bd.Conexion()
             conexion.ejecutar(
-                "CALL SP_BAJA_VEHICULO(%s, @MSJ, @MSJ2);",
+                "CALL SP_BAJA_VEHICULO(%s);",
                 (idVehiculo,)
             )
             resultado = conexion.obtener("SELECT @MSJ AS MSJ, @MSJ2 AS MSJ2;")
@@ -113,7 +105,7 @@ class Vehiculo:
         try:
             conexion = bd.Conexion()
             conexion.ejecutar(
-                "CALL SP_ELIMINAR_VEHICULO(%s, @MSJ, @MSJ2);",
+                "CALL SP_ELIMINAR_VEHICULO(%s);",
                 (idVehiculo,)
             )
             resultado = conexion.obtener("SELECT @MSJ AS MSJ, @MSJ2 AS MSJ2;")

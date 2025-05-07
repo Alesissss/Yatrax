@@ -271,7 +271,6 @@ CREATE TABLE tipo_vehiculo (
 CREATE TABLE vehiculo (
     idVehiculo INT AUTO_INCREMENT PRIMARY KEY,
     placa VARCHAR(10) NOT NULL UNIQUE,
-    modelo VARCHAR(50) NOT NULL,
     anio INT,
     color VARCHAR(30),
     estado TINYINT NOT NULL,
@@ -3209,7 +3208,6 @@ DELIMITER $$
 -- 1) Insertar un nuevo vehículo (estado = 1)
 CREATE PROCEDURE SP_INSERTAR_VEHICULO(
     IN p_placa VARCHAR(10),
-    IN p_modelo VARCHAR(50),
     IN p_anio INT,
     IN p_color VARCHAR(30),
     IN p_idTipoVehiculo INT
@@ -3225,8 +3223,8 @@ BEGIN
     SET @MSJ  = NULL;
     SET @MSJ2 = NULL;
 
-    INSERT INTO vehiculo (placa, modelo, anio, color, estado, idTipoVehiculo)
-    VALUES (p_placa, p_modelo, p_anio, p_color, 1, p_idTipoVehiculo);
+    INSERT INTO vehiculo (placa, anio, color, estado, idTipoVehiculo)
+    VALUES (p_placa, p_anio, p_color, 1, p_idTipoVehiculo);
 
     SET @MSJ  = 'Vehículo insertado correctamente';
 END$$
@@ -3235,7 +3233,6 @@ END$$
 CREATE PROCEDURE SP_ACTUALIZAR_VEHICULO(
     IN p_idVehiculo      INT,
     IN p_placa           VARCHAR(10),
-    IN p_modelo          VARCHAR(50),
     IN p_anio            INT,
     IN p_color           VARCHAR(30),
     IN p_idTipoVehiculo  INT,
@@ -3254,7 +3251,6 @@ BEGIN
     UPDATE vehiculo
     SET
         placa          = p_placa,
-        modelo         = p_modelo,
         anio           = p_anio,
         color          = p_color,
         idTipoVehiculo = p_idTipoVehiculo,
