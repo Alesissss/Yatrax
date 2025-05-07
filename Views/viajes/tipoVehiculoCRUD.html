@@ -23,9 +23,12 @@
 
                         <div class="mb-3">
                             <label for="txt_marca">idMarca</label>
-                            <input type="number" name="txt_marca" id="txt_marca" class="form-control" placeholder="Id de la marca" value="{{ tipoVehiculo.idMarca }}" {% if btnId == "btn_Regresar" %} disabled {% endif %}>
+                            <div class="input-group">
+                                <select id="cbx_Marca" name="txt_marca" class="form-control" {% if btnId=='btn_Regresar'
+                                    %}disabled{% endif %}>
+                                </select>
+                            </div>
                         </div>
-
                         <div class="mb-3">
                             <label for="txt_Estado">Estado</label>
                             <select id="txt_Estado" name="txt_estado" class="form-control" {% if btnId == "btn_Regresar" %} disabled {% endif %}>
@@ -49,8 +52,29 @@
 
 {% block scripts %}
 <script>
+    function fct_GetMarcas() {
+        $.getJSON('/trabajadores/viajes/GetData_Marcas', function (response) {
+            if (response.Status === 'success') {
+                let items = '<option disabled>--SELECCIONAR--</option>';
+
+                $.each(response.data, function (index, item) {
+                    if (item.id === Number("{{ tipoVehiculo.idMarca }}")) {
+                        items += `<option selected value="${item.id}">${item.nombre}</option>`;
+                    } else {
+                        items += `<option value="${item.id}">${item.nombre}</option>`;
+                    }
+                });
+
+                $('#cbx_Marca').html(items);
+            } else {
+                console.error('Error al obtener los tipos de usuario:', response.Msj);
+            }
+        });
+    }
     // Aquí puedes agregar cualquier script que necesites
     $(document).ready(function () {
+
+        fct_GetMarcas()
 
         let idTipoVehiculo = "{{ tipoVehiculo.id }}"
 
