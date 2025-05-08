@@ -195,6 +195,13 @@
                                         <p>Gestionar tipos de servicio</p>
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a href="{{ url_for('ventas.Menu_Servicio') }}"
+                                        class="nav-link {% if active_page == 'tipoServicio' %}active{% endif %}">
+                                        <i class="bi bi-telephone nav-icon"></i>
+                                        <p>Gestionar servicio</p>
+                                    </a>
+                                </li>
                                 {% endif %}
                                 {% if 33 in session['menus'] %}
                                 <li class="nav-item">

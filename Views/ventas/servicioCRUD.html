@@ -1,0 +1,144 @@
+{% extends "index.html" %}
+
+{% block title %}YATRAX - {{ tittle }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="text-center mb-0">{{ tittle }}</ h4>
+                </div>
+                <div class="card-body" autocomplete="off">
+                    <!-- Formulario para registrar el tipo de vehículo -->
+                    <!-- /trabajadores/ventas/registrarservicio -->
+                    <form action=""
+                    method="POST" id="formservicio">
+
+                        <div class="mb-3">
+                            <label for="txt_nombre">Nombre del servicio</label>
+                            <input type="text" name="txt_nombre" id="txt_Nombre" class="form-control" placeholder="Nombre del servicio" value="{{ servicio.nombre }}" {% if btnId == "btn_Regresar" %} disabled {% endif %}>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="txt_descripcion">Descripción del servicio</label>
+                            <input type="text" name="txt_descripcion" id="txt_Nombre" class="form-control" placeholder="Descripción del servicio" value="{{ servicio.descripcion }}" {% if btnId == "btn_Regresar" %} disabled {% endif %}>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="txt_idTipoServicio">Tipo servicio</label>
+                            <div class="input-group">
+                                <select id="cbx_TipoServicio" name="txt_idTipoServicio" class="form-control" {% if btnId=='btn_Regresar'
+                                    %}disabled{% endif %}>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="txt_Estado">Estado</label>
+                            <select id="txt_Estado" name="txt_estado" class="form-control" {% if btnId == "btn_Regresar" %} disabled {% endif %}>
+                                <option value="1" {% if servicio.estado == 1 %}selected{% endif %}>Activo</option>
+                                <option value="0" {% if servicio.estado == 0 %}selected{% endif %}>Inactivo</option>
+                            </select>
+                        </div>
+
+                        <div class="text-center">
+                            <button id="btn_Listado" type="button" class="btn btn-danger">Volver al listado de
+                                tipo de vehiculo</button>
+                            <button id="{{ btnId }}" type="submit" class="btn btn-primary">Aceptar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function fct_GetTipoServicio() {
+        $.getJSON('/trabajadores/ventas/GetData_TipoServicio', function (response) {
+            if (response.Status === 'success') {
+                let items = '<option disabled>--SELECCIONAR--</option>';
+                
+                $.each(response.data, function (index, item) {
+                    if (item.id === Number("{{ servicio.idTipoServicio }}")) {
+                        items += `<option selected value="${item.id}">${item.TIPO}</option>`;
+                    } else {
+                        items += `<option value="${item.id}">${item.TIPO}</option>`;
+                    }
+                });
+
+                $('#cbx_TipoServicio').html(items);
+            } else {
+                console.error('Error al obtener los tipos de usuario:', response.Msj);
+            }
+        });
+    }
+    // Aquí puedes agregar cualquier script que necesites
+    $(document).ready(function () {
+        fct_GetTipoServicio()
+
+        let idservicio = "{{ servicio.idServicio }}"
+
+        $("#btn_Listado").click(()=>{
+            window.location.href="/trabajadores/ventas/GestionarServicio"
+        })
+
+        $("#btn_Regresar").click(()=>{
+            window.location.href="/trabajadores/ventas/GestionarServicio"
+        })
+
+        $('#formservicio').on('submit', function(e) {
+            e.preventDefault();
+
+            $("#btn_Actualizar").click(()=>{
+                $.ajax({
+                    url: `/trabajadores/ventas/editarServicio/${idservicio}`,
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        // Mostrar toastr de éxito
+                        toastr.success(response.Msj, 'Éxito');
+                        
+                        // Redirigir después de 2 segundos (opcional)
+                        setTimeout(function() {
+                            window.location.href = "/trabajadores/ventas/GestionarServicio";
+                        }, 1000);
+                    },
+                    error: function(xhr) {
+                        // Mostrar toastr de error
+                        let errorMsg = xhr.responseJSON ? xhr.responseJSON.Msj : 'Error desconocido';
+                        toastr.error(errorMsg, 'Error');
+                    }
+                });
+            })
+
+            $("#btn_Registrar").click(()=>{
+                $.ajax({
+                    url: '/trabajadores/ventas/registrarServicio',
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        // Mostrar toastr de éxito
+                        toastr.success(response.Msj, 'Éxito');
+                        
+                        // Redirigir después de 2 segundos (opcional)
+                        setTimeout(function() {
+                            window.location.href = "/trabajadores/ventas/GestionarServicio";
+                        }, 1000);
+                    },
+                    error: function(xhr) {
+                        // Mostrar toastr de error
+                        let errorMsg = xhr.responseJSON ? xhr.responseJSON.Msj : 'Error desconocido';
+                        toastr.error(errorMsg, 'Error');
+                    }
+                });
+            })
+            
+        });
+
+    });
+</script>
+{% endblock %}
