@@ -55,10 +55,27 @@
                                     </select>
                                 </div>
                             </div>
-                            <div id="info">
-                            
-                                <p><strong>Latitud:</strong> <span id="lat">-</span></p>
-                                <p><strong>Longitud:</strong> <span id="lng">-</span></p>
+                            <div id="info" class="mb-3">
+                                    <label for="lng">Longitud</label>
+                                    <div class="input-group">
+                                        <input id="lng" class="form-control" placeholder="Longitud" readonly
+                                            value="{{ sucursal.longitud }}">
+                                        <div class="input-group-append">
+                                            <div class="input-group-text"><i class="fa fa-map"></i></div>
+                                        </div>
+                                    </div>
+  
+                                    <label for="lat">Latitud</label>
+                                    <div class="input-group">
+                                        <input id="lat" class="form-control" placeholder="Latitud" readonly
+                                            value="{{ sucursal.latitud }}">
+                                        <div class="input-group-append">
+                                            <div class="input-group-text"><i class="fa fa-map"></i></div>
+                                    </div>
+                            </div>
+
+                                <!-- <p><strong>Latitud:</strong> <span id="lat">-</span></p>
+                                <p><strong>Longitud:</strong> <span id="lng">-</span></p> -->
                             </div>        
                         </div>
                         <div class="col-md-6">
@@ -166,8 +183,8 @@
         const lat = e.latlng.lat.toFixed(6);
         const lng = e.latlng.lng.toFixed(6);
 
-        document.getElementById('lat').textContent = lat;
-        document.getElementById('lng').textContent = lng;
+        document.getElementById('lat').value = lat;
+        document.getElementById('lng').value = lng;
 
         if (!marker) {
             marker = L.marker(e.latlng).addTo(map);
@@ -318,6 +335,8 @@
                 }
             });
         });
+
+        
 
         $("#btn_Editar").click(function () {
             const id = Number("{{ sucursal.id }}");
