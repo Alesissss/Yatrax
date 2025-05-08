@@ -257,8 +257,9 @@ def nuevoTipoVehiculo():
         try:
             nombre= request.form["txt_nombre"]
             marca = request.form["txt_marca"]
+            cantidad = request.form["txt_cantidad"]
 
-            mensajes = TipoVehiculo.insertarTipoVehiculo(nombre,marca)
+            mensajes = TipoVehiculo.insertarTipoVehiculo(nombre,marca,cantidad)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
@@ -295,9 +296,10 @@ def editarTipoVehiculo(idTipoVehiculo):
         try:
             nombre= request.form["txt_nombre"]
             marca = request.form["txt_marca"]
+            cantidad = request.form["txt_cantidad"]
             estado = int(request.form["txt_estado"])
 
-            mensajes = TipoVehiculo.actualizarTipoVehiculo(idTipoVehiculo,nombre,marca,estado)
+            mensajes = TipoVehiculo.actualizarTipoVehiculo(idTipoVehiculo,nombre,marca,estado,cantidad)
 
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')

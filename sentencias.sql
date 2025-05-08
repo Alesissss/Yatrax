@@ -70,7 +70,6 @@ DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPOVEHICULO;
-DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPOVEHICULO;
 
 -- Eliminar procedimientos si existen
 DROP PROCEDURE IF EXISTS SP_INSERTAR_NIVEL;
@@ -299,6 +298,7 @@ CREATE TABLE tipo_vehiculo (
     nombre VARCHAR(50) NOT NULL,
     idMarca INT NULL,
     estado TINYINT NOT NULL,
+    cantidad INT NOT NULL,
     CONSTRAINT fk_tipo_vehiculo_marca FOREIGN KEY (idMarca) REFERENCES marca(id)
 );
 
@@ -2994,6 +2994,7 @@ DELIMITER $$
 CREATE PROCEDURE SP_INSERTAR_TIPOVEHICULO(
     IN p_nombre VARCHAR(50),
     IN p_idMarca INT,
+    IN p_cantidad INT,
     OUT MSJ VARCHAR(255)
 )
 BEGIN
@@ -3007,8 +3008,8 @@ BEGIN
     IF v_existeMarca = 0 THEN
         SET MSJ = 'La marca no existe';
     ELSE
-        INSERT INTO tipo_vehiculo (nombre, idMarca, estado)
-        VALUES (p_nombre, p_idMarca, 1);
+        INSERT INTO tipo_vehiculo (nombre, idMarca, estado, cantidad)
+        VALUES (p_nombre, p_idMarca, 1, p_cantidad);
         SET MSJ = 'Tipo de vehículo insertado correctamente';
     END IF;
 END$$
@@ -3019,6 +3020,7 @@ CREATE PROCEDURE SP_ACTUALIZAR_TIPOVEHICULO(
     IN p_nombre VARCHAR(50),
     IN p_idMarca INT,
     IN p_estado TINYINT,
+    IN p_cantidad INT,
     OUT MSJ VARCHAR(255),
     OUT MSJ2 VARCHAR(255)
 )
@@ -3047,7 +3049,8 @@ BEGIN
         UPDATE tipo_vehiculo
         SET nombre  = p_nombre,
             idMarca = p_idMarca,
-            estado  = p_estado
+            estado  = p_estado,
+            cantidad = p_cantidad
         WHERE idTipoVehiculo = p_id;
         COMMIT;
 

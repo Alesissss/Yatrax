@@ -29,6 +29,12 @@
                                 </select>
                             </div>
                         </div>
+
+                        <div class="mb-3">
+                            <label for="txt_cantidad">Cantidad</label>
+                            <input type="number" name="txt_cantidad" id="txt_cantidad" class="form-control" placeholder="Ingrese la cantidad de vehiuclos de ese tipo" value="{{ tipoVehiculo.cantidad }}" {% if btnId == "btn_Regresar" %} disabled {% endif %}>
+                        </div>
+
                         <div class="mb-3">
                             <label for="txt_Estado">Estado</label>
                             <select id="txt_Estado" name="txt_estado" class="form-control" {% if btnId == "btn_Regresar" %} disabled {% endif %}>
