@@ -1,6 +1,7 @@
 import hashlib
 from flask import Blueprint, request, jsonify, render_template, session, redirect, url_for, abort
 from Models.usuario import Usuario
+from Models.tipoUsuario import TipoUsuario
 from Models.conf_menus import Conf_Menus
 
 home_bp = Blueprint('home', __name__, url_prefix='/trabajadores/home')
@@ -58,7 +59,7 @@ def login():
 
             usuario = Usuario.autenticar(email, password_hash)
             if usuario:
-                menus = Usuario.obtener_menus(usuario['id'])
+                menus = TipoUsuario.obtener_menus(usuario['id_tipousuario'])
                 menu_ids = [menu['id'] for menu in menus]  # List comprehension para obtener solo los IDs
                 session['usuario'] = usuario
                 session['menus'] = menu_ids
@@ -110,3 +111,9 @@ def SetModulo():
         return jsonify({'Status': 'error', 'Msj': 'El módulo seleccionado no existe'})
     except Exception as e:
             return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+    
+@home_bp.route('/inicioUsuarios')
+def inicio_usuarios():
+    if 'usuario' in session:
+        return render_template('home/homeUsuarios.html', active_menu="mUsuarios")
+    return redirect(url_for('home.login'))

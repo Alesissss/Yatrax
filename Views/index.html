@@ -136,7 +136,7 @@
                                     <i class="right fas fa-angle-left"></i>
                                 </p>
                             </a>
-                            <ul class="nav nav-treeview" style="display: none;">
+                            <ul class="nav nav-treeview" style="display: block;">
                                 {% if 10 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('usuario.Menu_Usuarios') }}"
@@ -168,7 +168,7 @@
                                     <i class="right fas fa-angle-left"></i>
                                 </p>
                             </a>
-                            <ul class="nav nav-treeview" style="display: none;">
+                            <ul class="nav nav-treeview" style="display: block;">
                                 {% if 30 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('ventas.Menu_TipoComprobante') }}"
@@ -218,7 +218,7 @@
                                     <i class="right fas fa-angle-left"></i>
                                 </p>
                             </a>
-                            <ul class="nav nav-treeview" style="display: none;">
+                            <ul class="nav nav-treeview" style="display: block;">
                                 {% if 40 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('viajes.Menu_Horarios') }}"
@@ -293,7 +293,7 @@
                                     <i class="right fas fa-angle-left"></i>
                                 </p>
                             </a>
-                            <ul class="nav nav-treeview" style="display: none;">
+                            <ul class="nav nav-treeview" style="display: block;">
                                 {% if 50 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('personal.Menu_TipoPersonal') }}"
@@ -316,7 +316,7 @@
                                     <i class="right fas fa-angle-left"></i>
                                 </p>
                             </a>
-                            <ul class="nav nav-treeview" style="display: none;">
+                            <ul class="nav nav-treeview" style="display: block;">
                                 {% if 60 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('atencion.Menu_Atencion') }}"
@@ -338,7 +338,7 @@
                                 <p>CONFIGURACIÓN</p>
                                 <i class="right fas fa-angle-left"></i>
                             </a>
-                            <ul class="nav nav-treeview" style="display: none;">
+                            <ul class="nav nav-treeview" style="display: block;">
                                 {% if 20 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('configuracion.Menu_Permisos') }}"

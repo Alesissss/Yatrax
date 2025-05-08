@@ -225,8 +225,8 @@ CREATE TABLE conf_menus (
 -- Crear tabla detalle_menu
 CREATE TABLE conf_dmenus (
     idMenu INT REFERENCES conf_menus (id),
-    idUsuario INT REFERENCES usuarios (id),
-    PRIMARY KEY (idMenu, idUsuario)
+    idTipoUsuario INT REFERENCES usuarios (id),
+    PRIMARY KEY (idMenu, idTipoUsuario)
 );
 
 -- Crear tabla conf_plantillas
@@ -2209,35 +2209,35 @@ INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (50, 'Gestionar tipo
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (60, 'Ejemplo', 1, 6);
 
 -- Tabla dmenus
-INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (1, 1);
-INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (2, 1);
-INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (3, 1);
-INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (4, 1);
-INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (5, 1);
-INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (6, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (1, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (2, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (3, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (4, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (5, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (6, 1);
 -- Submenús de "USUARIOS"
-INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (10, 1);
-INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (11, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (10, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (11, 1);
 -- Submenús de "CONFIGURACIÓN"
-INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (20, 1);
-INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (21, 1);
-INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (22, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (20, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (21, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (22, 1);
 -- Submenús de "VENTAS"
-INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (30, 1);
-INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (31, 1);
-INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (32, 1);
-INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (33, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (30, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (31, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (32, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (33, 1);
 -- Submenús de "VIAJES"
-INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (40, 1);
-INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (41, 1);
-INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (42, 1);
-INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (43, 1);
-INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (44, 1);
-INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (45, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (40, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (41, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (42, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (43, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (44, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (45, 1);
 -- Submenús de "PERSONAL"
-INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (50, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (50, 1);
 -- Submenús de "ATENCIÓN AL CLIENTE"
-INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (60, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (60, 1);
 
 -- Tabla apariencia
 INSERT INTO conf_plantillas (id, nombre, color_header, color_footer, logo, estado, fecha_registro, usuario) VALUES (1, 'YATRAX', '#0c336e', '#000000', '/Static/img/plantillas/logo_yatusa.png', 1, '2025-03-06 20:06:14', 'SYSTEM');
@@ -2768,7 +2768,7 @@ DELIMITER ;
 DELIMITER $$
 CREATE PROCEDURE SP_ASIGNAR_DMENU(
     IN P_IDMENU INT,
-    IN P_IDUSUARIO INT
+    IN P_IDTIPOUSUARIO INT
 )
 BEGIN
     DECLARE cMenus INT;
@@ -2780,13 +2780,13 @@ BEGIN
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
-    SELECT COUNT(*) INTO cMenus FROM conf_dmenus WHERE idMenu = P_IDMENU AND idUsuario = P_IDUSUARIO;
+    SELECT COUNT(*) INTO cMenus FROM conf_dmenus WHERE idMenu = P_IDMENU AND idTipoUsuario = P_IDTIPOUSUARIO;
 
     IF cMenus > 0 THEN
         SET @MSJ2 = 'El permiso que intenta asignar, ya existe';
     ELSE
-        INSERT INTO conf_dmenus (idMenu, idUsuario) 
-        VALUES (P_IDMENU, P_IDUSUARIO);
+        INSERT INTO conf_dmenus (idMenu, idTipoUsuario) 
+        VALUES (P_IDMENU, P_IDTIPOUSUARIO);
 
         SET @MSJ = 'Se asignó correctamente el permiso';
     END IF;
@@ -2797,7 +2797,7 @@ DELIMITER ;
 DELIMITER $$
 CREATE PROCEDURE SP_ELIMINAR_DMENU(
     IN P_IDMENU INT,
-    IN P_IDUSUARIO INT
+    IN P_IDTIPOUSUARIO INT
 )
 BEGIN
     DECLARE cMenus INT;
@@ -2809,12 +2809,12 @@ BEGIN
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
-    SELECT COUNT(*) INTO cMenus FROM conf_dmenus WHERE idMenu = P_IDMENU AND idUsuario = P_IDUSUARIO;
+    SELECT COUNT(*) INTO cMenus FROM conf_dmenus WHERE idMenu = P_IDMENU AND idTipoUsuario = P_IDTIPOUSUARIO;
 
     IF cMenus <= 0 THEN
         SET @MSJ2 = 'El permiso que intenta eliminar, no existe';
     ELSE
-        DELETE FROM conf_dmenus WHERE idMenu = P_IDMENU AND idUsuario = P_IDUSUARIO; 
+        DELETE FROM conf_dmenus WHERE idMenu = P_IDMENU AND idTipoUsuario = P_IDTIPOUSUARIO; 
         SET @MSJ = 'Se eliminó correctamente el permiso';
     END IF;
 END $$

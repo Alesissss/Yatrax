@@ -5,7 +5,7 @@
     <div class="panel-heading">
         <div class="row">
             <div class="col-md-12">
-                <h1>Bienvenido al dashboard, selecciona un módulo:</h1>
+                <h1>Bienvenido al sistema, selecciona un módulo:</h1>
             </div>
         </div>
     </div>
@@ -134,7 +134,41 @@
                 success: function (response) {
                     if (response.Status === 'success') {
                         toastr.success(response.Msj, 'MENSAJE DE SISTEMA');
-                        window.location.reload();
+                        console.log(idModulo);
+                        console.log(typeof idModulo);  // debería decir "number"
+
+                        switch (Number(idModulo)) {
+                            case 1:
+                                console.log(idModulo + ' hola');
+                                window.location.href = '/trabajadores/home/inicioUsuarios';
+                                break;
+                            case 2:
+                                console.log(idModulo);
+                                window.location.href = '/trabajadores/home/inicioUsuarios';
+                                break;
+                            case 3:
+                                console.log(idModulo);
+                                window.location.href = '/trabajadores/home/inicioUsuarios';
+                                break;
+                            case 4:
+                                console.log(idModulo);
+
+                                window.location.href = '/trabajadores/home/inicioUsuarios';
+                                break;
+                            case 5:
+                                console.log(idModulo);
+
+                                window.location.href = '/trabajadores/home/inicioUsuarios';
+                                break;
+                            case 6:
+                                console.log(idModulo);
+                                window.location.href = '/trabajadores/home/inicioUsuarios';
+                                break;
+                            default:
+                                console.error('ID de módulo no reconocido:', idModulo);
+                                break;
+                        }
+                        // window.location.reload();
                     } else {
                         toastr.error(response.Msj, 'MENSAJE DE SISTEMA');
                     }
