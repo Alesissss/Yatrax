@@ -45,47 +45,6 @@ class Usuario:
         finally:
             conexion.cerrar()
 
-    #OBTENER MENÚS
-    @classmethod
-    def obtener_menus(cls, id):
-        conexion = bd.Conexion()
-        try:
-            menus = conexion.obtener("SELECT men.id, men.nombre"
-            " FROM conf_menus men INNER JOIN conf_dmenus dmen on dmen.idMenu = men.id WHERE dmen.idUsuario = %s AND men.estado = 1", (id))
-            return menus
-        finally:
-            conexion.cerrar()
-
-    #ASIGNAR DMENU
-    @classmethod
-    def agregar_menu(cls, idMenu, idUsuario):
-        conexion = bd.Conexion()
-
-        try:
-            # Llamar al procedimiento almacenado
-            conexion.ejecutar("CALL SP_ASIGNAR_DMENU(%s, %s);", (idMenu, idUsuario))
-
-            # Obtener mensajes de salida
-            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
-            return resultado[0]  # Retorna un diccionario con los mensajes
-        finally:
-            conexion.cerrar()
-
-    #ELIMINAR DMENU
-    @classmethod
-    def eliminar_menu(cls, idMenu, idUsuario):
-        conexion = bd.Conexion()
-
-        try:
-            # Llamar al procedimiento almacenado
-            conexion.ejecutar("CALL SP_ELIMINAR_DMENU(%s, %s);", (idMenu, idUsuario))
-
-            # Obtener mensajes de salida
-            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
-            return resultado[0]  # Retorna un diccionario con los mensajes
-        finally:
-            conexion.cerrar()
-
     #REGISTRAR
     @classmethod
     def registrar(cls, nombre, email, password, imagen, estado, idTipoUsuario, usuario):

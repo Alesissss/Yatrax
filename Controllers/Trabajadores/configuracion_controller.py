@@ -1,6 +1,7 @@
 import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort
 from Models.usuario import Usuario
+from Models.tipoUsuario import TipoUsuario
 from Models.metodo_pago import MetodoPago
 from Models.conf_menus import Conf_Menus
 from Models.conf_plantillas import Conf_Plantillas
@@ -72,19 +73,19 @@ def Plantilla_Nuevo():
 # FUNCIONES
 
 # REGION PERMISOS
-@configuracion_bp.route("/GetData_Usuarios", methods=["GET"])
-def get_usuarios():
+@configuracion_bp.route("/GetData_TiposUsuario", methods=["GET"])
+def get_tipoUsuarios():
     try:
-        usuarios = Usuario.obtener_todos()
-        return jsonify({'data': usuarios, 'Status': 'success', 'Msj': 'Listado de usuarios retornado exitosamene'})
+        tiposUsuario = TipoUsuario.obtener_todos()
+        return jsonify({'data': tiposUsuario, 'Status': 'success', 'Msj': 'Listado de tipos de usuario retornado exitosamene'})
     except Exception as e:
-        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar usuarios: + {repr(e)}'})
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar tipos de usuarios: + {repr(e)}'})
 
 @configuracion_bp.route('/EditarPermisos/<int:id>', methods=['GET', 'POST'])
 def Editar_Permisos(id):
     try:
-        usuario = Usuario.obtener_por_id(id)
-        dmnus = Usuario.obtener_menus(id)
+        tipoUsuario = TipoUsuario.obtener_por_id(id)
+        dmnus = TipoUsuario.obtener_menus(id)
         menus = Conf_Menus.obtener_todos()
         dmnus_ids = [menu['id'] for menu in dmnus]
 
@@ -102,15 +103,15 @@ def Editar_Permisos(id):
 
         if request.method == 'POST':
             idMenu = int(request.form.get('idMenu').strip())
-            idUsuario = int(request.form.get('idUsuario').strip())
+            idTipoUsuario = int(request.form.get('idTipoUsuario').strip())
             accion = int(request.form.get('accion').strip())
             
             if accion == 1:
-                mensajes = Usuario.agregar_menu(idMenu, idUsuario)
+                mensajes = TipoUsuario.agregar_menu(idMenu, idTipoUsuario)
                 msj1 = mensajes.get('@MSJ')
                 msj2 = mensajes.get('@MSJ2')
             else:
-                mensajes = Usuario.eliminar_menu(idMenu, idUsuario)
+                mensajes = TipoUsuario.eliminar_menu(idMenu, idTipoUsuario)
                 msj1 = mensajes.get('@MSJ')
                 msj2 = mensajes.get('@MSJ2')
 
@@ -121,9 +122,9 @@ def Editar_Permisos(id):
             else:
                 return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar permisos'})
 
-        if usuario:
-            return render_template('configuracion/permisosEditar.html', active_page="permisos", active_menu='mConfiguracion', usuario=usuario, dmnus=dmnus, dmnus_ids=dmnus_ids, menus=menus_jerarquicos)
-        return render_template('configuracion/permisosEditar.html', active_page="permisos", active_menu='mConfiguracion', usuario={}, dmnus=[], dmnus_ids=[], menus=[])
+        if tipoUsuario:
+            return render_template('configuracion/permisosEditar.html', active_page="permisos", active_menu='mConfiguracion', tipoUsuario=tipoUsuario, dmnus=dmnus, dmnus_ids=dmnus_ids, menus=menus_jerarquicos)
+        return render_template('configuracion/permisosEditar.html', active_page="permisos", active_menu='mConfiguracion', tipoUsuario={}, dmnus=[], dmnus_ids=[], menus=[])
 
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
