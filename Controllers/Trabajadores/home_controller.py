@@ -85,9 +85,7 @@ def logout():
 
 @home_bp.route('/inicio')
 def index():
-    if 'usuario' in session:
-        return render_template('home/home.html', active_page="home")
-    return redirect(url_for('home.login'))
+    return render_template('home/home.html', active_page="home")
 
 @home_bp.route('/error')
 def error():
@@ -113,7 +111,25 @@ def SetModulo():
             return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
     
 @home_bp.route('/inicioUsuarios')
-def inicio_usuarios():
-    if 'usuario' in session:
-        return render_template('home/homeUsuarios.html', active_menu="mUsuarios")
-    return redirect(url_for('home.login'))
+def inicioUsuarios():
+    return render_template('home/homeUsuarios.html', active_menu="mUsuarios")
+
+@home_bp.route('/inicioConfiguracion')
+def inicioConfiguracion():
+    return render_template('home/homeConfiguracion.html', active_menu="mConfiguracion")
+
+@home_bp.route('/inicioVentas')
+def inicioVentas():
+    return render_template('home/homeVentas.html', active_menu="mVentas")
+
+@home_bp.route('/inicioViajes')
+def inicioViajes():
+    return render_template('home/homeViajes.html', active_menu="mViajes")
+
+@home_bp.route('/inicioPersonal')
+def inicioPersonal():
+    return render_template('home/homePersonal.html', active_menu="mPersonal")
+
+@home_bp.route('/inicioAtencion')
+def inicioAtencion():
+    return render_template('home/homeAtencion.html', active_menu="mAtencion")

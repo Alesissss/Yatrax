@@ -2228,14 +2228,16 @@ INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (22, 'Gestionar mét
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (30, 'Gestionar tipo comprobante', 1, 3);
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (31, 'Gestionar tipo cliente', 1, 3);
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (32, 'Gestionar tipo servicio', 1, 3);
-INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (33, 'Gestionar tipo documento', 1, 3);
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (33, 'Gestionar servicio', 1, 3);
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (34, 'Gestionar tipo documento', 1, 3);
 -- Submenús de VIAJES
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (40, 'Gestionar horarios', 1, 4);
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (41, 'Gestionar tipo vehículo', 1, 4);
-INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (42, 'Gestionar niveles', 1, 4);
-INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (43, 'Gestionar sucursales', 1, 4);
-INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (44, 'Gestionar marcas', 1, 4);
-INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (45, 'Gestionar rutas', 1, 4);
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (42, 'Gestionar vehículo', 1, 4);
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (43, 'Gestionar niveles', 1, 4);
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (44, 'Gestionar sucursales', 1, 4);
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (45, 'Gestionar marcas', 1, 4);
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (46, 'Gestionar rutas', 1, 4);
 -- Submenús de PERSONAL
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (50, 'Gestionar tipo personal', 1, 5);
 -- Submenús de ATENCIÓN AL CLIENTE
@@ -2260,6 +2262,7 @@ INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (30, 1);
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (31, 1);
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (32, 1);
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (33, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (34, 1);
 -- Submenús de "VIAJES"
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (40, 1);
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (41, 1);
@@ -2267,6 +2270,7 @@ INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (42, 1);
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (43, 1);
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (44, 1);
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (45, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (46, 1);
 -- Submenús de "PERSONAL"
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (50, 1);
 -- Submenús de "ATENCIÓN AL CLIENTE"

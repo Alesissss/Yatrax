@@ -139,32 +139,25 @@
 
                         switch (Number(idModulo)) {
                             case 1:
-                                console.log(idModulo + ' hola');
                                 window.location.href = '/trabajadores/home/inicioUsuarios';
                                 break;
                             case 2:
-                                console.log(idModulo);
-                                window.location.href = '/trabajadores/home/inicioUsuarios';
+                                window.location.href = '/trabajadores/home/inicioConfiguracion';
                                 break;
                             case 3:
-                                console.log(idModulo);
-                                window.location.href = '/trabajadores/home/inicioUsuarios';
+                                window.location.href = '/trabajadores/home/inicioVentas';
                                 break;
                             case 4:
-                                console.log(idModulo);
-
-                                window.location.href = '/trabajadores/home/inicioUsuarios';
+                                window.location.href = '/trabajadores/home/inicioViajes';
                                 break;
                             case 5:
-                                console.log(idModulo);
-
-                                window.location.href = '/trabajadores/home/inicioUsuarios';
+                                window.location.href = '/trabajadores/home/inicioPersonal';
                                 break;
                             case 6:
-                                console.log(idModulo);
-                                window.location.href = '/trabajadores/home/inicioUsuarios';
+                                window.location.href = '/trabajadores/home/inicioAtencion';
                                 break;
                             default:
+                                toastr.error('Ocurrió un error inesperado al seleccionar el módulo', 'MENSAJE DE SISTEMA');
                                 console.error('ID de módulo no reconocido:', idModulo);
                                 break;
                         }

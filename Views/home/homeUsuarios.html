@@ -4,54 +4,78 @@
 <div class="container-fluid p-4">
     <div class="row mb-3">
         <div class="col-12">
-            <h1 class="mb-2">Bienvenido al módulo de usuarios</h1>
-            <p class="text-muted">Este módulo permite administrar los usuarios del sistema y clasificar sus tipos según su función o nivel de acceso.</p>
+            <h1 class="mb-2">👤 Bienvenido al módulo de usuarios</h1>
+            <p class="text-muted">Este módulo permite administrar los usuarios del sistema y clasificar sus tipos según
+                su función o nivel de acceso.</p>
         </div>
     </div>
-
     <div class="row">
         <!-- Sección informativa 1 -->
-        <div class="col-md-4">
-            <div class="info-box bg-light">
-                <div class="info-box-content">
-                    <span class="info-box-text font-weight-bold">Consulta de usuarios</span>
-                    <span class="info-box-number text-muted">
-                        Visualiza y revisa la información básica de los usuarios registrados en el sistema.
+        <div class="col-md-4 d-flex align-items-stretch">
+            <div class="info-box bg-primary elevation-2 text-white w-100">
+                <span class="info-box-icon"><i class="fas fa-users"></i></span>
+                <div class="info-box-content d-flex flex-column justify-content-between h-100">
+                    <span class="info-box-text">Consulta de usuarios</span>
+                    <span class="info-box-number">
+                        Visualiza y revisa la información básica de los usuarios registrados.
                     </span>
                 </div>
             </div>
         </div>
-
         <!-- Sección informativa 2 -->
-        <div class="col-md-4">
-            <div class="info-box bg-light">
-                <div class="info-box-content">
-                    <span class="info-box-text font-weight-bold">Registro de nuevos usuarios</span>
-                    <span class="info-box-number text-muted">
-                        Da de alta a nuevos usuarios completando sus datos personales y tipo asignado.
+        <div class="col-md-4 d-flex align-items-stretch">
+            <div class="info-box bg-success elevation-2 text-white w-100">
+                <span class="info-box-icon"><i class="fas fa-user-plus"></i></span>
+                <div class="info-box-content d-flex flex-column justify-content-between h-100">
+                    <span class="info-box-text">Registro de nuevos usuarios</span>
+                    <span class="info-box-number">
+                        Da de alta a nuevos usuarios registrados en el sistema con sus datos personales.
                     </span>
                 </div>
             </div>
         </div>
-
         <!-- Sección informativa 3 -->
-        <div class="col-md-4">
-            <div class="info-box bg-light">
-                <div class="info-box-content">
-                    <span class="info-box-text font-weight-bold">Gestión de tipos de usuario</span>
-                    <span class="info-box-number text-muted">
-                        Define y organiza las diferentes categorías o perfiles de usuarios del sistema.
+        <div class="col-md-4 d-flex align-items-stretch">
+            <div class="info-box bg-warning elevation-2 text-white w-100">
+                <span class="info-box-icon"><i class="fas fa-user-cog"></i></span>
+                <div class="info-box-content d-flex flex-column justify-content-between h-100">
+                    <span class="info-box-text">Gestión de tipos de usuario</span>
+                    <span class="info-box-number">
+                        Define y organiza las categorías de usuario que el sistema va a organizar.
                     </span>
                 </div>
             </div>
         </div>
     </div>
-
     <div class="row mt-3">
         <div class="col-12">
             <div class="callout callout-info">
-                <h5>¿Sabías que...?</h5>
-                <p>Clasificar correctamente a los usuarios por tipo ayuda a personalizar su experiencia y controlar sus funcionalidades.</p>
+                <h5>💡 ¿Sabías que...?</h5>
+                <p>Clasificar correctamente a los usuarios por tipo ayuda a personalizar su experiencia y controlar sus
+                    funcionalidades.</p>
+            </div>
+        </div>
+    </div>
+    <!-- Gráficos con ECharts -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h3 class="card-title">Cantidad de usuarios por tipo</h3>
+                </div>
+                <div class="card-body">
+                    <div id="chartUsuariosTipo" style="width: 100%; height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="card-title">Cantidad de registros de usuarios mensuales</h3>
+                </div>
+                <div class="card-body">
+                    <div id="chartRegistrosMensuales" style="width: 100%; height: 300px;"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -62,4 +86,72 @@
 {% endblock %}
 
 {% block scripts %}
+<!-- Apache ECharts -->
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/theme/dark.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let isDarkMode = document.body.classList.contains('dark-mode');
+
+        var chartUsuarios = echarts.init(document.getElementById('chartUsuariosTipo'), isDarkMode ? 'dark' : '');
+        var optionUsuarios = {
+            tooltip: {
+                trigger: 'item'
+            },
+            legend: {
+                top: '5%',
+                left: 'center'
+            },
+            series: [
+                {
+                    name: 'Usuarios',
+                    type: 'pie',
+                    radius: '50%',
+                    data: [
+                        { value: 1048, name: 'Administradores' },
+                        { value: 735, name: 'Supervisores' },
+                        { value: 580, name: 'Usuarios normales' }
+                    ],
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }
+            ]
+        };
+        chartUsuarios.setOption(optionUsuarios);
+
+        var chartRegistros = echarts.init(document.getElementById('chartRegistrosMensuales'), isDarkMode ? 'dark' : '');
+        var optionRegistros = {
+            tooltip: {
+                trigger: 'axis'
+            },
+            xAxis: {
+                type: 'category',
+                data: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun']
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: [{
+                data: [120, 200, 150, 80, 70, 110],
+                type: 'bar',
+                barWidth: '60%',
+                itemStyle: {
+                    color: '#00c0ef'
+                }
+            }]
+        };
+        chartRegistros.setOption(optionRegistros);
+
+        window.addEventListener('resize', function () {
+            chartUsuarios.resize();
+            chartRegistros.resize();
+        });
+    });
+</script>
 {% endblock %}

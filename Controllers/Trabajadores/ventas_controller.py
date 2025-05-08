@@ -78,7 +78,7 @@ def Menu_TipoServicio():
 
 @ventas_bp.route('/GestionarServicio')
 def Menu_Servicio():
-    return render_template('ventas/servicio.html', active_page="tipoServicio", active_menu = 'mVentas')
+    return render_template('ventas/servicio.html', active_page="servicio", active_menu = 'mVentas')
 
 @ventas_bp.route('/TipoServicioNuevo')
 def Menu_TipoServicioNuevo():
