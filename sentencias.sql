@@ -69,6 +69,7 @@ DROP TABLE IF EXISTS conf_dmenus;
 DROP TABLE IF EXISTS conf_menus;
 DROP TABLE IF EXISTS usuarios;
 DROP TABLE IF EXISTS tipo_usuario;
+DROP TABLE IF EXISTS vehiculo;
 DROP TABLE IF EXISTS tipo_vehiculo;
 DROP TABLE IF EXISTS sucursal;
 DROP TABLE IF EXISTS horario;
@@ -236,6 +237,7 @@ CREATE TABLE conf_plantillas (
     color_footer VARCHAR(255) NOT NULL,
     logo VARCHAR(255) NOT NULL,
     estado BOOLEAN NOT NULL,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NOT NULL
 );
 
@@ -265,6 +267,20 @@ CREATE TABLE tipo_vehiculo (
     idMarca INT NULL,
     estado TINYINT NOT NULL,
     CONSTRAINT fk_tipo_vehiculo_marca FOREIGN KEY (idMarca) REFERENCES marca(id)
+);
+
+CREATE TABLE vehiculo (
+    idVehiculo INT AUTO_INCREMENT PRIMARY KEY,
+    placa VARCHAR(10) NOT NULL UNIQUE,
+    anio INT,
+    color VARCHAR(30),
+    estado TINYINT NOT NULL,
+    idTipoVehiculo INT NOT NULL,
+    CONSTRAINT fk_tipo_vehiculo
+        FOREIGN KEY (idTipoVehiculo)
+        REFERENCES tipo_vehiculo(idTipoVehiculo)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 -- Crear tabla metodo_pago
@@ -2224,7 +2240,7 @@ INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (50, 1);
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (60, 1);
 
 -- Tabla apariencia
-INSERT INTO conf_plantillas (id, nombre, color_header, color_footer, logo, estado, usuario) VALUES (1, 'YATRAX', '#0c336e', '#000000', '/Static/img/plantillas/logo_yatusa.png', 1, 'SYSTEM');
+INSERT INTO conf_plantillas (id, nombre, color_header, color_footer, logo, estado, fecha_registro, usuario) VALUES (1, 'YATRAX', '#0c336e', '#000000', '/Static/img/plantillas/logo_yatusa.png', 1, '2025-03-06 20:06:14', 'SYSTEM');
 
 -- Crear procedimiento SP_REGISTRAR_USUARIO
 DELIMITER $$
@@ -3180,6 +3196,127 @@ BEGIN
     END IF;
 END$$
 
+DELIMITER ;
+
+-- Eliminar procedimientos almacenados si existen
+DROP PROCEDURE IF EXISTS SP_INSERTAR_VEHICULO;
+DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_VEHICULO;
+DROP PROCEDURE IF EXISTS SP_BAJA_VEHICULO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_VEHICULO;
+
+DELIMITER $$
+
+-- 1) Insertar un nuevo vehículo (estado = 1)
+CREATE PROCEDURE SP_INSERTAR_VEHICULO(
+    IN p_placa VARCHAR(10),
+    IN p_anio INT,
+    IN p_color VARCHAR(30),
+    IN p_idTipoVehiculo INT
+)
+BEGIN
+    -- Variables de salida en user variables
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al insertar vehículo';
+        SET @MSJ  = NULL;
+    END;
+
+    SET @MSJ  = NULL;
+    SET @MSJ2 = NULL;
+
+    INSERT INTO vehiculo (placa, anio, color, estado, idTipoVehiculo)
+    VALUES (p_placa, p_anio, p_color, 1, p_idTipoVehiculo);
+
+    SET @MSJ  = 'Vehículo insertado correctamente';
+END$$
+
+-- 2) Actualizar datos de un vehículo existente
+CREATE PROCEDURE SP_ACTUALIZAR_VEHICULO(
+    IN p_idVehiculo      INT,
+    IN p_placa           VARCHAR(10),
+    IN p_anio            INT,
+    IN p_color           VARCHAR(30),
+    IN p_idTipoVehiculo  INT,
+    IN p_estado          TINYINT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al actualizar vehículo';
+        SET @MSJ  = NULL;
+    END;
+
+    SET @MSJ  = NULL;
+    SET @MSJ2 = NULL;
+
+    UPDATE vehiculo
+    SET
+        placa          = p_placa,
+        anio           = p_anio,
+        color          = p_color,
+        idTipoVehiculo = p_idTipoVehiculo,
+        estado         = p_estado
+    WHERE idVehiculo = p_idVehiculo;
+
+    IF ROW_COUNT() = 0 THEN
+        SET @MSJ2 = 'No se encontró el vehículo especificado';
+    ELSE
+        SET @MSJ = 'Vehículo actualizado correctamente';
+    END IF;
+END$$
+
+-- 3) Dar de baja (poner estado = 0)
+CREATE PROCEDURE SP_BAJA_VEHICULO(
+    IN p_idVehiculo INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al dar de baja vehículo';
+        SET @MSJ  = NULL;
+    END;
+
+    SET @MSJ  = NULL;
+    SET @MSJ2 = NULL;
+
+    UPDATE vehiculo
+    SET estado = 0
+    WHERE idVehiculo = p_idVehiculo;
+
+    IF ROW_COUNT() = 0 THEN
+        SET @MSJ2 = 'No se encontró el vehículo para dar de baja';
+    ELSE
+        SET @MSJ = 'Vehículo dado de baja correctamente';
+    END IF;
+END$$
+
+-- 4) Eliminar un vehículo de la tabla
+CREATE PROCEDURE SP_ELIMINAR_VEHICULO(
+    IN p_idVehiculo INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al eliminar vehículo';
+        SET @MSJ  = NULL;
+    END;
+
+    SET @MSJ  = NULL;
+    SET @MSJ2 = NULL;
+
+    DELETE FROM vehiculo
+    WHERE idVehiculo = p_idVehiculo;
+
+    IF ROW_COUNT() = 0 THEN
+        SET @MSJ2 = 'No se encontró el vehículo para eliminar';
+    ELSE
+        SET @MSJ = 'Vehículo eliminado correctamente';
+    END IF;
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
 CREATE PROCEDURE SP_DARBAJA_PISO(
     IN p_idNivel INT
 )
