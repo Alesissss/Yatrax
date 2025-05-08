@@ -13,30 +13,30 @@ from werkzeug.utils import secure_filename
 viajes_bp = Blueprint('viajes', __name__, url_prefix='/trabajadores/viajes')
 
 # ERRORES 
-# # Manejar errores 401 (Página no autorizada)
-# @viajes_bp.errorhandler(401)
-# def error_401(error):
-#     return render_template("error.html", error="Página no autorizada"), 401
+# Manejar errores 401 (Página no autorizada)
+@viajes_bp.errorhandler(401)
+def error_401(error):
+    return render_template("error.html", error="Página no autorizada"), 401
 
-# # Manejar errores 403 (Página no autorizada para este usuario)
-# @viajes_bp.errorhandler(403)
-# def error_403(error):
-#     return render_template("error.html", error="Página restringida"), 403
+# Manejar errores 403 (Página no autorizada para este usuario)
+@viajes_bp.errorhandler(403)
+def error_403(error):
+    return render_template("error.html", error="Página restringida"), 403
 
-# # Manejar errores 404 (Página no encontrada)
-# @viajes_bp.errorhandler(404)
-# def error_404(error):
-#     return render_template("error.html", error="Página no encontrada"), 404
+# Manejar errores 404 (Página no encontrada)
+@viajes_bp.errorhandler(404)
+def error_404(error):
+    return render_template("error.html", error="Página no encontrada"), 404
 
-# # Manejar errores 500 (Error interno del servidor)
-# @viajes_bp.errorhandler(500)
-# def error_500(error):
-#     return render_template("error.html", error="Error interno del servidor"), 500
+# Manejar errores 500 (Error interno del servidor)
+@viajes_bp.errorhandler(500)
+def error_500(error):
+    return render_template("error.html", error="Error interno del servidor"), 500
 
-# # Manejar cualquier otro error genérico
-# @viajes_bp.errorhandler(Exception)
-# def error_general(error):
-#     return render_template("error.html", error="Ocurrió un error inesperado"), 500
+# Manejar cualquier otro error genérico
+@viajes_bp.errorhandler(Exception)
+def error_general(error):
+    return render_template("error.html", error="Ocurrió un error inesperado"), 500
 
 # RESTRICCIONES
 @viajes_bp.before_request
@@ -69,7 +69,7 @@ def Menu_TipoVehiculo():
 
 @viajes_bp.route('/GestionarVehiculo')
 def Menu_Vehiculo():
-    return render_template('viajes/vehiculo.html', active_page="tipoVehiculo", active_menu='mViajes')
+    return render_template('viajes/vehiculo.html', active_page="vehiculo", active_menu='mViajes')
 
 @viajes_bp.route('/GestionarSucursal')
 def Menu_Sucursal():

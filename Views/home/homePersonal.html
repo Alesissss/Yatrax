@@ -1,0 +1,65 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="container-fluid p-4">
+    <div class="row mb-3">
+        <div class="col-12">
+            <h1 class="mb-2">Bienvenido al módulo de usuarios</h1>
+            <p class="text-muted">Este módulo permite administrar los usuarios del sistema y clasificar sus tipos según su función o nivel de acceso.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Sección informativa 1 -->
+        <div class="col-md-4">
+            <div class="info-box bg-light">
+                <div class="info-box-content">
+                    <span class="info-box-text font-weight-bold">Consulta de usuarios</span>
+                    <span class="info-box-number text-muted">
+                        Visualiza y revisa la información básica de los usuarios registrados en el sistema.
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección informativa 2 -->
+        <div class="col-md-4">
+            <div class="info-box bg-light">
+                <div class="info-box-content">
+                    <span class="info-box-text font-weight-bold">Registro de nuevos usuarios</span>
+                    <span class="info-box-number text-muted">
+                        Da de alta a nuevos usuarios completando sus datos personales y tipo asignado.
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección informativa 3 -->
+        <div class="col-md-4">
+            <div class="info-box bg-light">
+                <div class="info-box-content">
+                    <span class="info-box-text font-weight-bold">Gestión de tipos de usuario</span>
+                    <span class="info-box-number text-muted">
+                        Define y organiza las diferentes categorías o perfiles de usuarios del sistema.
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="callout callout-info">
+                <h5>¿Sabías que...?</h5>
+                <p>Clasificar correctamente a los usuarios por tipo ayuda a personalizar su experiencia y controlar sus funcionalidades.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
