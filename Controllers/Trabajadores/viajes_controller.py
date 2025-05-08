@@ -707,7 +707,7 @@ def ver_sucursal(idSucursal):
 def darBaja_sucursal(idSucursal):
     try:
         usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
-        mensajes = Sucursal.darBaja(idSucursal, usuario_actual)
+        mensajes = Sucursal.dar_baja(idSucursal, usuario_actual)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 
