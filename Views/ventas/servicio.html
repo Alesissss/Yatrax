@@ -1,26 +1,26 @@
 {% extends "index.html" %}
 
-{% block title %}YATRAX - Gestión de sucursales{% endblock %}
+{% block title %}YATRAX - Gestión de Servicio{% endblock %}
 
 {% block content %}
 <div class="container-fluid p-4">
     <div class="panel-heading">
         <div class="row">
             <div class="col-md-12">
-                <h1>Gestionar sucursales</h1>
+                <h1>Gestionar Servicio</h1>
             </div>
         </div>
     </div>
     <div class="panel-body">
         <div class="row">
             <div class="col-12">
-                <table id="tbl_Sucursal" class="table table-bordered table-short-rows">
+                <table id="tbl_Servicio" class="table table-bordered table-short-rows">
                     <thead class="bg-gray">
                         <tr>
                             <th class="text-center">ID</th>
                             <th class="text-center">NOMBRE</th>
-                            <th class="text-center">CIUDAD</th>
-                            <th class="text-center">DIRECCIÓN</th>
+                            <th class="text-center">DESCRIPCION</th>
+                            <th class="text-center">TIPO SERVICIO</th>
                             <th class="text-center">ESTADO</th>
                             <th class="text-center">ACCIÓN</th>
                         </tr>
@@ -35,7 +35,7 @@
 {% endblock %}
 {% block scripts %}
 <script>
-    var dtSucursal;
+    var dtUsuarios;
 
     $(document).ready(function () {
         // $('body').addClass('sidebar-collapse');
@@ -101,12 +101,12 @@
             lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
         });
 
-        fct_IniciarTablaSucursal('#tbl_Sucursal');
+        fct_IniciarTablaUsuarios('#tbl_Servicio');
     });
 
-    function fct_IniciarTablaSucursal(IdTabla) {
+    function fct_IniciarTablaUsuarios(IdTabla) {
         // Inicializar DataTables con botones
-        dtSucursal = $(IdTabla).DataTable({
+        dtUsuarios = $(IdTabla).DataTable({
             buttons: [
                 {
                     extend: 'copy',
@@ -119,7 +119,7 @@
                     text: '<i class="bi bi-file-earmark-excel"></i>',
                     titleAttr: 'Exportar a Excel',
                     className: 'btn btn-success',
-                    filename: 'Sucursal' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Usuarios' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     footer: true,
                     exportOptions:
                     {
@@ -132,7 +132,7 @@
                     text: '<i class="bi bi-file-earmark-pdf"></i>',
                     titleAttr: 'Exportar a PDF',
                     className: 'btn btn-danger',
-                    filename: 'Sucursal' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Usuarios' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     exportOptions:
                     {
                         stripHtml: true,
@@ -160,16 +160,16 @@
                     columns: ':not(.noVis)',
                 },
                 {
-                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo Sucursal',
+                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo servicio',
                     className: 'btn bg-success m-1',
                     titleAttr: 'Nuevo',
                     action: function (e, dt, node, config) {
-                        fct_SucursalNuevo();
+                        fct_NuevoServicio();
                     },
                 },
             ],
             ajax: {
-                url: "/trabajadores/viajes/GetData_Sucursal",
+                url: "/trabajadores/ventas/GetData_Servicio",
                 type: "GET",
                 datatype: "json",
                 data: function (d) {
@@ -180,6 +180,7 @@
                         console.error(json.Msj);
                         return [];
                     }
+                    console.log(json.data)
                     return json.data;
                 },
                 error: function (xhr, error, thrown) {
@@ -190,13 +191,13 @@
             columns: [
                 { data: "id", name: "id" },
                 { data: "nombre", name: "nombre" },
-                { data: "departamento", name: "departamento" },
-                { data: "direccion", name: "direccion" },
+                { data: "descripcion", name: "descripcion" },
+                { data: "idTipoServicio", name: "idTipoServicio" },
                 { 
                     data: "estado", 
                     name: "estado",
                     render: function(data, type, row) {
-                        return data === 1 ? 'Vigente' : 'No vigente'; 
+                        return data === 1 ? 'Activo' : 'No activo'; 
                     },
                 },
                 {
@@ -205,10 +206,10 @@
                     render: function (data, type, row) {
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_SucursalVer('${data.id}')" title="Ver Sucursal"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_SucursalEditar('${data.id}')" title="Editar Sucursal"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_SucursalDarBaja('${data.id}')" title="Dar de baja Sucursal"><i class="bi bi-arrow-down-circle"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_SucursalEliminar('${data.id}')" title="Eliminar Sucursal"><i class="bi bi-trash"></i></button>
+                            <button class="btn btn-xs m-1 btn-info" onclick="fct_VerServicio('${data.id}')" title="Ver tipo vehiculo"><i class="bi bi-eye"></i></button>
+                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_ServicioEditar('${data.id}')" title="Editar tipo vehiculo"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_ServicioDarBaja('${data.id}')" title="Dar de baja tipo vehiculo"><i class="bi bi-arrow-down-circle"></i></button>
+                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_ServicioEliminar('${data.id}')" title="Eliminar tipo vehiculo"><i class="bi bi-trash"></i></button>
                         </div>
                         `;
                     },
@@ -221,11 +222,11 @@
                     className: "text-center align-middle",
                 },
                 {
-                    targets: [1, 2, 3, 4, 5],
+                    targets: [1, 2, 3],
                     className: 'align-middle',
                 },
                 {
-                    targets: [5],
+                    targets: [4],
                     orderable: false,
                     width: '10%',
                 },
@@ -255,22 +256,22 @@
         });
     }
 
-    function fct_SucursalNuevo() {
-        window.location.href = '/trabajadores/viajes/SucursalNueva';
+    function fct_NuevoServicio() {
+        window.location.href = '/trabajadores/ventas/registrarServicio';
     }
 
-    function fct_SucursalEditar(Id) {
-        window.location.href = `/trabajadores/viajes/EditarSucursal/${Id}`;
+    function fct_ServicioEditar(Id) {
+        window.location.href = `/trabajadores/ventas/editarServicio/${Id}`;
     }
 
-    function fct_SucursalVer(Id) {
-        window.location.href = `/trabajadores/viajes/VerSucursal/${Id}`;
+    function fct_VerServicio(Id) {
+        window.location.href = `/trabajadores/ventas/verServicio/${Id}`;
     }
 
-    function fct_SucursalEliminar(Id) {
+    function fct_ServicioEliminar(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción eliminará a la sucursal. ¿Deseas continuar?",
+            text: "Esta acción eliminará el tipo de vehiculo. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -281,7 +282,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/viajes/EliminarSucursal/${Id}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/ventas/eliminarServicio/${Id}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
@@ -290,7 +291,7 @@
                                 toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
                                 return;
                             }
-                            fct_IniciarTablaSucursal('#tbl_Sucursal');
+                            fct_IniciarTablaUsuarios('#tbl_Servicio');
                             toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                         } else {
                             toastr.error(response.Msj, "MENSAJE DE SISTEMA");
@@ -306,10 +307,10 @@
         });
     }
 
-    function fct_SucursalDarBaja(Id) {
+    function fct_ServicioDarBaja(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción le dará de baja a la sucursal. ¿Deseas continuar?",
+            text: "Esta acción le dará de baja al tipo de vehiculo. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -320,22 +321,19 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/viajes/DarBajaSucursal/${Id}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/ventas/DarBajaServicio/${Id}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
-                        if (response.Status === "success") {
-                            if (response.Msj2 !== '' && response.Msj2 !== null) {
-                                toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                                return;
-                            }
-                            fct_IniciarTablaSucursal('#tbl_Sucursal');
-                            toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                        if (response && response.Status === "success") {
+                            fct_IniciarTablaUsuarios('#tbl_Servicio');
+                            toastr.success(response.Msj || "Operación exitosa", "MENSAJE DE SISTEMA");
                         } else {
-                            toastr.error(response.Msj, "MENSAJE DE SISTEMA");
-                            console.error('Error: ' + response.Msj);
+                            toastr.error((response && response.Msj) || "Error desconocido", "MENSAJE DE SISTEMA");
+                            console.error('Error: ' + (response ? response.Msj : "No hay respuesta"));
                         }
                     },
+
                     error: function (xhr, Status, error) {
                         toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
                         console.error('Error:' + error);

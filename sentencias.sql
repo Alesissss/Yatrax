@@ -49,10 +49,34 @@ DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPO_COMPROBANTE;
 DROP PROCEDURE IF EXISTS SP_DAR_BAJA_TIPO_COMPROBANTE;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_COMPROBANTE;
 
+DROP PROCEDURE IF EXISTS SP_INSERTAR_SERVICIO;
+DROP PROCEDURE IF EXISTS SP_UPDATE_SERVICIO;
+DROP PROCEDURE IF EXISTS SP_BAJA_SERVICIO;
+DROP PROCEDURE IF EXISTS SP_DELETE_SERVICIO;
+
 DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPO_SERVICIO;
 DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPO_SERVICIO;
 DROP PROCEDURE IF EXISTS SP_DAR_BAJA_TIPO_SERVICIO;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_SERVICIO;
+
+-- Eliminar procedimientos almacenados si existen
+DROP PROCEDURE IF EXISTS SP_INSERTAR_VEHICULO;
+DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_VEHICULO;
+DROP PROCEDURE IF EXISTS SP_BAJA_VEHICULO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_VEHICULO;
+
+-- Eliminar procedimientos existentes (si los hay)
+DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPOVEHICULO;
+DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPOVEHICULO;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPOVEHICULO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPOVEHICULO;
+DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPOVEHICULO;
+
+-- Eliminar procedimientos si existen
+DROP PROCEDURE IF EXISTS SP_INSERTAR_NIVEL;
+DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_NIVEL;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_PISO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_NIVEL;
 
 DROP PROCEDURE IF EXISTS SP_REGISTRAR_MARCA;
 DROP PROCEDURE IF EXISTS SP_EDITAR_MARCA;
@@ -77,6 +101,7 @@ DROP TABLE IF EXISTS tipo_cliente;
 DROP TABLE IF EXISTS ubigeo;
 DROP TABLE IF EXISTS metodo_pago;
 DROP TABLE IF EXISTS tipo_personal;
+DROP TABLE IF EXISTS servicio;
 DROP TABLE IF EXISTS tipo_servicio;
 DROP TABLE IF EXISTS tipo_comprobante;
 DROP TABLE IF EXISTS tipo_documento;
@@ -96,6 +121,14 @@ CREATE TABLE tipo_servicio (
     usuario VARCHAR(100) not null
 );
 
+CREATE TABLE servicio(
+    idServicio INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) not null,
+    descripcion VARCHAR(255) not null,
+    idTipoServicio INT NOT NULL,
+    estado TINYINT NOT NULL,
+    FOREIGN KEY (idTipoServicio) REFERENCES tipo_servicio(idTipoServicio)
+);
 
 -- Crear tabla tipo_comprobante
 CREATE TABLE tipo_comprobante (
@@ -2953,13 +2986,6 @@ DELIMITER ;
 
 --  tipo vehiculo
 
--- Eliminar procedimientos existentes (si los hay)
-DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPOVEHICULO;
-DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPOVEHICULO;
-DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPOVEHICULO;
-DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPOVEHICULO;
-DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPOVEHICULO;
-
 -- Cambiar delimitador para creación de procedimientos
 DELIMITER $$
 
@@ -3101,12 +3127,6 @@ END$$
 -- Restaurar delimitador
 DELIMITER ;
 
--- Eliminar procedimientos si existen
-DROP PROCEDURE IF EXISTS SP_INSERTAR_NIVEL;
-DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_NIVEL;
-DROP PROCEDURE IF EXISTS SP_DARBAJA_PISO;
-DROP PROCEDURE IF EXISTS SP_ELIMINAR_NIVEL;
-
 DELIMITER $$
 
 CREATE PROCEDURE SP_INSERTAR_NIVEL(
@@ -3197,12 +3217,6 @@ BEGIN
 END$$
 
 DELIMITER ;
-
--- Eliminar procedimientos almacenados si existen
-DROP PROCEDURE IF EXISTS SP_INSERTAR_VEHICULO;
-DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_VEHICULO;
-DROP PROCEDURE IF EXISTS SP_BAJA_VEHICULO;
-DROP PROCEDURE IF EXISTS SP_ELIMINAR_VEHICULO;
 
 DELIMITER $$
 
@@ -4001,6 +4015,112 @@ BEGIN
         SET @MSJ = 'Se eliminó correctamente el tipo de servicio|';
     END IF;
 END $$
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE SP_INSERTAR_SERVICIO(
+    IN p_nombre VARCHAR(50),
+    IN p_descripcion VARCHAR(255),
+    IN p_idTipoServicio INT
+)
+BEGIN
+    DECLARE existe_nombre INT;
+
+    SELECT COUNT(*) INTO existe_nombre 
+      FROM servicio 
+     WHERE nombre = p_nombre 
+       AND idTipoServicio = p_idTipoServicio;
+
+    IF existe_nombre = 0 THEN
+        INSERT INTO servicio (nombre, descripcion, idTipoServicio, estado)
+        VALUES (p_nombre, p_descripcion, p_idTipoServicio, 1);
+        SELECT 
+          'Servicio insertado correctamente' AS MSJ,
+          ''                                 AS MSJ2;
+    ELSE
+        SELECT 
+          ''                                            AS MSJ,
+          'Error: Nombre duplicado en el mismo tipo de servicio' AS MSJ2;
+    END IF;
+END$$
+
+CREATE PROCEDURE SP_UPDATE_SERVICIO(
+    IN p_idServicio INT,
+    IN p_nombre VARCHAR(50),
+    IN p_descripcion VARCHAR(255),
+    IN p_idTipoServicio INT,
+    IN p_estado TINYINT
+)
+BEGIN
+    DECLARE existe_nombre INT;
+
+    SELECT COUNT(*) INTO existe_nombre 
+      FROM servicio 
+     WHERE nombre = p_nombre 
+       AND idTipoServicio = p_idTipoServicio
+       AND idServicio <> p_idServicio;
+
+    IF existe_nombre = 0 THEN
+        UPDATE servicio 
+           SET nombre         = p_nombre,
+               descripcion    = p_descripcion,
+               idTipoServicio = p_idTipoServicio,
+               estado         = p_estado
+         WHERE idServicio    = p_idServicio;
+
+        IF ROW_COUNT() > 0 THEN
+            SELECT 
+              'Servicio actualizado correctamente' AS MSJ,
+              ''                                 AS MSJ2;
+        ELSE
+            SELECT 
+              ''                                AS MSJ,
+              'Error: ID de servicio no encontrado' AS MSJ2;
+        END IF;
+    ELSE
+        SELECT 
+          ''                                            AS MSJ,
+          'Error: Nombre duplicado en el mismo tipo de servicio' AS MSJ2;
+    END IF;
+END$$
+
+CREATE PROCEDURE SP_BAJA_SERVICIO(
+    IN p_idServicio INT
+)
+BEGIN
+    UPDATE servicio 
+       SET estado = 0 
+     WHERE idServicio = p_idServicio;
+
+    IF ROW_COUNT() > 0 THEN
+        SELECT 
+          'Servicio dado de baja correctamente' AS MSJ,
+          ''                                  AS MSJ2;
+    ELSE
+        SELECT 
+          ''                                AS MSJ,
+          'Error: ID de servicio no encontrado' AS MSJ2;
+    END IF;
+END$$
+
+CREATE PROCEDURE SP_DELETE_SERVICIO(
+    IN p_idServicio INT
+)
+BEGIN
+    DELETE FROM servicio 
+     WHERE idServicio = p_idServicio;
+
+    IF ROW_COUNT() > 0 THEN
+        SELECT 
+          'Servicio eliminado correctamente' AS MSJ,
+          ''                                AS MSJ2;
+    ELSE
+        SELECT 
+          ''                                AS MSJ,
+          'Error: ID de servicio no encontrado' AS MSJ2;
+    END IF;
+END$$
 
 DELIMITER ;
 
