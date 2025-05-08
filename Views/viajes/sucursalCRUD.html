@@ -121,6 +121,7 @@
     const map = L.map('map').setView([-9.19, -75.0152], 6);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 18,
+        minZoom: 6,
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
@@ -176,8 +177,8 @@
                 
                 // Obtener los componentes de la dirección
                 const departamento = address.state || '';
-                const provincia = address.region || address.suburb || '';
-                const distrito = address.village || address.town || address.city || '';
+                const provincia = address.region || '';
+                const distrito = address.village || address.town || address.suburb || address.city || address.hamlet ||'';
                 const direccionCompleta = data.display_name || 'Dirección no disponible';
                 const country = address.country || '';
 
@@ -187,7 +188,7 @@
                 document.getElementById("txt_country").value = country;
 
                 // Asignar a los inputs ocultos
-                document.getElementById("txt_departamento").value = departamento;
+                document.getElementById("txt_departamento").value = provincia;
                 document.getElementById("txt_provincia").value = provincia;
                 document.getElementById("txt_distrito").value = distrito;
             }

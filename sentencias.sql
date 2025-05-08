@@ -270,6 +270,7 @@ CREATE TABLE conf_plantillas (
     color_footer VARCHAR(255) NOT NULL,
     logo VARCHAR(255) NOT NULL,
     estado BOOLEAN NOT NULL,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NOT NULL
 );
 
@@ -2272,7 +2273,7 @@ INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (50, 1);
 INSERT INTO conf_dmenus (idMenu, idUsuario) VALUES (60, 1);
 
 -- Tabla apariencia
-INSERT INTO conf_plantillas (id, nombre, color_header, color_footer, logo, estado, usuario) VALUES (1, 'YATRAX', '#0c336e', '#000000', '/Static/img/plantillas/logo_yatusa.png', 1, 'SYSTEM');
+INSERT INTO conf_plantillas (id, nombre, color_header, color_footer, logo, estado, fecha_registro, usuario) VALUES (1, 'YATRAX', '#0c336e', '#000000', '/Static/img/plantillas/logo_yatusa.png', 1, '2025-03-06 20:06:14', 'SYSTEM');
 
 -- Crear procedimiento SP_REGISTRAR_USUARIO
 DELIMITER $$
