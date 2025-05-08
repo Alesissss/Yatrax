@@ -108,6 +108,7 @@ DROP TABLE IF EXISTS tipo_documento;
 DROP TABLE IF EXISTS marca;
 DROP TABLE IF EXISTS ruta;
 DROP TABLE IF EXISTS nivel;
+DROP TABLE IF EXISTS ciudad;
 
 -- Crear tabla tipo_servicio
 CREATE TABLE tipo_servicio (
@@ -206,6 +207,12 @@ CREATE TABLE usuarios (
     estado_registro INT not null DEFAULT 1,
     fecha_registro DATETIME not null DEFAULT CURRENT_TIMESTAMP, 
     usuario VARCHAR(100) not null
+);
+
+CREATE TABLE ciudad(
+    id int AUTO_INCREMENT PRIMARY KEY,
+    nombre varchar(50) NOT NULL,
+    abreviatura varchar(10) NOT NULL
 );
 
 CREATE TABLE horario (
@@ -327,6 +334,37 @@ CREATE TABLE metodo_pago (
     fecha_registro DATETIME not null DEFAULT CURRENT_TIMESTAMP, 
     usuario VARCHAR(100) not null
 );
+
+-- INSERTS IATA CIUDAD
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Arequipa','AQP');
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Callao','LIM');
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Chiclayo','CIX');
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Cusco','CUZ');
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Iquitos','IQT');
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Juliaca','JUL');
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Piura','PIU');
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Pucallpa','PCL');
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Puerto Maldonado','PEM');
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Talara','TYL');
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Tacna','TCQ');
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Trujillo','TRU');
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Andahuaylas','ANS');
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Ayacucho','AYP');
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Chimbote','CHM');
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Huaraz','ATA');
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Chachapoyas','CHH');
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Cajamarca','CJA');
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Jaén','JAE');
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Huánuco','HUU');
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Tingo María','TGI');
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Pisco','PIO');
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Jauja','JAU');
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Mazamari','MZA');
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Yurimaguas','YMS');
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Ilo','ILQ');
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Tarapoto','TPP');
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Punta Sal','PTL');
+INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Tumbes','TBP');
 
 -- INSERTS DE UBIGEO
 insert into ubigeo (ubigeo, departamento, provincia, distrito) values ('010101','Amazonas','Chachapoyas','Chachapoyas');
