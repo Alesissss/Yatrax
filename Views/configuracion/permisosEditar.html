@@ -12,7 +12,7 @@
         </div>
     </div>
     <div class="panel-body">
-        <table class="table table-bordered table-hover">
+        <!-- <table class="table table-bordered table-hover">
             <thead class="thead-dark">
                 <tr>
                     <th>Nombre del módulo</th>
@@ -22,16 +22,16 @@
             <tbody>
                 {% for menu in menus %}
                 <tr class="bg-transparent text-white">
-                    <td colspan="2">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <button class="btn btn-sm btn-light" data-toggle="collapse"
-                                data-target="#collapseMenu{{ loop.index }}" aria-expanded="false"
-                                aria-controls="collapseMenu{{ loop.index }}">
-                                <i class="fas fa-chevron-down"></i> {{ menu['nombre'] }}
-                            </button>
-                            <input type="checkbox" class="permiso-checkbox" data-idmenu="{{ menu['id'] }}"
-                                data-idusuario="{{ tipoUsuario.id }}" {% if menu['id'] in dmnus_ids %}checked{% endif %}>
-                        </div>
+                    <td>
+                        <button class="btn btn-sm btn-light" data-toggle="collapse"
+                            data-target="#collapseMenu{{ loop.index }}" aria-expanded="false"
+                            aria-controls="collapseMenu{{ loop.index }}">
+                            <i class="fas fa-chevron-down"></i> {{ menu['nombre'] }}
+                        </button>
+                    </td>
+                    <td class="text-center">
+                        <input type="checkbox" class="permiso-checkbox" data-idmenu="{{ menu['id'] }}"
+                            data-idusuario="{{ tipoUsuario.id }}" {% if menu['id'] in dmnus_ids %}checked{% endif %}>
                     </td>
                 </tr>
                 <tr>
@@ -44,8 +44,8 @@
                                         <td class="pl-4">- {{ submenu['nombre'] }}</td>
                                         <td class="text-center">
                                             <input type="checkbox" class="permiso-checkbox"
-                                                data-idmenu="{{ submenu['id'] }}" data-idusuario="{{ tipoUsuario.id }}" {%
-                                                if submenu['id'] in dmnus_ids %}checked{% endif %}>
+                                                data-idmenu="{{ submenu['id'] }}" data-idusuario="{{ tipoUsuario.id }}"
+                                                {% if submenu['id'] in dmnus_ids %}checked{% endif %}>
                                         </td>
                                     </tr>
                                     {% endfor %}
@@ -56,13 +56,124 @@
                 </tr>
                 {% endfor %}
             </tbody>
+        </table> -->
+        <table class="table table-bordered table-hover permisos-table">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Nombre del módulo</th>
+                    <th class="columna-permiso">Permiso</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for menu in menus %}
+                <!-- Módulo principal -->
+                <tr class="modulo-principal" data-modulo="{{ menu['id'] }}">
+                    <td>
+                        <span class="expandir-icon" onclick="toggleSubmenus(`{{ menu['id'] }}`)">
+                            <i class="fas fa-chevron-right"></i>
+                        </span>
+                        {{ menu['nombre'] }}
+                    </td>
+                    <td class="columna-permiso">
+                        <input type="checkbox" class="permiso-checkbox" data-idmenu="{{ menu['id'] }}"
+                            data-idusuario="{{ tipoUsuario.id }}" {% if menu['id'] in dmnus_ids %}checked{% endif %}>
+                    </td>
+                </tr>
+
+                <!-- Submenús -->
+                {% for submenu in menu['submenus'] %}
+                <tr class="modulo-submenu submenu-{{ menu['id'] }} submenu-hidden" data-submenu="{{ submenu['id'] }}">
+                    <td>
+                        <span class="expandir-icon" onclick="toggleClaim(`{{ submenu['id'] }}`)">
+                            <i class="fas fa-chevron-right"></i>
+                        </span>
+                        {{ submenu['nombre'] }}</td>
+                    <td class="columna-permiso">
+                        <input type="checkbox" class="permiso-checkbox" data-idmenu="{{ submenu['id'] }}"
+                            data-idusuario="{{ tipoUsuario.id }}" {% if submenu['id'] in dmnus_ids %}checked{% endif %}>
+                    </td>
+                </tr>
+                {% for claim in submenu['submenus'] %}
+                <tr class="modulo-claim claim-{{ submenu['id'] }} submenu-hidden">
+                    <td>- {{ claim['nombre'] }}</td>
+                    <td class="columna-permiso">
+                        <input type="checkbox" class="claim-checkbox" data-idclaim="{{ claim['id'] }}"
+                            data-idusuario="{{ tipoUsuario.id }}" {% if claim['id'] in dclaims_ids %}checked{% endif %}>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% endfor %}
+                {% endfor %}
+            </tbody>
         </table>
     </div>
 </div>
 {% endblock %}
+{% block styles %}
+<style>
+    .permisos-table {
+        border-collapse: collapse;
+        width: 100%;
+    }
 
+    .permisos-table td,
+    .permisos-table th {
+        vertical-align: middle;
+    }
+
+    .columna-permiso {
+        text-align: center;
+    }
+
+    .submenu-hidden {
+        display: none;
+    }
+
+    .expandir-icon {
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
 {% block scripts %}
 <script>
+    function toggleSubmenus(moduloId) {
+        const submenus = document.querySelectorAll('.submenu-' + moduloId);
+        const icon = document.querySelector(`[data-modulo="${moduloId}"] .expandir-icon i`);
+
+        const estaOculto = submenus[0].classList.contains('submenu-hidden');
+
+        submenus.forEach(submenu => {
+            if (estaOculto) {
+                submenu.classList.remove('submenu-hidden');
+                icon.classList.remove('fa-chevron-right');
+                icon.classList.add('fa-chevron-down');
+            } else {
+                submenu.classList.add('submenu-hidden');
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-right');
+            }
+        });
+    }
+
+    function toggleClaim(moduloId) {
+        const submenus = document.querySelectorAll('.claim-' + moduloId);
+        const icon = document.querySelector(`[data-submenu="${moduloId}"] .expandir-icon i`);
+
+        const estaOculto = submenus[0].classList.contains('submenu-hidden');
+
+        submenus.forEach(submenu => {
+            if (estaOculto) {
+                submenu.classList.remove('submenu-hidden');
+                icon.classList.remove('fa-chevron-right');
+                icon.classList.add('fa-chevron-down');
+            } else {
+                submenu.classList.add('submenu-hidden');
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-right');
+            }
+        });
+    }
+
     $(document).ready(function () {
         $('.permiso-checkbox').on('click', function (e) {
             const checkbox = $(this);
@@ -76,7 +187,7 @@
 
             Swal.fire({
                 title: "¿Estás seguro?",
-                text: "Esta acción va a " + texto + " el permiso del usuario. ¿Deseas continuar?",
+                text: "Esta acción va a " + texto + " el permiso del tipo de usuario. ¿Deseas continuar?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
@@ -86,9 +197,70 @@
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
+                    
                     const formData = new FormData();
                     formData.append('idMenu', idMenu);
                     formData.append('idTipoUsuario', idUsuario);
+                    formData.append('esClaim', 0);
+                    formData.append('accion', accion);
+
+                    $.ajax({
+                        url: `/trabajadores/configuracion/EditarPermisos/${idUsuario}`,
+                        method: "POST",
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function (response) {
+                            if (response.Status === "success") {
+                                if (response.Msj) {
+                                    toastr.success(response.Msj, 'MENSAJE DE SISTEMA');
+                                    checkbox.prop('checked', isChecked);
+                                } else if (response.Msj2) {
+                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                }
+                            } else {
+                                toastr.error(response.Msj || "Error desconocido.", 'MENSAJE DE SISTEMA');
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("AJAX error:", error);
+                            toastr.error("Hubo un error al comunicarse con el servidor.", 'MENSAJE DE SISTEMA');
+                        }
+                    });
+                } else {
+                    checkbox.prop('checked', !isChecked);
+                }
+            });
+        });
+
+        $('.claim-checkbox').on('click', function (e) {
+            const checkbox = $(this);
+            const idMenu = checkbox.data('idclaim');
+            console.log(idMenu);
+            const idUsuario = Number("{{ tipoUsuario.id }}");
+            const isChecked = checkbox.is(':checked');
+            const accion = isChecked ? 1 : 0;
+            let texto = accion === 1 ? 'asignar' : 'eliminar';
+
+            e.preventDefault();
+
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción va a " + texto + " el permiso del tipo de usuario. ¿Deseas continuar?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, " + texto,
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    
+                    const formData = new FormData();
+                    formData.append('idMenu', idMenu);
+                    formData.append('idTipoUsuario', idUsuario);
+                    formData.append('esClaim', 1);
                     formData.append('accion', accion);
 
                     $.ajax({

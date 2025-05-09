@@ -60,9 +60,12 @@ def login():
             usuario = Usuario.autenticar(email, password_hash)
             if usuario:
                 menus = TipoUsuario.obtener_menus(usuario['id_tipousuario'])
+                claims = TipoUsuario.obtener_claims(usuario['id_tipousuario'])
                 menu_ids = [menu['id'] for menu in menus]  # List comprehension para obtener solo los IDs
+                claims_ids = [claim['id'] for claim in claims]
                 session['usuario'] = usuario
                 session['menus'] = menu_ids
+                session['claims'] = claims_ids
                 return jsonify({'Status': 'success', 'Msj': 'Inicio de sesión exitoso'})
 
             return jsonify({'Status': 'error', 'Msj': 'Credenciales incorrectas'})

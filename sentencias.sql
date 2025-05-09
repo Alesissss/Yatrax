@@ -1,6 +1,8 @@
 -- Primero eliminamos los procedimientos por si existen
 DROP PROCEDURE IF EXISTS SP_ASIGNAR_DMENU;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_DMENU;
+DROP PROCEDURE IF EXISTS SP_ASIGNAR_DCLAIM;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_DCLAIM;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_USUARIO;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_USUARIO;
 DROP PROCEDURE IF EXISTS SP_EDITAR_USUARIO;
@@ -89,7 +91,9 @@ DROP PROCEDURE IF EXISTS SP_DARBAJA_RUTA;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_RUTA;
 -- Luego eliminamos las tablas, primero la que depende de la otra
 DROP TABLE IF EXISTS conf_plantillas;
+DROP TABLE IF EXISTS conf_dclaims;
 DROP TABLE IF EXISTS conf_dmenus;
+DROP TABLE IF EXISTS conf_claims;
 DROP TABLE IF EXISTS conf_menus;
 DROP TABLE IF EXISTS usuarios;
 DROP TABLE IF EXISTS tipo_usuario;
@@ -267,6 +271,22 @@ CREATE TABLE conf_dmenus (
     idMenu INT REFERENCES conf_menus (id),
     idTipoUsuario INT REFERENCES usuarios (id),
     PRIMARY KEY (idMenu, idTipoUsuario)
+);
+
+-- Crear tabla claims
+CREATE TABLE conf_claims (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    estado BOOLEAN NOT NULL,
+    idPadre INT NULL,
+    FOREIGN KEY (idPadre) REFERENCES conf_menus(id)
+);
+
+-- Crear tabla detalle_claim
+CREATE TABLE conf_dclaims (
+    idClaim INT REFERENCES conf_claims (id),
+    idTipoUsuario INT REFERENCES tipo_usuario (id),
+    PRIMARY KEY (idClaim, idTipoUsuario)
 );
 
 -- Crear tabla conf_plantillas
@@ -2255,33 +2275,153 @@ INSERT INTO conf_menus (id, nombre, estado) VALUES (3, 'M_VENTAS', 1);
 INSERT INTO conf_menus (id, nombre, estado) VALUES (4, 'M_VIAJES', 1);
 INSERT INTO conf_menus (id, nombre, estado) VALUES (5, 'M_PERSONAL', 1);
 INSERT INTO conf_menus (id, nombre, estado) VALUES (6, 'M_ATENCION', 1);
+
 -- Submenús de USUARIOS
+-- Gestionar usuarios
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (10, 'Gestionar usuarios', 1, 1);
+-- Claims de Gestionar usuarios (Menú 10)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (1, 'Registrar usuario', 1, 10);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (2, 'Editar usuario', 1, 10);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (3, 'Eliminar usuario', 1, 10);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (4, 'Ver usuario', 1, 10);
+
+-- Gestionar tipos de usuarios
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (11, 'Gestionar tipos de usuarios', 1, 1);
+-- Claims de Gestionar tipos de usuarios (Menú 11)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (5, 'Registrar tipo de usuario', 1, 11);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (6, 'Editar tipo de usuario', 1, 11);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (7, 'Eliminar tipo de usuario', 1, 11);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (8, 'Ver tipo de usuario', 1, 11);
+
 -- Submenús de CONFIGURACIÓN
+-- Gestionar permisos
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (20, 'Gestionar permisos', 1, 2);
+-- Claims de Gestionar permisos (Menú 20)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (9, 'Editar permisos', 1, 20);
+
+-- Gestionar plantillas
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (21, 'Gestionar plantillas', 1, 2);
+-- Claims de Gestionar plantillas (Menú 21)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (10, 'Registrar plantilla', 1, 21);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (11, 'Editar plantilla', 1, 21);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (12, 'Eliminar plantilla', 1, 21);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (13, 'Ver plantilla', 1, 21);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (14, 'Activar plantilla', 1, 21);
+
+-- Gestionar métodos de pago
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (22, 'Gestionar métodos de pago', 1, 2);
+-- Claims de Gestionar métodos de pago (Menú 22)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (15, 'Registrar método de pago', 1, 22);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (16, 'Editar método de pago', 1, 22);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (17, 'Eliminar método de pago', 1, 22);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (18, 'Ver método de pago', 1, 22);
+
 -- Submenús de VENTAS
+-- Gestionar tipo de comprobante
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (30, 'Gestionar tipo comprobante', 1, 3);
+-- Claims de Gestionar tipo de comprobante (Menú 30)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (19, 'Registrar tipo comprobante', 1, 30);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (20, 'Editar tipo comprobante', 1, 30);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (21, 'Eliminar tipo comprobante', 1, 30);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (22, 'Ver tipo comprobante', 1, 30);
+
+-- Gestionar tipo de cliente
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (31, 'Gestionar tipo cliente', 1, 3);
+-- Claims de Gestionar tipo cliente (Menú 31)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (23, 'Registrar tipo cliente', 1, 31);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (24, 'Editar tipo cliente', 1, 31);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (25, 'Eliminar tipo cliente', 1, 31);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (26, 'Ver tipo cliente', 1, 31);
+
+-- Gestionar tipo de servicio
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (32, 'Gestionar tipo servicio', 1, 3);
+-- Claims de Gestionar tipo servicio (Menú 32)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (27, 'Registrar tipo servicio', 1, 32);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (28, 'Editar tipo servicio', 1, 32);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (29, 'Eliminar tipo servicio', 1, 32);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (30, 'Ver tipo servicio', 1, 32);
+
+-- Gestionar servicios
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (33, 'Gestionar servicio', 1, 3);
+-- Claims de Gestionar servicio (Menú 33)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (31, 'Registrar servicio', 1, 33);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (32, 'Editar servicio', 1, 33);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (33, 'Eliminar servicio', 1, 33);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (34, 'Ver servicio', 1, 33);
+
+-- Gestionar tipo de documento
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (34, 'Gestionar tipo documento', 1, 3);
+-- Claims de Gestionar tipo documento (Menú 34)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (35, 'Registrar tipo documento', 1, 34);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (36, 'Editar tipo documento', 1, 34);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (37, 'Eliminar tipo documento', 1, 34);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (38, 'Ver tipo documento', 1, 34);
+
 -- Submenús de VIAJES
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (40, 'Gestionar horarios', 1, 4);
+
+-- Gestionar tipo de vehículo
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (41, 'Gestionar tipo vehículo', 1, 4);
+-- Claims de Gestionar tipo vehículo (Menú 41)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (39, 'Registrar tipo vehículo', 1, 41);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (40, 'Editar tipo vehículo', 1, 41);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (41, 'Eliminar tipo vehículo', 1, 41);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (42, 'Ver tipo vehículo', 1, 41);
+
+-- Gestionar vehículos
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (42, 'Gestionar vehículo', 1, 4);
+-- Claims de Gestionar vehículo (Menú 42)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (43, 'Registrar vehículo', 1, 42);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (44, 'Editar vehículo', 1, 42);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (45, 'Eliminar vehículo', 1, 42);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (46, 'Ver vehículo', 1, 42);
+
+-- Gestionar niveles
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (43, 'Gestionar niveles', 1, 4);
+-- Claims de Gestionar niveles (Menú 43)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (47, 'Registrar niveles', 1, 43);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (48, 'Editar niveles', 1, 43);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (49, 'Eliminar niveles', 1, 43);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (50, 'Ver niveles', 1, 43);
+
+-- Gestionar sucursales
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (44, 'Gestionar sucursales', 1, 4);
+-- Claims de Gestionar sucursales (Menú 44)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (51, 'Registrar sucursales', 1, 44);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (52, 'Editar sucursales', 1, 44);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (53, 'Eliminar sucursales', 1, 44);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (54, 'Ver sucursales', 1, 44);
+
+-- Gestionar marcas
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (45, 'Gestionar marcas', 1, 4);
+-- Claims de Gestionar marcas (Menú 45)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (55, 'Registrar marcas', 1, 45);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (56, 'Editar marcas', 1, 45);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (57, 'Eliminar marcas', 1, 45);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (58, 'Ver marcas', 1, 45);
+
+-- Gestionar rutas
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (46, 'Gestionar rutas', 1, 4);
+-- Claims de Gestionar rutas (Menú 46)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (59, 'Registrar rutas', 1, 46);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (60, 'Editar rutas', 1, 46);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (61, 'Eliminar rutas', 1, 46);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (62, 'Ver rutas', 1, 46);
+
 -- Submenús de PERSONAL
+-- Gestionar tipo de personal
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (50, 'Gestionar tipo personal', 1, 5);
+-- Claims de Gestionar tipo personal (Menú 50)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (63, 'Registrar tipo personal', 1, 50);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (64, 'Editar tipo personal', 1, 50);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (65, 'Eliminar tipo personal', 1, 50);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (66, 'Ver tipo personal', 1, 50);
+
 -- Submenús de ATENCIÓN AL CLIENTE
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (60, 'Ejemplo', 1, 6);
 
 -- Tabla dmenus
+-- Módulos principales
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (1, 1);
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (2, 1);
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (3, 1);
@@ -2313,6 +2453,74 @@ INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (46, 1);
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (50, 1);
 -- Submenús de "ATENCIÓN AL CLIENTE"
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (60, 1);
+
+-- Todos los claims al administrador
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (1,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (2,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (3,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (4,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (5,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (6,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (7,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (8,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (9,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (10,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (11,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (12,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (13,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (14,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (15,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (16,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (17,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (18,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (19,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (20,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (21,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (22,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (23,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (24,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (25,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (26,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (27,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (28,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (29,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (30,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (31,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (32,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (33,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (34,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (35,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (36,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (37,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (38,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (39,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (40,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (41,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (42,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (43,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (44,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (45,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (46,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (47,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (48,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (49,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (50,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (51,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (52,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (53,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (54,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (55,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (56,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (57,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (58,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (59,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (60,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (61,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (62,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (63,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (64,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (65,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (66,1);
 
 -- Tabla apariencia
 INSERT INTO conf_plantillas (id, nombre, color_header, color_footer, logo, estado, fecha_registro, usuario) VALUES (1, 'YATRAX', '#0c336e', '#000000', '/Static/img/plantillas/logo_yatusa.png', 1, '2025-03-06 20:06:14', 'SYSTEM');
@@ -2890,6 +3098,62 @@ BEGIN
         SET @MSJ2 = 'El permiso que intenta eliminar, no existe';
     ELSE
         DELETE FROM conf_dmenus WHERE idMenu = P_IDMENU AND idTipoUsuario = P_IDTIPOUSUARIO; 
+        SET @MSJ = 'Se eliminó correctamente el permiso';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ASIGNAR_DCLAIM
+DELIMITER $$
+CREATE PROCEDURE SP_ASIGNAR_DCLAIM(
+    IN P_IDCLAIM INT,
+    IN P_IDTIPOUSUARIO INT
+)
+BEGIN
+    DECLARE cClaims INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cClaims FROM conf_dclaims WHERE idClaim = P_IDCLAIM AND idTipoUsuario = P_IDTIPOUSUARIO;
+
+    IF cClaims > 0 THEN
+        SET @MSJ2 = 'El permiso que intenta asignar, ya existe';
+    ELSE
+        INSERT INTO conf_dclaims (idClaim, idTipoUsuario) 
+        VALUES (P_IDCLAIM, P_IDTIPOUSUARIO);
+
+        SET @MSJ = 'Se asignó correctamente el permiso';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_DCLAIM
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_DCLAIM(
+    IN P_IDCLAIM INT,
+    IN P_IDTIPOUSUARIO INT
+)
+BEGIN
+    DECLARE cClaims INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cClaims FROM conf_dclaims WHERE idClaim = P_IDCLAIM AND idTipoUsuario = P_IDTIPOUSUARIO;
+
+    IF cClaims <= 0 THEN
+        SET @MSJ2 = 'El permiso que intenta eliminar, no existe';
+    ELSE
+        DELETE FROM conf_dclaims WHERE idClaim = P_IDCLAIM AND idTipoUsuario = P_IDTIPOUSUARIO; 
         SET @MSJ = 'Se eliminó correctamente el permiso';
     END IF;
 END $$
