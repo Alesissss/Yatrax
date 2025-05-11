@@ -315,6 +315,17 @@
                                 </li>
                                 {% endif %}
                             </ul>
+                            <!-- Menu Personal -->
+                             <ul class="nav nav-treeview" style="display: block;">
+                                <li class="nav-item">
+                                    <a href="{{ url_for('personal.Menu_Personal') }}"
+                                        class="nav-link {% if active_page == 'tipoPersonal' %}active{% endif %}">
+                                        <i class="bi bi-calendar-week nav-icon"></i>
+                                        <p>Gestionar Personal</p>
+                                    </a>
+                                </li>
+                            </ul>
+                            
                         </li>
                         {% endif %}
                         {% endif %}

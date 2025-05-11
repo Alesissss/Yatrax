@@ -40,7 +40,10 @@ DROP PROCEDURE IF EXISTS SP_REGISTRAR_TIPO_DOCUMENTO;
 DROP PROCEDURE IF EXISTS SP_EDITAR_TIPO_DOCUMENTO;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPO_DOCUMENTO;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_DOCUMENTO;
-
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_PERSONAL;
+DROP PROCEDURE IF EXISTS SP_EDITAR_PERSONAL;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_PERSONAL;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_PERSONAL;
 DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPOVEHICULO;
@@ -112,6 +115,7 @@ DROP TABLE IF EXISTS marca;
 DROP TABLE IF EXISTS ruta;
 DROP TABLE IF EXISTS nivel;
 DROP TABLE IF EXISTS ciudad;
+DROP TABLE IF EXISTS personal;
 
 -- Crear tabla tipo_servicio
 CREATE TABLE tipo_servicio (
@@ -353,6 +357,23 @@ CREATE TABLE metodo_pago (
     estado_registro INT not null DEFAULT 1,
     fecha_registro DATETIME not null DEFAULT CURRENT_TIMESTAMP, 
     usuario VARCHAR(100) not null
+);
+
+-- Crear tabla personal
+
+CREATE TABLE personal (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    imagen VARCHAR(255) NOT NULL,
+    estado BOOLEAN NOT NULL,
+    id_tipopersonal INT NOT NULL,
+    estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
+    estado_registro INT NOT NULL DEFAULT 1,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+    usuario VARCHAR(100) NOT NULL,
+    FOREIGN KEY (id_tipopersonal) REFERENCES tipo_personal(id) -- Relación con tipo_personal
 );
 
 -- INSERTS IATA CIUDAD
@@ -4830,4 +4851,147 @@ BEGIN
         SET @MSJ = 'Se eliminó correctamente a la ruta';
     END IF;
 END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_REGISTRAR_PERSONAL
+
+DELIMITER $$
+
+CREATE PROCEDURE SP_REGISTRAR_PERSONAL(
+    IN P_NOMBRE VARCHAR(255),
+    IN P_EMAIL VARCHAR(255),
+    IN P_PASS VARCHAR(255),
+    IN P_IMAGEN VARCHAR(255),
+    IN P_ESTADO BOOLEAN,
+    IN P_IDTIPOPERSONAL INT,
+    IN P_USUARIO VARCHAR(255)
+)
+BEGIN
+    DECLARE cEmail INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cEmail FROM personal WHERE EMAIL = P_EMAIL AND ESTADO_REGISTRO = 1;
+
+    IF cEmail > 0 THEN
+        SET @MSJ2 = 'El correo que intenta registrar ya está registrado';
+    ELSE
+        INSERT INTO personal (NOMBRE, EMAIL, PASSWORD, IMAGEN, ESTADO, ID_TIPOPERSONAL, USUARIO) 
+        VALUES (P_NOMBRE, P_EMAIL, P_PASS, P_IMAGEN, P_ESTADO, P_IDTIPOPERSONAL, P_USUARIO);
+
+        SET @MSJ = 'Se registró correctamente al personal';
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Crear procedimiento SP_EDITAR_PERSONAL
+
+DELIMITER $$
+
+CREATE PROCEDURE SP_EDITAR_PERSONAL(
+    IN P_ID INT,
+    IN P_NOMBRE VARCHAR(255),
+    IN P_EMAIL VARCHAR(255),
+    IN P_IMAGEN VARCHAR(255),
+    IN P_ESTADO BOOLEAN,
+    IN P_IDTIPOPERSONAL INT
+)
+BEGIN
+    DECLARE cPersonal INT;
+    DECLARE cEmail INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cPersonal FROM personal WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+    SELECT COUNT(*) INTO cEmail FROM personal WHERE EMAIL = P_EMAIL AND ID != P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cPersonal <= 0 THEN
+        SET @MSJ2 = 'El personal que intenta editar no existe';
+    ELSEIF cEmail != 0 THEN
+        SET @MSJ2 = 'El correo ingresado ya existe';
+    ELSE
+        UPDATE personal 
+        SET NOMBRE = P_NOMBRE, 
+            EMAIL = P_EMAIL,
+            IMAGEN = P_IMAGEN,
+            ESTADO = P_ESTADO,
+            ID_TIPOPERSONAL = P_IDTIPOPERSONAL, 
+            ESTADO_PROCESO = 'MODIFICADO' 
+        WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se modificó correctamente al personal';
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Crear procedimiento SP_DARBAJA_PERSONAL
+
+DELIMITER $$
+
+CREATE PROCEDURE SP_DARBAJA_PERSONAL(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cPersonal INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cPersonal FROM personal WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cPersonal <= 0 THEN
+        SET @MSJ2 = 'El personal que intenta dar de baja no existe';
+    ELSE
+        UPDATE personal SET ESTADO = 0, ESTADO_PROCESO = 'MODIFICADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se dio de baja correctamente al personal';
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_PERSONAL
+
+DELIMITER $$
+
+CREATE PROCEDURE SP_ELIMINAR_PERSONAL(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cPersonal INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cPersonal FROM personal WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cPersonal <= 0 THEN
+        SET @MSJ2 = 'El personal que intenta eliminar no existe';
+    ELSE
+        UPDATE personal SET ESTADO_REGISTRO = 2, ESTADO_PROCESO = 'ELIMINADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se eliminó correctamente al personal';
+    END IF;
+END $$
+
 DELIMITER ;
