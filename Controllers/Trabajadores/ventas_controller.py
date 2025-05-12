@@ -503,7 +503,6 @@ def editar_servicio(idServicio):
 
             mensajes = Servicio.actualizarServicio(idServicio, nombre, descripcion, idTipoServicio, estado)
 
-            mensajes = Servicio.darBajaServicio(idServicio)
             if mensajes and isinstance(mensajes, list) and len(mensajes) > 0:
                 msj1 = mensajes[0].get('MSJ')
                 msj2 = mensajes[0].get('MSJ2')
