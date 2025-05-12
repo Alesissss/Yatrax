@@ -309,23 +309,21 @@
                                 <li class="nav-item">
                                     <a href="{{ url_for('personal.Menu_TipoPersonal') }}"
                                         class="nav-link {% if active_page == 'tipoPersonal' %}active{% endif %}">
-                                        <i class="bi bi-calendar-week nav-icon"></i>
+                                        <i class="bi bi-person-gear nav-icon"></i>
                                         <p>Gestionar tipo personal</p>
                                     </a>
                                 </li>
                                 {% endif %}
-                            </ul>
-                            <!-- Menu Personal -->
-                             <ul class="nav nav-treeview" style="display: block;">
+                                {% if 51 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('personal.Menu_Personal') }}"
-                                        class="nav-link {% if active_page == 'tipoPersonal' %}active{% endif %}">
-                                        <i class="bi bi-calendar-week nav-icon"></i>
+                                        class="nav-link {% if active_page == 'personal' %}active{% endif %}">
+                                        <i class="bi bi-person-vcard nav-icon"></i>
                                         <p>Gestionar Personal</p>
                                     </a>
                                 </li>
+                                {% endif %}
                             </ul>
-                            
                         </li>
                         {% endif %}
                         {% endif %}

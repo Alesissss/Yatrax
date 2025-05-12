@@ -11,10 +11,7 @@ endblock %} {% block content %}
   <div class="panel-body">
     <div class="row">
       <div class="col-12">
-        <table
-          id="tbl_tipoVehiculo"
-          class="table table-bordered table-short-rows"
-        >
+        <table id="tbl_tipoVehiculo" class="table table-bordered table-short-rows">
           <thead class="bg-gray">
             <tr>
               <th class="text-center">ID</th>
@@ -131,7 +128,7 @@ endblock %} {% block content %}
           text: '<i class="bi bi-file-earmark-excel"></i>',
           titleAttr: "Exportar a Excel",
           className: "btn btn-success",
-          filename: "Usuarios" + " " + moment().format("DD-MM-YYYY HH_mm"),
+          filename: "Tipo Vehículo" + " " + moment().format("DD-MM-YYYY HH_mm"),
           footer: true,
           exportOptions: {
             stripHtml: true,
@@ -143,7 +140,7 @@ endblock %} {% block content %}
           text: '<i class="bi bi-file-earmark-pdf"></i>',
           titleAttr: "Exportar a PDF",
           className: "btn btn-danger",
-          filename: "Usuarios" + " " + moment().format("DD-MM-YYYY HH_mm"),
+          filename: "Tipo Vehículo" + " " + moment().format("DD-MM-YYYY HH_mm"),
           exportOptions: {
             stripHtml: true,
             columns: ":not(:last-child)",
@@ -181,7 +178,7 @@ endblock %} {% block content %}
         url: "/trabajadores/viajes/GetData_TipoVehiculo",
         type: "GET",
         datatype: "json",
-        data: function (d) {},
+        data: function (d) { },
         dataSrc: function (json) {
           if (json.Status === "error") {
             toastr.error(
@@ -208,13 +205,20 @@ endblock %} {% block content %}
         { data: "capacidad", name: "capacidad" },
         { data: "marca", name: "Marca" },
         { data: "cantidad", name: "cantidad" },
-        {
-          data: "estado",
+        { 
+          data: "estado", 
           name: "estado",
           render: function (data, type, row) {
-            return data === 1 ? "Activo" : "No activo";
+              let estado = data === 1 ? 'Vigente' : 'No vigente';
+              if (estado === "Vigente") {
+                  return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-success fs-5">${estado}</span></h5>`;
+              } else if (estado === "No vigente") {
+                  return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-danger fs-5">${estado}</span></h5>`;
+              } else {
+                  return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge fs-5" style="background-color: #800080; color: white;">${estado}</span></h5>`;
+              }
           },
-        },
+      },
         {
           data: null,
           name: null,
@@ -238,13 +242,13 @@ endblock %} {% block content %}
           className: "text-center align-middle",
         },
         {
-          targets: [1, 2, 3, 4],
+          targets: [1, 2, 3, 4, 5, 6],
           className: "align-middle",
         },
         {
-          targets: [5],
+          targets: [6],
           orderable: false,
-          width: "10%",
+          width: "15%",
         },
       ],
       lengthMenu: [
@@ -426,7 +430,7 @@ endblock %} {% block content %}
 
   // Carga opciones de vehículo
   function fct_GetTipoVehiculo(selected) {
-    $.getJSON('/trabajadores/viajes/GetData_TipoVehiculo', function(response) {
+    $.getJSON('/trabajadores/viajes/GetData_TipoVehiculo', function (response) {
       if (response.Status === 'success') {
         let items = '<option disabled>--SELECCIONAR--</option>';
         response.data.forEach(item => {
@@ -460,13 +464,13 @@ endblock %} {% block content %}
     // Eventos
     document.getElementById('btn_Listado').onclick = () => window.location.href = '/trabajadores/viajes/GestionarNivel';
 
-    form.onsubmit = function(e) {
+    form.onsubmit = function (e) {
       e.preventDefault();
       $.ajax({
         url: '/trabajadores/viajes/registrarNivel',
         type: 'POST',
         data: $(this).serialize(),
-        success: function(response) {
+        success: function (response) {
           if (response.Status === 'success') {
             toastr.success(response.Msj || 'Nivel registrado correctamente', 'Éxito');
             setTimeout(() => window.location.reload(), 1000);
@@ -474,7 +478,7 @@ endblock %} {% block content %}
             toastr.error(response.Msj || 'Ocurrió un error al registrar', 'Error');
           }
         },
-        error: function(xhr) {
+        error: function (xhr) {
           const msg = xhr.responseJSON ? xhr.responseJSON.Msj : 'Error desconocido';
           toastr.error(msg, 'Error');
         }
@@ -517,54 +521,54 @@ endblock %} {% block content %}
         ) {
           $.fn.dataTable.ext.buttons.excelHtml5.available(dt, config)
             ? $.fn.dataTable.ext.buttons.excelHtml5.action.call(
-                self,
-                e,
-                dt,
-                button,
-                config
-              )
+              self,
+              e,
+              dt,
+              button,
+              config
+            )
             : $.fn.dataTable.ext.buttons.excelFlash.action.call(
-                self,
-                e,
-                dt,
-                button,
-                config
-              );
+              self,
+              e,
+              dt,
+              button,
+              config
+            );
         } else if (button[0].className.indexOf("buttons-csv") >= 0) {
           $.fn.dataTable.ext.buttons.csvHtml5.available(dt, config)
             ? $.fn.dataTable.ext.buttons.csvHtml5.action.call(
-                self,
-                e,
-                dt,
-                button,
-                config
-              )
+              self,
+              e,
+              dt,
+              button,
+              config
+            )
             : $.fn.dataTable.ext.buttons.csvFlash.action.call(
-                self,
-                e,
-                dt,
-                button,
-                config
-              );
+              self,
+              e,
+              dt,
+              button,
+              config
+            );
         } else if (
           button[0].className.indexOf("buttons-pdf") >= 0 ||
           button[0].className.indexOf("btn btn-danger") >= 0
         ) {
           $.fn.dataTable.ext.buttons.pdfHtml5.available(dt, config)
             ? $.fn.dataTable.ext.buttons.pdfHtml5.action.call(
-                self,
-                e,
-                dt,
-                button,
-                config
-              )
+              self,
+              e,
+              dt,
+              button,
+              config
+            )
             : $.fn.dataTable.ext.buttons.pdfFlash.action.call(
-                self,
-                e,
-                dt,
-                button,
-                config
-              );
+              self,
+              e,
+              dt,
+              button,
+              config
+            );
         } else if (
           button[0].className.indexOf("buttons-print") >= 0 ||
           button[0].className.indexOf("btn btn-info") >= 0

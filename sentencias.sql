@@ -106,6 +106,7 @@ DROP TABLE IF EXISTS horario;
 DROP TABLE IF EXISTS tipo_cliente;
 DROP TABLE IF EXISTS ubigeo;
 DROP TABLE IF EXISTS metodo_pago;
+DROP TABLE IF EXISTS personal;
 DROP TABLE IF EXISTS tipo_personal;
 DROP TABLE IF EXISTS servicio;
 DROP TABLE IF EXISTS tipo_servicio;
@@ -115,7 +116,6 @@ DROP TABLE IF EXISTS marca;
 DROP TABLE IF EXISTS ruta;
 DROP TABLE IF EXISTS nivel;
 DROP TABLE IF EXISTS ciudad;
-DROP TABLE IF EXISTS personal;
 
 -- Crear tabla tipo_servicio
 CREATE TABLE tipo_servicio (
@@ -2438,6 +2438,13 @@ INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (64, 'Editar tipo pe
 INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (65, 'Eliminar tipo personal', 1, 50);
 INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (66, 'Ver tipo personal', 1, 50);
 
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (51, 'Gestionar personal', 1, 5);
+-- Claims de Gestionar tipo personal (Menú 50)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (67, 'Registrar personal', 1, 51);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (68, 'Editar personal', 1, 51);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (69, 'Eliminar personal', 1, 51);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (70, 'Ver personal', 1, 51);
+
 -- Submenús de ATENCIÓN AL CLIENTE
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (60, 'Ejemplo', 1, 6);
 
@@ -2472,6 +2479,7 @@ INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (45, 1);
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (46, 1);
 -- Submenús de "PERSONAL"
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (50, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (51, 1);
 -- Submenús de "ATENCIÓN AL CLIENTE"
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (60, 1);
 
@@ -2542,6 +2550,10 @@ INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (63,1);
 INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (64,1);
 INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (65,1);
 INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (66,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (67,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (68,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (69,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (70,1);
 
 -- Tabla apariencia
 INSERT INTO conf_plantillas (id, nombre, color_header, color_footer, logo, estado, fecha_registro, usuario) VALUES (1, 'YATRAX', '#0c336e', '#000000', '/Static/img/plantillas/logo_yatusa.png', 1, '2025-03-06 20:06:14', 'SYSTEM');
