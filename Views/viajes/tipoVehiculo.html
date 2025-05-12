@@ -205,20 +205,20 @@ endblock %} {% block content %}
         { data: "capacidad", name: "capacidad" },
         { data: "marca", name: "Marca" },
         { data: "cantidad", name: "cantidad" },
-        {
-          data: "estado",
+        { 
+          data: "estado", 
           name: "estado",
           render: function (data, type, row) {
-            let estado = data === 1 ? 'Vigente' : 'No vigente';
-            if (estado === "Vigente") {
-              return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-success fs-5">${estado}</span></h5>`;
-            } else if (estado === "No vigente") {
-              return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-danger fs-5">${estado}</span></h5>`;
-            } else {
-              return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge fs-5" style="background-color: #800080; color: white;">${estado}</span></h5>`;
-            }
+              let estado = data === 1 ? 'Vigente' : 'No vigente';
+              if (estado === "Vigente") {
+                  return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-success fs-5">${estado}</span></h5>`;
+              } else if (estado === "No vigente") {
+                  return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-danger fs-5">${estado}</span></h5>`;
+              } else {
+                  return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge fs-5" style="background-color: #800080; color: white;">${estado}</span></h5>`;
+              }
           },
-        },
+      },
         {
           data: null,
           name: null,
@@ -242,13 +242,13 @@ endblock %} {% block content %}
           className: "text-center align-middle",
         },
         {
-          targets: [1, 2, 3, 4],
+          targets: [1, 2, 3, 4, 5, 6],
           className: "align-middle",
         },
         {
-          targets: [5],
+          targets: [6],
           orderable: false,
-          width: "10%",
+          width: "15%",
         },
       ],
       lengthMenu: [
