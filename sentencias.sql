@@ -323,7 +323,6 @@ CREATE TABLE marca (
     usuario VARCHAR(100) NOT NULL
 );
 
-
 CREATE TABLE tipo_vehiculo (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL,
@@ -335,7 +334,7 @@ CREATE TABLE tipo_vehiculo (
 
 CREATE TABLE vehiculo (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    placa VARCHAR(10) NOT NULL,
+    placa VARCHAR(10),
     anio INT,
     color VARCHAR(30),
     estado TINYINT NOT NULL,
@@ -3331,40 +3330,68 @@ DELIMITER $$
 -- Procedimiento para insertar tipo de vehículo
 
 CREATE PROCEDURE SP_INSERTAR_TIPOVEHICULO(
-    IN p_nombre VARCHAR(50),
-    IN p_idMarca INT,
-    IN p_cantidad INT,
-    OUT MSJ VARCHAR(255)
+    IN  p_nombre     VARCHAR(50),
+    IN  p_idMarca    INT,
+    IN  p_cantidad   INT,
+    OUT MSJ          VARCHAR(255)
 )
 BEGIN
+    -- 1) Declaración de variables LO PRIMERO
     DECLARE v_existeMarca INT DEFAULT 0;
+    DECLARE v_nuevoTipo   INT DEFAULT 0;
+    DECLARE v_i           INT DEFAULT 1;
 
-    -- Verificar si la marca existe
+    -- 2) Verificar si la marca existe
     SELECT COUNT(*) INTO v_existeMarca
-    FROM marca
-    WHERE id = p_idMarca;
+      FROM marca
+     WHERE id = p_idMarca;
 
     IF v_existeMarca = 0 THEN
         SET MSJ = 'La marca no existe';
     ELSE
+        -- 3) Inserto el nuevo tipo de vehículo
         INSERT INTO tipo_vehiculo (nombre, id_marca, estado, cantidad)
         VALUES (p_nombre, p_idMarca, 1, p_cantidad);
-        SET MSJ = 'Tipo de vehículo insertado correctamente';
+
+        -- 4) Capturo el ID recién generado
+        SET v_nuevoTipo = LAST_INSERT_ID();
+
+        -- 5) Bucle para crear p_cantidad vehículos con placa NULL
+        WHILE v_i <= p_cantidad DO
+            INSERT INTO vehiculo (
+                placa,
+                anio,
+                color,
+                estado,
+                id_tipo_vehiculo
+            ) VALUES (
+                NULL,       -- placa como NULL
+                NULL,       -- año
+                NULL,       -- color
+                1,          -- estado activo
+                v_nuevoTipo
+            );
+            SET v_i = v_i + 1;
+        END WHILE;
+
+        SET MSJ = CONCAT('Tipo de vehículo insertado y ', p_cantidad, ' vehículos creados');
     END IF;
 END$$
 
--- Procedimiento para actualizar tipo de vehículo
 CREATE PROCEDURE SP_ACTUALIZAR_TIPOVEHICULO(
-    IN p_id INT,
-    IN p_nombre VARCHAR(50),
-    IN p_idMarca INT,
-    IN p_estado TINYINT,
-    IN p_cantidad INT,
-    OUT MSJ VARCHAR(255),
-    OUT MSJ2 VARCHAR(255)
+    IN  p_id        INT,
+    IN  p_nombre    VARCHAR(50),
+    IN  p_idMarca   INT,
+    IN  p_estado    TINYINT,
+    IN  p_cantidad  INT,
+    OUT MSJ         VARCHAR(255),
+    OUT MSJ2        VARCHAR(255)
 )
 BEGIN
-    DECLARE v_existeMarca INT DEFAULT 0;
+    DECLARE v_existeMarca   INT DEFAULT 0;
+    DECLARE v_total         INT DEFAULT 0;
+    DECLARE v_sinplaca      INT DEFAULT 0;
+    DECLARE v_diff          INT DEFAULT 0;
 
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -3372,28 +3399,85 @@ BEGIN
         SET MSJ2 = 'Error inesperado al actualizar el tipo de vehículo';
     END;
 
-    SET MSJ = NULL;
+    SET MSJ  = NULL;
     SET MSJ2 = NULL;
 
-    -- Verificar existencia de la marca
+    -- 1) Verificar que la marca exista
     SELECT COUNT(*) INTO v_existeMarca
-    FROM marca
-    WHERE id = p_idMarca;
+      FROM marca
+     WHERE id = p_idMarca;
 
     IF v_existeMarca = 0 THEN
         SET MSJ2 = 'La marca indicada no existe';
     ELSE
-        -- Actualizar el tipo de vehículo
-        START TRANSACTION;
-        UPDATE tipo_vehiculo
-        SET nombre  = p_nombre,
-            id_marca = p_idMarca,
-            estado  = p_estado,
-            cantidad = p_cantidad
-        WHERE id = p_id;
-        COMMIT;
+        -- 2) Conteos
+        SELECT COUNT(*) INTO v_total
+          FROM vehiculo
+         WHERE id_tipo_vehiculo = p_id;
 
-        SET MSJ = 'Se actualizó correctamente el tipo de vehículo';
+        SELECT COUNT(*) INTO v_sinplaca
+          FROM vehiculo
+         WHERE id_tipo_vehiculo = p_id
+           AND placa IS NULL;
+
+        -- 3) Inicio de transacción
+        START TRANSACTION;
+
+        IF p_cantidad < v_total THEN
+            SET v_diff = v_total - p_cantidad;
+
+            IF v_sinplaca = 0 THEN
+                -- Todos los vehículos tienen placa: no se puede reducir
+                SET MSJ2 = 'No se puede reducir: todos los vehículos ya tienen placa';
+                ROLLBACK;
+
+            ELSEIF v_diff > v_sinplaca THEN
+                -- No hay suficientes sin placa
+                SET MSJ2 = CONCAT(
+                  'Sólo hay ', v_sinplaca,
+                  ' vehículos sin placa; no se pueden eliminar ',
+                  v_diff
+                );
+                ROLLBACK;
+
+            ELSE
+                -- Eliminar sólo los excedentes sin placa
+                DELETE FROM vehiculo
+                 WHERE id_tipo_vehiculo = p_id
+                   AND placa IS NULL
+                 ORDER BY id
+                 LIMIT v_diff;
+            END IF;
+
+        ELSEIF p_cantidad > v_total THEN
+            -- Insertar los faltantes con placa NULL
+            SET v_diff = p_cantidad - v_total;
+            WHILE v_diff > 0 DO
+                INSERT INTO vehiculo (
+                    placa,
+                    anio,
+                    color,
+                    estado,
+                    id_tipo_vehiculo
+                ) VALUES (
+                    NULL, NULL, NULL, 1, p_id
+                );
+                SET v_diff = v_diff - 1;
+            END WHILE;
+        END IF;
+
+        -- 4) Si no hubo ningún error (MSJ2 sigue NULL), actualizo y comito
+        IF MSJ2 IS NULL THEN
+            UPDATE tipo_vehiculo
+            SET nombre   = p_nombre,
+                id_marca = p_idMarca,
+                estado   = p_estado,
+                cantidad = p_cantidad
+            WHERE id = p_id;
+
+            COMMIT;
+            SET MSJ = 'Tipo de vehículo y su flota actualizada correctamente';
+        END IF;
     END IF;
 END$$
 
