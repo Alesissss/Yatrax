@@ -311,8 +311,8 @@ def editarTipoVehiculo(idTipoVehiculo):
 
             mensajes = TipoVehiculo.actualizarTipoVehiculo(idTipoVehiculo,nombre,marca,estado,cantidad)
 
-            msj1 = mensajes.get('@MSJ')
-            msj2 = mensajes.get('@MSJ2')
+            msj1 = mensajes.get('MSJ')
+            msj2 = mensajes.get('MSJ2')
 
             if msj1:
                 return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
