@@ -80,6 +80,10 @@ def Menu_TipoServicio():
 def Menu_Servicio():
     return render_template('ventas/servicio.html', active_page="servicio", active_menu = 'mVentas')
 
+@ventas_bp.route('/GestionarClientes')
+def Menu_Clientes():
+    return render_template('ventas/cliente.html', active_page="cliente", active_menu='mVentas')
+
 @ventas_bp.route('/TipoServicioNuevo')
 def Menu_TipoServicioNuevo():
     return render_template('ventas/tipoServicioCRUD.html', active_page="tipoServicio", active_menu = 'mVentas', tiposervicio = {}, tittle = 'Registrar tipo servicio', btnId = 'btn_Registrar')
