@@ -780,7 +780,7 @@ def buscar_abreviatura():
                 'data': resultado
             })
         else:
-            resultado = provincia[:3] if len(provincia) >= 3 else provincia.ljust(3, 'X')
+            resultado = provincia[:3] if len(provincia) >= 2 else provincia.ljust(3, 'X')
             Ciudad.registrar_abreviatura(provincia, resultado)
         return jsonify({
             "Status": "success",
@@ -790,7 +790,7 @@ def buscar_abreviatura():
         return jsonify({
             'status': 'error',
             'message': 'Error interno del servidor'
-        }), 500
+        }), 100
 
 @viajes_bp.route('/api/geocodificar', methods=['GET'])
 def geocodificar_coordenadas():
