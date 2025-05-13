@@ -4,15 +4,15 @@
 <div class="container-fluid p-4">
     <div class="row mb-3">
         <div class="col-md-12">
-            <h1 class="mb-2">👤 Bienvenido al módulo de ventas</h1>
+            <h1 class="mb-2"><i class="bi bi-cart4"></i> Bienvenido al módulo de ventas</h1>
             <p class="text-muted">Este módulo permite administrar los procesos relacionados a las ventas y los clientes.</p>
         </div>
     </div>
-    <div class="row">
+    <div class="row d-flex">
         <!-- Sección informativa 1 -->
-        <div class="col-md-4 d-flex align-items-stretch">
+        <div class="col-md-4 h-100">
             <div class="info-box bg-primary elevation-2 text-white w-100">
-                <span class="info-box-icon"><i class="fas fa-users"></i></span>
+                <span class="info-box-icon"><i class="bi bi-bag-check-fill"></i></span>
                 <div class="info-box-content d-flex flex-column justify-content-between h-100">
                     <span class="info-box-text">Consulta de ventas</span>
                     <span class="info-box-number">
@@ -22,9 +22,9 @@
             </div>
         </div>
         <!-- Sección informativa 2 -->
-        <div class="col-md-4 d-flex align-items-stretch">
+        <div class="col-md-4 h-100">
             <div class="info-box bg-success elevation-2 text-white w-100">
-                <span class="info-box-icon"><i class="fas fa-user-plus"></i></span>
+                <span class="info-box-icon"><i class="bi bi-bag-plus-fill"></i></span>
                 <div class="info-box-content d-flex flex-column justify-content-between h-100">
                     <span class="info-box-text">Registro de nuevos servicios, tipos de cliente, comprobantes.</span>
                     <span class="info-box-number">
@@ -34,13 +34,15 @@
             </div>
         </div>
         <!-- Sección informativa 3 -->
-        <div class="col-md-4 d-flex align-items-stretch">
+        <div class="col-md-4 h-100">
             <div class="info-box bg-warning elevation-2 text-white w-100">
-                <span class="info-box-icon"><i class="fas fa-user-cog"></i></span>
+                <span class="info-box-icon"><i class="bi bi-briefcase-fill"></i></span>
                 <div class="info-box-content d-flex flex-column justify-content-between h-100">
                     <span class="info-box-text">Gestión de tipos de servicio</span>
                     <span class="info-box-number">
                         Define y organiza los servicios que brinda la empresa.
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     </span>
                 </div>
             </div>
@@ -50,8 +52,7 @@
         <div class="col-12">
             <div class="callout callout-info">
                 <h5>💡 ¿Sabías que...?</h5>
-                <p>Clasificar correctamente a los usuarios por tipo ayuda a personalizar su experiencia y controlar sus
-                    funcionalidades.</p>
+                <p>Realizar una buena gestión de los servicios ayuda a mejorar la eficiencia en la programación de viajes.</p>
             </div>
         </div>
     </div>
@@ -60,7 +61,7 @@
         <div class="col-md-6">
             <div class="card h-100">
                 <div class="card-header bg-info text-white">
-                    <h3 class="card-title">Cantidad de usuarios por tipo</h3>
+                    <h3 class="card-title">Cantidad de ingresos por servicio</h3>
                 </div>
                 <div class="card-body">
                     <div id="chartUsuariosTipo" style="width: 100%; height: 350px;"></div>
@@ -70,17 +71,19 @@
         <div class="col-md-6">
             <div class="card h-100">
                 <div class="card-header bg-danger text-white">
-                    <h3 class="card-title">Cantidad de registros de usuarios mensuales</h3>
+                    <h3 class="card-title">Cantidad de ingresos por un determinado periodo</h3>
                 </div>
                 <div class="card-body">
                     <div class="col-md-12 mb-3">
-                        <label for="cbx_Estado">Estado</label>
-                        <div class="input-group">
-                            <select id="cbx_Estado" class="form-control">
-                                <option disabled>--SELECCIONAR--</option>
-                                <option value="1">Vigente</option>
-                                <option value="0">No vigente</option>
-                            </select>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="">Fecha de inicio: </label>
+                                <input type="date" name="" id="" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="">Fecha final: </label>
+                                <input type="date" name="" id="" class="form-control">
+                            </div>
                         </div>
                     </div>
                     <div id="chartRegistrosMensuales" style="width: 100%; height: 300px;"></div>
@@ -118,9 +121,9 @@
                     type: 'pie',
                     radius: '50%',
                     data: [
-                        { value: 1048, name: 'Administradores' },
-                        { value: 735, name: 'Supervisores' },
-                        { value: 580, name: 'Usuarios normales' }
+                        { value: 1048, name: 'Buscama' },
+                        { value: 735, name: 'Bus' },
+                        { value: 580, name: 'Buscama-plus' }
                     ],
                     emphasis: {
                         itemStyle: {
