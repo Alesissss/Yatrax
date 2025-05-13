@@ -21,7 +21,7 @@
         border-radius: 30px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         width: 100%;
-        max-width: 500px;
+        max-width: 600px;
         padding: 40px;
         margin: 80px auto 40px;
         /* Margen superior fijo para el navbar */
@@ -51,18 +51,10 @@
         margin-bottom: 20px;
     }
 
-    .ytrx-input-icon {
-        position: absolute;
-        left: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #1976d2;
-    }
-
     /* Campos de formulario */
     .ytrx-form-input {
         width: 100%;
-        padding: 15px 15px 15px 50px;
+        padding: 15px 15px 15px 10px;
         border: 1px solid #ddd;
         border-radius: 8px;
         font-size: 16px;
@@ -90,8 +82,7 @@
     }
 
     #ytrx-doc-number {
-        width: 70%;
-        padding: 15px 15px 15px 50px;
+        width: 70%
     }
 
     /* Botón de submit */
@@ -148,12 +139,10 @@
         <form id="ytrx-register-form">
             <!-- Nombre completo -->
             <div class="ytrx-input-group">
-                <span class="ytrx-input-icon">👤</span>
                 <input type="text" id="ytrx-fullname" class="ytrx-form-input" placeholder="Nombre y Apellidos" required>
             </div>
 
             <div class="ytrx-input-group">
-                <span class="ytrx-input-icon">📅</span>
                 <input type="date" id="ytrx-birthdate" class="ytrx-form-input" placeholder="Fecha de nacimiento"
                     required>
             </div>
@@ -168,7 +157,6 @@
                     <option value="pasaporte">Pasaporte</option>
                 </select>
                 <div style="position: relative; width: 70%;">
-                    <span class="ytrx-input-icon">🆔</span>
                     <input type="text" id="ytrx-doc-number" class="ytrx-form-input" style="width: 100%;" placeholder="Número de documento"
                         required>
                 </div>
@@ -176,25 +164,21 @@
 
             <!-- Teléfono -->
             <div class="ytrx-input-group">
-                <span class="ytrx-input-icon">📱</span>
                 <input type="tel" id="ytrx-phone" class="ytrx-form-input" placeholder="Número de teléfono" required>
             </div>
 
             <!-- Email -->
             <div class="ytrx-input-group">
-                <span class="ytrx-input-icon">✉️</span>
                 <input type="email" id="ytrx-email" class="ytrx-form-input" placeholder="Correo electrónico" required>
             </div>
 
             <!-- Contraseña -->
             <div class="ytrx-input-group">
-                <span class="ytrx-input-icon">🔒</span>
                 <input type="password" id="ytrx-password" class="ytrx-form-input" placeholder="Contraseña" required>
             </div>
 
             <!-- Confirmar contraseña -->
             <div class="ytrx-input-group">
-                <span class="ytrx-input-icon">🔒</span>
                 <input type="password" id="ytrx-confirm-password" class="ytrx-form-input"
                     placeholder="Confirma contraseña" required>
             </div>
@@ -203,7 +187,7 @@
 
             <!-- Registro con redes sociales -->
             <div style="text-align: center; margin-top: 30px;">
-                <p style="margin-bottom: 15px; color: #666;">O regístrate con</p>
+                <p style="margin-bottom: 15px; color: #666;">O conéctate con</p>
                 <div style="display: flex; justify-content: center; gap: 15px;">
                     <button type="button" style="border: none; background: none; cursor: pointer;">
                         <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
