@@ -1,26 +1,35 @@
 {% extends "index.html" %}
 
-{% block title %}YATRAX - Gestión de tipos de servicios{% endblock %}
+{% block title %}YATRAX - Gestión de clientes{% endblock %}
 
 {% block content %}
 <div class="container-fluid p-4">
     <div class="panel-heading">
         <div class="row">
             <div class="col-md-12">
-                <h1>Gestionar tipos de servicios</h1>
+                <h1>Gestionar clientes</h1>
             </div>
         </div>
     </div>
     <div class="panel-body">
         <div class="row">
             <div class="col-12">
-                <table id="tbl_TipoServicio" class="table table-bordered table-short-rows">
+                <table id="tbl_Clientes" class="table table-bordered table-short-rows">
                     <thead class="bg-gray">
                         <tr>
                             <th class="text-center">ID</th>
-                            <th class="text-center">NOMBRE</th>
-                            <th class="text-center">ESTADO</th>
-                            <th class="text-center">DESCRIPCIÓN</th>
+                            <th class="text-center">PAIS</th>
+                            <th class="text-center">TIPO DOCUMENTO</th>
+                            <th class="text-center">NUMERO DOCUMENTO</th>
+                            <th class="text-center">NOMBRES</th>
+                            <th class="text-center">APELLIDO PATERNO</th>
+                            <th class="text-center">APELLIDO MATERNO</th>
+                            <th class="text-center">SEXO</th>
+                            <th class="text-center">FECHA NACIMIENTO</th>
+                            <th class="text-center">DIRECCIÓN</th>
+                            <th class="text-center">TELÉFONO</th>
+                            <th class="text-center">EMAIL</th>
+
                             <th class="text-center">ACCIÓN</th>
                         </tr>
                     </thead>
@@ -34,7 +43,7 @@
 {% endblock %}
 {% block scripts %}
 <script>
-    var dtServicio;
+    var dtClientes;
 
     $(document).ready(function () {
         // $('body').addClass('sidebar-collapse');
@@ -100,12 +109,12 @@
             lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
         });
 
-        fct_IniciarTablaTipoServicio('#tbl_TipoServicio');
+        fct_IniciarTablaClientes('#tbl_Clientes');
     });
 
-    function fct_IniciarTablaTipoServicio(IdTabla) {
+    function fct_IniciarTablaClientes(IdTabla) {
         // Inicializar DataTables con botones
-        dtServicio = $(IdTabla).DataTable({
+        dtClientes = $(IdTabla).DataTable({
             buttons: [
                 {
                     extend: 'copy',
@@ -118,7 +127,7 @@
                     text: '<i class="bi bi-file-earmark-excel"></i>',
                     titleAttr: 'Exportar a Excel',
                     className: 'btn btn-success',
-                    filename: 'Tipo Servicio' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Clientes' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     footer: true,
                     exportOptions:
                     {
@@ -131,7 +140,7 @@
                     text: '<i class="bi bi-file-earmark-pdf"></i>',
                     titleAttr: 'Exportar a PDF',
                     className: 'btn btn-danger',
-                    filename: 'Tipo Servicio' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Clientes' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     exportOptions:
                     {
                         stripHtml: true,
@@ -159,65 +168,82 @@
                     columns: ':not(.noVis)',
                 },
                 {
-                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo tipo servicio',
+                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo cliente',
                     className: 'btn bg-success m-1',
                     titleAttr: 'Nuevo',
                     action: function (e, dt, node, config) {
-                        fct_TipoServicioNuevo();
+                        fct_ClienteNuevo();
                     },
                 },
             ],
-            ajax: {
-                url: "/trabajadores/ventas/GetData_TipoServicio",
-                type: "GET",
-                datatype: "json",
-                data: function (d) {
-                },
-                dataSrc: function (json) {
-                    if (json.Status === "error") {
-                        toastr.error('Ocurrió un error inesperado al intentar listar la tabla');
-                        console.error(json.Msj);
-                        return [];
-                    }
-                    return json.data;
-                },
-                error: function (xhr, error, thrown) {
-                    toastr.error('Ocurrió un error inesperado al intentar listar la tabla');
-                    console.error('Error en la solicitud Ajax: ' + error + xhr.Msj + thrown);
-                },
-            },
-            columns: [
-                { data: "ID", name: "ID" },
-                { data: "TIPO", name: "TIPO" },
-                { 
-                    data: "estado", 
-                    name: "estado",
-                    render: function (data, type, row) {
-                        let estado = data === 1 ? 'Vigente' : 'No vigente';
-                        if (estado === "Vigente") {
-                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-success fs-5">${estado}</span></h5>`;
-                        } else if (estado === "No vigente") {
-                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-danger fs-5">${estado}</span></h5>`;
-                        } else {
-                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge fs-5" style="background-color: #800080; color: white;">${estado}</span></h5>`;
-                        }
-                    },
-                },
-                {data: "descripcion", name: "descripcion"},
+            data: [
                 {
-                    data: null,
-                    name: null,
+                    'id': 1,
+                    'pais': 'Peru',
+                    'tipo documento': 'dni',
+                    'numero documento': '71309189',
+                    'nombres': 'Edgar',
+                    'apellido paterno': 'Alarcon',
+                    'apellido materno': 'Chapoñan',
+                    'sexo': 'Masculino',
+                    'fecha nacimiento': '03/08/2005',
+                    'direccion': 'Nicolas de Pierola 163',
+                    'telefono': '948811527',
+                    'email': 'edgaralarconhd@gmail.com',
+                    'accion': '',
+                    'nombre': 'Edgar Alarcon',
+                    'tipocliente': 'Administrador',
+                    'estado': 1
+                }
+            ],
+
+            // ajax: {
+            //     url: "/trabajadores/viajes/GetData_Clientes",
+            //     type: "GET",
+            //     datatype: "json",
+            //     data: function (d) {
+            //     },
+            //     dataSrc: function (json) {
+            //         if (json.Status === "error") {
+            //             toastr.error('Ocurrió un error inesperado al intentar listar la tabla');
+            //             console.error(json.Msj);
+            //             return [];
+            //         }
+            //         return json.data;
+            //     },
+            //     error: function (xhr, error, thrown) {
+            //         toastr.error('Ocurrió un error inesperado al intentar listar la tabla');
+            //         console.error('Error en la solicitud Ajax: ' + error + xhr.Msj + thrown);
+            //     },
+            // },
+            columns: [
+                { data: "id", name: "id" },
+                { data: "pais", name: "pais" },
+                { data: "tipo documento", name: "tipo documento" },
+                { data: "numero documento", name: "numero documento" },
+                { data: "nombres", name: "nombres" },
+                { data: "apellido paterno", name: "apellido paterno" },
+                { data: "apellido materno", name: "apellido materno" },
+                { data: "sexo", name: "sexo" },
+                { data: "fecha nacimiento", name: "fecha nacimiento" },
+                { data: "direccion", name: "direccion" },
+                { data: "telefono", name: "telefono" },
+                { data: "email", name: "email" },
+                {
+                    data: "accion",
+                    name: "accion",
                     render: function (data, type, row) {
                         return `
-                        <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_TipoServicioVer('${data.ID}')" title="Ver tipo Servicio"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_TipoServicioEditar('${data.ID}')" title="Editar tipo Servicio"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_TipoServicioDarBaja('${data.ID}')" title="Dar de baja tipo Servicio"><i class="bi bi-arrow-down-circle"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_TipoServicioEliminar('${data.ID}')" title="Eliminar tipo Servicio"><i class="bi bi-trash"></i></button>
-                        </div>
-                        `;
+                <div class="flex-wrap btn-group">
+                    <button class="btn btn-xs m-1 btn-info" onclick="fct_ClienteVer('${row.id}')" title="Ver cliente"><i class="bi bi-eye"></i></button>
+                    <button class="btn btn-xs m-1 btn-primary" onclick="fct_ClienteEditar('${row.id}')" title="Editar cliente"><i class="bi bi-pencil-square"></i></button>
+                    <button class="btn btn-xs m-1 btn-warning" onclick="fct_ClienteDarBaja('${row.id}')" title="Dar de baja cliente"><i class="bi bi-arrow-down-circle"></i></button>
+                    <button class="btn btn-xs m-1 btn-danger" onclick="fct_ClienteEliminar('${row.id}')" title="Eliminar cliente"><i class="bi bi-trash"></i></button>
+                </div>
+            `;
                     },
                     className: 'text-center align-middle',
+                    orderable: false
                 }
             ],
             columnDefs: [
@@ -226,12 +252,13 @@
                     className: "text-center align-middle",
                 },
                 {
-                    targets: [1, 2, 3],
-                    className: 'align-middle',
+                    targets: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+                    className: 'text-center align-middle',
                 },
                 {
-                    targets: [3],
+                    targets: [12],
                     orderable: false,
+                    className: 'text-center align-middle',
                     width: '10%',
                 },
             ],
@@ -260,22 +287,22 @@
         });
     }
 
-    function fct_TipoServicioNuevo() {
-        window.location.href = '/trabajadores/ventas/TipoServicioNuevo';
+    function fct_ClienteNuevo() {
+        window.location.href = '/trabajadores/viajes/ClienteNuevo';
     }
 
-    function fct_TipoServicioEditar(Id) {
-        window.location.href = `/trabajadores/ventas/EditarTipoServicio/${Id}`;
+    function fct_ClienteEditar(Id) {
+        window.location.href = `/trabajadores/clientes/EditarCliente/${Id}`;
     }
 
-    function fct_TipoServicioVer(Id) {
-        window.location.href = `/trabajadores/ventas/VerTipoServicio/${Id}`;
+    function fct_ClienteVer(Id) {
+        window.location.href = `/trabajadores/clientes/VerCliente/${Id}`;
     }
 
-    function fct_TipoServicioEliminar(Id) {
+    function fct_ClienteEliminar(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción eliminará al tipo servicio. ¿Deseas continuar?",
+            text: "Esta acción eliminará al cliente. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -286,7 +313,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/ventas/EliminarTipoServicio/${Id}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/clientes/EliminarCliente/${Id}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
@@ -295,7 +322,7 @@
                                 toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
                                 return;
                             }
-                            fct_IniciarTablaTipoServicio('#tbl_TipoServicio');
+                            fct_IniciarTablaClientes('#tbl_Clientes');
                             toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                         } else {
                             toastr.error(response.Msj, "MENSAJE DE SISTEMA");
@@ -311,10 +338,10 @@
         });
     }
 
-    function fct_TipoServicioDarBaja(Id) {
+    function fct_ClienteDarBaja(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción le dará de baja al tipo servicio. ¿Deseas continuar?",
+            text: "Esta acción le dará de baja al cliente. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -325,7 +352,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/ventas/DarBajaTipoServicio/${Id}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/clientes/DarBajaCliente/${Id}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
@@ -334,7 +361,7 @@
                                 toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
                                 return;
                             }
-                            fct_IniciarTablaTipoServicio('#tbl_TipoServicio');
+                            fct_IniciarTablaClientes('#tbl_Clientes');
                             toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                         } else {
                             toastr.error(response.Msj, "MENSAJE DE SISTEMA");

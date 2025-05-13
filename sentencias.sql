@@ -1,6 +1,8 @@
 -- Primero eliminamos los procedimientos por si existen
 DROP PROCEDURE IF EXISTS SP_ASIGNAR_DMENU;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_DMENU;
+DROP PROCEDURE IF EXISTS SP_ASIGNAR_DCLAIM;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_DCLAIM;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_USUARIO;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_USUARIO;
 DROP PROCEDURE IF EXISTS SP_EDITAR_USUARIO;
@@ -39,11 +41,19 @@ DROP PROCEDURE IF EXISTS SP_REGISTRAR_TIPO_DOCUMENTO;
 DROP PROCEDURE IF EXISTS SP_EDITAR_TIPO_DOCUMENTO;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPO_DOCUMENTO;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_DOCUMENTO;
-
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_PERSONAL;
+DROP PROCEDURE IF EXISTS SP_EDITAR_PERSONAL;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_PERSONAL;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_PERSONAL;
 DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPOVEHICULO;
+
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_ASIENTO;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_ASIENTO;
+DROP PROCEDURE IF EXISTS SP_EDITAR_ASIENTO;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_ASIENTO;
 
 DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPO_COMPROBANTE;
 DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPO_COMPROBANTE;
@@ -51,7 +61,7 @@ DROP PROCEDURE IF EXISTS SP_DAR_BAJA_TIPO_COMPROBANTE;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_COMPROBANTE;
 
 DROP PROCEDURE IF EXISTS SP_INSERTAR_SERVICIO;
-DROP PROCEDURE IF EXISTS SP_UPDATE_SERVICIO;
+DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_SERVICIO;
 DROP PROCEDURE IF EXISTS SP_BAJA_SERVICIO;
 DROP PROCEDURE IF EXISTS SP_DELETE_SERVICIO;
 
@@ -71,7 +81,16 @@ DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPOVEHICULO;
-DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPOVEHICULO;
+
+-- Eliminar procedimientos existentes (si los hay)
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_CLIENTE_NATURAL;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_CLIENTE_JURIDICO;
+
+DROP PROCEDURE IF EXISTS SP_EDITAR_CLIENTE_NATURAL;
+DROP PROCEDURE IF EXISTS SP_EDITAR_CLIENTE_JURIDICO;
+
+DROP PROCEDURE IF EXISTS SP_DARBAJA_CLIENTE;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_CLIENTE;
 
 -- Eliminar procedimientos si existen
 DROP PROCEDURE IF EXISTS SP_INSERTAR_NIVEL;
@@ -90,7 +109,9 @@ DROP PROCEDURE IF EXISTS SP_DARBAJA_RUTA;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_RUTA;
 -- Luego eliminamos las tablas, primero la que depende de la otra
 DROP TABLE IF EXISTS conf_plantillas;
+DROP TABLE IF EXISTS conf_dclaims;
 DROP TABLE IF EXISTS conf_dmenus;
+DROP TABLE IF EXISTS conf_claims;
 DROP TABLE IF EXISTS conf_menus;
 DROP TABLE IF EXISTS usuarios;
 DROP TABLE IF EXISTS tipo_usuario;
@@ -101,6 +122,7 @@ DROP TABLE IF EXISTS horario;
 DROP TABLE IF EXISTS tipo_cliente;
 DROP TABLE IF EXISTS ubigeo;
 DROP TABLE IF EXISTS metodo_pago;
+DROP TABLE IF EXISTS personal;
 DROP TABLE IF EXISTS tipo_personal;
 DROP TABLE IF EXISTS servicio;
 DROP TABLE IF EXISTS tipo_servicio;
@@ -110,6 +132,8 @@ DROP TABLE IF EXISTS marca;
 DROP TABLE IF EXISTS ruta;
 DROP TABLE IF EXISTS nivel;
 DROP TABLE IF EXISTS ciudad;
+DROP TABLE IF EXISTS asiento;
+DROP TABLE IF EXISTS cliente;
 
 -- Crear tabla tipo_servicio
 CREATE TABLE tipo_servicio (
@@ -124,12 +148,12 @@ CREATE TABLE tipo_servicio (
 );
 
 CREATE TABLE servicio(
-    idServicio INT AUTO_INCREMENT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) not null,
     descripcion VARCHAR(255) not null,
-    idTipoServicio INT NOT NULL,
+    id_tipo_servicio INT NOT NULL,
     estado TINYINT NOT NULL,
-    FOREIGN KEY (idTipoServicio) REFERENCES tipo_servicio(idTipoServicio)
+    FOREIGN KEY (id_tipo_servicio) REFERENCES tipo_servicio(idTipoServicio)
 );
 
 -- Crear tabla tipo_comprobante
@@ -255,6 +279,48 @@ CREATE TABLE ruta (
     usuario VARCHAR(100) NOT NULL
 );
 
+CREATE TABLE cliente (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    
+    id_pais INT NOT NULL,
+    id_tipo_doc INT NOT NULL,
+    id_tipo_cliente INT NOT NULL,
+    
+    numero_documento VARCHAR(20) NOT NULL, -- UNIQUE,
+    
+    nombres VARCHAR(90),
+    ape_paterno VARCHAR(50),
+    ape_materno VARCHAR(50),
+    
+    sexo TINYINT DEFAULT 0, -- 'O' para otros/no especificado
+    f_nacimiento DATE,
+    
+    razon_social VARCHAR(90),
+    direccion VARCHAR(70),
+    
+    telefono VARCHAR(13), -- Ej: +51912345678
+    email VARCHAR(100) NOT NULL,
+    password VARCHAR(256) NOT NULL, -- SHA-256 hash
+    
+    fechaRegistro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE asiento (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    nro_asiento SMALLINT  NOT NULL,  -- Hasta 9999
+    id_nivel TINYINT NOT NULL,
+
+    tipo_asiento VARCHAR(30) NOT NULL,
+
+    estado TINYINT NOT NULL CHECK (estado IN (0, 1, 2, 3)),
+
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL
+);
+
+
 -- Crear tabla menus
 CREATE TABLE conf_menus (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -271,6 +337,22 @@ CREATE TABLE conf_dmenus (
     PRIMARY KEY (idMenu, idTipoUsuario)
 );
 
+-- Crear tabla claims
+CREATE TABLE conf_claims (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    estado BOOLEAN NOT NULL,
+    idPadre INT NULL,
+    FOREIGN KEY (idPadre) REFERENCES conf_menus(id)
+);
+
+-- Crear tabla detalle_claim
+CREATE TABLE conf_dclaims (
+    idClaim INT REFERENCES conf_claims (id),
+    idTipoUsuario INT REFERENCES tipo_usuario (id),
+    PRIMARY KEY (idClaim, idTipoUsuario)
+);
+
 -- Crear tabla conf_plantillas
 CREATE TABLE conf_plantillas (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -284,9 +366,9 @@ CREATE TABLE conf_plantillas (
 );
 
 CREATE TABLE nivel(
-    idNivel int AUTO_INCREMENT primary key,
+    id int AUTO_INCREMENT primary key,
     nroPiso int not null,
-    tipo_vehiculo int not null,
+    id_tipo_vehiculo int not null,
     cantidad int not null,
     estado TINYINT not null
 );
@@ -302,25 +384,25 @@ CREATE TABLE marca (
     usuario VARCHAR(100) NOT NULL
 );
 
-
 CREATE TABLE tipo_vehiculo (
-    idTipoVehiculo INT AUTO_INCREMENT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL,
-    idMarca INT NULL,
+    id_marca INT NULL,
     estado TINYINT NOT NULL,
-    CONSTRAINT fk_tipo_vehiculo_marca FOREIGN KEY (idMarca) REFERENCES marca(id)
+    cantidad INT NOT NULL,
+    CONSTRAINT fk_tipo_vehiculo_marca FOREIGN KEY (id_marca) REFERENCES marca(id)
 );
 
 CREATE TABLE vehiculo (
-    idVehiculo INT AUTO_INCREMENT PRIMARY KEY,
-    placa VARCHAR(10) NOT NULL UNIQUE,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    placa VARCHAR(10),
     anio INT,
     color VARCHAR(30),
     estado TINYINT NOT NULL,
-    idTipoVehiculo INT NOT NULL,
+    id_tipo_vehiculo INT NOT NULL,
     CONSTRAINT fk_tipo_vehiculo
-        FOREIGN KEY (idTipoVehiculo)
-        REFERENCES tipo_vehiculo(idTipoVehiculo)
+        FOREIGN KEY (id_tipo_vehiculo)
+        REFERENCES tipo_vehiculo(id)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
@@ -335,6 +417,23 @@ CREATE TABLE metodo_pago (
     estado_registro INT not null DEFAULT 1,
     fecha_registro DATETIME not null DEFAULT CURRENT_TIMESTAMP, 
     usuario VARCHAR(100) not null
+);
+
+-- Crear tabla personal
+
+CREATE TABLE personal (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    imagen VARCHAR(255) NOT NULL,
+    estado BOOLEAN NOT NULL,
+    id_tipopersonal INT NOT NULL,
+    estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
+    estado_registro INT NOT NULL DEFAULT 1,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+    usuario VARCHAR(100) NOT NULL,
+    FOREIGN KEY (id_tipopersonal) REFERENCES tipo_personal(id) -- Relación con tipo_personal
 );
 
 -- INSERTS IATA CIUDAD
@@ -2257,33 +2356,174 @@ INSERT INTO conf_menus (id, nombre, estado) VALUES (3, 'M_VENTAS', 1);
 INSERT INTO conf_menus (id, nombre, estado) VALUES (4, 'M_VIAJES', 1);
 INSERT INTO conf_menus (id, nombre, estado) VALUES (5, 'M_PERSONAL', 1);
 INSERT INTO conf_menus (id, nombre, estado) VALUES (6, 'M_ATENCION', 1);
+
 -- Submenús de USUARIOS
+-- Gestionar usuarios
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (10, 'Gestionar usuarios', 1, 1);
+-- Claims de Gestionar usuarios (Menú 10)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (1, 'Registrar usuario', 1, 10);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (2, 'Editar usuario', 1, 10);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (3, 'Eliminar usuario', 1, 10);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (4, 'Ver usuario', 1, 10);
+
+-- Gestionar tipos de usuarios
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (11, 'Gestionar tipos de usuarios', 1, 1);
+-- Claims de Gestionar tipos de usuarios (Menú 11)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (5, 'Registrar tipo de usuario', 1, 11);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (6, 'Editar tipo de usuario', 1, 11);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (7, 'Eliminar tipo de usuario', 1, 11);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (8, 'Ver tipo de usuario', 1, 11);
+
 -- Submenús de CONFIGURACIÓN
+-- Gestionar permisos
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (20, 'Gestionar permisos', 1, 2);
+-- Claims de Gestionar permisos (Menú 20)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (9, 'Editar permisos', 1, 20);
+
+-- Gestionar plantillas
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (21, 'Gestionar plantillas', 1, 2);
+-- Claims de Gestionar plantillas (Menú 21)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (10, 'Registrar plantilla', 1, 21);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (11, 'Editar plantilla', 1, 21);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (12, 'Eliminar plantilla', 1, 21);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (13, 'Ver plantilla', 1, 21);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (14, 'Activar plantilla', 1, 21);
+
+-- Gestionar métodos de pago
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (22, 'Gestionar métodos de pago', 1, 2);
+-- Claims de Gestionar métodos de pago (Menú 22)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (15, 'Registrar método de pago', 1, 22);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (16, 'Editar método de pago', 1, 22);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (17, 'Eliminar método de pago', 1, 22);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (18, 'Ver método de pago', 1, 22);
+
 -- Submenús de VENTAS
+-- Gestionar tipo de comprobante
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (30, 'Gestionar tipo comprobante', 1, 3);
+-- Claims de Gestionar tipo de comprobante (Menú 30)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (19, 'Registrar tipo comprobante', 1, 30);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (20, 'Editar tipo comprobante', 1, 30);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (21, 'Eliminar tipo comprobante', 1, 30);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (22, 'Ver tipo comprobante', 1, 30);
+
+-- Gestionar tipo de cliente
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (31, 'Gestionar tipo cliente', 1, 3);
-INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (32, 'Gestionar tipo servicio', 1, 3);
-INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (33, 'Gestionar servicio', 1, 3);
-INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (34, 'Gestionar tipo documento', 1, 3);
+-- Claims de Gestionar tipo cliente (Menú 31)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (23, 'Registrar tipo cliente', 1, 31);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (24, 'Editar tipo cliente', 1, 31);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (25, 'Eliminar tipo cliente', 1, 31);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (26, 'Ver tipo cliente', 1, 31);
+
+-- Gestionar cliente
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (32, 'Gestionar cliente', 1, 3);
+-- Claims de Gestionar cliente (Menú 32)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (27, 'Registrar tipo cliente', 1, 32);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (28, 'Editar tipo cliente', 1, 32);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (29, 'Eliminar tipo cliente', 1, 32);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (30, 'Ver tipo cliente', 1, 32);
+
+-- Gestionar tipo de servicio
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (33, 'Gestionar tipo servicio', 1, 3);
+-- Claims de Gestionar tipo servicio (Menú 33)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (31, 'Registrar tipo servicio', 1, 33);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (32, 'Editar tipo servicio', 1, 33);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (33, 'Eliminar tipo servicio', 1, 33);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (34, 'Ver tipo servicio', 1, 33);
+
+-- Gestionar servicios
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (34, 'Gestionar servicio', 1, 3);
+-- Claims de Gestionar servicio (Menú 34)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (35, 'Registrar servicio', 1, 34);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (36, 'Editar servicio', 1, 34);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (37, 'Eliminar servicio', 1, 34);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (38, 'Ver servicio', 1, 34);
+
+-- Gestionar tipo de documento
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (35, 'Gestionar tipo documento', 1, 3);
+-- Claims de Gestionar tipo documento (Menú 35)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (39, 'Registrar tipo documento', 1, 35);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (40, 'Editar tipo documento', 1, 35);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (41, 'Eliminar tipo documento', 1, 35);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (42, 'Ver tipo documento', 1, 35);
+
 -- Submenús de VIAJES
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (40, 'Gestionar horarios', 1, 4);
+
+-- Gestionar tipo de vehículo
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (41, 'Gestionar tipo vehículo', 1, 4);
+-- Claims de Gestionar tipo vehículo (Menú 41)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (43, 'Registrar tipo vehículo', 1, 41);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (44, 'Editar tipo vehículo', 1, 41);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (45, 'Eliminar tipo vehículo', 1, 41);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (46, 'Ver tipo vehículo', 1, 41);
+
+-- Gestionar vehículos
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (42, 'Gestionar vehículo', 1, 4);
+-- Claims de Gestionar vehículo (Menú 42)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (47, 'Registrar vehículo', 1, 42);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (48, 'Editar vehículo', 1, 42);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (49, 'Eliminar vehículo', 1, 42);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (50, 'Ver vehículo', 1, 42);
+
+-- Gestionar niveles
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (43, 'Gestionar niveles', 1, 4);
-INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (44, 'Gestionar sucursales', 1, 4);
-INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (45, 'Gestionar marcas', 1, 4);
-INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (46, 'Gestionar rutas', 1, 4);
+-- Claims de Gestionar niveles (Menú 43)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (51, 'Registrar niveles', 1, 43);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (52, 'Editar niveles', 1, 43);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (53, 'Eliminar niveles', 1, 43);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (54, 'Ver niveles', 1, 43);
+
+-- Gestionar asientos
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (44, 'Gestionar asientos', 1, 4);
+
+-- Gestionar sucursales
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (45, 'Gestionar sucursales', 1, 4);
+-- Claims de Gestionar sucursales (Menú 44)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (55, 'Registrar sucursales', 1, 45);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (56, 'Editar sucursales', 1, 45);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (57, 'Eliminar sucursales', 1, 45);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (58, 'Ver sucursales', 1, 45);
+
+-- Gestionar marcas
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (46, 'Gestionar marcas', 1, 4);
+-- Claims de Gestionar marcas (Menú 45)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (59, 'Registrar marcas', 1, 46);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (60, 'Editar marcas', 1, 46);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (61, 'Eliminar marcas', 1, 46);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (62, 'Ver marcas', 1, 46);
+
+-- Gestionar rutas
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (47, 'Gestionar rutas', 1, 4);
+-- Claims de Gestionar rutas (Menú 46)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (63, 'Registrar rutas', 1, 47);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (64, 'Editar rutas', 1, 47);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (65, 'Eliminar rutas', 1, 47);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (66, 'Ver rutas', 1, 47);
+
+-- Programar viajes
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (48, 'Programar viajes', 1, 4);
+
 -- Submenús de PERSONAL
+-- Gestionar tipo de personal
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (50, 'Gestionar tipo personal', 1, 5);
+-- Claims de Gestionar tipo personal (Menú 50)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (67, 'Registrar tipo personal', 1, 50);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (68, 'Editar tipo personal', 1, 50);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (69, 'Eliminar tipo personal', 1, 50);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (70, 'Ver tipo personal', 1, 50);
+
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (51, 'Gestionar personal', 1, 5);
+-- Claims de Gestionar tipo personal (Menú 50)
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (71, 'Registrar personal', 1, 51);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (72, 'Editar personal', 1, 51);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (73, 'Eliminar personal', 1, 51);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (74, 'Ver personal', 1, 51);
+
 -- Submenús de ATENCIÓN AL CLIENTE
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (60, 'Ejemplo', 1, 6);
 
 -- Tabla dmenus
+-- Módulos principales
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (1, 1);
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (2, 1);
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (3, 1);
@@ -2311,10 +2551,88 @@ INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (43, 1);
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (44, 1);
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (45, 1);
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (46, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (47, 1);
 -- Submenús de "PERSONAL"
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (50, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (51, 1);
 -- Submenús de "ATENCIÓN AL CLIENTE"
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (60, 1);
+
+-- Todos los claims al administrador
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (1,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (2,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (3,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (4,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (5,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (6,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (7,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (8,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (9,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (10,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (11,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (12,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (13,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (14,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (15,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (16,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (17,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (18,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (19,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (20,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (21,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (22,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (23,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (24,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (25,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (26,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (27,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (28,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (29,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (30,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (31,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (32,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (33,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (34,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (35,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (36,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (37,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (38,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (39,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (40,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (41,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (42,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (43,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (44,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (45,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (46,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (47,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (48,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (49,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (50,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (51,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (52,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (53,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (54,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (55,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (56,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (57,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (58,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (59,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (60,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (61,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (62,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (63,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (64,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (65,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (66,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (67,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (68,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (69,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (70,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (71,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (72,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (73,1);
+INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (74,1);
 
 -- Tabla apariencia
 INSERT INTO conf_plantillas (id, nombre, color_header, color_footer, logo, estado, fecha_registro, usuario) VALUES (1, 'YATRAX', '#0c336e', '#000000', '/Static/img/plantillas/logo_yatusa.png', 1, '2025-03-06 20:06:14', 'SYSTEM');
@@ -2449,6 +2767,210 @@ BEGIN
     END IF;
 END $$
 DELIMITER ;
+
+-- aaaaaaaaaaaaaaa
+-- Crear procedimiento SP_REGISTRAR_CLIENTE
+DELIMITER $$
+CREATE PROCEDURE SP_REGISTRAR_CLIENTE_NATURAL(
+    IN P_ID_PAIS INT,
+    IN P_ID_TIPO_DOC INT,
+    IN P_ID_TIPO_CLIENTE INT,
+    IN P_NUMERO_DOCUMENTO VARCHAR(20),
+    IN P_NOMBRES VARCHAR(90),
+    IN P_APE_PATERNO VARCHAR(50),
+    IN P_APE_MATERNO VARCHAR(50),
+    IN P_SEXO TINYINT,
+    IN P_F_NACIMIENTO DATE,
+    IN P_DIRECCION VARCHAR(70),
+    IN P_TELEFONO VARCHAR(13),
+    IN P_EMAIL VARCHAR(100),
+    IN P_PASSWORD VARCHAR(256),
+    IN P_USUARIO DATETIME
+)
+BEGIN
+    DECLARE cEmail INT;
+    DECLARE cNumeroDoc INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cEmail FROM CLIENTE WHERE EMAIL = P_EMAIL;
+    SELECT COUNT(*) INTO cNumeroDoc FROM CLIENTE WHERE numero_documento = P_NUMERO_DOCUMENTO;
+    IF cEmail > 0 THEN
+        SET @MSJ2 = 'El correo que intenta registrar ya está registrado';
+    ELSEIF cNumeroDoc > 0 THEN
+        SET @MSJ2 = 'El numero de documento que intenta registrar ya está registrado';
+    ELSE
+        INSERT INTO CLIENTE (id_pais,id_tipo_doc,id_tipo_cliente,numero_documento,nombres, ape_paterno, ape_materno, sexo, f_nacimiento, direccion, telefono, email, password,usuario) 
+        VALUES (P_ID_PAIS, P_ID_TIPO_DOC, P_ID_TIPO_CLIENTE, P_NUMERO_DOCUMENTO, P_NOMBRES, P_APE_PATERNO, P_APE_MATERNO, P_SEXO, P_F_NACIMIENTO, P_DIRECCION, P_TELEFONO, P_EMAIL, P_PASSWORD, P_USUARIO);
+        SET @MSJ = 'Se registró correctamente al cliente';
+    END IF;
+END $$
+DELIMITER ;
+
+DELIMITER $$
+CREATE PROCEDURE SP_REGISTRAR_CLIENTE_JURIDICO(
+    IN P_ID_PAIS INT,
+    IN P_ID_TIPO_DOC INT,
+    IN P_NUMERO_DOCUMENTO VARCHAR(20),
+    IN P_RAZON_SOCIAL VARCHAR(90),
+    IN P_DIRECCION VARCHAR(70),
+    IN P_TELEFONO VARCHAR(13),
+    IN P_EMAIL VARCHAR(100),
+    IN P_PASSWORD VARCHAR(256),
+    IN P_USUARIO DATETIME
+)
+BEGIN
+    DECLARE cEmail INT;
+    DECLARE cRazonSocial INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cEmail FROM cliente WHERE EMAIL = P_EMAIL;
+    SELECT COUNT(*) INTO cRazonSocial FROM cliente WHERE RAZON_SOCIAL = P_RAZON_SOCIAL;
+
+    IF cEmail > 0 THEN
+        SET @MSJ2 = 'El correo que intenta registrar ya está registrado';
+    ELSEIF cRazonSocial > 0 THEN
+    	SET @MSJ2 = 'La razón social que intenta registrar ya está registrado';
+    ELSE  
+        INSERT INTO CLIENTE (id_pais,id_tipo_doc,numero_documento, razon_social, direccion, telefono, email, password,usuario) 
+        VALUES (P_ID_PAIS, P_ID_TIPO_DOC, P_NUMERO_DOCUMENTO, P_RAZON_SOCIAL, P_DIRECCION, P_TELEFONO, P_EMAIL, P_PASSWORD, P_USUARIO);
+        SET @MSJ = 'Se registró correctamente al cliente';
+    END IF;
+END $$
+DELIMITER ;
+
+
+-- Crear procedimiento SP_EDITAR_CLIENTE
+DELIMITER $$
+CREATE PROCEDURE SP_EDITAR_CLIENTE_NATURAL(
+    IN P_ID INT,
+    IN P_ID_PAIS INT,
+    IN P_ID_TIPO_DOC INT,
+    IN P_ID_TIPO_CLIENTE INT,
+    IN P_NUMERO_DOCUMENTO VARCHAR(20),
+    IN P_NOMBRES VARCHAR(90),
+    IN P_APE_PATERNO VARCHAR(50),
+    IN P_APE_MATERNO VARCHAR(50),
+    IN P_SEXO TINYINT,
+    IN P_F_NACIMIENTO DATE,
+    IN P_DIRECCION VARCHAR(70),
+    IN P_TELEFONO VARCHAR(13),
+    IN P_EMAIL VARCHAR(100),
+    IN P_PASSWORD VARCHAR(256),
+    IN P_USUARIO DATETIME
+)
+BEGIN
+    DECLARE cCliente INT;
+    DECLARE cEmail INT;
+    DECLARE cNumeroDoc INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cCliente FROM CLIENTE WHERE id = P_ID;
+    SELECT COUNT(*) INTO cEmail FROM CLIENTE WHERE EMAIL = P_EMAIL;
+    SELECT COUNT(*) INTO cNumeroDoc FROM CLIENTE WHERE numero_documento = P_NUMERO_DOCUMENTO;
+
+    IF cCliente <= 0 THEN
+        SET @MSJ2 = 'El cliente que intenta editar no existe';
+    ELSEIF cEmail != 0 THEN
+        SET @MSJ2 = 'El correo ingresado ya existe';
+    ELSEIF cNumeroDoc != 0 THEN
+        SET @MSJ2 = 'El numero de documento ingresado ya existe';
+    ELSE
+        UPDATE CLIENTE
+        SET id_pais = P_ID_PAIS,
+        id_tipo_doc = P_ID_TIPO_DOC,
+        id_tipo_cliente = P_ID_TIPO_CLIENTE,
+        numero_documento = P_NUMERO_DOCUMENTO,
+        nombres = P_NOMBRES,
+        ape_paterno = P_APE_PATERNO,
+        ape_materno = P_APE_MATERNO,
+        sexo = P_SEXO,
+        f_nacimiento = P_F_NACIMIENTO,
+        direccion = P_DIRECCION,
+        telefono = P_TELEFONO,
+        email = P_EMAIL,
+        password = P_PASSWORD,
+        usuario = P_USUARIO
+        WHERE id = P_ID;
+        
+        SET @MSJ = 'Se modificó correctamente al usuario';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_DARBAJA_CLIENTE
+DELIMITER $$
+CREATE PROCEDURE SP_DARBAJA_CLIENTE(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cCliente INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cCliente FROM cliente WHERE ID = P_ID;
+
+    IF cCliente <= 0 THEN
+        SET @MSJ2 = 'El cliente que intenta dar de baja no existe';
+    ELSE
+        UPDATE cliente SET ESTADO = 0 WHERE ID = P_ID;
+
+        SET @MSJ = 'Se dio de baja correctamente al cliente';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_CLIENTE
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_CLIENTE(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cCliente INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cCliente FROM cliente WHERE ID = P_ID;
+
+    IF cCliente <= 0 THEN
+        SET @MSJ2 = 'El cliente que intenta eliminar no existe';
+    ELSE
+        DELETE FROM horario WHERE ID = P_ID;
+        SET @MSJ = 'Se eliminó correctamente al usuario';
+    END IF;
+END $$
+DELIMITER ;
+-- aaaaaaaaaaaaaaa
+
+
+
 
 DELIMITER $$
 CREATE PROCEDURE SP_REGISTRAR_ABREVIATURA_CIUDAD(
@@ -2641,6 +3163,135 @@ BEGIN
     END IF;
 END $$
 DELIMITER ;
+
+-- REGISTRAR ASIENTO
+DELIMITER $$
+CREATE PROCEDURE SP_REGISTRAR_ASIENTO(
+    IN P_NRO_ASIENTO SMALLINT,
+    IN P_ID_NIVEL TINYINT,
+    IN P_TIPO_ASIENTO VARCHAR(30),
+    IN P_ESTADO TINYINT,
+    IN P_USUARIO VARCHAR(100)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    IF P_ESTADO NOT IN (0, 1, 2, 3, 4) THEN
+        SET @MSJ2 = 'El estado seleccionado no está disponible';
+    ELSE
+        INSERT INTO asiento (nro_asiento, id_nivel, tipo_asiento, estado, usuario)
+        VALUES (P_NRO_ASIENTO, P_ID_NIVEL, P_TIPO_ASIENTO, P_ESTADO, P_USUARIO);
+
+        SET @MSJ = 'Se registró correctamente el asiento';
+    END IF;
+END $$
+DELIMITER ;
+
+
+-- EDITAR ASIENTO
+DELIMITER $$
+CREATE PROCEDURE SP_EDITAR_ASIENTO(
+    IN P_ID INT,
+    IN P_NRO_ASIENTO SMALLINT,
+    IN P_ID_NIVEL TINYINT,
+    IN P_TIPO_ASIENTO VARCHAR(30),
+    IN P_ESTADO TINYINT,
+    IN P_USUARIO VARCHAR(100)
+)
+BEGIN
+    DECLARE cAsiento INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cAsiento FROM asiento WHERE id = P_ID;
+
+    IF cAsiento = 0 THEN
+        SET @MSJ2 = 'El asiento que intenta editar no existe';
+    ELSEIF P_ESTADO NOT IN (0, 1, 2, 3, 4) THEN
+        SET @MSJ2 = 'El estado seleccionado no está disponible';
+    ELSE
+        UPDATE asiento
+        SET nro_asiento = P_NRO_ASIENTO,
+            id_nivel = P_ID_NIVEL,
+            tipo_asiento = P_TIPO_ASIENTO,
+            estado = P_ESTADO,
+            usuario = P_USUARIO
+        WHERE id = P_ID;
+
+        SET @MSJ = 'Se modificó correctamente el asiento';
+    END IF;
+END $$
+DELIMITER ;
+
+
+-- DAR DE BAJA EL ASIENTO
+DELIMITER $$
+CREATE PROCEDURE SP_DARBAJA_ASIENTO(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cAsiento INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cAsiento FROM asiento WHERE id = P_ID;
+
+    IF cAsiento = 0 THEN
+        SET @MSJ2 = 'El asiento que intenta dar de baja no existe';
+    ELSE
+        UPDATE asiento
+        SET estado = 0
+        WHERE id = P_ID;
+
+        SET @MSJ = 'Se dio de baja correctamente el asiento';
+    END IF;
+END $$
+DELIMITER ;
+
+
+-- ELIMINAR ASIENTO
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_ASIENTO(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cAsiento INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cAsiento FROM asiento WHERE id = P_ID;
+
+    IF cAsiento = 0 THEN
+        SET @MSJ2 = 'El asiento que intenta eliminar no existe';
+    ELSE
+        DELETE FROM asiento WHERE id = P_ID;
+
+        SET @MSJ = 'Se eliminó correctamente el asiento';
+    END IF;
+END $$
+DELIMITER ;
+
 
 -- Crear procedimiento SP_REGISTRAR_TIPO_USUARIO
 DELIMITER $$
@@ -2940,6 +3591,62 @@ BEGIN
 END $$
 DELIMITER ;
 
+-- Crear procedimiento SP_ASIGNAR_DCLAIM
+DELIMITER $$
+CREATE PROCEDURE SP_ASIGNAR_DCLAIM(
+    IN P_IDCLAIM INT,
+    IN P_IDTIPOUSUARIO INT
+)
+BEGIN
+    DECLARE cClaims INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cClaims FROM conf_dclaims WHERE idClaim = P_IDCLAIM AND idTipoUsuario = P_IDTIPOUSUARIO;
+
+    IF cClaims > 0 THEN
+        SET @MSJ2 = 'El permiso que intenta asignar, ya existe';
+    ELSE
+        INSERT INTO conf_dclaims (idClaim, idTipoUsuario) 
+        VALUES (P_IDCLAIM, P_IDTIPOUSUARIO);
+
+        SET @MSJ = 'Se asignó correctamente el permiso';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_DCLAIM
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_DCLAIM(
+    IN P_IDCLAIM INT,
+    IN P_IDTIPOUSUARIO INT
+)
+BEGIN
+    DECLARE cClaims INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cClaims FROM conf_dclaims WHERE idClaim = P_IDCLAIM AND idTipoUsuario = P_IDTIPOUSUARIO;
+
+    IF cClaims <= 0 THEN
+        SET @MSJ2 = 'El permiso que intenta eliminar, no existe';
+    ELSE
+        DELETE FROM conf_dclaims WHERE idClaim = P_IDCLAIM AND idTipoUsuario = P_IDTIPOUSUARIO; 
+        SET @MSJ = 'Se eliminó correctamente el permiso';
+    END IF;
+END $$
+DELIMITER ;
+
 -- Crear procedimiento SP_REGISTRAR_PLANTILLA
 DELIMITER $$
 CREATE PROCEDURE SP_REGISTRAR_PLANTILLA(
@@ -3079,38 +3786,68 @@ DELIMITER $$
 -- Procedimiento para insertar tipo de vehículo
 
 CREATE PROCEDURE SP_INSERTAR_TIPOVEHICULO(
-    IN p_nombre VARCHAR(50),
-    IN p_idMarca INT,
-    OUT MSJ VARCHAR(255)
+    IN  p_nombre     VARCHAR(50),
+    IN  p_idMarca    INT,
+    IN  p_cantidad   INT,
+    OUT MSJ          VARCHAR(255)
 )
 BEGIN
+    -- 1) Declaración de variables LO PRIMERO
     DECLARE v_existeMarca INT DEFAULT 0;
+    DECLARE v_nuevoTipo   INT DEFAULT 0;
+    DECLARE v_i           INT DEFAULT 1;
 
-    -- Verificar si la marca existe
+    -- 2) Verificar si la marca existe
     SELECT COUNT(*) INTO v_existeMarca
-    FROM marca
-    WHERE id = p_idMarca;
+      FROM marca
+     WHERE id = p_idMarca;
 
     IF v_existeMarca = 0 THEN
         SET MSJ = 'La marca no existe';
     ELSE
-        INSERT INTO tipo_vehiculo (nombre, idMarca, estado)
-        VALUES (p_nombre, p_idMarca, 1);
-        SET MSJ = 'Tipo de vehículo insertado correctamente';
+        -- 3) Inserto el nuevo tipo de vehículo
+        INSERT INTO tipo_vehiculo (nombre, id_marca, estado, cantidad)
+        VALUES (p_nombre, p_idMarca, 1, p_cantidad);
+
+        -- 4) Capturo el ID recién generado
+        SET v_nuevoTipo = LAST_INSERT_ID();
+
+        -- 5) Bucle para crear p_cantidad vehículos con placa NULL
+        WHILE v_i <= p_cantidad DO
+            INSERT INTO vehiculo (
+                placa,
+                anio,
+                color,
+                estado,
+                id_tipo_vehiculo
+            ) VALUES (
+                NULL,       -- placa como NULL
+                NULL,       -- año
+                NULL,       -- color
+                1,          -- estado activo
+                v_nuevoTipo
+            );
+            SET v_i = v_i + 1;
+        END WHILE;
+
+        SET MSJ = CONCAT('Tipo de vehículo insertado y ', p_cantidad, ' vehículos creados');
     END IF;
 END$$
 
--- Procedimiento para actualizar tipo de vehículo
 CREATE PROCEDURE SP_ACTUALIZAR_TIPOVEHICULO(
-    IN p_id INT,
-    IN p_nombre VARCHAR(50),
-    IN p_idMarca INT,
-    IN p_estado TINYINT,
-    OUT MSJ VARCHAR(255),
-    OUT MSJ2 VARCHAR(255)
+    IN  p_id        INT,
+    IN  p_nombre    VARCHAR(50),
+    IN  p_idMarca   INT,
+    IN  p_estado    TINYINT,
+    IN  p_cantidad  INT,
+    OUT MSJ         VARCHAR(255),
+    OUT MSJ2        VARCHAR(255)
 )
 BEGIN
-    DECLARE v_existeMarca INT DEFAULT 0;
+    DECLARE v_existeMarca   INT DEFAULT 0;
+    DECLARE v_total         INT DEFAULT 0;
+    DECLARE v_sinplaca      INT DEFAULT 0;
+    DECLARE v_diff          INT DEFAULT 0;
 
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -3118,27 +3855,85 @@ BEGIN
         SET MSJ2 = 'Error inesperado al actualizar el tipo de vehículo';
     END;
 
-    SET MSJ = NULL;
+    SET MSJ  = NULL;
     SET MSJ2 = NULL;
 
-    -- Verificar existencia de la marca
+    -- 1) Verificar que la marca exista
     SELECT COUNT(*) INTO v_existeMarca
-    FROM marca
-    WHERE id = p_idMarca;
+      FROM marca
+     WHERE id = p_idMarca;
 
     IF v_existeMarca = 0 THEN
         SET MSJ2 = 'La marca indicada no existe';
     ELSE
-        -- Actualizar el tipo de vehículo
-        START TRANSACTION;
-        UPDATE tipo_vehiculo
-        SET nombre  = p_nombre,
-            idMarca = p_idMarca,
-            estado  = p_estado
-        WHERE idTipoVehiculo = p_id;
-        COMMIT;
+        -- 2) Conteos
+        SELECT COUNT(*) INTO v_total
+          FROM vehiculo
+         WHERE id_tipo_vehiculo = p_id;
 
-        SET MSJ = 'Se actualizó correctamente el tipo de vehículo';
+        SELECT COUNT(*) INTO v_sinplaca
+          FROM vehiculo
+         WHERE id_tipo_vehiculo = p_id
+           AND placa IS NULL;
+
+        -- 3) Inicio de transacción
+        START TRANSACTION;
+
+        IF p_cantidad < v_total THEN
+            SET v_diff = v_total - p_cantidad;
+
+            IF v_sinplaca = 0 THEN
+                -- Todos los vehículos tienen placa: no se puede reducir
+                SET MSJ2 = 'No se puede reducir: todos los vehículos ya tienen placa';
+                ROLLBACK;
+
+            ELSEIF v_diff > v_sinplaca THEN
+                -- No hay suficientes sin placa
+                SET MSJ2 = CONCAT(
+                  'Sólo hay ', v_sinplaca,
+                  ' vehículos sin placa; no se pueden eliminar ',
+                  v_diff
+                );
+                ROLLBACK;
+
+            ELSE
+                -- Eliminar sólo los excedentes sin placa
+                DELETE FROM vehiculo
+                 WHERE id_tipo_vehiculo = p_id
+                   AND placa IS NULL
+                 ORDER BY id
+                 LIMIT v_diff;
+            END IF;
+
+        ELSEIF p_cantidad > v_total THEN
+            -- Insertar los faltantes con placa NULL
+            SET v_diff = p_cantidad - v_total;
+            WHILE v_diff > 0 DO
+                INSERT INTO vehiculo (
+                    placa,
+                    anio,
+                    color,
+                    estado,
+                    id_tipo_vehiculo
+                ) VALUES (
+                    NULL, NULL, NULL, 1, p_id
+                );
+                SET v_diff = v_diff - 1;
+            END WHILE;
+        END IF;
+
+        -- 4) Si no hubo ningún error (MSJ2 sigue NULL), actualizo y comito
+        IF MSJ2 IS NULL THEN
+            UPDATE tipo_vehiculo
+            SET nombre   = p_nombre,
+                id_marca = p_idMarca,
+                estado   = p_estado,
+                cantidad = p_cantidad
+            WHERE id = p_id;
+
+            COMMIT;
+            SET MSJ = 'Tipo de vehículo y su flota actualizada correctamente';
+        END IF;
     END IF;
 END$$
 
@@ -3162,7 +3957,7 @@ BEGIN
 
     SELECT COUNT(*) INTO v_existe
     FROM tipo_vehiculo
-    WHERE idTipoVehiculo = p_id;
+    WHERE id = p_id;
 
     IF v_existe = 0 THEN
         SET MSJ2 = 'El tipo de vehículo no existe';
@@ -3170,7 +3965,7 @@ BEGIN
         START TRANSACTION;
         UPDATE tipo_vehiculo
         SET estado = 0
-        WHERE idTipoVehiculo = p_id;
+        WHERE id = p_id;
         COMMIT;
 
         SET MSJ = 'Tipo de vehículo dado de baja correctamente';
@@ -3197,14 +3992,14 @@ BEGIN
 
     SELECT COUNT(*) INTO v_existe
     FROM tipo_vehiculo
-    WHERE idTipoVehiculo = p_id;
+    WHERE id = p_id;
 
     IF v_existe = 0 THEN
         SET MSJ2 = 'El tipo de vehículo no existe';
     ELSE
         START TRANSACTION;
         DELETE FROM tipo_vehiculo
-        WHERE idTipoVehiculo = p_id;
+        WHERE id = p_id;
         COMMIT;
 
         SET MSJ = 'Tipo de vehículo eliminado correctamente';
@@ -3236,9 +4031,9 @@ BEGIN
         SELECT COUNT(*) + 1
           INTO nuevo_nroPiso
         FROM nivel
-        WHERE tipo_vehiculo = p_tipo_vehiculo;
+        WHERE id_tipo_vehiculo = p_tipo_vehiculo;
 
-        INSERT INTO nivel (nroPiso, tipo_vehiculo, cantidad, estado)
+        INSERT INTO nivel (nroPiso, id_tipo_vehiculo, cantidad, estado)
         VALUES (nuevo_nroPiso, p_tipo_vehiculo, p_cantidad, 1);
 
         SET @MSJ = CONCAT(
@@ -3251,55 +4046,100 @@ BEGIN
 END$$
 
 CREATE PROCEDURE SP_ACTUALIZAR_NIVEL(
-    IN p_idNivel        INT,
-    IN p_nroPiso        INT,
-    IN p_tipo_vehiculo  INT,
-    IN p_cantidad       INT,
-    IN p_estado         TINYINT
+  IN p_idNivel        INT,
+  IN p_nroPiso        INT,
+  IN p_tipo_vehiculo  INT,
+  IN p_cantidad       INT,
+  IN p_estado         TINYINT
 )
 BEGIN
-    DECLARE max_piso INT DEFAULT 0;
+  DECLARE max_piso INT DEFAULT 0;
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  BEGIN
+    SET @MSJ2 = 'Error inesperado al actualizar nivel';
+    SET @MSJ  = NULL;
+  END;
+  SET @MSJ  = NULL; SET @MSJ2 = NULL;
+  IF p_cantidad <= 0 THEN
+    SET @MSJ2 = 'La cantidad debe ser mayor a 0';
+  ELSEIF p_nroPiso <= 0 THEN
+    SET @MSJ2 = 'El número de piso debe ser mayor a 0';
+  ELSE
+    SELECT COALESCE(MAX(nroPiso), 0) INTO max_piso
+      FROM nivel
+      WHERE id_tipo_vehiculo = p_tipo_vehiculo;
+    IF p_nroPiso > max_piso + 1 THEN
+      SET @MSJ2 = 'No puede actualizar a un piso mayor que el siguiente consecutivo';
+    ELSE
+      UPDATE nivel
+        SET nroPiso         = p_nroPiso,
+            id_tipo_vehiculo = p_tipo_vehiculo,
+            cantidad        = p_cantidad,
+            estado          = p_estado
+      WHERE id = p_idNivel;
+      IF ROW_COUNT() = 0 THEN
+        SET @MSJ2 = 'No se encontró el nivel especificado';
+      ELSE
+        SET @MSJ = 'Nivel actualizado correctamente';
+      END IF;
+    END IF;
+  END IF;
+END$$
 
-    -- Handler para errores inesperados
+CREATE PROCEDURE SP_DARBAJA_PISO(
+    IN p_idNivel INT
+)
+BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
-        SET @MSJ2 = 'Error inesperado al actualizar nivel';
+        SET @MSJ2 = 'Error inesperado al dar de baja el piso';
         SET @MSJ  = NULL;
     END;
 
-    -- Inicialización de mensajes
     SET @MSJ  = NULL;
     SET @MSJ2 = NULL;
 
-    -- Validaciones básicas
-    IF p_cantidad <= 0 THEN
-        SET @MSJ2 = 'La cantidad debe ser mayor a 0';
-    ELSEIF p_nroPiso <= 0 THEN
-        SET @MSJ2 = 'El número de piso debe ser mayor a 0';
+    UPDATE nivel
+    SET estado = 0
+    WHERE id = p_idNivel;
+
+    SET @MSJ = 'Piso dado de baja correctamente';
+END$$
+
+
+CREATE PROCEDURE SP_ELIMINAR_NIVEL(
+    IN p_idNivel INT
+)
+BEGIN
+    DECLARE piso_actual         INT;
+    DECLARE tipo_vehiculo_act   INT;
+    DECLARE max_piso            INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al eliminar nivel';
+        SET @MSJ  = NULL;
+    END;
+
+    SET @MSJ  = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT nroPiso, id_tipo_vehiculo
+      INTO piso_actual, tipo_vehiculo_act
+    FROM nivel
+    WHERE id = p_idNivel;
+
+    SELECT MAX(nroPiso)
+      INTO max_piso
+    FROM nivel
+    WHERE id_tipo_vehiculo = tipo_vehiculo_act;
+
+    IF piso_actual < max_piso THEN
+        SET @MSJ2 = 'Solo se puede eliminar el piso más alto para evitar inconsistencias';
     ELSE
-        -- Obtengo el mayor piso actual para este tipo de vehículo
-        SELECT COALESCE(MAX(nroPiso), 0)
-          INTO max_piso
-        FROM nivel
-        WHERE tipo_vehiculo = p_tipo_vehiculo;
-
-        IF p_nroPiso > max_piso + 1 THEN
-            SET @MSJ2 = 'No puede actualizar a un piso mayor que el siguiente consecutivo';
-        ELSE
-            -- Realizo el UPDATE
-            UPDATE nivel
-            SET nroPiso       = p_nroPiso,
-                tipo_vehiculo = p_tipo_vehiculo,
-                cantidad      = p_cantidad,
-                estado        = p_estado
-            WHERE idNivel = p_idNivel;
-
-            IF ROW_COUNT() = 0 THEN
-                SET @MSJ2 = 'No se encontró el nivel especificado';
-            ELSE
-                SET @MSJ = 'Nivel actualizado correctamente';
-            END IF;
-        END IF;
+        DELETE FROM nivel
+        WHERE id = p_idNivel;
+        SET @MSJ = 'Nivel eliminado correctamente';
     END IF;
 END$$
 
@@ -3325,7 +4165,7 @@ BEGIN
     SET @MSJ  = NULL;
     SET @MSJ2 = NULL;
 
-    INSERT INTO vehiculo (placa, anio, color, estado, idTipoVehiculo)
+    INSERT INTO vehiculo (placa, anio, color, estado, id_tipo_vehiculo)
     VALUES (p_placa, p_anio, p_color, 1, p_idTipoVehiculo);
 
     SET @MSJ  = 'Vehículo insertado correctamente';
@@ -3355,9 +4195,9 @@ BEGIN
         placa          = p_placa,
         anio           = p_anio,
         color          = p_color,
-        idTipoVehiculo = p_idTipoVehiculo,
+        id_tipo_vehiculo = p_idTipoVehiculo,
         estado         = p_estado
-    WHERE idVehiculo = p_idVehiculo;
+    WHERE id = p_idVehiculo;
 
     IF ROW_COUNT() = 0 THEN
         SET @MSJ2 = 'No se encontró el vehículo especificado';
@@ -3382,7 +4222,7 @@ BEGIN
 
     UPDATE vehiculo
     SET estado = 0
-    WHERE idVehiculo = p_idVehiculo;
+    WHERE id = p_idVehiculo;
 
     IF ROW_COUNT() = 0 THEN
         SET @MSJ2 = 'No se encontró el vehículo para dar de baja';
@@ -3406,72 +4246,12 @@ BEGIN
     SET @MSJ2 = NULL;
 
     DELETE FROM vehiculo
-    WHERE idVehiculo = p_idVehiculo;
+    WHERE id = p_idVehiculo;
 
     IF ROW_COUNT() = 0 THEN
         SET @MSJ2 = 'No se encontró el vehículo para eliminar';
     ELSE
         SET @MSJ = 'Vehículo eliminado correctamente';
-    END IF;
-END$$
-
-DELIMITER ;
-
-DELIMITER $$
-CREATE PROCEDURE SP_DARBAJA_PISO(
-    IN p_idNivel INT
-)
-BEGIN
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        SET @MSJ2 = 'Error inesperado al dar de baja el piso';
-        SET @MSJ  = NULL;
-    END;
-
-    SET @MSJ  = NULL;
-    SET @MSJ2 = NULL;
-
-    UPDATE nivel
-    SET estado = 0
-    WHERE idNivel = p_idNivel;
-
-    SET @MSJ = 'Piso dado de baja correctamente';
-END$$
-
-
-CREATE PROCEDURE SP_ELIMINAR_NIVEL(
-    IN p_idNivel INT
-)
-BEGIN
-    DECLARE piso_actual         INT;
-    DECLARE tipo_vehiculo_act   INT;
-    DECLARE max_piso            INT;
-
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        SET @MSJ2 = 'Error inesperado al eliminar nivel';
-        SET @MSJ  = NULL;
-    END;
-
-    SET @MSJ  = NULL;
-    SET @MSJ2 = NULL;
-
-    SELECT nroPiso, tipo_vehiculo
-      INTO piso_actual, tipo_vehiculo_act
-    FROM nivel
-    WHERE idNivel = p_idNivel;
-
-    SELECT MAX(nroPiso)
-      INTO max_piso
-    FROM nivel
-    WHERE tipo_vehiculo = tipo_vehiculo_act;
-
-    IF piso_actual < max_piso THEN
-        SET @MSJ2 = 'Solo se puede eliminar el piso más alto para evitar inconsistencias';
-    ELSE
-        DELETE FROM nivel
-        WHERE idNivel = p_idNivel;
-        SET @MSJ = 'Nivel eliminado correctamente';
     END IF;
 END$$
 
@@ -4117,10 +4897,10 @@ BEGIN
     SELECT COUNT(*) INTO existe_nombre 
       FROM servicio 
      WHERE nombre = p_nombre 
-       AND idTipoServicio = p_idTipoServicio;
+       AND id_tipo_servicio = p_idTipoServicio;
 
     IF existe_nombre = 0 THEN
-        INSERT INTO servicio (nombre, descripcion, idTipoServicio, estado)
+        INSERT INTO servicio (nombre, descripcion, id_tipo_servicio, estado)
         VALUES (p_nombre, p_descripcion, p_idTipoServicio, 1);
         SELECT 
           'Servicio insertado correctamente' AS MSJ,
@@ -4132,7 +4912,7 @@ BEGIN
     END IF;
 END$$
 
-CREATE PROCEDURE SP_UPDATE_SERVICIO(
+CREATE PROCEDURE SP_ACTUALIZAR_SERVICIO(
     IN p_idServicio INT,
     IN p_nombre VARCHAR(50),
     IN p_descripcion VARCHAR(255),
@@ -4145,16 +4925,16 @@ BEGIN
     SELECT COUNT(*) INTO existe_nombre 
       FROM servicio 
      WHERE nombre = p_nombre 
-       AND idTipoServicio = p_idTipoServicio
-       AND idServicio <> p_idServicio;
+       AND id_tipo_servicio = p_idTipoServicio
+       AND id <> p_idServicio;
 
     IF existe_nombre = 0 THEN
         UPDATE servicio 
            SET nombre         = p_nombre,
                descripcion    = p_descripcion,
-               idTipoServicio = p_idTipoServicio,
+               id_tipo_servicio = p_idTipoServicio,
                estado         = p_estado
-         WHERE idServicio    = p_idServicio;
+         WHERE id  = p_idServicio;
 
         IF ROW_COUNT() > 0 THEN
             SELECT 
@@ -4178,7 +4958,7 @@ CREATE PROCEDURE SP_BAJA_SERVICIO(
 BEGIN
     UPDATE servicio 
        SET estado = 0 
-     WHERE idServicio = p_idServicio;
+     WHERE id = p_idServicio;
 
     IF ROW_COUNT() > 0 THEN
         SELECT 
@@ -4196,7 +4976,7 @@ CREATE PROCEDURE SP_DELETE_SERVICIO(
 )
 BEGIN
     DELETE FROM servicio 
-     WHERE idServicio = p_idServicio;
+     WHERE id = p_idServicio;
 
     IF ROW_COUNT() > 0 THEN
         SELECT 
@@ -4608,4 +5388,147 @@ BEGIN
         SET @MSJ = 'Se eliminó correctamente a la ruta';
     END IF;
 END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_REGISTRAR_PERSONAL
+
+DELIMITER $$
+
+CREATE PROCEDURE SP_REGISTRAR_PERSONAL(
+    IN P_NOMBRE VARCHAR(255),
+    IN P_EMAIL VARCHAR(255),
+    IN P_PASS VARCHAR(255),
+    IN P_IMAGEN VARCHAR(255),
+    IN P_ESTADO BOOLEAN,
+    IN P_IDTIPOPERSONAL INT,
+    IN P_USUARIO VARCHAR(255)
+)
+BEGIN
+    DECLARE cEmail INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cEmail FROM personal WHERE EMAIL = P_EMAIL AND ESTADO_REGISTRO = 1;
+
+    IF cEmail > 0 THEN
+        SET @MSJ2 = 'El correo que intenta registrar ya está registrado';
+    ELSE
+        INSERT INTO personal (NOMBRE, EMAIL, PASSWORD, IMAGEN, ESTADO, ID_TIPOPERSONAL, USUARIO) 
+        VALUES (P_NOMBRE, P_EMAIL, P_PASS, P_IMAGEN, P_ESTADO, P_IDTIPOPERSONAL, P_USUARIO);
+
+        SET @MSJ = 'Se registró correctamente al personal';
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Crear procedimiento SP_EDITAR_PERSONAL
+
+DELIMITER $$
+
+CREATE PROCEDURE SP_EDITAR_PERSONAL(
+    IN P_ID INT,
+    IN P_NOMBRE VARCHAR(255),
+    IN P_EMAIL VARCHAR(255),
+    IN P_IMAGEN VARCHAR(255),
+    IN P_ESTADO BOOLEAN,
+    IN P_IDTIPOPERSONAL INT
+)
+BEGIN
+    DECLARE cPersonal INT;
+    DECLARE cEmail INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cPersonal FROM personal WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+    SELECT COUNT(*) INTO cEmail FROM personal WHERE EMAIL = P_EMAIL AND ID != P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cPersonal <= 0 THEN
+        SET @MSJ2 = 'El personal que intenta editar no existe';
+    ELSEIF cEmail != 0 THEN
+        SET @MSJ2 = 'El correo ingresado ya existe';
+    ELSE
+        UPDATE personal 
+        SET NOMBRE = P_NOMBRE, 
+            EMAIL = P_EMAIL,
+            IMAGEN = P_IMAGEN,
+            ESTADO = P_ESTADO,
+            ID_TIPOPERSONAL = P_IDTIPOPERSONAL, 
+            ESTADO_PROCESO = 'MODIFICADO' 
+        WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se modificó correctamente al personal';
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Crear procedimiento SP_DARBAJA_PERSONAL
+
+DELIMITER $$
+
+CREATE PROCEDURE SP_DARBAJA_PERSONAL(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cPersonal INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cPersonal FROM personal WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cPersonal <= 0 THEN
+        SET @MSJ2 = 'El personal que intenta dar de baja no existe';
+    ELSE
+        UPDATE personal SET ESTADO = 0, ESTADO_PROCESO = 'MODIFICADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se dio de baja correctamente al personal';
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_PERSONAL
+
+DELIMITER $$
+
+CREATE PROCEDURE SP_ELIMINAR_PERSONAL(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cPersonal INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cPersonal FROM personal WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+    IF cPersonal <= 0 THEN
+        SET @MSJ2 = 'El personal que intenta eliminar no existe';
+    ELSE
+        UPDATE personal SET ESTADO_REGISTRO = 2, ESTADO_PROCESO = 'ELIMINADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        SET @MSJ = 'Se eliminó correctamente al personal';
+    END IF;
+END $$
+
 DELIMITER ;

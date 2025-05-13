@@ -195,11 +195,11 @@
                     render: function (data, type, row) {
                         let estado = data === 'A' ? 'Vigente' : 'No vigente';
                         if (estado === "Vigente") {
-                            return `<h3 class="badge badge-success">${estado}</h3>`;
+                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-success fs-5">${estado}</span></h5>`;
                         } else if (estado === "No vigente") {
-                            return `<h3  class="badge badge-danger">${estado}</h3>`;
+                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-danger fs-5">${estado}</span></h5>`;
                         } else {
-                            return `<span class="badge" style="background-color: #800080; color: white;">${estado}</span>`;
+                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge fs-5" style="background-color: #800080; color: white;">${estado}</span></h5>`;
                         }
                     },
                 },

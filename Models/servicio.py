@@ -15,13 +15,13 @@ class Servicio:
             conexion = bd.Conexion()
             listado = conexion.obtener("""
                     SELECT
-                        s.idServicio AS id,
+                        s.id AS id,
                         s.nombre AS nombre,
                         s.descripcion AS descripcion,
                         tpser.nombre AS idTipoServicio,
                         s.estado AS estado
                     FROM servicio s 
-                    LEFT JOIN tipo_servicio tpser ON s.idTipoServicio = tpser.idTipoServicio
+                    LEFT JOIN tipo_servicio tpser ON s.id_tipo_servicio = tpser.idTipoServicio
             """)
             return listado
         finally:
@@ -32,7 +32,7 @@ class Servicio:
     def obtener_unServicio(cls, idServicio):
         try:
             conexion = bd.Conexion()
-            servicio = conexion.obtener("SELECT * FROM servicio WHERE idServicio = %s", (idServicio,))
+            servicio = conexion.obtener("SELECT * FROM servicio WHERE id = %s", (idServicio,))
             return servicio[0]
         finally:
             if conexion:
@@ -55,7 +55,7 @@ class Servicio:
     def actualizarServicio(cls, idServicio, nombre, descripcion, idTipoServicio, estado):
         try:
             conexion = bd.Conexion()
-            resultado = conexion.ejecutar("CALL SP_UPDATE_SERVICIO(%s, %s, %s, %s, %s)",
+            resultado = conexion.ejecutar("CALL SP_ACTUALIZAR_SERVICIO(%s, %s, %s, %s, %s)",
                                           (idServicio, nombre, descripcion, idTipoServicio, estado))
             result = resultado.fetchall()
             return result
