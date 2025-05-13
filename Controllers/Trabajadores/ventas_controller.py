@@ -659,4 +659,18 @@ def eliminar_tipo_documento(id):
 
 # END REGION TIPO DOCUMENTO #
 
+# REGION CLIENTE
+# END REGION CLIENTE 
+
+# REGION ASIENTO 
+@ventas_bp.route('/ClienteNuevo')
+def cliente_nuevo():
+    return render_template(
+        'ventas/clienteCRUD.html',
+        tittle='Registrar cliente'
+    )
+
+# END REGION ASIENTO
+
+
 # END FUNCIONES

@@ -49,6 +49,11 @@ DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPOVEHICULO;
 
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_ASIENTO;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_ASIENTO;
+DROP PROCEDURE IF EXISTS SP_EDITAR_ASIENTO;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_ASIENTO;
+
 DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPO_COMPROBANTE;
 DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPO_COMPROBANTE;
 DROP PROCEDURE IF EXISTS SP_DAR_BAJA_TIPO_COMPROBANTE;
@@ -75,6 +80,16 @@ DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPOVEHICULO;
+
+-- Eliminar procedimientos existentes (si los hay)
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_CLIENTE_NATURAL;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_CLIENTE_JURIDICO;
+
+DROP PROCEDURE IF EXISTS SP_EDITAR_CLIENTE_NATURAL;
+DROP PROCEDURE IF EXISTS SP_EDITAR_CLIENTE_JURIDICO;
+
+DROP PROCEDURE IF EXISTS SP_DARBAJA_CLIENTE;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_CLIENTE;
 
 -- Eliminar procedimientos si existen
 DROP PROCEDURE IF EXISTS SP_INSERTAR_NIVEL;
@@ -116,6 +131,8 @@ DROP TABLE IF EXISTS marca;
 DROP TABLE IF EXISTS ruta;
 DROP TABLE IF EXISTS nivel;
 DROP TABLE IF EXISTS ciudad;
+DROP TABLE IF EXISTS asiento;
+DROP TABLE IF EXISTS cliente;
 
 -- Crear tabla tipo_servicio
 CREATE TABLE tipo_servicio (
@@ -259,6 +276,48 @@ CREATE TABLE ruta (
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NOT NULL
 );
+
+CREATE TABLE cliente (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    
+    id_pais INT NOT NULL,
+    id_tipo_doc INT NOT NULL,
+    id_tipo_cliente INT NOT NULL,
+    
+    numero_documento VARCHAR(20) NOT NULL, -- UNIQUE,
+    
+    nombres VARCHAR(90),
+    ape_paterno VARCHAR(50),
+    ape_materno VARCHAR(50),
+    
+    sexo TINYINT DEFAULT 0, -- 'O' para otros/no especificado
+    f_nacimiento DATE,
+    
+    razon_social VARCHAR(90),
+    direccion VARCHAR(70),
+    
+    telefono VARCHAR(13), -- Ej: +51912345678
+    email VARCHAR(100) NOT NULL,
+    password VARCHAR(256) NOT NULL, -- SHA-256 hash
+    
+    fechaRegistro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE asiento (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    nro_asiento SMALLINT  NOT NULL,  -- Hasta 9999
+    id_nivel TINYINT NOT NULL,
+
+    tipo_asiento VARCHAR(30) NOT NULL,
+
+    estado TINYINT NOT NULL CHECK (estado IN (0, 1, 2, 3)),
+
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL
+);
+
 
 -- Crear tabla menus
 CREATE TABLE conf_menus (
@@ -2689,6 +2748,210 @@ BEGIN
 END $$
 DELIMITER ;
 
+-- aaaaaaaaaaaaaaa
+-- Crear procedimiento SP_REGISTRAR_CLIENTE
+DELIMITER $$
+CREATE PROCEDURE SP_REGISTRAR_CLIENTE_NATURAL(
+    IN P_ID_PAIS INT,
+    IN P_ID_TIPO_DOC INT,
+    IN P_ID_TIPO_CLIENTE INT,
+    IN P_NUMERO_DOCUMENTO VARCHAR(20),
+    IN P_NOMBRES VARCHAR(90),
+    IN P_APE_PATERNO VARCHAR(50),
+    IN P_APE_MATERNO VARCHAR(50),
+    IN P_SEXO TINYINT,
+    IN P_F_NACIMIENTO DATE,
+    IN P_DIRECCION VARCHAR(70),
+    IN P_TELEFONO VARCHAR(13),
+    IN P_EMAIL VARCHAR(100),
+    IN P_PASSWORD VARCHAR(256),
+    IN P_USUARIO DATETIME
+)
+BEGIN
+    DECLARE cEmail INT;
+    DECLARE cNumeroDoc INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cEmail FROM CLIENTE WHERE EMAIL = P_EMAIL;
+    SELECT COUNT(*) INTO cNumeroDoc FROM CLIENTE WHERE numero_documento = P_NUMERO_DOCUMENTO;
+    IF cEmail > 0 THEN
+        SET @MSJ2 = 'El correo que intenta registrar ya está registrado';
+    ELSEIF cNumeroDoc > 0 THEN
+        SET @MSJ2 = 'El numero de documento que intenta registrar ya está registrado';
+    ELSE
+        INSERT INTO CLIENTE (id_pais,id_tipo_doc,id_tipo_cliente,numero_documento,nombres, ape_paterno, ape_materno, sexo, f_nacimiento, direccion, telefono, email, password,usuario) 
+        VALUES (P_ID_PAIS, P_ID_TIPO_DOC, P_ID_TIPO_CLIENTE, P_NUMERO_DOCUMENTO, P_NOMBRES, P_APE_PATERNO, P_APE_MATERNO, P_SEXO, P_F_NACIMIENTO, P_DIRECCION, P_TELEFONO, P_EMAIL, P_PASSWORD, P_USUARIO);
+        SET @MSJ = 'Se registró correctamente al cliente';
+    END IF;
+END $$
+DELIMITER ;
+
+DELIMITER $$
+CREATE PROCEDURE SP_REGISTRAR_CLIENTE_JURIDICO(
+    IN P_ID_PAIS INT,
+    IN P_ID_TIPO_DOC INT,
+    IN P_NUMERO_DOCUMENTO VARCHAR(20),
+    IN P_RAZON_SOCIAL VARCHAR(90),
+    IN P_DIRECCION VARCHAR(70),
+    IN P_TELEFONO VARCHAR(13),
+    IN P_EMAIL VARCHAR(100),
+    IN P_PASSWORD VARCHAR(256),
+    IN P_USUARIO DATETIME
+)
+BEGIN
+    DECLARE cEmail INT;
+    DECLARE cRazonSocial INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cEmail FROM cliente WHERE EMAIL = P_EMAIL;
+    SELECT COUNT(*) INTO cRazonSocial FROM cliente WHERE RAZON_SOCIAL = P_RAZON_SOCIAL;
+
+    IF cEmail > 0 THEN
+        SET @MSJ2 = 'El correo que intenta registrar ya está registrado';
+    ELSEIF cRazonSocial > 0 THEN
+    	SET @MSJ2 = 'La razón social que intenta registrar ya está registrado';
+    ELSE  
+        INSERT INTO CLIENTE (id_pais,id_tipo_doc,numero_documento, razon_social, direccion, telefono, email, password,usuario) 
+        VALUES (P_ID_PAIS, P_ID_TIPO_DOC, P_NUMERO_DOCUMENTO, P_RAZON_SOCIAL, P_DIRECCION, P_TELEFONO, P_EMAIL, P_PASSWORD, P_USUARIO);
+        SET @MSJ = 'Se registró correctamente al cliente';
+    END IF;
+END $$
+DELIMITER ;
+
+
+-- Crear procedimiento SP_EDITAR_CLIENTE
+DELIMITER $$
+CREATE PROCEDURE SP_EDITAR_CLIENTE_NATURAL(
+    IN P_ID INT,
+    IN P_ID_PAIS INT,
+    IN P_ID_TIPO_DOC INT,
+    IN P_ID_TIPO_CLIENTE INT,
+    IN P_NUMERO_DOCUMENTO VARCHAR(20),
+    IN P_NOMBRES VARCHAR(90),
+    IN P_APE_PATERNO VARCHAR(50),
+    IN P_APE_MATERNO VARCHAR(50),
+    IN P_SEXO TINYINT,
+    IN P_F_NACIMIENTO DATE,
+    IN P_DIRECCION VARCHAR(70),
+    IN P_TELEFONO VARCHAR(13),
+    IN P_EMAIL VARCHAR(100),
+    IN P_PASSWORD VARCHAR(256),
+    IN P_USUARIO DATETIME
+)
+BEGIN
+    DECLARE cCliente INT;
+    DECLARE cEmail INT;
+    DECLARE cNumeroDoc INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cCliente FROM CLIENTE WHERE id = P_ID;
+    SELECT COUNT(*) INTO cEmail FROM CLIENTE WHERE EMAIL = P_EMAIL;
+    SELECT COUNT(*) INTO cNumeroDoc FROM CLIENTE WHERE numero_documento = P_NUMERO_DOCUMENTO;
+
+    IF cCliente <= 0 THEN
+        SET @MSJ2 = 'El cliente que intenta editar no existe';
+    ELSEIF cEmail != 0 THEN
+        SET @MSJ2 = 'El correo ingresado ya existe';
+    ELSEIF cNumeroDoc != 0 THEN
+        SET @MSJ2 = 'El numero de documento ingresado ya existe';
+    ELSE
+        UPDATE CLIENTE
+        SET id_pais = P_ID_PAIS,
+        id_tipo_doc = P_ID_TIPO_DOC,
+        id_tipo_cliente = P_ID_TIPO_CLIENTE,
+        numero_documento = P_NUMERO_DOCUMENTO,
+        nombres = P_NOMBRES,
+        ape_paterno = P_APE_PATERNO,
+        ape_materno = P_APE_MATERNO,
+        sexo = P_SEXO,
+        f_nacimiento = P_F_NACIMIENTO,
+        direccion = P_DIRECCION,
+        telefono = P_TELEFONO,
+        email = P_EMAIL,
+        password = P_PASSWORD,
+        usuario = P_USUARIO
+        WHERE id = P_ID;
+        
+        SET @MSJ = 'Se modificó correctamente al usuario';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_DARBAJA_CLIENTE
+DELIMITER $$
+CREATE PROCEDURE SP_DARBAJA_CLIENTE(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cCliente INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cCliente FROM cliente WHERE ID = P_ID;
+
+    IF cCliente <= 0 THEN
+        SET @MSJ2 = 'El cliente que intenta dar de baja no existe';
+    ELSE
+        UPDATE cliente SET ESTADO = 0 WHERE ID = P_ID;
+
+        SET @MSJ = 'Se dio de baja correctamente al cliente';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_CLIENTE
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_CLIENTE(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cCliente INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cCliente FROM cliente WHERE ID = P_ID;
+
+    IF cCliente <= 0 THEN
+        SET @MSJ2 = 'El cliente que intenta eliminar no existe';
+    ELSE
+        DELETE FROM horario WHERE ID = P_ID;
+        SET @MSJ = 'Se eliminó correctamente al usuario';
+    END IF;
+END $$
+DELIMITER ;
+-- aaaaaaaaaaaaaaa
+
+
+
+
 DELIMITER $$
 CREATE PROCEDURE SP_REGISTRAR_SUCURSAL(
     IN P_DEPARTAMENTO VARCHAR(50),
@@ -2837,6 +3100,135 @@ BEGIN
     END IF;
 END $$
 DELIMITER ;
+
+-- REGISTRAR ASIENTO
+DELIMITER $$
+CREATE PROCEDURE SP_REGISTRAR_ASIENTO(
+    IN P_NRO_ASIENTO SMALLINT,
+    IN P_ID_NIVEL TINYINT,
+    IN P_TIPO_ASIENTO VARCHAR(30),
+    IN P_ESTADO TINYINT,
+    IN P_USUARIO VARCHAR(100)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    IF P_ESTADO NOT IN (0, 1, 2, 3, 4) THEN
+        SET @MSJ2 = 'El estado seleccionado no está disponible';
+    ELSE
+        INSERT INTO asiento (nro_asiento, id_nivel, tipo_asiento, estado, usuario)
+        VALUES (P_NRO_ASIENTO, P_ID_NIVEL, P_TIPO_ASIENTO, P_ESTADO, P_USUARIO);
+
+        SET @MSJ = 'Se registró correctamente el asiento';
+    END IF;
+END $$
+DELIMITER ;
+
+
+-- EDITAR ASIENTO
+DELIMITER $$
+CREATE PROCEDURE SP_EDITAR_ASIENTO(
+    IN P_ID INT,
+    IN P_NRO_ASIENTO SMALLINT,
+    IN P_ID_NIVEL TINYINT,
+    IN P_TIPO_ASIENTO VARCHAR(30),
+    IN P_ESTADO TINYINT,
+    IN P_USUARIO VARCHAR(100)
+)
+BEGIN
+    DECLARE cAsiento INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cAsiento FROM asiento WHERE id = P_ID;
+
+    IF cAsiento = 0 THEN
+        SET @MSJ2 = 'El asiento que intenta editar no existe';
+    ELSEIF P_ESTADO NOT IN (0, 1, 2, 3, 4) THEN
+        SET @MSJ2 = 'El estado seleccionado no está disponible';
+    ELSE
+        UPDATE asiento
+        SET nro_asiento = P_NRO_ASIENTO,
+            id_nivel = P_ID_NIVEL,
+            tipo_asiento = P_TIPO_ASIENTO,
+            estado = P_ESTADO,
+            usuario = P_USUARIO
+        WHERE id = P_ID;
+
+        SET @MSJ = 'Se modificó correctamente el asiento';
+    END IF;
+END $$
+DELIMITER ;
+
+
+-- DAR DE BAJA EL ASIENTO
+DELIMITER $$
+CREATE PROCEDURE SP_DARBAJA_ASIENTO(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cAsiento INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cAsiento FROM asiento WHERE id = P_ID;
+
+    IF cAsiento = 0 THEN
+        SET @MSJ2 = 'El asiento que intenta dar de baja no existe';
+    ELSE
+        UPDATE asiento
+        SET estado = 0
+        WHERE id = P_ID;
+
+        SET @MSJ = 'Se dio de baja correctamente el asiento';
+    END IF;
+END $$
+DELIMITER ;
+
+
+-- ELIMINAR ASIENTO
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_ASIENTO(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cAsiento INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cAsiento FROM asiento WHERE id = P_ID;
+
+    IF cAsiento = 0 THEN
+        SET @MSJ2 = 'El asiento que intenta eliminar no existe';
+    ELSE
+        DELETE FROM asiento WHERE id = P_ID;
+
+        SET @MSJ = 'Se eliminó correctamente el asiento';
+    END IF;
+END $$
+DELIMITER ;
+
 
 -- Crear procedimiento SP_REGISTRAR_TIPO_USUARIO
 DELIMITER $$
