@@ -1,0 +1,122 @@
+{% extends "index.html" %}
+
+{% block title %}YATRAX - {{ tittle }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="text-center mb-0">{{ tittle }}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="col-md-12 mb-3">
+                        <label for="txt_Pais">País</label>
+                        <div class="input-group">
+                            <input type="text" id="txt_Pais" class="form-control" placeholder="País">
+                            <div class="input-group-append">
+                                <div class="input-group-text"><i class="fas fa-flag"></i></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label for="cbx_TipoDocumento">Tipo de documento</label>
+                        <div class="input-group">
+                            <select id="cbx_TipoDocumento" class="form-control">
+                                <option disabled selected>--SELECCIONAR--</option>
+                                <option value="dni">DNI</option>
+                                <option value="ruc">RUC</option>
+                                <option value="ce">Carnet de extranjería</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label for="txt_NumeroDocumento">Número de documento</label>
+                        <div class="input-group">
+                            <input type="text" id="txt_NumeroDocumento" class="form-control" placeholder="Número de documento">
+                            <div class="input-group-append">
+                                <div class="input-group-text"><i class="fas fa-id-card"></i></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label for="txt_ApellidoPaterno">Apellido paterno</label>
+                        <div class="input-group">
+                            <input type="text" id="txt_ApellidoPaterno" class="form-control" placeholder="Apellido paterno">
+                            <div class="input-group-append">
+                                <div class="input-group-text"><i class="fas fa-user-tag"></i></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label for="txt_ApellidoMaterno">Apellido materno</label>
+                        <div class="input-group">
+                            <input type="text" id="txt_ApellidoMaterno" class="form-control" placeholder="Apellido materno">
+                            <div class="input-group-append">
+                                <div class="input-group-text"><i class="fas fa-user-tag"></i></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label for="cbx_Sexo">Sexo</label>
+                        <div class="input-group">
+                            <select id="cbx_Sexo" class="form-control">
+                                <option disabled selected>--SELECCIONAR--</option>
+                                <option value="Masculino">Masculino</option>
+                                <option value="Femenino">Femenino</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label for="txt_FechaNacimiento">Fecha de nacimiento</label>
+                        <div class="input-group">
+                            <input type="date" id="txt_FechaNacimiento" class="form-control">
+                            <div class="input-group-append">
+                                <div class="input-group-text"><i class="fas fa-calendar-alt"></i></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label for="txt_Direccion">Dirección</label>
+                        <div class="input-group">
+                            <input type="text" id="txt_Direccion" class="form-control" placeholder="Dirección">
+                            <div class="input-group-append">
+                                <div class="input-group-text"><i class="fas fa-map-marker-alt"></i></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label for="txt_Telefono">Teléfono</label>
+                        <div class="input-group">
+                            <input type="text" id="txt_Telefono" class="form-control" placeholder="Teléfono">
+                            <div class="input-group-append">
+                                <div class="input-group-text"><i class="fas fa-phone"></i></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botón de acción -->
+                    <div class="text-center">
+                        <button class="btn btn-success" id="btn_Guardar">Guardar</button>
+                        <a href="/trabajadores/usuarios/GestionarUsuarios" class="btn btn-secondary">Volver</a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Aquí puedes agregar el JS si es necesario -->
+{% endblock %}

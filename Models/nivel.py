@@ -16,7 +16,7 @@ class Nivel:
             conexion = bd.Conexion()
             listado = conexion.obtener("""
                 SELECT 
-                n.idNivel AS id,
+                n.id AS id,
                 n.nroPiso,
                 tv.nombre AS tipo_vehiculo,
                 n.cantidad,
@@ -24,7 +24,7 @@ class Nivel:
             FROM 
                 nivel n
             INNER JOIN 
-                tipo_vehiculo tv ON n.tipo_vehiculo = tv.idTipoVehiculo;
+                tipo_vehiculo tv ON n.id_tipo_vehiculo = tv.id;
             """)
             return listado
         finally:
@@ -37,7 +37,7 @@ class Nivel:
         try:
             conexion = bd.Conexion()
             listado = conexion.obtener(
-                "SELECT * FROM nivel WHERE idNivel = %s",
+                "SELECT * FROM nivel WHERE id = %s",
                 (idNivel,)
             )
             return listado[0]

@@ -8,7 +8,9 @@ from Models.horario import Horario
 from Models.ubigeo import Ubigeo
 from Models.marca import Marca
 from Models.ruta import Ruta
+from Models.cliente import Cliente
 from werkzeug.utils import secure_filename
+from Models.asiento import Asiento
 
 viajes_bp = Blueprint('viajes', __name__, url_prefix='/trabajadores/viajes')
 
@@ -86,6 +88,14 @@ def Menu_Nivel():
 @viajes_bp.route('/GestionarRutas')
 def Menu_Rutas():
     return render_template('viajes/ruta.html', active_page="ruta", active_menu='mViajes')
+
+@viajes_bp.route('/GestionarClientes')
+def Menu_Clientes():
+    return render_template('viajes/cliente.html', active_page="cliente", active_menu='mViajes')
+
+@viajes_bp.route('/GestionarAsiento')
+def Menu_Asiento():
+    return render_template('viajes/asiento.html', active_page="asiento", active_menu='mViajes')
 
 @viajes_bp.route('/RutaNuevo')
 def TipoUsuario_Nuevo():
@@ -354,6 +364,14 @@ def eliminarTipoVehiculo(idTipoVehiculo):
 # END REGION TIPO VEHICULO
 
 # REGION VEHICULO
+@viajes_bp.route("/GetData_Clientes")
+def get_clientes():
+    try:
+        clientes = Cliente.obtener_todos()
+        return jsonify({'data': clientes, 'Status': 'success', 'Msj': 'Listado de vehículos retornado exitosamente'})
+    except Exception as e:
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar los vehículos: {repr(e)}'})
+    
 @viajes_bp.route("/GetData_Vehiculo")
 def get_vehiculos():
     try:
@@ -361,6 +379,7 @@ def get_vehiculos():
         return jsonify({'data': vehiculos, 'Status': 'success', 'Msj': 'Listado de vehículos retornado exitosamente'})
     except Exception as e:
         return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar los vehículos: {repr(e)}'})
+
 
 @viajes_bp.route('/registrarVehiculo', methods=["GET", "POST"])
 def nuevoVehiculo():
@@ -568,7 +587,7 @@ def ver_usuario(id):
         horario_data = Horario.obtener_por_id(id)
         if horario_data:
             return render_template('viajes/horarioCRUD.html', active_page="horarios", active_menu='mViajes', horario=horario_data, tittle = 'Ver horario', btnId = 'btn_Aceptar')
-        return render_template('viajes/horarioCRUD.html', active_page="usuarios", active_menu='mUsuarios', usuario={}, tittle = 'Ver usuario', btnId = 'btn_Aceptar')
+        return render_template('viajes/horarioCRUD.html', active_page="horarios", active_menu='mViajes', usuario={}, tittle = 'Ver horario', btnId = 'btn_Aceptar')
         
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
@@ -1025,5 +1044,132 @@ def darBaja_ruta(id):  # Recibe el ID de la URL
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
 # END REGION RUTA
+
+# REGION DE ASIENTO
+@viajes_bp.route('/AsientoNuevo')
+def asiento_nuevo():
+    return render_template(
+        'viajes/asientoCRUD.html', 
+        active_page="asiento", 
+        active_menu='mViajes',  
+        asiento={}, 
+        tittle = 'Registrar asiento', 
+        btnId = 'btn_Registrar')
+
+# Obtener todos los asientos
+@viajes_bp.route("/GetData_Asientos", methods=["GET"])
+def get_asientos():
+    try:
+        asientos = Asiento.obtener_todos()
+        return jsonify({'data': asientos, 'Status': 'success', 'Msj': 'Listado de asientos retornado exitosamente'})
+    except Exception as e:
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar asientos: {repr(e)}'})
+
+# Registrar asiento
+@viajes_bp.route("/RegistrarAsiento", methods=["POST"])
+def registrar_asiento():
+    try:
+        nro_asiento = request.form.get("nro_asiento").strip()
+        nivel = request.form.get("nivel")
+        tipo_asiento = request.form.get("tipo_asiento")
+        estado = request.form.get("estado")
+        usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
+
+        if not nro_asiento or not nivel or not tipo_asiento or not estado:
+            return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
+
+        mensajes = Asiento.registrar(nro_asiento, nivel, tipo_asiento, estado, usuario_actual)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar asiento'})
+
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+# Eliminar asiento
+@viajes_bp.route("/EliminarAsiento/<int:id>", methods=['POST'])
+def eliminar_asiento(id):
+    try:
+        mensajes = Asiento.eliminar(id)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al eliminar asiento'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+# Editar asiento
+@viajes_bp.route("/EditarAsiento/<int:id>", methods=['GET', 'POST'])
+def editar_asiento(id):
+    try:
+        asiento = Asiento.obtener_por_id(id)
+
+        if request.method == 'POST':
+            nro_asiento = request.form.get("nro_asiento").strip()
+            nivel = request.form.get("nivel")
+            tipo_asiento = request.form.get("tipo_asiento")
+            estado = request.form.get("estado")
+
+            if not nro_asiento or not nivel or not tipo_asiento or not estado:
+                return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
+
+            mensajes = Asiento.editar(id, nro_asiento, nivel, tipo_asiento, estado)
+            msj1 = mensajes.get('@MSJ')
+            msj2 = mensajes.get('@MSJ2')
+
+            if msj1:
+                return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+            elif msj2:
+                return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+            else:
+                return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar asiento'})
+
+        if asiento:
+            return render_template('asiento/asientoCRUD.html', active_page="asientos", active_menu='mAsientos', asiento=asiento, tittle='Editar asiento', btnId='btn_Editar')
+        return render_template('asiento/asientoCRUD.html', active_page="asientos", active_menu='mAsientos', asiento={}, tittle='Editar asiento', btnId='btn_Editar')
+
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+# Ver asiento
+@viajes_bp.route("/VerAsiento/<int:id>", methods=['GET'])
+def ver_asiento(id):
+    try:
+        asiento = Asiento.obtener_por_id(id)
+        if asiento:
+            return render_template('asiento/asientoCRUD.html', active_page="asientos", active_menu='mAsientos', asiento=asiento, tittle='Ver asiento', btnId='btn_Aceptar')
+        return render_template('asiento/asientoCRUD.html', active_page="asientos", active_menu='mAsientos', asiento={}, tittle='Ver asiento', btnId='btn_Aceptar')
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+# Dar de baja asiento
+@viajes_bp.route("/DarBajaAsiento/<int:id>", methods=['POST'])
+def dar_baja_asiento(id):
+    try:
+        mensajes = Asiento.darBaja(id)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja el asiento'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+# END REGION ASIENTO
 
 # END FUNCIONES
