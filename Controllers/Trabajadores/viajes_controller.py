@@ -4,6 +4,7 @@ from Models.nivel import Nivel
 from Models.tipoVehiculo import TipoVehiculo
 from Models.vehiculo import Vehiculo
 from Models.sucursal import Sucursal
+from Models.ciudad import Ciudad
 from Models.horario import Horario
 from Models.ubigeo import Ubigeo
 from Models.marca import Marca
@@ -88,7 +89,6 @@ def Menu_Nivel():
 @viajes_bp.route('/GestionarRutas')
 def Menu_Rutas():
     return render_template('viajes/ruta.html', active_page="ruta", active_menu='mViajes')
-
 
 @viajes_bp.route('/GestionarAsiento')
 def Menu_Asiento():
@@ -312,8 +312,8 @@ def editarTipoVehiculo(idTipoVehiculo):
 
             mensajes = TipoVehiculo.actualizarTipoVehiculo(idTipoVehiculo,nombre,marca,estado,cantidad)
 
-            msj1 = mensajes.get('@MSJ')
-            msj2 = mensajes.get('@MSJ2')
+            msj1 = mensajes.get('MSJ')
+            msj2 = mensajes.get('MSJ2')
 
             if msj1:
                 return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
@@ -634,19 +634,21 @@ def registrar_sucursal():
         direccion = request.form.get("txt_direccion", "").strip()
         latitud = request.form.get("txt_latitud")
         longitud = request.form.get("txt_longitud")
-        departamento = request.form.get("txt_departamento", "").strip()
+        ciudad = request.form.get("txt_ciudad", "").strip()
+        abreviatura = request.form.get("txt_abreviatura", "").strip()
         usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO')
 
         # Validaciones básicas
-        if not all([nombre, latitud, longitud, departamento]):
+        if not all([nombre, latitud, longitud, ciudad, abreviatura]):
             return jsonify({"Status": "error", "Msj": "Todos los campos son requeridos"})
 
         resultado = Sucursal.registrar(
-            departamento=departamento,
+            ciudad=ciudad,
             nombre=nombre,
             direccion=direccion,
             latitud=latitud,
             longitud=longitud,
+            abreviatura=abreviatura,
             usuario_actual=usuario_actual
         )
         
@@ -694,10 +696,10 @@ def editar_sucursal(idSucursal):
             direccion = request.form.get("txt_direccion").strip()
             latitud = request.form.get("txt_latitud").strip()
             longitud = request.form.get("txt_longitud").strip()
-            departamento = request.form.get("txt_departamento").strip()
+            ciudad = request.form.get("txt_ciudad").strip()
             usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
             
-            mensajes = Sucursal.editar(idSucursal, departamento, direccion, nombre, latitud, longitud, usuario_actual)
+            mensajes = Sucursal.editar(idSucursal, ciudad, direccion, nombre, latitud, longitud, usuario_actual)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
@@ -754,7 +756,7 @@ def obtener_sucursales_mapa():
                 'id': suc['id'],
                 'nombre': suc['nombre'],
                 'direccion': suc['direccion'],
-                'departamento': suc['departamento'],
+                'ciudad': suc['ciudad'],
                 'latitud': float(suc['latitud']) if suc['latitud'] else None,
                 'longitud': float(suc['longitud']) if suc['longitud'] else None
             })
@@ -762,6 +764,33 @@ def obtener_sucursales_mapa():
         return jsonify(sucursales_json)
     except Exception as e:
         return jsonify({"Status": "error", "Msj": str(e)}), 500
+
+@viajes_bp.route('/BuscarAbreviatura', methods=['POST'])
+def buscar_abreviatura():
+    try:
+        data = request.json
+        provincia = data.get("provincia", '').strip()
+        if not provincia:
+            return jsonify({'error': 'Parámetro de provincia no proporcionado'}), 400
+        
+        resultado = Ciudad.obtener_abreviatura(provincia)
+        if resultado:
+            return jsonify({
+                'status': 'success',
+                'data': resultado
+            })
+        else:
+            resultado = provincia[:3] if len(provincia) >= 2 else provincia.ljust(3, 'X')
+            Ciudad.registrar_abreviatura(provincia, resultado)
+        return jsonify({
+            "Status": "success",
+            "data": resultado,
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': 'Error interno del servidor'
+        }), 100
 
 @viajes_bp.route('/api/geocodificar', methods=['GET'])
 def geocodificar_coordenadas():

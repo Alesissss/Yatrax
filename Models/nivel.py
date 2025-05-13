@@ -68,8 +68,8 @@ class Nivel:
                 "CALL SP_INSERTAR_NIVEL(%s, %s)",
                 (tipo_vehiculo, cantidad)
             )
-            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
-            return resultado[0]  # (mensaje_exito, mensaje_error)
+            resultado = conexion.obtener("SELECT @MSJ AS MSJ, @MSJ2 AS MSJ2;")
+            return resultado[0]["MSJ"], resultado[0]["MSJ2"]  # (mensaje_exito, mensaje_error)
         except Exception as e:
             print(f"Error en insertar_nivel: {e}")
             raise
@@ -86,8 +86,8 @@ class Nivel:
                 "CALL SP_ACTUALIZAR_NIVEL(%s, %s, %s, %s,%s)",
                 (idNivel, nroPiso, tipo_vehiculo, cantidad,estado)
             )
-            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
-            return resultado[0]
+            resultado = conexion.obtener("SELECT @MSJ as MSJ, @MSJ2 as MSJ2;")
+            return resultado[0]["MSJ"], resultado[0]["MSJ2"]
         except Exception as e:
             print(f"Error en actualizar_nivel: {e}")
             raise
@@ -104,8 +104,8 @@ class Nivel:
                 "CALL SP_DARBAJA_PISO(%s)",
                 (idNivel,)
             )
-            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
-            return resultado[0]
+            resultado = conexion.obtener("SELECT @MSJ AS MSJ, @MSJ2 AS MSJ2;")
+            return resultado[0]["MSJ"], resultado[0]["MSJ2"]
         except Exception as e:
             print(f"Error en dar_baja_piso: {e}")
             raise
@@ -122,8 +122,8 @@ class Nivel:
                 "CALL SP_ELIMINAR_NIVEL(%s)",
                 (idNivel,)
             )
-            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
-            return resultado[0]
+            resultado = conexion.obtener("SELECT @MSJ as MSJ, @MSJ2 as MSJ2;")
+            return resultado[0]["MSJ"], resultado[0]["MSJ2"]
         except Exception as e:
             print(f"Error en eliminar_nivel: {e}")
             raise
