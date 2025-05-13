@@ -55,6 +55,16 @@
                                     </select>
                                 </div>
                             </div>
+                            <div class="mb-3">
+                                <label for="txt_abreviatura">Abreviatura</label> 
+                                <div class="input-group">
+                                    <input type="text" id="txt_abreviatura" class="form-control" readonly
+                                        value="{{ sucursal.abreviatura }}" oninput="this.value = this.value;">
+                                    <div class="input-group-append">
+                                        <div class="input-group-text"><i class="fa fa-map"></i></div>
+                                    </div>
+                                </div>
+                            </div>
                             <div id="info" class="mb-3">
                                     <label for="lng">Longitud</label>
                                     <div class="input-group">
@@ -214,9 +224,28 @@
                 document.getElementById("txt_country").value = country;
 
                 // Asignar a los inputs ocultos
-                document.getElementById("txt_departamento").value = provincia;
+                document.getElementById("txt_departamento").value = departamento;
                 document.getElementById("txt_provincia").value = provincia;
                 document.getElementById("txt_distrito").value = distrito;
+
+                // Buscar abreviatura solo si hay provincia
+                if (provincia) {
+                    try {
+                        const abreviaturaResponse = await $.ajax({
+                            url: "/trabajadores/viajes/BuscarAbreviatura",
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify({ "provincia": provincia }),
+                            dataType: "json"
+                        });
+
+                        if (abreviaturaResponse.Status === "success") {
+                            document.getElementById("txt_abreviatura").value = abreviaturaResponse.data;
+                        }
+                    } catch (ajaxError) {
+                        toastr.error("Error al consultar abreviatura", "MENSAJE DE SISTEMA");
+                    }
+                }                
             }
         } catch (error) {
             console.error("Error al obtener ubicación:", error);
@@ -259,13 +288,14 @@
         $("#btn_Registrar").click(function () {
             let nombre = $("#txt_nombre").val().trim();
             let direccion = $("#txt_direccion").val().trim();
-            let latitud = $("#lat").text().trim();
-            let longitud = $("#lng").text().trim();
+            let latitud = $("#lat").val().trim();
+            let longitud = $("#lng").val().trim();
             let departamento = $("#txt_departamento").val().trim();
             let provincia = $("#txt_provincia").val().trim();
             let distrito = $("#txt_distrito").val().trim();
             let estado = $('#cbx_Estado').val();
             let country = $("#txt_country").val().trim();
+            let abreviatura = $("#txt_abreviatura").val().trim();
 
             if (country !== 'Perú') {
                 toastr.warning("La ubicación debe ser en Perú", "MENSAJE DE SISTEMA");
@@ -303,6 +333,7 @@
                     formData.append("txt_departamento", departamento);
                     formData.append("txt_provincia", provincia);
                     formData.append("txt_distrito", distrito);
+                    formData.append("txt_abreviatura", abreviatura);
 
                     $.ajax({
                         url: "/trabajadores/viajes/RegistrarSucursal",
@@ -350,6 +381,8 @@
             let distrito = $("#txt_distrito").val().trim();
             let estado = $('#cbx_Estado').val();
             let country = $("#txt_country").val().trim();
+            let abreviatura = $("#txt_abreviatura").val().trim();
+
 
             if (country !== 'Perú') {
                 toastr.warning("La ubicación debe ser en Perú", "MENSAJE DE SISTEMA");
@@ -382,6 +415,7 @@
                     formData.append("txt_provincia", provincia);
                     formData.append("txt_distrito", distrito);
                     formData.append("estado", estado);
+                    formData.append("txt_abreviatura", abreviatura);
 
                     $.ajax({
                         url: `/trabajadores/viajes/EditarSucursal/${id}`,
