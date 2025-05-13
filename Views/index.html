@@ -130,7 +130,7 @@
                         {% if 1 in session['menus'] %}
                         <li class="nav-item menu-is-opening menu-open">
                             <a href="#" class="nav-link {% if active_menu == 'mUsuarios' %}active{% endif %}">
-                                <i class="nav-icon fas fas fa-users"></i>
+                                <i class="nav-icon fas fa-users"></i>
                                 <p>
                                     USUARIOS
                                     <i class="right fas fa-angle-left"></i>
@@ -189,6 +189,15 @@
                                 {% endif %}
                                 {% if 32 in session['menus'] %}
                                 <li class="nav-item">
+                                    <a href="{{ url_for('ventas.Menu_Clientes') }}"
+                                        class="nav-link {% if active_page == 'tipoCliente' %}active{% endif %}">
+                                        <i class="fas fa-users nav-icon"></i>
+                                        <p>Gestionar tipos de cliente</p>
+                                    </a>
+                                </li>
+                                {% endif %}
+                                {% if 33 in session['menus'] %}
+                                <li class="nav-item">
                                     <a href="{{ url_for('ventas.Menu_TipoServicio') }}"
                                         class="nav-link {% if active_page == 'tipoServicio' %}active{% endif %}">
                                         <i class="bi bi-telephone nav-icon"></i>
@@ -196,7 +205,7 @@
                                     </a>
                                 </li>
                                 {% endif %}
-                                {% if 33 in session['menus'] %}
+                                {% if 34 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('ventas.Menu_Servicio') }}"
                                         class="nav-link {% if active_page == 'servicio' %}active{% endif %}">
@@ -205,7 +214,7 @@
                                     </a>
                                 </li>
                                 {% endif %}
-                                {% if 34 in session['menus'] %}
+                                {% if 35 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('ventas.Menu_TipoDocumento') }}"
                                         class="nav-link {% if active_page == 'tipoDocumento' %}active{% endif %}">

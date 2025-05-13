@@ -89,9 +89,6 @@ def Menu_Nivel():
 def Menu_Rutas():
     return render_template('viajes/ruta.html', active_page="ruta", active_menu='mViajes')
 
-@viajes_bp.route('/GestionarClientes')
-def Menu_Clientes():
-    return render_template('viajes/cliente.html', active_page="cliente", active_menu='mViajes')
 
 @viajes_bp.route('/GestionarAsiento')
 def Menu_Asiento():
@@ -1071,12 +1068,12 @@ def registrar_asiento():
     try:
         nro_asiento = request.form.get("nro_asiento").strip()
         nivel = request.form.get("nivel")
-        tipo_asiento = request.form.get("tipo_asiento")
+        tipo_asiento = request.form.get("tipo")
         estado = request.form.get("estado")
         usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
 
         if not nro_asiento or not nivel or not tipo_asiento or not estado:
-            return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
+            return jsonify({"Status": "error", "Msj": f"Todos los campos son obligatorios {nro_asiento},{nivel},{tipo_asiento},{estado}"})
 
         mensajes = Asiento.registrar(nro_asiento, nivel, tipo_asiento, estado, usuario_actual)
         msj1 = mensajes.get('@MSJ')
@@ -1118,13 +1115,15 @@ def editar_asiento(id):
         if request.method == 'POST':
             nro_asiento = request.form.get("nro_asiento").strip()
             nivel = request.form.get("nivel")
-            tipo_asiento = request.form.get("tipo_asiento")
+            tipo_asiento = request.form.get("tipo")
             estado = request.form.get("estado")
+            usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
 
             if not nro_asiento or not nivel or not tipo_asiento or not estado:
                 return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
+            
 
-            mensajes = Asiento.editar(id, nro_asiento, nivel, tipo_asiento, estado)
+            mensajes = Asiento.editar(id, nro_asiento, nivel, tipo_asiento, estado,usuario_actual)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
@@ -1136,8 +1135,8 @@ def editar_asiento(id):
                 return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar asiento'})
 
         if asiento:
-            return render_template('asiento/asientoCRUD.html', active_page="asientos", active_menu='mAsientos', asiento=asiento, tittle='Editar asiento', btnId='btn_Editar')
-        return render_template('asiento/asientoCRUD.html', active_page="asientos", active_menu='mAsientos', asiento={}, tittle='Editar asiento', btnId='btn_Editar')
+            return render_template('viajes/asientoCRUD.html', active_page="asientos", active_menu='mAsientos', asiento=asiento, tittle='Editar asiento', btnId='btn_Editar')
+        return render_template('viajes/asientoCRUD.html', active_page="asientos", active_menu='mAsientos', asiento={}, tittle='Editar asiento', btnId='btn_Editar')
 
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
@@ -1148,8 +1147,8 @@ def ver_asiento(id):
     try:
         asiento = Asiento.obtener_por_id(id)
         if asiento:
-            return render_template('asiento/asientoCRUD.html', active_page="asientos", active_menu='mAsientos', asiento=asiento, tittle='Ver asiento', btnId='btn_Aceptar')
-        return render_template('asiento/asientoCRUD.html', active_page="asientos", active_menu='mAsientos', asiento={}, tittle='Ver asiento', btnId='btn_Aceptar')
+            return render_template('viajes/asientoCRUD.html', active_page="asientos", active_menu='mAsientos', asiento=asiento, tittle='Ver asiento', btnId='btn_Aceptar')
+        return render_template('viajes/asientoCRUD.html', active_page="asientos", active_menu='mAsientos', asiento={}, tittle='Ver asiento', btnId='btn_Aceptar')
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
