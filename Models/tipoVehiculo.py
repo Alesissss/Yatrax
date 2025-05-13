@@ -15,17 +15,17 @@ class TipoVehiculo:
             conexion = bd.Conexion()
             listado = conexion.obtener("""
                 SELECT 
-                    tv.idTipoVehiculo AS id,
+                    tv.id AS id,
                     tv.nombre AS nombre,
                     COALESCE(SUM(CASE WHEN n.estado = 1 THEN n.cantidad ELSE 0 END), 0) AS capacidad,
                     m.nombre AS marca,
                     tv.cantidad,
                     tv.estado
                 FROM tipo_vehiculo tv
-                LEFT JOIN nivel n ON tv.idTipoVehiculo = n.tipo_vehiculo
-                LEFT JOIN marca m ON tv.idMarca = m.id
+                LEFT JOIN nivel n ON tv.id = n.id_tipo_vehiculo
+                LEFT JOIN marca m ON tv.id_marca = m.id
                 GROUP BY 
-                    tv.idTipoVehiculo, 
+                    tv.id, 
                     tv.nombre, 
                     m.nombre, 
                     tv.cantidad, 
@@ -41,12 +41,12 @@ class TipoVehiculo:
             conexion = bd.Conexion()
             listado = conexion.obtener("""
                 SELECT 
-                    idTipoVehiculo AS id,
+                    id AS id,
                     nombre,
-                    idMarca,
+                    id_marca,
                     cantidad,
                     estado
-                FROM tipo_vehiculo where idTipoVehiculo=%s
+                FROM tipo_vehiculo where id=%s
             """,(idTipoVehiculo,))
             return listado[0] if listado else None
         except Exception as e:
@@ -63,7 +63,7 @@ class TipoVehiculo:
             conexion = bd.Conexion()
             conexion.ejecutar('CALL SP_INSERTAR_TIPOVEHICULO(%s,%s,%s,@MSJ)', (nombre,idmarca,cantidad))
             resultado = conexion.obtener("SELECT @MSJ;")
-            return resultado[0]        
+            return resultado[0]    
         except Exception as e:
             print(f"Error en insertarTipoVehiculo: {str(e)}")
             raise

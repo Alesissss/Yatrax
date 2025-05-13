@@ -514,7 +514,7 @@ def editar_servicio(idServicio):
             elif msj2:
                 return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
             else:
-                return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja servicio'})
+                return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar el servicio'})
 
         except Exception as e:
             return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})

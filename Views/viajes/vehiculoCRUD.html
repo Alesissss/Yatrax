@@ -66,9 +66,9 @@
         $.getJSON('/trabajadores/viajes/GetData_TipoVehiculo', function (response) {
             if (response.Status === 'success') {
                 let items = '<option disabled>--SELECCIONAR--</option>';
-
+                
                 $.each(response.data, function (index, item) {
-                    if (item.id === Number("{{ vehiculo.idTipoVehiculo }}")) {
+                    if (item.id === Number("{{ vehiculo.id_tipo_vehiculo }}")) {
                         items += `<option selected value="${item.id}">${item.nombre}</option>`;
                     } else {
                         items += `<option value="${item.id}">${item.nombre}</option>`;
@@ -85,7 +85,7 @@
     $(document).ready(function () {
         fct_GetMarcas()
 
-        let idvehiculo = "{{ vehiculo.idVehiculo }}"
+        let idvehiculo = "{{ vehiculo.id }}"
 
         $("#btn_Listado").click(()=>{
             window.location.href="/trabajadores/viajes/GestionarVehiculo"

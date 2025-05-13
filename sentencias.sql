@@ -55,7 +55,7 @@ DROP PROCEDURE IF EXISTS SP_DAR_BAJA_TIPO_COMPROBANTE;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_COMPROBANTE;
 
 DROP PROCEDURE IF EXISTS SP_INSERTAR_SERVICIO;
-DROP PROCEDURE IF EXISTS SP_UPDATE_SERVICIO;
+DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_SERVICIO;
 DROP PROCEDURE IF EXISTS SP_BAJA_SERVICIO;
 DROP PROCEDURE IF EXISTS SP_DELETE_SERVICIO;
 
@@ -130,12 +130,12 @@ CREATE TABLE tipo_servicio (
 );
 
 CREATE TABLE servicio(
-    idServicio INT AUTO_INCREMENT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) not null,
     descripcion VARCHAR(255) not null,
-    idTipoServicio INT NOT NULL,
+    id_tipo_servicio INT NOT NULL,
     estado TINYINT NOT NULL,
-    FOREIGN KEY (idTipoServicio) REFERENCES tipo_servicio(idTipoServicio)
+    FOREIGN KEY (id_tipo_servicio) REFERENCES tipo_servicio(idTipoServicio)
 );
 
 -- Crear tabla tipo_comprobante
@@ -305,9 +305,9 @@ CREATE TABLE conf_plantillas (
 );
 
 CREATE TABLE nivel(
-    idNivel int AUTO_INCREMENT primary key,
+    id int AUTO_INCREMENT primary key,
     nroPiso int not null,
-    tipo_vehiculo int not null,
+    id_tipo_vehiculo int not null,
     cantidad int not null,
     estado TINYINT not null
 );
@@ -325,24 +325,24 @@ CREATE TABLE marca (
 
 
 CREATE TABLE tipo_vehiculo (
-    idTipoVehiculo INT AUTO_INCREMENT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL,
-    idMarca INT NULL,
+    id_marca INT NULL,
     estado TINYINT NOT NULL,
     cantidad INT NOT NULL,
-    CONSTRAINT fk_tipo_vehiculo_marca FOREIGN KEY (idMarca) REFERENCES marca(id)
+    CONSTRAINT fk_tipo_vehiculo_marca FOREIGN KEY (id_marca) REFERENCES marca(id)
 );
 
 CREATE TABLE vehiculo (
-    idVehiculo INT AUTO_INCREMENT PRIMARY KEY,
-    placa VARCHAR(10) NOT NULL UNIQUE,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    placa VARCHAR(10) NOT NULL,
     anio INT,
     color VARCHAR(30),
     estado TINYINT NOT NULL,
-    idTipoVehiculo INT NOT NULL,
+    id_tipo_vehiculo INT NOT NULL,
     CONSTRAINT fk_tipo_vehiculo
-        FOREIGN KEY (idTipoVehiculo)
-        REFERENCES tipo_vehiculo(idTipoVehiculo)
+        FOREIGN KEY (id_tipo_vehiculo)
+        REFERENCES tipo_vehiculo(id)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
@@ -3347,7 +3347,7 @@ BEGIN
     IF v_existeMarca = 0 THEN
         SET MSJ = 'La marca no existe';
     ELSE
-        INSERT INTO tipo_vehiculo (nombre, idMarca, estado, cantidad)
+        INSERT INTO tipo_vehiculo (nombre, id_marca, estado, cantidad)
         VALUES (p_nombre, p_idMarca, 1, p_cantidad);
         SET MSJ = 'Tipo de vehículo insertado correctamente';
     END IF;
@@ -3387,10 +3387,10 @@ BEGIN
         START TRANSACTION;
         UPDATE tipo_vehiculo
         SET nombre  = p_nombre,
-            idMarca = p_idMarca,
+            id_marca = p_idMarca,
             estado  = p_estado,
             cantidad = p_cantidad
-        WHERE idTipoVehiculo = p_id;
+        WHERE id = p_id;
         COMMIT;
 
         SET MSJ = 'Se actualizó correctamente el tipo de vehículo';
@@ -3417,7 +3417,7 @@ BEGIN
 
     SELECT COUNT(*) INTO v_existe
     FROM tipo_vehiculo
-    WHERE idTipoVehiculo = p_id;
+    WHERE id = p_id;
 
     IF v_existe = 0 THEN
         SET MSJ2 = 'El tipo de vehículo no existe';
@@ -3425,7 +3425,7 @@ BEGIN
         START TRANSACTION;
         UPDATE tipo_vehiculo
         SET estado = 0
-        WHERE idTipoVehiculo = p_id;
+        WHERE id = p_id;
         COMMIT;
 
         SET MSJ = 'Tipo de vehículo dado de baja correctamente';
@@ -3452,14 +3452,14 @@ BEGIN
 
     SELECT COUNT(*) INTO v_existe
     FROM tipo_vehiculo
-    WHERE idTipoVehiculo = p_id;
+    WHERE id = p_id;
 
     IF v_existe = 0 THEN
         SET MSJ2 = 'El tipo de vehículo no existe';
     ELSE
         START TRANSACTION;
         DELETE FROM tipo_vehiculo
-        WHERE idTipoVehiculo = p_id;
+        WHERE id = p_id;
         COMMIT;
 
         SET MSJ = 'Tipo de vehículo eliminado correctamente';
@@ -3491,9 +3491,9 @@ BEGIN
         SELECT COUNT(*) + 1
           INTO nuevo_nroPiso
         FROM nivel
-        WHERE tipo_vehiculo = p_tipo_vehiculo;
+        WHERE id_tipo_vehiculo = p_tipo_vehiculo;
 
-        INSERT INTO nivel (nroPiso, tipo_vehiculo, cantidad, estado)
+        INSERT INTO nivel (nroPiso, id_tipo_vehiculo, cantidad, estado)
         VALUES (nuevo_nroPiso, p_tipo_vehiculo, p_cantidad, 1);
 
         SET @MSJ = CONCAT(
@@ -3506,55 +3506,100 @@ BEGIN
 END$$
 
 CREATE PROCEDURE SP_ACTUALIZAR_NIVEL(
-    IN p_idNivel        INT,
-    IN p_nroPiso        INT,
-    IN p_tipo_vehiculo  INT,
-    IN p_cantidad       INT,
-    IN p_estado         TINYINT
+  IN p_idNivel        INT,
+  IN p_nroPiso        INT,
+  IN p_tipo_vehiculo  INT,
+  IN p_cantidad       INT,
+  IN p_estado         TINYINT
 )
 BEGIN
-    DECLARE max_piso INT DEFAULT 0;
+  DECLARE max_piso INT DEFAULT 0;
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  BEGIN
+    SET @MSJ2 = 'Error inesperado al actualizar nivel';
+    SET @MSJ  = NULL;
+  END;
+  SET @MSJ  = NULL; SET @MSJ2 = NULL;
+  IF p_cantidad <= 0 THEN
+    SET @MSJ2 = 'La cantidad debe ser mayor a 0';
+  ELSEIF p_nroPiso <= 0 THEN
+    SET @MSJ2 = 'El número de piso debe ser mayor a 0';
+  ELSE
+    SELECT COALESCE(MAX(nroPiso), 0) INTO max_piso
+      FROM nivel
+      WHERE id_tipo_vehiculo = p_tipo_vehiculo;
+    IF p_nroPiso > max_piso + 1 THEN
+      SET @MSJ2 = 'No puede actualizar a un piso mayor que el siguiente consecutivo';
+    ELSE
+      UPDATE nivel
+        SET nroPiso         = p_nroPiso,
+            id_tipo_vehiculo = p_tipo_vehiculo,
+            cantidad        = p_cantidad,
+            estado          = p_estado
+      WHERE id = p_idNivel;
+      IF ROW_COUNT() = 0 THEN
+        SET @MSJ2 = 'No se encontró el nivel especificado';
+      ELSE
+        SET @MSJ = 'Nivel actualizado correctamente';
+      END IF;
+    END IF;
+  END IF;
+END$$
 
-    -- Handler para errores inesperados
+CREATE PROCEDURE SP_DARBAJA_PISO(
+    IN p_idNivel INT
+)
+BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
-        SET @MSJ2 = 'Error inesperado al actualizar nivel';
+        SET @MSJ2 = 'Error inesperado al dar de baja el piso';
         SET @MSJ  = NULL;
     END;
 
-    -- Inicialización de mensajes
     SET @MSJ  = NULL;
     SET @MSJ2 = NULL;
 
-    -- Validaciones básicas
-    IF p_cantidad <= 0 THEN
-        SET @MSJ2 = 'La cantidad debe ser mayor a 0';
-    ELSEIF p_nroPiso <= 0 THEN
-        SET @MSJ2 = 'El número de piso debe ser mayor a 0';
+    UPDATE nivel
+    SET estado = 0
+    WHERE id = p_idNivel;
+
+    SET @MSJ = 'Piso dado de baja correctamente';
+END$$
+
+
+CREATE PROCEDURE SP_ELIMINAR_NIVEL(
+    IN p_idNivel INT
+)
+BEGIN
+    DECLARE piso_actual         INT;
+    DECLARE tipo_vehiculo_act   INT;
+    DECLARE max_piso            INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al eliminar nivel';
+        SET @MSJ  = NULL;
+    END;
+
+    SET @MSJ  = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT nroPiso, id_tipo_vehiculo
+      INTO piso_actual, tipo_vehiculo_act
+    FROM nivel
+    WHERE id = p_idNivel;
+
+    SELECT MAX(nroPiso)
+      INTO max_piso
+    FROM nivel
+    WHERE id_tipo_vehiculo = tipo_vehiculo_act;
+
+    IF piso_actual < max_piso THEN
+        SET @MSJ2 = 'Solo se puede eliminar el piso más alto para evitar inconsistencias';
     ELSE
-        -- Obtengo el mayor piso actual para este tipo de vehículo
-        SELECT COALESCE(MAX(nroPiso), 0)
-          INTO max_piso
-        FROM nivel
-        WHERE tipo_vehiculo = p_tipo_vehiculo;
-
-        IF p_nroPiso > max_piso + 1 THEN
-            SET @MSJ2 = 'No puede actualizar a un piso mayor que el siguiente consecutivo';
-        ELSE
-            -- Realizo el UPDATE
-            UPDATE nivel
-            SET nroPiso       = p_nroPiso,
-                tipo_vehiculo = p_tipo_vehiculo,
-                cantidad      = p_cantidad,
-                estado        = p_estado
-            WHERE idNivel = p_idNivel;
-
-            IF ROW_COUNT() = 0 THEN
-                SET @MSJ2 = 'No se encontró el nivel especificado';
-            ELSE
-                SET @MSJ = 'Nivel actualizado correctamente';
-            END IF;
-        END IF;
+        DELETE FROM nivel
+        WHERE id = p_idNivel;
+        SET @MSJ = 'Nivel eliminado correctamente';
     END IF;
 END$$
 
@@ -3580,7 +3625,7 @@ BEGIN
     SET @MSJ  = NULL;
     SET @MSJ2 = NULL;
 
-    INSERT INTO vehiculo (placa, anio, color, estado, idTipoVehiculo)
+    INSERT INTO vehiculo (placa, anio, color, estado, id_tipo_vehiculo)
     VALUES (p_placa, p_anio, p_color, 1, p_idTipoVehiculo);
 
     SET @MSJ  = 'Vehículo insertado correctamente';
@@ -3610,9 +3655,9 @@ BEGIN
         placa          = p_placa,
         anio           = p_anio,
         color          = p_color,
-        idTipoVehiculo = p_idTipoVehiculo,
+        id_tipo_vehiculo = p_idTipoVehiculo,
         estado         = p_estado
-    WHERE idVehiculo = p_idVehiculo;
+    WHERE id = p_idVehiculo;
 
     IF ROW_COUNT() = 0 THEN
         SET @MSJ2 = 'No se encontró el vehículo especificado';
@@ -3637,7 +3682,7 @@ BEGIN
 
     UPDATE vehiculo
     SET estado = 0
-    WHERE idVehiculo = p_idVehiculo;
+    WHERE id = p_idVehiculo;
 
     IF ROW_COUNT() = 0 THEN
         SET @MSJ2 = 'No se encontró el vehículo para dar de baja';
@@ -3661,72 +3706,12 @@ BEGIN
     SET @MSJ2 = NULL;
 
     DELETE FROM vehiculo
-    WHERE idVehiculo = p_idVehiculo;
+    WHERE id = p_idVehiculo;
 
     IF ROW_COUNT() = 0 THEN
         SET @MSJ2 = 'No se encontró el vehículo para eliminar';
     ELSE
         SET @MSJ = 'Vehículo eliminado correctamente';
-    END IF;
-END$$
-
-DELIMITER ;
-
-DELIMITER $$
-CREATE PROCEDURE SP_DARBAJA_PISO(
-    IN p_idNivel INT
-)
-BEGIN
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        SET @MSJ2 = 'Error inesperado al dar de baja el piso';
-        SET @MSJ  = NULL;
-    END;
-
-    SET @MSJ  = NULL;
-    SET @MSJ2 = NULL;
-
-    UPDATE nivel
-    SET estado = 0
-    WHERE idNivel = p_idNivel;
-
-    SET @MSJ = 'Piso dado de baja correctamente';
-END$$
-
-
-CREATE PROCEDURE SP_ELIMINAR_NIVEL(
-    IN p_idNivel INT
-)
-BEGIN
-    DECLARE piso_actual         INT;
-    DECLARE tipo_vehiculo_act   INT;
-    DECLARE max_piso            INT;
-
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        SET @MSJ2 = 'Error inesperado al eliminar nivel';
-        SET @MSJ  = NULL;
-    END;
-
-    SET @MSJ  = NULL;
-    SET @MSJ2 = NULL;
-
-    SELECT nroPiso, tipo_vehiculo
-      INTO piso_actual, tipo_vehiculo_act
-    FROM nivel
-    WHERE idNivel = p_idNivel;
-
-    SELECT MAX(nroPiso)
-      INTO max_piso
-    FROM nivel
-    WHERE tipo_vehiculo = tipo_vehiculo_act;
-
-    IF piso_actual < max_piso THEN
-        SET @MSJ2 = 'Solo se puede eliminar el piso más alto para evitar inconsistencias';
-    ELSE
-        DELETE FROM nivel
-        WHERE idNivel = p_idNivel;
-        SET @MSJ = 'Nivel eliminado correctamente';
     END IF;
 END$$
 
@@ -4372,10 +4357,10 @@ BEGIN
     SELECT COUNT(*) INTO existe_nombre 
       FROM servicio 
      WHERE nombre = p_nombre 
-       AND idTipoServicio = p_idTipoServicio;
+       AND id_tipo_servicio = p_idTipoServicio;
 
     IF existe_nombre = 0 THEN
-        INSERT INTO servicio (nombre, descripcion, idTipoServicio, estado)
+        INSERT INTO servicio (nombre, descripcion, id_tipo_servicio, estado)
         VALUES (p_nombre, p_descripcion, p_idTipoServicio, 1);
         SELECT 
           'Servicio insertado correctamente' AS MSJ,
@@ -4387,7 +4372,7 @@ BEGIN
     END IF;
 END$$
 
-CREATE PROCEDURE SP_UPDATE_SERVICIO(
+CREATE PROCEDURE SP_ACTUALIZAR_SERVICIO(
     IN p_idServicio INT,
     IN p_nombre VARCHAR(50),
     IN p_descripcion VARCHAR(255),
@@ -4400,16 +4385,16 @@ BEGIN
     SELECT COUNT(*) INTO existe_nombre 
       FROM servicio 
      WHERE nombre = p_nombre 
-       AND idTipoServicio = p_idTipoServicio
-       AND idServicio <> p_idServicio;
+       AND id_tipo_servicio = p_idTipoServicio
+       AND id <> p_idServicio;
 
     IF existe_nombre = 0 THEN
         UPDATE servicio 
            SET nombre         = p_nombre,
                descripcion    = p_descripcion,
-               idTipoServicio = p_idTipoServicio,
+               id_tipo_servicio = p_idTipoServicio,
                estado         = p_estado
-         WHERE idServicio    = p_idServicio;
+         WHERE id  = p_idServicio;
 
         IF ROW_COUNT() > 0 THEN
             SELECT 
@@ -4433,7 +4418,7 @@ CREATE PROCEDURE SP_BAJA_SERVICIO(
 BEGIN
     UPDATE servicio 
        SET estado = 0 
-     WHERE idServicio = p_idServicio;
+     WHERE id = p_idServicio;
 
     IF ROW_COUNT() > 0 THEN
         SELECT 
@@ -4451,7 +4436,7 @@ CREATE PROCEDURE SP_DELETE_SERVICIO(
 )
 BEGIN
     DELETE FROM servicio 
-     WHERE idServicio = p_idServicio;
+     WHERE id = p_idServicio;
 
     IF ROW_COUNT() > 0 THEN
         SELECT 

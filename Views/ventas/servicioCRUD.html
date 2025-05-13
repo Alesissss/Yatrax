@@ -63,8 +63,7 @@
                 let items = '<option disabled>--SELECCIONAR--</option>';
                 
                 $.each(response.data, function (index, item) {
-                    console.log(item)
-                    if (item.id === Number("{{ servicio.idTipoServicio }}")) {
+                    if (item.id === Number("{{ servicio.id_tipo_servicio }}")) {
                         items += `<option selected value="${item.ID}">${item.TIPO}</option>`;
                     } else {
                         items += `<option value="${item.ID}">${item.TIPO}</option>`;
@@ -81,7 +80,7 @@
     $(document).ready(function () {
         fct_GetTipoServicio()
 
-        let idservicio = "{{ servicio.idServicio }}"
+        let idservicio = "{{ servicio.id }}"
 
         $("#btn_Listado").click(()=>{
             window.location.href="/trabajadores/ventas/GestionarServicio"
