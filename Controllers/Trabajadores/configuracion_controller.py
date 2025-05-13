@@ -1,8 +1,10 @@
 import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort
 from Models.usuario import Usuario
+from Models.tipoUsuario import TipoUsuario
 from Models.metodo_pago import MetodoPago
 from Models.conf_menus import Conf_Menus
+from Models.conf_claims import Conf_Claims
 from Models.conf_plantillas import Conf_Plantillas
 from werkzeug.utils import secure_filename
 
@@ -72,47 +74,72 @@ def Plantilla_Nuevo():
 # FUNCIONES
 
 # REGION PERMISOS
-@configuracion_bp.route("/GetData_Usuarios", methods=["GET"])
-def get_usuarios():
+@configuracion_bp.route("/GetData_TiposUsuario", methods=["GET"])
+def get_tipoUsuarios():
     try:
-        usuarios = Usuario.obtener_todos()
-        return jsonify({'data': usuarios, 'Status': 'success', 'Msj': 'Listado de usuarios retornado exitosamene'})
+        tiposUsuario = TipoUsuario.obtener_todos()
+        return jsonify({'data': tiposUsuario, 'Status': 'success', 'Msj': 'Listado de tipos de usuario retornado exitosamene'})
     except Exception as e:
-        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar usuarios: + {repr(e)}'})
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar tipos de usuarios: + {repr(e)}'})
 
 @configuracion_bp.route('/EditarPermisos/<int:id>', methods=['GET', 'POST'])
 def Editar_Permisos(id):
     try:
-        usuario = Usuario.obtener_por_id(id)
-        dmnus = Usuario.obtener_menus(id)
-        menus = Conf_Menus.obtener_todos()
-        dmnus_ids = [menu['id'] for menu in dmnus]
+        tipoUsuario = TipoUsuario.obtener_por_id(id)
 
-        menus_jerarquicos = []
-        for menu in menus:
-            # Menú principal
-            if menu['idPadre'] is None:
-                menu['submenus'] = []
-                menus_jerarquicos.append(menu)
-            else:
-                # Submenú
-                parent_menu = next((m for m in menus_jerarquicos if m['id'] == menu['idPadre']), None)
-                if parent_menu:
-                    parent_menu['submenus'].append(menu)
+        dmnus = TipoUsuario.obtener_menus(id)
+        menus = Conf_Menus.obtener_todos()
+
+        dclaims = TipoUsuario.obtener_claims(id)
+        claims = Conf_Claims.obtener_todos()
+
+        dmnus_ids = [menu['id'] for menu in dmnus]
+        dclaims_ids = [claim['id'] for claim in dclaims]
+
+        # menus_jerarquicos = []
+        # for menu in menus:
+        #     # Menú principal
+        #     if menu['idPadre'] is None:
+        #         menu['submenus'] = []
+        #         menus_jerarquicos.append(menu)
+        #     else:
+        #         # Submenú
+        #         parent_menu = next((m for m in menus_jerarquicos if m['id'] == menu['idPadre']), None)
+        #         if parent_menu:
+        #             parent_menu['submenus'].append(menu)
+
+        menus_jerarquicos = construir_menu_con_claims(menus, claims)
 
         if request.method == 'POST':
             idMenu = int(request.form.get('idMenu').strip())
-            idUsuario = int(request.form.get('idUsuario').strip())
+            idTipoUsuario = int(request.form.get('idTipoUsuario').strip())
             accion = int(request.form.get('accion').strip())
+            esClaim = int(request.form.get('esClaim').strip())
+
+            if esClaim == 0:
+                
+                if accion == 1:
+                    mensajes = TipoUsuario.agregar_menu(idMenu, idTipoUsuario)
+                    msj1 = mensajes.get('@MSJ')
+                    msj2 = mensajes.get('@MSJ2')
+                else:
+                    mensajes = TipoUsuario.eliminar_menu(idMenu, idTipoUsuario)
+                    msj1 = mensajes.get('@MSJ')
+                    msj2 = mensajes.get('@MSJ2')
+
+            elif esClaim == 1:
+
+                if accion == 1:
+                    mensajes = TipoUsuario.agregar_claim(idMenu, idTipoUsuario)
+                    msj1 = mensajes.get('@MSJ')
+                    msj2 = mensajes.get('@MSJ2')
+                else:
+                    mensajes = TipoUsuario.eliminar_claim(idMenu, idTipoUsuario)
+                    msj1 = mensajes.get('@MSJ')
+                    msj2 = mensajes.get('@MSJ2')
             
-            if accion == 1:
-                mensajes = Usuario.agregar_menu(idMenu, idUsuario)
-                msj1 = mensajes.get('@MSJ')
-                msj2 = mensajes.get('@MSJ2')
             else:
-                mensajes = Usuario.eliminar_menu(idMenu, idUsuario)
-                msj1 = mensajes.get('@MSJ')
-                msj2 = mensajes.get('@MSJ2')
+                return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar permisos'})
 
             if msj1:
                 return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
@@ -121,12 +148,38 @@ def Editar_Permisos(id):
             else:
                 return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar permisos'})
 
-        if usuario:
-            return render_template('configuracion/permisosEditar.html', active_page="permisos", active_menu='mConfiguracion', usuario=usuario, dmnus=dmnus, dmnus_ids=dmnus_ids, menus=menus_jerarquicos)
-        return render_template('configuracion/permisosEditar.html', active_page="permisos", active_menu='mConfiguracion', usuario={}, dmnus=[], dmnus_ids=[], menus=[])
+        if tipoUsuario:
+            return render_template('configuracion/permisosEditar.html', active_page="permisos", active_menu='mConfiguracion', tipoUsuario=tipoUsuario, dmnus=dmnus, dmnus_ids=dmnus_ids, dclaims=dclaims, dclaims_ids=dclaims_ids, menus=menus_jerarquicos)
+        return render_template('configuracion/permisosEditar.html', active_page="permisos", active_menu='mConfiguracion', tipoUsuario={}, dmnus=[], dmnus_ids=[], dclaims=[], dclaims_ids=[], menus=[])
 
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+def construir_menu_con_claims(menus, claims):
+    menu_dict = {m['id']: {**m, 'submenus': []} for m in menus}
+    jerarquia = []
+
+    for menu in menu_dict.values():
+        id_padre = menu.get('idPadre')
+        if id_padre is None:
+            # Menú principal
+            jerarquia.append(menu)
+        else:
+            # Submenú (nivel 2)
+            padre = menu_dict.get(id_padre)
+            if padre:
+                padre['submenus'].append(menu)
+
+    for claim in claims:
+        id_padre = claim.get('idPadre')
+        if id_padre in menu_dict:
+            padre = menu_dict[id_padre]
+            if 'submenus' in padre:
+                padre['submenus'].append(claim)
+            else:
+                padre['submenus'] = [claim]
+
+    return jerarquia
 
 # END REGION PERMISOS
 

@@ -2,6 +2,7 @@ import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort
 from Models.tipoCliente import TipoCliente
 from Models.tipoServicio import TipoServicio
+from Models.servicio import Servicio
 from Models.tipoComprobante import TipoComprobante
 from Models.tipoDocumento import TipoDocumento
 
@@ -74,6 +75,10 @@ def TipoComprobante_Nuevo():
 @ventas_bp.route('/GestionarTipoServicio')
 def Menu_TipoServicio():
     return render_template('ventas/tiposervicio.html', active_page="tipoServicio", active_menu = 'mVentas')
+
+@ventas_bp.route('/GestionarServicio')
+def Menu_Servicio():
+    return render_template('ventas/servicio.html', active_page="servicio", active_menu = 'mVentas')
 
 @ventas_bp.route('/TipoServicioNuevo')
 def Menu_TipoServicioNuevo():
@@ -417,6 +422,137 @@ def eliminar_tipo_servicio(id):
 
 # END REGION TIPO SERVICIO #
 
+# REGION SERVICIO
+
+@ventas_bp.route("/GetData_Servicio")
+def get_servicios():
+    try:
+        servicios = Servicio.obtener_todos()
+        return jsonify({
+            'data': servicios,
+            'Status': 'success',
+            'Msj': 'Listado de servicios retornado exitosamente'
+        })
+    except Exception as e:
+        return jsonify({
+            'data': [],
+            'Status': 'error',
+            'Msj': f'Ocurrió un error al listar los servicios: {repr(e)}'
+        })
+
+@ventas_bp.route('/registrarServicio', methods=["GET", "POST"])
+def nuevo_servicio():
+    if request.method == "GET":
+        return render_template(
+            "ventas/servicioCRUD.html",
+            tittle="Nuevo servicio",
+            servicio={},
+            btnId="btn_Registrar",
+            active_page="servicio",
+            active_menu='mVentas'
+        )
+    else:
+        try:
+            nombre         = request.form['txt_nombre'].strip()
+            descripcion    = request.form['txt_descripcion'].strip()
+            idTipoServicio = int(request.form['txt_idTipoServicio'])
+
+            mensajes = Servicio.insertarServicio(nombre, descripcion, idTipoServicio)
+            msj1 = mensajes[0].get('MSJ') or mensajes[0].get('@MSJ')
+            msj2 = mensajes[0].get('MSJ2') or mensajes[0].get('@MSJ2')
+
+            if msj1:
+                return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+            elif msj2:
+                return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+            else:
+                return jsonify({"Status": "error", 'Msj': 'Error desconocido al insertar servicio'})
+        except Exception as e:
+            return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@ventas_bp.route("/verServicio/<int:idServicio>")
+def ver_servicio(idServicio):
+    servicio = Servicio.obtener_unServicio(idServicio)
+    return render_template(
+        "ventas/servicioCRUD.html",
+        tittle="Ver servicio",
+        servicio=servicio,
+        btnId="btn_Regresar",
+        active_page="servicio",
+        active_menu='mVentas'
+    )
+
+@ventas_bp.route("/editarServicio/<int:idServicio>", methods=["GET", "POST"])
+def editar_servicio(idServicio):
+    if request.method == "GET":
+        servicio = Servicio.obtener_unServicio(idServicio)
+        return render_template(
+            "ventas/servicioCRUD.html",
+            tittle="Editar servicio",
+            servicio=servicio,
+            btnId="btn_Actualizar",
+            active_page="servicio",
+            active_menu='mVentas'
+        )
+    else:
+        try:
+            nombre         = request.form['txt_nombre'].strip()
+            descripcion    = request.form['txt_descripcion'].strip()
+            idTipoServicio = int(request.form['txt_idTipoServicio'])
+            estado         = int(request.form['txt_estado'])
+
+            mensajes = Servicio.actualizarServicio(idServicio, nombre, descripcion, idTipoServicio, estado)
+
+            if mensajes and isinstance(mensajes, list) and len(mensajes) > 0:
+                msj1 = mensajes[0].get('MSJ')
+                msj2 = mensajes[0].get('MSJ2')
+            else:
+                msj1 = msj2 = None
+
+            if msj1:
+                return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+            elif msj2:
+                return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+            else:
+                return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar el servicio'})
+
+        except Exception as e:
+            return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@ventas_bp.route("/DarBajaServicio/<int:idServicio>", methods=["POST"])
+def dar_baja_servicio(idServicio):
+    try:
+        mensajes = Servicio.darBajaServicio(idServicio)
+        msj1 = mensajes[0].get('MSJ')
+        msj2 = mensajes[0].get('MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja servicio'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@ventas_bp.route("/eliminarServicio/<int:idServicio>", methods=["POST"])
+def eliminar_servicio(idServicio):
+    try:
+        mensajes = Servicio.eliminarServicio(idServicio)
+        msj1 = mensajes[0].get('MSJ')
+        msj2 = mensajes[0].get('MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al eliminar servicio'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+# END REGION
+
 # REGION TIPO DOCUMENTO #
 @ventas_bp.route("/GetData_TipoDocumento", methods=["GET"])
 def get_tipo_documento():
@@ -522,5 +658,19 @@ def eliminar_tipo_documento(id):
         return jsonify({"Status": "Error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
 # END REGION TIPO DOCUMENTO #
+
+# REGION CLIENTE
+# END REGION CLIENTE 
+
+# REGION ASIENTO 
+@ventas_bp.route('/ClienteNuevo')
+def cliente_nuevo():
+    return render_template(
+        'ventas/clienteCRUD.html',
+        tittle='Registrar cliente'
+    )
+
+# END REGION ASIENTO
+
 
 # END FUNCIONES

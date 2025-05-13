@@ -136,7 +136,7 @@
                                     <i class="right fas fa-angle-left"></i>
                                 </p>
                             </a>
-                            <ul class="nav nav-treeview" style="display: none;">
+                            <ul class="nav nav-treeview" style="display: block;">
                                 {% if 10 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('usuario.Menu_Usuarios') }}"
@@ -168,7 +168,7 @@
                                     <i class="right fas fa-angle-left"></i>
                                 </p>
                             </a>
-                            <ul class="nav nav-treeview" style="display: none;">
+                            <ul class="nav nav-treeview" style="display: block;">
                                 {% if 30 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('ventas.Menu_TipoComprobante') }}"
@@ -198,6 +198,15 @@
                                 {% endif %}
                                 {% if 33 in session['menus'] %}
                                 <li class="nav-item">
+                                    <a href="{{ url_for('ventas.Menu_Servicio') }}"
+                                        class="nav-link {% if active_page == 'servicio' %}active{% endif %}">
+                                        <i class="bi bi-briefcase nav-icon"></i>
+                                        <p>Gestionar servicio</p>
+                                    </a>
+                                </li>
+                                {% endif %}
+                                {% if 34 in session['menus'] %}
+                                <li class="nav-item">
                                     <a href="{{ url_for('ventas.Menu_TipoDocumento') }}"
                                         class="nav-link {% if active_page == 'tipoDocumento' %}active{% endif %}">
                                         <i class="bi bi-file-binary-fill"></i>
@@ -218,7 +227,7 @@
                                     <i class="right fas fa-angle-left"></i>
                                 </p>
                             </a>
-                            <ul class="nav nav-treeview" style="display: none;">
+                            <ul class="nav nav-treeview" style="display: block;">
                                 {% if 40 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('viajes.Menu_Horarios') }}"
@@ -232,21 +241,30 @@
                                 <li class="nav-item">
                                     <a href="{{ url_for('viajes.Menu_TipoVehiculo') }}"
                                         class="nav-link {% if active_page == 'tipoVehiculo' %}active{% endif %}">
-                                        <i class="bi bi-bus-front nav-icon"></i>
+                                        <i class="bi bi-bus-front-fill nav-icon"></i>
                                         <p>Gestionar tipo vehículo</p>
                                     </a>
                                 </li>
                                 {% endif %}
                                 {% if 42 in session['menus'] %}
                                 <li class="nav-item">
-                                    <a href="{{ url_for('viajes.Menu_Nivel') }}"
-                                        class="nav-link {% if active_page == 'nivel' %}active{% endif %}">
+                                    <a href="{{ url_for('viajes.Menu_Vehiculo') }}"
+                                        class="nav-link {% if active_page == 'vehiculo' %}active{% endif %}">
                                         <i class="bi bi-bus-front nav-icon"></i>
-                                        <p>Gestionar niveles</p>
+                                        <p>Gestionar vehiculo</p>
                                     </a>
                                 </li>
                                 {% endif %}
                                 {% if 43 in session['menus'] %}
+                                <li class="nav-item">
+                                    <a href="{{ url_for('viajes.Menu_Nivel') }}"
+                                        class="nav-link {% if active_page == 'nivel' %}active{% endif %}">
+                                        <i class="bi bi-bar-chart-steps nav-icon"></i>
+                                        <p>Gestionar niveles</p>
+                                    </a>
+                                </li>
+                                {% endif %}
+                                {% if 44 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('viajes.Menu_Sucursal') }}"
                                         class="nav-link {% if active_page == 'sucursal' %}active{% endif %}">
@@ -255,16 +273,16 @@
                                     </a>
                                 </li>
                                 {% endif %}
-                                {% if 44 in session['menus'] %}
+                                {% if 45 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('viajes.Menu_Marcas') }}"
                                         class="nav-link {% if active_page == 'marcas' %}active{% endif %}">
-                                        <i class="bi bi-building nav-icon"></i>
+                                        <i class="bi bi-tag nav-icon"></i>
                                         <p>Gestionar marcas</p>
                                     </a>
                                 </li>
                                 {% endif %}
-                                {% if 45 in session['menus'] %}
+                                {% if 46 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('viajes.Menu_Rutas') }}"
                                         class="nav-link {% if active_page == 'ruta' %}active{% endif %}">
@@ -286,13 +304,22 @@
                                     <i class="right fas fa-angle-left"></i>
                                 </p>
                             </a>
-                            <ul class="nav nav-treeview" style="display: none;">
+                            <ul class="nav nav-treeview" style="display: block;">
                                 {% if 50 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('personal.Menu_TipoPersonal') }}"
                                         class="nav-link {% if active_page == 'tipoPersonal' %}active{% endif %}">
-                                        <i class="bi bi-calendar-week nav-icon"></i>
+                                        <i class="bi bi-person-gear nav-icon"></i>
                                         <p>Gestionar tipo personal</p>
+                                    </a>
+                                </li>
+                                {% endif %}
+                                {% if 51 in session['menus'] %}
+                                <li class="nav-item">
+                                    <a href="{{ url_for('personal.Menu_Personal') }}"
+                                        class="nav-link {% if active_page == 'personal' %}active{% endif %}">
+                                        <i class="bi bi-person-vcard nav-icon"></i>
+                                        <p>Gestionar Personal</p>
                                     </a>
                                 </li>
                                 {% endif %}
@@ -309,7 +336,7 @@
                                     <i class="right fas fa-angle-left"></i>
                                 </p>
                             </a>
-                            <ul class="nav nav-treeview" style="display: none;">
+                            <ul class="nav nav-treeview" style="display: block;">
                                 {% if 60 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('atencion.Menu_Atencion') }}"
@@ -331,7 +358,7 @@
                                 <p>CONFIGURACIÓN</p>
                                 <i class="right fas fa-angle-left"></i>
                             </a>
-                            <ul class="nav nav-treeview" style="display: none;">
+                            <ul class="nav nav-treeview" style="display: block;">
                                 {% if 20 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('configuracion.Menu_Permisos') }}"

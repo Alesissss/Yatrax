@@ -16,7 +16,7 @@
   }
 
   /* Contenedor principal del modal */
-  .container {
+  .container_log {
     box-sizing: border-box;
     padding: 0;
     font-family: "Segoe UI", sans-serif;
@@ -32,7 +32,7 @@
     /* Añade un poco de margen alrededor */
   }
 
-  .left {
+  .left_log {
     flex: 1;
     background-image: url("{{url_for('static',filename='img/login_pc.jpg')}}");
     background-size: 100% 100%;
@@ -49,7 +49,7 @@
     max-width: 400px;
   }
 
-  .right {
+  .right_log {
     flex: 1;
     padding: 40px;
     position: relative;
@@ -82,7 +82,8 @@
   }
 
   .input-group {
-    margin-bottom: 20px;
+    margin-bottom: 0px;
+    margin-top: 10px;
   }
 
   .entrada {
@@ -141,7 +142,7 @@
 
   /* Responsive Design */
   @media (max-width: 992px) {
-    .container {
+    .container_log {
       flex-direction: column;
       border-radius: 10px;
       /* Reduce un poco el radio en pantallas pequeñas */
@@ -156,7 +157,7 @@
     }
 
 
-    .left {
+    .left_log {
       background-image: url("{{url_for('static',filename='img/login_celular.jpg')}}");
       background-size: cover;
       background-position: center;
@@ -164,8 +165,8 @@
       background-attachment: fixed;
     }
 
-    .left,
-    .right {
+    .left_log,
+    .right_log {
       width: 100%;
       padding: 20px;
       /* Reduce el padding en móviles */
@@ -178,13 +179,13 @@
   }
 
   @media (max-width: 576px) {
-    .container {
+    .container_log {
       width: 95%;
       /* Ocupa aún más ancho en pantallas muy pequeñas */
       margin: 15px auto;
     }
 
-    .right {
+    .right_log {
       padding: 15px;
     }
 
@@ -200,7 +201,7 @@
       max-width: 150px;
     }
 
-    .left {
+    .left_log {
       height: 400px;
     }
   }
@@ -235,28 +236,29 @@
     }
   }
 </style>
-<div class="container">
+<div class="container_log">
 
-  <div class="left">
+  <div class="left_log">
     <!-- <img src="{{ url_for('static', filename='img/login_imagen.png') }}" alt="Autobús y persona" class="illustration" /> -->
   </div>
-  <div class="right">
+  <div class="right_log">
     <button type="button" id="closeModal" class="close" data-dismiss="modal" aria-label="Close">
       <span>×</span>
     </button>
-    <h2 class="subtitulo">Inicio de Sesión</h2>
+    <h2 class="subtitulo">Inicio de sesión</h2>
     <form>
       <div class="input-group">
-        <input class="entrada" type="email" placeholder="Correo Electrónico" required />
+        <input class="entrada" type="email" placeholder="Correo electrónico" required />
       </div>
+      
       <div class="input-group">
         <input class="entrada" type="password" placeholder="Contraseña" required />
       </div>
       <a href="#" class="forgot" onclick="fct_forgotPass(event)">¿Olvidaste tu contraseña?</a>
-      <button type="submit" class="login-btn">Iniciar Sesión</button>
+      <button type="submit" class="login-btn">Iniciar sesión</button>
     </form>
     <div class="social-login">
-      <p>o inicia sesión con</p>
+      <p>o ingresa con</p>
       <div class="icons">
         <img src="https://cdn-icons-png.flaticon.com/512/300/300221.png" alt="Google" />
         <img src="https://cdn-icons-png.flaticon.com/512/732/732221.png" alt="Outlook" />

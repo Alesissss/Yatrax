@@ -1,27 +1,30 @@
 {% extends "index.html" %}
 
-{% block title %}YATRAX - Gestión de tipos de servicios{% endblock %}
+{% block title %}YATRAX - Gestión de tipo vehiculo{% endblock %}
 
 {% block content %}
 <div class="container-fluid p-4">
     <div class="panel-heading">
         <div class="row">
             <div class="col-md-12">
-                <h1>Gestionar tipos de servicios</h1>
+                <h1>Gestionar vehículo</h1>
             </div>
         </div>
     </div>
     <div class="panel-body">
         <div class="row">
             <div class="col-12">
-                <table id="tbl_TipoServicio" class="table table-bordered table-short-rows">
+                <table id="tbl_Vehiculo" class="table table-bordered table-short-rows">
                     <thead class="bg-gray">
                         <tr>
                             <th class="text-center">ID</th>
-                            <th class="text-center">NOMBRE</th>
+                            <th class="text-center">PLACA</th>
+                            <th class="text-center">AÑO</th>
+                            <th class="text-center">COLOR</th>
+                            <th class="text-center">TIPO VEHICULO</th>
+                            <th class="text-center">MARCA</th>
                             <th class="text-center">ESTADO</th>
-                            <th class="text-center">DESCRIPCIÓN</th>
-                            <th class="text-center">ACCIÓN</th>
+                            <th class="text-center">ACCION</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white table-short-rows">
@@ -34,7 +37,7 @@
 {% endblock %}
 {% block scripts %}
 <script>
-    var dtServicio;
+    var dtUsuarios;
 
     $(document).ready(function () {
         // $('body').addClass('sidebar-collapse');
@@ -100,12 +103,12 @@
             lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
         });
 
-        fct_IniciarTablaTipoServicio('#tbl_TipoServicio');
+        fct_IniciarTablaUsuarios('#tbl_Vehiculo');
     });
 
-    function fct_IniciarTablaTipoServicio(IdTabla) {
+    function fct_IniciarTablaUsuarios(IdTabla) {
         // Inicializar DataTables con botones
-        dtServicio = $(IdTabla).DataTable({
+        dtUsuarios = $(IdTabla).DataTable({
             buttons: [
                 {
                     extend: 'copy',
@@ -118,7 +121,7 @@
                     text: '<i class="bi bi-file-earmark-excel"></i>',
                     titleAttr: 'Exportar a Excel',
                     className: 'btn btn-success',
-                    filename: 'Tipo Servicio' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Vehículo' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     footer: true,
                     exportOptions:
                     {
@@ -131,7 +134,7 @@
                     text: '<i class="bi bi-file-earmark-pdf"></i>',
                     titleAttr: 'Exportar a PDF',
                     className: 'btn btn-danger',
-                    filename: 'Tipo Servicio' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Vehículo' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     exportOptions:
                     {
                         stripHtml: true,
@@ -159,16 +162,16 @@
                     columns: ':not(.noVis)',
                 },
                 {
-                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo tipo servicio',
+                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo  vehículo',
                     className: 'btn bg-success m-1',
                     titleAttr: 'Nuevo',
                     action: function (e, dt, node, config) {
-                        fct_TipoServicioNuevo();
+                        fct_NuevoVehiculo();
                     },
                 },
             ],
             ajax: {
-                url: "/trabajadores/ventas/GetData_TipoServicio",
+                url: "/trabajadores/viajes/GetData_Vehiculo",
                 type: "GET",
                 datatype: "json",
                 data: function (d) {
@@ -187,8 +190,12 @@
                 },
             },
             columns: [
-                { data: "ID", name: "ID" },
-                { data: "TIPO", name: "TIPO" },
+                { data: "id", name: "Id" },
+                { data: "placa", name: "Placa" },
+                { data: "anio", name: "Año" },
+                { data: "color", name: "Color" },
+                { data: "tipoVehiculo", name: "Tipo Vehiculo" },
+                { data: "marca", name: "Marca" },
                 { 
                     data: "estado", 
                     name: "estado",
@@ -203,17 +210,16 @@
                         }
                     },
                 },
-                {data: "descripcion", name: "descripcion"},
                 {
                     data: null,
                     name: null,
                     render: function (data, type, row) {
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_TipoServicioVer('${data.ID}')" title="Ver tipo Servicio"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_TipoServicioEditar('${data.ID}')" title="Editar tipo Servicio"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_TipoServicioDarBaja('${data.ID}')" title="Dar de baja tipo Servicio"><i class="bi bi-arrow-down-circle"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_TipoServicioEliminar('${data.ID}')" title="Eliminar tipo Servicio"><i class="bi bi-trash"></i></button>
+                            <button class="btn btn-xs m-1 btn-info" onclick="fct_VerVehiculo('${data.id}')" title="Ver tipo vehiculo"><i class="bi bi-eye"></i></button>
+                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_VehiculoEditar('${data.id}')" title="Editar tipo vehiculo"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_VehiculoDarBaja('${data.id}')" title="Dar de baja tipo vehiculo"><i class="bi bi-arrow-down-circle"></i></button>
+                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_VehiculoEliminar('${data.id}')" title="Eliminar tipo vehiculo"><i class="bi bi-trash"></i></button>
                         </div>
                         `;
                     },
@@ -226,11 +232,11 @@
                     className: "text-center align-middle",
                 },
                 {
-                    targets: [1, 2, 3],
-                    className: 'align-middle',
+                    targets: [1, 2, 3, 4, 5, 6],
+                    className: 'text-center align-middle',
                 },
                 {
-                    targets: [3],
+                    targets: [7],
                     orderable: false,
                     width: '10%',
                 },
@@ -260,22 +266,22 @@
         });
     }
 
-    function fct_TipoServicioNuevo() {
-        window.location.href = '/trabajadores/ventas/TipoServicioNuevo';
+    function fct_NuevoVehiculo() {
+        window.location.href = '/trabajadores/viajes/registrarVehiculo';
     }
 
-    function fct_TipoServicioEditar(Id) {
-        window.location.href = `/trabajadores/ventas/EditarTipoServicio/${Id}`;
+    function fct_VehiculoEditar(Id) {
+        window.location.href = `/trabajadores/viajes/editarVehiculo/${Id}`;
     }
 
-    function fct_TipoServicioVer(Id) {
-        window.location.href = `/trabajadores/ventas/VerTipoServicio/${Id}`;
+    function fct_VerVehiculo(Id) {
+        window.location.href = `/trabajadores/viajes/verVehiculo/${Id}`;
     }
 
-    function fct_TipoServicioEliminar(Id) {
+    function fct_VehiculoEliminar(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción eliminará al tipo servicio. ¿Deseas continuar?",
+            text: "Esta acción eliminará el tipo de vehiculo. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -286,7 +292,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/ventas/EliminarTipoServicio/${Id}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/viajes/eliminarVehiculo/${Id}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
@@ -295,7 +301,7 @@
                                 toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
                                 return;
                             }
-                            fct_IniciarTablaTipoServicio('#tbl_TipoServicio');
+                            fct_IniciarTablaUsuarios('#tbl_Vehiculo');
                             toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                         } else {
                             toastr.error(response.Msj, "MENSAJE DE SISTEMA");
@@ -311,10 +317,10 @@
         });
     }
 
-    function fct_TipoServicioDarBaja(Id) {
+    function fct_VehiculoDarBaja(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción le dará de baja al tipo servicio. ¿Deseas continuar?",
+            text: "Esta acción le dará de baja al tipo de vehiculo. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -325,22 +331,19 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/ventas/DarBajaTipoServicio/${Id}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/viajes/DarBajaVehiculo/${Id}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
-                        if (response.Status === "success") {
-                            if (response.Msj2 !== '' && response.Msj2 !== null) {
-                                toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                                return;
-                            }
-                            fct_IniciarTablaTipoServicio('#tbl_TipoServicio');
-                            toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                        if (response && response.Status === "success") {
+                            fct_IniciarTablaUsuarios('#tbl_Vehiculo');
+                            toastr.success(response.Msj || "Operación exitosa", "MENSAJE DE SISTEMA");
                         } else {
-                            toastr.error(response.Msj, "MENSAJE DE SISTEMA");
-                            console.error('Error: ' + response.Msj);
+                            toastr.error((response && response.Msj) || "Error desconocido", "MENSAJE DE SISTEMA");
+                            console.error('Error: ' + (response ? response.Msj : "No hay respuesta"));
                         }
                     },
+
                     error: function (xhr, Status, error) {
                         toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
                         console.error('Error:' + error);

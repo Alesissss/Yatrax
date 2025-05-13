@@ -53,6 +53,7 @@ class Sucursal:
             )
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
             return resultado[0]  # Retorna un diccionario con los mensajes
+            
         finally:
             conexion.cerrar()
 
@@ -83,7 +84,7 @@ class Sucursal:
     def dar_baja(cls, id, usuario):
         conexion = bd.Conexion()
         try:
-            conexion.ejecutar("CALL SP_DARBAJA_SUCURSAL(%s);", (id, usuario,))
+            conexion.ejecutar("CALL SP_DARBAJA_SUCURSAL(%s, %s);", (id, usuario,))
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
             return resultado[0]
         finally:
