@@ -89,7 +89,6 @@ def Menu_Nivel():
 def Menu_Rutas():
     return render_template('viajes/ruta.html', active_page="ruta", active_menu='mViajes')
 
-
 @viajes_bp.route('/GestionarAsiento')
 def Menu_Asiento():
     return render_template('viajes/asiento.html', active_page="asiento", active_menu='mViajes')
