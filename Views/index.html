@@ -128,7 +128,7 @@
                         {% if session.get('moduloSelected') %}
                         {% if session['moduloSelected'] == 1 %}
                         {% if 1 in session['menus'] %}
-                        <li class="nav-item">
+                        <li class="nav-item menu-is-opening menu-open">
                             <a href="#" class="nav-link {% if active_menu == 'mUsuarios' %}active{% endif %}">
                                 <i class="nav-icon fas fas fa-users"></i>
                                 <p>
@@ -161,7 +161,7 @@
                         {% endif %}
                         {% if session['moduloSelected'] == 3 %}
                         {% if 3 in session['menus'] %}
-                        <li class="nav-item">
+                        <li class="nav-item menu-is-opening menu-open">
                             <a href="#" class="nav-link {% if active_menu == 'mVentas' %}active{% endif %}">
                                 <i class="nav-icon bi bi-cart3"></i>
                                 <p>VENTAS
@@ -220,7 +220,7 @@
                         {% endif %}
                         {% if session['moduloSelected'] == 4 %}
                         {% if 4 in session['menus'] %}
-                        <li class="nav-item">
+                        <li class="nav-item menu-is-opening menu-open">
                             <a href="#" class="nav-link {% if active_menu == 'mViajes' %}active{% endif %}">
                                 <i class="nav-icon fas fa-bus"></i>
                                 <p>VIAJES
@@ -291,13 +291,22 @@
                                     </a>
                                 </li>
                                 {% endif %}
+                                {% if 47 in session['menus'] %}
+                                <li class="nav-item">
+                                    <a href="{{ url_for('viajes.Menu_ProgramarViaje') }}"
+                                        class="nav-link {% if active_page == 'programarViaje' %}active{% endif %}">
+                                        <i class="bi-geo nav-icon"></i>
+                                        <p>Programar viajes</p>
+                                    </a>
+                                </li>
+                                {% endif %}
                             </ul>
                         </li>
                         {% endif %}
                         {% endif %}
                         {% if session['moduloSelected'] == 5 %}
                         {% if 5 in session['menus'] %}
-                        <li class="nav-item">
+                        <li class="nav-item menu-is-opening menu-open">
                             <a href="#" class="nav-link {% if active_menu == 'mPersonal' %}active{% endif %}">
                                 <i class="nav-icon bi bi-person-lines-fill"></i>
                                 <p>PERSONAL
@@ -329,7 +338,7 @@
                         {% endif %}
                         {% if session['moduloSelected'] == 6 %}
                         {% if 6 in session['menus'] %}
-                        <li class="nav-item">
+                        <li class="nav-item menu-is-opening menu-open">
                             <a href="#" class="nav-link {% if active_menu == 'mAtencion' %}active{% endif %}">
                                 <i class="nav-icon fas fa-comments"></i>
                                 <p>ATENCIÓN AL CLIENTE
@@ -352,7 +361,7 @@
                         {% endif %}
                         {% if session['moduloSelected'] == 2 %}
                         {% if 2 in session['menus'] %}
-                        <li class="nav-item">
+                        <li class="nav-item menu-is-opening menu-open">
                             <a href="#" class="nav-link {% if active_menu == 'mConfiguracion' %}active{% endif %}">
                                 <i class="nav-icon fas fa-cogs"></i>
                                 <p>CONFIGURACIÓN</p>

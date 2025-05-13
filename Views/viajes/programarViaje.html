@@ -1,0 +1,274 @@
+{% extends "index.html" %}
+
+{% block title %}YATRAX - Gestión de rutas{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4">
+    <div class="row">
+        <div class="col-md-12 col-sm-6">
+            <div class="card card-primary card-tabs">
+                <div class="card-header p-0 pt-1">
+                    <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="tab01-tab" data-toggle="pill" href="#tab-01" role="tab"
+                                aria-controls="tab-01" aria-selected="true">Viajes programados</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="tab02-tab" data-toggle="pill" href="#tab-02" role="tab"
+                                aria-controls="tab-02" aria-selected="false">Programar viaje</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="tab03-tab" data-toggle="pill" href="#tab-03" role="tab"
+                                aria-controls="tab-03" aria-selected="false">Seguimiento de viajes</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content" id="custom-tabs-one-tabContent">
+
+                        <!-- Tab 1 -->
+                        <div class="tab-pane fade show active" id="tab-01" role="tabpanel" aria-labelledby="tab01-tab">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <h1>Viajes programados vigentes</h1>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <table id="tbl_Viajes" class="table table-bordered table-short-rows">
+                                            <thead class="bg-gray">
+                                                <tr>
+                                                    <th class="text-center">ID</th>
+                                                    <th class="text-center">ORIGEN</th>
+                                                    <th class="text-center">DESTINO</th>
+                                                    <th class="text-center">BUS</th>
+                                                    <th class="text-center">CHOFER</th>
+                                                    <th class="text-center">TIPO SERVICIO</th>
+                                                    <th class="text-center">SERVICIO</th>
+                                                    <th class="text-center">PRECIO POR ASIENTO</th>
+                                                    <th class="text-center">ESTADO</th>
+                                                    <th class="text-center">ACCIÓN</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="bg-white table-short-rows">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 2 -->
+                        <div class="tab-pane fade" id="tab-02" role="tabpanel" aria-labelledby="tab02-tab">
+                            <div class="panel-heading">
+                                <!-- <div class="row">
+                                    <div class="col-md-12">
+                                        <h1>Programar un nuevo viaje</h1>
+                                    </div>
+                                </div> -->
+                            </div>
+                            <div class="panel-body">
+                                <div class="card h-100 w-100">
+                                    <div class="card-header bg-primary text-white">
+                                        <h4 class="text-center mb-0">Programar un nuevo viaje</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="card card-outline card-primary h-100">
+                                                    <div class="card-header">
+                                                        <h3 class="card-title">Datos Generales</h3>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row">
+                                                            <div class="col-md-12 mb-3">
+                                                                <label for="cbx_Ruta">Ruta</label>
+                                                                <div class="input-group">
+                                                                    <select id="cbx_Ruta" class="form-control">
+                                                                        <option disabled>--SELECCIONAR--</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-12 mb-3">
+                                                                <label for="txt_Origen">Origen</label>
+                                                                <div class="input-group">
+                                                                    <input type="text" id="txt_Origen"
+                                                                        class="form-control" placeholder="Origen"
+                                                                        oninput="this.value = this.value.toUpperCase();"
+                                                                        disabled>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-12 mb-3">
+                                                                <label for="txt_Origen">Destino</label>
+                                                                <div class="input-group">
+                                                                    <input type="text" id="txt_Destino"
+                                                                        class="form-control" placeholder="Destino"
+                                                                        oninput="this.value = this.value.toUpperCase();"
+                                                                        disabled>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-12 mb-3">
+                                                                <label for="txt_hora_salida">Hora de salida:</label>
+                                                                <div class="input-group">
+                                                                    <input type="time" id="txt_hora_salida"
+                                                                        class="form-control" placeholder="HH:mm:SS">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="card card-outline card-primary h-100">
+                                                    <div class="card-header">
+                                                        <h3 class="card-title">Asignar bus</h3>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row">
+                                                            <div class="col-md-12 mb-3">
+                                                                <label for="cbx_Bus">Bus</label>
+                                                                <div class="input-group">
+                                                                    <select id="cbx_Bus" class="form-control">
+                                                                        <option disabled>--SELECCIONAR--</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-12 mb-3">
+                                                                <label for="cbx_Servicio">Servicio</label>
+                                                                <div class="input-group">
+                                                                    <select id="cbx_Servicio" class="form-control">
+                                                                        <option disabled>--SELECCIONAR--</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-12 mb-3">
+                                                                <label for="txt_Niveles">Cantidad de niveles</label>
+                                                                <div class="input-group">
+                                                                    <input type="text" id="txt_Niveles"
+                                                                        class="form-control"
+                                                                        placeholder="Cantidad de niveles"
+                                                                        oninput="this.value = this.value.toUpperCase();"
+                                                                        disabled>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-12 mb-3">
+                                                                <label for="txt_Asientos">Cantidad total de
+                                                                    asientos</label>
+                                                                <div class="input-group">
+                                                                    <input type="text" id="txt_Asientos"
+                                                                        class="form-control"
+                                                                        placeholder="Cantidad total de asientos"
+                                                                        oninput="this.value = this.value.toUpperCase();"
+                                                                        disabled>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="card card-outline card-primary h-100">
+                                                    <div class="card-header">
+                                                        <h3 class="card-title">Asignar personal</h3>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row">
+                                                            <div class="col-md-12 mb-3">
+                                                                <label for="cbx_Chofer">Chofer</label>
+                                                                <div class="input-group">
+                                                                    <select id="cbx_Chofer" class="form-control" multiple="multiple">
+                                                                        <option value="1">Chofer 1</option>
+                                                                        <option value="2">Chofer 2 </option>
+                                                                        <option value="3">Chofer 3</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-12 mb-3">
+                                                                <label for="cbx_Tripulante">Tripulantes</label>
+                                                                <div class="input-group">
+                                                                    <select id="cbx_Tripulante" class="form-control"
+                                                                        multiple="multiple">
+                                                                        <option>Tripulante 1</option>
+                                                                        <option>Tripulante 2 </option>
+                                                                        <option>Tripulante 3</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer">
+                                        <div class="col-md-12 text-center">
+                                            <button id="btn_Guardar" type="button" class="btn btn-success">Guardar
+                                                cambios</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 3 -->
+                        <div class="tab-pane fade" id="tab-03" role="tabpanel" aria-labelledby="tab03-tab">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <h1>Seguimiento en vivo de un viaje</h1>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div> <!-- /.tab-content -->
+                </div> <!-- /.card-body -->
+            </div> <!-- /.card -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        $('#cbx_Chofer').select2({
+            theme: 'bootstrap4',
+            containerCss: {
+                'background-color': '#1f2d3d',
+            },
+            placeholder: "Buscar...",
+            language: {
+                noResults: function () {
+                    return "No se encontraron resultados";
+                }
+            },
+            allowClear: true
+        });
+
+        $('#cbx_Chofer').val(0);
+
+        $('#cbx_Tripulante').select2({
+            theme: 'bootstrap4',
+            containerCss: {
+                'background-color': '#1f2d3d',
+            },
+            placeholder: "Buscar...",
+            language: {
+                noResults: function () {
+                    return "No se encontraron resultados";
+                }
+            },
+            allowClear: true
+        });
+    });
+</script>
+{% endblock %}

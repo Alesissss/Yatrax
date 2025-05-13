@@ -2487,6 +2487,9 @@ INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (60, 'Editar rutas',
 INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (61, 'Eliminar rutas', 1, 46);
 INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (62, 'Ver rutas', 1, 46);
 
+-- Programar viajes
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (47, 'Programar viajes', 1, 4);
+
 -- Submenús de PERSONAL
 -- Gestionar tipo de personal
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (50, 'Gestionar tipo personal', 1, 5);
@@ -2535,6 +2538,7 @@ INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (43, 1);
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (44, 1);
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (45, 1);
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (46, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (47, 1);
 -- Submenús de "PERSONAL"
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (50, 1);
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (51, 1);
