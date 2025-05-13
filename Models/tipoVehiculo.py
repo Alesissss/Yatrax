@@ -76,8 +76,8 @@ class TipoVehiculo:
         conexion = None
         try:
             conexion = bd.Conexion()
-            conexion.ejecutar("CALL SP_ACTUALIZAR_TIPOVEHICULO(%s,%s,%s,%s,%s,@mensaje, @error)",(id,nombre,marca,estado,cantidad))
-            resultado = conexion.obtener("SELECT @mensaje AS MSJ, @error AS MSJ2;")
+            conexion.ejecutar("CALL SP_ACTUALIZAR_TIPOVEHICULO(%s,%s,%s,%s,%s,@MSJ,@MSJ2)",(id,nombre,marca,estado,cantidad))
+            resultado = conexion.obtener("SELECT @MSJ AS MSJ, @MSJ2 AS MSJ2;")
             return resultado[0]
         finally:
             if conexion:
