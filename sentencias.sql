@@ -15,6 +15,7 @@ DROP PROCEDURE IF EXISTS SP_REGISTRAR_PLANTILLA;
 DROP PROCEDURE IF EXISTS SP_EDITAR_PLANTILLA;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_PLANTILLA;
 DROP PROCEDURE IF EXISTS SP_ACTIVAR_PLANTILLA;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_ABREVIATURA_CIUDAD;
 DROP PROCEDURE IF EXISTS SP_REGISTRAR_SUCURSAL;
 DROP PROCEDURE IF EXISTS SP_EDITAR_SUCURSAL;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_SUCURSAL;
@@ -236,7 +237,7 @@ CREATE TABLE usuarios (
 CREATE TABLE ciudad(
     id int AUTO_INCREMENT PRIMARY KEY,
     nombre varchar(50) NOT NULL,
-    abreviatura varchar(10) NOT NULL
+    abreviatura CHAR(3) NOT NULL
 );
 
 CREATE TABLE horario (
@@ -251,13 +252,14 @@ CREATE TABLE horario (
 
 -- Crear tabla sucursal
 CREATE TABLE sucursal (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    departamento VARCHAR(50) NOT NULL,
+    id CHAR(5) PRIMARY KEY,
+    ciudad VARCHAR(50) NOT NULL,
     nombre VARCHAR(50) NOT NULL,
     direccion VARCHAR(255) NOT NULL,
     latitud DECIMAL(8,6) NOT NULL,
     longitud DECIMAL(9,6) NOT NULL,
     estado TINYINT NOT NULL DEFAULT 1,
+    abreviatura CHAR(3) NOT NULL,
     estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
     estado_registro INT NOT NULL DEFAULT 1,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -2437,7 +2439,7 @@ INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (37, 'Eliminar servi
 INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (38, 'Ver servicio', 1, 34);
 
 -- Gestionar tipo de documento
-INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (36, 'Gestionar tipo documento', 1, 3);
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (35, 'Gestionar tipo documento', 1, 3);
 -- Claims de Gestionar tipo documento (Menú 35)
 INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (39, 'Registrar tipo documento', 1, 35);
 INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (40, 'Editar tipo documento', 1, 35);
@@ -2471,32 +2473,35 @@ INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (52, 'Editar niveles
 INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (53, 'Eliminar niveles', 1, 43);
 INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (54, 'Ver niveles', 1, 43);
 
+-- Gestionar asientos
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (44, 'Gestionar asientos', 1, 4);
+
 -- Gestionar sucursales
-INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (44, 'Gestionar sucursales', 1, 4);
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (45, 'Gestionar sucursales', 1, 4);
 -- Claims de Gestionar sucursales (Menú 44)
-INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (55, 'Registrar sucursales', 1, 44);
-INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (56, 'Editar sucursales', 1, 44);
-INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (57, 'Eliminar sucursales', 1, 44);
-INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (58, 'Ver sucursales', 1, 44);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (55, 'Registrar sucursales', 1, 45);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (56, 'Editar sucursales', 1, 45);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (57, 'Eliminar sucursales', 1, 45);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (58, 'Ver sucursales', 1, 45);
 
 -- Gestionar marcas
-INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (45, 'Gestionar marcas', 1, 4);
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (46, 'Gestionar marcas', 1, 4);
 -- Claims de Gestionar marcas (Menú 45)
-INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (59, 'Registrar marcas', 1, 45);
-INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (60, 'Editar marcas', 1, 45);
-INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (61, 'Eliminar marcas', 1, 45);
-INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (62, 'Ver marcas', 1, 45);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (59, 'Registrar marcas', 1, 46);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (60, 'Editar marcas', 1, 46);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (61, 'Eliminar marcas', 1, 46);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (62, 'Ver marcas', 1, 46);
 
 -- Gestionar rutas
-INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (46, 'Gestionar rutas', 1, 4);
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (47, 'Gestionar rutas', 1, 4);
 -- Claims de Gestionar rutas (Menú 46)
-INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (63, 'Registrar rutas', 1, 46);
-INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (64, 'Editar rutas', 1, 46);
-INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (65, 'Eliminar rutas', 1, 46);
-INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (66, 'Ver rutas', 1, 46);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (63, 'Registrar rutas', 1, 47);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (64, 'Editar rutas', 1, 47);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (65, 'Eliminar rutas', 1, 47);
+INSERT INTO conf_claims(id, nombre, estado, idPadre) VALUES (66, 'Ver rutas', 1, 47);
 
 -- Programar viajes
-INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (47, 'Programar viajes', 1, 4);
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (48, 'Programar viajes', 1, 4);
 
 -- Submenús de PERSONAL
 -- Gestionar tipo de personal
@@ -2968,17 +2973,50 @@ DELIMITER ;
 
 
 DELIMITER $$
+CREATE PROCEDURE SP_REGISTRAR_ABREVIATURA_CIUDAD(
+    IN P_NOMBRE VARCHAR(50),
+    IN P_ABREVIATURA CHAR(3)
+)
+BEGIN
+    DECLARE cAbreviatura INT;
+    
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cAbreviatura
+    FROM CIUDAD 
+    WHERE nombre = P_NOMBRE AND abreviatura = P_ABREVIATURA;
+
+    IF cAbreviatura > 0 THEN
+        SET @MSJ2 = 'La abreviatura que intenta registrar ya está registrada';
+    ELSE
+        INSERT INTO ciudad (nombre, abreviatura) 
+        VALUES (P_NOMBRE, P_ABREVIATURA);
+        
+        SET @MSJ = 'Se registró correctamente la abreviatura de la ciudad';
+    END IF;
+END $$
+DELIMITER ;
+
+DELIMITER $$
 CREATE PROCEDURE SP_REGISTRAR_SUCURSAL(
-    IN P_DEPARTAMENTO VARCHAR(50),
+    IN P_CIUDAD VARCHAR(50),
     IN P_NOMBRE VARCHAR(50),
     IN P_DIRECCION VARCHAR(255),
     IN P_LATITUD DECIMAL(8,6),
     IN P_LONGITUD DECIMAL(9,6),
+    IN P_ABREVIATURA CHAR(3),
     IN P_USUARIO VARCHAR(100)
 )
 BEGIN
     DECLARE cSucursal INT;
-    DECLARE cNombre INT;
+    DECLARE cAbreviatura INT;
+    DECLARE cAUX CHAR(5);
 
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -2990,13 +3028,23 @@ BEGIN
 
     SELECT COUNT(*) INTO cSucursal
     FROM sucursal 
-    WHERE nombre = P_NOMBRE AND estado_registro = 1;
+    WHERE nombre = P_NOMBRE AND estado_registro = 1 AND abreviatura = P_ABREVIATURA;
+
+    SELECT COUNT(*) INTO cAbreviatura
+    FROM sucursal 
+    WHERE abreviatura = P_ABREVIATURA AND estado_registro = 1;
+
+    IF cAbreviatura <9 THEN
+        SET cAUX = CONCAT(P_ABREVIATURA,'0', cAbreviatura+1);
+    ELSE
+        SET cAUX = CONCAT(P_ABREVIATURA,cAbreviatura+1);
+    END IF;
 
     IF cSucursal > 0 THEN
         SET @MSJ2 = 'La sucursal que intenta registrar ya está registrada';
     ELSE
-        INSERT INTO sucursal (departamento, nombre, direccion, latitud, longitud, usuario) 
-        VALUES (P_DEPARTAMENTO, P_NOMBRE, P_DIRECCION, P_LATITUD, P_LONGITUD, P_USUARIO);
+        INSERT INTO sucursal (id, ciudad, nombre, direccion, latitud, longitud, abreviatura, usuario) 
+        VALUES (cAUX,P_CIUDAD, P_NOMBRE, P_DIRECCION, P_LATITUD, P_LONGITUD, P_ABREVIATURA, P_USUARIO);
         
         SET @MSJ = 'Se registró correctamente la sucursal';
     END IF;
