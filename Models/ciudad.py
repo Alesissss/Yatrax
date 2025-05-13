@@ -22,3 +22,17 @@ class Ciudad:
             return resultado[0] if resultado else None
         finally:
             conexion.cerrar()
+            
+    @classmethod
+    def registar_abreviatura(cls, nombre, abreviatura):
+        conexion = bd.Conexion()
+        try:
+            # Llamar al procedimiento almacenado
+            conexion.ejecutar(
+                "CALL SP_REGISTRAR_ABREVIATURA_CIUDAD(%s, %s);",
+                (nombre, abreviatura)
+            )
+            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
+            return resultado[0]  # Retorna un diccionario con los mensajes
+        finally:
+            conexion.cerrar()

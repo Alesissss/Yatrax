@@ -20,7 +20,7 @@ class Asiento:
         try:
             asientos = conexion.obtener("""
                 SELECT a.id, a.nro_asiento, n.nroPiso AS nivel, a.tipo_asiento, a.estado 
-                FROM asiento a INNER JOIN nivel n ON a.id_nivel = n.idNivel
+                FROM asiento a LEFT JOIN nivel n ON a.id_nivel = n.id
             """)
             return asientos
         finally:
@@ -32,7 +32,7 @@ class Asiento:
         try:
             asiento = conexion.obtener("""
                 SELECT a.id, a.nro_asiento, n.nroPiso AS nivel, a.tipo_asiento, a.estado 
-                FROM asiento a INNER JOIN nivel n ON a.id_nivel = n.idNivel
+                FROM asiento a INNER JOIN nivel n ON a.id_nivel = n.id
                 WHERE a.id = %s
             """, (asiento_id,))
             return asiento[0] if asiento else None
@@ -50,10 +50,10 @@ class Asiento:
             conexion.cerrar()
 
     @classmethod
-    def editar(cls, id, nro_asiento, id_nivel, tipo_asiento, estado):
+    def editar(cls, id, nro_asiento, id_nivel, tipo_asiento, estado,usuario):
         conexion = bd.Conexion()
         try:
-            conexion.ejecutar("CALL SP_EDITAR_ASIENTO(%s, %s, %s, %s, %s);", (id, nro_asiento, id_nivel, tipo_asiento, estado))
+            conexion.ejecutar("CALL SP_EDITAR_ASIENTO(%s, %s, %s, %s, %s,%s);", (id, nro_asiento, id_nivel, tipo_asiento, estado,usuario))
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
             return resultado[0]
         finally:

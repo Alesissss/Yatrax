@@ -43,6 +43,7 @@
                         <div class="input-group">
                             <select id="cbx_TipoAsiento" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{%
                                 endif %}>
+                                <option disabled selected>--SELECCIONAR--</option>
                                 <option value="Reclinable" {% if asiento.tipo=='Reclinable' %}selected{% endif %}>
                                     Reclinable</option>
                                 <option value="Semi-reclinable" {% if asiento.tipo=='Semi-reclinable' %}selected{% endif
@@ -91,13 +92,6 @@
             let tipo = $("#cbx_TipoAsiento").val();
             let estado = $("#cbx_Estado").val();
 
-            console.log("Número de asiento:", nroAsiento);
-            console.log("Nivel:", nivel);
-            console.log("Tipo:", tipo);
-            console.log("Estado:", estado);
-
-
-
             if (!nroAsiento || !nivel || !tipo || !estado) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
@@ -111,7 +105,8 @@
                 confirmButtonColor: "#3085d6",
                 cancelButtonColor: "#d33",
                 confirmButtonText: "Sí, registrar",
-                cancelButtonText: "Cancelar"
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
                     let formData = new FormData();
@@ -130,7 +125,7 @@
                             if (response.Status === "success") {
                                 toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                                 setTimeout(() => {
-                                    window.location.href = "/trabajadores/viajes/GestionarAsientos";
+                                    window.location.href = "/trabajadores/viajes/GestionarAsiento";
                                 }, 500);
                             } else {
                                 toastr.error(response.Msj, "MENSAJE DE SISTEMA");
@@ -185,7 +180,7 @@
                             if (response.Status === "success") {
                                 toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                                 setTimeout(() => {
-                                    window.location.href = "/trabajadores/viajes/GestionarAsientos";
+                                    window.location.href = "/trabajadores/viajes/GestionarAsiento";
                                 }, 500);
                             } else {
                                 toastr.error(response.Msj, "MENSAJE DE SISTEMA");
@@ -201,7 +196,7 @@
 
         // Botones de volver o aceptar
         $("#btn_Aceptar, #btn_Volver").click(function () {
-            window.location.href = "/trabajadores/viajes/GestionarAsientos";
+            window.location.href = "/trabajadores/viajes/GestionarAsiento";
         });
     });
 </script>

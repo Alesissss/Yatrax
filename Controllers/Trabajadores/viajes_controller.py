@@ -4,6 +4,7 @@ from Models.nivel import Nivel
 from Models.tipoVehiculo import TipoVehiculo
 from Models.vehiculo import Vehiculo
 from Models.sucursal import Sucursal
+from Models.ciudad import Ciudad
 from Models.horario import Horario
 from Models.ubigeo import Ubigeo
 from Models.marca import Marca
@@ -89,10 +90,6 @@ def Menu_Nivel():
 def Menu_Rutas():
     return render_template('viajes/ruta.html', active_page="ruta", active_menu='mViajes')
 
-@viajes_bp.route('/GestionarClientes')
-def Menu_Clientes():
-    return render_template('viajes/cliente.html', active_page="cliente", active_menu='mViajes')
-
 @viajes_bp.route('/GestionarAsiento')
 def Menu_Asiento():
     return render_template('viajes/asiento.html', active_page="asiento", active_menu='mViajes')
@@ -100,6 +97,10 @@ def Menu_Asiento():
 @viajes_bp.route('/RutaNuevo')
 def TipoUsuario_Nuevo():
     return render_template('viajes/rutaCRUD.html', active_page="ruta", active_menu='mViajes', ruta={}, tittle = 'Registrar ruta', btnId = 'btn_Registrar')
+
+@viajes_bp.route('/ProgramarViaje')
+def Menu_ProgramarViaje():
+    return render_template('viajes/programarViaje.html', active_page="programarViaje", active_menu='mViajes')
 
 # @viajes_bp.route('/GestionarMarcas')
 # def Menu_Marcas():
@@ -633,19 +634,21 @@ def registrar_sucursal():
         direccion = request.form.get("txt_direccion", "").strip()
         latitud = request.form.get("txt_latitud")
         longitud = request.form.get("txt_longitud")
-        departamento = request.form.get("txt_departamento", "").strip()
+        ciudad = request.form.get("txt_ciudad", "").strip()
+        abreviatura = request.form.get("txt_abreviatura", "").strip()
         usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO')
 
         # Validaciones básicas
-        if not all([nombre, latitud, longitud, departamento]):
+        if not all([nombre, latitud, longitud, ciudad, abreviatura]):
             return jsonify({"Status": "error", "Msj": "Todos los campos son requeridos"})
 
         resultado = Sucursal.registrar(
-            departamento=departamento,
+            ciudad=ciudad,
             nombre=nombre,
             direccion=direccion,
             latitud=latitud,
             longitud=longitud,
+            abreviatura=abreviatura,
             usuario_actual=usuario_actual
         )
         
@@ -693,10 +696,10 @@ def editar_sucursal(idSucursal):
             direccion = request.form.get("txt_direccion").strip()
             latitud = request.form.get("txt_latitud").strip()
             longitud = request.form.get("txt_longitud").strip()
-            departamento = request.form.get("txt_departamento").strip()
+            ciudad = request.form.get("txt_ciudad").strip()
             usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
             
-            mensajes = Sucursal.editar(idSucursal, departamento, direccion, nombre, latitud, longitud, usuario_actual)
+            mensajes = Sucursal.editar(idSucursal, ciudad, direccion, nombre, latitud, longitud, usuario_actual)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
@@ -753,7 +756,7 @@ def obtener_sucursales_mapa():
                 'id': suc['id'],
                 'nombre': suc['nombre'],
                 'direccion': suc['direccion'],
-                'departamento': suc['departamento'],
+                'ciudad': suc['ciudad'],
                 'latitud': float(suc['latitud']) if suc['latitud'] else None,
                 'longitud': float(suc['longitud']) if suc['longitud'] else None
             })
@@ -761,6 +764,33 @@ def obtener_sucursales_mapa():
         return jsonify(sucursales_json)
     except Exception as e:
         return jsonify({"Status": "error", "Msj": str(e)}), 500
+
+@viajes_bp.route('/BuscarAbreviatura', methods=['POST'])
+def buscar_abreviatura():
+    try:
+        data = request.json
+        provincia = data.get("provincia", '').strip()
+        if not provincia:
+            return jsonify({'error': 'Parámetro de provincia no proporcionado'}), 400
+        
+        resultado = Ciudad.obtener_abreviatura(provincia)
+        if resultado:
+            return jsonify({
+                'status': 'success',
+                'data': resultado
+            })
+        else:
+            resultado = provincia[:3] if len(provincia) >= 3 else provincia.ljust(3, 'X')
+            Ciudad.registrar_abreviatura(provincia, resultado)
+        return jsonify({
+            "Status": "success",
+            "data": resultado,
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': 'Error interno del servidor'
+        }), 500
 
 @viajes_bp.route('/api/geocodificar', methods=['GET'])
 def geocodificar_coordenadas():
@@ -1067,12 +1097,12 @@ def registrar_asiento():
     try:
         nro_asiento = request.form.get("nro_asiento").strip()
         nivel = request.form.get("nivel")
-        tipo_asiento = request.form.get("tipo_asiento")
+        tipo_asiento = request.form.get("tipo")
         estado = request.form.get("estado")
         usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
 
         if not nro_asiento or not nivel or not tipo_asiento or not estado:
-            return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
+            return jsonify({"Status": "error", "Msj": f"Todos los campos son obligatorios {nro_asiento},{nivel},{tipo_asiento},{estado}"})
 
         mensajes = Asiento.registrar(nro_asiento, nivel, tipo_asiento, estado, usuario_actual)
         msj1 = mensajes.get('@MSJ')
@@ -1114,13 +1144,15 @@ def editar_asiento(id):
         if request.method == 'POST':
             nro_asiento = request.form.get("nro_asiento").strip()
             nivel = request.form.get("nivel")
-            tipo_asiento = request.form.get("tipo_asiento")
+            tipo_asiento = request.form.get("tipo")
             estado = request.form.get("estado")
+            usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
 
             if not nro_asiento or not nivel or not tipo_asiento or not estado:
                 return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
+            
 
-            mensajes = Asiento.editar(id, nro_asiento, nivel, tipo_asiento, estado)
+            mensajes = Asiento.editar(id, nro_asiento, nivel, tipo_asiento, estado,usuario_actual)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
@@ -1132,8 +1164,8 @@ def editar_asiento(id):
                 return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar asiento'})
 
         if asiento:
-            return render_template('asiento/asientoCRUD.html', active_page="asientos", active_menu='mAsientos', asiento=asiento, tittle='Editar asiento', btnId='btn_Editar')
-        return render_template('asiento/asientoCRUD.html', active_page="asientos", active_menu='mAsientos', asiento={}, tittle='Editar asiento', btnId='btn_Editar')
+            return render_template('viajes/asientoCRUD.html', active_page="asientos", active_menu='mAsientos', asiento=asiento, tittle='Editar asiento', btnId='btn_Editar')
+        return render_template('viajes/asientoCRUD.html', active_page="asientos", active_menu='mAsientos', asiento={}, tittle='Editar asiento', btnId='btn_Editar')
 
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
@@ -1144,8 +1176,8 @@ def ver_asiento(id):
     try:
         asiento = Asiento.obtener_por_id(id)
         if asiento:
-            return render_template('asiento/asientoCRUD.html', active_page="asientos", active_menu='mAsientos', asiento=asiento, tittle='Ver asiento', btnId='btn_Aceptar')
-        return render_template('asiento/asientoCRUD.html', active_page="asientos", active_menu='mAsientos', asiento={}, tittle='Ver asiento', btnId='btn_Aceptar')
+            return render_template('viajes/asientoCRUD.html', active_page="asientos", active_menu='mAsientos', asiento=asiento, tittle='Ver asiento', btnId='btn_Aceptar')
+        return render_template('viajes/asientoCRUD.html', active_page="asientos", active_menu='mAsientos', asiento={}, tittle='Ver asiento', btnId='btn_Aceptar')
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
