@@ -24,7 +24,7 @@ class Ciudad:
             conexion.cerrar()
             
     @classmethod
-    def registar_abreviatura(cls, nombre, abreviatura):
+    def registrar_abreviatura(cls, nombre, abreviatura):
         conexion = bd.Conexion()
         try:
             # Llamar al procedimiento almacenado

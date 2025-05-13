@@ -4236,22 +4236,37 @@ CREATE PROCEDURE SP_ELIMINAR_VEHICULO(
     IN p_idVehiculo INT
 )
 BEGIN
+    DECLARE v_idTipoVehiculo INT;
+
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         SET @MSJ2 = 'Error inesperado al eliminar vehículo';
         SET @MSJ  = NULL;
+        ROLLBACK;
     END;
 
-    SET @MSJ  = NULL;
-    SET @MSJ2 = NULL;
+    START TRANSACTION;
 
+    -- Obtener el tipo de vehículo antes de eliminar
+    SELECT id_tipo_vehiculo INTO v_idTipoVehiculo
+    FROM vehiculo
+    WHERE id = p_idVehiculo;
+
+    -- Eliminar el vehículo
     DELETE FROM vehiculo
     WHERE id = p_idVehiculo;
 
     IF ROW_COUNT() = 0 THEN
         SET @MSJ2 = 'No se encontró el vehículo para eliminar';
+        ROLLBACK;
     ELSE
+        -- Actualizar la cantidad del tipo de vehículo
+        UPDATE tipo_vehiculo
+        SET cantidad = cantidad - 1
+        WHERE id = v_idTipoVehiculo;
+
         SET @MSJ = 'Vehículo eliminado correctamente';
+        COMMIT;
     END IF;
 END$$
 
