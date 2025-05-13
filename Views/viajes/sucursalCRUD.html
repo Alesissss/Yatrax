@@ -5,81 +5,107 @@
 {% block content %}
 <div class="container-fluid">
     <div class="row justify-content-center">
-        <div class="col-md-6">
+        <div class="col-md-12">
             <div class="card">
                 <div class="card-header bg-primary text-white">
                     <h4 class="text-center mb-0">{{ tittle }}</h4>
                 </div>
                 <div class="card-body">
-                    <div class="mb-3">
-                        <label for="txt_nombre">Nombre</label>
-                        <div class="input-group">
-                            <input type="text" id="txt_nombre" class="form-control" placeholder="Nombre"
-                                value="{{ sucursal.nombre }}" oninput="this.value = this.value.toUpperCase();">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-home"></i></div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h2>Datos de la sucursal</h2>
+                            <div class="mb-3">
+                                <label for="txt_nombre">Nombre</label>
+                                <div class="input-group">
+                                    <input type="text" id="txt_nombre" class="form-control" placeholder="Nombre"
+                                        value="{{ sucursal.nombre }}" oninput="this.value = this.value;">
+                                    <div class="input-group-append">
+                                        <div class="input-group-text"><i class="fas fa-home"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="txt_direccion">Dirección</label>
+                                <div class="input-group">
+                                    <input type="text" id="txt_direccion" class="form-control" placeholder="Dirección"
+                                        value="{{ sucursal.direccion }}" oninput="this.value = this.value;">
+                                    <div class="input-group-append">
+                                        <div class="input-group-text"><i class="fa fa-map"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="txt_ubicacion">Ubicación</label>
+                                <div class="input-group">
+                                    <input type="text" id="txt_ubicacion" class="form-control" placeholder="Ubicación" readonly
+                                        value="{{ ubicacion }}" oninput="this.value = this.value;">
+                                    <div class="input-group-append">
+                                        <div class="input-group-text"><i class="fa fa-map"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="cbx_Estado">Estado</label>
+                                <div class="input-group">
+                                    <select id="cbx_Estado" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{% endif
+                                        %}>
+                                        <option disabled>--SELECCIONAR--</option>
+                                        <option {% if sucursal.estado==1 %}selected{% endif %} value="1">Vigente</option>
+                                        <option {% if sucursal.estado==0 %}selected{% endif %} value="0">No vigente</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="info" class="mb-3">
+                                    <label for="lng">Longitud</label>
+                                    <div class="input-group">
+                                        <input id="lng" class="form-control" placeholder="Longitud" readonly
+                                            value="{{ sucursal.longitud }}">
+                                        <div class="input-group-append">
+                                            <div class="input-group-text"><i class="fa fa-map"></i></div>
+                                        </div>
+                                    </div>
+  
+                                    <label for="lat">Latitud</label>
+                                    <div class="input-group">
+                                        <input id="lat" class="form-control" placeholder="Latitud" readonly
+                                            value="{{ sucursal.latitud }}">
+                                        <div class="input-group-append">
+                                            <div class="input-group-text"><i class="fa fa-map"></i></div>
+                                    </div>
+                            </div>
+
+                                <!-- <p><strong>Latitud:</strong> <span id="lat">-</span></p>
+                                <p><strong>Longitud:</strong> <span id="lng">-</span></p> -->
+                            </div>        
+                        </div>
+                        <div class="col-md-6">
+                            <h2>Ubicación de la sucursal en el mapa</h2>
+
+                            <div id="map"></div>
+                            
+                        </div>
+                        <div class="col-md-12 mt-3">
+                            <div class="text-center">
+                                <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de
+                                    sucursales</button>
+                                <button id="{{ btnId }}" type="button" class="btn btn-primary">Aceptar</button>
                             </div>
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="txt_direccion">Dirección</label>
-                        <div class="input-group">
-                            <input type="text" id="txt_direccion" class="form-control" placeholder="Dirección"
-                                value="{{ sucursal.direccion }}" oninput="this.value = this.value.toUpperCase();">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fa fa-map"></i></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="txt_ubicacion">Ubicación</label>
-                        <div class="input-group">
-                            <input type="text" id="txt_ubicacion" class="form-control" placeholder="Ubicación" readonly
-                                value="{{ ubicacion }}" oninput="this.value = this.value.toUpperCase();">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fa fa-map"></i></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="cbx_Estado">Estado</label>
-                        <div class="input-group">
-                            <select id="cbx_Estado" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{% endif
-                                %}>
-                                <option disabled>--SELECCIONAR--</option>
-                                <option {% if sucursal.estado==1 %}selected{% endif %} value="1">Vigente</option>
-                                <option {% if sucursal.estado==0 %}selected{% endif %} value="0">No vigente</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <h2>Buscar ubicaciones</h2>
-
-                    <div id="map"></div>
-                    <div id="info">
-                        <p><strong>Latitud:</strong> <span id="lat">-</span></p>
-                        <p><strong>Longitud:</strong> <span id="lng">-</span></p>
-                    </div>
-
-                    <div class="text-center">
-                        <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de
-                            sucursales</button>
-                        <button id="{{ btnId }}" type="button" class="btn btn-primary">Aceptar</button>
-                    </div>
-
                     <input type="hidden" id="txt_departamento" name="departamento">
                     <input type="hidden" id="txt_provincia" name="provincia">
                     <input type="hidden" id="txt_distrito" name="distrito">
                     <input type="hidden" id="txt_country" name="country">
                 </div>
             </div>
+
         </div>
     </div>
 </div>
 
 <style>
     #map {
-        height: 400px;
+        height: 600px;
         width: 100%;
     }
 
@@ -157,8 +183,8 @@
         const lat = e.latlng.lat.toFixed(6);
         const lng = e.latlng.lng.toFixed(6);
 
-        document.getElementById('lat').textContent = lat;
-        document.getElementById('lng').textContent = lng;
+        document.getElementById('lat').value = lat;
+        document.getElementById('lng').value = lng;
 
         if (!marker) {
             marker = L.marker(e.latlng).addTo(map);
@@ -225,7 +251,7 @@
         const input = document.querySelector('.leaflet-control-geocoder input');
         if (input) {
             input.placeholder = "Buscar ubicación en Perú...";
-            input.style.width = '100%';
+            input.style.width = '350px';
         }
     }, 300);
 
@@ -233,8 +259,8 @@
         $("#btn_Registrar").click(function () {
             let nombre = $("#txt_nombre").val().trim();
             let direccion = $("#txt_direccion").val().trim();
-            let latitud = $("#lat").text().trim();
-            let longitud = $("#lng").text().trim();
+            let latitud = $("#lat").val().trim();
+            let longitud = $("#lng").val().trim();
             let departamento = $("#txt_departamento").val().trim();
             let provincia = $("#txt_provincia").val().trim();
             let distrito = $("#txt_distrito").val().trim();
@@ -309,6 +335,8 @@
                 }
             });
         });
+
+        
 
         $("#btn_Editar").click(function () {
             const id = Number("{{ sucursal.id }}");

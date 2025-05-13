@@ -27,7 +27,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="txt_idTipoServicio">Tipo servicio</label>
+                            <label for="idTipoServicio">Tipo servicio</label>
                             <div class="input-group">
                                 <select id="cbx_TipoServicio" name="txt_idTipoServicio" class="form-control" {% if btnId=='btn_Regresar'
                                     %}disabled{% endif %}>
@@ -35,8 +35,8 @@
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label for="txt_Estado">Estado</label>
-                            <select id="txt_Estado" name="txt_estado" class="form-control" {% if btnId == "btn_Regresar" %} disabled {% endif %}>
+                            <label for="estado">Estado</label>
+                            <select id="txt_estado" name="txt_estado" class="form-control" {% if btnId == "btn_Regresar" %} disabled {% endif %}>
                                 <option value="1" {% if servicio.estado == 1 %}selected{% endif %}>Activo</option>
                                 <option value="0" {% if servicio.estado == 0 %}selected{% endif %}>Inactivo</option>
                             </select>
@@ -63,10 +63,10 @@
                 let items = '<option disabled>--SELECCIONAR--</option>';
                 
                 $.each(response.data, function (index, item) {
-                    if (item.id === Number("{{ servicio.idTipoServicio }}")) {
-                        items += `<option selected value="${item.id}">${item.TIPO}</option>`;
+                    if (item.id === Number("{{ servicio.id_tipo_servicio }}")) {
+                        items += `<option selected value="${item.ID}">${item.TIPO}</option>`;
                     } else {
-                        items += `<option value="${item.id}">${item.TIPO}</option>`;
+                        items += `<option value="${item.ID}">${item.TIPO}</option>`;
                     }
                 });
 
@@ -80,7 +80,7 @@
     $(document).ready(function () {
         fct_GetTipoServicio()
 
-        let idservicio = "{{ servicio.idServicio }}"
+        let idservicio = "{{ servicio.id }}"
 
         $("#btn_Listado").click(()=>{
             window.location.href="/trabajadores/ventas/GestionarServicio"

@@ -64,24 +64,6 @@
   <h1>{% block tematica %}{% endblock %}</h1>
 </header>
 <main>
-  <div class="container mb-5">
-    <!-- Header section -->
-    <div class="row mb-3 border-bottom pb-2">
-        <div class="col-md-3 fw-bold">Origen</div>
-        <div class="col-md-3 fw-bold">Destino</div>
-        <div class="col-md-3 fw-bold">Fecha Ida</div>
-        <div class="col-md-3 fw-bold">Fecha Regreso</div>
-    </div>
-    <div class="row mb-4">
-        <div class="col-md-3">CAJAMARCA</div>
-        <div class="col-md-3">CHICLAYO</div>
-        <div class="col-md-3">
-            <input type="date" class="form-control" id="fechaIda" min="<?php echo date('Y-m-d'); ?>">
-        </div>
-        <div class="col-md-3">
-            <input type="date" class="form-control" id="fechaRegreso" disabled>
-        </div>
-    </div>
 
     <!-- Search form -->
     <div id="datos_viaje" class="mb-4 col-md-12">

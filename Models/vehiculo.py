@@ -16,14 +16,14 @@ class Vehiculo:
             conexion = bd.Conexion()
             listado = conexion.obtener("""
                 SELECT
-                    v.idVehiculo as id,
+                    v.id as id,
                     v.placa as placa,
                     v.anio as anio,
                     v.color as color,
                     tpve.nombre as tipoVehiculo,
                     m.nombre as marca,
                     v.estado as estado
-                FROM vehiculo v left join tipo_vehiculo tpve on v.idTipoVehiculo=tpve.idTipoVehiculo inner join marca m on tpve.idMarca=m.id;
+                FROM vehiculo v left join tipo_vehiculo tpve on v.id_tipo_vehiculo=tpve.id inner join marca m on tpve.id_marca=m.id;
             """)
             return listado
         except Exception as e:
@@ -37,7 +37,7 @@ class Vehiculo:
     def obtener_unVehiculo(cls, idVehiculo):
         try:
             conexion = bd.Conexion()
-            listado = conexion.obtener("""SELECT * FROM vehiculo WHERE idVehiculo = %s;""", (idVehiculo,))
+            listado = conexion.obtener("""SELECT * FROM vehiculo WHERE id = %s;""", (idVehiculo,))
 
             return listado[0] if listado else None
         except Exception as e:

@@ -78,7 +78,7 @@ def Menu_TipoServicio():
 
 @ventas_bp.route('/GestionarServicio')
 def Menu_Servicio():
-    return render_template('ventas/servicio.html', active_page="tipoServicio", active_menu = 'mVentas')
+    return render_template('ventas/servicio.html', active_page="servicio", active_menu = 'mVentas')
 
 @ventas_bp.route('/TipoServicioNuevo')
 def Menu_TipoServicioNuevo():
@@ -503,7 +503,6 @@ def editar_servicio(idServicio):
 
             mensajes = Servicio.actualizarServicio(idServicio, nombre, descripcion, idTipoServicio, estado)
 
-            mensajes = Servicio.darBajaServicio(idServicio)
             if mensajes and isinstance(mensajes, list) and len(mensajes) > 0:
                 msj1 = mensajes[0].get('MSJ')
                 msj2 = mensajes[0].get('MSJ2')
@@ -515,7 +514,7 @@ def editar_servicio(idServicio):
             elif msj2:
                 return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
             else:
-                return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja servicio'})
+                return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar el servicio'})
 
         except Exception as e:
             return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
@@ -659,5 +658,19 @@ def eliminar_tipo_documento(id):
         return jsonify({"Status": "Error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
 # END REGION TIPO DOCUMENTO #
+
+# REGION CLIENTE
+# END REGION CLIENTE 
+
+# REGION ASIENTO 
+@ventas_bp.route('/ClienteNuevo')
+def cliente_nuevo():
+    return render_template(
+        'ventas/clienteCRUD.html',
+        tittle='Registrar cliente'
+    )
+
+# END REGION ASIENTO
+
 
 # END FUNCIONES
