@@ -3,6 +3,12 @@
 {% block title %}YATRAX - Gestión de usuarios{% endblock %}
 
 {% block content %}
+<div class="card d-none" id="efec-cargando">
+    <div id="d-none"
+        class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center overlay dark d-none">
+        <i class="fas fa-3x fa-sync-alt fa-spin text-white"></i>
+    </div>
+</div>
 <div class="container-fluid p-4">
     <div class="panel-heading">
         <div class="row">
@@ -192,8 +198,8 @@
                 { data: "nombre", name: "nombre" },
                 { data: "email", name: "email" },
                 { data: "tipousuario", name: "tipousuario" },
-                { 
-                    data: "estado", 
+                {
+                    data: "estado",
                     name: "estado",
                     render: function (data, type, row) {
                         let estado = data === 1 ? 'Vigente' : 'No vigente';
@@ -350,6 +356,14 @@
                 });
             }
         });
+    }
+
+    function ShowSpinner() {
+        $('#efec-cargando').removeClass('d-none');
+    }
+
+    function HideSpinner() {
+        $('#efec-cargando').addClass('d-none');
     }
 
     function newexportaction(e, dt, button, config) {
