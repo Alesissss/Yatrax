@@ -2543,6 +2543,7 @@ INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (31, 1);
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (32, 1);
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (33, 1);
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (34, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (35, 1);
 -- Submenús de "VIAJES"
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (40, 1);
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (41, 1);
@@ -2552,6 +2553,7 @@ INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (44, 1);
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (45, 1);
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (46, 1);
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (47, 1);
+INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (48, 1);
 -- Submenús de "PERSONAL"
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (50, 1);
 INSERT INTO conf_dmenus (idMenu, idTipoUsuario) VALUES (51, 1);
