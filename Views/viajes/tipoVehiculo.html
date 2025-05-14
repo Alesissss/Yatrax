@@ -16,7 +16,6 @@ endblock %} {% block content %}
             <tr>
               <th class="text-center">ID</th>
               <th class="text-center">NOMBRE</th>
-              <th class="text-center">CAPACIDAD</th>
               <th class="text-center">MARCA</th>
               <th class="text-center">CANTIDAD</th>
               <th class="text-center">ESTADO</th>
@@ -202,7 +201,6 @@ endblock %} {% block content %}
       columns: [
         { data: "id", name: "id" },
         { data: "nombre", name: "nombre" },
-        { data: "capacidad", name: "capacidad" },
         { data: "marca", name: "Marca" },
         { data: "cantidad", name: "cantidad" },
         { 
@@ -225,7 +223,6 @@ endblock %} {% block content %}
           render: function (data, type, row) {
             return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_AgregarNivel('${data.id}')" title="Registrar nivel">Agregar nivel</button>
                             <button class="btn btn-xs m-1 btn-info" onclick="fct_VerTipoVehiculo('${data.id}')" title="Ver tipo vehiculo"><i class="bi bi-eye"></i></button>
                             <button class="btn btn-xs m-1 btn-primary" onclick="fct_tipoVehiculoEditar('${data.id}')" title="Editar tipo vehiculo"><i class="bi bi-pencil-square"></i></button>
                             <button class="btn btn-xs m-1 btn-warning" onclick="fct_tipoVehiculoDarBaja('${data.id}')" title="Dar de baja tipo vehiculo"><i class="bi bi-arrow-down-circle"></i></button>
@@ -242,11 +239,11 @@ endblock %} {% block content %}
           className: "text-center align-middle",
         },
         {
-          targets: [1, 2, 3, 4, 5, 6],
+          targets: [1, 2, 3, 4],
           className: "align-middle",
         },
         {
-          targets: [6],
+          targets: [5],
           orderable: false,
           width: "15%",
         },
@@ -381,53 +378,7 @@ endblock %} {% block content %}
       }
     });
   }
-
-  function generarModalNivel() {
-    // Elimina modal previo si existe
-    const prev = document.getElementById('modalNivel');
-    if (prev) prev.remove();
-
-    const html = `
-      <div class="modal fade" id="modalNivel" tabindex="-1" aria-labelledby="modalNivelLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-              <h5 class="modal-title" id="modalNivelLabel"></h5>
-            </div>
-            <div class="modal-body">
-              <form id="formNivel">
-                <div class="mb-3">
-                  <label for="txt_nroPiso">Número de piso</label>
-                  <input type="number" name="txt_nroPiso" id="txt_nroPiso" class="form-control" placeholder="Número de piso">
-                </div>
-                <div class="mb-3">
-                  <label for="cbx_TipoVehiculo">Tipo de vehículo</label>
-                  <select id="cbx_TipoVehiculo" name="txt_tipoVehiculo" class="form-control"></select>
-                </div>
-                <div class="mb-3">
-                  <label for="txt_cantidad">Cantidad</label>
-                  <input type="number" name="txt_cantidad" id="txt_cantidad" class="form-control" placeholder="Cantidad de espacios">
-                </div>
-                <div class="mb-3">
-                  <label for="txt_estado">Estado</label>
-                  <select id="txt_estado" name="txt_estado" class="form-control">
-                    <option value="1">Activo</option>
-                    <option value="0">Inactivo</option>
-                  </select>
-                </div>
-                <div class="text-center">
-                  <button id="btn_Listado" type="button" class="btn btn-danger" data-bs-dismiss="modal">Volver al listado de niveles</button>
-                  <button id="btn_Action" type="submit" class="btn btn-primary">Aceptar</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>`;
-
-    document.body.insertAdjacentHTML('beforeend', html);
-  }
-
+  
   // Carga opciones de vehículo
   function fct_GetTipoVehiculo(selected) {
     $.getJSON('/trabajadores/viajes/GetData_TipoVehiculo', function (response) {
@@ -441,52 +392,6 @@ endblock %} {% block content %}
       }
     });
   }
-
-  // Función principal: crear y mostrar modal
-  function fct_AgregarNivel() {
-    // Siempre modo registrar
-    generarModalNivel();
-
-    // Configurar título y botón
-    document.getElementById('modalNivelLabel').textContent = 'Registrar Nivel';
-    const btnAction = document.getElementById('btn_Action');
-    btnAction.textContent = 'Registrar';
-
-    // Limpiar formulario y opciones
-    const form = document.getElementById('formNivel');
-    form.reset();
-    fct_GetTipoVehiculo(null);
-
-    // Mostrar modal
-    const modal = new bootstrap.Modal(document.getElementById('modalNivel'));
-    modal.show();
-
-    // Eventos
-    document.getElementById('btn_Listado').onclick = () => window.location.href = '/trabajadores/viajes/GestionarNivel';
-
-    form.onsubmit = function (e) {
-      e.preventDefault();
-      $.ajax({
-        url: '/trabajadores/viajes/registrarNivel',
-        type: 'POST',
-        data: $(this).serialize(),
-        success: function (response) {
-          if (response.Status === 'success') {
-            toastr.success(response.Msj || 'Nivel registrado correctamente', 'Éxito');
-            setTimeout(() => window.location.reload(), 1000);
-          } else {
-            toastr.error(response.Msj || 'Ocurrió un error al registrar', 'Error');
-          }
-        },
-        error: function (xhr) {
-          const msg = xhr.responseJSON ? xhr.responseJSON.Msj : 'Error desconocido';
-          toastr.error(msg, 'Error');
-        }
-      });
-    };
-  }
-
-
 
   function newexportaction(e, dt, button, config) {
     // Guardar el contenido original del botón

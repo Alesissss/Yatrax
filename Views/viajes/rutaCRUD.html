@@ -5,62 +5,119 @@
 {% block content %}
 <div class="container-fluid">
     <div class="row justify-content-center">
-        <div class="col-md-6">
+        <div class="col-md-12">
             <div class="card">
                 <div class="card-header bg-primary text-white">
                     <h4 class="text-center mb-0">{{ tittle }}</h4>
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label for="txt_Ruta">Nombre</label>
-                            <div class="input-group">
-                                <input type="text" id="txt_Ruta" class="form-control" placeholder="Nombre"
-                                    value="{{ ruta.nombre }}" oninput="this.value = this.value.toUpperCase();" {% if
-                                    btnId=='btn_Aceptar' %}disabled{% endif %}>
+                        <div class="col-md-6">
+                            <h2>Datos de la ruta</h2>
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label for="txt_Ruta">Nombre</label>
+                                    <div class="input-group">
+                                        <input type="text" id="txt_Ruta" class="form-control" placeholder="Nombre"
+                                            value="{{ ruta.nombre }}" oninput="this.value = this.value.toUpperCase();"
+                                            {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 mb-3">
+                                    <label for="cbx_Origen">Sucursal origen</label>
+                                    <div class="input-group">
+                                        <select id="cbx_Origen" class="form-control" {% if btnId=='btn_Aceptar'
+                                            %}disabled{% endif %}>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 mb-3">
+                                    <label for="cbx_Destino">Sucursal destino</label>
+                                    <div class="input-group">
+                                        <select id="cbx_Destino" class="form-control" {% if btnId=='btn_Aceptar'
+                                            %}disabled{% endif %}>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 mb-3">
+                                    <label for="cbx_Estado">Estado</label>
+                                    <div class="input-group">
+                                        <select id="cbx_Estado" class="form-control" {% if btnId=='btn_Aceptar'
+                                            %}disabled{% endif %}>
+                                            <option disabled>--SELECCIONAR--</option>
+                                            <option {% if ruta.estado==1 %}selected{% endif %} value="1">Vigente
+                                            </option>
+                                            <option {% if ruta.estado==0 %}selected{% endif %} value="0">No vigente
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-12 mb-3">
-                            <label for="cbx_Origen">Sucursal origen</label>
-                            <div class="input-group">
-                                <select id="cbx_Origen" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{%
-                                    endif %}>
-                                </select>
-                            </div>
+                        <div class="col-md-6">
+                            <h2>Ubicación de la ruta en el mapa</h2>
+                            <div id="map"></div>
                         </div>
-                        <div class="col-md-12 mb-3">
-                            <label for="cbx_Destino">Sucursal destino</label>
-                            <div class="input-group">
-                                <select id="cbx_Destino" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{%
-                                    endif %}>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <label for="cbx_Estado">Estado</label>
-                            <div class="input-group">
-                                <select id="cbx_Estado" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{%
-                                    endif %}>
-                                    <option disabled>--SELECCIONAR--</option>
-                                    <option {% if ruta.estado==1 %}selected{% endif %} value="1">Vigente</option>
-                                    <option {% if ruta.estado==0 %}selected{% endif %} value="0">No vigente</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-12 text-center">
+                        <div class="col-md-12 text-center mt-3">
                             <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de
                                 rutas</button>
                             <button id="{{ btnId }}" type="button" class="btn btn-primary">Aceptar</button>
                         </div>
                     </div>
+                    <input type="hidden" id="txt_departamento" name="departamento">
+                    <input type="hidden" id="txt_provincia" name="provincia">
+                    <input type="hidden" id="txt_distrito" name="distrito">
+                    <input type="hidden" id="txt_country" name="country">
                 </div>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
+{% block styles %}
+<style>
+    #map {
+        height: 600px;
+        width: 100%;
+    }
+
+    .leaflet-control-geocoder {
+        display: block !important;
+        width: 100% !important;
+    }
+
+    .leaflet-control-geocoder .leaflet-control-geocoder-form {
+        display: block !important;
+        width: 100% !important;
+        align-content: center !important;
+    }
+
+    .leaflet-control-geocoder .leaflet-control-geocoder-icon {
+        display: none !important;
+        /* Oculta el ícono de la lupa */
+    }
+
+    #map>div.leaflet-control-container>div.leaflet-top.leaflet-right>div {
+        align-content: center;
+    }
+</style>
+{% endblock %}
 {% block scripts %}
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 <script>
+    // Configuración del mapa
+    const map = L.map('map').setView([-9.19, -75.0152], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        minZoom: 6,
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Variable para el marcador de nueva ubicación
+    let marker;
+
     function fct_GetSucursales() {
         $.getJSON('/trabajadores/viajes/GetSucursales', function (response) {
             if (response.Status === 'success') {
@@ -132,7 +189,7 @@
                 return;
             }
 
-            if (idOrigen === idDestino){
+            if (idOrigen === idDestino) {
                 toastr.warning("La sucursal de origen no puede ser la misma que la de destino", "MENSAJE DE SISTEMA");
                 return;
             }
@@ -200,7 +257,7 @@
                 return;
             }
 
-            if (idOrigen === idDestino){
+            if (idOrigen === idDestino) {
                 toastr.warning("La sucursal de origen no puede ser la misma que la de destino", "MENSAJE DE SISTEMA");
                 return;
             }

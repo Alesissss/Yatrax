@@ -17,12 +17,10 @@ class TipoVehiculo:
                 SELECT 
                     tv.id AS id,
                     tv.nombre AS nombre,
-                    COALESCE(SUM(CASE WHEN n.estado = 1 THEN n.cantidad ELSE 0 END), 0) AS capacidad,
                     m.nombre AS marca,
                     tv.cantidad,
                     tv.estado
                 FROM tipo_vehiculo tv
-                LEFT JOIN nivel n ON tv.id = n.id_tipo_vehiculo
                 LEFT JOIN marca m ON tv.id_marca = m.id
                 GROUP BY 
                     tv.id, 
@@ -76,8 +74,8 @@ class TipoVehiculo:
         conexion = None
         try:
             conexion = bd.Conexion()
-            conexion.ejecutar("CALL SP_ACTUALIZAR_TIPOVEHICULO(%s,%s,%s,%s,%s,@mensaje, @error)",(id,nombre,marca,estado,cantidad))
-            resultado = conexion.obtener("SELECT @mensaje AS MSJ, @error AS MSJ2;")
+            conexion.ejecutar("CALL SP_ACTUALIZAR_TIPOVEHICULO(%s,%s,%s,%s,%s,@MSJ,@MSJ2)",(id,nombre,marca,estado,cantidad))
+            resultado = conexion.obtener("SELECT @MSJ AS MSJ, @MSJ2 AS MSJ2;")
             return resultado[0]
         finally:
             if conexion:

@@ -3,6 +3,11 @@
 {% block title %}YATRAX - {{ tittle }}{% endblock %}
 
 {% block content %}
+<div class="card d-none" id="efec-cargando">
+    <div class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center overlay dark">
+        <i class="fas fa-3x fa-sync-alt fa-spin text-white"></i>
+    </div>
+</div>
 <div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-md-12">
@@ -37,8 +42,8 @@
                             <div class="mb-3">
                                 <label for="txt_ubicacion">Ubicación</label>
                                 <div class="input-group">
-                                    <input type="text" id="txt_ubicacion" class="form-control" placeholder="Ubicación" readonly
-                                        value="{{ ubicacion }}" oninput="this.value = this.value;">
+                                    <input type="text" id="txt_ubicacion" class="form-control" placeholder="Ubicación"
+                                        readonly value="{{ ubicacion }}" oninput="this.value = this.value;">
                                     <div class="input-group-append">
                                         <div class="input-group-text"><i class="fa fa-map"></i></div>
                                     </div>
@@ -47,16 +52,18 @@
                             <div class="mb-3">
                                 <label for="cbx_Estado">Estado</label>
                                 <div class="input-group">
-                                    <select id="cbx_Estado" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{% endif
-                                        %}>
+                                    <select id="cbx_Estado" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{%
+                                        endif %}>
                                         <option disabled>--SELECCIONAR--</option>
-                                        <option {% if sucursal.estado==1 %}selected{% endif %} value="1">Vigente</option>
-                                        <option {% if sucursal.estado==0 %}selected{% endif %} value="0">No vigente</option>
+                                        <option {% if sucursal.estado==1 %}selected{% endif %} value="1">Vigente
+                                        </option>
+                                        <option {% if sucursal.estado==0 %}selected{% endif %} value="0">No vigente
+                                        </option>
                                     </select>
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label for="txt_abreviatura">Abreviatura</label> 
+                                <label for="txt_abreviatura">Abreviatura</label>
                                 <div class="input-group">
                                     <input type="text" id="txt_abreviatura" class="form-control" readonly
                                         value="{{ sucursal.abreviatura }}" oninput="this.value = this.value;">
@@ -66,33 +73,33 @@
                                 </div>
                             </div>
                             <div id="info" class="mb-3">
-                                    <label for="lng">Longitud</label>
-                                    <div class="input-group">
-                                        <input id="lng" class="form-control" placeholder="Longitud" readonly
-                                            value="{{ sucursal.longitud }}">
-                                        <div class="input-group-append">
-                                            <div class="input-group-text"><i class="fa fa-map"></i></div>
-                                        </div>
+                                <label for="lng">Longitud</label>
+                                <div class="input-group">
+                                    <input id="lng" class="form-control" placeholder="Longitud" readonly
+                                        value="{{ sucursal.longitud }}">
+                                    <div class="input-group-append">
+                                        <div class="input-group-text"><i class="fa fa-map"></i></div>
                                     </div>
-  
-                                    <label for="lat">Latitud</label>
-                                    <div class="input-group">
-                                        <input id="lat" class="form-control" placeholder="Latitud" readonly
-                                            value="{{ sucursal.latitud }}">
-                                        <div class="input-group-append">
-                                            <div class="input-group-text"><i class="fa fa-map"></i></div>
+                                </div>
+
+                                <label for="lat">Latitud</label>
+                                <div class="input-group">
+                                    <input id="lat" class="form-control" placeholder="Latitud" readonly
+                                        value="{{ sucursal.latitud }}">
+                                    <div class="input-group-append">
+                                        <div class="input-group-text"><i class="fa fa-map"></i></div>
                                     </div>
-                            </div>
+                                </div>
 
                                 <!-- <p><strong>Latitud:</strong> <span id="lat">-</span></p>
                                 <p><strong>Longitud:</strong> <span id="lng">-</span></p> -->
-                            </div>        
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <h2>Ubicación de la sucursal en el mapa</h2>
 
                             <div id="map"></div>
-                            
+
                         </div>
                         <div class="col-md-12 mt-3">
                             <div class="text-center">
@@ -153,6 +160,14 @@
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
 <script>
+    function ShowSpinner() {
+        $('#efec-cargando').removeClass('d-none');
+    }
+
+    function HideSpinner() {
+        $('#efec-cargando').addClass('d-none');
+    }
+
     // Configuración del mapa
     const map = L.map('map').setView([-9.19, -75.0152], 6);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -175,7 +190,7 @@
                             <b>${sucursal.nombre}</b><br>
                             <small>${sucursal.direccion || 'Sin dirección'}</small>
                         `;
-                        
+
                         L.marker([sucursal.latitud, sucursal.longitud])
                             .addTo(map)
                             .bindPopup(popupContent);
@@ -189,7 +204,8 @@
     map.whenReady(cargarSucursales);
 
     // Manejo de clics en el mapa
-    map.on('click', async function(e) {
+    map.on('click', async function (e) {
+        ShowSpinner();
         const lat = e.latlng.lat.toFixed(6);
         const lng = e.latlng.lng.toFixed(6);
 
@@ -206,15 +222,15 @@
             const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`, {
                 headers: { 'User-Agent': 'Mozilla/5.0' }
             });
-            
+
             if (response.ok) {
                 const data = await response.json();
                 const address = data.address || {};
-                
+
                 // Obtener los componentes de la dirección
                 const departamento = address.state || '';
                 const provincia = address.region || '';
-                const distrito = address.village || address.town || address.suburb || address.city || address.hamlet ||'';
+                const distrito = address.village || address.town || address.suburb || address.city || address.hamlet || '';
                 const direccionCompleta = data.display_name || 'Dirección no disponible';
                 const country = address.country || '';
 
@@ -230,22 +246,40 @@
 
                 // Buscar abreviatura solo si hay provincia
                 if (provincia) {
-                    try {
-                        const abreviaturaResponse = await $.ajax({
-                            url: "/trabajadores/viajes/BuscarAbreviatura",
-                            type: "POST",
-                            contentType: "application/json",
-                            data: JSON.stringify({ "provincia": provincia }),
-                            dataType: "json"
-                        });
-
-                        if (abreviaturaResponse.Status === "success") {
-                            document.getElementById("txt_abreviatura").value = abreviaturaResponse.data;
+                    ShowSpinner();
+                    $.ajax({
+                        url: "/trabajadores/viajes/BuscarAbreviatura",
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify({
+                            provincia: provincia,
+                        }),
+                        success: function (response) {
+                            if (response.Status === "success") {
+                                if (response.data.abreviatura === null || response.data.abreviatura === '') {
+                                    toastr.warning('No se encontró la abreviatura', 'MENSAJE DE SISTEMA');
+                                    $('#txt_abreviatura').val('');
+                                    HideSpinner();
+                                    return;
+                                }
+                                $('#txt_abreviatura').val(response.data.abreviatura);
+                                toastr.success('Abreviatura encontrada exitosamente', "MENSAJE DE SISTEMA");
+                            } else {
+                                toastr.warning('Error al consultar abreviatura', "MENSAJE DE SISTEMA");
+                            }
+                            HideSpinner();
+                        },
+                        error: function (xhr, Status, error) {
+                            HideSpinner();
+                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                            console.error('Error:' + error);
                         }
-                    } catch (ajaxError) {
-                        toastr.error("Error al consultar abreviatura", "MENSAJE DE SISTEMA");
-                    }
-                }                
+                    });
+                } else {
+                    toastr.warning('No se encontró la abreviatura PROVINCIA', 'MENSAJE DE SISTEMA');
+                    $('#txt_abreviatura').val('');
+                    HideSpinner();
+                }
             }
         } catch (error) {
             console.error("Error al obtener ubicación:", error);
@@ -261,16 +295,16 @@
         geocoder: L.Control.Geocoder.nominatim({
             geocodingQueryParams: { countrycodes: 'pe' }
         })
-    }).on('markgeocode', function(e) {
+    }).on('markgeocode', function (e) {
         const latlng = e.geocode.center;
         map.setView(latlng, 16);
-        
+
         if (!marker) {
             marker = L.marker(latlng).addTo(map);
         } else {
             marker.setLatLng(latlng);
         }
-        
+
         document.getElementById('lat').textContent = latlng.lat.toFixed(6);
         document.getElementById('lng').textContent = latlng.lng.toFixed(6);
     }).addTo(map);
@@ -335,6 +369,8 @@
                     formData.append("txt_distrito", distrito);
                     formData.append("txt_abreviatura", abreviatura);
 
+                    formData.append("txt_ciudad", provincia);
+
                     $.ajax({
                         url: "/trabajadores/viajes/RegistrarSucursal",
                         type: "POST",
@@ -345,7 +381,7 @@
                             if (response.Status === "success") {
                                 if (response.Msj2 !== '' && response.Msj2 !== null) {
                                     toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                                    actualizarMapa();
+                                    // actualizarMapa();
                                     return;
                                 } else {
                                     toastr.success(response.Msj, "MENSAJE DE SISTEMA");
@@ -367,15 +403,13 @@
             });
         });
 
-        
-
         $("#btn_Editar").click(function () {
             const id = Number("{{ sucursal.id }}");
 
             let nombre = $("#txt_nombre").val().trim();
             let direccion = $("#txt_direccion").val().trim();
-            let latitud = $("#lat").text().trim();
-            let longitud = $("#lng").text().trim();
+            let latitud = $("#lat").val().trim();
+            let longitud = $("#lng").val().trim();
             let departamento = $("#txt_departamento").val().trim();
             let provincia = $("#txt_provincia").val().trim();
             let distrito = $("#txt_distrito").val().trim();
@@ -417,6 +451,8 @@
                     formData.append("estado", estado);
                     formData.append("txt_abreviatura", abreviatura);
 
+                    formData.append("txt_ciudad", provincia);
+
                     $.ajax({
                         url: `/trabajadores/viajes/EditarSucursal/${id}`,
                         type: "POST",
@@ -427,7 +463,7 @@
                             if (response.Status === "success") {
                                 if (response.Msj2 !== '' && response.Msj2 !== null) {
                                     toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                                    actualizarMapa();
+                                    // actualizarMapa();
                                     return;
                                 } else {
                                     toastr.success(response.Msj, "MENSAJE DE SISTEMA");

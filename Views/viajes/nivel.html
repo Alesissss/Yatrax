@@ -19,8 +19,8 @@
                         <tr>
                             <th class="text-center">ID</th>
                             <th class="text-center">NRO PISO</th>
-                            <th class="text-center">TIPO VEHICULO</th>
-                            <th class="text-center">CANTIDAD</th>
+                            <th class="text-center">PLACA VEHICULO</th>
+                            <th class="text-center">CANTIDAD ASIENTOS</th>
                             <th class="text-center">ESTADO</th>
                             <th class="text-center">ACCIÓN</th>
                         </tr>
@@ -190,13 +190,22 @@
             columns: [
                 { data: "id", name: "id" },
                 { data: "nroPiso", name: "Nro Piso" },
-                { data: "tipo_vehiculo", name: "Tipo Vehiculo" },
+                { data: "placa", name: "Placa" },
                 { data: "cantidad", name: "Cantidad" },
                 { 
                     data: "estado", 
                     name: "estado",
-                    render: function(data, type, row) {
-                        return data === 1 ? 'Activo' : 'No activo'; 
+                    data: "estado", 
+                    name: "estado",
+                    render: function (data, type, row) {
+                        let estado = data === 1 ? 'Activo' : 'No activo';
+                        if (estado === "Activo") {
+                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-success fs-5">${estado}</span></h5>`;
+                        } else if (estado === "No activo") {
+                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-danger fs-5">${estado}</span></h5>`;
+                        } else {
+                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge fs-5" style="background-color: #800080; color: white;">${estado}</span></h5>`;
+                        }
                     },
                 },
                 {
