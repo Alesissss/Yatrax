@@ -365,14 +365,6 @@ CREATE TABLE conf_plantillas (
     usuario VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE nivel(
-    id int AUTO_INCREMENT primary key,
-    nroPiso int not null,
-    id_tipo_vehiculo int not null,
-    cantidad int not null,
-    estado TINYINT not null
-);
-
 CREATE TABLE marca (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
@@ -404,6 +396,15 @@ CREATE TABLE vehiculo (
     REFERENCES tipo_vehiculo(id)
         ON DELETE CASCADE
         ON UPDATE CASCADE
+);
+
+CREATE TABLE nivel(
+    id int AUTO_INCREMENT primary key,
+    nroPiso int not null,
+    id_vehiculo int not null,
+    cantidad int not null,
+    estado TINYINT not null,
+    foreign key (id_vehiculo) references vehiculo(id)
 );
 
 -- Crear tabla metodo_pago
@@ -4012,8 +4013,8 @@ DELIMITER ;
 DELIMITER $$
 
 CREATE PROCEDURE SP_INSERTAR_NIVEL(
-    IN p_tipo_vehiculo INT,
-    IN p_cantidad       INT
+    IN p_vehiculo INT,
+    IN p_cantidad INT
 )
 BEGIN
     DECLARE nuevo_nroPiso INT;
@@ -4031,10 +4032,10 @@ BEGIN
         SELECT COUNT(*) + 1
           INTO nuevo_nroPiso
         FROM nivel
-        WHERE id_tipo_vehiculo = p_tipo_vehiculo;
+        WHERE id_vehiculo = p_vehiculo;
 
-        INSERT INTO nivel (nroPiso, id_tipo_vehiculo, cantidad, estado)
-        VALUES (nuevo_nroPiso, p_tipo_vehiculo, p_cantidad, 1);
+        INSERT INTO nivel (nroPiso, id_vehiculo, cantidad, estado)
+        VALUES (nuevo_nroPiso, p_vehiculo, p_cantidad, 1);
 
         SET @MSJ = CONCAT(
             'Nivel insertado correctamente con nroPiso ',
@@ -4048,7 +4049,7 @@ END$$
 CREATE PROCEDURE SP_ACTUALIZAR_NIVEL(
   IN p_idNivel        INT,
   IN p_nroPiso        INT,
-  IN p_tipo_vehiculo  INT,
+  IN p_vehiculo       INT,
   IN p_cantidad       INT,
   IN p_estado         TINYINT
 )
@@ -4067,13 +4068,13 @@ BEGIN
   ELSE
     SELECT COALESCE(MAX(nroPiso), 0) INTO max_piso
       FROM nivel
-      WHERE id_tipo_vehiculo = p_tipo_vehiculo;
+      WHERE id_vehiculo = p_vehiculo;
     IF p_nroPiso > max_piso + 1 THEN
       SET @MSJ2 = 'No puede actualizar a un piso mayor que el siguiente consecutivo';
     ELSE
       UPDATE nivel
         SET nroPiso         = p_nroPiso,
-            id_tipo_vehiculo = p_tipo_vehiculo,
+            id_vehiculo = p_vehiculo,
             cantidad        = p_cantidad,
             estado          = p_estado
       WHERE id = p_idNivel;
@@ -4112,7 +4113,7 @@ CREATE PROCEDURE SP_ELIMINAR_NIVEL(
 )
 BEGIN
     DECLARE piso_actual         INT;
-    DECLARE tipo_vehiculo_act   INT;
+    DECLARE vehiculo_act   INT;
     DECLARE max_piso            INT;
 
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -4124,15 +4125,15 @@ BEGIN
     SET @MSJ  = NULL;
     SET @MSJ2 = NULL;
 
-    SELECT nroPiso, id_tipo_vehiculo
-      INTO piso_actual, tipo_vehiculo_act
+    SELECT nroPiso, id_vehiculo
+      INTO piso_actual, vehiculo_act
     FROM nivel
     WHERE id = p_idNivel;
 
     SELECT MAX(nroPiso)
       INTO max_piso
     FROM nivel
-    WHERE id_tipo_vehiculo = tipo_vehiculo_act;
+    WHERE id_vehiculo = vehiculo_act;
 
     IF piso_actual < max_piso THEN
         SET @MSJ2 = 'Solo se puede eliminar el piso más alto para evitar inconsistencias';

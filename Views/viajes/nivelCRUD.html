@@ -17,16 +17,12 @@
                             <input type="number" name="txt_nroPiso" id="txt_nroPiso" class="form-control"
                                 placeholder="Número de piso"
                                 value="{{ nivel.nroPiso }}"
-                                {% if btnId == "btn_Regresar" %} disabled {% endif %}>
+                                readonly>
                         </div>
                         <div class="mb-3">
-                            <label for="txt_tipoVehiculo">Tipo de vehículo</label>
-                            <!-- <input type="text" name="txt_tipoVehiculo" id="txt_tipoVehiculo" class="form-control"
-                                placeholder="Tipo de vehículo"
-                                value="{{ nivel.tipo_vehiculo}}"
-                                {% if btnId == "btn_Regresar" %} disabled {% endif %}> -->
+                            <label for="txt_vehiculo">Vehículo</label>
                             <div class="input-group">
-                                <select id="cbx_TipoVehiculo" name="txt_tipoVehiculo" class="form-control" {% if btnId=='btn_Regresar'
+                                <select id="cbx_TipoVehiculo" name="txt_vehiculo" class="form-control" {% if btnId=='btn_Regresar'
                                         %}disabled{% endif %}>
                                 </select>
                             </div>
@@ -62,16 +58,16 @@
 
 {% block scripts %}
 <script>
-    function fct_GetTipoVehiculo() {
-        $.getJSON('/trabajadores/viajes/GetData_TipoVehiculo', function (response) {
+    function fct_Vehiculos() {
+        $.getJSON('/trabajadores/viajes/GetData_Vehiculo', function (response) {
             if (response.Status === 'success') {
                 let items = '<option disabled>--SELECCIONAR--</option>';
 
                 $.each(response.data, function (index, item) {
-                    if (item.id === Number("{{ nivel.id_tipo_vehiculo }}")) {
-                        items += `<option selected value="${item.id}">${item.nombre}</option>`;
+                    if (item.id === Number("{{ nivel.id_vehiculo }}")) {
+                        items += `<option selected value="${item.id}">${item.placa}</option>`;
                     } else {
-                        items += `<option value="${item.id}">${item.nombre}</option>`;
+                        items += `<option value="${item.id}">${item.placa}</option>`;
                     }
                 });
 
@@ -84,10 +80,10 @@
 
     $(document).ready(function () {
 
-        fct_GetTipoVehiculo()
+        fct_Vehiculos()
 
         // ID del nivel para editar/ver
-        let idNivel = "{{ nivel.id if nivel.idNivel is not none else '' }}";
+        let idNivel = "{{ nivel.id if nivel.id is not none else '' }}";
 
         // Volver al listado
         $("#btn_Listado, #btn_Regresar").click(function(){

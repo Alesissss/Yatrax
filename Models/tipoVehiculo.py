@@ -17,12 +17,10 @@ class TipoVehiculo:
                 SELECT 
                     tv.id AS id,
                     tv.nombre AS nombre,
-                    COALESCE(SUM(CASE WHEN n.estado = 1 THEN n.cantidad ELSE 0 END), 0) AS capacidad,
                     m.nombre AS marca,
                     tv.cantidad,
                     tv.estado
                 FROM tipo_vehiculo tv
-                LEFT JOIN nivel n ON tv.id = n.id_tipo_vehiculo
                 LEFT JOIN marca m ON tv.id_marca = m.id
                 GROUP BY 
                     tv.id, 
