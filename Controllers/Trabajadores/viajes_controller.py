@@ -776,7 +776,7 @@ def buscar_abreviatura():
         resultado = Ciudad.obtener_abreviatura(provincia)
         if resultado:
             return jsonify({
-                'status': 'success',
+                'Status': 'success',
                 'data': resultado
             })
         else:
@@ -784,7 +784,7 @@ def buscar_abreviatura():
             Ciudad.registrar_abreviatura(provincia, resultado)
         return jsonify({
             "Status": "success",
-            "data": resultado,
+            "data": {'abreviatura': resultado},
         })
     except Exception as e:
         return jsonify({
