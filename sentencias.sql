@@ -301,7 +301,7 @@ CREATE TABLE cliente (
     telefono VARCHAR(13), -- Ej: +51912345678
     email VARCHAR(100) NOT NULL,
     password VARCHAR(256) NOT NULL, -- SHA-256 hash
-    estado TINYINT DEFAULT 1;
+    estado TINYINT DEFAULT 1,
     
     fechaRegistro DATETIME DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NOT NULL
