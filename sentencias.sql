@@ -283,15 +283,15 @@ CREATE TABLE cliente (
     id INT AUTO_INCREMENT PRIMARY KEY,
     
     id_pais INT NOT NULL,
-    id_tipo_doc INT NOT NULL,
     id_tipo_cliente INT NOT NULL,
+    id_tipo_doc INT NOT NULL,
     
     numero_documento VARCHAR(20) NOT NULL, -- UNIQUE,
     
     nombres VARCHAR(90),
     ape_paterno VARCHAR(50),
     ape_materno VARCHAR(50),
-    
+        
     sexo TINYINT DEFAULT 0, -- 'O' para otros/no especificado
     f_nacimiento DATE,
     
@@ -301,6 +301,7 @@ CREATE TABLE cliente (
     telefono VARCHAR(13), -- Ej: +51912345678
     email VARCHAR(100) NOT NULL,
     password VARCHAR(256) NOT NULL, -- SHA-256 hash
+    estado TINYINT DEFAULT 1;
     
     fechaRegistro DATETIME DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NOT NULL
@@ -2785,7 +2786,8 @@ CREATE PROCEDURE SP_REGISTRAR_CLIENTE_NATURAL(
     IN P_TELEFONO VARCHAR(13),
     IN P_EMAIL VARCHAR(100),
     IN P_PASSWORD VARCHAR(256),
-    IN P_USUARIO DATETIME
+    IN P_ESTADO TINYINT,
+    IN P_USUARIO VARCHAR(100)
 )
 BEGIN
     DECLARE cEmail INT;
@@ -2805,8 +2807,8 @@ BEGIN
     ELSEIF cNumeroDoc > 0 THEN
         SET @MSJ2 = 'El numero de documento que intenta registrar ya está registrado';
     ELSE
-        INSERT INTO CLIENTE (id_pais,id_tipo_doc,id_tipo_cliente,numero_documento,nombres, ape_paterno, ape_materno, sexo, f_nacimiento, direccion, telefono, email, password,usuario) 
-        VALUES (P_ID_PAIS, P_ID_TIPO_DOC, P_ID_TIPO_CLIENTE, P_NUMERO_DOCUMENTO, P_NOMBRES, P_APE_PATERNO, P_APE_MATERNO, P_SEXO, P_F_NACIMIENTO, P_DIRECCION, P_TELEFONO, P_EMAIL, P_PASSWORD, P_USUARIO);
+        INSERT INTO CLIENTE (id_pais,id_tipo_doc,id_tipo_cliente,numero_documento,nombres, ape_paterno, ape_materno, sexo, f_nacimiento, direccion, telefono, email, password,estado,usuario) 
+        VALUES (P_ID_PAIS, P_ID_TIPO_DOC, P_ID_TIPO_CLIENTE, P_NUMERO_DOCUMENTO, P_NOMBRES, P_APE_PATERNO, P_APE_MATERNO, P_SEXO, P_F_NACIMIENTO, P_DIRECCION, P_TELEFONO, P_EMAIL, P_PASSWORD,P_ESTADO,P_USUARIO);
         SET @MSJ = 'Se registró correctamente al cliente';
     END IF;
 END $$
@@ -2822,7 +2824,8 @@ CREATE PROCEDURE SP_REGISTRAR_CLIENTE_JURIDICO(
     IN P_TELEFONO VARCHAR(13),
     IN P_EMAIL VARCHAR(100),
     IN P_PASSWORD VARCHAR(256),
-    IN P_USUARIO DATETIME
+    IN P_ESTADO TINYINT,
+    IN P_USUARIO VARCHAR(100)
 )
 BEGIN
     DECLARE cEmail INT;
@@ -2843,15 +2846,15 @@ BEGIN
     ELSEIF cRazonSocial > 0 THEN
     	SET @MSJ2 = 'La razón social que intenta registrar ya está registrado';
     ELSE  
-        INSERT INTO CLIENTE (id_pais,id_tipo_doc,numero_documento, razon_social, direccion, telefono, email, password,usuario) 
-        VALUES (P_ID_PAIS, P_ID_TIPO_DOC, P_NUMERO_DOCUMENTO, P_RAZON_SOCIAL, P_DIRECCION, P_TELEFONO, P_EMAIL, P_PASSWORD, P_USUARIO);
+        INSERT INTO CLIENTE (id_pais,id_tipo_doc,numero_documento, razon_social, direccion, telefono, email, password,estado,usuario) 
+        VALUES (P_ID_PAIS, P_ID_TIPO_DOC, P_NUMERO_DOCUMENTO, P_RAZON_SOCIAL, P_DIRECCION, P_TELEFONO, P_EMAIL, P_PASSWORD, P_ESTADO,P_USUARIO);
         SET @MSJ = 'Se registró correctamente al cliente';
     END IF;
 END $$
 DELIMITER ;
 
 
--- Crear procedimiento SP_EDITAR_CLIENTE
+-- Crear procedimiento SP_EDITAR_CLIENTE_NATURAL
 DELIMITER $$
 CREATE PROCEDURE SP_EDITAR_CLIENTE_NATURAL(
     IN P_ID INT,
@@ -2868,7 +2871,7 @@ CREATE PROCEDURE SP_EDITAR_CLIENTE_NATURAL(
     IN P_TELEFONO VARCHAR(13),
     IN P_EMAIL VARCHAR(100),
     IN P_PASSWORD VARCHAR(256),
-    IN P_USUARIO DATETIME
+    IN P_ESTADO TINYINT
 )
 BEGIN
     DECLARE cCliente INT;
@@ -2883,8 +2886,8 @@ BEGIN
     SET @MSJ2 = NULL;
 
     SELECT COUNT(*) INTO cCliente FROM CLIENTE WHERE id = P_ID;
-    SELECT COUNT(*) INTO cEmail FROM CLIENTE WHERE EMAIL = P_EMAIL;
-    SELECT COUNT(*) INTO cNumeroDoc FROM CLIENTE WHERE numero_documento = P_NUMERO_DOCUMENTO;
+    SELECT COUNT(*) INTO cEmail FROM CLIENTE WHERE EMAIL = P_EMAIL AND id != P_ID;
+    SELECT COUNT(*) INTO cNumeroDoc FROM CLIENTE WHERE numero_documento = P_NUMERO_DOCUMENTO AND id != P_ID;
 
     IF cCliente <= 0 THEN
         SET @MSJ2 = 'El cliente que intenta editar no existe';
@@ -2907,10 +2910,63 @@ BEGIN
         telefono = P_TELEFONO,
         email = P_EMAIL,
         password = P_PASSWORD,
-        usuario = P_USUARIO
+        estado = P_ESTADO
         WHERE id = P_ID;
         
         SET @MSJ = 'Se modificó correctamente al usuario';
+    END IF;
+END $$
+DELIMITER ;
+-- Crear procedimiento SP_EDITAR_CLIENTE_JURIDICO
+DELIMITER $$
+CREATE PROCEDURE SP_EDITAR_CLIENTE_JURIDICO(
+    IN P_ID INT,
+    IN P_ID_PAIS INT,
+    IN P_ID_TIPO_DOC INT,
+    IN P_NUMERO_DOCUMENTO VARCHAR(20),
+    IN P_RAZON_SOCIAL VARCHAR(90),
+    IN P_DIRECCION VARCHAR(70),
+    IN P_TELEFONO VARCHAR(13),
+    IN P_EMAIL VARCHAR(100),
+    IN P_PASSWORD VARCHAR(256),
+    IN P_ESTADO TINYINT
+)
+BEGIN
+    DECLARE cCliente INT;
+    DECLARE cEmail INT;
+    DECLARE cNumeroDoc INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cCliente FROM CLIENTE WHERE id = P_ID;
+    SELECT COUNT(*) INTO cEmail FROM CLIENTE WHERE EMAIL = P_EMAIL AND id != P_ID;
+    SELECT COUNT(*) INTO cNumeroDoc FROM CLIENTE WHERE numero_documento = P_NUMERO_DOCUMENTO AND id != P_ID;
+
+    IF cCliente <= 0 THEN
+        SET @MSJ2 = 'El cliente que intenta editar no existe';
+    ELSEIF cEmail != 0 THEN
+        SET @MSJ2 = 'El correo ingresado ya existe';
+    ELSEIF cNumeroDoc != 0 THEN
+        SET @MSJ2 = 'El número de documento ingresado ya existe';
+    ELSE
+        UPDATE CLIENTE
+        SET id_pais = P_ID_PAIS,
+            id_tipo_doc = P_ID_TIPO_DOC,
+            numero_documento = P_NUMERO_DOCUMENTO,
+            razon_social = P_RAZON_SOCIAL,
+            direccion = P_DIRECCION,
+            telefono = P_TELEFONO,
+            email = P_EMAIL,
+            password = P_PASSWORD,
+            estado = P_ESTADO
+        WHERE id = P_ID;
+
+        SET @MSJ = 'Se modificó correctamente al cliente';
     END IF;
 END $$
 DELIMITER ;
@@ -2922,6 +2978,7 @@ CREATE PROCEDURE SP_DARBAJA_CLIENTE(
 )
 BEGIN
     DECLARE cCliente INT;
+    DECLARE cDeBaja INT;  
     DECLARE EXIT HANDLER FOR SQLEXCEPTION 
     BEGIN
         SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
@@ -2931,9 +2988,12 @@ BEGIN
     SET @MSJ2 = NULL;
 
     SELECT COUNT(*) INTO cCliente FROM cliente WHERE ID = P_ID;
+    SELECT COUNT(*) INTO cDeBaja FROM cliente where ID = P_ID AND estado = 0;
 
     IF cCliente <= 0 THEN
         SET @MSJ2 = 'El cliente que intenta dar de baja no existe';
+    ELSEIF cDeBaja > 0 THEN
+        SET @MSJ2 = 'El cliente ya se encuentra dado de baja';
     ELSE
         UPDATE cliente SET ESTADO = 0 WHERE ID = P_ID;
 
@@ -2962,7 +3022,7 @@ BEGIN
     IF cCliente <= 0 THEN
         SET @MSJ2 = 'El cliente que intenta eliminar no existe';
     ELSE
-        DELETE FROM horario WHERE ID = P_ID;
+        DELETE FROM CLIENTE WHERE ID = P_ID;
         SET @MSJ = 'Se eliminó correctamente al usuario';
     END IF;
 END $$

@@ -29,6 +29,7 @@
                             <th class="text-center">DIRECCIÓN</th>
                             <th class="text-center">TELÉFONO</th>
                             <th class="text-center">EMAIL</th>
+                            <th class="text-center">ESTADO</th>
 
                             <th class="text-center">ACCIÓN</th>
                         </tr>
@@ -176,46 +177,25 @@
                     },
                 },
             ],
-            data: [
-                {
-                    'id': 1,
-                    'pais': 'Peru',
-                    'tipo documento': 'dni',
-                    'numero documento': '71309189',
-                    'nombres': 'Edgar',
-                    'apellido paterno': 'Alarcon',
-                    'apellido materno': 'Chapoñan',
-                    'sexo': 'Masculino',
-                    'fecha nacimiento': '03/08/2005',
-                    'direccion': 'Nicolas de Pierola 163',
-                    'telefono': '948811527',
-                    'email': 'edgaralarconhd@gmail.com',
-                    'accion': '',
-                    'nombre': 'Edgar Alarcon',
-                    'tipocliente': 'Administrador',
-                    'estado': 1
-                }
-            ],
-
-            // ajax: {
-            //     url: "/trabajadores/viajes/GetData_Clientes",
-            //     type: "GET",
-            //     datatype: "json",
-            //     data: function (d) {
-            //     },
-            //     dataSrc: function (json) {
-            //         if (json.Status === "error") {
-            //             toastr.error('Ocurrió un error inesperado al intentar listar la tabla');
-            //             console.error(json.Msj);
-            //             return [];
-            //         }
-            //         return json.data;
-            //     },
-            //     error: function (xhr, error, thrown) {
-            //         toastr.error('Ocurrió un error inesperado al intentar listar la tabla');
-            //         console.error('Error en la solicitud Ajax: ' + error + xhr.Msj + thrown);
-            //     },
-            // },
+            ajax: {
+                url: "/trabajadores/viajes/GetData_Clientes",
+                type: "GET",
+                datatype: "json",
+                data: function (d) {
+                },
+                dataSrc: function (json) {
+                    if (json.Status === "error") {
+                        toastr.error('Ocurrió un error inesperado al intentar listar la tabla');
+                        console.error(json.Msj);
+                        return [];
+                    }
+                    return json.data;
+                },
+                error: function (xhr, error, thrown) {
+                    toastr.error('Ocurrió un error inesperado al intentar listar la tabla');
+                    console.error('Error en la solicitud Ajax: ' + error + xhr.Msj + thrown);
+                },
+            },
             columns: [
                 { data: "id", name: "id" },
                 { data: "pais", name: "pais" },
@@ -229,9 +209,23 @@
                 { data: "direccion", name: "direccion" },
                 { data: "telefono", name: "telefono" },
                 { data: "email", name: "email" },
+                { 
+                    data: "estado", 
+                    name: "estado",
+                    render: function (data, type, row) {
+                        let estado = data === 1 ? 'Vigente' : 'No vigente';
+                        if (estado === "Vigente") {
+                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-success fs-5">${estado}</span></h5>`;
+                        } else if (estado === "No vigente") {
+                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-danger fs-5">${estado}</span></h5>`;
+                        } else {
+                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge fs-5" style="background-color: #800080; color: white;">${estado}</span></h5>`;
+                        }
+                    },
+                },
                 {
-                    data: "accion",
-                    name: "accion",
+                    data: "",
+                    name: "",
                     render: function (data, type, row) {
                         return `
                 <div class="flex-wrap btn-group">
