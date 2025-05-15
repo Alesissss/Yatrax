@@ -628,12 +628,13 @@ def registrar_sucursal():
         direccion = request.form.get("txt_direccion", "").strip()
         latitud = request.form.get("txt_latitud")
         longitud = request.form.get("txt_longitud")
-        ciudad = request.form.get("txt_ciudad", "").strip()
+        ciudad = request.form.get("txt_provincia", "").strip()
         abreviatura = request.form.get("txt_abreviatura", "").strip()
+        estado = request.form.get("estado")
         usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO')
 
         # Validaciones básicas
-        if not all([nombre, latitud, longitud, ciudad, abreviatura]):
+        if not all([nombre, latitud, longitud, ciudad, abreviatura, direccion]):
             return jsonify({"Status": "error", "Msj": "Todos los campos son requeridos"})
 
         resultado = Sucursal.registrar(
@@ -642,6 +643,7 @@ def registrar_sucursal():
             direccion=direccion,
             latitud=latitud,
             longitud=longitud,
+            estado=estado,
             abreviatura=abreviatura,
             usuario_actual=usuario_actual
         )
@@ -690,10 +692,16 @@ def editar_sucursal(idSucursal):
             direccion = request.form.get("txt_direccion").strip()
             latitud = request.form.get("txt_latitud").strip()
             longitud = request.form.get("txt_longitud").strip()
-            ciudad = request.form.get("txt_ciudad").strip()
+            ciudad = request.form.get("txt_provincia").strip()
+            abreviatura = request.form.get("txt_abreviatura").strip()
+            estado = request.form.get("estado")
+            # Obtener el usuario actual desde la sesión
             usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
             
-            mensajes = Sucursal.editar(idSucursal, ciudad, direccion, nombre, latitud, longitud, usuario_actual)
+            if not all([nombre, latitud, longitud, ciudad, abreviatura, direccion]):
+                return jsonify({"Status": "error", "Msj": "Todos los campos son requeridos"})
+            
+            mensajes = Sucursal.editar(idSucursal, ciudad, direccion, nombre, latitud, longitud, estado, abreviatura, usuario_actual)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 

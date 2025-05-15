@@ -115,10 +115,9 @@ DROP TABLE IF EXISTS conf_claims;
 DROP TABLE IF EXISTS conf_menus;
 DROP TABLE IF EXISTS usuarios;
 DROP TABLE IF EXISTS tipo_usuario;
-DROP TABLE IF EXISTS vehiculo;
-DROP TABLE IF EXISTS tipo_vehiculo;
 DROP TABLE IF EXISTS sucursal;
 DROP TABLE IF EXISTS horario;
+DROP TABLE IF EXISTS asiento;
 DROP TABLE IF EXISTS tipo_cliente;
 DROP TABLE IF EXISTS ubigeo;
 DROP TABLE IF EXISTS metodo_pago;
@@ -128,12 +127,14 @@ DROP TABLE IF EXISTS servicio;
 DROP TABLE IF EXISTS tipo_servicio;
 DROP TABLE IF EXISTS tipo_comprobante;
 DROP TABLE IF EXISTS tipo_documento;
+DROP TABLE IF EXISTS nivel;
+DROP TABLE IF EXISTS vehiculo;
+DROP TABLE IF EXISTS tipo_vehiculo;
 DROP TABLE IF EXISTS marca;
 DROP TABLE IF EXISTS ruta;
-DROP TABLE IF EXISTS nivel;
 DROP TABLE IF EXISTS ciudad;
-DROP TABLE IF EXISTS asiento;
 DROP TABLE IF EXISTS cliente;
+
 
 -- Crear tabla tipo_servicio
 CREATE TABLE tipo_servicio (
@@ -252,7 +253,8 @@ CREATE TABLE horario (
 
 -- Crear tabla sucursal
 CREATE TABLE sucursal (
-    id CHAR(5) PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    cod_sucursal CHAR(5) NOT NULL,
     ciudad VARCHAR(50) NOT NULL,
     nombre VARCHAR(50) NOT NULL,
     direccion VARCHAR(255) NOT NULL,
@@ -3072,6 +3074,7 @@ CREATE PROCEDURE SP_REGISTRAR_SUCURSAL(
     IN P_DIRECCION VARCHAR(255),
     IN P_LATITUD DECIMAL(8,6),
     IN P_LONGITUD DECIMAL(9,6),
+    IN P_ESTADO TINYINT,
     IN P_ABREVIATURA CHAR(3),
     IN P_USUARIO VARCHAR(100)
 )
@@ -3105,8 +3108,8 @@ BEGIN
     IF cSucursal > 0 THEN
         SET @MSJ2 = 'La sucursal que intenta registrar ya está registrada';
     ELSE
-        INSERT INTO sucursal (id, ciudad, nombre, direccion, latitud, longitud, abreviatura, usuario) 
-        VALUES (cAUX,P_CIUDAD, P_NOMBRE, P_DIRECCION, P_LATITUD, P_LONGITUD, P_ABREVIATURA, P_USUARIO);
+        INSERT INTO sucursal (cod_sucursal, ciudad, nombre, direccion, latitud, longitud, estado, abreviatura, usuario) 
+        VALUES (cAUX,P_CIUDAD, P_NOMBRE, P_DIRECCION, P_LATITUD, P_LONGITUD,P_ESTADO, P_ABREVIATURA, P_USUARIO);
         
         SET @MSJ = 'Se registró correctamente la sucursal';
     END IF;
@@ -3122,11 +3125,15 @@ CREATE PROCEDURE SP_EDITAR_SUCURSAL(
     IN P_DIRECCION VARCHAR(255),
     IN P_LATITUD DECIMAL(8,6),
     IN P_LONGITUD DECIMAL(9,6),
+    IN P_ESTADO TINYINT,
+    IN P_ABREVIATURA CHAR(5),
     IN P_USUARIO VARCHAR(100)
 )
 BEGIN
     DECLARE cSucursal INT;
     DECLARE cNombre INT;
+    DECLARE cAbreviatura INT;
+    DECLARE cAUX CHAR(5);
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
@@ -3143,6 +3150,17 @@ BEGIN
     FROM sucursal 
     WHERE nombre = P_NOMBRE AND id != P_ID AND estado_registro = 1;
 
+    SELECT COUNT(*) INTO cAbreviatura
+    FROM sucursal 
+    WHERE abreviatura = P_ABREVIATURA AND estado_registro = 1;
+
+    IF cAbreviatura <9 THEN
+        SET cAUX = CONCAT(P_ABREVIATURA,'0', cAbreviatura+1);
+    ELSE
+        SET cAUX = CONCAT(P_ABREVIATURA,cAbreviatura+1);
+    END IF;
+
+
     IF cSucursal <= 0 THEN
         SET @MSJ2 = 'La sucursal que intenta editar no existe';
     ELSEIF cNombre > 0 THEN
@@ -3151,9 +3169,12 @@ BEGIN
         UPDATE sucursal 
         SET departamento = P_DEPARTAMENTO,
             nombre = P_NOMBRE,
+            cod_sucursal = cAUX,
             direccion = P_DIRECCION,
             latitud = P_LATITUD,
             longitud = P_LONGITUD,
+            estado = P_ESTADO,
+            abreviatura = P_ABREVIATURA,
             usuario = P_USUARIO,
             estado_proceso = 'MODIFICADO'
         WHERE id = P_ID AND estado_registro = 1;
