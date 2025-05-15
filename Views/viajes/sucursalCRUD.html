@@ -367,9 +367,8 @@
                     formData.append("txt_departamento", departamento);
                     formData.append("txt_provincia", provincia);
                     formData.append("txt_distrito", distrito);
+                    formData.append("estado", estado);
                     formData.append("txt_abreviatura", abreviatura);
-
-                    formData.append("txt_ciudad", provincia);
 
                     $.ajax({
                         url: "/trabajadores/viajes/RegistrarSucursal",
@@ -450,8 +449,6 @@
                     formData.append("txt_distrito", distrito);
                     formData.append("estado", estado);
                     formData.append("txt_abreviatura", abreviatura);
-
-                    formData.append("txt_ciudad", provincia);
 
                     $.ajax({
                         url: `/trabajadores/viajes/EditarSucursal/${id}`,

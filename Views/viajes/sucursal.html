@@ -18,6 +18,7 @@
                     <thead class="bg-gray">
                         <tr>
                             <th class="text-center">ID</th>
+                            <th class="text-center">CÓDIGO SUCURSAL</th>
                             <th class="text-center">NOMBRE</th>
                             <th class="text-center">CIUDAD</th>
                             <th class="text-center">DIRECCIÓN</th>
@@ -189,6 +190,7 @@
             },
             columns: [
                 { data: "id", name: "id" },
+                { data: "cod_sucursal", name: "cod_sucursal" },
                 { data: "nombre", name: "nombre" },
                 { data: "ciudad", name: "ciudad" },
                 { data: "direccion", name: "direccion" },
@@ -228,11 +230,11 @@
                     className: "text-center align-middle",
                 },
                 {
-                    targets: [1, 2, 3, 4, 5],
+                    targets: [1, 2, 3, 4, 5, 6],
                     className: 'align-middle',
                 },
                 {
-                    targets: [5],
+                    targets: [6],
                     orderable: false,
                     width: '10%',
                 },

@@ -115,10 +115,9 @@ DROP TABLE IF EXISTS conf_claims;
 DROP TABLE IF EXISTS conf_menus;
 DROP TABLE IF EXISTS usuarios;
 DROP TABLE IF EXISTS tipo_usuario;
-DROP TABLE IF EXISTS vehiculo;
-DROP TABLE IF EXISTS tipo_vehiculo;
 DROP TABLE IF EXISTS sucursal;
 DROP TABLE IF EXISTS horario;
+DROP TABLE IF EXISTS asiento;
 DROP TABLE IF EXISTS tipo_cliente;
 DROP TABLE IF EXISTS ubigeo;
 DROP TABLE IF EXISTS metodo_pago;
@@ -128,12 +127,14 @@ DROP TABLE IF EXISTS servicio;
 DROP TABLE IF EXISTS tipo_servicio;
 DROP TABLE IF EXISTS tipo_comprobante;
 DROP TABLE IF EXISTS tipo_documento;
+DROP TABLE IF EXISTS nivel;
+DROP TABLE IF EXISTS vehiculo;
+DROP TABLE IF EXISTS tipo_vehiculo;
 DROP TABLE IF EXISTS marca;
 DROP TABLE IF EXISTS ruta;
-DROP TABLE IF EXISTS nivel;
 DROP TABLE IF EXISTS ciudad;
-DROP TABLE IF EXISTS asiento;
 DROP TABLE IF EXISTS cliente;
+
 
 -- Crear tabla tipo_servicio
 CREATE TABLE tipo_servicio (
@@ -252,7 +253,8 @@ CREATE TABLE horario (
 
 -- Crear tabla sucursal
 CREATE TABLE sucursal (
-    id CHAR(5) PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    cod_sucursal CHAR(5) NOT NULL,
     ciudad VARCHAR(50) NOT NULL,
     nombre VARCHAR(50) NOT NULL,
     direccion VARCHAR(255) NOT NULL,
@@ -283,15 +285,15 @@ CREATE TABLE cliente (
     id INT AUTO_INCREMENT PRIMARY KEY,
     
     id_pais INT NOT NULL,
-    id_tipo_doc INT NOT NULL,
     id_tipo_cliente INT NOT NULL,
+    id_tipo_doc INT NOT NULL,
     
     numero_documento VARCHAR(20) NOT NULL, -- UNIQUE,
     
     nombres VARCHAR(90),
     ape_paterno VARCHAR(50),
     ape_materno VARCHAR(50),
-    
+        
     sexo TINYINT DEFAULT 0, -- 'O' para otros/no especificado
     f_nacimiento DATE,
     
@@ -301,6 +303,7 @@ CREATE TABLE cliente (
     telefono VARCHAR(13), -- Ej: +51912345678
     email VARCHAR(100) NOT NULL,
     password VARCHAR(256) NOT NULL, -- SHA-256 hash
+    estado TINYINT DEFAULT 1,
     
     fechaRegistro DATETIME DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NOT NULL
@@ -365,14 +368,6 @@ CREATE TABLE conf_plantillas (
     usuario VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE nivel(
-    id int AUTO_INCREMENT primary key,
-    nroPiso int not null,
-    id_tipo_vehiculo int not null,
-    cantidad int not null,
-    estado TINYINT not null
-);
-
 CREATE TABLE marca (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
@@ -404,6 +399,15 @@ CREATE TABLE vehiculo (
     REFERENCES tipo_vehiculo(id)
         ON DELETE CASCADE
         ON UPDATE CASCADE
+);
+
+CREATE TABLE nivel(
+    id int AUTO_INCREMENT primary key,
+    nroPiso int not null,
+    id_vehiculo int not null,
+    cantidad int not null,
+    estado TINYINT not null,
+    foreign key (id_vehiculo) references vehiculo(id)
 );
 
 -- Crear tabla metodo_pago
@@ -2786,7 +2790,8 @@ CREATE PROCEDURE SP_REGISTRAR_CLIENTE_NATURAL(
     IN P_TELEFONO VARCHAR(13),
     IN P_EMAIL VARCHAR(100),
     IN P_PASSWORD VARCHAR(256),
-    IN P_USUARIO DATETIME
+    IN P_ESTADO TINYINT,
+    IN P_USUARIO VARCHAR(100)
 )
 BEGIN
     DECLARE cEmail INT;
@@ -2806,8 +2811,8 @@ BEGIN
     ELSEIF cNumeroDoc > 0 THEN
         SET @MSJ2 = 'El numero de documento que intenta registrar ya está registrado';
     ELSE
-        INSERT INTO CLIENTE (id_pais,id_tipo_doc,id_tipo_cliente,numero_documento,nombres, ape_paterno, ape_materno, sexo, f_nacimiento, direccion, telefono, email, password,usuario) 
-        VALUES (P_ID_PAIS, P_ID_TIPO_DOC, P_ID_TIPO_CLIENTE, P_NUMERO_DOCUMENTO, P_NOMBRES, P_APE_PATERNO, P_APE_MATERNO, P_SEXO, P_F_NACIMIENTO, P_DIRECCION, P_TELEFONO, P_EMAIL, P_PASSWORD, P_USUARIO);
+        INSERT INTO CLIENTE (id_pais,id_tipo_doc,id_tipo_cliente,numero_documento,nombres, ape_paterno, ape_materno, sexo, f_nacimiento, direccion, telefono, email, password,estado,usuario) 
+        VALUES (P_ID_PAIS, P_ID_TIPO_DOC, P_ID_TIPO_CLIENTE, P_NUMERO_DOCUMENTO, P_NOMBRES, P_APE_PATERNO, P_APE_MATERNO, P_SEXO, P_F_NACIMIENTO, P_DIRECCION, P_TELEFONO, P_EMAIL, P_PASSWORD,P_ESTADO,P_USUARIO);
         SET @MSJ = 'Se registró correctamente al cliente';
     END IF;
 END $$
@@ -2823,7 +2828,8 @@ CREATE PROCEDURE SP_REGISTRAR_CLIENTE_JURIDICO(
     IN P_TELEFONO VARCHAR(13),
     IN P_EMAIL VARCHAR(100),
     IN P_PASSWORD VARCHAR(256),
-    IN P_USUARIO DATETIME
+    IN P_ESTADO TINYINT,
+    IN P_USUARIO VARCHAR(100)
 )
 BEGIN
     DECLARE cEmail INT;
@@ -2844,15 +2850,15 @@ BEGIN
     ELSEIF cRazonSocial > 0 THEN
     	SET @MSJ2 = 'La razón social que intenta registrar ya está registrado';
     ELSE  
-        INSERT INTO CLIENTE (id_pais,id_tipo_doc,numero_documento, razon_social, direccion, telefono, email, password,usuario) 
-        VALUES (P_ID_PAIS, P_ID_TIPO_DOC, P_NUMERO_DOCUMENTO, P_RAZON_SOCIAL, P_DIRECCION, P_TELEFONO, P_EMAIL, P_PASSWORD, P_USUARIO);
+        INSERT INTO CLIENTE (id_pais,id_tipo_doc,numero_documento, razon_social, direccion, telefono, email, password,estado,usuario) 
+        VALUES (P_ID_PAIS, P_ID_TIPO_DOC, P_NUMERO_DOCUMENTO, P_RAZON_SOCIAL, P_DIRECCION, P_TELEFONO, P_EMAIL, P_PASSWORD, P_ESTADO,P_USUARIO);
         SET @MSJ = 'Se registró correctamente al cliente';
     END IF;
 END $$
 DELIMITER ;
 
 
--- Crear procedimiento SP_EDITAR_CLIENTE
+-- Crear procedimiento SP_EDITAR_CLIENTE_NATURAL
 DELIMITER $$
 CREATE PROCEDURE SP_EDITAR_CLIENTE_NATURAL(
     IN P_ID INT,
@@ -2869,7 +2875,7 @@ CREATE PROCEDURE SP_EDITAR_CLIENTE_NATURAL(
     IN P_TELEFONO VARCHAR(13),
     IN P_EMAIL VARCHAR(100),
     IN P_PASSWORD VARCHAR(256),
-    IN P_USUARIO DATETIME
+    IN P_ESTADO TINYINT
 )
 BEGIN
     DECLARE cCliente INT;
@@ -2884,8 +2890,8 @@ BEGIN
     SET @MSJ2 = NULL;
 
     SELECT COUNT(*) INTO cCliente FROM CLIENTE WHERE id = P_ID;
-    SELECT COUNT(*) INTO cEmail FROM CLIENTE WHERE EMAIL = P_EMAIL;
-    SELECT COUNT(*) INTO cNumeroDoc FROM CLIENTE WHERE numero_documento = P_NUMERO_DOCUMENTO;
+    SELECT COUNT(*) INTO cEmail FROM CLIENTE WHERE EMAIL = P_EMAIL AND id != P_ID;
+    SELECT COUNT(*) INTO cNumeroDoc FROM CLIENTE WHERE numero_documento = P_NUMERO_DOCUMENTO AND id != P_ID;
 
     IF cCliente <= 0 THEN
         SET @MSJ2 = 'El cliente que intenta editar no existe';
@@ -2908,10 +2914,63 @@ BEGIN
         telefono = P_TELEFONO,
         email = P_EMAIL,
         password = P_PASSWORD,
-        usuario = P_USUARIO
+        estado = P_ESTADO
         WHERE id = P_ID;
         
         SET @MSJ = 'Se modificó correctamente al usuario';
+    END IF;
+END $$
+DELIMITER ;
+-- Crear procedimiento SP_EDITAR_CLIENTE_JURIDICO
+DELIMITER $$
+CREATE PROCEDURE SP_EDITAR_CLIENTE_JURIDICO(
+    IN P_ID INT,
+    IN P_ID_PAIS INT,
+    IN P_ID_TIPO_DOC INT,
+    IN P_NUMERO_DOCUMENTO VARCHAR(20),
+    IN P_RAZON_SOCIAL VARCHAR(90),
+    IN P_DIRECCION VARCHAR(70),
+    IN P_TELEFONO VARCHAR(13),
+    IN P_EMAIL VARCHAR(100),
+    IN P_PASSWORD VARCHAR(256),
+    IN P_ESTADO TINYINT
+)
+BEGIN
+    DECLARE cCliente INT;
+    DECLARE cEmail INT;
+    DECLARE cNumeroDoc INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cCliente FROM CLIENTE WHERE id = P_ID;
+    SELECT COUNT(*) INTO cEmail FROM CLIENTE WHERE EMAIL = P_EMAIL AND id != P_ID;
+    SELECT COUNT(*) INTO cNumeroDoc FROM CLIENTE WHERE numero_documento = P_NUMERO_DOCUMENTO AND id != P_ID;
+
+    IF cCliente <= 0 THEN
+        SET @MSJ2 = 'El cliente que intenta editar no existe';
+    ELSEIF cEmail != 0 THEN
+        SET @MSJ2 = 'El correo ingresado ya existe';
+    ELSEIF cNumeroDoc != 0 THEN
+        SET @MSJ2 = 'El número de documento ingresado ya existe';
+    ELSE
+        UPDATE CLIENTE
+        SET id_pais = P_ID_PAIS,
+            id_tipo_doc = P_ID_TIPO_DOC,
+            numero_documento = P_NUMERO_DOCUMENTO,
+            razon_social = P_RAZON_SOCIAL,
+            direccion = P_DIRECCION,
+            telefono = P_TELEFONO,
+            email = P_EMAIL,
+            password = P_PASSWORD,
+            estado = P_ESTADO
+        WHERE id = P_ID;
+
+        SET @MSJ = 'Se modificó correctamente al cliente';
     END IF;
 END $$
 DELIMITER ;
@@ -2923,6 +2982,7 @@ CREATE PROCEDURE SP_DARBAJA_CLIENTE(
 )
 BEGIN
     DECLARE cCliente INT;
+    DECLARE cDeBaja INT;  
     DECLARE EXIT HANDLER FOR SQLEXCEPTION 
     BEGIN
         SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
@@ -2932,9 +2992,12 @@ BEGIN
     SET @MSJ2 = NULL;
 
     SELECT COUNT(*) INTO cCliente FROM cliente WHERE ID = P_ID;
+    SELECT COUNT(*) INTO cDeBaja FROM cliente where ID = P_ID AND estado = 0;
 
     IF cCliente <= 0 THEN
         SET @MSJ2 = 'El cliente que intenta dar de baja no existe';
+    ELSEIF cDeBaja > 0 THEN
+        SET @MSJ2 = 'El cliente ya se encuentra dado de baja';
     ELSE
         UPDATE cliente SET ESTADO = 0 WHERE ID = P_ID;
 
@@ -2963,7 +3026,7 @@ BEGIN
     IF cCliente <= 0 THEN
         SET @MSJ2 = 'El cliente que intenta eliminar no existe';
     ELSE
-        DELETE FROM horario WHERE ID = P_ID;
+        DELETE FROM CLIENTE WHERE ID = P_ID;
         SET @MSJ = 'Se eliminó correctamente al usuario';
     END IF;
 END $$
@@ -3011,6 +3074,7 @@ CREATE PROCEDURE SP_REGISTRAR_SUCURSAL(
     IN P_DIRECCION VARCHAR(255),
     IN P_LATITUD DECIMAL(8,6),
     IN P_LONGITUD DECIMAL(9,6),
+    IN P_ESTADO TINYINT,
     IN P_ABREVIATURA CHAR(3),
     IN P_USUARIO VARCHAR(100)
 )
@@ -3044,8 +3108,8 @@ BEGIN
     IF cSucursal > 0 THEN
         SET @MSJ2 = 'La sucursal que intenta registrar ya está registrada';
     ELSE
-        INSERT INTO sucursal (id, ciudad, nombre, direccion, latitud, longitud, abreviatura, usuario) 
-        VALUES (cAUX,P_CIUDAD, P_NOMBRE, P_DIRECCION, P_LATITUD, P_LONGITUD, P_ABREVIATURA, P_USUARIO);
+        INSERT INTO sucursal (cod_sucursal, ciudad, nombre, direccion, latitud, longitud, estado, abreviatura, usuario) 
+        VALUES (cAUX,P_CIUDAD, P_NOMBRE, P_DIRECCION, P_LATITUD, P_LONGITUD,P_ESTADO, P_ABREVIATURA, P_USUARIO);
         
         SET @MSJ = 'Se registró correctamente la sucursal';
     END IF;
@@ -3061,11 +3125,15 @@ CREATE PROCEDURE SP_EDITAR_SUCURSAL(
     IN P_DIRECCION VARCHAR(255),
     IN P_LATITUD DECIMAL(8,6),
     IN P_LONGITUD DECIMAL(9,6),
+    IN P_ESTADO TINYINT,
+    IN P_ABREVIATURA CHAR(3),
     IN P_USUARIO VARCHAR(100)
 )
 BEGIN
     DECLARE cSucursal INT;
     DECLARE cNombre INT;
+    DECLARE cAbreviatura INT;
+    DECLARE cAUX CHAR(5);
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
@@ -3082,6 +3150,17 @@ BEGIN
     FROM sucursal 
     WHERE nombre = P_NOMBRE AND id != P_ID AND estado_registro = 1;
 
+    SELECT COUNT(*) INTO cAbreviatura
+    FROM sucursal 
+    WHERE abreviatura = P_ABREVIATURA AND estado_registro = 1;
+
+    IF cAbreviatura <9 THEN
+        SET cAUX = CONCAT(P_ABREVIATURA,'0', cAbreviatura+1);
+    ELSE
+        SET cAUX = CONCAT(P_ABREVIATURA,cAbreviatura+1);
+    END IF;
+
+
     IF cSucursal <= 0 THEN
         SET @MSJ2 = 'La sucursal que intenta editar no existe';
     ELSEIF cNombre > 0 THEN
@@ -3090,9 +3169,12 @@ BEGIN
         UPDATE sucursal 
         SET departamento = P_DEPARTAMENTO,
             nombre = P_NOMBRE,
+            cod_sucursal = cAUX,
             direccion = P_DIRECCION,
             latitud = P_LATITUD,
             longitud = P_LONGITUD,
+            estado = P_ESTADO,
+            abreviatura = P_ABREVIATURA,
             usuario = P_USUARIO,
             estado_proceso = 'MODIFICADO'
         WHERE id = P_ID AND estado_registro = 1;
@@ -4012,8 +4094,8 @@ DELIMITER ;
 DELIMITER $$
 
 CREATE PROCEDURE SP_INSERTAR_NIVEL(
-    IN p_tipo_vehiculo INT,
-    IN p_cantidad       INT
+    IN p_vehiculo INT,
+    IN p_cantidad INT
 )
 BEGIN
     DECLARE nuevo_nroPiso INT;
@@ -4031,10 +4113,10 @@ BEGIN
         SELECT COUNT(*) + 1
           INTO nuevo_nroPiso
         FROM nivel
-        WHERE id_tipo_vehiculo = p_tipo_vehiculo;
+        WHERE id_vehiculo = p_vehiculo;
 
-        INSERT INTO nivel (nroPiso, id_tipo_vehiculo, cantidad, estado)
-        VALUES (nuevo_nroPiso, p_tipo_vehiculo, p_cantidad, 1);
+        INSERT INTO nivel (nroPiso, id_vehiculo, cantidad, estado)
+        VALUES (nuevo_nroPiso, p_vehiculo, p_cantidad, 1);
 
         SET @MSJ = CONCAT(
             'Nivel insertado correctamente con nroPiso ',
@@ -4048,7 +4130,7 @@ END$$
 CREATE PROCEDURE SP_ACTUALIZAR_NIVEL(
   IN p_idNivel        INT,
   IN p_nroPiso        INT,
-  IN p_tipo_vehiculo  INT,
+  IN p_vehiculo       INT,
   IN p_cantidad       INT,
   IN p_estado         TINYINT
 )
@@ -4067,13 +4149,13 @@ BEGIN
   ELSE
     SELECT COALESCE(MAX(nroPiso), 0) INTO max_piso
       FROM nivel
-      WHERE id_tipo_vehiculo = p_tipo_vehiculo;
+      WHERE id_vehiculo = p_vehiculo;
     IF p_nroPiso > max_piso + 1 THEN
       SET @MSJ2 = 'No puede actualizar a un piso mayor que el siguiente consecutivo';
     ELSE
       UPDATE nivel
         SET nroPiso         = p_nroPiso,
-            id_tipo_vehiculo = p_tipo_vehiculo,
+            id_vehiculo = p_vehiculo,
             cantidad        = p_cantidad,
             estado          = p_estado
       WHERE id = p_idNivel;
@@ -4112,7 +4194,7 @@ CREATE PROCEDURE SP_ELIMINAR_NIVEL(
 )
 BEGIN
     DECLARE piso_actual         INT;
-    DECLARE tipo_vehiculo_act   INT;
+    DECLARE vehiculo_act   INT;
     DECLARE max_piso            INT;
 
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -4124,15 +4206,15 @@ BEGIN
     SET @MSJ  = NULL;
     SET @MSJ2 = NULL;
 
-    SELECT nroPiso, id_tipo_vehiculo
-      INTO piso_actual, tipo_vehiculo_act
+    SELECT nroPiso, id_vehiculo
+      INTO piso_actual, vehiculo_act
     FROM nivel
     WHERE id = p_idNivel;
 
     SELECT MAX(nroPiso)
       INTO max_piso
     FROM nivel
-    WHERE id_tipo_vehiculo = tipo_vehiculo_act;
+    WHERE id_vehiculo = vehiculo_act;
 
     IF piso_actual < max_piso THEN
         SET @MSJ2 = 'Solo se puede eliminar el piso más alto para evitar inconsistencias';
