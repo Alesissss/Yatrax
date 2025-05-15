@@ -173,20 +173,6 @@
             });
     }
 
-    // Ubicaciones cercanas para probar
-    const origen = {
-        latitud: -12.04318, // Coordenadas de un punto en Lima
-        longitud: -77.02824 // Coordenadas de un punto en Lima
-    };
-
-    const destino = {
-        latitud: -12.03928, // Coordenadas de un punto cercano en Lima
-        longitud: -77.02983 // Coordenadas de un punto cercano en Lima
-    };
-
-    // Llamar a la función dibujarRuta con las ubicaciones de prueba
-    dibujarRuta(origen, destino);
-
     function fct_GetSucursales() {
         $.getJSON('/trabajadores/viajes/GetSucursales', function (response) {
             if (response.Status === 'success') {
