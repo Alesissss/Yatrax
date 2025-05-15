@@ -23,7 +23,8 @@
                                 <label for="txt_nombre">Nombre</label>
                                 <div class="input-group">
                                     <input type="text" id="txt_nombre" class="form-control" placeholder="Nombre"
-                                        value="{{ sucursal.nombre }}" oninput="this.value = this.value;">
+                                        value="{{ sucursal.nombre }}" oninput="this.value = this.value;" {% if
+                                        btnId=='btn_Aceptar' %}disabled{% endif %}>
                                     <div class="input-group-append">
                                         <div class="input-group-text"><i class="fas fa-home"></i></div>
                                     </div>
@@ -33,7 +34,8 @@
                                 <label for="txt_direccion">Dirección</label>
                                 <div class="input-group">
                                     <input type="text" id="txt_direccion" class="form-control" placeholder="Dirección"
-                                        value="{{ sucursal.direccion }}" oninput="this.value = this.value;">
+                                        value="{{ sucursal.direccion }}" oninput="this.value = this.value;" {% if
+                                        btnId=='btn_Aceptar' %}disabled{% endif %}>
                                     <div class="input-group-append">
                                         <div class="input-group-text"><i class="fa fa-map"></i></div>
                                     </div>
@@ -152,6 +154,7 @@
     }
 </style>
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 {% endblock %}
 
 {% block scripts %}
@@ -194,6 +197,51 @@
                         L.marker([sucursal.latitud, sucursal.longitud])
                             .addTo(map)
                             .bindPopup(popupContent);
+
+                        if (sucursal.id === Number("{{ sucursal.id }}")) {
+                            ShowSpinner();
+                            try {
+                                $.ajax({
+                                    url: `https://nominatim.openstreetmap.org/reverse?format=json&lat=${Number(sucursal.latitud)}&lon=${Number(sucursal.longitud)}`,
+                                    method: 'GET',
+                                    headers: {
+                                        'User-Agent': 'Mozilla/5.0'
+                                    },
+                                    success: function (data) {
+                                        const address = data.address || {};
+
+                                        const departamento = address.state || '';
+                                        const provincia = address.region || '';
+                                        const distrito = address.village || address.town || address.suburb || address.city || address.hamlet || '';
+                                        const direccionCompleta = data.display_name || 'Dirección no disponible';
+                                        const country = address.country || '';
+
+                                        // Asignar a campos visibles
+                                        document.getElementById("txt_direccion").value = direccionCompleta;
+                                        document.getElementById("txt_ubicacion").value = `${departamento} - ${provincia} - ${distrito}`;
+                                        document.getElementById("txt_country").value = country;
+
+                                        // Asignar a los inputs ocultos
+                                        document.getElementById("txt_departamento").value = departamento;
+                                        document.getElementById("txt_provincia").value = provincia;
+                                        document.getElementById("txt_distrito").value = distrito;
+
+                                        // Asignar a campos visibles
+                                        $('#txt_ubicacion').val(`${departamento} - ${provincia} - ${distrito}`);
+                                        HideSpinner();
+                                    },
+                                    error: function (xhr, status, error) {
+                                        console.error("Error al obtener ubicación:", error);
+                                        $('#txt_ubicacion').val('');
+                                        HideSpinner();
+                                    }
+                                });
+                            } catch (error) {
+                                console.error("Excepción inesperada:", error);
+                                $('#txt_ubicacion').val('');
+                                HideSpinner();
+                            }
+                        }
                     }
                 });
             })
@@ -204,89 +252,92 @@
     map.whenReady(cargarSucursales);
 
     // Manejo de clics en el mapa
-    map.on('click', async function (e) {
-        ShowSpinner();
-        const lat = e.latlng.lat.toFixed(6);
-        const lng = e.latlng.lng.toFixed(6);
 
-        document.getElementById('lat').value = lat;
-        document.getElementById('lng').value = lng;
+    if ("{{ btnId }}" !== "btn_Aceptar") {
+        map.on('click', async function (e) {
+            ShowSpinner();
+            const lat = e.latlng.lat.toFixed(6);
+            const lng = e.latlng.lng.toFixed(6);
 
-        if (!marker) {
-            marker = L.marker(e.latlng).addTo(map);
-        } else {
-            marker.setLatLng(e.latlng);
-        }
+            document.getElementById('lat').value = lat;
+            document.getElementById('lng').value = lng;
 
-        try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`, {
-                headers: { 'User-Agent': 'Mozilla/5.0' }
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                const address = data.address || {};
-
-                // Obtener los componentes de la dirección
-                const departamento = address.state || '';
-                const provincia = address.region || '';
-                const distrito = address.village || address.town || address.suburb || address.city || address.hamlet || '';
-                const direccionCompleta = data.display_name || 'Dirección no disponible';
-                const country = address.country || '';
-
-                // Asignar a campos visibles
-                document.getElementById("txt_direccion").value = direccionCompleta;
-                document.getElementById("txt_ubicacion").value = `${departamento} - ${provincia} - ${distrito}`;
-                document.getElementById("txt_country").value = country;
-
-                // Asignar a los inputs ocultos
-                document.getElementById("txt_departamento").value = departamento;
-                document.getElementById("txt_provincia").value = provincia;
-                document.getElementById("txt_distrito").value = distrito;
-
-                // Buscar abreviatura solo si hay provincia
-                if (provincia) {
-                    ShowSpinner();
-                    $.ajax({
-                        url: "/trabajadores/viajes/BuscarAbreviatura",
-                        type: "POST",
-                        contentType: "application/json",
-                        data: JSON.stringify({
-                            provincia: provincia,
-                        }),
-                        success: function (response) {
-                            if (response.Status === "success") {
-                                if (response.data.abreviatura === null || response.data.abreviatura === '') {
-                                    toastr.warning('No se encontró la abreviatura', 'MENSAJE DE SISTEMA');
-                                    $('#txt_abreviatura').val('');
-                                    HideSpinner();
-                                    return;
-                                }
-                                $('#txt_abreviatura').val(response.data.abreviatura);
-                                toastr.success('Abreviatura encontrada exitosamente', "MENSAJE DE SISTEMA");
-                            } else {
-                                toastr.warning('Error al consultar abreviatura', "MENSAJE DE SISTEMA");
-                            }
-                            HideSpinner();
-                        },
-                        error: function (xhr, Status, error) {
-                            HideSpinner();
-                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
-                            console.error('Error:' + error);
-                        }
-                    });
-                } else {
-                    toastr.warning('No se encontró la abreviatura PROVINCIA', 'MENSAJE DE SISTEMA');
-                    $('#txt_abreviatura').val('');
-                    HideSpinner();
-                }
+            if (!marker) {
+                marker = L.marker(e.latlng).addTo(map);
+            } else {
+                marker.setLatLng(e.latlng);
             }
-        } catch (error) {
-            console.error("Error al obtener ubicación:", error);
-            document.getElementById("txt_direccion").value = '';
-            document.getElementById("txt_ubicacion").value = '';
-        }
-    });
+
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`, {
+                    headers: { 'User-Agent': 'Mozilla/5.0' }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const address = data.address || {};
+
+                    // Obtener los componentes de la dirección
+                    const departamento = address.state || '';
+                    const provincia = address.region || '';
+                    const distrito = address.village || address.town || address.suburb || address.city || address.hamlet || '';
+                    const direccionCompleta = data.display_name || 'Dirección no disponible';
+                    const country = address.country || '';
+
+                    // Asignar a campos visibles
+                    document.getElementById("txt_direccion").value = direccionCompleta;
+                    document.getElementById("txt_ubicacion").value = `${departamento} - ${provincia} - ${distrito}`;
+                    document.getElementById("txt_country").value = country;
+
+                    // Asignar a los inputs ocultos
+                    document.getElementById("txt_departamento").value = departamento;
+                    document.getElementById("txt_provincia").value = provincia;
+                    document.getElementById("txt_distrito").value = distrito;
+
+                    // Buscar abreviatura solo si hay provincia
+                    if (provincia) {
+                        ShowSpinner();
+                        $.ajax({
+                            url: "/trabajadores/viajes/BuscarAbreviatura",
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify({
+                                provincia: provincia,
+                            }),
+                            success: function (response) {
+                                if (response.Status === "success") {
+                                    if (response.data.abreviatura === null || response.data.abreviatura === '') {
+                                        toastr.warning('No se encontró la abreviatura', 'MENSAJE DE SISTEMA');
+                                        $('#txt_abreviatura').val('');
+                                        HideSpinner();
+                                        return;
+                                    }
+                                    $('#txt_abreviatura').val(response.data.abreviatura);
+                                    toastr.success('Abreviatura encontrada exitosamente', "MENSAJE DE SISTEMA");
+                                } else {
+                                    toastr.warning('Error al consultar abreviatura', "MENSAJE DE SISTEMA");
+                                }
+                                HideSpinner();
+                            },
+                            error: function (xhr, Status, error) {
+                                HideSpinner();
+                                toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                                console.error('Error:' + error);
+                            }
+                        });
+                    } else {
+                        toastr.warning('No se encontró la abreviatura PROVINCIA', 'MENSAJE DE SISTEMA');
+                        $('#txt_abreviatura').val('');
+                        HideSpinner();
+                    }
+                }
+            } catch (error) {
+                console.error("Error al obtener ubicación:", error);
+                document.getElementById("txt_direccion").value = '';
+                document.getElementById("txt_ubicacion").value = '';
+            }
+        });
+    }
 
     // Configuración del buscador
     const searchControl = L.Control.geocoder({
@@ -415,7 +466,6 @@
             let estado = $('#cbx_Estado').val();
             let country = $("#txt_country").val().trim();
             let abreviatura = $("#txt_abreviatura").val().trim();
-
 
             if (country !== 'Perú') {
                 toastr.warning("La ubicación debe ser en Perú", "MENSAJE DE SISTEMA");

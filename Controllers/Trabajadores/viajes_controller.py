@@ -102,6 +102,10 @@ def TipoUsuario_Nuevo():
 def Menu_ProgramarViaje():
     return render_template('viajes/programarViaje.html', active_page="programarViaje", active_menu='mViajes')
 
+@viajes_bp.route('/ProgramarViajeNuevo')
+def Menu_ProgramarViajeNuevo():
+    return render_template('viajes/programarViajeCRUD.html', active_page="programarViaje", active_menu='mViajes', tittle = 'Registrar viaje', btnId = 'btn_Registrar')
+
 # @viajes_bp.route('/GestionarMarcas')
 # def Menu_Marcas():
 #     return render_template('viajes/marcas.html', active_page="marcas", active_menu='mViajes')
@@ -701,7 +705,7 @@ def editar_sucursal(idSucursal):
             if not all([nombre, latitud, longitud, ciudad, abreviatura, direccion]):
                 return jsonify({"Status": "error", "Msj": "Todos los campos son requeridos"})
             
-            mensajes = Sucursal.editar(idSucursal, ciudad, direccion, nombre, latitud, longitud, estado, abreviatura, usuario_actual)
+            mensajes = Sucursal.editar(idSucursal, ciudad, nombre, direccion, latitud, longitud, estado, abreviatura, usuario_actual)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
@@ -967,7 +971,7 @@ def get_rutaSucursal():
         sucursal = Sucursal.obtener_todos()
 
         sucursal_filtrada = [
-            {k: v for k, v in s.items() if k in ['id', 'nombre', 'estado']} 
+            {k: v for k, v in s.items() if k in ['id' , 'ciudad', 'nombre', 'direccion', 'latitud', 'longitud', 'estado']} 
             for s in sucursal if s.get('estado') == 1
         ]
 

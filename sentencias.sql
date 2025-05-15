@@ -254,7 +254,7 @@ CREATE TABLE horario (
 -- Crear tabla sucursal
 CREATE TABLE sucursal (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    cod_sucursal CHAR(5) NOT NULL,
+    cod_sucursal CHAR(6) NOT NULL,
     ciudad VARCHAR(50) NOT NULL,
     nombre VARCHAR(50) NOT NULL,
     direccion VARCHAR(255) NOT NULL,
@@ -2773,7 +2773,6 @@ BEGIN
 END $$
 DELIMITER ;
 
--- aaaaaaaaaaaaaaa
 -- Crear procedimiento SP_REGISTRAR_CLIENTE
 DELIMITER $$
 CREATE PROCEDURE SP_REGISTRAR_CLIENTE_NATURAL(
@@ -3080,8 +3079,8 @@ CREATE PROCEDURE SP_REGISTRAR_SUCURSAL(
 )
 BEGIN
     DECLARE cSucursal INT;
-    DECLARE cAbreviatura INT;
-    DECLARE cAUX CHAR(5);
+    DECLARE cAUX CHAR(6);
+    DECLARE cCorrelativo INT;
 
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -3095,15 +3094,9 @@ BEGIN
     FROM sucursal 
     WHERE nombre = P_NOMBRE AND estado_registro = 1 AND abreviatura = P_ABREVIATURA;
 
-    SELECT COUNT(*) INTO cAbreviatura
-    FROM sucursal 
-    WHERE abreviatura = P_ABREVIATURA AND estado_registro = 1;
+    SELECT COALESCE(MAX(CAST(SUBSTRING_INDEX(cod_sucursal, '-', -1) AS UNSIGNED)), 0) + 1 INTO cCorrelativo FROM sucursal WHERE abreviatura = P_ABREVIATURA AND estado_registro = 1;
 
-    IF cAbreviatura <9 THEN
-        SET cAUX = CONCAT(P_ABREVIATURA,'0', cAbreviatura+1);
-    ELSE
-        SET cAUX = CONCAT(P_ABREVIATURA,cAbreviatura+1);
-    END IF;
+    SET cAUX = CONCAT(P_ABREVIATURA, '-', LPAD(cCorrelativo, 2, '0'));
 
     IF cSucursal > 0 THEN
         SET @MSJ2 = 'La sucursal que intenta registrar ya está registrada';
@@ -3125,15 +3118,17 @@ CREATE PROCEDURE SP_EDITAR_SUCURSAL(
     IN P_DIRECCION VARCHAR(255),
     IN P_LATITUD DECIMAL(8,6),
     IN P_LONGITUD DECIMAL(9,6),
-    IN P_ESTADO TINYINT,
+    IN P_ESTADO INT,
     IN P_ABREVIATURA CHAR(3),
     IN P_USUARIO VARCHAR(100)
 )
 BEGIN
     DECLARE cSucursal INT;
     DECLARE cNombre INT;
-    DECLARE cAbreviatura INT;
-    DECLARE cAUX CHAR(5);
+    DECLARE cAUX CHAR(6);
+    DECLARE cCorrelativo INT;
+    DECLARE abreviatura_cambiada BOOLEAN DEFAULT FALSE;
+    
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
@@ -3150,16 +3145,19 @@ BEGIN
     FROM sucursal 
     WHERE nombre = P_NOMBRE AND id != P_ID AND estado_registro = 1;
 
-    SELECT COUNT(*) INTO cAbreviatura
-    FROM sucursal 
-    WHERE abreviatura = P_ABREVIATURA AND estado_registro = 1;
+    SELECT CASE WHEN abreviatura != P_ABREVIATURA THEN TRUE ELSE FALSE END INTO abreviatura_cambiada
+    FROM sucursal WHERE id = P_ID LIMIT 1;
 
-    IF cAbreviatura <9 THEN
-        SET cAUX = CONCAT(P_ABREVIATURA,'0', cAbreviatura+1);
+    IF abreviatura_cambiada THEN
+        SELECT COALESCE(MAX(CAST(SUBSTRING_INDEX(cod_sucursal, '-', -1) AS UNSIGNED)), 0) + 1
+        INTO cCorrelativo
+        FROM sucursal 
+        WHERE abreviatura = P_ABREVIATURA AND estado_registro = 1 AND id != P_ID;
+
+        SET cAUX = CONCAT(P_ABREVIATURA, '-', LPAD(cCorrelativo, 2, '0'));
     ELSE
-        SET cAUX = CONCAT(P_ABREVIATURA,cAbreviatura+1);
+        SELECT cod_sucursal INTO cAUX FROM sucursal WHERE id = P_ID;
     END IF;
-
 
     IF cSucursal <= 0 THEN
         SET @MSJ2 = 'La sucursal que intenta editar no existe';
@@ -3167,7 +3165,7 @@ BEGIN
         SET @MSJ2 = 'El nombre de la sucursal ya está en uso';
     ELSE
         UPDATE sucursal 
-        SET departamento = P_DEPARTAMENTO,
+        SET ciudad = P_DEPARTAMENTO,
             nombre = P_NOMBRE,
             cod_sucursal = cAUX,
             direccion = P_DIRECCION,

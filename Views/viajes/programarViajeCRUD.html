@@ -1,0 +1,179 @@
+{% extends "index.html" %}
+
+{% block title %}YATRAX - {{ tittle }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card h-100 w-100">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="text-center mb-0">Programar un nuevo viaje</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card card-outline card-primary h-100">
+                                <div class="card-header">
+                                    <h3 class="card-title">Datos Generales</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-12 mb-3">
+                                            <label for="cbx_Ruta">Ruta</label>
+                                            <div class="input-group">
+                                                <select id="cbx_Ruta" class="form-control">
+                                                    <option disabled>--SELECCIONAR--</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <label for="txt_Origen">Origen</label>
+                                            <div class="input-group">
+                                                <input type="text" id="txt_Origen" class="form-control"
+                                                    placeholder="Origen"
+                                                    oninput="this.value = this.value.toUpperCase();" disabled>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <label for="txt_Origen">Destino</label>
+                                            <div class="input-group">
+                                                <input type="text" id="txt_Destino" class="form-control"
+                                                    placeholder="Destino"
+                                                    oninput="this.value = this.value.toUpperCase();" disabled>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <label for="txt_hora_salida">Fecha y hora de salida:</label>
+                                            <div class="input-group">
+                                                <input class="form-control" type="datetime-local" id="fechaHora"
+                                                    name="fechaHora">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card card-outline card-primary h-100">
+                                <div class="card-header">
+                                    <h3 class="card-title">Asignar bus</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-12 mb-3">
+                                            <label for="cbx_Bus">Bus</label>
+                                            <div class="input-group">
+                                                <select id="cbx_Bus" class="form-control">
+                                                    <option disabled>--SELECCIONAR--</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <label for="cbx_Servicio">Servicio</label>
+                                            <div class="input-group">
+                                                <select id="cbx_Servicio" class="form-control">
+                                                    <option disabled>--SELECCIONAR--</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <label for="txt_Niveles">Cantidad de niveles</label>
+                                            <div class="input-group">
+                                                <input type="text" id="txt_Niveles" class="form-control"
+                                                    placeholder="Cantidad de niveles"
+                                                    oninput="this.value = this.value.toUpperCase();" disabled>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <label for="txt_Asientos">Cantidad total de
+                                                asientos</label>
+                                            <div class="input-group">
+                                                <input type="text" id="txt_Asientos" class="form-control"
+                                                    placeholder="Cantidad total de asientos"
+                                                    oninput="this.value = this.value.toUpperCase();" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card card-outline card-primary h-100">
+                                <div class="card-header">
+                                    <h3 class="card-title">Asignar personal</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-12 mb-3">
+                                            <label for="cbx_Chofer">Chofer</label>
+                                            <div class="input-group">
+                                                <select id="cbx_Chofer" class="form-control" multiple="multiple">
+                                                    <option value="1">Chofer 1</option>
+                                                    <option value="2">Chofer 2 </option>
+                                                    <option value="3">Chofer 3</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <label for="cbx_Tripulante">Tripulantes</label>
+                                            <div class="input-group">
+                                                <select id="cbx_Tripulante" class="form-control" multiple="multiple">
+                                                    <option>Tripulante 1</option>
+                                                    <option>Tripulante 2 </option>
+                                                    <option>Tripulante 3</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="col-md-12 text-center">
+                        <button id="btn_Guardar" type="button" class="btn btn-success">Guardar
+                            cambios</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        $('#cbx_Chofer').select2({
+            theme: 'bootstrap4',
+            containerCss: {
+                'background-color': '#1f2d3d',
+            },
+            placeholder: "Buscar...",
+            language: {
+                noResults: function () {
+                    return "No se encontraron resultados";
+                }
+            },
+            allowClear: true
+        });
+
+        $('#cbx_Chofer').val(0);
+
+        $('#cbx_Tripulante').select2({
+            theme: 'bootstrap4',
+            containerCss: {
+                'background-color': '#1f2d3d',
+            },
+            placeholder: "Buscar...",
+            language: {
+                noResults: function () {
+                    return "No se encontraron resultados";
+                }
+            },
+            allowClear: true
+        });
+    });
+</script>
+{% endblock %}

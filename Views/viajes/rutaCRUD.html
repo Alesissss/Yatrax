@@ -56,6 +56,7 @@
                         </div>
                         <div class="col-md-6">
                             <h2>Ubicación de la ruta en el mapa</h2>
+                            <button id="btnMostrarRuta" type="button" class="btn btn-primary">Mostrar ruta</button>
                             <div id="map"></div>
                         </div>
                         <div class="col-md-12 text-center mt-3">
@@ -101,11 +102,21 @@
         align-content: center;
     }
 </style>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
 {% endblock %}
 {% block scripts %}
+
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+<!-- Leaflet Routing Machine -->
+<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.min.js"></script>
+<!-- OpenRouteService -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
 <script>
     // Configuración del mapa
     const map = L.map('map').setView([-9.19, -75.0152], 6);
@@ -115,8 +126,52 @@
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
+    const orsAPIKey = '5b3ce3597851110001cf6248ee3267fd49824a40983b5ec79e79356f';
+
     // Variable para el marcador de nueva ubicación
     let marker;
+
+    // Variable global para controlar la ruta
+    var controlRuta;
+
+    function dibujarRuta(origen, destino) {
+        console.log("Origen:", origen);
+        console.log("Destino:", destino);
+
+        const orsAPIKey = '5b3ce3597851110001cf6248ee3267fd49824a40983b5ec79e79356f'; // 👉 Reemplaza con tu API Key de OpenRouteService
+
+        // Hacer la solicitud a OpenRouteService usando Axios
+        axios.get('https://api.openrouteservice.org/v2/directions/driving-car', {
+            headers: {
+                'Authorization': orsAPIKey
+            },
+            params: {
+                start: `${origen.longitud},${origen.latitud}`,  // Long, Lat
+                end: `${destino.longitud},${destino.latitud}`
+            }
+        })
+            .then(function (response) {
+                console.log("Respuesta de la API:", response.data);
+
+                // Verificamos si existen features en la respuesta
+                if (response.data.features && response.data.features.length > 0) {
+                    const ruta = response.data.features[0].geometry.coordinates;
+
+                    // Verificamos si existen coordenadas en la ruta
+                    if (ruta && ruta.length > 0) {
+                        // Dibujar la ruta en el mapa
+                        L.polyline(ruta.map(coord => [coord[1], coord[0]]), { color: 'blue' }).addTo(map);
+                    } else {
+                        console.error("No se encontraron coordenadas en la ruta.");
+                    }
+                } else {
+                    console.error("No se encontró ninguna ruta.");
+                }
+            })
+            .catch(function (error) {
+                console.error('Error al obtener la ruta:', error);
+            });
+    }
 
     function fct_GetSucursales() {
         $.getJSON('/trabajadores/viajes/GetSucursales', function (response) {
@@ -125,22 +180,19 @@
                 let itemsDestino = [];
 
                 $.each(response.data, function (index, item) {
-                    itemsOrigen.push({
+                    let option = {
                         id: item.id,
-                        text: item.id + " - " + item.nombre
-                    });
+                        text: item.id + " - " + item.nombre,
+                        latitud: item.latitud,
+                        longitud: item.longitud
+                    };
 
-                    itemsDestino.push({
-                        id: item.id,
-                        text: item.id + " - " + item.nombre
-                    });
+                    itemsOrigen.push(option);
+                    itemsDestino.push(option);
                 });
 
                 $('#cbx_Origen').select2({
                     theme: 'bootstrap4',
-                    containerCss: {
-                        'background-color': '#1f2d3d',
-                    },
                     placeholder: "Buscar...",
                     data: itemsOrigen,
                     language: {
@@ -153,9 +205,6 @@
 
                 $('#cbx_Destino').select2({
                     theme: 'bootstrap4',
-                    containerCss: {
-                        'background-color': '#1f2d3d',
-                    },
                     placeholder: "Buscar...",
                     data: itemsDestino,
                     language: {
@@ -168,7 +217,6 @@
 
                 $('#cbx_Origen').val("{{ ruta.idOrigen }}").trigger('change');
                 $('#cbx_Destino').val("{{ ruta.idDestino }}").trigger('change');
-
             } else {
                 console.error('Error al obtener las sucursales:', response.Msj);
             }
@@ -177,6 +225,31 @@
 
     $(document).ready(function () {
         fct_GetSucursales();
+
+        $('#btnMostrarRuta').on('click', function () {
+            const origen = $('#cbx_Origen').select2('data')[0];
+            const destino = $('#cbx_Destino').select2('data')[0];
+
+            let idOrigen = $('#cbx_Origen').val();
+            let idDestino = $('#cbx_Destino').val();
+            
+            if (idOrigen === idDestino) {
+                toastr.warning("La sucursal de origen no puede ser la misma que la de destino", "MENSAJE DE SISTEMA");
+                return;
+            }
+
+            if (origen && destino) {
+                dibujarRuta({
+                    latitud: parseFloat(origen.latitud),
+                    longitud: parseFloat(origen.longitud)
+                }, {
+                    latitud: parseFloat(destino.latitud),
+                    longitud: parseFloat(destino.longitud)
+                });
+            } else {
+                toastr.warning('Por favor selecciona ambas sucursales.', 'MENSAJE DE SISTEMA');
+            }
+        });
 
         $("#btn_Registrar").click(function () {
             let nombre = $("#txt_Ruta").val().trim();
@@ -299,6 +372,7 @@
                         },
                         error: function (xhr, Status, error) {
                             toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                            console.error('Error:' + error);
                         }
                     });
                 }
@@ -313,5 +387,28 @@
             window.location.href = "/trabajadores/viajes/GestionarRutas";
         });
     });
+
+    function cargarSucursales() {
+        fetch('/trabajadores/viajes/ObtenerSucursalesMapa')
+            .then(response => response.json())
+            .then(sucursales => {
+                sucursales.forEach(sucursal => {
+                    if (sucursal.latitud && sucursal.longitud) {
+                        const popupContent = `
+                            <b>${sucursal.nombre}</b><br>
+                            <small>${sucursal.direccion || 'Sin dirección'}</small>
+                        `;
+
+                        L.marker([sucursal.latitud, sucursal.longitud])
+                            .addTo(map)
+                            .bindPopup(popupContent);
+                    }
+                });
+            })
+            .catch(error => console.error('Error al cargar sucursales:', error));
+    }
+
+    // Cargar sucursales al iniciar
+    map.whenReady(cargarSucursales);
 </script>
 {% endblock %}
