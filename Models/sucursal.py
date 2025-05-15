@@ -60,7 +60,7 @@ class Sucursal:
             conexion.cerrar()
 
     @classmethod
-    def editar(cls, id, ciudad, direccion, nombre, latitud, longitud, estado, abreviatura, usuario):
+    def editar(cls, id, ciudad, nombre, direccion, latitud, longitud, estado, abreviatura, usuario):
         conexion = bd.Conexion()
         try:
             conexion.ejecutar(
