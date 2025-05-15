@@ -102,6 +102,10 @@ def TipoUsuario_Nuevo():
 def Menu_ProgramarViaje():
     return render_template('viajes/programarViaje.html', active_page="programarViaje", active_menu='mViajes')
 
+@viajes_bp.route('/ProgramarViajeNuevo')
+def Menu_ProgramarViajeNuevo():
+    return render_template('viajes/programarViajeCRUD.html', active_page="programarViaje", active_menu='mViajes', tittle = 'Registrar viaje', btnId = 'btn_Registrar')
+
 # @viajes_bp.route('/GestionarMarcas')
 # def Menu_Marcas():
 #     return render_template('viajes/marcas.html', active_page="marcas", active_menu='mViajes')

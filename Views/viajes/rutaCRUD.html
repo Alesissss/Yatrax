@@ -230,6 +230,14 @@
             const origen = $('#cbx_Origen').select2('data')[0];
             const destino = $('#cbx_Destino').select2('data')[0];
 
+            let idOrigen = $('#cbx_Origen').val();
+            let idDestino = $('#cbx_Destino').val();
+            
+            if (idOrigen === idDestino) {
+                toastr.warning("La sucursal de origen no puede ser la misma que la de destino", "MENSAJE DE SISTEMA");
+                return;
+            }
+
             if (origen && destino) {
                 dibujarRuta({
                     latitud: parseFloat(origen.latitud),
@@ -239,7 +247,7 @@
                     longitud: parseFloat(destino.longitud)
                 });
             } else {
-                alert("Por favor selecciona ambas sucursales.");
+                toastr.warning('Por favor selecciona ambas sucursales.', 'MENSAJE DE SISTEMA');
             }
         });
 
@@ -379,5 +387,28 @@
             window.location.href = "/trabajadores/viajes/GestionarRutas";
         });
     });
+
+    function cargarSucursales() {
+        fetch('/trabajadores/viajes/ObtenerSucursalesMapa')
+            .then(response => response.json())
+            .then(sucursales => {
+                sucursales.forEach(sucursal => {
+                    if (sucursal.latitud && sucursal.longitud) {
+                        const popupContent = `
+                            <b>${sucursal.nombre}</b><br>
+                            <small>${sucursal.direccion || 'Sin dirección'}</small>
+                        `;
+
+                        L.marker([sucursal.latitud, sucursal.longitud])
+                            .addTo(map)
+                            .bindPopup(popupContent);
+                    }
+                });
+            })
+            .catch(error => console.error('Error al cargar sucursales:', error));
+    }
+
+    // Cargar sucursales al iniciar
+    map.whenReady(cargarSucursales);
 </script>
 {% endblock %}
