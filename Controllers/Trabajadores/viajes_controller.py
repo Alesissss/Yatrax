@@ -701,7 +701,7 @@ def editar_sucursal(idSucursal):
             if not all([nombre, latitud, longitud, ciudad, abreviatura, direccion]):
                 return jsonify({"Status": "error", "Msj": "Todos los campos son requeridos"})
             
-            mensajes = Sucursal.editar(idSucursal, ciudad, direccion, nombre, latitud, longitud, estado, abreviatura, usuario_actual)
+            mensajes = Sucursal.editar(idSucursal, ciudad, nombre, direccion, latitud, longitud, estado, abreviatura, usuario_actual)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
