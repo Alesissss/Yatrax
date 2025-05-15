@@ -965,7 +965,7 @@ def get_rutaSucursal():
         sucursal = Sucursal.obtener_todos()
 
         sucursal_filtrada = [
-            {k: v for k, v in s.items() if k in ['id', 'nombre', 'estado']} 
+            {k: v for k, v in s.items() if k in ['id' , 'ciudad', 'nombre', 'direccion', 'latitud', 'longitud', 'estado']} 
             for s in sucursal if s.get('estado') == 1
         ]
 
