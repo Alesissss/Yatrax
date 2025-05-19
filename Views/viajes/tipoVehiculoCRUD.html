@@ -8,13 +8,12 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header bg-primary text-white">
-                    <h4 class="text-center mb-0">{{ tittle }}</ h4>
+                    <h4 class="text-center mb-0">{{ tittle }}</h4>
                 </div>
                 <div class="card-body" autocomplete="off">
                     <!-- Formulario para registrar el tipo de vehículo -->
                     <!-- /trabajadores/viajes/registrarTipoVehiculo -->
-                    <form action=""
-                    method="POST" id="formTipoVehiculo">
+                    <div id="formTipoVehiculo">
 
                         <div class="mb-3">
                             <label for="txt_Nombre">Nombre del tipo de vehículo</label>
@@ -46,9 +45,9 @@
                         <div class="text-center">
                             <button id="btn_Listado" type="button" class="btn btn-danger">Volver al listado de
                                 tipo de vehiculo</button>
-                            <button id="{{ btnId }}" type="submit" class="btn btn-primary">Aceptar</button>
+                            <button id="{{ btnId }}" type="button" class="btn btn-primary">Aceptar</button>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -92,55 +91,34 @@
             window.location.href="/trabajadores/viajes/GestionarTipoVehiculo"
         })
 
-        $('#formTipoVehiculo').on('submit', function(e) {
-            e.preventDefault();
+        $('#btn_Registrar, #btn_Actualizar').click(function(){
+            // determinamos URL según el id del botón clicado
+            const action = this.id; // 'btn_Registrar' o 'btn_Actualizar'
+            const url = (action === 'btn_Registrar')
+            ? '/trabajadores/viajes/registrarTipoVehiculo'
+            : `/trabajadores/viajes/editarTipoVehiculo/${idTipoVehiculo}`;
 
-            $("#btn_Actualizar").click(()=>{
-                $.ajax({
-                    url: `/trabajadores/viajes/editarTipoVehiculo/${idTipoVehiculo}`,
-                    type: 'POST',
-                    data: $(this).serialize(),
-                    success: function(response) {
-                        // Mostrar toastr de éxito
-                        toastr.success(response.Msj, 'Éxito');
-                        
-                        // Redirigir después de 2 segundos (opcional)
-                        setTimeout(function() {
-                            window.location.href = "/trabajadores/viajes/GestionarTipoVehiculo";
-                        }, 1000);
-                    },
-                    error: function(xhr) {
-                        // Mostrar toastr de error
-                        let errorMsg = xhr.responseJSON ? xhr.responseJSON.Msj : 'Error desconocido';
-                        toastr.error(errorMsg, 'Error');
-                    }
-                });
-            })
+            // serializamos inputs y selects dentro del div#formTipoVehiculo
+            const data = $('#formTipoVehiculo')
+            .find('input[name], select[name]')
+            .serialize();
 
-            $("#btn_Registrar").click(()=>{
-                $.ajax({
-                    url: '/trabajadores/viajes/registrarTipoVehiculo',
-                    type: 'POST',
-                    data: $(this).serialize(),
-                    success: function(response) {
-                        // Mostrar toastr de éxito
-                        toastr.success(response.Msj, 'Éxito');
-                        
-                        // Redirigir después de 2 segundos (opcional)
-                        setTimeout(function() {
-                            window.location.href = "/trabajadores/viajes/GestionarTipoVehiculo";
-                        }, 1000);
-                    },
-                    error: function(xhr) {
-                        // Mostrar toastr de error
-                        let errorMsg = xhr.responseJSON ? xhr.responseJSON.Msj : 'Error desconocido';
-                        toastr.error(errorMsg, 'Error');
-                    }
-                });
-            })
-            
-        });
-
+            $.ajax({
+            url: url,
+            type: 'POST',
+            data: data,
+            success: resp => {
+                toastr.success(resp.Msj, 'Éxito');
+                setTimeout(()=> {
+                window.location.href = '/trabajadores/viajes/GestionarTipoVehiculo';
+                }, 1000);
+            },
+            error: xhr => {
+                const msg = xhr.responseJSON?.Msj || 'Error desconocido';
+                toastr.error(msg, 'Error');
+            }
+            });
     });
+});
 </script>
 {% endblock %}

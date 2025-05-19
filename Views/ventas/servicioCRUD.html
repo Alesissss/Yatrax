@@ -13,8 +13,7 @@
                 <div class="card-body" autocomplete="off">
                     <!-- Formulario para registrar el tipo de vehículo -->
                     <!-- /trabajadores/ventas/registrarservicio -->
-                    <form action=""
-                    method="POST" id="formservicio">
+                    <div id="formservicio">
 
                         <div class="mb-3">
                             <label for="txt_nombre">Nombre del servicio</label>
@@ -47,7 +46,7 @@
                                 tipo de vehiculo</button>
                             <button id="{{ btnId }}" type="submit" class="btn btn-primary">Aceptar</button>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -90,55 +89,33 @@
             window.location.href="/trabajadores/ventas/GestionarServicio"
         })
 
-        $('#formservicio').on('submit', function(e) {
-            e.preventDefault();
+        $('#btn_Registrar, #btn_Actualizar').click(function () {
+            const action = this.id; // 'btn_Registrar' o 'btn_Actualizar'
 
-            $("#btn_Actualizar").click(()=>{
-                $.ajax({
-                    url: `/trabajadores/ventas/editarServicio/${idservicio}`,
-                    type: 'POST',
-                    data: $(this).serialize(),
-                    success: function(response) {
-                        // Mostrar toastr de éxito
-                        toastr.success(response.Msj, 'Éxito');
-                        
-                        // Redirigir después de 2 segundos (opcional)
-                        setTimeout(function() {
-                            window.location.href = "/trabajadores/ventas/GestionarServicio";
-                        }, 1000);
-                    },
-                    error: function(xhr) {
-                        // Mostrar toastr de error
-                        let errorMsg = xhr.responseJSON ? xhr.responseJSON.Msj : 'Error desconocido';
-                        toastr.error(errorMsg, 'Error');
-                    }
-                });
-            })
+            const url = (action === 'btn_Registrar')
+                ? '/trabajadores/ventas/registrarServicio'
+                : `/trabajadores/ventas/editarServicio/${idservicio}`;
 
-            $("#btn_Registrar").click(()=>{
-                $.ajax({
-                    url: '/trabajadores/ventas/registrarServicio',
-                    type: 'POST',
-                    data: $(this).serialize(),
-                    success: function(response) {
-                        // Mostrar toastr de éxito
-                        toastr.success(response.Msj, 'Éxito');
-                        
-                        // Redirigir después de 2 segundos (opcional)
-                        setTimeout(function() {
-                            window.location.href = "/trabajadores/ventas/GestionarServicio";
-                        }, 1000);
-                    },
-                    error: function(xhr) {
-                        // Mostrar toastr de error
-                        let errorMsg = xhr.responseJSON ? xhr.responseJSON.Msj : 'Error desconocido';
-                        toastr.error(errorMsg, 'Error');
-                    }
-                });
-            })
-            
+            const data = $('#formservicio')
+                .find('input[name], select[name]')
+                .serialize();
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: data,
+                success: function (response) {
+                    toastr.success(response.Msj, 'Éxito');
+                    setTimeout(() => {
+                        window.location.href = "/trabajadores/ventas/GestionarServicio";
+                    }, 1000);
+                },
+                error: function (xhr) {
+                    const errorMsg = xhr.responseJSON?.Msj || 'Error desconocido';
+                    toastr.error(errorMsg, 'Error');
+                }
+            });
         });
-
     });
 </script>
 {% endblock %}
