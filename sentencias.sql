@@ -4356,6 +4356,13 @@ CREATE PROCEDURE SP_INSERTAR_NIVEL(
 )
 BEGIN
     DECLARE nuevo_nroPiso INT;
+    DECLARE nuevo_idNivel INT;
+    DECLARE contador INT DEFAULT 1;
+
+    -- Declarar variables de mensaje si no están declaradas globalmente
+    -- Puedes omitir esto si @MSJ y @MSJ2 ya están definidas como variables de sesión
+    -- DECLARE @MSJ TEXT;
+    -- DECLARE @MSJ2 TEXT;
 
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -4367,22 +4374,82 @@ BEGIN
     SET @MSJ2 = NULL;
 
     IF p_cantidad > 0 THEN
+        -- Obtener el nuevo nroPiso
         SELECT COUNT(*) + 1
-          INTO nuevo_nroPiso
+        INTO nuevo_nroPiso
         FROM nivel
         WHERE id_vehiculo = p_vehiculo;
 
+        -- Insertar nuevo nivel
         INSERT INTO nivel (nroPiso, id_vehiculo, cantidad, estado)
         VALUES (nuevo_nroPiso, p_vehiculo, p_cantidad, 1);
 
+        -- Obtener el id generado del nivel insertado
+        SET nuevo_idNivel = LAST_INSERT_ID();
+
+        -- Insertar los asientos correspondientes
+        WHILE contador <= p_cantidad DO
+            INSERT INTO asiento (
+                nro_asiento,
+                id_nivel,
+                tipo_asiento,
+                estado,
+                fecha_registro
+            ) VALUES (
+                contador,
+                nuevo_idNivel,
+                'Económico',
+                1,
+                NOW()
+            );
+            SET contador = contador + 1;
+        END WHILE;
+
         SET @MSJ = CONCAT(
             'Nivel insertado correctamente con nroPiso ',
-            nuevo_nroPiso
+            nuevo_nroPiso,
+            ' y se crearon ',
+            p_cantidad,
+            ' asientos.'
         );
     ELSE
         SET @MSJ2 = 'La cantidad debe ser mayor a 0';
     END IF;
 END$$
+
+-- CREATE PROCEDURE SP_INSERTAR_NIVEL(
+--     IN p_vehiculo INT,
+--     IN p_cantidad INT
+-- )
+-- BEGIN
+--     DECLARE nuevo_nroPiso INT;
+
+--     DECLARE EXIT HANDLER FOR SQLEXCEPTION
+--     BEGIN
+--         SET @MSJ2 = 'Error inesperado al insertar nivel';
+--         SET @MSJ  = NULL;
+--     END;
+
+--     SET @MSJ  = NULL;
+--     SET @MSJ2 = NULL;
+
+--     IF p_cantidad > 0 THEN
+--         SELECT COUNT(*) + 1
+--           INTO nuevo_nroPiso
+--         FROM nivel
+--         WHERE id_vehiculo = p_vehiculo;
+
+--         INSERT INTO nivel (nroPiso, id_vehiculo, cantidad, estado)
+--         VALUES (nuevo_nroPiso, p_vehiculo, p_cantidad, 1);
+
+--         SET @MSJ = CONCAT(
+--             'Nivel insertado correctamente con nroPiso ',
+--             nuevo_nroPiso
+--         );
+--     ELSE
+--         SET @MSJ2 = 'La cantidad debe ser mayor a 0';
+--     END IF;
+-- END$$
 
 CREATE PROCEDURE SP_ACTUALIZAR_NIVEL(
   IN p_idNivel        INT,
