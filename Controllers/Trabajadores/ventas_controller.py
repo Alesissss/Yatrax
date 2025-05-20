@@ -5,6 +5,8 @@ from Models.tipoServicio import TipoServicio
 from Models.servicio import Servicio
 from Models.tipoComprobante import TipoComprobante
 from Models.tipoDocumento import TipoDocumento
+from Models.cliente import Cliente
+from Models.pais import Pais
 
 ventas_bp = Blueprint('ventas', __name__, url_prefix='/trabajadores/ventas')
 
@@ -664,13 +666,115 @@ def eliminar_tipo_documento(id):
 # END REGION TIPO DOCUMENTO #
 
 # REGION CLIENTE
+@ventas_bp.route('/GetData_Paises')
+def get_paises():
+    try:
+        paises = Pais.obtener_todos()
+        return jsonify({'data': paises, 'Status': 'success', 'Msj': 'Listado de paises retornado exitosamente'})
+    except Exception as e:
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar paises: {repr(e)}'})
+
 @ventas_bp.route('/ClienteNuevo')
 def cliente_nuevo():
     return render_template(
         'ventas/clienteCRUD.html',
-        tittle='Registrar cliente'
+        tittle='Registrar cliente',
+        cliente= {},
+        btnId= 'btn_Registrar',
+        active_page="cliente", 
+        active_menu='mVentas'
     )
 
+@ventas_bp.route("/RegistrarCliente", methods=["POST"])
+def registrar_cliente():
+    try:
+        nombre = request.form.get("nombre").strip()
+        estado = request.form.get("estado")
+        usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
+
+        mensajes = Cliente.registrar(nombre, estado, usuario_actual)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar tipo de usuario'})
+
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@ventas_bp.route("/EliminarCliente/<int:id>", methods=['POST'])
+def eliminar_cliente(id):  # Recibe el ID de la URL
+    try:
+        mensajes = Cliente.eliminar(id)  # Se usa el ID directamente
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al eliminar tipo de usuario'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@ventas_bp.route("/EditarCliente/<int:id>", methods=['GET', 'POST'])
+def editar_cliente(id):
+    try:
+        tipoUsuario = Cliente.obtener_por_id(id)
+
+        if request.method == 'POST':
+            nombre = request.form.get("nombre").strip()
+            estado = request.form.get("estado")
+            
+            mensajes = Cliente.editar(id, nombre, estado)
+            msj1 = mensajes.get('@MSJ')
+            msj2 = mensajes.get('@MSJ2')
+
+            if msj1:
+                return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+            elif msj2:
+                return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+            else:
+                return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar tipo de usuario'})
+
+        if tipoUsuario:
+            return render_template('usuario/tipoUsuarioCRUD.html', active_page="tipoUsuario", active_menu='mUsuarios', tipoUsuario=tipoUsuario, tittle = 'Editar tipo usuario', btnId = 'btn_Editar')
+        return render_template('usuario/tipoUsuarioCRUD.html', active_page="tipoUsuario", active_menu='mUsuarios', tipoUsuario={}, tittle = 'Editar tipo usuario', btnId = 'btn_Editar')
+
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+    
+@ventas_bp.route("/VerCliente/<int:id>", methods=['GET'])
+def ver_cliente(id):
+    try:
+        tipoUsuario = Cliente.obtener_por_id(id)
+        if tipoUsuario:
+            return render_template('usuario/tipoUsuarioCRUD.html', active_page="tipoUsuario", active_menu='mUsuarios', tipoUsuario=tipoUsuario, tittle = 'Ver tipo usuario', btnId = 'btn_Aceptar')
+        return render_template('usuario/tipoUsuarioCRUD.html', active_page="tipoUsuario", active_menu='mUsuarios', tipoUsuario={}, tittle = 'Ver tipo usuario', btnId = 'btn_Aceptar')
+        
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+    
+@ventas_bp.route("/DarBajaTipoUsuario/<int:id>", methods=['POST'])
+def darBaja_cliente(id):  # Recibe el ID de la URL
+    try:
+        mensajes = Cliente.darBaja(id)  # Se usa el ID directamente
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja al tipo de usuario'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
 # END REGION CLIENTE 
 

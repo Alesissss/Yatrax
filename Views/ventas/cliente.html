@@ -18,9 +18,9 @@
                     <thead class="bg-gray">
                         <tr>
                             <th class="text-center">ID</th>
-                            <th class="text-center">PAIS</th>
+                            <th class="text-center">PAÍS</th>
                             <th class="text-center">TIPO DOCUMENTO</th>
-                            <th class="text-center">NUMERO DOCUMENTO</th>
+                            <th class="text-center">N° DOCUMENTO</th>
                             <th class="text-center">NOMBRES</th>
                             <th class="text-center">APELLIDO PATERNO</th>
                             <th class="text-center">APELLIDO MATERNO</th>
@@ -30,7 +30,6 @@
                             <th class="text-center">TELÉFONO</th>
                             <th class="text-center">EMAIL</th>
                             <th class="text-center">ESTADO</th>
-
                             <th class="text-center">ACCIÓN</th>
                         </tr>
                     </thead>
@@ -205,7 +204,13 @@
                 { data: "apellido paterno", name: "apellido paterno" },
                 { data: "apellido materno", name: "apellido materno" },
                 { data: "sexo", name: "sexo" },
-                { data: "fecha nacimiento", name: "fecha nacimiento" },
+                { 
+                    data: "fecha nacimiento", 
+                    name: "fecha nacimiento",
+                    render: function (data, type, row) {
+                        return data;
+                    }
+                },
                 { data: "direccion", name: "direccion" },
                 { data: "telefono", name: "telefono" },
                 { data: "email", name: "email" },
@@ -282,15 +287,15 @@
     }
 
     function fct_ClienteNuevo() {
-        window.location.href = '/trabajadores/viajes/ClienteNuevo';
+        window.location.href = '/trabajadores/ventas/ClienteNuevo';
     }
 
     function fct_ClienteEditar(Id) {
-        window.location.href = `/trabajadores/clientes/EditarCliente/${Id}`;
+        window.location.href = `/trabajadores/ventas/EditarCliente/${Id}`;
     }
 
     function fct_ClienteVer(Id) {
-        window.location.href = `/trabajadores/clientes/VerCliente/${Id}`;
+        window.location.href = `/trabajadores/ventas/VerCliente/${Id}`;
     }
 
     function fct_ClienteEliminar(Id) {

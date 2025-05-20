@@ -12,15 +12,13 @@
                 </div>
                 <div class="card-body">
                     <div class="col-md-12 mb-3">
-                        <label for="txt_Pais">País</label>
+                        <label for="cbx_Pais">País</label>
                         <div class="input-group">
-                            <input type="text" id="txt_Pais" class="form-control" placeholder="País">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-flag"></i></div>
-                            </div>
+                            <select id="cbx_Pais" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{% endif
+                                %}>
+                            </select>
                         </div>
                     </div>
-
                     <div class="col-md-12 mb-3">
                         <label for="cbx_TipoDocumento">Tipo de documento</label>
                         <div class="input-group">
@@ -36,33 +34,43 @@
                     <div class="col-md-12 mb-3">
                         <label for="txt_NumeroDocumento">Número de documento</label>
                         <div class="input-group">
-                            <input type="text" id="txt_NumeroDocumento" class="form-control" placeholder="Número de documento">
+                            <input type="text" id="txt_NumeroDocumento" class="form-control"
+                                placeholder="Número de documento">
                             <div class="input-group-append">
                                 <div class="input-group-text"><i class="fas fa-id-card"></i></div>
                             </div>
                         </div>
                     </div>
-
+                    <div class="col-md-12 mb-3">
+                        <label for="txt_Nombres">Nombres</label>
+                        <div class="input-group">
+                            <input type="text" id="txt_Nombres" class="form-control"
+                                placeholder="Nombres">
+                            <div class="input-group-append">
+                                <div class="input-group-text"><i class="fas fa-user-tag"></i></div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="col-md-12 mb-3">
                         <label for="txt_ApellidoPaterno">Apellido paterno</label>
                         <div class="input-group">
-                            <input type="text" id="txt_ApellidoPaterno" class="form-control" placeholder="Apellido paterno">
+                            <input type="text" id="txt_ApellidoPaterno" class="form-control"
+                                placeholder="Apellido paterno">
                             <div class="input-group-append">
                                 <div class="input-group-text"><i class="fas fa-user-tag"></i></div>
                             </div>
                         </div>
                     </div>
-
                     <div class="col-md-12 mb-3">
                         <label for="txt_ApellidoMaterno">Apellido materno</label>
                         <div class="input-group">
-                            <input type="text" id="txt_ApellidoMaterno" class="form-control" placeholder="Apellido materno">
+                            <input type="text" id="txt_ApellidoMaterno" class="form-control"
+                                placeholder="Apellido materno">
                             <div class="input-group-append">
                                 <div class="input-group-text"><i class="fas fa-user-tag"></i></div>
                             </div>
                         </div>
                     </div>
-
                     <div class="col-md-12 mb-3">
                         <label for="cbx_Sexo">Sexo</label>
                         <div class="input-group">
@@ -73,7 +81,6 @@
                             </select>
                         </div>
                     </div>
-
                     <div class="col-md-12 mb-3">
                         <label for="txt_FechaNacimiento">Fecha de nacimiento</label>
                         <div class="input-group">
@@ -83,7 +90,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="col-md-12 mb-3">
                         <label for="txt_Direccion">Dirección</label>
                         <div class="input-group">
@@ -93,7 +99,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="col-md-12 mb-3">
                         <label for="txt_Telefono">Teléfono</label>
                         <div class="input-group">
@@ -103,13 +108,12 @@
                             </div>
                         </div>
                     </div>
-
                     <!-- Botón de acción -->
-                    <div class="text-center">
-                        <button class="btn btn-success" id="btn_Guardar">Guardar</button>
-                        <a href="/trabajadores/usuarios/GestionarUsuarios" class="btn btn-secondary">Volver</a>
+                    <div class="col-md-12 text-center">
+                        <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de
+                            clientes</button>
+                        <button id="{{ btnId }}" type="button" class="btn btn-primary">Aceptar</button>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -118,5 +122,43 @@
 {% endblock %}
 
 {% block scripts %}
-<!-- Aquí puedes agregar el JS si es necesario -->
+<script>
+    function fct_GetPaises() {
+        $.getJSON('/trabajadores/ventas/GetData_Paises', function (response) {
+            if (response.Status === 'success') {
+                let paises = [];
+
+                $.each(response.data, function (index, item) {
+                    let option = {
+                        id: item.id,
+                        text: item.iso3 + " - " + item.nombre,
+                        phone_code: item.phone_code
+                    };
+
+                    paises.push(option);
+                });
+
+                $('#cbx_Pais').select2({
+                    theme: 'bootstrap4',
+                    placeholder: "Buscar...",
+                    data: paises,
+                    language: {
+                        noResults: function () {
+                            return "No se encontraron resultados";
+                        }
+                    },
+                    allowClear: true
+                });
+
+                $('#cbx_Pais').val("{{ cliente.id_pais }}").trigger('change');
+            } else {
+                console.error('Error al obtener las sucursales:', response.Msj);
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        fct_GetPaises();
+    });
+</script>
 {% endblock %}
