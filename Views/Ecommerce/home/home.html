@@ -107,10 +107,13 @@
 
   /* Contenido de los tabs */
   .tab-content {
-    background-color: #b8b8b8;
+    background-color: #ffffff;
     border-top: 1px solid #315CAC;
-    padding: 20px;
+    padding: 30px;
     border-radius: 0 0 10px 10px;
+  }
+  .tab-content-pago{
+
   }
 
   .tab-content .step {
@@ -163,6 +166,129 @@
   .form-search button:hover {
     background-color: #003b8b;
   }
+  .rowcito{
+    display:grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .seccion_der{
+    margin-left:1em;
+    margin-right: 1em;
+  }
+  .seccion_der>*{
+    margin-bottom: 1em;
+  }
+
+  .detalles_viaje,
+  .resumen_compra{
+    border:1px solid black;
+    height: 45%;
+  }
+  
+  /* Seccion de pago */
+  .pago-wrapper {
+    margin-top: 20px;
+    font-family: Arial;
+  }
+
+  .pago-progress {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .etapa {
+    padding: 10px 15px;
+    text-align: center;
+    font-weight: bold;
+    color: #888;
+  }
+
+  .etapa.active {
+    color: #003b8b;
+  }
+
+  .barra {
+    flex-grow: 1;
+    height: 8px;
+    background: #ddd;
+    margin: 0 10px;
+    border-radius: 4px;
+    position: relative;
+  }
+
+  .barra-interna {
+    height: 8px;
+    background: #003b8b;
+    width: 50%;
+    /* Empieza a la mitad */
+    transition: width 0.4s ease;
+    border-radius: 4px;
+  }
+
+  .pago-seccion {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    overflow: hidden;
+  }
+
+  .pago-seccion .encabezado {
+    padding: 10px 15px;
+    font-weight: bold;
+  }
+
+  .pago-seccion.abierta .contenido {
+    display: block;
+    padding: 15px;
+  }
+
+  .pago-seccion .contenido {
+    display: none;
+  }
+
+  .azul {
+    background: #003b8b;
+    color: white;
+  }
+
+  .blanco {
+    background: #f4f4f4;
+    color: #003b8b;
+  }
+
+  .grid-form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+
+  .grid-form label {
+    display: block;
+  }
+
+  .grid-form .correo {
+    grid-column: span 2;
+  }
+
+  .grid-form input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100%;
+  }
+
+  .btn-siguiente {
+    background: #003b8b;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
 </style>
 {% endblock %}
 <header>
@@ -217,7 +343,85 @@
 
       <!-- Paso 4 -->
       <div class="step" id="step-3">
-        <p>Pago...</p>
+        <div class="pago-wrapper">
+          <!-- Barra de progreso -->
+          <div class="pago-progress">
+            <div class="etapa active">
+              <i class="fas fa-id-card"></i>
+              <span>Contacto</span>
+            </div>
+            <div class="barra">
+              <div class="barra-interna" id="barraProgreso"></div>
+            </div>
+            <div class="etapa" id="etapaPago">
+              <i class="fas fa-credit-card"></i>
+              <span>Pago</span>
+            </div>
+          </div>
+          <div class="rowcito">
+            <div class="seccion_izq">
+              <div class="pago-seccion abierta" id="seccionContacto">
+                <div class="encabezado azul">
+                  <span><i class="fas fa-circle-1"></i> Contacto</span>
+                  <i class="fa-solid fa-pen-to-square flotar_derecha"></i>
+                </div>
+                <div class="contenido">
+                  <div class="grid-form">
+                    <div class="correo">
+                      <label for="email">Correo:</label>
+                      <input name="email" type="email" placeholder="Correo">
+                    </div>
+                    <div class="nombre">
+                      <label for="nombre">Nombres:</label>
+                      <input name="nombre" type="text" placeholder="Nombre">
+                    </div>
+                    <div class="apellidos">
+                      <label for="apellidos">Apellidos:</label>
+                      <input type="text" placeholder="Apellidos">
+                    </div>
+                    <div class="doc">
+                      <label for="doc">Documento de identidad:</label>
+                      <input type="text" placeholder="Documento de identidad" name="doc">
+                    </div>
+                    <div class="telefono">
+                      <label for="telefono">Teléfono:</label>
+                      <input name="telefono" type="tel" placeholder="Teléfono/móvil">
+                    </div>
+
+                  </div>
+                  <button class="btn-siguiente" onclick="pasarAPago()">Siguiente <i
+                      class="fas fa-arrow-right"></i></button>
+                </div>
+              </div>
+
+              <!-- Sección PAGO (oculta al inicio) -->
+              <div class="pago-seccion" id="seccionPago">
+                <div class="encabezado blanco">
+                  <span><i class="fas fa-circle-2"></i> Pago</span>
+                </div>
+                <div class="contenido">
+                  <div class="metodo_pago">
+                    <label for="metodo_pago" class=""></label>
+                  </div>
+                  <button class="btn-siguiente" onclick="pasarAContacto()">Atras <i
+                      class="fas fa-arrow-left"></i></button>
+                </div>
+
+              </div>
+            </div>
+            <div class="seccion_der">
+                <div class="detalles_viaje">
+
+                </div>
+                <div class="resumen_compra">
+
+                </div>
+            </div>
+          </div>
+          <!-- Sección CONTACTO -->
+
+        </div>
+
       </div>
     </div>
   </section>
@@ -402,192 +606,7 @@
 </main>
 {% endblock %}
 {% block scripts %}
-<script>
-  $(document).ready(function () {
-    const viajes = [
-      {
-        numero: 1053,
-        origen: 'CAJAMARCA',
-        destino: 'CHICLAYO',
-        salida: '10:40PM',
-        llegada: '4:40AM',
-        duracion: '6h',
-        servicio: 'Servicio Nocturno Directo',
-        asientosLibres: 40,
-        precios: {
-          primerNivel: 85,
-          segundoNivel: 70
-        }
-      }
-    ];
 
-    let selectedSeats = {};
-
-    // Mostrar el viaje 1053 directamente sin necesidad de búsqueda
-    function mostrarViaje() {
-      $('#resultados').removeClass('d-none');
-      $('#horarios').empty();
-
-      viajes.forEach((viaje, i) => {
-        $('#horarios').append(`
-          <div class="card mb-3">
-            <div class="card-body">
-              <div class="row align-items-center">
-                <div class="col-md-3">
-                  <h6 class="mb-1"><strong>Viaje:</strong> ${viaje.numero}</h6>
-                  <p class="mb-1"><strong>Salida:</strong> ${viaje.origen} - ${viaje.salida}</p>
-                  <p class="mb-1"><strong>Llegada:</strong> ${viaje.destino} - ${viaje.llegada}</p>
-                </div>
-                <div class="col-md-2">
-                  <span>${viaje.servicio}</span>
-                </div>
-                <div class="col-md-2">
-                  <span>${viaje.duracion}</span>
-                </div>
-                <div class="col-md-2">
-                  <span>${viaje.asientosLibres} Libres</span>
-                </div>
-                <div class="col-md-2">
-                  <span>S/ ${viaje.precios.primerNivel} (1°N) <br> S/ ${viaje.precios.segundoNivel} (2°N)</span>
-                </div>
-                <div class="col-md-1">
-                  <button class="btn btn-primary elegirAsiento" data-index="${i}">Elegir</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        `);
-      });
-    }
-
-    // Mostrar el viaje al cargar la página
-    mostrarViaje();
-
-    $(document).on('click', '.elegirAsiento', function () {
-      $('#resultados').addClass('d-none');
-      $('#asientos_section').removeClass('d-none');
-      renderSeatMap();
-    });
-
-    function renderSeatMap() {
-      $('#asientos').empty();
-      $('#formulariosPasajeros').empty();
-      selectedSeats = {};
-
-      // Mapa de asientos con 20 en primer nivel y 20 en segundo nivel
-      const seatMap = `
-        <div class="seat-map-container">
-          <h6 class="text-center mb-3">1° Nivel - S/85</h6>
-          <div class="first-level mb-4">
-            ${renderSeatLevel(1, 20)}
-          </div>
-          <h6 class="text-center mb-3">2° Nivel - S/70</h6>
-          <div class="second-level">
-            ${renderSeatLevel(21, 40)}
-          </div>
-        </div>
-      `;
-
-      $('#asientos').html(seatMap);
-    }
-
-    function renderSeatLevel(start, end) {
-      let html = '<div class="d-flex flex-wrap justify-content-center">';
-      const occupiedSeats = [10, 27, 35]; // Asientos ocupados
-
-      for (let i = start; i <= end; i++) {
-        const isOccupied = occupiedSeats.includes(i);
-        html += `
-          <div class="seat ${isOccupied ? 'occupied' : 'available'} mx-1 mb-2" 
-               data-num="${i}" 
-               data-level="${i <= 20 ? 1 : 2}"
-               data-price="${i <= 20 ? 85 : 70}">
-            ${i <= 20 ? i : i - 20}
-          </div>
-        `;
-      }
-
-      html += '</div>';
-      return html;
-    }
-
-    $(document).on('click', '.seat.available', function () {
-      const seatNum = $(this).data('num');
-      const seatLevel = $(this).data('level');
-      const seatPrice = $(this).data('price');
-
-      if ($(this).hasClass('selected')) {
-        // Deseleccionar asiento
-        $(this).removeClass('selected').addClass('available');
-        $(`#passenger-form-${seatNum}`).remove();
-        delete selectedSeats[seatNum];
-      } else {
-        // Seleccionar asiento
-        $(this).removeClass('available').addClass('selected');
-        selectedSeats[seatNum] = true;
-        renderPassengerForm(seatNum, seatLevel, seatPrice);
-      }
-    });
-
-    function renderPassengerForm(seatNum, level, price) {
-      $('#formulariosPasajeros').append(`
-        <div class="card mb-3 passenger-form" id="passenger-form-${seatNum}">
-          <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <span>Asiento ${seatNum <= 20 ? seatNum : seatNum - 20} - ${level}° Nivel (S/${price})</span>
-            <button type="button" class="btn btn-sm btn-light remove-seat" data-seat="${seatNum}">
-              <i class="fas fa-times"></i> Quitar
-            </button>
-          </div>
-          <div class="card-body">
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label class="form-label">Nombres completos</label>
-                <input type="text" class="form-control" required>
-              </div>
-              <div class="col-md-6 mb-3">
-                <label class="form-label">Apellidos completos</label>
-                <input type="text" class="form-control" required>
-              </div>
-              <div class="col-md-4 mb-3">
-                <label class="form-label">DNI</label>
-                <input type="text" class="form-control" required>
-              </div>
-              <div class="col-md-4 mb-3">
-                <label class="form-label">Fecha Nacimiento</label>
-                <input type="date" class="form-control">
-              </div>
-              <div class="col-md-4 mb-3">
-                <label class="form-label">Género</label>
-                <select class="form-select">
-                  <option>Masculino</option>
-                  <option>Femenino</option>
-                  <option>Otro</option>
-                </select>
-              </div>
-              <div class="col-md-6 mb-3">
-                <label class="form-label">Teléfono</label>
-                <input type="tel" class="form-control">
-              </div>
-              <div class="col-md-6 mb-3">
-                <label class="form-label">Correo electrónico</label>
-                <input type="email" class="form-control">
-              </div>
-            </div>
-          </div>
-        </div>
-      `);
-    }
-
-    $(document).on('click', '.remove-seat', function () {
-      const seatNum = $(this).data('seat');
-      $(`#passenger-form-${seatNum}`).remove();
-      $(`.seat[data-num="${seatNum}"]`)
-        .removeClass('selected')
-        .addClass('available');
-      delete selectedSeats[seatNum];
-    });
-  });
-</script>
 <script>
   let currentStep = 0;
   const steps = document.querySelectorAll('.step');
@@ -613,6 +632,44 @@
       tabs[currentStep].classList.add('active');
     });
   });
+
+  function pasarAPago() {
+    // Oculta CONTACTO
+    document.getElementById("seccionContacto").classList.remove("abierta");
+    document.querySelector("#seccionContacto .encabezado").classList.remove("azul");
+    document.querySelector("#seccionContacto .encabezado").classList.add("blanco");
+
+    // Muestra PAGO
+    document.getElementById("seccionPago").classList.add("abierta");
+    document.querySelector("#seccionPago .encabezado").classList.remove("blanco");
+    document.querySelector("#seccionPago .encabezado").classList.add("azul");
+
+    // Mueve barra
+    document.getElementById("barraProgreso").style.width = "100%";
+
+    // Marca etapa activa
+    document.getElementById("etapaPago").classList.add("active");
+  }
+
+  function pasarAContacto() {
+    // Oculta CONTACTO
+    document.getElementById("seccionContacto").classList.add("abierta");
+    document.querySelector("#seccionContacto .encabezado").classList.add("azul");
+    document.querySelector("#seccionContacto .encabezado").classList.remove("blanco");
+
+    // Muestra PAGO
+    document.getElementById("seccionPago").classList.remove("abierta");
+    document.querySelector("#seccionPago .encabezado").classList.add("blanco");
+    document.querySelector("#seccionPago .encabezado").classList.remove("azul");
+
+    // Mueve barra
+    document.getElementById("barraProgreso").style.width = "50%";
+
+    // Marca etapa activa
+    document.getElementById("etapaPago").classList.remove("active");
+  }
+
+
 
 </script>
 {% endblock %}
