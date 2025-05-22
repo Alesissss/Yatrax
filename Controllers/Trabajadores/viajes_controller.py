@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort
+from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort, json
 from Models.nivel import Nivel
 from Models.tipoVehiculo import TipoVehiculo
 from Models.vehiculo import Vehiculo
@@ -96,7 +96,7 @@ def Menu_Asiento():
 
 @viajes_bp.route('/RutaNuevo')
 def TipoUsuario_Nuevo():
-    return render_template('viajes/rutaCRUD.html', active_page="ruta", active_menu='mViajes', ruta={}, tittle = 'Registrar ruta', btnId = 'btn_Registrar')
+    return render_template('viajes/rutaCRUD.html', active_page="ruta", active_menu='mViajes', ruta={}, escalas=[], tittle = 'Registrar ruta', btnId = 'btn_Registrar')
 
 @viajes_bp.route('/ProgramarViaje')
 def Menu_ProgramarViaje():
@@ -965,31 +965,41 @@ def get_rutas():
     except Exception as e:
         return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar rutas: + {repr(e)}'})
 
-@viajes_bp.route("/GetSucursales", methods=["GET"])
-def get_rutaSucursal():
+@viajes_bp.route("/GetData_SucursalesMapaRuta", methods=['GET'])
+def obtener_sucursales_mapa_ruta():
     try:
-        sucursal = Sucursal.obtener_todos()
-
-        sucursal_filtrada = [
-            {k: v for k, v in s.items() if k in ['id' , 'ciudad', 'nombre', 'direccion', 'latitud', 'longitud', 'estado']} 
-            for s in sucursal if s.get('estado') == 1
-        ]
-
-        return jsonify({'data': sucursal_filtrada, 'Status': 'success', 'Msj': 'Listado de sucursales retornado exitosamente'})
+        sucursales = Sucursal.obtener_todos()
+        
+        # Convertir a formato JSON compatible
+        sucursales_json = []
+        for suc in sucursales:
+            if suc['estado'] == 1:
+                sucursales_json.append({
+                    'id': suc['id'],
+                    'nombre': suc['nombre'],
+                    'direccion': suc['direccion'],
+                    'ciudad': suc['ciudad'],
+                    'latitud': float(suc['latitud']) if suc['latitud'] else None,
+                    'longitud': float(suc['longitud']) if suc['longitud'] else None
+                })
+        
+        return jsonify(sucursales_json)
     except Exception as e:
-        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar las sucursales: + {repr(e)}'})
-
+        return jsonify({"Status": "error", "Msj": str(e)}), 500
 
 @viajes_bp.route("/RegistrarRuta", methods=["POST"])
 def registrar_ruta():
     try:
         nombre = request.form.get("nombre").strip()
-        origen = int(request.form.get("origen").strip())
-        destino = int(request.form.get("destino").strip())
         estado = request.form.get("estado")
+        escalas_json = request.form.get("escalas")
+
+        escalas = json.loads(escalas_json) if escalas_json else []
+        tipo = "ESCALA" if len(escalas) > 2 else "DIRECTO"
+
         usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
 
-        mensajes = Ruta.registrar(nombre, origen, destino, estado, usuario_actual)
+        mensajes = Ruta.registrar(nombre, estado, tipo, escalas, usuario_actual)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 
@@ -1023,14 +1033,19 @@ def eliminar_ruta(id):  # Recibe el ID de la URL
 def editar_ruta(id):
     try:
         ruta = Ruta.obtener_por_id(id)
+        escalas = Ruta.obtener_escalas_por_ruta(id)
 
         if request.method == 'POST':
             nombre = request.form.get("nombre").strip()
-            origen = int(request.form.get("origen").strip())
-            destino = int(request.form.get("destino").strip())
             estado = request.form.get("estado")
+            escalas_json = request.form.get("escalas")
+
+            usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
+
+            escalas = json.loads(escalas_json) if escalas_json else []
+            tipo = "ESCALA" if len(escalas) > 2 else "DIRECTO"
             
-            mensajes = Ruta.editar(id, nombre, origen, destino, estado)
+            mensajes = Ruta.editar(id, nombre, tipo, estado, escalas, usuario_actual)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
@@ -1041,9 +1056,9 @@ def editar_ruta(id):
             else:
                 return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar ruta'})
 
-        if ruta:
-            return render_template('viajes/rutaCRUD.html', active_page="ruta", active_menu='mViajes', ruta=ruta, tittle = 'Editar ruta', btnId = 'btn_Editar')
-        return render_template('viajes/rutaCRUD.html', active_page="ruta", active_menu='mViajes', ruta={}, tittle = 'Editar ruta', btnId = 'btn_Editar')
+        if ruta and escalas:
+            return render_template('viajes/rutaCRUD.html', active_page="ruta", active_menu='mViajes', ruta=ruta, escalas=escalas, tittle = 'Editar ruta', btnId = 'btn_Editar')
+        return render_template('viajes/rutaCRUD.html', active_page="ruta", active_menu='mViajes', ruta={}, escalas=[], tittle = 'Editar ruta', btnId = 'btn_Editar')
 
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
@@ -1052,9 +1067,10 @@ def editar_ruta(id):
 def ver_ruta(id):
     try:
         ruta = Ruta.obtener_por_id(id)
-        if ruta:
-            return render_template('viajes/rutaCRUD.html', active_page="ruta", active_menu='mViajes', ruta=ruta, tittle = 'Ver ruta', btnId = 'btn_Aceptar')
-        return render_template('viajes/rutaCRUD.html', active_page="ruta", active_menu='mViajes', ruta={}, tittle = 'Ver ruta', btnId = 'btn_Aceptar')
+        escalas = Ruta.obtener_escalas_por_ruta(id)
+        if ruta and escalas:
+            return render_template('viajes/rutaCRUD.html', active_page="ruta", active_menu='mViajes', ruta=ruta, escalas=escalas, tittle = 'Ver ruta', btnId = 'btn_Aceptar')
+        return render_template('viajes/rutaCRUD.html', active_page="ruta", active_menu='mViajes', ruta={}, escalas=[], tittle = 'Ver ruta', btnId = 'btn_Aceptar')
         
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})

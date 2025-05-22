@@ -112,9 +112,8 @@
     padding: 30px;
     border-radius: 0 0 10px 10px;
   }
-  .tab-content-pago{
 
-  }
+  .tab-content-pago {}
 
   .tab-content .step {
     display: none;
@@ -166,24 +165,27 @@
   .form-search button:hover {
     background-color: #003b8b;
   }
-  .rowcito{
-    display:grid;
+
+  .rowcito {
+    display: grid;
     grid-template-columns: repeat(2, 1fr);
   }
-  .seccion_der{
-    margin-left:1em;
+
+  .seccion_der {
+    margin-left: 1em;
     margin-right: 1em;
   }
-  .seccion_der>*{
+
+  .seccion_der>* {
     margin-bottom: 1em;
   }
 
   .detalles_viaje,
-  .resumen_compra{
-    border:1px solid black;
+  .resumen_compra {
+    border: 1px solid black;
     height: 45%;
   }
-  
+
   /* Seccion de pago */
   .pago-wrapper {
     margin-top: 20px;
@@ -288,7 +290,6 @@
     font-weight: bold;
     cursor: pointer;
   }
-  
 </style>
 {% endblock %}
 <header>
@@ -410,12 +411,12 @@
               </div>
             </div>
             <div class="seccion_der">
-                <div class="detalles_viaje">
+              <div class="detalles_viaje">
 
-                </div>
-                <div class="resumen_compra">
+              </div>
+              <div class="resumen_compra">
 
-                </div>
+              </div>
             </div>
           </div>
           <!-- Sección CONTACTO -->
@@ -425,114 +426,203 @@
       </div>
     </div>
   </section>
+  <h2 style="color: #315BAA; margin: 2%; font-weight: bold;" class="text-center">Servicios</h2>
+  <section class="position-relative">
+    <div class="container-fluid d-flex justify-content-center align-items-center">
+      <div id="carouselExample" class="carousel slide w-100 position-relative">
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <div class="d-flex justify-content-center gap-5">
+              <a href="#" style="text-decoration: none;">
+                <div class="card" style="width: 18rem;">
+                  <img src="../../../Static/img/login_celular.jpg" class="card-img-top" alt=""
+                    style="border: 3px solid black; border-radius: 5%; display: block; margin: 5%; width: auto; height: auto;">
+                  <div class="card-body">
+                    <h5 class="card-title text-center" style="font-weight: bold;">Económico</h5>
+                    <p class="card-text text-center">Autobuses cómodos y seguros a precios accesibles. Pensando para
+                      usuarios
+                      que priorizan economía sin perder calidad.
+                    </p>
+                  </div>
+                </div>
+              </a>
+              <a href="#" style="text-decoration: none;">
+                <div class="card" style="width: 18rem;">
+                  <img src="../../../Static/img/login_celular.jpg" class="card-img-top" alt=""
+                    style="border: 3px solid black; border-radius: 5%; display: block; margin: 5%; width: auto; height: auto;">
+                  <div class="card-body">
+                    <h5 class="card-title text-center" style="font-weight: bold;">Económico</h5>
+                    <p class="card-text text-center">Autobuses cómodos y seguros a precios accesibles. Pensando para
+                      usuarios
+                      que priorizan economía sin perder calidad.
+                    </p>
+                  </div>
+                </div>
+              </a>
+              <a href="#" style="text-decoration: none;">
+                <div class="card" style="width: 18rem;">
+                  <img src="../../../Static/img/login_celular.jpg" class="card-img-top" alt=""
+                    style="border: 3px solid black; border-radius: 5%; display: block; margin: 5%; width: auto; height: auto;">
+                  <div class="card-body">
+                    <h5 class="card-title text-center" style="font-weight: bold;">Económico</h5>
+                    <p class="card-text text-center">Autobuses cómodos y seguros a precios accesibles. Pensando para
+                      usuarios
+                      que priorizan economía sin perder calidad.
+                    </p>
+                  </div>
+                </div>
+              </a>
+              <a href="#" style="text-decoration: none;">
+                <div class="card" style="width: 18rem;">
+                  <img src="../../../Static/img/login_celular.jpg" class="card-img-top" alt=""
+                    style="border: 3px solid black; border-radius: 5%; display: block; margin: 5%; width: auto; height: auto;">
+                  <div class="card-body">
+                    <h5 class="card-title text-center" style="font-weight: bold;">Económico</h5>
+                    <p class="card-text text-center">Autobuses cómodos y seguros a precios accesibles. Pensando para
+                      usuarios
+                      que priorizan economía sin perder calidad.
+                    </p>
+                  </div>
+                </div>
+              </a>
+            </div>
+          </div>
+          <!-- Botón anterior -->
+          <button class="carousel-control-prev justify-content-md-end" type="button" data-bs-target="#carouselExample"
+            data-bs-slide="prev" style="color: black;">
+            <span class="carousel-control-prev-icon" aria-hidden="true"
+              style="filter: invert(0%) brightness(0%)"></span>
+            <span class="visually-hidden">Anterior</span>
+          </button>
+          <!-- Botón siguiente -->
+          <button class="carousel-control-next justify-content-md-start" type="button" data-bs-target="#carouselExample"
+            data-bs-slide="next" style="color: black;">
+            <span class="carousel-control-next-icon" aria-hidden="true"
+              style="filter: invert(0%) brightness(0%)"></span>
+            <span class="visually-hidden">Siguiente</span>
+          </button>
 
-
-  <section id="ctn_beneficios">
-    <div>
-      <h2>Compra segura</h2>
-      <br>
-      <p>Comprar pasajes de bus para tu viaje de turismo no tiene que ser estresante o inseguro. De hecho, ahora
-        existe la posibilidad de comprarlos desde el lugar en que te encuentres y en el momento que desees gracias al
-        método en línea de compra de pasajes. Además, nuestra plataforma garantiza total transparencia y seguridad en
-        las transacciones con el fin de que compres tu pasajes de bus con la tranquilidad que necesitas.</p>
-    </div>
-    <div>
-      <h2>Medios de pago de confianza</h2>
-      <br>
-      <p>El cumplimiento de los estándares de seguridad de datos (DSS) de las industrias de tarjeta de pago es un
-        requisito para todas las entidades que almacenan, procesan o transmiten información de tarjetahabientes,
-        incluidas las instituciones financieras, los comercios y los proveedores de servicios. Los programas de Visa
-        administran el cumplimiento de los DSS de PCI al requerir que los participantes demuestren el cumplimiento
-        regularmente.</p>
-    </div>
-    <div>
-      <h2>Facilidad</h2>
-      <br>
-      <p>El sistema de ventas por internet trabaja en línea con nuestros diferentes sistemas de venta, puede consultar
-        los turnos y precios para posteriormente realiza su compra en un entorno amigable y que le permite realizar
-        compras de forma rápida y sencilla, tenemos varias opciones de pago y si desea ser asesorado puede llamar al
-        número que figura en nuestra página web.</p>
-    </div>
+        </div>
+      </div>
   </section>
-  <section id="consultas">
-    <h2>Preguntas frecuentes</h2>
-    <br>
-    <!-- Pregunta 1 -->
-    <details>
-      <summary>¿Cómo puedo comprar un pasaje de turismo terrestre?</summary>
-      <p>
-        Puedes comprar tus pasajes directamente en nuestra página web, a través de nuestra aplicación móvil o
-        visitando nuestras oficinas físicas. Aceptamos pagos con tarjeta de crédito, débito y transferencias
-        bancarias.
-      </p>
-    </details>
 
-    <!-- Pregunta 2 -->
-    <details>
-      <summary>¿Qué rutas de turismo terrestre ofrecen?</summary>
-      <p>
-        Ofrecemos rutas a los principales destinos turísticos del país, incluyendo ciudades históricas, playas y
-        parques naturales. Puedes consultar todas nuestras rutas disponibles en la sección "Destinos" de nuestra
-        página web.
-      </p>
-    </details>
+  <section id="principal" class="h-75 container-sm mx-auto d-flex justify-content-md-start align-items-start">
+    <div class="row">
+      <h2 style="color: #315BAA; margin: 2%; font-weight: bold;" class="text-center">Preguntas frecuentes</h2>
+      <div class="col-md-8">
+        <div class="accordion" id="accordionExample">
+          <div class="accordion-item my-4">
+            <h2 class="accordion-header" id="headingOne">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
+                aria-expanded="false" aria-controls="collapseOne">
+                <i class="bi bi-truck-flatbed"></i>
+                <span class="px-3 text-black">¿Postergar y activar boleto?</span>
+              </button>
+            </h2>
+            <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne"
+              data-bs-parent="#accordionExample">
+              <div class="accordion-body">
+                <h2 class="fs-6 fw-semibold"></h2>
+                <div class="my-2">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa, odit.</div>
+              </div>
+            </div>
+          </div>
 
-    <!-- Pregunta 3 -->
-    <details>
-      <summary>¿Cuánto tiempo tarda el envío de paquetes?</summary>
-      <p>
-        El tiempo de envío depende de la distancia y el destino. Para envíos locales, el tiempo estimado es de 1 a 2
-        días hábiles. Para envíos nacionales, puede tardar entre 3 y 5 días hábiles. Te proporcionaremos un número de
-        seguimiento para que puedas monitorear tu paquete.
-      </p>
-    </details>
+          <!-- Segundo acordion de pregunta -->
 
-    <!-- Pregunta 4 -->
-    <details>
-      <summary>¿Qué tipo de paquetes puedo enviar?</summary>
-      <p>
-        Aceptamos paquetes de diversos tamaños y pesos, desde documentos hasta mercancías de tamaño mediano. Sin
-        embargo, no transportamos materiales peligrosos o ilegales. Para más detalles, consulta nuestra política de
-        envíos.
-      </p>
-    </details>
+          <div class="accordion-item my-4">
+            <h2 class="accordion-header" id="headingTwo">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                <i class="bi bi-credit-card"></i>
+                <span class="px-3 text-black">¿Qué pasa si deseo cambiar mi boleto a nombre de otra persona?</span>
+              </button>
+            </h2>
+            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+              data-bs-parent="#accordionExample">
+              <div class="accordion-body">
+                <h2 class="fs-6 fw-semibold"></h2>
+                <div class="my-2">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa, odit.</div>
+              </div>
+            </div>
+          </div>
 
-    <!-- Pregunta 5 -->
-    <details>
-      <summary>¿Ofrecen servicios de turismo para grupos?</summary>
-      <p>
-        Sí, ofrecemos servicios especializados para grupos, incluyendo transporte privado y paquetes personalizados.
-        Contáctanos directamente para obtener más información y un presupuesto adaptado a tus necesidades.
-      </p>
-    </details>
+          <!-- Siguiente bloque de preguntas -->
 
-    <!-- Pregunta 6 -->
-    <details>
-      <summary>¿Qué debo hacer si mi paquete no llega a tiempo?</summary>
-      <p>
-        Si tu paquete no llega dentro del tiempo estimado, contáctanos inmediatamente a través de nuestro servicio de
-        atención al cliente. Te ayudaremos a rastrear el paquete y resolver cualquier inconveniente.
-      </p>
-    </details>
+          <div class="accordion-item my-4">
+            <h2 class="accordion-header" id="heading3">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#collapse3" aria-expanded="false" aria-controls="collapse3">
+                <i class="bi bi-credit-card"></i>
+                <span class="px-3 text-black">¿Cómo realizo un cambio de ruta?</span>
+              </button>
+            </h2>
+            <div id="collapse3" class="accordion-collapse collapse" aria-labelledby="heading3"
+              data-bs-parent="#accordionExample">
+              <div class="accordion-body">
+                <h2 class="fs-6 fw-semibold"></h2>
+                <div class="my-2">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa, odit.</div>
+              </div>
+            </div>
+          </div>
 
-    <!-- Pregunta 7 -->
-    <details>
-      <summary>¿Puedo cancelar o cambiar mi pasaje?</summary>
-      <p>
-        Sí, puedes cancelar o cambiar tu pasaje, pero esto está sujeto a nuestras políticas de cancelación y cambio.
-        Te recomendamos revisar los términos y condiciones al momento de la compra o contactarnos para más detalles.
-      </p>
-    </details>
+          <div class="accordion-item my-4">
+            <h2 class="accordion-header" id="heading4">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#collapse4" aria-expanded="false" aria-controls="collapse4">
+                <i class="bi bi-credit-card"></i>
+                <span class="px-3 text-black">¿Debo imprimir mi boleto para viajar?</span>
+              </button>
+            </h2>
+            <div id="collapse4" class="accordion-collapse collapse" aria-labelledby="heading4"
+              data-bs-parent="#accordionExample">
+              <div class="accordion-body">
+                <h2 class="fs-6 fw-semibold"></h2>
+                <div class="my-2">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa, odit.</div>
+              </div>
+            </div>
+          </div>
 
-    <!-- Pregunta 8 -->
-    <details>
-      <summary>¿Qué medidas de seguridad tienen para el transporte de pasajeros?</summary>
-      <p>
-        La seguridad de nuestros pasajeros es nuestra prioridad. Nuestros vehículos cumplen con todos los estándares
-        de seguridad, y nuestros conductores están altamente capacitados. Además, contamos con seguros de viaje para
-        mayor tranquilidad.
-      </p>
-    </details>
+          <div class="accordion-item my-4">
+            <h2 class="accordion-header" id="heading5">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#collapse5" aria-expanded="false" aria-controls="collapse5">
+                <i class="bi bi-credit-card"></i>
+                <span class="px-3 text-black">¿Puedo llevar mascotas?</span>
+              </button>
+            </h2>
+            <div id="collapse5" class="accordion-collapse collapse" aria-labelledby="heading5"
+              data-bs-parent="#accordionExample">
+              <div class="accordion-body">
+                <h2 class="fs-6 fw-semibold"></h2>
+                <div class="my-2">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa, odit.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item my-4">
+            <h2 class="accordion-header" id="headingTwo">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#collapse6" aria-expanded="false" aria-controls="collapse6">
+                <i class="bi bi-credit-card"></i>
+                <span class="px-3 text-black">¿Cuánto de peso de equipaje está permitido llevar?</span>
+              </button>
+            </h2>
+            <div id="collapse6" class="accordion-collapse collapse" aria-labelledby="heading6"
+              data-bs-parent="#accordionExample">
+              <div class="accordion-body">
+                <h2 class="fs-6 fw-semibold"></h2>
+                <div class="my-2">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa, odit.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 d-flex align-items-center justify-content-center">
+        <img src="../../../Static/img/seleccionIMGTYR.png" alt="Imagen ilustrativa" class="img-fluid"
+          style="max-height: 300px;">
+      </div>
+    </div>
   </section>
 </main>
 {% endblock %}
