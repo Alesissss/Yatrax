@@ -15,48 +15,153 @@
     transition: all 0.2s;
     border: 2px solid transparent;
   }
-  
+
   .available {
     background-color: #e8f5e9;
     border-color: #4caf50;
     color: #2e7d32;
   }
-  
+
   .available:hover {
     transform: scale(1.1);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   }
-  
+
   .selected {
     background-color: #2196f3;
     color: white;
     border-color: #0d47a1;
   }
-  
+
   .occupied {
     background-color: #ffcdd2;
     color: #c62828;
     border-color: #b71c1c;
     cursor: not-allowed;
   }
-  
+
   .seat-map-container {
     padding: 15px;
   }
-  
+
   .passenger-form {
     border-left: 3px solid #2196f3;
   }
-  
+
   #asientos {
     border-right: 1px solid #dee2e6;
     height: calc(100vh - 200px);
     overflow-y: auto;
   }
-  
+
   #formulariosPasajeros {
     height: calc(100vh - 200px);
     overflow-y: auto;
+  }
+
+  /* SECCIÓN COMPRA PASAJE */
+  /* Contenedor principal */
+  .pasaje-container {
+    background: #f2f2f2;
+    padding: 0;
+    border-radius: 10px;
+    border: 1px solid #315CAC;
+    max-width: 100%;
+    width: 80%;
+    margin: 40px auto;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+
+
+  /* Barra de navegación de pasos */
+  .tab-nav {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #ccc;
+    background-color: white;
+    border-radius: 10px 10px 0 0;
+    overflow: hidden;
+  }
+
+  .tab-link {
+    flex: 1;
+    padding: 12px 0;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    background-color: white;
+    color: #003b8b;
+    border-right: 1px solid #ccc;
+    transition: 0.3s ease;
+  }
+
+  .tab-link:last-child {
+    border-right: none;
+  }
+
+  .tab-link.active {
+    background-color: #003b8b;
+    color: white;
+  }
+
+  /* Contenido de los tabs */
+  .tab-content {
+    background-color: #b8b8b8;
+    border-top: 1px solid #315CAC;
+    padding: 20px;
+    border-radius: 0 0 10px 10px;
+  }
+
+  .tab-content .step {
+    display: none;
+  }
+
+  .tab-content .step.active {
+    display: block;
+  }
+
+  /* Estilo del formulario */
+  .form-search {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    /* 5 columnas iguales */
+    gap: 10px;
+    padding: 20px;
+    background: #b8b8b8;
+    border-radius: 0 0 10px 10px;
+  }
+
+  .checkbox-row {
+    grid-column: span 5;
+    padding-top: 10px;
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    font-weight: normal;
+    gap: 10px;
+  }
+
+  .form-search select,
+  .form-search input[type="date"],
+  .form-search button {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+
+
+  .form-search button {
+    background-color: #0050c8;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s ease;
+  }
+
+  .form-search button:hover {
+    background-color: #003b8b;
   }
 </style>
 {% endblock %}
@@ -64,116 +169,61 @@
   <h1>{% block tematica %}{% endblock %}</h1>
 </header>
 <main>
+  <!-- INICIO SECCIÓN: COMPRA PASAJE -->
+  <section class="pasaje-container">
+    <div class="tab-nav">
+      <button class="tab-link active" data-step="0">Elegir destino</button>
+      <button class="tab-link" data-step="1">Itinerario ida</button>
+      <button class="tab-link" data-step="2">Itinerario regreso</button>
+      <button class="tab-link" data-step="3">Pago</button>
+    </div>
 
-    <!-- Search form -->
-    <div id="datos_viaje" class="mb-4 col-md-12">
-      <div class="row g-2">
-        <div class="col-md-2">
-          <select name="origen" class="form-control">
-            <option disabled>Origen</option>
-            <option value="CAJAMARCA" selected>CAJAMARCA</option>
-            <option value="LIMA">LIMA</option>
-            <option value="CUSCO">CUSCO</option>
+    <div class="tab-content">
+      <!-- Paso 1 -->
+      <div class="step active" id="step-0">
+        <form id="form-destino" class="form-search">
+          <select name="origen">
+            <option disabled selected>Origen</option>
+            <!-- Llama de la BD todas las ciudades -->
+            <option value="CAJAMARCA">Cajamarca</option>
+            <option value="LIMA">Lima</option>
           </select>
-        </div>
-        <div class="col-md-2">
-          <select name="destino" class="form-control">
-            <option disabled>Destino</option>
-            <option value="CHICLAYO" selected>CHICLAYO</option>
-            <option value="TRUJILLO">TRUJILLO</option>
+          <select name="destino">
+            <option disabled selected>Destino</option>
+            <!-- Llama de la BD todas las ciudades -->
+            <option value="CHICLAYO">Chiclayo</option>
+            <option value="TRUJILLO">Trujillo</option>
           </select>
-        </div>
-        <div class="col-md-2">
-          <input type="date" class="form-control" id="fechaIdaSearch" min="<?php echo date('Y-m-d'); ?>">
-        </div>
-        <div class="col-md-2">
-          <input type="date" class="form-control" id="fechaRegresoSearch" placeholder="Fecha Retorno" disabled>
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-secondary w-100" id="buscarViajes">Buscar</button>
-        </div>
+          <input type="date" name="fecha_ida" placeholder="Fecha ida">
+          <input type="date" name="fecha_vuelta" placeholder="Fecha regreso">
+          <button type="button" onclick="nextStep()">Buscar</button>
+          <div class="checkbox-row">
+            <input type="checkbox" id="pasaje_libre" name="pasaje_libre">
+            <label for="pasaje_libre">Pasaje libre</label>
+          </div>
+        </form>
       </div>
-    </div>
 
-    <!-- Results section -->
-    <div id="resultados" class="col-md-12">
-      <h5 class="ps-3 mb-3">Elige el itinerario para el viaje de IDA (CAJAMARCA A CHICLAYO)</h5>
-      <div id="horarios" class="m-5">
-        <!-- Specific itinerary you requested -->
-        <div class="card mb-3">
-          <div class="card-body">
-            <div class="row align-items-center">
-              <div class="col-md-2">
-                <h6>10:40 PM Salida</h6>
-                <h6>04:40 AM Llegada estimada</h6>
-                <small class="text-muted">Viaje: 1053</small>
-              </div>
-              <div class="col-md-2">
-                <span>Servicio Nocturno</span>
-              </div>
-              <div class="col-md-1">
-                <span>Directo</span>
-              </div>
-              <div class="col-md-2">
-                <span>1º Nivel 2º Nivel</span>
-              </div>
-              <div class="col-md-1">
-                <span>18 Libres</span>
-              </div>
-              <div class="col-md-2">
-                <span>S/ 85 S/ 70</span>
-              </div>
-              <div class="col-md-2">
-                <button class="btn btn-primary btn-elegir" data-viaje="1053">ELEGIR</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Additional sample itineraries -->
-        <div class="card mb-3">
-          <div class="card-body">
-            <div class="row align-items-center">
-              <div class="col-md-2">
-                <h6>06:00 AM Salida</h6>
-                <h6>02:30 PM Llegada estimada</h6>
-              </div>
-              <div class="col-md-2">
-                <span>Servicio B - Andino</span>
-              </div>
-              <div class="col-md-1">
-                <span>2 Escalas</span>
-              </div>
-              <div class="col-md-2">
-                <span>1º Nivel 2º Nivel</span>
-              </div>
-              <div class="col-md-1">
-                <span>32 Libres</span>
-              </div>
-              <div class="col-md-2">
-                <span>S/ 90 S/ 75</span>
-              </div>
-              <div class="col-md-2">
-                <button class="btn btn-primary btn-elegir">ELEGIR</button>
-              </div>
-            </div>
-          </div>
-        </div>
+      <!-- Paso 2 -->
+      <div class="step" id="step-1">
+        <p>Itinerario de ida...</p>
+        <button onclick="nextStep()">Siguiente</button>
       </div>
-    </div>
 
-    <!-- Seat selection section (hidden by default) -->
-    <div id="asientos_section" class="d-none mt-5 col-md-12">
-      <div class="row mx-auto">
-        <h5>Seleccione su(s) asiento(s)</h5>
-        <div id="asientos" class="d-flex flex-wrap mb-3 col-md-6"></div>
-        <div class="col-md-6">
-          <div id="formulariosPasajeros" class="col-md-12">
-          </div>
-        </div>
+      <!-- Paso 3 -->
+      <div class="step" id="step-2">
+        <p>Itinerario de regreso...</p>
+        <button onclick="nextStep()">Siguiente</button>
+      </div>
+
+      <!-- Paso 4 -->
+      <div class="step" id="step-3">
+        <p>Pago...</p>
       </div>
     </div>
-</div>
+  </section>
+
+
   <section id="ctn_beneficios">
     <div>
       <h2>Compra segura</h2>
@@ -309,7 +359,7 @@
     function mostrarViaje() {
       $('#resultados').removeClass('d-none');
       $('#horarios').empty();
-      
+
       viajes.forEach((viaje, i) => {
         $('#horarios').append(`
           <div class="card mb-3">
@@ -345,7 +395,7 @@
     // Mostrar el viaje al cargar la página
     mostrarViaje();
 
-    $(document).on('click', '.elegirAsiento', function() {
+    $(document).on('click', '.elegirAsiento', function () {
       $('#resultados').addClass('d-none');
       $('#asientos_section').removeClass('d-none');
       renderSeatMap();
@@ -355,7 +405,7 @@
       $('#asientos').empty();
       $('#formulariosPasajeros').empty();
       selectedSeats = {};
-      
+
       // Mapa de asientos con 20 en primer nivel y 20 en segundo nivel
       const seatMap = `
         <div class="seat-map-container">
@@ -369,14 +419,14 @@
           </div>
         </div>
       `;
-      
+
       $('#asientos').html(seatMap);
     }
 
     function renderSeatLevel(start, end) {
       let html = '<div class="d-flex flex-wrap justify-content-center">';
       const occupiedSeats = [10, 27, 35]; // Asientos ocupados
-      
+
       for (let i = start; i <= end; i++) {
         const isOccupied = occupiedSeats.includes(i);
         html += `
@@ -384,20 +434,20 @@
                data-num="${i}" 
                data-level="${i <= 20 ? 1 : 2}"
                data-price="${i <= 20 ? 85 : 70}">
-            ${i <= 20 ? i : i-20}
+            ${i <= 20 ? i : i - 20}
           </div>
         `;
       }
-      
+
       html += '</div>';
       return html;
     }
 
-    $(document).on('click', '.seat.available', function() {
+    $(document).on('click', '.seat.available', function () {
       const seatNum = $(this).data('num');
       const seatLevel = $(this).data('level');
       const seatPrice = $(this).data('price');
-      
+
       if ($(this).hasClass('selected')) {
         // Deseleccionar asiento
         $(this).removeClass('selected').addClass('available');
@@ -415,7 +465,7 @@
       $('#formulariosPasajeros').append(`
         <div class="card mb-3 passenger-form" id="passenger-form-${seatNum}">
           <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <span>Asiento ${seatNum <= 20 ? seatNum : seatNum-20} - ${level}° Nivel (S/${price})</span>
+            <span>Asiento ${seatNum <= 20 ? seatNum : seatNum - 20} - ${level}° Nivel (S/${price})</span>
             <button type="button" class="btn btn-sm btn-light remove-seat" data-seat="${seatNum}">
               <i class="fas fa-times"></i> Quitar
             </button>
@@ -460,7 +510,7 @@
       `);
     }
 
-    $(document).on('click', '.remove-seat', function() {
+    $(document).on('click', '.remove-seat', function () {
       const seatNum = $(this).data('seat');
       $(`#passenger-form-${seatNum}`).remove();
       $(`.seat[data-num="${seatNum}"]`)
@@ -469,5 +519,32 @@
       delete selectedSeats[seatNum];
     });
   });
+</script>
+<script>
+  let currentStep = 0;
+  const steps = document.querySelectorAll('.step');
+  const tabs = document.querySelectorAll('.tab-link');
+
+  function nextStep() {
+    if (currentStep < steps.length - 1) {
+      steps[currentStep].classList.remove('active');
+      tabs[currentStep].classList.remove('active');
+      currentStep++;
+      steps[currentStep].classList.add('active');
+      tabs[currentStep].classList.add('active');
+    }
+  }
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const stepIndex = parseInt(tab.getAttribute('data-step'));
+      steps[currentStep].classList.remove('active');
+      tabs[currentStep].classList.remove('active');
+      currentStep = stepIndex;
+      steps[currentStep].classList.add('active');
+      tabs[currentStep].classList.add('active');
+    });
+  });
+
 </script>
 {% endblock %}
