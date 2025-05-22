@@ -19,8 +19,7 @@
                         <tr>
                             <th class="text-center">ID</th>
                             <th class="text-center">NOMBRE</th>
-                            <th class="text-center">ORIGEN</th>
-                            <th class="text-center">DESTINO</th>
+                            <th class="text-center">TIPO</th>
                             <th class="text-center">ESTADO</th>
                             <th class="text-center">ACCIÓN</th>
                         </tr>
@@ -190,8 +189,7 @@
             columns: [
                 { data: "id", name: "id" },
                 { data: "nombre", name: "nombre" },
-                { data: "nombreOrigen", name: "nombreOrigen" },
-                { data: "nombreDestino", name: "nombreDestino" },
+                { data: "tipo", name: "tipo" },
 
                 {
                     data: "estado",
@@ -229,11 +227,11 @@
                     className: "text-center align-middle",
                 },
                 {
-                    targets: [1, 2, 3, 4, 5],
+                    targets: [1, 2, 3, 4],
                     className: 'align-middle',
                 },
                 {
-                    targets: [5],
+                    targets: [4],
                     orderable: false,
                     width: '10%',
                 },

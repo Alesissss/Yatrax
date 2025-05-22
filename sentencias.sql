@@ -108,6 +108,7 @@ DROP PROCEDURE IF EXISTS SP_EDITAR_RUTA;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_RUTA;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_RUTA;
 -- Luego eliminamos las tablas, primero la que depende de la otra
+DROP TABLE IF EXISTS escala;
 DROP TABLE IF EXISTS conf_plantillas;
 DROP TABLE IF EXISTS conf_dclaims;
 DROP TABLE IF EXISTS conf_dmenus;
@@ -283,13 +284,24 @@ CREATE TABLE sucursal (
 CREATE TABLE ruta (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
-    sucursalOrigen INT NOT NULL,    
-    sucursalDestino INT NOT NULL,
+    tipo VARCHAR(100) NOT NULL,
     estado BOOLEAN NOT NULL DEFAULT 1,
     estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
     estado_registro INT NOT NULL DEFAULT 1,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NOT NULL
+);
+
+-- Crear tabla escala
+CREATE TABLE escala (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nro_orden INT NOT NULL,
+    idSucursal INT NOT NULL,
+    idRuta INT NOT NULL,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL,
+    FOREIGN KEY (idSucursal) REFERENCES sucursal (id),
+    FOREIGN KEY (idRuta) REFERENCES ruta (id)
 );
 
 CREATE TABLE cliente (
@@ -346,9 +358,11 @@ CREATE TABLE conf_menus (
 
 -- Crear tabla detalle_menu
 CREATE TABLE conf_dmenus (
-    idMenu INT REFERENCES conf_menus (id),
-    idTipoUsuario INT REFERENCES usuarios (id),
-    PRIMARY KEY (idMenu, idTipoUsuario)
+    idMenu INT,
+    idTipoUsuario INT,
+    PRIMARY KEY (idMenu, idTipoUsuario),
+    FOREIGN KEY (idMenu) REFERENCES conf_menus (id),
+    FOREIGN KEY (idTipoUsuario) REFERENCES usuarios (id)
 );
 
 -- Crear tabla claims
@@ -362,9 +376,11 @@ CREATE TABLE conf_claims (
 
 -- Crear tabla detalle_claim
 CREATE TABLE conf_dclaims (
-    idClaim INT REFERENCES conf_claims (id),
-    idTipoUsuario INT REFERENCES tipo_usuario (id),
-    PRIMARY KEY (idClaim, idTipoUsuario)
+    idClaim INT,
+    idTipoUsuario INT,
+    PRIMARY KEY (idClaim, idTipoUsuario),
+    FOREIGN KEY (idClaim) REFERENCES conf_claims (id),
+    FOREIGN KEY (idTipoUsuario) REFERENCES tipo_usuario (id)
 );
 
 -- Crear tabla conf_plantillas
@@ -5680,14 +5696,12 @@ END $$
 DELIMITER $$
 CREATE PROCEDURE SP_REGISTRAR_RUTA(
     IN P_NOMBRE VARCHAR(255),
-    IN P_ORIGEN INT,
-    IN P_DESTINO INT,
     IN P_ESTADO BOOLEAN,
+    IN P_TIPO VARCHAR(255),
     IN P_USUARIO VARCHAR(255)
 )
 BEGIN
     DECLARE cNombre INT;
-    DECLARE cRepetido INT;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION 
     BEGIN
         SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
@@ -5697,15 +5711,12 @@ BEGIN
     SET @MSJ2 = NULL;
 
     SELECT COUNT(*) INTO cNombre FROM ruta WHERE nombre = P_NOMBRE AND ESTADO_REGISTRO = 1;
-    SELECT COUNT(*) INTO cRepetido FROM ruta WHERE sucursalOrigen = P_ORIGEN AND sucursalDestino = P_DESTINO AND ESTADO_REGISTRO = 1;
 
     IF cNombre > 0 THEN
         SET @MSJ2 = 'El nombre de ruta que intenta registrar ya está registrado';
-    ELSEIF cRepetido != 0 THEN
-        SET @MSJ2 = 'Ya existe una ruta con esa sucursal origen y esa sucursal destino respectivamente';
     ELSE
-        INSERT INTO ruta (NOMBRE, SUCURSALORIGEN, SUCURSALDESTINO, ESTADO, USUARIO) 
-        VALUES (P_NOMBRE, P_ORIGEN, P_DESTINO, P_ESTADO, P_USUARIO);
+        INSERT INTO ruta (NOMBRE, TIPO, ESTADO, USUARIO) 
+        VALUES (P_NOMBRE, P_TIPO, P_ESTADO, P_USUARIO);
 
         SET @MSJ = 'Se registró correctamente la ruta';
     END IF;
@@ -5717,14 +5728,12 @@ DELIMITER $$
 CREATE PROCEDURE SP_EDITAR_RUTA(
     IN P_ID INT,
     IN P_NOMBRE VARCHAR(255),
-    IN P_ORIGEN INT,
-    IN P_DESTINO INT,
+    IN P_TIPO VARCHAR(255),
     IN P_ESTADO BOOLEAN
 )
 BEGIN
     DECLARE cNombre INT;
     DECLARE cExiste INT;
-    DECLARE cRepetido INT;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
@@ -5735,19 +5744,15 @@ BEGIN
 
     SELECT COUNT(*) INTO cExiste FROM ruta WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
     SELECT COUNT(*) INTO cNombre FROM ruta WHERE NOMBRE = P_NOMBRE AND ID != P_ID AND ESTADO_REGISTRO = 1;
-    SELECT COUNT(*) INTO cRepetido FROM ruta WHERE ID != P_ID AND sucursalOrigen = P_ORIGEN AND sucursalDestino = P_DESTINO AND ESTADO_REGISTRO = 1;
 
     IF cExiste <= 0 THEN
         SET @MSJ2 = 'La ruta que intenta editar no existe';
     ELSEIF cNombre != 0 THEN
         SET @MSJ2 = 'El nombre ingresado ya existe';
-    ELSEIF cRepetido != 0 THEN
-        SET @MSJ2 = 'Ya existe una ruta con esa sucursal origen y esa sucursal destino respectivamente';
     ELSE
         UPDATE ruta 
         SET NOMBRE = P_NOMBRE,
-            SUCURSALORIGEN = P_ORIGEN,
-            SUCURSALDESTINO = P_DESTINO, 
+            TIPO = P_TIPO,
             ESTADO = P_ESTADO, 
             estado_proceso = 'MODIFICADO' 
         WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
@@ -5804,7 +5809,10 @@ BEGIN
     IF cExiste <= 0 THEN
         SET @MSJ2 = 'La ruta que intenta eliminar no existe';
     ELSE
-        UPDATE ruta SET ESTADO_REGISTRO = 2, ESTADO_PROCESO = 'ELIMINADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+        -- UPDATE ruta SET ESTADO_REGISTRO = 2, ESTADO_PROCESO = 'ELIMINADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+
+        DELETE FROM escala WHERE idRuta = P_ID;
+        DELETE FROM ruta WHERE id = ID;
 
         SET @MSJ = 'Se eliminó correctamente a la ruta';
     END IF;

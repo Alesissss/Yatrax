@@ -3,6 +3,11 @@
 {% block title %}YATRAX - {{ tittle }}{% endblock %}
 
 {% block content %}
+<div class="card d-none" id="efec-cargando">
+    <div class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center overlay dark">
+        <i class="fas fa-3x fa-sync-alt fa-spin text-white"></i>
+    </div>
+</div>
 <div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-md-12">
@@ -24,22 +29,6 @@
                                     </div>
                                 </div>
                                 <div class="col-md-12 mb-3">
-                                    <label for="cbx_Origen">Sucursal origen</label>
-                                    <div class="input-group">
-                                        <select id="cbx_Origen" class="form-control" {% if btnId=='btn_Aceptar'
-                                            %}disabled{% endif %}>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-12 mb-3">
-                                    <label for="cbx_Destino">Sucursal destino</label>
-                                    <div class="input-group">
-                                        <select id="cbx_Destino" class="form-control" {% if btnId=='btn_Aceptar'
-                                            %}disabled{% endif %}>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-12 mb-3">
                                     <label for="cbx_Estado">Estado</label>
                                     <div class="input-group">
                                         <select id="cbx_Estado" class="form-control" {% if btnId=='btn_Aceptar'
@@ -52,11 +41,40 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div class="col-md-12 mb-3">
+                                    <label for="txt_Tipo">Tipo</label>
+                                    <div class="input-group">
+                                        <input type="text" id="txt_Tipo" class="form-control" placeholder="Tipo"
+                                            readonly value="{{ ruta.tipo }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-12 mb-3">
+                                    <table id="tbl_Escalas" class="table table-short-rows">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-center d-none">Id Sucursal</th>
+                                                <th class="text-center" style="width: 100px;">N° Orden</th>
+                                                <th class="text-center">Sucursal</th>
+                                                <th class="text-center">Acción</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="table-short-rows">
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <h2>Ubicación de la ruta en el mapa</h2>
-                            <button id="btnMostrarRuta" type="button" class="btn btn-primary">Mostrar ruta</button>
+                            <div class="row">
+                                <div class="col-md-7">
+                                    <h2>Ubicación de la ruta en el mapa</h2>
+                                </div>
+                                <div class="col-md-5 d-flex align-items-center gap-3">
+                                    <h5>Leyenda:&nbsp;</h5>
+                                    <h5 class="text-end"><span class="badge badge-primary fs-5">SÍ PASA</span></h5>
+                                    <h5 class="text-end"><span class="badge badge-dark fs-5">NO PASA</span></h5>
+                                </div>
+                            </div>
                             <div id="map"></div>
                         </div>
                         <div class="col-md-12 text-center mt-3">
@@ -118,6 +136,39 @@
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 <script>
+
+    // Lista de escalas
+    let escalas = [];
+    let markers = [];
+    let escalasRecibidas = JSON.parse('{{ escalas | tojson }}');
+    console.log('{{ ruta | tojson }}');
+
+    const iconoAzul = L.icon({
+        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',  // Icono estándar de Leaflet
+        iconSize: [25, 41],  // Tamaño del icono
+        iconAnchor: [12, 41],  // Punto de anclaje
+        popupAnchor: [1, -34],  // Punto desde donde se abre el popup
+        shadowSize: [41, 41]  // Sombra del icono
+    });
+
+    const iconoNegro = L.icon({
+        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',  // Usamos el mismo ícono
+        iconSize: [25, 41],  // Tamaño del icono
+        iconAnchor: [12, 41],  // Punto de anclaje
+        popupAnchor: [1, -34],  // Punto desde donde se abre el popup
+        shadowSize: [41, 41],  // Sombra del icono
+        className: 'blue-marker'  // Añadimos una clase CSS para cambiar el color
+    });
+
+    // Estilo CSS para cambiar el color del marcador cuando se agrega a la ruta
+    const styleAzul = document.createElement('style');
+    styleAzul.innerHTML = `
+    .blue-marker {
+        filter: invert(25%) sepia(95%) saturate(100%) hue-rotate(190deg) brightness(90%) contrast(100%);
+    }
+`;
+    document.head.appendChild(styleAzul);
+
     // Configuración del mapa
     const map = L.map('map').setView([-9.19, -75.0152], 6);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -128,143 +179,244 @@
 
     const orsAPIKey = '5b3ce3597851110001cf6248ee3267fd49824a40983b5ec79e79356f';
 
-    // Variable para el marcador de nueva ubicación
-    let marker;
+    let capaRutas = L.layerGroup().addTo(map);
 
-    // Variable global para controlar la ruta
-    var controlRuta;
+    function borrarRutasPrevias() {
+        capaRutas.clearLayers();
+    }
 
-    function dibujarRuta(origen, destino) {
-        console.log("Origen:", origen);
-        console.log("Destino:", destino);
+    function dibujarRutaDesdeEscalas() {
+        ShowSpinner();
 
-        const orsAPIKey = '5b3ce3597851110001cf6248ee3267fd49824a40983b5ec79e79356f'; // 👉 Reemplaza con tu API Key de OpenRouteService
+        if (escalas.length < 2) {
+            toastr.warning("Debe haber al menos dos sucursales para dibujar la ruta.", 'MENSAJE DE SISTEMA');
+            HideSpinner();
+            return;
+        }
 
-        // Hacer la solicitud a OpenRouteService usando Axios
-        axios.get('https://api.openrouteservice.org/v2/directions/driving-car', {
-            headers: {
-                'Authorization': orsAPIKey
-            },
-            params: {
-                start: `${origen.longitud},${origen.latitud}`,  // Long, Lat
-                end: `${destino.longitud},${destino.latitud}`
-            }
-        })
-            .then(function (response) {
-                console.log("Respuesta de la API:", response.data);
+        borrarRutasPrevias();
 
-                // Verificamos si existen features en la respuesta
-                if (response.data.features && response.data.features.length > 0) {
-                    const ruta = response.data.features[0].geometry.coordinates;
+        const coordenadas = escalas.map(escala => {
+            return {
+                lat: escala.latitud,
+                lng: escala.longitud
+            };
+        });
 
-                    // Verificamos si existen coordenadas en la ruta
-                    if (ruta && ruta.length > 0) {
-                        // Dibujar la ruta en el mapa
-                        L.polyline(ruta.map(coord => [coord[1], coord[0]]), { color: 'blue' }).addTo(map);
-                    } else {
-                        console.error("No se encontraron coordenadas en la ruta.");
-                    }
-                } else {
-                    console.error("No se encontró ninguna ruta.");
+        for (let i = 0; i < coordenadas.length - 1; i++) {
+            const origen = coordenadas[i];
+            const destino = coordenadas[i + 1];
+
+            const orsAPIKey = '5b3ce3597851110001cf6248ee3267fd49824a40983b5ec79e79356f';
+            axios.get('https://api.openrouteservice.org/v2/directions/driving-car', {
+                headers: {
+                    'Authorization': orsAPIKey
+                },
+                params: {
+                    start: `${origen.lng},${origen.lat}`,
+                    end: `${destino.lng},${destino.lat}`
                 }
             })
-            .catch(function (error) {
-                console.error('Error al obtener la ruta:', error);
-            });
+                .then(function (response) {
+                    console.log("Respuesta de la API:", response.data);
+
+                    if (response.data.features && response.data.features.length > 0) {
+                        const ruta = response.data.features[0].geometry.coordinates;
+
+
+                        if (coordenadas.length - 2 === i) {
+                            HideSpinner();
+                        }
+
+                        if (ruta && ruta.length > 0) {
+                            L.polyline(ruta.map(coord => [coord[1], coord[0]]), { color: 'blue' }).addTo(capaRutas);
+                        } else {
+                            console.error("No se encontraron coordenadas en la ruta.");
+                            HideSpinner();
+                        }
+                    } else {
+                        console.error("No se encontró ninguna ruta.");
+                        HideSpinner();
+                    }
+                })
+                .catch(function (error) {
+                    console.error('Error al obtener la ruta:', error);
+                });
+        }
     }
 
-    function fct_GetSucursales() {
-        $.getJSON('/trabajadores/viajes/GetSucursales', function (response) {
-            if (response.Status === 'success') {
-                let itemsOrigen = [];
-                let itemsDestino = [];
+    function cargarSucursales() {
+        fetch('/trabajadores/viajes/GetData_SucursalesMapaRuta')
+            .then(response => response.json())
+            .then(sucursales => {
+                sucursales.forEach(sucursal => {
+                    if (sucursal.latitud && sucursal.longitud) {
+                        const popupContent = `
+                        <b>${sucursal.nombre}</b><br>
+                        <small>${sucursal.direccion || 'Sin dirección'}</small>
+                    `;
+                        // Para la funcionalidad VER
+                        let esVer = '{{ btnId }}' === 'btn_Aceptar' ? true : false;
 
-                $.each(response.data, function (index, item) {
-                    let option = {
-                        id: item.id,
-                        text: item.id + " - " + item.nombre,
-                        latitud: item.latitud,
-                        longitud: item.longitud
-                    };
+                        // Creamos el marcador con el icono negro inicial
+                        const marker = L.marker([sucursal.latitud, sucursal.longitud], { icon: iconoNegro })
+                            .addTo(map)
+                            .bindPopup(popupContent);
 
-                    itemsOrigen.push(option);
-                    itemsDestino.push(option);
-                });
-
-                $('#cbx_Origen').select2({
-                    theme: 'bootstrap4',
-                    placeholder: "Buscar...",
-                    data: itemsOrigen,
-                    language: {
-                        noResults: function () {
-                            return "No se encontraron resultados";
+                        // Al hacer click, agregamos la sucursal y cambiamos su color a azul
+                        if (!esVer) {
+                            marker.on('click', function () {
+                                fct_AgregarEscala(sucursal.id, sucursal.nombre, sucursal.latitud, sucursal.longitud, marker);
+                            });
                         }
-                    },
-                    allowClear: true
-                });
 
-                $('#cbx_Destino').select2({
-                    theme: 'bootstrap4',
-                    placeholder: "Buscar...",
-                    data: itemsDestino,
-                    language: {
-                        noResults: function () {
-                            return "No se encontraron resultados";
+                        for (i = 0; i < escalasRecibidas.length; i++) {
+                            if (escalasRecibidas[i]['idSucursal'] === sucursal.id) {
+                                fct_AgregarEscala(sucursal.id, sucursal.nombre, sucursal.latitud, sucursal.longitud, marker);
+                            }
                         }
-                    },
-                    allowClear: true
+                    }
                 });
+            })
+            .catch(error => console.error('Error al cargar sucursales:', error));
+    }
 
-                $('#cbx_Origen').val("{{ ruta.idOrigen }}").trigger('change');
-                $('#cbx_Destino').val("{{ ruta.idDestino }}").trigger('change');
-            } else {
-                console.error('Error al obtener las sucursales:', response.Msj);
+    function fct_AgregarEscala(id, nombre, latitud, longitud, marker) {
+        const existeSucursal = escalas.some(escala => escala.id === id);
+
+        if (existeSucursal) {
+            toastr.warning("Esta sucursal ya ha sido agregada.", 'MENSAJE DE SISTEMA');
+            return;
+        }
+
+        let nroOrden = escalas.length + 1;
+        escalas.push({ 'id': id, 'nombre': nombre, 'nroOrden': nroOrden, 'latitud': latitud, 'longitud': longitud });
+
+        markers[id] = marker;
+        marker.setIcon(iconoAzul);
+        const item = `
+        <tr>
+            <td class="d-none">${id}</td>
+            <td class="text-center style="width: 100px;"">${nroOrden}</td>
+            <td class="text-left">${nombre}</td>
+            <td class="text-center">
+                <button class="btn btn-primary btn-sm" onclick="moverEscala(${id}, 'subir') {% if btnId == 'btn_Aceptar' %}disabled{% endif %}">↑</button>
+                <button class="btn btn-primary btn-sm" onclick="moverEscala(${id}, 'bajar') {% if btnId == 'btn_Aceptar' %}disabled{% endif %}">↓</button>
+                <button class="btn btn-danger btn-sm" onclick="eliminarEscala(${id}) {% if btnId == 'btn_Aceptar' %}disabled{% endif %}">Eliminar</button>
+            </td>
+        </tr>
+    `;
+
+        // Insertar la fila en el tbody de la tabla
+        document.querySelector('#tbl_Escalas tbody').innerHTML += item;
+
+        // Mostrar el tipo de ruta
+        fct_MostrarTipo();
+
+        if (escalas.length >= 2) {
+            dibujarRutaDesdeEscalas();
+        }
+    }
+
+    // Función para eliminar una escala
+    function eliminarEscala(id) {
+        // Eliminar la escala del array escalas
+        escalas = escalas.filter(escala => escala.id !== id);
+
+        if (markers[id]) {
+            markers[id].setIcon(iconoNegro);
+            delete markers[id];
+        }
+
+        // Eliminar la fila correspondiente de la tabla
+        document.querySelectorAll(`#tbl_Escalas tbody tr`).forEach(row => {
+            if (row.querySelector('td.d-none').textContent == id) {
+                row.remove();
             }
         });
+
+        // Reordenar la tabla después de eliminar
+        reordenarTabla(markers[id]);
+
+        // Mostrar el tipo de ruta
+        fct_MostrarTipo();
+
+        if (escalas.length >= 2) {
+            dibujarRutaDesdeEscalas();
+        } else {
+            borrarRutasPrevias();
+        }
     }
+
+    function moverEscala(id, direccion, marker) {
+        const index = escalas.findIndex(escala => escala.id === id);
+
+        if (index === -1) return;
+
+        if (direccion === 'subir' && index > 0) {
+            [escalas[index], escalas[index - 1]] = [escalas[index - 1], escalas[index]];
+        }
+        else if (direccion === 'bajar' && index < escalas.length - 1) {
+            [escalas[index], escalas[index + 1]] = [escalas[index + 1], escalas[index]];
+        }
+
+        reordenarTabla(marker);
+
+        if (escalas.length >= 2) {
+            dibujarRutaDesdeEscalas();
+        }
+    }
+
+    function reordenarTabla(marker) {
+        escalas.forEach((escala, index) => {
+            escala.nroOrden = index + 1;
+        });
+
+        const tbody = document.querySelector('#tbl_Escalas tbody');
+        tbody.innerHTML = '';
+
+        escalas.forEach(escala => {
+            const item = `
+            <tr data-id="${escala.id}">
+                <td class="d-none">${escala.id}</td>
+                <td class="text-center style="width: 100px;"">${escala.nroOrden}</td>
+                <td class="text-left">${escala.nombre}</td>
+                <td class="text-center">
+                    <button class="btn btn-primary btn-sm" onclick="moverEscala(${escala.id}, 'subir', ${marker})">↑</button>
+                    <button class="btn btn-primary btn-sm" onclick="moverEscala(${escala.id}, 'bajar', ${marker})">↓</button>
+                    <button class="btn btn-danger btn-sm" onclick="eliminarEscala(${escala.id}, ${marker})">Eliminar</button>
+                </td>
+            </tr>
+        `;
+            tbody.innerHTML += item;
+        });
+    }
+
+    function fct_MostrarTipo() {
+        let cantidad = escalas.length;
+        if (cantidad > 2) {
+            $('#txt_Tipo').val('ESCALA');
+        } else if (cantidad === 2) {
+            $('#txt_Tipo').val('DIRECTO');
+        } else {
+            $('#txt_Tipo').val('');
+        }
+    }
+
+    map.whenReady(cargarSucursales);
 
     $(document).ready(function () {
-        fct_GetSucursales();
-
-        $('#btnMostrarRuta').on('click', function () {
-            const origen = $('#cbx_Origen').select2('data')[0];
-            const destino = $('#cbx_Destino').select2('data')[0];
-
-            let idOrigen = $('#cbx_Origen').val();
-            let idDestino = $('#cbx_Destino').val();
-            
-            if (idOrigen === idDestino) {
-                toastr.warning("La sucursal de origen no puede ser la misma que la de destino", "MENSAJE DE SISTEMA");
-                return;
-            }
-
-            if (origen && destino) {
-                dibujarRuta({
-                    latitud: parseFloat(origen.latitud),
-                    longitud: parseFloat(origen.longitud)
-                }, {
-                    latitud: parseFloat(destino.latitud),
-                    longitud: parseFloat(destino.longitud)
-                });
-            } else {
-                toastr.warning('Por favor selecciona ambas sucursales.', 'MENSAJE DE SISTEMA');
-            }
-        });
-
         $("#btn_Registrar").click(function () {
             let nombre = $("#txt_Ruta").val().trim();
-            let idOrigen = $('#cbx_Origen').val();
-            let idDestino = $('#cbx_Destino').val();
             let estado = $('#cbx_Estado').val();
 
-            if (!nombre || !idOrigen || !idDestino || !estado) {
+            if (!nombre || !estado || !escalas) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
 
-            if (idOrigen === idDestino) {
-                toastr.warning("La sucursal de origen no puede ser la misma que la de destino", "MENSAJE DE SISTEMA");
-                return;
+            if (escalas.length < 2) {
+                toastr.warning('Debe haber al menos dos sucursales por ruta', 'MENSAJE DE SISTEMA');
             }
 
             Swal.fire({
@@ -282,8 +434,7 @@
 
                     let formData = new FormData();
                     formData.append("nombre", nombre);
-                    formData.append("origen", idOrigen);
-                    formData.append("destino", idDestino);
+                    formData.append("escalas", JSON.stringify(escalas));
                     formData.append("estado", estado);
 
                     $.ajax({
@@ -321,18 +472,15 @@
             const id = Number("{{ ruta.id }}");
 
             let nombre = $("#txt_Ruta").val().trim();
-            let idOrigen = $('#cbx_Origen').val();
-            let idDestino = $('#cbx_Destino').val();
             let estado = $('#cbx_Estado').val();
 
-            if (!nombre || !idOrigen || !idDestino || !estado) {
+            if (!nombre || !estado || !escalas) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
 
-            if (idOrigen === idDestino) {
-                toastr.warning("La sucursal de origen no puede ser la misma que la de destino", "MENSAJE DE SISTEMA");
-                return;
+            if (escalas.length < 2) {
+                toastr.warning('Debe haber al menos dos sucursales por ruta', 'MENSAJE DE SISTEMA');
             }
 
             Swal.fire({
@@ -350,8 +498,7 @@
 
                     let formData = new FormData();
                     formData.append("nombre", nombre);
-                    formData.append("origen", idOrigen);
-                    formData.append("destino", idDestino);
+                    formData.append("escalas", JSON.stringify(escalas));
                     formData.append("estado", estado);
 
                     $.ajax({
@@ -388,27 +535,12 @@
         });
     });
 
-    function cargarSucursales() {
-        fetch('/trabajadores/viajes/ObtenerSucursalesMapa')
-            .then(response => response.json())
-            .then(sucursales => {
-                sucursales.forEach(sucursal => {
-                    if (sucursal.latitud && sucursal.longitud) {
-                        const popupContent = `
-                            <b>${sucursal.nombre}</b><br>
-                            <small>${sucursal.direccion || 'Sin dirección'}</small>
-                        `;
-
-                        L.marker([sucursal.latitud, sucursal.longitud])
-                            .addTo(map)
-                            .bindPopup(popupContent);
-                    }
-                });
-            })
-            .catch(error => console.error('Error al cargar sucursales:', error));
+    function ShowSpinner() {
+        $('#efec-cargando').removeClass('d-none');
     }
 
-    // Cargar sucursales al iniciar
-    map.whenReady(cargarSucursales);
+    function HideSpinner() {
+        $('#efec-cargando').addClass('d-none');
+    }
 </script>
 {% endblock %}
