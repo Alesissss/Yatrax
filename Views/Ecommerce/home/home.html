@@ -112,9 +112,8 @@
     padding: 30px;
     border-radius: 0 0 10px 10px;
   }
-  .tab-content-pago{
 
-  }
+  .tab-content-pago {}
 
   .tab-content .step {
     display: none;
@@ -166,24 +165,27 @@
   .form-search button:hover {
     background-color: #003b8b;
   }
-  .rowcito{
-    display:grid;
+
+  .rowcito {
+    display: grid;
     grid-template-columns: repeat(2, 1fr);
   }
-  .seccion_der{
-    margin-left:1em;
+
+  .seccion_der {
+    margin-left: 1em;
     margin-right: 1em;
   }
-  .seccion_der>*{
+
+  .seccion_der>* {
     margin-bottom: 1em;
   }
 
   .detalles_viaje,
-  .resumen_compra{
-    border:1px solid black;
+  .resumen_compra {
+    border: 1px solid black;
     height: 45%;
   }
-  
+
   /* Seccion de pago */
   .pago-wrapper {
     margin-top: 20px;
@@ -288,7 +290,6 @@
     font-weight: bold;
     cursor: pointer;
   }
-  
 </style>
 {% endblock %}
 <header>
@@ -410,12 +411,12 @@
               </div>
             </div>
             <div class="seccion_der">
-                <div class="detalles_viaje">
+              <div class="detalles_viaje">
 
-                </div>
-                <div class="resumen_compra">
+              </div>
+              <div class="resumen_compra">
 
-                </div>
+              </div>
             </div>
           </div>
           <!-- Sección CONTACTO -->
@@ -431,7 +432,20 @@
       <div id="carouselExample" class="carousel slide w-100 position-relative">
         <div class="carousel-inner">
           <div class="carousel-item active">
-            <div class="d-flex justify-content-center gap-3">
+            <div class="d-flex justify-content-center gap-5">
+              <a href="#" style="text-decoration: none;">
+                <div class="card" style="width: 18rem;">
+                  <img src="../../../Static/img/login_celular.jpg" class="card-img-top" alt=""
+                    style="border: 3px solid black; border-radius: 5%; display: block; margin: 5%; width: auto; height: auto;">
+                  <div class="card-body">
+                    <h5 class="card-title text-center" style="font-weight: bold;">Económico</h5>
+                    <p class="card-text text-center">Autobuses cómodos y seguros a precios accesibles. Pensando para
+                      usuarios
+                      que priorizan economía sin perder calidad.
+                    </p>
+                  </div>
+                </div>
+              </a>
               <a href="#" style="text-decoration: none;">
                 <div class="card" style="width: 18rem;">
                   <img src="../../../Static/img/login_celular.jpg" class="card-img-top" alt=""
@@ -474,15 +488,15 @@
             </div>
           </div>
           <!-- Botón anterior -->
-          <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev"
-            style="color: black;">
+          <button class="carousel-control-prev justify-content-md-end" type="button" data-bs-target="#carouselExample"
+            data-bs-slide="prev" style="color: black;">
             <span class="carousel-control-prev-icon" aria-hidden="true"
               style="filter: invert(0%) brightness(0%)"></span>
             <span class="visually-hidden">Anterior</span>
           </button>
           <!-- Botón siguiente -->
-          <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next"
-            style="color: black;">
+          <button class="carousel-control-next justify-content-md-start" type="button" data-bs-target="#carouselExample"
+            data-bs-slide="next" style="color: black;">
             <span class="carousel-control-next-icon" aria-hidden="true"
               style="filter: invert(0%) brightness(0%)"></span>
             <span class="visually-hidden">Siguiente</span>
@@ -492,116 +506,123 @@
       </div>
   </section>
 
-  <section id="principal" class="h-75 container-sm mx-auto d-flex justify-content-md-start align-items-start"
-    style="max-width: 1000px;">
-    <div class="accordion container-fluid" id="accordionExample">
-    <h2 style="color: #315BAA; margin: 5%; font-weight: bold;" class="text-center">Preguntas frecuentes</h2>
+  <section id="principal" class="h-75 container-sm mx-auto d-flex justify-content-md-start align-items-start">
+    <div class="row">
+      <h2 style="color: #315BAA; margin: 2%; font-weight: bold;" class="text-center">Preguntas frecuentes</h2>
+      <div class="col-md-8">
+        <div class="accordion" id="accordionExample">
+          <div class="accordion-item my-4">
+            <h2 class="accordion-header" id="headingOne">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
+                aria-expanded="false" aria-controls="collapseOne">
+                <i class="bi bi-truck-flatbed"></i>
+                <span class="px-3 text-black">¿Postergar y activar boleto?</span>
+              </button>
+            </h2>
+            <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne"
+              data-bs-parent="#accordionExample">
+              <div class="accordion-body">
+                <h2 class="fs-6 fw-semibold"></h2>
+                <div class="my-2">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa, odit.</div>
+              </div>
+            </div>
+          </div>
 
-      <div class="accordion-item my-4" style="max-width: 50%;">
-        <h2 class="accordion-header" id="headingOne">
-          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
-            aria-expanded="false" aria-controls="collapseOne">
-            <i class="bi bi-truck-flatbed"></i>
-            <span class="px-3 text-black">¿Postergar y activar boleto?</span>
-          </button>
-        </h2>
-        <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne"
-          data-bs-parent="#accordionExample">
-          <div class="accordion-body">
-            <h2 class="fs-6 fw-semibold"></h2>
-            <div class="my-2">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa, odit.</div>
+          <!-- Segundo acordion de pregunta -->
+
+          <div class="accordion-item my-4">
+            <h2 class="accordion-header" id="headingTwo">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                <i class="bi bi-credit-card"></i>
+                <span class="px-3 text-black">¿Qué pasa si deseo cambiar mi boleto a nombre de otra persona?</span>
+              </button>
+            </h2>
+            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+              data-bs-parent="#accordionExample">
+              <div class="accordion-body">
+                <h2 class="fs-6 fw-semibold"></h2>
+                <div class="my-2">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa, odit.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Siguiente bloque de preguntas -->
+
+          <div class="accordion-item my-4">
+            <h2 class="accordion-header" id="heading3">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#collapse3" aria-expanded="false" aria-controls="collapse3">
+                <i class="bi bi-credit-card"></i>
+                <span class="px-3 text-black">¿Cómo realizo un cambio de ruta?</span>
+              </button>
+            </h2>
+            <div id="collapse3" class="accordion-collapse collapse" aria-labelledby="heading3"
+              data-bs-parent="#accordionExample">
+              <div class="accordion-body">
+                <h2 class="fs-6 fw-semibold"></h2>
+                <div class="my-2">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa, odit.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item my-4">
+            <h2 class="accordion-header" id="heading4">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#collapse4" aria-expanded="false" aria-controls="collapse4">
+                <i class="bi bi-credit-card"></i>
+                <span class="px-3 text-black">¿Debo imprimir mi boleto para viajar?</span>
+              </button>
+            </h2>
+            <div id="collapse4" class="accordion-collapse collapse" aria-labelledby="heading4"
+              data-bs-parent="#accordionExample">
+              <div class="accordion-body">
+                <h2 class="fs-6 fw-semibold"></h2>
+                <div class="my-2">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa, odit.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item my-4">
+            <h2 class="accordion-header" id="heading5">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#collapse5" aria-expanded="false" aria-controls="collapse5">
+                <i class="bi bi-credit-card"></i>
+                <span class="px-3 text-black">¿Puedo llevar mascotas?</span>
+              </button>
+            </h2>
+            <div id="collapse5" class="accordion-collapse collapse" aria-labelledby="heading5"
+              data-bs-parent="#accordionExample">
+              <div class="accordion-body">
+                <h2 class="fs-6 fw-semibold"></h2>
+                <div class="my-2">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa, odit.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item my-4">
+            <h2 class="accordion-header" id="headingTwo">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#collapse6" aria-expanded="false" aria-controls="collapse6">
+                <i class="bi bi-credit-card"></i>
+                <span class="px-3 text-black">¿Cuánto de peso de equipaje está permitido llevar?</span>
+              </button>
+            </h2>
+            <div id="collapse6" class="accordion-collapse collapse" aria-labelledby="heading6"
+              data-bs-parent="#accordionExample">
+              <div class="accordion-body">
+                <h2 class="fs-6 fw-semibold"></h2>
+                <div class="my-2">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa, odit.</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-
-      <!-- Segundo acordion de pregunta -->
-
-      <div class="accordion-item my-4" style="max-width: 50%;">
-        <h2 class="accordion-header" id="headingTwo">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-            data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-            <i class="bi bi-credit-card"></i>
-            <span class="px-3 text-black">¿Qué pasa si deseo cambiar mi boleto a nombre de otra persona?</span>
-          </button>
-        </h2>
-        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
-          data-bs-parent="#accordionExample">
-          <div class="accordion-body">
-            <h2 class="fs-6 fw-semibold"></h2>
-            <div class="my-2">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa, odit.</div>
-          </div>
-        </div>
+      <div class="col-md-4 d-flex align-items-center justify-content-center">
+        <img src="../../../Static/img/seleccionIMGTYR.png" alt="Imagen ilustrativa" class="img-fluid"
+          style="max-height: 300px;">
       </div>
-
-      <!-- Siguiente bloque de preguntas -->
-
-      <div class="accordion-item my-4" style="max-width: 50%;">
-        <h2 class="accordion-header" id="heading3">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse3"
-            aria-expanded="false" aria-controls="collapse3">
-            <i class="bi bi-credit-card"></i>
-            <span class="px-3 text-black">¿Cómo realizo un cambio de ruta?</span>
-          </button>
-        </h2>
-        <div id="collapse3" class="accordion-collapse collapse" aria-labelledby="heading3"
-          data-bs-parent="#accordionExample">
-          <div class="accordion-body">
-            <h2 class="fs-6 fw-semibold"></h2>
-            <div class="my-2">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa, odit.</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="accordion-item my-4" style="max-width: 50%;">
-        <h2 class="accordion-header" id="heading4">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse4"
-            aria-expanded="false" aria-controls="collapse4">
-            <i class="bi bi-credit-card"></i>
-            <span class="px-3 text-black">¿Debo imprimir mi boleto para viajar?</span>
-          </button>
-        </h2>
-        <div id="collapse4" class="accordion-collapse collapse" aria-labelledby="heading4"
-          data-bs-parent="#accordionExample">
-          <div class="accordion-body">
-            <h2 class="fs-6 fw-semibold"></h2>
-            <div class="my-2">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa, odit.</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="accordion-item my-4" style="max-width: 50%;">
-        <h2 class="accordion-header" id="heading5">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse5"
-            aria-expanded="false" aria-controls="collapse5">
-            <i class="bi bi-credit-card"></i>
-            <span class="px-3 text-black">¿Puedo llevar mascotas?</span>
-          </button>
-        </h2>
-        <div id="collapse5" class="accordion-collapse collapse" aria-labelledby="heading5"
-          data-bs-parent="#accordionExample">
-          <div class="accordion-body">
-            <h2 class="fs-6 fw-semibold"></h2>
-            <div class="my-2">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa, odit.</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="accordion-item my-4" style="max-width: 50%;">
-        <h2 class="accordion-header" id="headingTwo">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse6"
-            aria-expanded="false" aria-controls="collapse6">
-            <i class="bi bi-credit-card"></i>
-            <span class="px-3 text-black">¿Cuánto de peso de equipaje está permitido llevar?</span>
-          </button>
-        </h2>
-        <div id="collapse6" class="accordion-collapse collapse" aria-labelledby="heading6"
-          data-bs-parent="#accordionExample">
-          <div class="accordion-body">
-            <h2 class="fs-6 fw-semibold"></h2>
-            <div class="my-2">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa, odit.</div>
-          </div>
-        </div>
-      </div>
+    </div>
   </section>
 </main>
 {% endblock %}
