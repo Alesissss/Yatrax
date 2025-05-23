@@ -12,34 +12,37 @@ from Models.ruta import Ruta
 from Models.cliente import Cliente
 from werkzeug.utils import secure_filename
 from Models.asiento import Asiento
+from Models.tipo_herramienta import TipoHerramienta
+from Models.herramienta import Herramienta
 
 viajes_bp = Blueprint('viajes', __name__, url_prefix='/trabajadores/viajes')
 
 # ERRORES 
 # Manejar errores 401 (Página no autorizada)
-@viajes_bp.errorhandler(401)
-def error_401(error):
-    return render_template("error.html", error="Página no autorizada"), 401
 
-# Manejar errores 403 (Página no autorizada para este usuario)
-@viajes_bp.errorhandler(403)
-def error_403(error):
-    return render_template("error.html", error="Página restringida"), 403
+# @viajes_bp.errorhandler(401)
+# def error_401(error):
+#     return render_template("error.html", error="Página no autorizada"), 401
 
-# Manejar errores 404 (Página no encontrada)
-@viajes_bp.errorhandler(404)
-def error_404(error):
-    return render_template("error.html", error="Página no encontrada"), 404
+# # Manejar errores 403 (Página no autorizada para este usuario)
+# @viajes_bp.errorhandler(403)
+# def error_403(error):
+#     return render_template("error.html", error="Página restringida"), 403
 
-# Manejar errores 500 (Error interno del servidor)
-@viajes_bp.errorhandler(500)
-def error_500(error):
-    return render_template("error.html", error="Error interno del servidor"), 500
+# # Manejar errores 404 (Página no encontrada)
+# @viajes_bp.errorhandler(404)
+# def error_404(error):
+#     return render_template("error.html", error="Página no encontrada"), 404
 
-# Manejar cualquier otro error genérico
-@viajes_bp.errorhandler(Exception)
-def error_general(error):
-    return render_template("error.html", error="Ocurrió un error inesperado"), 500
+# # Manejar errores 500 (Error interno del servidor)
+# @viajes_bp.errorhandler(500)
+# def error_500(error):
+#     return render_template("error.html", error="Error interno del servidor"), 500
+
+# # Manejar cualquier otro error genérico
+# @viajes_bp.errorhandler(Exception)
+# def error_general(error):
+#     return render_template("error.html", error="Ocurrió un error inesperado"), 500
 
 # RESTRICCIONES
 @viajes_bp.before_request
@@ -134,11 +137,15 @@ def get_niveles():
 @viajes_bp.route('/registrarNivel', methods=["GET", "POST"])
 def nuevo_nivel():
     if request.method == "GET":
+        lista_tipo_herramienta = TipoHerramienta.obtener_todos()
+        lista_herramienta = Herramienta.obtener_todos()
         # Renderiza formulario para registrar un nuevo nivel
         return render_template(
             "viajes/nivelCRUD.html",  # Cambia el template a uno para nivel
-            tittle="Nuevo nivel",
+            title="Nuevo nivel",
             nivel={},
+            tipo_herramientas = lista_tipo_herramienta,
+            herramientas = lista_herramienta,
             btnId="btn_Registrar",
             active_page="nivel",
             active_menu='mViajes'
@@ -256,7 +263,7 @@ def nuevoTipoVehiculo():
     if request.method == "GET":
         return render_template(
             "viajes/tipoVehiculoCRUD.html",
-            tittle="Nuevo tipo de vehículo",
+            title="Nuevo tipo de vehículo",
             tipoVehiculo={},
             btnId="btn_Registrar",
             active_page="tipoVehiculo", 
@@ -1221,5 +1228,26 @@ def dar_baja_asiento(id):
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
 # END REGION ASIENTO
+
+
+# SECCIÓN HERRAMIENTA
+@viajes_bp.route("/GetData_Herammientas")
+def obtener_herramientas():
+    try:
+        objTipoHerramienta = TipoHerramienta()
+        lista_herramientas = objTipoHerramienta.obtener_todos()
+        return jsonify({
+            "data":lista_herramientas,
+            "msg":"Listado de herramientas correctamente",
+            "status":"succes"
+        })
+    except Exception as e:
+        return jsonify({
+            "data":"",
+            "msg":f"Ha ocurrido un error al listar las herramientas: {e}",
+            "status":"succes"
+        }) 
+
+# END SECCIÓN HERRAMIENTA
 
 # END FUNCIONES

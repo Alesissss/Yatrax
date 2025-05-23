@@ -138,7 +138,8 @@ DROP TABLE IF EXISTS ruta;
 DROP TABLE IF EXISTS ciudad;
 DROP TABLE IF EXISTS cliente;
 DROP TABLE IF EXISTS pais;
-
+DROP TABLE IF EXISTS herramienta;
+DROP TABLE IF EXISTS tipo_herramienta;
 -- Crear tabla pais
 CREATE TABLE pais(
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -188,6 +189,12 @@ CREATE TABLE tipo_comprobante (
     estado_registro INT NOT NULL DEFAULT 1,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) not null
+);
+CREATE TABLE tipo_herramienta(
+	id int AUTO_INCREMENT PRIMARY KEY,
+    nombre varchar(50),
+    fecha_registro date DEFAULT CURRENT_DATE,
+    usuario varchar(100)
 );
 
 -- Crear tabla ubigeo
@@ -475,6 +482,38 @@ CREATE TABLE personal (
     usuario VARCHAR(100) NOT NULL,
     FOREIGN KEY (id_tipopersonal) REFERENCES tipo_personal(id) -- Relación con tipo_personal
 );
+
+CREATE TABLE herramienta(
+	id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre varchar(60),
+    icono varchar(200),
+    id_tipo INT REFERENCES tipo_herramienta(id)
+);
+
+
+-- INSERT TIPO_HERRAMIENTA  
+
+INSERT INTO tipo_herramienta (nombre) VALUES ('Asientos');
+INSERT INTO tipo_herramienta (nombre) VALUES ('Acceso');
+INSERT INTO tipo_herramienta (nombre) VALUES ('Seguridad');
+INSERT INTO tipo_herramienta (nombre) VALUES ('Multimedia');
+
+-- INSERT HERRAMIENTA
+
+INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Asiento a 140°','fas fa-chair',1);
+INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Asiento a 160°','fas fa-chair',1);
+INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Asiento cama','fas fa-chair',1);
+
+
+INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Televisor','fas fa-desktop',4);
+
+
+INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Baño','fas fa-restroom',3);
+INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Extintor','fas fa-fire-extinguisher',3);
+
+
+INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Puerta','fas fa-door-closed',2	);
+
 
 -- INSERTS PAIS
 INSERT INTO pais (id, nombre, name, iso2, iso3, phone_code, continente) VALUES (1,'Afganistán','Afghanistan','AF','AFG','93','Asia');
