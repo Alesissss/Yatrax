@@ -1,13 +1,13 @@
 {% extends "index.html" %}
 
-{% block title %}YATRAX - Gestión de servicio{% endblock %}
+{% block title %}YATRAX - Gestión de servicios{% endblock %}
 
 {% block content %}
 <div class="container-fluid p-4">
     <div class="panel-heading">
         <div class="row">
             <div class="col-md-12">
-                <h1>Gestionar servicio</h1>
+                <h1>Gestionar servicios</h1>
             </div>
         </div>
     </div>
@@ -20,7 +20,6 @@
                             <th class="text-center">ID</th>
                             <th class="text-center">NOMBRE</th>
                             <th class="text-center">DESCRIPCION</th>
-                            <th class="text-center">TIPO SERVICIO</th>
                             <th class="text-center">ESTADO</th>
                             <th class="text-center">ACCIÓN</th>
                         </tr>
@@ -101,10 +100,10 @@
             lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
         });
 
-        fct_IniciarTablaUsuarios('#tbl_Servicio');
+        fct_IniciarTablaServicios('#tbl_Servicio');
     });
 
-    function fct_IniciarTablaUsuarios(IdTabla) {
+    function fct_IniciarTablaServicios(IdTabla) {
         // Inicializar DataTables con botones
         dtUsuarios = $(IdTabla).DataTable({
             buttons: [
@@ -119,7 +118,7 @@
                     text: '<i class="bi bi-file-earmark-excel"></i>',
                     titleAttr: 'Exportar a Excel',
                     className: 'btn btn-success',
-                    filename: 'Servicio' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Servicios' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     footer: true,
                     exportOptions:
                     {
@@ -132,7 +131,7 @@
                     text: '<i class="bi bi-file-earmark-pdf"></i>',
                     titleAttr: 'Exportar a PDF',
                     className: 'btn btn-danger',
-                    filename: 'Servicio' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Servicios' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     exportOptions:
                     {
                         stripHtml: true,
@@ -191,7 +190,6 @@
                 { data: "id", name: "id" },
                 { data: "nombre", name: "nombre" },
                 { data: "descripcion", name: "descripcion" },
-                { data: "idTipoServicio", name: "idTipoServicio" },
                 { 
                     data: "estado", 
                     name: "estado",
@@ -212,10 +210,10 @@
                     render: function (data, type, row) {
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_VerServicio('${data.id}')" title="Ver tipo vehiculo"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_ServicioEditar('${data.id}')" title="Editar tipo vehiculo"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_ServicioDarBaja('${data.id}')" title="Dar de baja tipo vehiculo"><i class="bi bi-arrow-down-circle"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_ServicioEliminar('${data.id}')" title="Eliminar tipo vehiculo"><i class="bi bi-trash"></i></button>
+                            <button class="btn btn-xs m-1 btn-info" onclick="fct_VerServicio('${data.id}')" title="Ver servicio"><i class="bi bi-eye"></i></button>
+                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_ServicioEditar('${data.id}')" title="Editar servicio"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_ServicioDarBaja('${data.id}')" title="Dar de baja servicio"><i class="bi bi-arrow-down-circle"></i></button>
+                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_ServicioEliminar('${data.id}')" title="Eliminar servicio"><i class="bi bi-trash"></i></button>
                         </div>
                         `;
                     },
@@ -277,12 +275,12 @@
     function fct_ServicioEliminar(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción eliminará el tipo de vehiculo. ¿Deseas continuar?",
+            text: "Esta acción eliminará el servicio. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             cancelButtonColor: "#d33",
-            confirmButtonText: "Sí, eliminar",
+            confirmButtonText: "Sí, eliminar servicio",
             cancelButtonText: "Cancelar",
             reverseButtons: true // Invertir el orden de los botones
         }).then((result) => {
@@ -297,7 +295,7 @@
                                 toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
                                 return;
                             }
-                            fct_IniciarTablaUsuarios('#tbl_Servicio');
+                            fct_IniciarTablaServicios('#tbl_Servicio');
                             toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                         } else {
                             toastr.error(response.Msj, "MENSAJE DE SISTEMA");
@@ -316,12 +314,12 @@
     function fct_ServicioDarBaja(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción le dará de baja al tipo de vehiculo. ¿Deseas continuar?",
+            text: "Esta acción le dará de baja al servicio. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             cancelButtonColor: "#d33",
-            confirmButtonText: "Sí, dar de baja",
+            confirmButtonText: "Sí, dar de baja al servicio",
             cancelButtonText: "Cancelar",
             reverseButtons: true // Invertir el orden de los botones
         }).then((result) => {
@@ -331,12 +329,16 @@
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
-                        if (response && response.Status === "success") {
-                            fct_IniciarTablaUsuarios('#tbl_Servicio');
-                            toastr.success(response.Msj || "Operación exitosa", "MENSAJE DE SISTEMA");
+                        if (response.Status === "success") {
+                            if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                return;
+                            }
+                            fct_IniciarTablaServicios('#tbl_Servicio');
+                            toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                         } else {
-                            toastr.error((response && response.Msj) || "Error desconocido", "MENSAJE DE SISTEMA");
-                            console.error('Error: ' + (response ? response.Msj : "No hay respuesta"));
+                            toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                            console.error('Error: ' + response.Msj);
                         }
                     },
 
