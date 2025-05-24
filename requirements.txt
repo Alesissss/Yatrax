@@ -1,4 +1,5 @@
 Flask
 pymysql
 requests
+Flask-Mail
 # $ pip install -r requirements.txt
