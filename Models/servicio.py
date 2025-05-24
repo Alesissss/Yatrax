@@ -2,91 +2,112 @@ import bd
 import hashlib
 
 class Servicio:
-    def __init__(self, idServicio, nombre, descripcion, idTipoServicio, estado):
-        self.idServicio = idServicio
+    def __init__(self, id, nombre, descripcion, estado, fechaRegistro, usuario):
+        self.id = id
         self.nombre = nombre
         self.descripcion = descripcion
-        self.idTipoServicio = idTipoServicio
         self.estado = estado
+        self.fechaRegistro = fechaRegistro
+        self.usuario = usuario
 
     @classmethod
     def obtener_todos(cls):
         try:
             conexion = bd.Conexion()
-            listado = conexion.obtener("""
-                    SELECT
-                        s.id AS id,
-                        s.nombre AS nombre,
-                        s.descripcion AS descripcion,
-                        tpser.nombre AS idTipoServicio,
-                        s.estado AS estado
-                    FROM servicio s 
-                    LEFT JOIN tipo_servicio tpser ON s.id_tipo_servicio = tpser.idTipoServicio
-            """)
-            return listado
+            servicios = conexion.obtener(""" SELECT s.id AS id, s.nombre AS nombre, s.descripcion AS descripcion, s.estado FROM servicio s """)
+            return servicios
         finally:
-            if conexion:
-                conexion.cerrar()
+            conexion.cerrar()
 
     @classmethod
-    def obtener_unServicio(cls, idServicio):
+    def obtener_uno(cls, id):
         try:
             conexion = bd.Conexion()
-            servicio = conexion.obtener("SELECT * FROM servicio WHERE id = %s", (idServicio,))
-            return servicio[0]
+            servicio = conexion.obtener("SELECT s.id AS id, s.nombre AS nombre, s.descripcion AS descripcion, s.estado FROM servicio s WHERE id = %s", (id,))
+            return servicio[0] if servicio else None
         finally:
-            if conexion:
-                conexion.cerrar()
+            conexion.cerrar()
 
     @classmethod
-    def insertarServicio(cls, nombre, descripcion, idTipoServicio):
+    def obtener_micros_por_servicio(cls, id):
         try:
             conexion = bd.Conexion()
-            resultado = conexion.ejecutar("CALL SP_INSERTAR_SERVICIO(%s, %s, %s)", (nombre, descripcion, idTipoServicio))
-            result = resultado.fetchall()
-            return result
+            micros = conexion.obtener(""" SELECT m.id, m.nombre, m.descripcion, m.estado, sm.idServicio as idServicio FROM microservicio m INNER JOIN servicio_microservicio sm on m.id = sm.idMicroservicio WHERE sm.idServicio = %s """, (id,))
+            return micros
+        finally:
+            conexion.cerrar()
+
+    @classmethod
+    def registrar(cls, nombre, descripcion, estado, usuario, microservicios):
+        try:
+            conexion = bd.Conexion()
+            conexion.ejecutar("CALL SP_INSERTAR_SERVICIO(%s, %s, %s, %s)", (nombre, descripcion, estado, usuario), auto_commit=False)
+
+            mensajes = conexion.obtener("SELECT @MSJ, @MSJ2, LAST_INSERT_ID() AS idServicio;")
+
+            idServicio = mensajes[0]['idServicio']
+            msj2 = mensajes[0]['@MSJ2']
+
+            if msj2:
+                raise Exception('Error al registrar servicio: ' + msj2)
+            
+            for m in microservicios:
+                conexion.ejecutar("INSERT INTO servicio_microservicio (idServicio, idMicroservicio, usuario) VALUES (%s, %s, %s)", (idServicio, m['id'], usuario), auto_commit=False)
+
+            conexion.conn.commit()
+            return mensajes[0]
+        
         except Exception as e:
-            print("Ha ocurrido un error al insertar un servicio: " + repr(e))
+            conexion.conn.rollback()
+            return {'@MSJ': '', '@MSJ2': f'Error al ejecutar la transacción de registro de servicio: {repr(e)}'}        
         finally:
-            if conexion:
-                conexion.cerrar()
+            conexion.cerrar()
 
     @classmethod
-    def actualizarServicio(cls, idServicio, nombre, descripcion, idTipoServicio, estado):
+    def editar(cls, id, nombre, descripcion, estado, usuario, microservicios):
         try:
             conexion = bd.Conexion()
-            resultado = conexion.ejecutar("CALL SP_ACTUALIZAR_SERVICIO(%s, %s, %s, %s, %s)",
-                                          (idServicio, nombre, descripcion, idTipoServicio, estado))
-            result = resultado.fetchall()
-            return result
+            conexion.ejecutar("CALL SP_ACTUALIZAR_SERVICIO(%s, %s, %s, %s)", (id, nombre, descripcion, estado), auto_commit=False)
+
+            mensajes = conexion.obtener("SELECT @MSJ, @MSJ2")
+            msj2 = mensajes[0]['@MSJ2']
+
+            if msj2:
+                raise Exception('Error al registrar servicio: ' + msj2)
+            
+            conexion.ejecutar("DELETE FROM servicio_microservicio WHERE idServicio = %s", (id,), auto_commit=False)
+
+            for m in microservicios:
+                conexion.ejecutar("INSERT INTO servicio_microservicio (idServicio, idMicroservicio, usuario) VALUES (%s, %s, %s)", (id, m['id'], usuario), auto_commit=False)
+
+            conexion.conn.commit()
+            return mensajes[0]
         except Exception as e:
-            print("Ha ocurrido un error al actualizar un servicio: " + repr(e))
+            conexion.conn.rollback()
+            return {'@MSJ': '', '@MSJ2': f'Error al ejecutar la transacción de registro de servicio: {repr(e)}'} 
         finally:
-            if conexion:
-                conexion.cerrar()
+            conexion.cerrar()
 
     @classmethod
-    def darBajaServicio(cls, idServicio):
+    def darBaja(cls, id):
         try:
             conexion = bd.Conexion()
-            resultado = conexion.ejecutar("CALL SP_BAJA_SERVICIO(%s)", (idServicio,))
-            result = resultado.fetchall()
-            return result
+            conexion.ejecutar("CALL SP_BAJA_SERVICIO(%s)", (id,))
+            mensajes = conexion.obtener("SELECT @MSJ, @MSJ2")
+            return mensajes[0]
         except Exception as e:
             print("Ha ocurrido un error al dar de baja un servicio: " + repr(e))
         finally:
-            if conexion:
-                conexion.cerrar()
+            conexion.cerrar()
 
     @classmethod
-    def eliminarServicio(cls, idServicio):
+    def eliminar(cls, id):
         try:
             conexion = bd.Conexion()
-            resultado = conexion.ejecutar("CALL SP_DELETE_SERVICIO(%s)", (idServicio,))
-            result = resultado.fetchall()
-            return result
+            conexion.ejecutar("CALL SP_DELETE_SERVICIO(%s)", (id,))
+            mensajes = conexion.obtener("SELECT @MSJ, @MSJ2")
+            return mensajes[0]
         except Exception as e:
             print("Ha ocurrido un error al eliminar un servicio: " + repr(e))
         finally:
-            if conexion:
-                conexion.cerrar()
+            conexion.cerrar()

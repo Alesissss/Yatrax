@@ -1,23 +1,21 @@
 {% extends "index.html" %}
 
-{% block title %}YATRAX - {{ tittle }}{% endblock %}
+{% block title %}YATRAX - {{ title }}{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-
 <style>
-    .herramienta {
+    .control {
         cursor: grab;
     }
 
-    .herramienta:active {
+    .control:active {
         cursor: grabbing;
     }
 
     button[data-tipo] i {
         pointer-events: none;
-        /* Para evitar conflictos al soltar */
     }
 </style>
 
@@ -37,171 +35,119 @@
                         </li>
                     </ul>
                 </div>
+
                 <div class="card-body">
                     <div class="tab-content" id="custom-tabs-one-tabContent">
 
-                        <!-- Tab 1 -->
+                        <!-- Tab 1: Datos de nivel -->
                         <div class="tab-pane fade show active" id="tab-01" role="tabpanel" aria-labelledby="tab01-tab">
-                            <!-- <div class="panel-heading bg-">
-                                <h4 class="text-center mb-0 text-break">{{ tittle }}</h4>
-                            </div> -->
-                            <div class="panel-body">
-                                <div class="row justify-content-center">
-                                    <div class="col-md-12 col-sm-10">
-                                        <form action="" method="POST" id="formNivel">
-                                            <div class="mb-3">
-                                                <label for="txt_nroPiso" class="form-label">Número de piso</label>
-                                                <input type="number" name="txt_nroPiso" id="txt_nroPiso"
-                                                    class="form-control" placeholder="Número de piso"
-                                                    value="{{ nivel.nroPiso }}" readonly>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="txt_vehiculo" class="form-label">Tipo vehículo</label>
-                                                <div class="input-group">
-                                                    <select id="cbx_TipoVehiculo" name="txt_vehiculo"
-                                                        class="form-control" {% if btnId=='btn_Regresar' %}disabled{%
-                                                        endif %}>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="txt_cantidad" class="form-label">Cantidad</label>
-                                                <input type="number" name="txt_cantidad" id="txt_cantidad"
-                                                    class="form-control" placeholder="Cantidad de espacios"
-                                                    value="{{ nivel.cantidad }}" {% if btnId=="btn_Regresar" %} disabled
-                                                    {% endif %}>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="txt_estado" class="form-label">Estado</label>
-                                                <select id="txt_estado" name="txt_estado" class="form-control" {% if
-                                                    btnId=="btn_Regresar" %} disabled {% endif %}>
-                                                    <option value="1" {% if nivel.estado==1 or nivel.estado=="activo"
-                                                        %}selected{% endif %}>Activo</option>
-                                                    <option value="0" {% if nivel.estado==0 or nivel.estado=="inactivo"
-                                                        %}selected{% endif %}>Inactivo</option>
-                                                </select>
-                                            </div>
-                                            <div class="text-center">
-                                                <button id="btn_Listado" type="button"
-                                                    class="btn btn-danger mb-2">Volver al listado</button>
-                                                {% if btnId != "btn_Regresar" %}
-                                                <button id="{{ btnId }}" type="submit"
-                                                    class="btn btn-primary mb-2">Aceptar</button>
-                                                {% endif %}
-                                            </div>
-                                        </form>
-                                    </div>
+                            <form action="" method="POST" id="formNivel">
+                                <div class="mb-3">
+                                    <label for="txt_nroPiso" class="form-label">Número de piso</label>
+                                    <input type="number" name="txt_nroPiso" id="txt_nroPiso" class="form-control"
+                                        placeholder="Número de piso" value="{{ nivel.nroPiso }}" readonly>
                                 </div>
-                            </div>
+                                <div class="mb-3">
+                                    <label for="txt_vehiculo" class="form-label">Tipo vehículo</label>
+                                    <select id="cbx_TipoVehiculo" name="txt_vehiculo" class="form-control" {% if
+                                        btnId=='btn_Regresar' %}disabled{% endif %}></select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="txt_cantidad" class="form-label">Cantidad</label>
+                                    <input type="number" name="txt_cantidad" id="txt_cantidad" class="form-control"
+                                        placeholder="Cantidad de espacios" value="{{ nivel.cantidad }}" {% if
+                                        btnId=="btn_Regresar" %} disabled {% endif %}>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="txt_estado" class="form-label">Estado</label>
+                                    <select id="txt_estado" name="txt_estado" class="form-control" {% if
+                                        btnId=="btn_Regresar" %} disabled {% endif %}>
+                                        <option value="1" {% if nivel.estado==1 or nivel.estado=="activo" %}selected{%
+                                            endif %}>Activo</option>
+                                        <option value="0" {% if nivel.estado==0 or nivel.estado=="inactivo" %}selected{%
+                                            endif %}>Inactivo</option>
+                                    </select>
+                                </div>
+                                <div class="text-center">
+                                    <button id="btn_Listado" type="button" class="btn btn-danger mb-2">Volver al
+                                        listado</button>
+                                    {% if btnId != "btn_Regresar" %}
+                                    <button id="{{ btnId }}" type="submit" class="btn btn-primary mb-2">Aceptar</button>
+                                    {% endif %}
+                                </div>
+                            </form>
                         </div>
 
-                        <!-- Tab 2 -->
+                        <!-- Tab 2: Diseño del nivel -->
                         <div class="tab-pane fade" id="tab-02" role="tabpanel" aria-labelledby="tab02-tab">
-                            <div class="panel-body">
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="card w-100">
-                                            <div class="card-body">
-                                                <!-- <div class="row mb-3 text-center text-sm-start">
-                                            <div class="col-12 col-sm-4 mb-2">
-                                                <h6><b>Tipo vehículo:</b> <span id="lbl_tipo_vehiculo">Jaguar</span></h6>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <h5><b>Nivel o piso:</b> <span id="lbl_tipo_vehiculo">{{ nivel.nroPiso }} piso</span>
-                                                </h5>
-                                            </div>
-                                        </div> -->
-
-                                                <div class="p-3 rounded shadow-sm">
-                                                    <div class="row">
-                                                        <!--
-                                                
-                                                -->
-                                                        <!-- Herramientas -->
-                                                        <div class="col-12 col-md-4 border-end border-info mb-3">
-                                                            <h6><i class="fas fa-edit me-2 my-4"></i><b>Herramientas</b>
-                                                            </h6>
-                                                            <!-- DESPLEGABLE -->
-                                                            <div class="col-md-12">
-                                                                <div class="card card-info collapsed-card">
-                                                                    <div class="card-header">
-                                                                        <h3 class="card-title">Herramientas</h3>
-
-                                                                        <div class="card-tools">
-                                                                            <button type="button" class="btn btn-tool"
-                                                                                data-card-widget="collapse"><i
-                                                                                    class="fas fa-plus"></i>
-                                                                            </button>
-                                                                        </div>
-                                                                        <!-- /.card-tools -->
-                                                                    </div>
-                                                                    <!-- /.card-header -->
-                                                                    <div class="card-body" style="display: none;">
-                                                                        The body of the card
-                                                                    </div>
-                                                                    <!-- /.card-body -->
-                                                                </div>
-                                                            </div>
-                                                            <div class=" col-md-12 bg-white">
-                                                                <div class="d-flex flex-wrap">
-                                                                    <i class="fas fa-desktop fa-lg m-2 herramienta"
-                                                                        draggable="true" data-tipo="tv"
-                                                                        title="Televisor"></i>
-                                                                    <i class="fas fa-restroom fa-lg m-2 herramienta"
-                                                                        draggable="true" data-tipo="baño"
-                                                                        title="Baño"></i>
-                                                                    <i class="fas fa-door-closed fa-lg m-2 herramienta"
-                                                                        draggable="true" data-tipo="puerta"
-                                                                        title="Entrada/Salida"></i>
-                                                                    <i class="fas fa-fire-extinguisher fa-lg m-2 herramienta"
-                                                                        draggable="true" data-tipo="extintor"
-                                                                        title="Extintor"></i>
-                                                                    <i class="fas fa-user-tie fa-lg m-2 herramienta"
-                                                                        draggable="true" data-tipo="conductor"
-                                                                        title="Conductor"></i>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                        <!-- Matriz de asientos -->
-                                                        <div class="col-12 col-md-8">
-                                                            <h6><i class="fas fa-edit me-2 my-4"></i><b>Diseño del
-                                                                    nivel</b>
-                                                            </h6>
-
-                                                            <div class="row justify-content-center"
-                                                                id="matrizContainer">
-                                                                <!-- Matriz generada con JS -->
-                                                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h3 class="card-title">Controles</h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="accordion">
+                                                {% for tipo_herramienta in tipo_herramientas %}
+                                                <div class="card card-{{ loop.cycle('info','primary') }}">
+                                                    <div class="card-header">
+                                                        <h4 class="card-title w-100">
+                                                            <a class="d-block w-100 collapsed" data-toggle="collapse"
+                                                                href="#collapse{{ loop.index }}"
+                                                                aria-expanded="false">{{ tipo_herramienta.nombre }}</a>
+                                                        </h4>
+                                                    </div>
+                                                    <div id="collapse{{ loop.index }}" class="collapse"
+                                                        data-parent="#accordion">
+                                                        <div class="card-body d-flex flex-wrap bg-white">
+                                                            {% for herramienta in herramientas %}
+                                                            {% if herramienta.id_tipo==tipo_herramienta.id %}
+                                                            <i class="{{ herramienta.icono }} fa-lg m-2 control"
+                                                                draggable="true" data-tipo="{{ herramienta.id }}"
+                                                                title="{{ herramienta.nombre }}"></i>
+                                                            {% endif %}
+                                                            {% endfor %}
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="card-footer text-center">
-                                                <button id="btn_Listado" type="button"
-                                                    class="btn btn-danger mb-2">Volver al
-                                                    listado</button>
-                                                {% if btnId != "btn_Regresar" %}
-                                                <button id="{{ btnId }}" type="submit"
-                                                    class="btn btn-primary mb-2">Aceptar</button>
-                                                {% endif %}
+                                                {% endfor %}
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+
+                                <div class="col-md-8">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h3 class="card-title">Diseño</h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row justify-content-center" id="matrizContainer"></div>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                            <div class="card-footer text-center">
+                                <button id="btn_Listado" type="button" class="btn btn-danger mb-2">Volver al
+                                    listado</button>
+                                {% if btnId != "btn_Regresar" %}
+                                <button id="{{ btnId }}" type="submit" class="btn btn-primary mb-2">Aceptar</button>
+                                {% endif %}
                             </div>
                         </div>
+
                     </div> <!-- /.tab-content -->
                 </div> <!-- /.card-body -->
             </div> <!-- /.card -->
         </div>
     </div>
 </div>
+
 <style>
     .btn-seat {
         width: 50px;
         height: 50px;
-        text-align: center;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -366,5 +312,14 @@
             });
         });
     });
+    function fct_get_tipo_herramientas() {
+        let ruta = "/trabajadores/viajes/GetData_Herramientas";
+        fetch(ruta)
+            .then(response => response.json())
+            .then(data => {
+
+            })
+
+    }
 </script>
 {% endblock %}

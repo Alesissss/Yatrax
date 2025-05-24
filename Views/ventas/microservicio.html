@@ -1,26 +1,26 @@
 {% extends "index.html" %}
 
-{% block title %}YATRAX - Gestión de tipos de servicios{% endblock %}
+{% block title %}YATRAX - Gestión de microservicios{% endblock %}
 
 {% block content %}
 <div class="container-fluid p-4">
     <div class="panel-heading">
         <div class="row">
             <div class="col-md-12">
-                <h1>Gestionar tipos de servicios</h1>
+                <h1>Gestionar microservicios</h1>
             </div>
         </div>
     </div>
     <div class="panel-body">
         <div class="row">
             <div class="col-12">
-                <table id="tbl_TipoServicio" class="table table-bordered table-short-rows">
+                <table id="tbl_Microservicio" class="table table-bordered table-short-rows">
                     <thead class="bg-gray">
                         <tr>
                             <th class="text-center">ID</th>
                             <th class="text-center">NOMBRE</th>
+                            <th class="text-center">DESCRIPCION</th>
                             <th class="text-center">ESTADO</th>
-                            <th class="text-center">DESCRIPCIÓN</th>
                             <th class="text-center">ACCIÓN</th>
                         </tr>
                     </thead>
@@ -34,7 +34,7 @@
 {% endblock %}
 {% block scripts %}
 <script>
-    var dtServicio;
+    var dtMicroservicios;
 
     $(document).ready(function () {
         // $('body').addClass('sidebar-collapse');
@@ -100,12 +100,12 @@
             lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
         });
 
-        fct_IniciarTablaTipoServicio('#tbl_TipoServicio');
+        fct_IniciarTablaMicroservicios('#tbl_Microservicio');
     });
 
-    function fct_IniciarTablaTipoServicio(IdTabla) {
+    function fct_IniciarTablaMicroservicios(IdTabla) {
         // Inicializar DataTables con botones
-        dtServicio = $(IdTabla).DataTable({
+        dtMicroservicios = $(IdTabla).DataTable({
             buttons: [
                 {
                     extend: 'copy',
@@ -118,7 +118,7 @@
                     text: '<i class="bi bi-file-earmark-excel"></i>',
                     titleAttr: 'Exportar a Excel',
                     className: 'btn btn-success',
-                    filename: 'Tipo Servicio' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Microservicios' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     footer: true,
                     exportOptions:
                     {
@@ -131,7 +131,7 @@
                     text: '<i class="bi bi-file-earmark-pdf"></i>',
                     titleAttr: 'Exportar a PDF',
                     className: 'btn btn-danger',
-                    filename: 'Tipo Servicio' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Microservicios' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     exportOptions:
                     {
                         stripHtml: true,
@@ -159,16 +159,16 @@
                     columns: ':not(.noVis)',
                 },
                 {
-                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo tipo servicio',
+                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo microservicio',
                     className: 'btn bg-success m-1',
                     titleAttr: 'Nuevo',
                     action: function (e, dt, node, config) {
-                        fct_TipoServicioNuevo();
+                        fct_NuevoMicroservicio();
                     },
                 },
             ],
             ajax: {
-                url: "/trabajadores/ventas/GetData_TipoServicio",
+                url: "/trabajadores/ventas/GetData_Microservicios",
                 type: "GET",
                 datatype: "json",
                 data: function (d) {
@@ -187,8 +187,9 @@
                 },
             },
             columns: [
-                { data: "ID", name: "ID" },
-                { data: "TIPO", name: "TIPO" },
+                { data: "id", name: "id" },
+                { data: "nombre", name: "nombre" },
+                { data: "descripcion", name: "descripcion" },
                 { 
                     data: "estado", 
                     name: "estado",
@@ -203,17 +204,16 @@
                         }
                     },
                 },
-                {data: "descripcion", name: "descripcion"},
                 {
                     data: null,
                     name: null,
                     render: function (data, type, row) {
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_TipoServicioVer('${data.ID}')" title="Ver tipo Servicio"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_TipoServicioEditar('${data.ID}')" title="Editar tipo Servicio"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_TipoServicioDarBaja('${data.ID}')" title="Dar de baja tipo Servicio"><i class="bi bi-arrow-down-circle"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_TipoServicioEliminar('${data.ID}')" title="Eliminar tipo Servicio"><i class="bi bi-trash"></i></button>
+                            <button class="btn btn-xs m-1 btn-info" onclick="fct_VerMicroservicio('${data.id}')" title="Ver microservicio"><i class="bi bi-eye"></i></button>
+                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_MicroservicioEditar('${data.id}')" title="Editar microservicio"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_MicroservicioDarBaja('${data.id}')" title="Dar de baja microservicio"><i class="bi bi-arrow-down-circle"></i></button>
+                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_MicroservicioEliminar('${data.id}')" title="Eliminar microservicio"><i class="bi bi-trash"></i></button>
                         </div>
                         `;
                     },
@@ -230,7 +230,7 @@
                     className: 'align-middle',
                 },
                 {
-                    targets: [3],
+                    targets: [4],
                     orderable: false,
                     width: '10%',
                 },
@@ -260,33 +260,33 @@
         });
     }
 
-    function fct_TipoServicioNuevo() {
-        window.location.href = '/trabajadores/ventas/TipoServicioNuevo';
+    function fct_NuevoMicroservicio() {
+        window.location.href = '/trabajadores/ventas/MicroservicioNuevo';
     }
 
-    function fct_TipoServicioEditar(Id) {
-        window.location.href = `/trabajadores/ventas/EditarTipoServicio/${Id}`;
+    function fct_MicroservicioEditar(Id) {
+        window.location.href = `/trabajadores/ventas/EditarMicroservicio/${Id}`;
     }
 
-    function fct_TipoServicioVer(Id) {
-        window.location.href = `/trabajadores/ventas/VerTipoServicio/${Id}`;
+    function fct_VerMicroservicio(Id) {
+        window.location.href = `/trabajadores/ventas/VerMicroservicio/${Id}`;
     }
 
-    function fct_TipoServicioEliminar(Id) {
+    function fct_MicroservicioEliminar(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción eliminará al tipo servicio. ¿Deseas continuar?",
+            text: "Esta acción eliminará el microservicio. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             cancelButtonColor: "#d33",
-            confirmButtonText: "Sí, eliminar",
+            confirmButtonText: "Sí, eliminar microservicio",
             cancelButtonText: "Cancelar",
             reverseButtons: true // Invertir el orden de los botones
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/ventas/EliminarTipoServicio/${Id}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/ventas/EliminarMicroservicio/${Id}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
@@ -295,7 +295,7 @@
                                 toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
                                 return;
                             }
-                            fct_IniciarTablaTipoServicio('#tbl_TipoServicio');
+                            fct_IniciarTablaMicroservicios('#tbl_Microservicio');
                             toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                         } else {
                             toastr.error(response.Msj, "MENSAJE DE SISTEMA");
@@ -311,21 +311,21 @@
         });
     }
 
-    function fct_TipoServicioDarBaja(Id) {
+    function fct_ServicioDarBaja(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción le dará de baja al tipo servicio. ¿Deseas continuar?",
+            text: "Esta acción le dará de baja al microservicio. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             cancelButtonColor: "#d33",
-            confirmButtonText: "Sí, dar de baja",
+            confirmButtonText: "Sí, dar de baja microservicio",
             cancelButtonText: "Cancelar",
             reverseButtons: true // Invertir el orden de los botones
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/ventas/DarBajaTipoServicio/${Id}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/ventas/DarBajaMicroservicio/${Id}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
@@ -334,13 +334,14 @@
                                 toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
                                 return;
                             }
-                            fct_IniciarTablaTipoServicio('#tbl_TipoServicio');
+                            fct_IniciarTablaMicroservicios('#tbl_Microservicio');
                             toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                         } else {
                             toastr.error(response.Msj, "MENSAJE DE SISTEMA");
                             console.error('Error: ' + response.Msj);
                         }
                     },
+
                     error: function (xhr, Status, error) {
                         toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
                         console.error('Error:' + error);

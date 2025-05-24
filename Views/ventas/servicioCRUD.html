@@ -8,42 +8,44 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header bg-primary text-white">
-                    <h4 class="text-center mb-0">{{ tittle }}</ h4>
+                    <h4 class="text-center mb-0">{{ tittle }}</h4>
                 </div>
-                <div class="card-body" autocomplete="off">
-                    <!-- Formulario para registrar el tipo de vehículo -->
-                    <!-- /trabajadores/ventas/registrarservicio -->
-                    <div id="formservicio">
-
-                        <div class="mb-3">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
                             <label for="txt_nombre">Nombre del servicio</label>
-                            <input type="text" name="txt_nombre" id="txt_Nombre" class="form-control" placeholder="Nombre del servicio" value="{{ servicio.nombre }}" {% if btnId == "btn_Regresar" %} disabled {% endif %}>
+                            <input type="text" name="txt_nombre" id="txt_nombre" class="form-control"
+                                placeholder="Nombre del servicio" value="{{ servicio.nombre }}" {% if
+                                btnId=="btn_Regresar" %} disabled {% endif %}>
                         </div>
-
-                        <div class="mb-3">
+                        <div class="col-md-12 mb-3">
                             <label for="txt_descripcion">Descripción del servicio</label>
-                            <input type="text" name="txt_descripcion" id="txt_Nombre" class="form-control" placeholder="Descripción del servicio" value="{{ servicio.descripcion }}" {% if btnId == "btn_Regresar" %} disabled {% endif %}>
+                            <input type="text" name="txt_descripcion" id="txt_descripcion" class="form-control"
+                                placeholder="Descripción del servicio" value="{{ servicio.descripcion }}" {% if
+                                btnId=="btn_Regresar" %} disabled {% endif %}>
                         </div>
-
-                        <div class="mb-3">
-                            <label for="idTipoServicio">Tipo servicio</label>
+                        <div class="col-md-12 mb-3">
+                            <label for="cbx_Estado">Estado</label>
                             <div class="input-group">
-                                <select id="cbx_TipoServicio" name="txt_idTipoServicio" class="form-control" {% if btnId=='btn_Regresar'
-                                    %}disabled{% endif %}>
+                                <select id="cbx_Estado" class="form-control" {% if btnId=='btn_Regresar' %}disabled{%
+                                    endif %}>
+                                    <option disabled>--SELECCIONAR--</option>
+                                    <option {% if servicio.estado==1 %}selected{% endif %} value="1">Vigente</option>
+                                    <option {% if servicio.estado==0 %}selected{% endif %} value="0">No vigente</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="estado">Estado</label>
-                            <select id="txt_estado" name="txt_estado" class="form-control" {% if btnId == "btn_Regresar" %} disabled {% endif %}>
-                                <option value="1" {% if servicio.estado == 1 %}selected{% endif %}>Activo</option>
-                                <option value="0" {% if servicio.estado == 0 %}selected{% endif %}>Inactivo</option>
-                            </select>
+                        <div class="col-md-12 mb-3">
+                            <label for="cbx_Microservicios">Microservicios</label>
+                            <div class="input-group">
+                                <select id="cbx_Microservicios" class="form-control" multiple="multiple" {% if btnId=='btn_Regresar' %}disabled{%
+                                    endif %}>
+                                </select>
+                            </div>
                         </div>
-
-                        <div class="text-center">
+                        <div class="col-md-12 text-center">
                             <button id="btn_Listado" type="button" class="btn btn-danger">Volver al listado de
-                                tipo de vehiculo</button>
+                                servicios</button>
                             <button id="{{ btnId }}" type="submit" class="btn btn-primary">Aceptar</button>
                         </div>
                     </div>
@@ -56,66 +58,180 @@
 
 {% block scripts %}
 <script>
-    function fct_GetTipoServicio() {
-        $.getJSON('/trabajadores/ventas/GetData_TipoServicio', function (response) {
-            if (response.Status === 'success') {
-                let items = '<option disabled>--SELECCIONAR--</option>';
-                
+
+    function fct_CargarMicroservicios() {
+        $.getJSON('/trabajadores/ventas/Get_Microservicios_Servicio', function (response) {
+            if (response && response.Status === "success") {
+                let items = [];
+
+                // Armar los items para select2
                 $.each(response.data, function (index, item) {
-                    if (item.id === Number("{{ servicio.id_tipo_servicio }}")) {
-                        items += `<option selected value="${item.ID}">${item.TIPO}</option>`;
-                    } else {
-                        items += `<option value="${item.ID}">${item.TIPO}</option>`;
-                    }
+                    items.push({ id: item.id, text: item.nombre });
                 });
 
-                $('#cbx_TipoServicio').html(items);
+                // Inicializar select2
+                $('#cbx_Microservicios').select2({
+                    theme: 'bootstrap4',
+                    placeholder: "Buscar...",
+                    data: items,
+                    language: {
+                        noResults: function () {
+                            return "No se encontraron resultados";
+                        }
+                    },
+                    allowClear: true
+                });
+
+                let microserviciosRecibidos = JSON.parse('{{ microservicios | tojson }}')
+                let idsSeleccionados = microserviciosRecibidos.map(function (m) {
+                    return m.id;
+                });
+
+                $('#cbx_Microservicios').val(idsSeleccionados).trigger('change');
+
             } else {
-                console.error('Error al obtener los tipos de usuario:', response.Msj);
+                console.error('Error al obtener los microservicios: ' + response.Msj);
             }
         });
     }
+
     // Aquí puedes agregar cualquier script que necesites
     $(document).ready(function () {
-        fct_GetTipoServicio()
+        fct_CargarMicroservicios();
 
-        let idservicio = "{{ servicio.id }}"
+        $("#btn_Registrar").click(function () {
+            let nombre = $("#txt_nombre").val().trim();
+            let descripcion = $('#txt_descripcion').val();
+            let estado = $('#cbx_Estado').val();
 
-        $("#btn_Listado").click(()=>{
-            window.location.href="/trabajadores/ventas/GestionarServicio"
-        })
+            if (!nombre || !descripcion || !estado) {
+                toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                return;
+            }
 
-        $("#btn_Regresar").click(()=>{
-            window.location.href="/trabajadores/ventas/GestionarServicio"
-        })
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción registrará al servicio. ¿Deseas continuar?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, registrar servicio",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
 
-        $('#btn_Registrar, #btn_Actualizar').click(function () {
-            const action = this.id; // 'btn_Registrar' o 'btn_Actualizar'
+                    let formData = new FormData();
+                    let ids = $('#cbx_Microservicios').val();
+                    let microservicios = ids.map(id => ({ id: parseInt(id, 10) }));
 
-            const url = (action === 'btn_Registrar')
-                ? '/trabajadores/ventas/registrarServicio'
-                : `/trabajadores/ventas/editarServicio/${idservicio}`;
+                    formData.append("nombre", nombre);
+                    formData.append("descripcion", descripcion);
+                    formData.append("estado", estado);
+                    formData.append("microservicios", JSON.stringify(microservicios));
 
-            const data = $('#formservicio')
-                .find('input[name], select[name]')
-                .serialize();
-
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: data,
-                success: function (response) {
-                    toastr.success(response.Msj, 'Éxito');
-                    setTimeout(() => {
-                        window.location.href = "/trabajadores/ventas/GestionarServicio";
-                    }, 1000);
-                },
-                error: function (xhr) {
-                    const errorMsg = xhr.responseJSON?.Msj || 'Error desconocido';
-                    toastr.error(errorMsg, 'Error');
+                    $.ajax({
+                        url: '/trabajadores/ventas/registrarServicio',
+                        type: "POST",
+                        processData: false,
+                        contentType: false,
+                        data: formData,
+                        success: function (response) {
+                            if (response.Status === "success") {
+                                if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                    return;
+                                } else {
+                                    toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                                    setTimeout(() => {
+                                        window.location.href = "/trabajadores/ventas/GestionarServicio"
+                                    }, 500);
+                                }
+                            } else {
+                                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                                console.error('Error: ' + response.Msj);
+                            }
+                        },
+                        error: function (xhr, Status, error) {
+                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                            console.error('Error:' + error);
+                        }
+                    });
                 }
             });
         });
+
+        $("#btn_Actualizar").click(function () {
+            const id = Number('{{ servicio.id }}');
+
+            let nombre = $("#txt_nombre").val().trim();
+            let descripcion = $('#txt_descripcion').val();
+            let estado = $('#cbx_Estado').val();
+
+            if (!nombre || !descripcion || !estado) {
+                toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                return;
+            }
+
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción modificará al servicio. ¿Deseas continuar?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, editar servicio",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    let formData = new FormData();
+                    let ids = $('#cbx_Microservicios').val();
+                    let microservicios = ids.map(id => ({ id: parseInt(id, 10) }));
+
+                    formData.append("nombre", nombre);
+                    formData.append("descripcion", descripcion);
+                    formData.append("estado", estado);
+                    formData.append("microservicios", JSON.stringify(microservicios));
+
+                    $.ajax({
+                        url: `/trabajadores/ventas/editarServicio/${id}`,
+                        type: "POST",
+                        processData: false,
+                        contentType: false,
+                        data: formData,
+                        success: function (response) {
+                            if (response.Status === "success") {
+                                if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                    return;
+                                } else {
+                                    toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                                    setTimeout(() => {
+                                        window.location.href = "/trabajadores/ventas/GestionarServicio"
+                                    }, 500);
+                                }
+                            } else {
+                                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                            }
+                        },
+                        error: function (xhr, Status, error) {
+                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                        }
+                    });
+                }
+            });
+        });
+
+        $("#btn_Listado").click(() => {
+            window.location.href = "/trabajadores/ventas/GestionarServicio"
+        })
+
+        $("#btn_Regresar").click(() => {
+            window.location.href = "/trabajadores/ventas/GestionarServicio"
+        })
     });
 </script>
 {% endblock %}
