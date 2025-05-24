@@ -125,7 +125,7 @@
                                             <div class="row justify-content-center" id="matrizContainer"></div>
                                         </div>
                                     </div>
-                                    
+
                                 </div>
                             </div>
                             <div class="card-footer text-center">
@@ -165,12 +165,12 @@
 {% block scripts %}
 <script>
     let herramientaSeleccionada = null;
-
+    const list_herramientas = {{ herramientas | tojson }};
     $(document).ready(() => {
         generarMatriz();
 
         // Eventos de herramientas (drag)
-        document.querySelectorAll('.herramienta').forEach(icono => {
+        document.querySelectorAll('.control').forEach(icono => {
             icono.addEventListener('dragstart', function (e) {
                 herramientaSeleccionada = this.getAttribute('data-tipo');
             });
@@ -178,9 +178,10 @@
     });
 
     function generarMatriz() {
+        
         const filas = 15;
         const columnas = 6;
-        const cantidad = parseInt("{{ nivel.cantidad }}");
+        // const cantidad = parseInt("{{ nivel.cantidad }}");
         const contenedor = document.getElementById('matrizContainer');
         contenedor.innerHTML = '';
 
@@ -188,10 +189,8 @@
         contenedor.style.gridTemplateColumns = `repeat(${columnas}, auto)`;
         contenedor.style.gap = '8px';
 
-        for (let i = 0; i < filas; i++) {
-            for (let j = 0; j < columnas; j++) {
-                const numeroAsiento = i * columnas + j + 1;
-                if (numeroAsiento > cantidad) break;
+        for (let i = 1; i <= filas; i++) {
+            for (let j = 1; j <= columnas; j++) {
 
                 const btn = document.createElement('button');
                 btn.className = 'btn btn-light border-dark';
@@ -199,7 +198,6 @@
                 btn.style.height = '40px';
                 btn.setAttribute('data-x', j);
                 btn.setAttribute('data-y', i);
-                btn.setAttribute('data-num', numeroAsiento);
                 btn.setAttribute('data-tipo', '');
 
                 // Drag-over y drop
@@ -214,11 +212,12 @@
 
                 // Click: alterna entre asiento y vacío
                 btn.addEventListener('click', function () {
+                    let idAsiento = 1;
+                    let herramienta_dict = list_herramientas.find(h => h.id === parseInt(idAsiento));
                     const tipoActual = this.getAttribute('data-tipo');
-
                     if (tipoActual === '') {
-                        this.setAttribute('data-tipo', 'asiento');
-                        this.innerHTML = '<i class="fas fa-chair"></i>';
+                        this.setAttribute('data-tipo', `${idAsiento}`);
+                        this.innerHTML = `<i class="${herramienta_dict.icono}"></i>`;
                     } else {
                         this.setAttribute('data-tipo', '');
                         this.innerHTML = '';
@@ -230,17 +229,14 @@
         }
     }
 
-    function obtenerIcono(tipo) {
-        switch (tipo) {
-            case 'tv': return '<i class="fas fa-desktop"></i>';
-            case 'baño': return '<i class="fas fa-restroom"></i>';
-            case 'puerta': return '<i class="fas fa-door-closed"></i>';
-            case 'extintor': return '<i class="fas fa-fire-extinguisher"></i>';
-            case 'conductor': return '<i class="fas fa-user-tie"></i>';
-            case 'asiento': return '<i class="fas fa-chair"></i>';
-            default: return '';
+    function obtenerIcono(idHerramienta) {
+        const herramienta_dict = list_herramientas.find(h => h.id === parseInt(idHerramienta));
+        if(herramienta_dict){
+            return `<i class="${herramienta_dict.icono}"></i>`
         }
+        return '';
     }
+
 </script>
 
 <script>
