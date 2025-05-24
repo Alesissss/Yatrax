@@ -17,9 +17,7 @@ class Ruta:
     def obtener_todos(cls):
         conexion = bd.Conexion()
         try:
-            rutas = conexion.obtener(""" SELECT r.id, r.nombre, r.sucursalOrigen as idOrigen, so.nombre AS nombreOrigen, r.sucursalDestino as idDestino, 
-                                     sd.nombre AS nombreDestino, r.estado FROM ruta r INNER JOIN sucursal so ON r.sucursalOrigen = so.id INNER JOIN 
-                                     sucursal sd ON r.sucursalDestino = sd.id WHERE r.estado_registro = 1 """)
+            rutas = conexion.obtener(""" SELECT r.id, r.nombre, r.tipo, r.estado FROM ruta r""")
             return rutas
         finally:
             conexion.cerrar()
@@ -28,40 +26,91 @@ class Ruta:
     def obtener_por_id(cls, ruta_id):
         conexion = bd.Conexion()
         try:
-            ruta = conexion.obtener("SELECT r.id, r.nombre, r.sucursalOrigen as idOrigen, so.nombre AS nombreOrigen, r.sucursalDestino as idDestino, r.estado FROM ruta r INNER JOIN " 
-                                     "sucursal so ON r.sucursalOrigen = so.id INNER JOIN sucursal sd ON r.sucursalDestino = sd.id WHERE "
-                                     "r.estado_registro = 1 AND r.id = %s", (ruta_id,))
+            ruta = conexion.obtener("SELECT r.id, r.nombre, r.tipo, r.estado FROM ruta r WHERE r.id = %s", (ruta_id,))
             return ruta[0] if ruta else None
         finally:
             conexion.cerrar()
 
-    #REGISTRAR
     @classmethod
-    def registrar(cls, nombre, origen, destino, estado, usuario):
+    def obtener_escalas_por_ruta(cls, ruta_id):
         conexion = bd.Conexion()
         try:
-            # Llamar al procedimiento almacenado
-            conexion.ejecutar("CALL SP_REGISTRAR_RUTA(%s, %s, %s, %s, %s);", (nombre, origen, destino, estado, usuario))
-
-            # Obtener mensajes de salida
-            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
-            return resultado[0]  # Retorna un diccionario con los mensajes
+            escalas = conexion.obtener(""" SELECT id, nro_orden, idSucursal, idRuta from escala WHERE idRuta = %s""", (ruta_id,))
+            return escalas
         finally:
+            conexion.cerrar()
+
+    # REGISTRAR
+    @classmethod
+    def registrar(cls, nombre, estado, tipo, escalas, usuario):
+        try:
+            conexion = bd.Conexion()
+            
+            # Llamar al procedimiento almacenado
+            conexion.ejecutar("CALL SP_REGISTRAR_RUTA(%s, %s, %s, %s);", (nombre, estado, tipo, usuario), auto_commit=False)
+
+            # Obtener el mensaje de error y el último idRuta generado
+            resultado = conexion.obtener("SELECT @MSJ, @MSJ2, LAST_INSERT_ID() AS idRuta;")
+            idRuta = resultado[0]['idRuta']  # Obtener el último ID generado por la ruta
+            msj2 = resultado[0]['@MSJ2']
+
+            if msj2:  # Si hay un mensaje de error en msj2
+                raise Exception('Error al registrar ruta: ' + msj2)
+
+            # Insertar las escalas
+            for escala in escalas:
+                conexion.ejecutar("INSERT INTO escala (nro_orden, idSucursal, idRuta, usuario) VALUES (%s, %s, %s, %s)", 
+                                (escala['nroOrden'], escala['id'], idRuta, usuario), auto_commit=False)
+
+            # Si todo es correcto, confirmamos la transacción
+            conexion.conn.commit()
+            return resultado[0]  # Retorna un diccionario con los mensajes
+
+        except Exception as e:
+            # Si algo falla, hacemos un rollback
+            conexion.conn.rollback()
+            return {'@MSJ': '', '@MSJ2': f'Error al ejecutar la transacción de registro de ruta: {repr(e)}'}
+
+        finally:
+            # Cerramos la conexión
             conexion.cerrar()
 
     #EDITAR
     @classmethod
-    def editar(cls, id, nombre, origen, destino, estado):
-        conexion = bd.Conexion()
-
+    def editar(cls, id, nombre, tipo, estado, escalas, usuario):
         try:
+            conexion = bd.Conexion()
             # Llamar al procedimiento almacenado
-            conexion.ejecutar("CALL SP_EDITAR_RUTA(%s, %s, %s, %s, %s);", (id, nombre, origen, destino, estado))
+            conexion.ejecutar("CALL SP_EDITAR_RUTA(%s, %s, %s, %s);", (id, nombre, tipo, estado), auto_commit=False)
 
-            # Obtener mensajes de salida
+            # Obtener el mensaje de error y el último idRuta generado
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
+            msj2 = resultado[0]['@MSJ2']
+
+            if msj2:  # Si hay un mensaje de error en msj2
+                raise Exception('Error al editar ruta: ' + msj2)
+            
+            escalas_actuales = conexion.obtener(""" SELECT id, nro_orden, idSucursal, idRuta from escala WHERE idRuta = %s""", (id,))
+
+            # Borrar las escalas que existen actualmente
+            conexion.ejecutar("DELETE FROM escala WHERE idRuta = %s", (id), auto_commit=False)
+
+            # Insertar las escalas
+            for escala in escalas:
+                conexion.ejecutar("INSERT INTO escala (nro_orden, idSucursal, idRuta, usuario) VALUES (%s, %s, %s, %s)", 
+                                (escala['nroOrden'], escala['id'], id, usuario), auto_commit=False)
+
+            # Si todo es correcto, confirmamos la transacción
+            conexion.conn.commit()
             return resultado[0]  # Retorna un diccionario con los mensajes
+
+        except Exception as e:
+            # Si algo falla, hacemos un rollback
+            conexion.conn.rollback()
+            return {'@MSJ': '', '@MSJ2': f'Error al ejecutar la transacción de registro de ruta: {repr(e)}'}
+
         finally:
+            # Cerramos la conexión
             conexion.cerrar()
     
     #ELIMINAR
