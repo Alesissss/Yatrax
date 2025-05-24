@@ -1,6 +1,7 @@
 import hashlib
 from flask import Blueprint, request, jsonify, render_template, session, redirect, url_for, abort
 from Models.conf_plantillas import Conf_Plantillas
+from Models.api_net import ApiNetPe
 
 homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/home')
 
@@ -71,5 +72,26 @@ def get_ConfApariencia():
             return jsonify({'data': {}, 'Status': 'error', 'Msj': 'No se encontró configuración activa.'})
     except Exception as e:
         return jsonify({'data': {}, 'Status': 'error', 'Msj': f'Ocurrió un error al obtener la configuración: {repr(e)}'})
+    
+# API NET RENIEC
+# controller_clientes.py
+@homeClientes_bp.route('/api/get_persona_dni', methods=['GET'])
+def get_persona_dni():
+    try:
+        dni = request.args.get('dni')
+        if not dni:
+            return jsonify({'data': {}, 'Status': 'error', 'Msj': 'Debe proporcionar un DNI'})
+
+        api = ApiNetPe()
+        datos = api.get_person(dni)
+
+        if datos:
+            return jsonify({'data': datos, 'Status': 'success', 'Msj': 'Datos obtenidos correctamente'})
+        else:
+            return jsonify({'data': {}, 'Status': 'error', 'Msj': 'No se encontraron datos para el DNI proporcionado'})
+    except Exception as e:
+        return jsonify({'data': {}, 'Status': 'error', 'Msj': f'Error en el servidor: {repr(e)}'})
+
+# FIN API NET RENIEC
 
 # END FUNCIONES

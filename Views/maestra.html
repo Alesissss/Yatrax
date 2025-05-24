@@ -21,7 +21,12 @@
     <img src="" alt="logo_yatrax" id="maestra_logo">
     <ul>
       <li><a href="{{url_for('homeClientes.index')}}">Inicio</a></li>
-      <li><a href="">Servicios</a></li>
+      <li><a href="">Servicios</a>
+        <ul class="lista-desplegable" id="menuServicio">
+          <li class="item-lista"><a class="enlace-item" href="#"></a></li>
+          <li class="item-lista"><a class="enlace-item" href="#"></a></li>
+        </ul>
+      </li>
       <li><a href="">Contacto</a></li>
       <li class="contenedorcito">
         <a href="#" class="boton-menu" id="botonMenu">
@@ -431,6 +436,7 @@
   </script>
   <script>
     const botonMenu = document.getElementById('botonMenu');
+    const botonServicio = document.getElementById('botonServicio')
     const menuDesplegable = document.getElementById('menuDesplegable');
     // Aplicar posición relativa al botón de menú para el posicionamiento correcto del desplegable
     botonMenu.style.position = 'relative';
