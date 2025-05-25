@@ -4,19 +4,19 @@
 <div class="container-fluid p-4">
     <div class="row mb-3">
         <div class="col-12">
-            <h1 class="mb-2">Bienvenido al módulo de usuarios</h1>
-            <p class="text-muted">Este módulo permite administrar los usuarios del sistema y clasificar sus tipos según su función o nivel de acceso.</p>
+            <h1 class="mb-2">⚙️ Bienvenido al módulo de configuración</h1>
+            <p class="text-muted">Este módulo permite administrar el control y nivel de acceso de los trabajadores. Asimismo, permite la gestión y administración de la aplicación web</p>
         </div>
     </div>
 
     <div class="row">
         <!-- Sección informativa 1 -->
         <div class="col-md-4">
-            <div class="info-box bg-light">
+            <div class="info-box bg-primary">
                 <div class="info-box-content">
-                    <span class="info-box-text font-weight-bold">Consulta de usuarios</span>
-                    <span class="info-box-number text-muted">
-                        Visualiza y revisa la información básica de los usuarios registrados en el sistema.
+                    <span class="info-box-text font-weight-bold">Consulta de trabajadores</span>
+                    <span class="info-box-number text-white">
+                        Visualiza y revisa la información básica junto con los permisos pertenecientes a cada uno de los usuarios del sistema.
                     </span>
                 </div>
             </div>
@@ -24,11 +24,11 @@
 
         <!-- Sección informativa 2 -->
         <div class="col-md-4">
-            <div class="info-box bg-light">
+            <div class="info-box bg-success">
                 <div class="info-box-content">
                     <span class="info-box-text font-weight-bold">Registro de nuevos usuarios</span>
-                    <span class="info-box-number text-muted">
-                        Da de alta a nuevos usuarios completando sus datos personales y tipo asignado.
+                    <span class="info-box-number text-white">
+                        Permite el control y administración de los permisos para nuevos usuarios. Limitando la interfaz de trabajo basado en permisos.
                     </span>
                 </div>
             </div>
@@ -36,11 +36,11 @@
 
         <!-- Sección informativa 3 -->
         <div class="col-md-4">
-            <div class="info-box bg-light">
+            <div class="info-box bg-warning">
                 <div class="info-box-content">
-                    <span class="info-box-text font-weight-bold">Gestión de tipos de usuario</span>
-                    <span class="info-box-number text-muted">
-                        Define y organiza las diferentes categorías o perfiles de usuarios del sistema.
+                    <span class="info-box-text font-weight-bold">Gestión de la configuración</span>
+                    <span class="info-box-number text-black">
+                        Permite asignar permisos a empleados y controlar configuraciones clave, como el método de pago.
                     </span>
                 </div>
             </div>
@@ -51,7 +51,31 @@
         <div class="col-12">
             <div class="callout callout-info">
                 <h5>¿Sabías que...?</h5>
-                <p>Clasificar correctamente a los usuarios por tipo ayuda a personalizar su experiencia y controlar sus funcionalidades.</p>
+                <p>La gestión automatizada de permisos y configuraciones agiliza procesos y mejora la seguridad.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos con ECharts -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h3 class="card-title">Cantidad de usuarios por tipo de permiso</h3>
+                </div>
+                <div class="card-body">
+                    <div id="chartUsuariosxPermisos" style="width: 100%; height: 350px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="card-title">Metodo de pago más usado por los clientes</h3>
+                </div>
+                <div class="card-body">
+                    <div id="chartMetodoPagoxCliente" style="width: 100%; height: 350px;"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -62,4 +86,76 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/theme/dark.min.js"></script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let isDarkMode = document.body.classList.contains('dark-mode');
+
+        var chartUsuarios = echarts.init(document.getElementById('chartUsuariosxPermisos'), isDarkMode ? 'dark' : '');
+        var optionUsuarios = {
+            tooltip: {
+                trigger: 'item'
+            },
+            legend: {
+                top: '5%',
+                left: 'center'
+            },
+            series: [
+                {
+                    name: 'Usuarios',
+                    type: 'pie',
+                    radius: '50%',
+                    data: [
+                        { value: 1048, name: 'Administradores' },
+                        { value: 735, name: 'Supervisores' },
+                        { value: 580, name: 'Usuarios normales' }
+                    ],
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }
+            ]
+        };
+        chartUsuarios.setOption(optionUsuarios);
+
+        var chartUsuarios = echarts.init(document.getElementById('chartMetodoPagoxCliente'), isDarkMode ? 'dark' : '');
+        var optionUsuarios = {
+            tooltip: {
+                trigger: 'item'
+            },
+            legend: {
+                top: '5%',
+                left: 'center'
+            },
+            series: [
+                {
+                    name: 'Usuarios',
+                    type: 'pie',
+                    radius: '50%',
+                    data: [
+                        { value: 1048, name: 'Administradores' },
+                        { value: 735, name: 'Supervisores' },
+                        { value: 580, name: 'Usuarios normales' }
+                    ],
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }
+            ]
+        };
+        chartUsuarios.setOption(optionUsuarios);
+
+    });
+</script>
 {% endblock %}

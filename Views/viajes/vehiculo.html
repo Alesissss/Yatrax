@@ -325,10 +325,31 @@
       _getVehiculos(Id);
     }
 
+    function obtenerPlacaPorId(id) {
+        let placaEncontrada = null;
+
+        dtUsuarios.rows().every(function () {
+            const data = this.data();
+            if (String(data.id) === String(id)) {
+                placaEncontrada = data.placa;
+            }
+        });
+
+        return placaEncontrada;
+    }
+
+
     // ─── 3) Función de alto nivel que usa las dos anteriores ────────────────
     function _agregarNivel(Id) {
       // 3.1) genero e inyecto modal
-      _generarModalNivel(Id);
+      const placa = obtenerPlacaPorId(Id);
+
+      if (placa){
+        console.log('La placa es:', placa);
+        _generarModalNivel(Id);
+      }else{
+        toastr.warning('No se encontró una placa para ese ID');
+      }
 
       // 3.2) seteo valores y textos
       $('#txt_idVehiculo').val(Id);

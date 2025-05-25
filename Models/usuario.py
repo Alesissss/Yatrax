@@ -77,6 +77,18 @@ class Usuario:
         finally:
             conexion.cerrar()
     
+    @classmethod
+    def actualizar_contrasena(cls,email,contrasena):
+        conexion = bd.Conexion()
+
+        try:
+            clave_hasheada = hashlib.sha256(contrasena.encode()).hexdigest()
+            conexion.ejecutar("CALL SP_CAMBIAR_CLAVE(%s,%s,@MSJ,@MSJ2);", (email,clave_hasheada, ))
+            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
+            return resultado[0]
+        finally:
+            conexion.cerrar()
+
     #ELIMINAR
     @classmethod
     def eliminar(cls, id):

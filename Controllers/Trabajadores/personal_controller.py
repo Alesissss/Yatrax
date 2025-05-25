@@ -5,31 +5,31 @@ from Models.personal import Personal
 
 personal_bp = Blueprint('personal', __name__, url_prefix='/trabajadores/personal')
 
-# # ERRORES 
-# # Manejar errores 401 (Página no autorizada)
-# @personal_bp.errorhandler(401)
-# def error_401(error):
-#     return render_template("error.html", error="Página no autorizada"), 401
+# ERRORES 
+# Manejar errores 401 (Página no autorizada)
+@personal_bp.errorhandler(401)
+def error_401(error):
+    return render_template("error.html", error="Página no autorizada"), 401
 
-# # Manejar errores 403 (Página no autorizada para este usuario)
-# @personal_bp.errorhandler(403)
-# def error_403(error):
-#     return render_template("error.html", error="Página restringida"), 403
+# Manejar errores 403 (Página no autorizada para este usuario)
+@personal_bp.errorhandler(403)
+def error_403(error):
+    return render_template("error.html", error="Página restringida"), 403
 
-# # Manejar errores 404 (Página no encontrada)
-# @personal_bp.errorhandler(404)
-# def error_404(error):
-#     return render_template("error.html", error="Página no encontrada"), 404
+# Manejar errores 404 (Página no encontrada)
+@personal_bp.errorhandler(404)
+def error_404(error):
+    return render_template("error.html", error="Página no encontrada"), 404
 
-# # Manejar errores 500 (Error interno del servidor)
-# @personal_bp.errorhandler(500)
-# def error_500(error):
-#     return render_template("error.html", error="Error interno del servidor"), 500
+# Manejar errores 500 (Error interno del servidor)
+@personal_bp.errorhandler(500)
+def error_500(error):
+    return render_template("error.html", error="Error interno del servidor"), 500
 
-# # Manejar cualquier otro error genérico
-# @personal_bp.errorhandler(Exception)
-# def error_general(error):
-#     return render_template("error.html", error="Ocurrió un error inesperado"), 500
+# Manejar cualquier otro error genérico
+@personal_bp.errorhandler(Exception)
+def error_general(error):
+    return render_template("error.html", error="Ocurrió un error inesperado"), 500
 
 # RESTRICCIONES
 @personal_bp.before_request
@@ -191,8 +191,6 @@ def get_Personal():
 def registrar_personal():
     try:
         nombre = request.form.get("nombre").strip()
-        email = request.form.get("email").strip()
-        password = request.form.get("password").strip()
         estado = request.form.get("estado")
         idTipoPersonal = request.form.get("idTipoPersonal")
         imagen = request.files.get("imagen")  # Recibir la imagen (archivo)
@@ -206,7 +204,7 @@ def registrar_personal():
 
         usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
 
-        mensajes = Personal.registrar(nombre, email, password, imagen_path, estado, idTipoPersonal, usuario_actual)
+        mensajes = Personal.registrar(nombre, imagen_path, estado, idTipoPersonal, usuario_actual)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 
@@ -225,10 +223,8 @@ def registrar_personal():
 def editar_personal(id):
     try:
         personal = Personal.obtener_por_id(id)
-
         if request.method == 'POST':
             nombre = request.form.get("nombre").strip()
-            email = request.form.get("email").strip()
             estado = request.form.get("estado")
             idTipoPersonal = request.form.get("idTipoPersonal")
             imagen = request.files.get("imagen")  # Recibir la imagen (archivo)
@@ -242,7 +238,7 @@ def editar_personal(id):
 
             usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
 
-            mensajes = Personal.editar(id, nombre, email, imagen_path, estado, idTipoPersonal)
+            mensajes = Personal.editar(id, nombre, imagen_path, estado, idTipoPersonal)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
@@ -274,7 +270,6 @@ def darBaja_personal(id):
             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
         else:
             return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja al personal'})
-
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
@@ -320,6 +315,7 @@ def ver_personal(id):
     except Exception as e:
         # En caso de error, devolver un mensaje en formato JSON
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
 
 
 #END REGION PERSONAL

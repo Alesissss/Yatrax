@@ -6,6 +6,7 @@ from Models.metodo_pago import MetodoPago
 from Models.conf_menus import Conf_Menus
 from Models.conf_claims import Conf_Claims
 from Models.conf_plantillas import Conf_Plantillas
+from Models.tipoMetodoPago import TipoMetodoPago
 from werkzeug.utils import secure_filename
 
 configuracion_bp = Blueprint('configuracion', __name__, url_prefix='/trabajadores/configuracion')
@@ -68,6 +69,14 @@ def Menu_Plantillas():
 @configuracion_bp.route('/PlantillaNuevo')
 def Plantilla_Nuevo():
     return render_template('configuracion/plantillaCRUD.html', active_page="plantillas", active_menu='mConfiguracion', plantilla={}, tittle = 'Registrar plantilla', btnId = 'btn_Registrar')
+
+@configuracion_bp.route('/Menu_TipoMetodoPago')
+def Menu_TipoMetodoPago():
+    return render_template('configuracion/tipoMetodoPago.html', active_page="tipoMetodoPago", active_menu='mConfiguracion')
+
+@configuracion_bp.route('/TipoMetodoPagoNuevo')
+def Menu_TipoServicioNuevo():
+    return render_template('configuracion/tipoMetodoPagoCRUD.html', active_page="tipoMetodoPago", active_menu = 'mConfiguracion', tipoMetodoPago = {}, tittle = 'Registrar tipo de metodo de Pago', btnId = 'btn_Registrar')
 
 # END VIEWS
 
@@ -463,10 +472,128 @@ def dar_baja_metodo_pago(id):
             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
         else:
             return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja al metodo de pago'})
-
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
 
 # ENG REGION METODOS DE PAGO
+# REGION TIPO METODO PAGO
 
+@configuracion_bp.route("/RegistrarTipoMetodoPago", methods=["POST"])
+def registrar_tipo_metodo_pago():
+    try:
+        nombre = request.form.get("nombre").strip()
+        estado = request.form.get("estado")
+        usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO')
+        if not nombre or not estado:
+            return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
+
+        mensajes = TipoMetodoPago.registrar(nombre, estado, usuario_actual)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1})
+        elif msj2:
+            return jsonify({"Status": "error", 'Msj': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar tipo método de pago'})
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Error: {repr(e)}"})
+
+@configuracion_bp.route("/EditarTipoMetodoPago/<int:id>", methods=['GET', 'POST'])
+def editar_tipo_metodo_pago(id):
+    try:
+        tipoMetodoPago = TipoMetodoPago.obtener_por_id(id)
+        if request.method == 'POST':
+            nombre = request.form.get("nombre").strip()
+            estado = request.form.get("estado").strip()
+            usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO')
+
+            if not nombre or estado not in ["0", "1"]:
+                return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios y válidos"})
+
+            estado = estado == "1"  # Convertimos a booleano para SP
+
+            mensajes = TipoMetodoPago.editar(id, nombre, estado, usuario_actual)
+            msj1 = mensajes.get('@MSJ')
+            msj2 = mensajes.get('@MSJ2')
+
+            if msj1:
+                return jsonify({"Status": "success", "Msj": msj1, "Msj2": ""})
+            elif msj2:
+                return jsonify({"Status": "success", "Msj": "", "Msj2": msj2})
+            else:
+                return jsonify({"Status": "error", "Msj": "Error desconocido al actualizar el tipo de método de pago"})
+
+        if tipoMetodoPago:
+            return render_template('configuracion/tipoMetodoPagoCRUD.html',
+                                   active_page='tipoMetodoPago',
+                                   active_menu='mConfiguracion',
+                                   tipoMetodoPago=tipoMetodoPago,
+                                   tittle='Editar tipo método de pago',
+                                   btnId='btn_Editar')
+        return render_template('configuracion/tipoMetodoPagoCRUD.html',
+                               active_page='tipoMetodoPago',
+                               active_menu='mConfiguracion',
+                               tipoMetodoPago={},
+                               tittle='Editar tipo método de pago',
+                               btnId='btn_Editar')
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
+
+@configuracion_bp.route("/VerTipoMetodoPago/<int:id>", methods=['GET'])
+def ver_TipoMetodoPago(id):
+    try:
+        tipo_metodo_pago  = TipoMetodoPago.obtener_por_id(id)
+        if tipo_metodo_pago :
+            return render_template('configuracion/tipoMetodoPagoCRUD.html', active_page="tipoMetodoPago", active_menu='mConfiguracion', tipoMetodoPago=tipo_metodo_pago , tittle='Ver tipo metodo Pago', btnId='btn_Aceptar')
+        return render_template('configuracion/tipoMetodoPagoCRUD.html', active_page="tipoMetodoPago", active_menu='mConfiguracion', tipoMetodoPago={}, tittle='Ver tipo metodo Pago', btnId='btn_Aceptar')
+        
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@configuracion_bp.route("/DarBajaTipoMetodoPago/<int:id>", methods=['POST'])
+def darBaja_TipoMetodoPago(id):
+    try:
+        usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO')
+        mensajes = TipoMetodoPago.darBaja(id,usuario_actual)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja el tipo de método de pago'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@configuracion_bp.route("/EliminarTipoMetodoPago/<int:id>", methods=['POST'])
+def eliminar_TipoMetodoPago(id):
+    try:
+        mensajes = TipoMetodoPago.eliminar(id)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja el tipo de método de pago'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+
+
+@configuracion_bp.route("/GetData_TipoMetodoPago", methods=["GET"])
+def get_tipo_metodos_pago():
+    try:
+        metodos = TipoMetodoPago.obtener_todos()
+        if metodos:
+            return jsonify({"Status": "success", "data": metodos})
+        return jsonify({"Status": "info", "Msj": "Aún no hay tipos de métodos de pago registrados", "data": []})
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Error al obtener los tipos de métodos de pago: {repr(e)}", "data": []})
+
+# END REGION TIPO METODO PAGO
 # END FUNCIONES

@@ -21,7 +21,7 @@ class Personal:
     def obtener_todos(cls):
         conexion = bd.Conexion()
         try:
-            personal = conexion.obtener("SELECT per.id, per.nombre, per.email, per.imagen, per.estado, per.id_tipopersonal, tp.nombre as tipopersonal"
+            personal = conexion.obtener("SELECT per.id, per.nombre, per.imagen, per.estado, per.id_tipopersonal, tp.nombre as tipopersonal"
                                         " FROM personal per INNER JOIN tipo_personal tp on per.id_tipopersonal = tp.id WHERE per.estado_registro = 1")
             return personal
         finally:
@@ -32,7 +32,7 @@ class Personal:
     def obtener_por_id(cls, personal_id):
         conexion = bd.Conexion()
         try:
-            personal = conexion.obtener("SELECT per.id, per.nombre, per.email, per.imagen, per.estado, per.id_tipopersonal, tp.nombre as tipopersonal"
+            personal = conexion.obtener("SELECT per.id, per.nombre, per.imagen, per.estado, per.id_tipopersonal, tp.nombre as tipopersonal"
                                         " FROM personal per INNER JOIN tipo_personal tp on per.id_tipopersonal = tp.id WHERE per.estado_registro = 1 AND per.id = %s", (personal_id,))
             return personal[0] if personal else None
         finally:
@@ -40,13 +40,12 @@ class Personal:
 
     # Registrar un nuevo personal
     @classmethod
-    def registrar(cls, nombre, email, password, imagen, estado, idTipoPersonal, usuario):
+    def registrar(cls, nombre, imagen, estado, idTipoPersonal, usuario):
         conexion = bd.Conexion()
         try:
-            password_hash = hashlib.sha256(password.encode()).hexdigest()
 
             # Llamar al procedimiento almacenado para registrar el personal
-            conexion.ejecutar("CALL SP_REGISTRAR_PERSONAL(%s, %s, %s, %s, %s, %s, %s);", (nombre, email, password_hash, imagen, estado, idTipoPersonal, usuario))
+            conexion.ejecutar("CALL SP_REGISTRAR_PERSONAL(%s, %s, %s, %s, %s);", (nombre, imagen, estado, idTipoPersonal, usuario))
 
             # Obtener mensajes de salida
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
@@ -56,11 +55,11 @@ class Personal:
 
     # Editar un registro de personal
     @classmethod
-    def editar(cls, id, nombre, email, imagen, estado, idTipoPersonal):
+    def editar(cls, id, nombre, imagen, estado, idTipoPersonal):
         conexion = bd.Conexion()
         try:
             # Llamar al procedimiento almacenado para editar el personal
-            conexion.ejecutar("CALL SP_EDITAR_PERSONAL(%s, %s, %s, %s, %s, %s);", (id, nombre, email, imagen, estado, idTipoPersonal))
+            conexion.ejecutar("CALL SP_EDITAR_PERSONAL(%s, %s, %s, %s, %s);", (id, nombre, imagen, estado, idTipoPersonal))
 
             # Obtener mensajes de salida
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
