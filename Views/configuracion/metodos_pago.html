@@ -20,6 +20,7 @@ pago{% endblock %} {% block content %}
               <th class="text-center">ID</th>
               <th class="text-center">NOMBRE</th>
               <th class="text-center">LOGO</th>
+              <th class="text-center">QR</th>
               <th class="text-center">ESTADO</th>
               <th class="text-center">ACCIÓN</th>
             </tr>
@@ -186,6 +187,11 @@ pago{% endblock %} {% block content %}
               <img src="${data}" class="img-thumbnail" style="width: 50px;">
           </div>
           `; }},
+          { data: "qr", name: "qr", render: function(data) { return `
+          <div class="d-flex justify-content-center align-items-center">
+              <img src="${data}" class="img-thumbnail" style="width: 50px;">
+          </div>
+          `; }},
       {
           data: "estado",
           name: "estado",
@@ -224,7 +230,7 @@ pago{% endblock %} {% block content %}
                       width: "5%",
                   },
                   {
-                      targets: [1, 2, 3, 4],
+                      targets: [1, 2, 3, 4, 5],
                       className: 'align-middle',
                   },
                   {
@@ -238,9 +244,14 @@ pago{% endblock %} {% block content %}
                       className: 'text-center',
                   },
                   {
-                      targets: [4],
+                      targets: [5],
                       orderable: false,
                       width: '20%',
+                  },
+                  {
+                      targets: [4],
+                      orderable: false,
+                      width: '10%',
                   },
               ],
               lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],

@@ -11,7 +11,7 @@ class MetodoPago:
     def obtener_todos(cls):
         conexion = bd.Conexion()
         try:
-            return conexion.obtener("SELECT id, nombre, logo, estado FROM metodo_pago where estado_registro = 1")
+            return conexion.obtener("SELECT id, nombre, logo, estado, qr , id_tipo_metodoPago FROM metodo_pago where estado_registro = 1")
         finally:
             conexion.cerrar()
 
@@ -19,26 +19,26 @@ class MetodoPago:
     def obtener_por_id(cls, metodo_pago_id):
         conexion = bd.Conexion()
         try:
-            resultado = conexion.obtener("SELECT id, nombre, logo, estado FROM metodo_pago WHERE id = %s", (metodo_pago_id,))
+            resultado = conexion.obtener("SELECT id, nombre, logo, estado, qr , id_tipo_metodoPago FROM metodo_pago WHERE id = %s", (metodo_pago_id,))
             return resultado[0] if resultado else None
         finally:
             conexion.cerrar()
 
     @classmethod
-    def registrar(cls, nombre, logo, estado, usuario):
+    def registrar(cls, nombre, logo, estado, usuario,tipo_pago, qr):
         conexion = bd.Conexion()
         try:
-            conexion.ejecutar("CALL SP_REGISTRAR_METODO_PAGO(%s, %s, %s, %s)", (nombre, logo, estado, usuario))
+            conexion.ejecutar("CALL SP_REGISTRAR_METODO_PAGO(%s, %s, %s, %s,%s,%s)", (nombre, logo, estado, usuario, tipo_pago, qr))
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
             return resultado[0]
         finally:
             conexion.cerrar()
 
     @classmethod
-    def editar(cls, id, nombre, logo, estado):
+    def editar(cls, id, nombre, logo, estado, tipo_pago , qr):
         conexion = bd.Conexion()
         try:
-            conexion.ejecutar("CALL SP_EDITAR_METODO_PAGO(%s, %s, %s, %s)", (id,nombre, logo, estado))
+            conexion.ejecutar("CALL SP_EDITAR_METODO_PAGO(%s, %s, %s, %s,%s,%s)", (id,nombre, logo, estado,tipo_pago, qr))
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
             return resultado[0]
         finally:

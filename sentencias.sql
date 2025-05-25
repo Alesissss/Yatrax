@@ -113,6 +113,8 @@ DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPO_METODOPAGO;
 DROP PROCEDURE IF EXISTS SP_DAR_BAJA_TIPO_METODOPAGO;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_METODOPAGO;
 
+
+DROP PROCEDURE IF EXISTS SP_CAMBIAR_CLAVE;
 -- Luego eliminamos las tablas, primero la que depende de la otra
 DROP TABLE IF EXISTS servicio_microservicio;
 DROP TABLE IF EXISTS microservicio;
@@ -147,6 +149,8 @@ DROP TABLE IF EXISTS pais;
 DROP TABLE IF EXISTS herramienta;
 DROP TABLE IF EXISTS tipo_herramienta;
 DROP TABLE IF EXISTS tipo_metodoPago;
+
+
 -- Crear tabla pais
 CREATE TABLE pais(
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -460,6 +464,14 @@ CREATE TABLE nivel(
     estado TINYINT not null,
     foreign key (id_vehiculo) references vehiculo(id)
 );
+-- Crear tabla tipo metodo pago
+CREATE TABLE tipo_metodoPago (
+    idTipoMetodoPago INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    estado BOOLEAN NOT NULL,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) not null
+);
 
 -- Crear tabla metodo_pago
 CREATE TABLE metodo_pago (
@@ -467,11 +479,14 @@ CREATE TABLE metodo_pago (
     nombre VARCHAR(100) NOT NULL,
     logo VARCHAR(255) NOT NULL,
     estado BOOLEAN NOT NULL,
+    id_tipo_metodoPago INT NOT NULL,
+	qr VARCHAR(255) NULL,
     estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
     estado_registro INT not null DEFAULT 1,
     fecha_registro DATETIME not null DEFAULT CURRENT_TIMESTAMP, 
-    usuario VARCHAR(100) not null
-);
+    usuario VARCHAR(100) not null,
+    foreign key (id_tipo_metodoPago) references tipo_metodoPago(idTipoMetodoPago) -- Relación con tipo_metodoPago
+    );
 
 -- Crear tabla personal
 
@@ -486,14 +501,6 @@ CREATE TABLE personal (
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
     usuario VARCHAR(100) NOT NULL,
     FOREIGN KEY (id_tipopersonal) REFERENCES tipo_personal(id) -- Relación con tipo_personal
-);
--- Crear tabla tipo metodo pago
-CREATE TABLE tipo_metodoPago (
-    idTipoMetodoPago INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(50) NOT NULL,
-    estado BOOLEAN NOT NULL,
-    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    usuario VARCHAR(100) not null
 );
 
 CREATE TABLE herramienta(
@@ -5543,7 +5550,9 @@ CREATE PROCEDURE SP_REGISTRAR_METODO_PAGO(
     IN P_NOMBRE VARCHAR(100),
     IN P_LOGO VARCHAR(255),
     IN P_ESTADO BOOLEAN,
-    IN P_USUARIO VARCHAR(100)
+    IN P_USUARIO VARCHAR(100),
+    IN P_TIPO_METODO_PAGO INT,
+    IN P_QR VARCHAR(255)
 )
 BEGIN
     DECLARE cNombre INT;
@@ -5560,8 +5569,8 @@ BEGIN
     IF cNombre > 0 THEN
         SET @MSJ2 = 'El método de pago que intenta registrar ya está registrado';
     ELSE
-        INSERT INTO metodo_pago (NOMBRE, LOGO, ESTADO, ESTADO_PROCESO, ESTADO_REGISTRO, FECHA_REGISTRO, USUARIO) 
-        VALUES (P_NOMBRE, P_LOGO, P_ESTADO, DEFAULT, DEFAULT, CURRENT_TIMESTAMP, P_USUARIO);
+        INSERT INTO metodo_pago (NOMBRE, LOGO, ESTADO, ESTADO_PROCESO, ESTADO_REGISTRO, FECHA_REGISTRO, USUARIO, qr, id_tipo_metodoPago) 
+        VALUES (P_NOMBRE, P_LOGO, P_ESTADO, DEFAULT, DEFAULT, CURRENT_TIMESTAMP, P_USUARIO, P_QR, P_TIPO_METODO_PAGO);
 
         SET @MSJ = 'Se registró correctamente el método de pago';
     END IF;
@@ -5574,7 +5583,9 @@ CREATE PROCEDURE SP_EDITAR_METODO_PAGO(
     IN P_ID INT,
     IN P_NOMBRE VARCHAR(100),
     IN P_LOGO VARCHAR(255),
-    IN P_ESTADO BOOLEAN
+    IN P_ESTADO BOOLEAN,
+    IN P_TIPO_METODO_PAGO INT,
+    IN P_QR VARCHAR(255)
 )
 BEGIN
     DECLARE cMetodoPago INT;
@@ -5604,9 +5615,10 @@ BEGIN
             LOGO = P_LOGO,
             ESTADO = P_ESTADO,
             ESTADO_PROCESO = 'MODIFICADO',
-            ESTADO_REGISTRO = 1 -- El estado de registro permanece en 1
+            ESTADO_REGISTRO = 1, -- El estado de registro permanece en 1
+            QR= P_QR,
+            id_tipo_metodoPago = P_TIPO_METODO_PAGO
         WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
-
         SET @MSJ = 'Se modificó correctamente el método de pago';
     END IF;
 END $$
