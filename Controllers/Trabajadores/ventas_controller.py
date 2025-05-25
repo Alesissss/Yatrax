@@ -365,7 +365,7 @@ def editar_microservicio(id):
             if not nombre or not descripcion or estado not in ["0", "1"]:
                 return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios y válidos"})
 
-            mensajes = MicroServicio.editar(id, nombre, estado, descripcion)
+            mensajes = MicroServicio.editar(id, nombre, descripcion, estado)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 

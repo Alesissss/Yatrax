@@ -27,6 +27,7 @@
                             <th class="text-center">APELLIDOS Y NOMBRES</th>
                             <th class="text-center">EMAIL</th>
                             <th class="text-center">TIPO USUARIO</th>
+                            <th class="text-center">IMAGEN</th>
                             <th class="text-center">ESTADO</th>
                             <th class="text-center">ACCIÓN</th>
                         </tr>
@@ -199,6 +200,16 @@
                 { data: "email", name: "email" },
                 { data: "tipousuario", name: "tipousuario" },
                 {
+                    data: null,
+                    name: null,
+                    render: function (data, type, row) {
+                        return `<div>
+                            <img src="${data.imagen}" class="img-thumbnail" style="max-width: 100px;">
+                        </div>`;
+                    },
+                    className: 'text-center align-middle',
+                },
+                {
                     data: "estado",
                     name: "estado",
                     render: function (data, type, row) {
@@ -234,11 +245,11 @@
                     className: "text-center align-middle",
                 },
                 {
-                    targets: [1, 2, 3, 4],
+                    targets: [1, 2, 3, 4, 5],
                     className: 'align-middle',
                 },
                 {
-                    targets: [5],
+                    targets: [6],
                     orderable: false,
                     width: '10%',
                 },

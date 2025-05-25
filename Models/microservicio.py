@@ -44,7 +44,7 @@ class MicroServicio:
     def editar(cls, id, nombre, descripcion, estado):
         try:
             conexion = bd.Conexion()
-            conexion.ejecutar("CALL SP_ACTUALIZAR_SERVICIO(%s, %s, %s, %s)", (id, nombre, descripcion, estado))
+            conexion.ejecutar("CALL SP_ACTUALIZAR_MICROSERVICIO(%s, %s, %s, %s)", (id, nombre, descripcion, estado))
             mensajes = conexion.obtener("SELECT @MSJ, @MSJ2")
             return mensajes[0]
         except Exception as e:
@@ -56,7 +56,7 @@ class MicroServicio:
     def darBaja(cls, id):
         try:
             conexion = bd.Conexion()
-            conexion.ejecutar("CALL SP_BAJA_SERVICIO(%s)", (id,))
+            conexion.ejecutar("CALL SP_DAR_BAJA_MICROSERVICIO(%s)", (id,))
             mensajes = conexion.obtener("SELECT @MSJ, @MSJ2")
             return mensajes[0]
         except Exception as e:
@@ -68,7 +68,7 @@ class MicroServicio:
     def eliminar(cls, id):
         try:
             conexion = bd.Conexion()
-            conexion.ejecutar("CALL SP_DELETE_SERVICIO(%s)", (id,))
+            conexion.ejecutar("CALL SP_ELIMINAR_MICROSERVICIO(%s)", (id,))
             mensajes = conexion.obtener("SELECT @MSJ, @MSJ2")
             return mensajes[0]
         except Exception as e:
