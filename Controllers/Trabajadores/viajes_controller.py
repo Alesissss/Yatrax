@@ -152,19 +152,26 @@ def nuevo_nivel():
         )
     else:
         try:
-            tipo_vehiculo = request.form["txt_vehiculo"]
-            cantidad = int(request.form["txt_cantidad"])
+            data = request.get_json()
+            nroPiso = int(data["nroPiso"])
+            id_tipo_vehiculo = int(data["id_tipo_vehiculo"])
+            cantidad = int(data["cantidad"])
+            x_dimension = int(data["x_dimension"])
+            y_dimension = int(data["y_dimension"])
+            estado = int(data["estado"])
+            herramientas = data["herramientas"]  # Lista de dicts
 
-            msj1, msj2 = Nivel.insertar_nivel(tipo_vehiculo, cantidad)
+            # Validación mínima
+            if not herramientas:
+                return jsonify({"Status": "error", "Msj": "No se ha añadido ninguna herramienta"})
 
-            if msj1:
-                return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
-            elif msj2:
-                return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
-            else:
-                return jsonify({"Status": "error", 'Msj': 'Error desconocido al insertar nivel'})
+            # Convertir herramientas a objetos si es necesario
+           
+            Nivel.insertar_nivel(nroPiso, id_tipo_vehiculo,cantidad, x_dimension, y_dimension, estado, herramientas)
+            return jsonify({"Status": "success", "Msj": "Nivel registrado exitosamente"})
+
         except Exception as e:
-            return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+            return jsonify({"Status": "error", "Msj": f"Error inesperado: {repr(e)}"})
 
 @viajes_bp.route("/verNivel/<int:idNivel>")
 def ver_nivel(idNivel):
@@ -263,7 +270,7 @@ def nuevoTipoVehiculo():
     if request.method == "GET":
         return render_template(
             "viajes/tipoVehiculoCRUD.html",
-            title="Nuevo tipo de vehículo",
+            tittle="Nuevo tipo de vehículo",
             tipoVehiculo={},
             btnId="btn_Registrar",
             active_page="tipoVehiculo", 
