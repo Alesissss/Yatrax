@@ -11,38 +11,38 @@ home_bp = Blueprint('home', __name__, url_prefix='/trabajadores/home')
 
 # ERRORES 
 # Manejar errores 401 (Página no autorizada)
-# @home_bp.errorhandler(401)
-# def error_401(error):
-#     return render_template("error.html", error="Página no autorizada"), 401
+@home_bp.errorhandler(401)
+def error_401(error):
+    return render_template("error.html", error="Página no autorizada"), 401
 
-# # Manejar errores 404 (Página no encontrada)
-# @home_bp.errorhandler(404)
-# def error_404(error):
-#     return render_template("error.html", error="Página no encontrada"), 404
+# Manejar errores 404 (Página no encontrada)
+@home_bp.errorhandler(404)
+def error_404(error):
+    return render_template("error.html", error="Página no encontrada"), 404
 
-# # Manejar errores 500 (Error interno del servidor)
-# @home_bp.errorhandler(500)
-# def error_500(error):
-#     return render_template("error.html", error="Error interno del servidor"), 500
+# Manejar errores 500 (Error interno del servidor)
+@home_bp.errorhandler(500)
+def error_500(error):
+    return render_template("error.html", error="Error interno del servidor"), 500
 
-# # Manejar cualquier otro error genérico
-# @home_bp.errorhandler(Exception)
-# def error_general(error):
-#     return render_template("error.html", error="Ocurrió un error inesperado"), 500
+# Manejar cualquier otro error genérico
+@home_bp.errorhandler(Exception)
+def error_general(error):
+    return render_template("error.html", error="Ocurrió un error inesperado"), 500
 
-# # RESTRICCIONES
-# @home_bp.before_request
-# def verificar_sesion():
-#     rutas_permitidas = ['home.login', 'home.logout', 'static', 'home.cambiarContrasena','home.validarCorreo','home.ingresarCodigo','home.nuevaContrasena']  # Excluir login, logout y archivos estáticos
-#     usuario = session.get('usuario')
-#     menus = session.get('menus', [])
+# RESTRICCIONES
+@home_bp.before_request
+def verificar_sesion():
+    rutas_permitidas = ['home.login', 'home.logout', 'static', 'home.cambiarContrasena','home.validarCorreo','home.ingresarCodigo','home.nuevaContrasena']  # Excluir login, logout y archivos estáticos
+    usuario = session.get('usuario')
+    menus = session.get('menus', [])
 
-#     if not usuario and request.endpoint not in rutas_permitidas:
-#         session.clear()
-#         return redirect(url_for('home.login'))  # No autenticado → redirigir
+    if not usuario and request.endpoint not in rutas_permitidas:
+        session.clear()
+        return redirect(url_for('home.login'))  # No autenticado → redirigir
 
-#     if usuario and usuario['tipousuario'].upper() == 'CLIENTE' and request.endpoint not in rutas_permitidas:
-#         abort(401)  # Autenticado pero no autorizado para navegación general
+    if usuario and usuario['tipousuario'].upper() == 'CLIENTE' and request.endpoint not in rutas_permitidas:
+        abort(401)  # Autenticado pero no autorizado para navegación general
 
 #Login
 @home_bp.route('/')
