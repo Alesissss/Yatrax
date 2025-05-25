@@ -19,6 +19,7 @@ pago{% endblock %} {% block content %}
             <tr>
               <th class="text-center">ID</th>
               <th class="text-center">NOMBRE</th>
+              <th class="text-center">TIPO METODO DE PAGO</th>
               <th class="text-center">LOGO</th>
               <th class="text-center">QR</th>
               <th class="text-center">ESTADO</th>
@@ -182,6 +183,7 @@ pago{% endblock %} {% block content %}
               columns: [
       { data: "id", name: "id" },
       { data: "nombre", name: "nombre" },
+      { data: "tipoMetodo", name: "tipoMetodo" },
       { data: "logo", name: "logo", render: function(data) { return `
           <div class="d-flex justify-content-center align-items-center">
               <img src="${data}" class="img-thumbnail" style="width: 50px;">
@@ -234,24 +236,9 @@ pago{% endblock %} {% block content %}
                       className: 'align-middle',
                   },
                   {
-                      targets: [2],
+                      targets: [1],
                       orderable: false,
-                      width: '10%',
-                  },
-                  {
-                      targets: [3],
-                      width: '10%',
-                      className: 'text-center',
-                  },
-                  {
-                      targets: [5],
-                      orderable: false,
-                      width: '20%',
-                  },
-                  {
-                      targets: [4],
-                      orderable: false,
-                      width: '10%',
+                      width: '30%',
                   },
               ],
               lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
