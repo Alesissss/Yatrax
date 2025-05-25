@@ -172,11 +172,12 @@ CREATE TABLE microservicio (
 
 CREATE TABLE servicio (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(50) not null,
-    descripcion VARCHAR(255) not null,
+    nombre VARCHAR(50) NOT NULL,
+    descripcion VARCHAR(255) NOT NULL,
     estado BOOLEAN NOT NULL,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    usuario VARCHAR(100) not null
+    usuario VARCHAR(100) NOT NULL,
+    imagen TEXT
 );
 
 CREATE TABLE servicio_microservicio (
@@ -3560,48 +3561,53 @@ BEGIN
 END $$
 DELIMITER ;
 
+
+-- Procedimientos almacenados de servicios
 DELIMITER $$
 
+-- SP: Insertar Servicio
 CREATE PROCEDURE SP_INSERTAR_SERVICIO(
     IN P_NOMBRE VARCHAR(50),
     IN P_DESCRIPCION VARCHAR(255),
     IN P_ESTADO BOOLEAN,
-    IN P_USUARIO VARCHAR(100)
+    IN P_USUARIO VARCHAR(100),
+    IN P_IMAGEN TEXT
 )
 BEGIN
     DECLARE existe_nombre INT;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
-        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
     END;
 
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
-    SELECT COUNT(*) INTO existe_nombre 
-      FROM servicio 
-     WHERE nombre = P_NOMBRE;
+    SELECT COUNT(*) INTO existe_nombre FROM servicio WHERE nombre = P_NOMBRE;
 
     IF existe_nombre = 0 THEN
-        INSERT INTO servicio (nombre, descripcion, estado, usuario)
-        VALUES (P_NOMBRE, P_DESCRIPCION, P_ESTADO, P_USUARIO);
+        INSERT INTO servicio (nombre, descripcion, estado, usuario, imagen)
+        VALUES (P_NOMBRE, P_DESCRIPCION, P_ESTADO, P_USUARIO, P_IMAGEN);
         SET @MSJ = 'Se registró correctamente el servicio';
     ELSE
         SET @MSJ2 = 'Ya existe un servicio con ese nombre registrado';
     END IF;
 END$$
 
+
+-- SP: Actualizar Servicio
 CREATE PROCEDURE SP_ACTUALIZAR_SERVICIO(
     IN P_ID INT,
     IN P_NOMBRE VARCHAR(50),
     IN P_DESCRIPCION VARCHAR(255),
-    IN P_ESTADO BOOLEAN
+    IN P_ESTADO BOOLEAN,
+    IN P_IMAGEN TEXT
 )
 BEGIN
     DECLARE existe_nombre INT;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
-        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
     END;
 
     SET @MSJ = NULL;
@@ -3611,10 +3617,11 @@ BEGIN
 
     IF existe_nombre = 0 THEN
         UPDATE servicio 
-           SET nombre         = P_NOMBRE,
-               descripcion    = P_DESCRIPCION,
-               estado         = P_ESTADO
-         WHERE id  = P_ID;
+        SET nombre = P_NOMBRE,
+            descripcion = P_DESCRIPCION,
+            estado = P_ESTADO,
+            imagen = P_IMAGEN
+        WHERE id = P_ID;
 
         SET @MSJ = 'Se modificó correctamente el servicio';
     ELSE
@@ -3622,6 +3629,8 @@ BEGIN
     END IF;
 END$$
 
+
+-- SP: Dar de Baja Servicio (actualiza estado a 0)
 CREATE PROCEDURE SP_BAJA_SERVICIO(
     IN P_ID INT
 )
@@ -3629,13 +3638,14 @@ BEGIN
     DECLARE existe INT;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
-        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
     END;
 
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
     SELECT COUNT(*) INTO existe FROM servicio WHERE ID = P_ID;
+
     IF existe <= 0 THEN
         SET @MSJ2 = 'El servicio al que intenta dar de baja no existe';
     ELSE
@@ -3647,6 +3657,8 @@ BEGIN
     END IF;
 END$$
 
+
+-- SP: Eliminar Servicio (delete físico + relación)
 CREATE PROCEDURE SP_DELETE_SERVICIO(
     IN P_ID INT
 )
@@ -3654,15 +3666,16 @@ BEGIN
     DECLARE existe INT;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
-        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
     END;
 
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
     SELECT COUNT(*) INTO existe FROM servicio WHERE ID = P_ID;
+
     IF existe <= 0 THEN
-        SET @MSJ2 = 'El servicio al que intenta dar de baja no existe';
+        SET @MSJ2 = 'El servicio al que intenta eliminar no existe';
     ELSE
         DELETE FROM servicio_microservicio WHERE idServicio = P_ID;
         DELETE FROM servicio WHERE ID = P_ID;
