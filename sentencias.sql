@@ -137,6 +137,7 @@ DROP TABLE IF EXISTS servicio;
 DROP TABLE IF EXISTS tipo_servicio;
 DROP TABLE IF EXISTS tipo_comprobante;
 DROP TABLE IF EXISTS tipo_documento;
+DROP TABLE IF EXISTS nivel_herramienta;
 DROP TABLE IF EXISTS nivel;
 DROP TABLE IF EXISTS vehiculo;
 DROP TABLE IF EXISTS tipo_vehiculo;
@@ -456,10 +457,11 @@ CREATE TABLE vehiculo (
 CREATE TABLE nivel(
     id int AUTO_INCREMENT primary key,
     nroPiso int not null,
-    id_vehiculo int not null,
-    cantidad int not null,
+    id_tipo_vehiculo int not null,
+    x_dimension int not null,
+    y_dimension int not null,
     estado TINYINT not null,
-    foreign key (id_vehiculo) references vehiculo(id)
+    foreign key (id_tipo_vehiculo) references tipo_vehiculo(id)
 );
 
 -- Crear tabla metodo_pago
@@ -502,6 +504,15 @@ CREATE TABLE herramienta(
     nombre varchar(60),
     icono varchar(200),
     id_tipo INT REFERENCES tipo_herramienta(id)
+);
+
+CREATE TABLE nivel_herramienta(
+    id int AUTO_INCREMENT PRIMARY KEY,
+    id_herramienta int REFERENCES herramienta(id),
+    id_nivel int REFERENCES nivel(id),
+    x_dimension int not null,
+    y_dimension int not null
+ 
 );
 
 

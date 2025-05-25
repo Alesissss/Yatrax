@@ -17,14 +17,13 @@ class Nivel:
             listado = conexion.obtener("""
                 SELECT 
                 n.id AS id,
-                n.nroPiso,
-                v.placa AS placa,
-                n.cantidad,
+                n.nroPiso AS nroPiso,
+                v.nombre AS nombre,
                 n.estado
             FROM 
                 nivel n
             INNER JOIN 
-                vehiculo v ON n.id_vehiculo = v.id;
+                tipo_vehiculo v ON n.id_tipo_vehiculo = v.id;
             """)
             return listado
         finally:
@@ -60,22 +59,24 @@ class Nivel:
                 conexion.cerrar()
 
     @classmethod
-    def insertar_nivel(cls, vehiculo, cantidad):
-        conexion = None
+    def insertar_nivel(cls, nroPiso, id_tipo_vehiculo,cantidad,x_dimension,y_dimension,estado,lista_herramientas):
+        conexion = bd.Conexion()
         try:
-            conexion = bd.Conexion()
-            conexion.ejecutar(
-                "CALL SP_INSERTAR_NIVEL(%s, %s)",
-                (vehiculo, cantidad)
-            )
-            resultado = conexion.obtener("SELECT @MSJ AS MSJ, @MSJ2 AS MSJ2;")
-            return resultado[0]["MSJ"], resultado[0]["MSJ2"]  # (mensaje_exito, mensaje_error)
+            conexion.conn.begin()
+            cursor = conexion.ejecutar("INSERT INTO nivel (nroPiso,id_tipo_vehiculo, x_dimension, y_dimension, estado) VALUES (%s,%s,%s,%s,%s)",(nroPiso, id_tipo_vehiculo,x_dimension,y_dimension,estado),auto_commit=False)
+            ultimo_id = cursor.lastrowid
+            print(lista_herramientas)
+            for herramienta in lista_herramientas:   
+                print(herramienta) 
+                conexion.ejecutar("INSERT INTO nivel_herramienta (id_herramienta,id_nivel,x_dimension,y_dimension) VALUES (%s,%s,%s,%s)",(herramienta['tipo'],ultimo_id,herramienta['x'],herramienta['y']),auto_commit=False)
+            conexion.conn.commit()
+            print("Exito")
         except Exception as e:
-            print(f"Error en insertar_nivel: {e}")
-            raise
+            print(f"Error: {e}")
+            conexion.conn.rollback()
         finally:
-            if conexion:
-                conexion.cerrar()
+            conexion.cerrar()
+
 
     @classmethod
     def actualizar_nivel(cls, idNivel, nroPiso, vehiculo, cantidad,estado):
