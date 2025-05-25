@@ -1,5 +1,4 @@
 import os
-import bd_prueba
 
 from flask import Flask, render_template, request, redirect, flash, jsonify, session, url_for, abort
 
@@ -70,8 +69,4 @@ def home():
 #         return redirect(url_for('home.login'))
 
 if __name__ == "__main__":
-    db = bd_prueba.Conexion()
-    resultado = db.obtener("SELECT TOP 1 * FROM usuario")  # Cambia por una tabla existente
-    print(resultado)
-    db.cerrar()
     app.run(debug=True)
