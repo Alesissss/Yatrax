@@ -263,7 +263,7 @@ def nuevoTipoVehiculo():
     if request.method == "GET":
         return render_template(
             "viajes/tipoVehiculoCRUD.html",
-            title="Nuevo tipo de vehículo",
+            tittle="Nuevo tipo de vehículo",
             tipoVehiculo={},
             btnId="btn_Registrar",
             active_page="tipoVehiculo", 
