@@ -212,10 +212,15 @@
                         data: formData,
                         success: function (response) {
                             if (response.Status === "success") {
-                                toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                                setTimeout(() => {
-                                    window.location.href = "/trabajadores/personal/GestionarPersonal";
-                                }, 500);
+                                if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                    return;
+                                } else {
+                                    toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                                    setTimeout(() => {
+                                        window.location.href = "/trabajadores/personal/GestionarPersonal";
+                                    }, 500);
+                                }
                             } else {
                                 toastr.error(response.Msj, "MENSAJE DE SISTEMA");
                             }

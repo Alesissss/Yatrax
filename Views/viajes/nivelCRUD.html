@@ -1,12 +1,27 @@
 {% extends "index.html" %}
 
-{% block title %}YATRAX - {{ tittle }}{% endblock %}
+{% block title %}YATRAX - {{ title }}{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+    .control {
+        cursor: grab;
+    }
+
+    .control:active {
+        cursor: grabbing;
+    }
+
+    button[data-tipo] i {
+        pointer-events: none;
+    }
+</style>
 
 <div class="container-fluid p-4">
     <div class="row justify-content-center">
-        <div class="col-12 col-sm-10 col-md-10">
+        <div class="col-md-8">
             <div class="card card-primary card-tabs">
                 <div class="card-header p-0 pt-1">
                     <ul class="nav nav-tabs flex-wrap text-center" id="custom-tabs-one-tab" role="tablist">
@@ -20,115 +35,119 @@
                         </li>
                     </ul>
                 </div>
+
                 <div class="card-body">
                     <div class="tab-content" id="custom-tabs-one-tabContent">
 
-                        <!-- Tab 1 -->
+                        <!-- Tab 1: Datos de nivel -->
                         <div class="tab-pane fade show active" id="tab-01" role="tabpanel" aria-labelledby="tab01-tab">
-                            <!-- <div class="panel-heading bg-">
-                                <h4 class="text-center mb-0 text-break">{{ tittle }}</h4>
-                            </div> -->
-                            <div class="panel-body">
-                                <div class="row justify-content-center">
-                                    <div class="col-12 col-sm-10 col-md-6">
-                                        <form action="" method="POST" id="formNivel">
-                                            <div class="mb-3">
-                                                <label for="txt_nroPiso" class="form-label">Número de piso</label>
-                                                <input type="number" name="txt_nroPiso" id="txt_nroPiso"
-                                                    class="form-control" placeholder="Número de piso"
-                                                    value="{{ nivel.nroPiso }}" readonly>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="txt_vehiculo" class="form-label">Tipo vehículo</label>
-                                                <div class="input-group">
-                                                    <select id="cbx_TipoVehiculo" name="txt_vehiculo"
-                                                        class="form-control" {% if btnId=='btn_Regresar' %}disabled{% endif %}>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="txt_cantidad" class="form-label">Cantidad</label>
-                                                <input type="number" name="txt_cantidad" id="txt_cantidad"
-                                                    class="form-control" placeholder="Cantidad de espacios"
-                                                    value="{{ nivel.cantidad }}" {% if btnId=="btn_Regresar" %} disabled {% endif %}>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="txt_estado" class="form-label">Estado</label>
-                                                <select id="txt_estado" name="txt_estado" class="form-control" {% if btnId=="btn_Regresar" %} disabled {% endif %}>
-                                                    <option value="1" {% if nivel.estado==1 or nivel.estado=="activo" %}selected{% endif %}>Activo</option>
-                                                    <option value="0" {% if nivel.estado==0 or nivel.estado=="inactivo" %}selected{% endif %}>Inactivo</option>
-                                                </select>
-                                            </div>
-                                            <div class="text-center">
-                                                <button id="btn_Listado" type="button" class="btn btn-danger mb-2">Volver al listado</button>
-                                                {% if btnId != "btn_Regresar" %}
-                                                <button id="{{ btnId }}" type="submit" class="btn btn-primary mb-2">Aceptar</button>
-                                                {% endif %}
-                                            </div>
-                                        </form>
-                                    </div>
+                            <form action="" method="POST" id="formNivel">
+                                <div class="mb-3">
+                                    <label for="txt_nroPiso" class="form-label">Número de piso</label>
+                                    <input type="number" name="txt_nroPiso" id="txt_nroPiso" class="form-control"
+                                        placeholder="Número de piso" value="{{ nivel.nroPiso }}" readonly>
                                 </div>
-                            </div>
+                                <div class="mb-3">
+                                    <label for="txt_vehiculo" class="form-label">Tipo vehículo</label>
+                                    <select id="cbx_TipoVehiculo" name="txt_vehiculo" class="form-control" {% if
+                                        btnId=='btn_Regresar' %}disabled{% endif %}></select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="txt_cantidad" class="form-label">Cantidad</label>
+                                    <input type="number" name="txt_cantidad" id="txt_cantidad" class="form-control"
+                                        placeholder="Cantidad de espacios" value="{{ nivel.cantidad }}" {% if
+                                        btnId=="btn_Regresar" %} disabled {% endif %}>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="txt_estado" class="form-label">Estado</label>
+                                    <select id="txt_estado" name="txt_estado" class="form-control" {% if
+                                        btnId=="btn_Regresar" %} disabled {% endif %}>
+                                        <option value="1" {% if nivel.estado==1 or nivel.estado=="activo" %}selected{%
+                                            endif %}>Activo</option>
+                                        <option value="0" {% if nivel.estado==0 or nivel.estado=="inactivo" %}selected{%
+                                            endif %}>Inactivo</option>
+                                    </select>
+                                </div>
+                                <div class="text-center">
+                                    <button id="btn_Listado" type="button" class="btn btn-danger mb-2">Volver al
+                                        listado</button>
+                                    {% if btnId != "btn_Regresar" %}
+                                    <button id="{{ btnId }}" type="submit" class="btn btn-primary mb-2">Aceptar</button>
+                                    {% endif %}
+                                </div>
+                            </form>
                         </div>
 
-                        <!-- Tab 2 -->
+                        <!-- Tab 2: Diseño del nivel -->
                         <div class="tab-pane fade" id="tab-02" role="tabpanel" aria-labelledby="tab02-tab">
-                            <div class="panel-body">
-                                <div class="card w-100">
-                                    <div class="card-body">
-                                        <!-- <div class="row mb-3 text-center text-sm-start">
-                                            <div class="col-12 col-sm-4 mb-2">
-                                                <h6><b>Tipo vehículo:</b> <span id="lbl_tipo_vehiculo">Jaguar</span></h6>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <h5><b>Nivel o piso:</b> <span id="lbl_tipo_vehiculo">{{ nivel.nroPiso }} piso</span>
-                                                </h5>
-                                            </div>
-                                        </div> -->
-
-                                        <div class="p-3 rounded shadow-sm">
-                                            <div class="row">
-                                                <!-- Herramientas -->
-                                                <div class="col-12 col-md-3 border-end border-info mb-3">
-                                                    <h6><i class="fas fa-edit me-2"></i><b>Herramientas</b></h6>
-                                                    <div class="bg-white">
-                                                        <div class="">
-                                                            <i class="fas fa-desktop fa-2x m-2"></i>
-                                                            <i class="fas fa-restroom fa-2x m-2"></i>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h3 class="card-title">Controles</h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="accordion">
+                                                {% for tipo_herramienta in tipo_herramientas %}
+                                                <div class="card card-{{ loop.cycle('info','primary') }}">
+                                                    <div class="card-header">
+                                                        <h4 class="card-title w-100">
+                                                            <a class="d-block w-100 collapsed" data-toggle="collapse"
+                                                                href="#collapse{{ loop.index }}"
+                                                                aria-expanded="false">{{ tipo_herramienta.nombre }}</a>
+                                                        </h4>
+                                                    </div>
+                                                    <div id="collapse{{ loop.index }}" class="collapse"
+                                                        data-parent="#accordion">
+                                                        <div class="card-body d-flex flex-wrap bg-white">
+                                                            {% for herramienta in herramientas %}
+                                                            {% if herramienta.id_tipo==tipo_herramienta.id %}
+                                                            <i class="{{ herramienta.icono }} fa-lg m-2 control"
+                                                                draggable="true" data-tipo="{{ herramienta.id }}"
+                                                                title="{{ herramienta.nombre }}"></i>
+                                                            {% endif %}
+                                                            {% endfor %}
                                                         </div>
                                                     </div>
                                                 </div>
-
-                                                <!-- Matriz de asientos -->
-                                                <div class="col-12 col-md-9">
-                                                    <h6><i class="fas fa-edit me-2"></i><b>Diseño del nivel</b></h6>
-                                                    <div class="row justify-content-center" id="matrizContainer">
-                                                        <!-- Matriz generada con JS -->
-                                                    </div>
-                                                </div>
+                                                {% endfor %}
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="card-footer text-center">
-                                        <button id="btn_Listado" type="button" class="btn btn-danger mb-2">Volver al listado</button>
-                                        {% if btnId != "btn_Regresar" %}
-                                        <button id="{{ btnId }}" type="submit" class="btn btn-primary mb-2">Aceptar</button>
-                                        {% endif %}
+                                </div>
+
+                                <div class="col-md-8">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h3 class="card-title">Diseño</h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row justify-content-center" id="matrizContainer"></div>
+                                        </div>
                                     </div>
+
                                 </div>
                             </div>
+                            <div class="card-footer text-center">
+                                <button id="btn_Listado" type="button" class="btn btn-danger mb-2">Volver al
+                                    listado</button>
+                                {% if btnId != "btn_Regresar" %}
+                                <button id="{{ btnId }}" type="submit" class="btn btn-primary mb-2">Aceptar</button>
+                                {% endif %}
+                            </div>
                         </div>
+
                     </div> <!-- /.tab-content -->
                 </div> <!-- /.card-body -->
             </div> <!-- /.card -->
         </div>
     </div>
 </div>
+
 <style>
     .btn-seat {
         width: 50px;
         height: 50px;
-        text-align: center;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -145,36 +164,81 @@
 
 {% block scripts %}
 <script>
-    $(document).ready(generarMatriz())
+    let herramientaSeleccionada = null;
+    const list_herramientas = {{ herramientas | tojson }};
+    $(document).ready(() => {
+        generarMatriz();
+
+        // Eventos de herramientas (drag)
+        document.querySelectorAll('.control').forEach(icono => {
+            icono.addEventListener('dragstart', function (e) {
+                herramientaSeleccionada = this.getAttribute('data-tipo');
+            });
+        });
+    });
+
     function generarMatriz() {
-        const filas = 2;
-        const cantidad = parseInt("{{ nivel.cantidad }}"); // Asegura que sea un número
-        const columnas = Math.ceil(cantidad / filas);
-
+        
+        const filas = 15;
+        const columnas = 6;
+        // const cantidad = parseInt("{{ nivel.cantidad }}");
         const contenedor = document.getElementById('matrizContainer');
-        contenedor.innerHTML = ''; // Limpiar contenido anterior
+        contenedor.innerHTML = '';
 
-        for (let i = 0; i < filas; i++) {
-            const rowDiv = document.createElement('div');
-            rowDiv.className = 'd-flex mb-2 flex-wrap';
+        contenedor.style.display = 'grid';
+        contenedor.style.gridTemplateColumns = `repeat(${columnas}, auto)`;
+        contenedor.style.gap = '8px';
 
-            for (let j = 0; j < columnas; j++) {
-                const numeroAsiento = i * columnas + j + 1;
-                if (numeroAsiento > cantidad) break; // No crear botones extra
+        for (let i = 1; i <= filas; i++) {
+            for (let j = 1; j <= columnas; j++) {
 
-                const seat = document.createElement('button');
-                seat.className = 'btn btn-light border-dark m-y 2';
-                seat.style.width = '40px';
-                seat.style.height= '40px';
-                seat.textContent = "";
-                rowDiv.appendChild(seat);
-                
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-light border-dark';
+                btn.style.width = '40px';
+                btn.style.height = '40px';
+                btn.setAttribute('data-x', j);
+                btn.setAttribute('data-y', i);
+                btn.setAttribute('data-tipo', '');
+
+                // Drag-over y drop
+                btn.addEventListener('dragover', e => e.preventDefault());
+                btn.addEventListener('drop', function (e) {
+                    e.preventDefault();
+                    if (herramientaSeleccionada) {
+                        this.setAttribute('data-tipo', herramientaSeleccionada);
+                        this.innerHTML = obtenerIcono(herramientaSeleccionada);
+                    }
+                });
+
+                // Click: alterna entre asiento y vacío
+                btn.addEventListener('click', function () {
+                    let idAsiento = 1;
+                    let herramienta_dict = list_herramientas.find(h => h.id === parseInt(idAsiento));
+                    const tipoActual = this.getAttribute('data-tipo');
+                    if (tipoActual === '') {
+                        this.setAttribute('data-tipo', `${idAsiento}`);
+                        this.innerHTML = `<i class="${herramienta_dict.icono}"></i>`;
+                    } else {
+                        this.setAttribute('data-tipo', '');
+                        this.innerHTML = '';
+                    }
+                });
+
+                contenedor.appendChild(btn);
             }
-
-            contenedor.appendChild(rowDiv);
         }
     }
+
+    function obtenerIcono(idHerramienta) {
+        const herramienta_dict = list_herramientas.find(h => h.id === parseInt(idHerramienta));
+        if(herramienta_dict){
+            return `<i class="${herramienta_dict.icono}"></i>`
+        }
+        return '';
+    }
+
 </script>
+
 <script>
     function fct_Vehiculos() {
         $.getJSON('/trabajadores/viajes/GetData_Vehiculo', function (response) {
@@ -244,5 +308,14 @@
             });
         });
     });
+    function fct_get_tipo_herramientas() {
+        let ruta = "/trabajadores/viajes/GetData_Herramientas";
+        fetch(ruta)
+            .then(response => response.json())
+            .then(data => {
+
+            })
+
+    }
 </script>
 {% endblock %}

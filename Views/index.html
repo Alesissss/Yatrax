@@ -184,21 +184,21 @@
                                 {% endif %}
                                 {% if 33 in session['menus'] %}
                                 <li class="nav-item">
-                                    <a href="{{ url_for('ventas.Menu_TipoServicio') }}"
-                                        class="nav-link {% if active_page == 'tipoServicio' %}active{% endif %}">
-                                        <i class="bi bi-telephone nav-icon"></i>
-                                        <p>Gestionar tipos de servicio</p>
-                                    </a>
-                                </li>
-                                {% endif %}
-                                {% if 34 in session['menus'] %}
-                                <li class="nav-item">
                                     <a href="{{ url_for('ventas.Menu_Servicio') }}"
                                         class="nav-link {% if active_page == 'servicio' %}active{% endif %}">
                                         <i class="bi bi-briefcase nav-icon"></i>
                                         <p>Gestionar servicio</p>
                                     </a>
                                 </li>
+                                {% if 34 in session['menus'] %}
+                                <li class="nav-item">
+                                    <a href="{{ url_for('ventas.Menu_Microservicio') }}"
+                                        class="nav-link {% if active_page == 'microservicio' %}active{% endif %}">
+                                        <i class="bi bi-telephone nav-icon"></i>
+                                        <p>Gestionar microservicio</p>
+                                    </a>
+                                </li>
+                                {% endif %}
                                 {% endif %}
                                 {% if 35 in session['menus'] %}
                                 <li class="nav-item">

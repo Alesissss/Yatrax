@@ -13,9 +13,10 @@ class Conexion:
         )
         self.cursor = self.conn.cursor()
 
-    def ejecutar(self, query, params=None):
+    def ejecutar(self, query, params=None, auto_commit=True):
         self.cursor.execute(query, params or ())
-        self.conn.commit()
+        if auto_commit:
+            self.conn.commit()
         return self.cursor
 
     def obtener(self, query, params=None):

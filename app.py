@@ -10,11 +10,19 @@ from Controllers.Trabajadores.ventas_controller import ventas_bp
 from Controllers.Trabajadores.viajes_controller import viajes_bp
 from Controllers.Trabajadores.atencion_controller import atencion_bp
 from Controllers.Trabajadores.personal_controller import personal_bp
-
 # BLUEPRINTS ECOMMERCE
 from Controllers.Ecommerce.homeClientes_controller import homeClientes_bp
+#Extra para email
+from flask_mail import Mail, Message
 
 app = Flask(__name__, template_folder="Views", static_folder="Static")
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'yatraxyatusa@gmail.com'
+app.config['MAIL_PASSWORD'] = 'coivuoyrrpjnostu'
+
+mail = Mail(app)
 
 # # Manejar errores 401 (Página no autorizada)
 # @app.errorhandler(401)
