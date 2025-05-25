@@ -4,41 +4,41 @@
 <div class="container-fluid p-4">
     <div class="row mb-3">
         <div class="col-12">
-            <h1 class="mb-2">Bienvenido al módulo de usuarios</h1>
-            <p class="text-muted">Este módulo permite administrar los usuarios del sistema y clasificar sus tipos según su función o nivel de acceso.</p>
+            <h1 class="mb-2">💬 Bienvenido al módulo de atención al cliente</h1>
+            <p class="text-muted">Este módulo permite administrar a los usuarios pertenecientes a la plataforma.</p>
         </div>
     </div>
 
     <div class="row">
         <!-- Sección informativa 1 -->
         <div class="col-md-4">
-            <div class="info-box bg-light">
+            <div class="info-box bg-primary">
                 <div class="info-box-content">
-                    <span class="info-box-text font-weight-bold">Consulta de usuarios</span>
-                    <span class="info-box-number text-muted">
-                        Visualiza y revisa la información básica de los usuarios registrados en el sistema.
+                    <span class="info-box-text font-weight-bold">Consulta de clientes</span>
+                    <span class="info-box-number text-white">
+                        Visualiza y revisa la información básica de los clientes registrados en el sistema.
                     </span>
                 </div>
             </div>
         </div>
         <!-- Sección informativa 2 -->
         <div class="col-md-4">
-            <div class="info-box bg-light">
+            <div class="info-box bg-success">
                 <div class="info-box-content">
-                    <span class="info-box-text font-weight-bold">Registro de nuevos usuarios</span>
-                    <span class="info-box-number text-muted">
-                        Da de alta a nuevos usuarios completando sus datos personales y tipo asignado.
+                    <span class="info-box-text font-weight-bold">Registro de nuevos clientes</span>
+                    <span class="info-box-number text-white">
+                        Permite el registro de los datos personales de nuestros clientes.
                     </span>
                 </div>
             </div>
         </div>
         <!-- Sección informativa 3 -->
         <div class="col-md-4">
-            <div class="info-box bg-light">
+            <div class="info-box bg-warning">
                 <div class="info-box-content">
-                    <span class="info-box-text font-weight-bold">Gestión de tipos de usuario</span>
-                    <span class="info-box-number text-muted">
-                        Define y organiza las diferentes categorías o perfiles de usuarios del sistema.
+                    <span class="info-box-text font-weight-bold">Gestión de clientes</span>
+                    <span class="info-box-number text-black">
+                        Permite la administración de los usuarios registrados.
                     </span>
                 </div>
             </div>
@@ -48,7 +48,40 @@
         <div class="col-12">
             <div class="callout callout-info">
                 <h5>¿Sabías que...?</h5>
-                <p>Clasificar correctamente a los usuarios por tipo ayuda a personalizar su experiencia y controlar sus funcionalidades.</p>
+                <p>Un buen módulo de atención al cliente mejora la comunicación y permite resolver consultas rápidamente, aumentando la satisfacción y fidelidad de los usuarios.</p>
+            </div>
+        </div>
+    </div>
+    <!-- Gráficos con ECharts -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h3 class="card-title">Cantidad de clientes por pais</h3>
+                </div>
+                <div class="card-body">
+                    <div id="chartClientexPais" style="width: 100%; height: 350px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="card-title">Cantidad de registros de clientes mensuales</h3>
+                </div>
+                <div class="card-body">
+                    <div class="col-md-12 mb-3">
+                        <label for="cbx_Estado">Estado</label>
+                        <div class="input-group">
+                            <select id="cbx_Estado" class="form-control">
+                                <option disabled>--SELECCIONAR--</option>
+                                <option value="1">Vigente</option>
+                                <option value="0">No vigente</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="chartClientesMensuales" style="width: 100%; height: 300px;"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -59,4 +92,71 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/theme/dark.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let isDarkMode = document.body.classList.contains('dark-mode');
+
+        var chartUsuarios = echarts.init(document.getElementById('chartClientexPais'), isDarkMode ? 'dark' : '');
+        var optionUsuarios = {
+            tooltip: {
+                trigger: 'item'
+            },
+            legend: {
+                top: '5%',
+                left: 'center'
+            },
+            series: [
+                {
+                    name: 'Usuarios',
+                    type: 'pie',
+                    radius: '50%',
+                    data: [
+                        { value: 1048, name: 'Administradores' },
+                        { value: 735, name: 'Supervisores' },
+                        { value: 580, name: 'Usuarios normales' }
+                    ],
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }
+            ]
+        };
+        chartUsuarios.setOption(optionUsuarios);
+
+        var chartRegistros = echarts.init(document.getElementById('chartClientesMensuales'), isDarkMode ? 'dark' : '');
+        var optionRegistros = {
+            tooltip: {
+                trigger: 'axis'
+            },
+            xAxis: {
+                type: 'category',
+                data: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic']
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: [{
+                data: [120, 200, 150, 80, 70, 110, 40, 20, 50, 150, 220, 100],
+                type: 'bar',
+                barWidth: '60%',
+                itemStyle: {
+                    color: '#00c0ef'
+                }
+            }]
+        };
+        chartRegistros.setOption(optionRegistros);
+
+        window.addEventListener('resize', function () {
+            chartUsuarios.resize();
+            chartRegistros.resize();
+        });
+    });
+</script>
 {% endblock %}
