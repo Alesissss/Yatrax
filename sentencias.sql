@@ -528,47 +528,7 @@ INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Extintor','fas fa-fire-
 INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Puerta','fas fa-door-closed',2	);
 
 
-CREATE TABLE herramienta(
-	id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre varchar(60),
-    icono varchar(200),
-    id_tipo INT REFERENCES tipo_herramienta(id)
-);
 
-
-
--- INSERT TIPO_HERRAMIENTA  
-
-INSERT INTO tipo_herramienta (nombre) VALUES ('Asientos');
-INSERT INTO tipo_herramienta (nombre) VALUES ('Acceso');
-INSERT INTO tipo_herramienta (nombre) VALUES ('Seguridad');
-INSERT INTO tipo_herramienta (nombre) VALUES ('Multimedia');
-
--- INSERT HERRAMIENTA
-
-INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Asiento a 140°','fas fa-chair',1);
-INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Asiento a 160°','fas fa-chair',1);
-INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Asiento cama','fas fa-chair',1);
-
-
-INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Televisor','fas fa-desktop',4);
-
-
-INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Baño','fas fa-restroom',3);
-INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Extintor','fas fa-fire-extinguisher',3);
-
-
-INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Puerta','fas fa-door-closed',2	);
-
-
--- Crear tabla tipo metodo pago
-CREATE TABLE tipo_metodoPago (
-    idTipoMetodoPago INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(50) NOT NULL,
-    estado BOOLEAN NOT NULL,
-    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    usuario VARCHAR(100) not null
-);
 -- INSERTS PAIS
 INSERT INTO pais (id, nombre, name, iso2, iso3, phone_code, continente) VALUES (1,'Afganistán','Afghanistan','AF','AFG','93','Asia');
 INSERT INTO pais (id, nombre, name, iso2, iso3, phone_code, continente) VALUES (2,'Albania','Albania','AL','ALB','355','Europa');
