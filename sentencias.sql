@@ -4661,18 +4661,14 @@ BEGIN
     SET @MSJ  = NULL;
     SET @MSJ2 = NULL;
 
-    SELECT nroPiso, id_vehiculo
-      INTO piso_actual, vehiculo_act
+    SELECT COUNT(*) INTO piso_actual
     FROM nivel
     WHERE id = p_idNivel;
 
-    SELECT MAX(nroPiso)
-      INTO max_piso
-    FROM nivel
-    WHERE id_vehiculo = vehiculo_act;
+    DELETE FROM nivel_herramienta WHERE id_nivel = p_idNivel;
 
-    IF piso_actual < max_piso THEN
-        SET @MSJ2 = 'Solo se puede eliminar el piso más alto para evitar inconsistencias';
+    IF piso_actual <= 0 THEN
+        SET @MSJ2 = 'Intenta eliminar un nivel que no existe';
     ELSE
         DELETE FROM nivel
         WHERE id = p_idNivel;
