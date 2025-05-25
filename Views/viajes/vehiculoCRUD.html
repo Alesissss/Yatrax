@@ -95,34 +95,38 @@
         })
 
         $('#btn_Registrar, #btn_Actualizar').click(function () {
-            // Determinar la acción según el id del botón clicado
-            const action = this.id; // 'btn_Registrar' o 'btn_Actualizar'
+            if ($("#txt_placa").val().trim() !== "None" && $("#txt_anio").val().trim() !== "None" && $("#txt_color").val().trim() !== "None"){
+                // Determinar la acción según el id del botón clicado
+                const action = this.id; // 'btn_Registrar' o 'btn_Actualizar'
 
-            // Determinar URL según el botón
-            const url = (action === 'btn_Registrar')
-                ? '/trabajadores/viajes/registrarVehiculo'
-                : `/trabajadores/viajes/editarVehiculo/${idvehiculo}`;
+                // Determinar URL según el botón
+                const url = (action === 'btn_Registrar')
+                    ? '/trabajadores/viajes/registrarVehiculo'
+                    : `/trabajadores/viajes/editarVehiculo/${idvehiculo}`;
 
-            // Serializar inputs y selects dentro del formulario con id formvehiculo
-            const data = $('#formvehiculo')
-                .find('input[name], select[name]')
-                .serialize();
+                // Serializar inputs y selects dentro del formulario con id formvehiculo
+                const data = $('#formvehiculo')
+                    .find('input[name], select[name]')
+                    .serialize();
 
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: data,
-                success: function (response) {
-                    toastr.success(response.Msj, 'Éxito');
-                    setTimeout(() => {
-                        window.location.href = "/trabajadores/viajes/GestionarVehiculo";
-                    }, 1000);
-                },
-                error: function (xhr) {
-                    const errorMsg = xhr.responseJSON?.Msj || 'Error desconocido';
-                    toastr.error(errorMsg, 'Error');
-                }
-            });
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: data,
+                    success: function (response) {
+                        toastr.success(response.Msj, 'Éxito');
+                        setTimeout(() => {
+                            window.location.href = "/trabajadores/viajes/GestionarVehiculo";
+                        }, 1000);
+                    },
+                    error: function (xhr) {
+                        const errorMsg = xhr.responseJSON?.Msj || 'Error desconocido';
+                        toastr.error(errorMsg, 'Error');
+                    }
+                });
+            }else{
+                toastr.warning("Por favor complete todos los campos")
+            }
         });
     });
 </script>
