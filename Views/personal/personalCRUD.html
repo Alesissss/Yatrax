@@ -22,26 +22,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-12 mb-3">
-                            <label for="txt_Email">Correo electrónico</label>
-                            <div class="input-group">
-                                <input type="email" id="txt_Email" class="form-control" placeholder="Correo electrónico"
-                                    {% if btnId=='btn_Aceptar' %}disabled{% endif %} value="{{ personal.email }}">
-                                <div class="input-group-append">
-                                    <div class="input-group-text"><i class="fas fa-envelope"></i></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <label for="txt_Password">Contraseña</label>
-                            <div class="input-group">
-                                <input type="password" id="txt_Password" class="form-control" {% if btnId
-                                    !='btn_Registrar' %}disabled{% endif %} placeholder="Contraseña" value="********">
-                                <div class="input-group-append">
-                                    <div class="input-group-text"><i class="fas fa-lock"></i></div>
-                                </div>
-                            </div>
-                        </div>
+                       
                         <div class="col-md-12 mb-3">
                             <label for="cbx_Estado">Estado</label>
                             <div class="input-group">
@@ -132,13 +113,11 @@
 
         $("#btn_Registrar").click(function () {
             let nombre = $("#txt_Nombre").val().trim();
-            let email = $("#txt_Email").val().trim();
-            let password = $("#txt_Password").val().trim();
             let estado = $('#cbx_Estado').val();
             let tipoPersonal = $('#cbx_TipoPersonal').val();
             let imagen = $("#file_Imagen")[0].files[0];
 
-            if (!nombre || !email || !password || !estado || !tipoPersonal || !imagen) {
+            if (!nombre || !estado || !tipoPersonal || !imagen) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
@@ -157,8 +136,6 @@
                 if (result.isConfirmed) {
                     let formData = new FormData();
                     formData.append("nombre", nombre);
-                    formData.append("email", email);
-                    formData.append("password", password);
                     formData.append("estado", estado);
                     formData.append("idTipoPersonal", tipoPersonal);
                     formData.append("imagen", imagen);
@@ -197,12 +174,11 @@
             const id = Number("{{ personal.id }}");
 
             let nombre = $("#txt_Nombre").val().trim();
-            let email = $("#txt_Email").val().trim();
             let estado = $('#cbx_Estado').val();
             let tipoPersonal = $('#cbx_TipoPersonal').val();
             let imagen = $("#file_Imagen")[0].files[0];
 
-            if (!nombre || !email || !estado || !tipoPersonal) {
+            if (!nombre || !estado || !tipoPersonal) {
                 toastr.warning("Todos los campos son obligatorios, excepto la imagen.", "MENSAJE DE SISTEMA");
                 return;
             }
@@ -221,7 +197,6 @@
                 if (result.isConfirmed) {
                     let formData = new FormData();
                     formData.append("nombre", nombre);
-                    formData.append("email", email);
                     formData.append("estado", estado);
                     formData.append("idTipoPersonal", tipoPersonal);
 
