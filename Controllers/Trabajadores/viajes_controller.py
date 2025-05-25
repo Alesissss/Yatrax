@@ -155,7 +155,6 @@ def nuevo_nivel():
             data = request.get_json()
             nroPiso = int(data["nroPiso"])
             id_tipo_vehiculo = int(data["id_tipo_vehiculo"])
-            cantidad = int(data["cantidad"])
             x_dimension = int(data["x_dimension"])
             y_dimension = int(data["y_dimension"])
             estado = int(data["estado"])
@@ -167,7 +166,7 @@ def nuevo_nivel():
 
             # Convertir herramientas a objetos si es necesario
            
-            Nivel.insertar_nivel(nroPiso, id_tipo_vehiculo,cantidad, x_dimension, y_dimension, estado, herramientas)
+            Nivel.insertar_nivel(nroPiso, id_tipo_vehiculo, x_dimension, y_dimension, estado, herramientas)
             return jsonify({"Status": "success", "Msj": "Nivel registrado exitosamente"})
 
         except Exception as e:

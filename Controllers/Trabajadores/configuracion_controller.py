@@ -371,10 +371,11 @@ def MetodoPago_Editar_Ver(id):
 @configuracion_bp.route('/RegistrarMetodoPago', methods=["POST"])
 def registrar_metodo_pago():
     try:
-        nombre = request.form.get("nombre")
-        estado = request.form.get("estado")
+        nombre = request.form.get("nombre").strip()
+        estado = request.form.get("estado").strip()
         logo = request.files.get("logo")
-
+        tipo_pago = request.form.get("tipo_pago").strip()
+        logo = request.files.get("logo")
         if not nombre or not nombre.strip():
             return jsonify({"Status": "error", "Msj": "El nombre es obligatorio."})
         if not estado or not estado.strip():
@@ -382,12 +383,19 @@ def registrar_metodo_pago():
 
         if logo:
             logo_filename = secure_filename(logo.filename)
-            logo_path = f"/Static/img/metodos_pago/{logo_filename}"
-            logo.save(os.path.join("Static/img/metodos_pago", logo_filename))
+            logo_path = f"/Static/img/metodos_pago/logo/{logo_filename}"
+            logo.save(os.path.join("Static/img/metodos_pago/logo/", logo_filename))
         else:
             logo_path = "/Static/img/trabajadores/default-logo.png"  # Logo por defecto
-
-        mensajes = MetodoPago.registrar(nombre.strip(), logo_path, estado.strip(), session.get('usuario', {}).get('email', 'SIN USUARIO').strip())
+        qr = request.files.get("qr")
+        if qr:
+            qr_filename = secure_filename(qr.filename)
+            qr_path = f"/Static/img/metodos_pago/qr/{qr_filename}"
+            qr.save(os.path.join("Static/img/metodos_pago/qr", qr_filename))
+        else:
+            qr_path = "/Static/img/trabajadores/default-logo.png"
+            
+        mensajes = MetodoPago.registrar(nombre, logo_path, estado, session.get('usuario', {}).get('email', 'SIN USUARIO').strip(), tipo_pago, qr_path)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 
@@ -406,14 +414,15 @@ def registrar_metodo_pago():
 @configuracion_bp.route("/EditarMetodoPago/<int:id>", methods=['GET', 'POST'])
 def editar_metodo_pago(id):
     metodo_pago = MetodoPago.obtener_por_id(id)
+    tipos_pago = TipoMetodoPago.obtener_todos()
     if metodo_pago is None:
         return jsonify({"Status": "error", "Msj": "Método de pago no encontrado"})
     
     if request.method == 'POST':
         nombre = request.form.get("nombre").strip()
         estado = request.form.get("estado").strip()
+        tipo_pago = request.form.get("tipo_pago").strip()
         logo = request.files.get("logo")
-
         if not nombre or not estado:
             return jsonify({"Status": "error", "Msj": "Nombre y estado son obligatorios"})
 
@@ -423,8 +432,16 @@ def editar_metodo_pago(id):
             logo.save(os.path.join("Static/img/metodos_pago", logo_filename))
         else:
             logo_path = metodo_pago['logo']
-
-        mensajes = MetodoPago.editar(id, nombre, logo_path, estado)
+            
+        qr = request.files.get("qr")
+        if qr:
+            qr_filename = secure_filename(qr.filename)
+            qr_path = f"/Static/img/metodos_pago/qr/{qr_filename}"
+            qr.save(os.path.join("Static/img/metodos_pago/qr", qr_filename))
+        else:
+            qr_path = metodo_pago['qr']
+            
+        mensajes = MetodoPago.editar(id, nombre, logo_path, estado, tipo_pago, qr_path)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
         if msj1:
@@ -434,8 +451,7 @@ def editar_metodo_pago(id):
         else:
             return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar el metodo de pago'})
         # Redirigir con un mensaje de éxito
-
-    return render_template('configuracion/metodo_pago_crud.html', metodo_pago=metodo_pago, tittle="Editar método de pago", btnId="btn_Editar")
+    return render_template('configuracion/metodo_pago_crud.html', metodo_pago=metodo_pago, tipos_metodo_pago=tipos_pago, tittle="Editar método de pago", btnId="btn_Editar")
 
 # Ruta para eliminar un método de pago
 @configuracion_bp.route("/EliminarMetodoPago/<int:id>", methods=['POST'])
@@ -476,6 +492,7 @@ def dar_baja_metodo_pago(id):
         return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
 
 # ENG REGION METODOS DE PAGO
+
 # REGION TIPO METODO PAGO
 
 @configuracion_bp.route("/RegistrarTipoMetodoPago", methods=["POST"])
