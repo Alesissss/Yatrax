@@ -200,12 +200,9 @@
                     return;
                 }
 
-                let maxX = 0;
-                let maxY = 0;
-                herramientas.forEach(h => {
-                    if (h.x > maxX) maxX = h.x;
-                    if (h.y > maxY) maxY = h.y;
-                });
+                let maxX = 15;
+                let maxY = 6;
+                
 
                 const datos = {
                     nroPiso: $('#txt_nroPiso').val(),
