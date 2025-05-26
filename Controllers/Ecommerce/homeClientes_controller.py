@@ -56,9 +56,17 @@ def forgot_password():
 def register_cliente():
     return render_template('Ecommerce/home/formRegistro.html')
 
+@homeClientes_bp.route('transferenciaPasaje')
+def transferencia_pasaje():
+    return render_template('Ecommerce/home/transferenciaPasaje.html')
+
 @homeClientes_bp.route('/pago')
 def pago_pasajes():
     return render_template('Ecommerce/home/pago.html')
+
+@homeClientes_bp.route('/terminosYcondiciones')
+def terminos_y_condiciones():
+    return render_template('Ecommerce/home/terminosCondiciones.html')
 # END VIEWS
 
 # FUNCIONES
@@ -75,20 +83,32 @@ def get_ConfApariencia():
     
 # API NET RENIEC
 # controller_clientes.py
-@homeClientes_bp.route('/api/get_persona_dni', methods=['GET'])
-def get_persona_dni():
+@homeClientes_bp.route('/api/get_persona_data', methods=['GET'])
+def get_persona_data():
     try:
-        dni = request.args.get('dni')
-        if not dni:
+        tipo_doc = request.args.get('tipoDoc')
+        num_doc = request.args.get('numDoc')
+        if not tipo_doc:
             return jsonify({'data': {}, 'Status': 'error', 'Msj': 'Debe proporcionar un DNI'})
 
         api = ApiNetPe()
-        datos = api.get_person(dni)
 
-        if datos:
-            return jsonify({'data': datos, 'Status': 'success', 'Msj': 'Datos obtenidos correctamente'})
+        if tipo_doc == 'DNI':
+            datos = api.get_person(num_doc)
+
+            if datos:
+                return jsonify({'data': datos, 'Status': 'success', 'Msj': 'Datos obtenidos correctamente'})
+            else:
+                return jsonify({'data': {}, 'Status': 'error', 'Msj': 'No se encontraron datos para el DNI proporcionado'})
+        elif tipo_doc =='RUC':
+            datos = api.get_company(num_doc)
+            
+            if datos:
+                return jsonify({'data': datos, 'Status': 'success', 'Msj': 'Datos obtenidos correctamente'})
+            else:
+                return jsonify({'data': {}, 'Status': 'error', 'Msj': 'No se encontraron datos para el RUC proporcionado'})
         else:
-            return jsonify({'data': {}, 'Status': 'error', 'Msj': 'No se encontraron datos para el DNI proporcionado'})
+            return jsonify({'data': {}, 'Status': 'success', 'Msj': 'No hay datos para el tipo de documento ingresado'})
     except Exception as e:
         return jsonify({'data': {}, 'Status': 'error', 'Msj': f'Error en el servidor: {repr(e)}'})
 

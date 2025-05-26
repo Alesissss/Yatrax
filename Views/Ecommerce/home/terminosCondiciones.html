@@ -1,0 +1,242 @@
+{% extends "maestra.html" %}
+{% block titulo %}YATRAX - Terminos y condiciones{%endblock %}
+{% block contenido %}
+
+<style>
+  /* pestañas en azul base */
+  .nav-tabs .nav-link {
+    color: rgb(52, 86, 168);
+    border: none;
+    border-bottom: 2px solid #000000;
+    margin-right: 0 !important;
+    border-radius: 0 !important;
+    background-color: transparent !important;
+    position: relative;
+  }
+
+  /* pestaña activa en azul oscuro y texto blanco */
+  .nav-tabs .nav-link.active {
+    color: #fff !important;
+    background-color: rgb(52, 86, 168) !important;
+    border-color: rgb(52, 86, 168) rgb(52, 86, 168) transparent;
+  }
+
+  /* hover sobre pestañas (opcional) */
+  .nav-tabs .nav-link:hover {
+    background-color: rgba(52, 86, 168, 0.1);
+  }
+
+  .nav-tabs {
+    display: flex !important;
+    border-bottom: none !important;
+  }
+
+  .nav-item {
+    padding: 0.5rem 0;
+  }
+
+  /* Centrar el texto dentro de cada botón */
+  .nav-link {
+    text-align: center;
+    width: 100%;
+    /* Quitar márgenes o estilos que puedan venir de bs-brain */
+    margin: 0;
+  }
+</style>
+
+<div class="container p-8 mt-5">
+  <div class="container container-tabs">
+    <h2 class="text-center mb-4">Términos y Condiciones</h2>
+
+    <ul
+      class="nav nav-tabs mb-3 w-100"
+      id="terminosTabs"
+      role="tablist"
+      style="display: flex"
+    >
+      <li class="nav-item flex-fill text-center" role="presentation">
+        <button
+          class="nav-link active"
+          id="compra-tab"
+          data-bs-toggle="tab"
+          data-bs-target="#compra"
+          type="button"
+          role="tab"
+          aria-controls="compra"
+          aria-selected="true"
+        >
+          Condiciones de compras por Internet
+        </button>
+      </li>
+      <li class="nav-item flex-fill text-center" role="presentation">
+        <button
+          class="nav-link"
+          id="pasajes-tab"
+          data-bs-toggle="tab"
+          data-bs-target="#pasajes"
+          type="button"
+          role="tab"
+          aria-controls="pasajes"
+          aria-selected="false"
+        >
+          Pasajes
+        </button>
+      </li>
+      <li class="nav-item flex-fill text-center" role="presentation">
+        <button
+          class="nav-link"
+          id="encomiendas-tab"
+          data-bs-toggle="tab"
+          data-bs-target="#encomiendas"
+          type="button"
+          role="tab"
+          aria-controls="encomiendas"
+          aria-selected="false"
+        >
+          Encomiendas y Giros
+        </button>
+      </li>
+      <li class="nav-item flex-fill text-center" role="presentation">
+        <button
+          class="nav-link"
+          id="baselegal-tab"
+          data-bs-toggle="tab"
+          data-bs-target="#baselegal"
+          type="button"
+          role="tab"
+          aria-controls="baselegal"
+          aria-selected="false"
+        >
+          Base Legal
+        </button>
+      </li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content" id="terminosTabsContent">
+      <!-- Sección 1 -->
+      <div
+        class="tab-pane fade show active"
+        id="compra"
+        role="tabpanel"
+        aria-labelledby="compra-tab"
+      >
+        <ol class="ps-3">
+          <li>
+            La compra por Internet es exclusivamente para adquirir pasajes. No
+            se aceptan reservas, es responsabilidad del pasajero verificar la
+            conformidad de sus datos (nombre, DNI, fecha, hora de viaje, otros).
+          </li>
+          <li>
+            Al ingresar a la web dispone de 10 minutos para poder realizar su
+            compra. Si se le termina el tiempo sin completar su compra, su
+            sesión terminará y automáticamente los asientos seleccionados serán
+            liberados.
+          </li>
+          <li>
+            Para la compra es indispensable indicar una dirección de correo
+            electrónico válida del titular del boleto, a donde se le enviará el
+            comprobante de pago electrónico, y un número de teléfono celular
+            válido para establecer comunicación de ser necesario. Dichos datos
+            tienen calidad de declaración jurada.
+          </li>
+          <li>
+            El pasajero al momento de abordar el bus en el control respectivo,
+            deberá identificarse con su DNI físico; en caso de menores de edad
+            deberán contar con su autorización de viaje respectiva, así como su
+            DNI físico y/o partida física original, caso contrario no podrán
+            viajar, perdiendo su boleto sin derecho a devolución.
+          </li>
+          <li>
+            Las compras por internet solo podrán realizarse para los destinos
+            que se muestran en nuestra tienda virtual, teniendo en cuenta que
+            solo podrán visualizarse hasta una hora antes de su salida
+            programada.
+          </li>
+          <li>
+            La transferencia, postergación y/o devolución la realiza el titular
+            del boleto en forma personal, identificándose con su DNI; debiendo
+            solicitarlo con una anticipación no menor a 04 horas antes de su
+            fecha de viaje en ruta larga y 01 hora antes en ruta corta. Para
+            postergación de manera virtual realizarlo vía WhatsApp a los números
+            959947057, 954634973 o 949855871, con una anticipación de 24 horas a
+            la fecha y hora de su viaje (Ley Nº 29571 Art. 66.7 – Código de
+            protección y defensa del consumidor).
+          </li>
+          <li>
+            El sistema acepta como medios de pago TARJETAS DE CRÉDITO Y DÉBITO
+            VISA, MASTERCARD, y billetera virtual Yape y Plin.
+          </li>
+          <li>
+            Las condiciones de viaje que rigen para estos boletos son las mismas
+            que se aplican a los boletos comprados de manera presencial, las
+            cuales podrás encontrar en esta página web.
+          </li>
+          <li>
+            El uso, condiciones de crédito, intereses, formas de pago y otras
+            condiciones aplicables a las tarjetas de crédito, son de exclusiva
+            responsabilidad de su emisor.
+          </li>
+          <li>
+            La compra se realizará en soles, es responsabilidad del comprador el
+            tipo de cambio que se aplicará, si realiza la operación con otro
+            tipo de moneda.
+          </li>
+        </ol>
+      </div>
+
+      <!-- Sección 2 -->
+      <div
+        class="tab-pane fade"
+        id="pasajes"
+        role="tabpanel"
+        aria-labelledby="pasajes-tab"
+      >
+        <p>Aquí iría todo el contenido específico de "Pasajes":</p>
+        <ul>
+          <li>Política de cambios y devoluciones.</li>
+          <li>Requisitos para viajar.</li>
+          <li>Equipaje permitido.</li>
+          <!-- ... -->
+        </ul>
+      </div>
+
+      <!-- Sección 3 -->
+      <div
+        class="tab-pane fade"
+        id="encomiendas"
+        role="tabpanel"
+        aria-labelledby="encomiendas-tab"
+      >
+        <p>Contenido de "Encomiendas y Giros":</p>
+        <ul>
+          <li>Tarifas y tiempos de envío.</li>
+          <li>Documentación requerida.</li>
+          <li>Seguro y reclamaciones.</li>
+          <!-- ... -->
+        </ul>
+      </div>
+
+      <!-- Sección 4 -->
+      <div
+        class="tab-pane fade"
+        id="baselegal"
+        role="tabpanel"
+        aria-labelledby="baselegal-tab"
+      >
+        <p>Listado de normas y leyes aplicables:</p>
+        <ol>
+          <li>Ley Nº 29571 – Código de protección y defensa del consumidor.</li>
+          <li>Reglamento de transporte terrestre de personas.</li>
+          <li>Normas de seguridad y salud en el viaje.</li>
+          <!-- ... -->
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap Bundle (Popper + JS) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+{% endblock %}
