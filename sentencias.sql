@@ -1,5 +1,9 @@
 -- Primero eliminamos los procedimientos por si existen
 DROP PROCEDURE IF EXISTS SP_ASIGNAR_DMENU;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_INCIDENCIA;
+DROP PROCEDURE IF EXISTS SP_EDITAR_INCIDENCIA;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_INCIDENCIA;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_INCIDENCIA;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_DMENU;
 DROP PROCEDURE IF EXISTS SP_ASIGNAR_DCLAIM;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_DCLAIM;
@@ -117,6 +121,8 @@ DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_METODOPAGO;
 
 DROP PROCEDURE IF EXISTS SP_CAMBIAR_CLAVE;
 -- Luego eliminamos las tablas, primero la que depende de la otra
+DROP TABLE IF EXISTS personal_incidencia;
+DROP TABLE IF EXISTS incidencia;
 DROP TABLE IF EXISTS servicio_microservicio;
 DROP TABLE IF EXISTS microservicio;
 DROP TABLE IF EXISTS escala;
@@ -161,6 +167,18 @@ CREATE TABLE pais(
     iso3 VARCHAR(255),
     phone_code VARCHAR(255),
     continente VARCHAR(255)
+);
+
+-- Crear tabla incidencia
+CREATE TABLE incidencia (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR (255) NOT NULL,
+    descripcion VARCHAR (255) NOT NULL,
+    duracion_sancion INT NOT NULL,
+    estado BIT NOT NULL,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(255) NOT NULL
+
 );
 
 -- Crear tabla tipo_servicio
@@ -510,6 +528,20 @@ CREATE TABLE personal (
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
     usuario VARCHAR(100) NOT NULL,
     FOREIGN KEY (id_tipopersonal) REFERENCES tipo_personal(id) -- Relación con tipo_personal
+);
+
+-- Crear tabla personal_incidencia
+CREATE TABLE personal_incidencia (
+    personalid INT NOT NULL,
+    incidenciaid INT NOT NULL,
+    descripcion VARCHAR(255) NOT NULL,
+    fecha_fin DATETIME NOT NULL,
+    estado BIT NOT NULL,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(255) NOT NULL,
+    PRIMARY KEY (personalid, incidenciaid),
+    FOREIGN KEY (personalid) REFERENCES personal(id),
+    FOREIGN KEY (incidenciaid) REFERENCES incidencia(id)
 );
 
 CREATE TABLE herramienta(
@@ -1155,6 +1187,131 @@ INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (74,1);
 INSERT INTO conf_plantillas (id, nombre, color_header, color_footer, logo, estado, fecha_registro, usuario) VALUES (1, 'YATRAX', '#0c336e', '#000000', '/Static/img/plantillas/logo_yatusa.png', 1, '2025-03-06 20:06:14', 'SYSTEM');
 
 
+-- Crear procedimiento SP_REGISTRAR_INCIDENCIA
+DELIMITER $$
+CREATE PROCEDURE SP_REGISTRAR_INCIDENCIA(
+    IN P_NOMBRE VARCHAR(255),
+    IN P_DESCRIPCION VARCHAR(255),
+    IN P_DURACION_SANCION INT,
+    IN P_ESTADO BIT,
+    IN P_USUARIO VARCHAR(255)
+)
+BEGIN
+    DECLARE cNombre INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cNombre FROM incidencia where nombre = P_NOMBRE;
+
+    IF cNombre > 0 THEN
+        SET @MSJ2 = 'La incidencia que intenga registrar ya está registrada';
+    ELSE
+        INSERT INTO incidencia (nombre, descripcion, duracion_sancion, estado, usuario)
+        VALUES (P_NOMBRE, P_DESCRIPCION, P_DURACION_SANCION, P_ESTADO, P_USUARIO);
+
+        SET @MSJ = 'Incidencia registrada correctamente';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_EDITAR_INCIDENCIA
+
+DELIMITER $$
+CREATE PROCEDURE SP_EDITAR_INCIDENCIA(
+    IN P_ID INT,
+    IN P_NOMBRE VARCHAR(255),
+    IN P_DESCRIPCION VARCHAR(255),
+    IN P_DURACION_SANCION INT,
+    IN P_ESTADO BIT
+)
+BEGIN 
+    DECLARE cNombre INT;
+    DECLARE cID INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cID FROM incidencia WHERE id = P_ID;
+    SELECT COUNT(*) INTO cNombre FROM incidencia where nombre = P_NOMBRE;
+
+    IF cID <= 0 THEN
+        SET @MSJ2 = 'La incidencia que intenta editar no existe';
+    ELSEIF cNombre !=0 THEN
+        SET @MSJ2 = 'El nombre de incidencia ya existe';
+    ELSE
+        UPDATE incidencia SET nombre = P_NOMBRE, descripcion = P_DESCRIPCION, duracion_sancion = P_DURACION_SANCION, estado = P_ESTADO WHERE id =P_ID;
+        SET @MSJ = 'Se editó correctamente la incidencia';
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Crear procedimiento SP_DARBAJA_INCIDENCIA
+DELIMITER $$
+CREATE PROCEDURE SP_DARBAJA_INCIDENCIA(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cID INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT
+        ('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cID FROM incidencia WHERE id = P_ID;
+
+    IF cID <= 0 THEN
+        SET @MSJ2 = 'La incidencia que intenta dar de baja no existe';
+    ELSE
+        UPDATE incidencia SET estado = 0 where id = P_ID;
+        SET @MSJ = 'Se dio de baja correctamente la incidencia';
+    END IF;
+
+END $$
+
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_INCIDENCIA
+
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_INCIDENCIA(
+    P_ID INT
+)
+BEGIN
+    DECLARE cID INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cID FROM incidencia WHERE id = P_ID;
+
+    IF cID <= 0 THEN
+        SET @MSJ2 = 'La incidencia que intenta eliminar no existe';
+    ELSE
+        DELETE FROM incidencia where id = P_ID;
+        SET @MSJ = 'Se eliminó correctamente la incidencia';
+    END IF;
+
+END $$
+
+DELIMITER ;
 
 -- Crear procedimiento SP_REGISTRAR_USUARIO
 DELIMITER $$
