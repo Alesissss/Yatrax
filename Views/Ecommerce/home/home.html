@@ -433,58 +433,18 @@
         <div class="carousel-inner">
           <div class="carousel-item active">
             <div class="d-flex justify-content-center gap-5">
-              <a href="#" style="text-decoration: none;">
-                <div class="card" style="width: 18rem;">
-                  <img src="../../../Static/img/login_celular.jpg" class="card-img-top" alt=""
-                    style="border: 3px solid black; border-radius: 5%; display: block; margin: 5%; width: auto; height: auto;">
-                  <div class="card-body">
-                    <h5 class="card-title text-center" style="font-weight: bold;">Económico</h5>
-                    <p class="card-text text-center">Autobuses cómodos y seguros a precios accesibles. Pensando para
-                      usuarios
-                      que priorizan economía sin perder calidad.
-                    </p>
+              {% for servicio in datos["servicios"] %}
+                <a href="#" style="text-decoration: none;">
+                  <div class="card" style="width: 18rem; height: 420px;">
+                    <img src="/{{ servicio.imagen }}" class="card-img-top" alt="Imagen de servicio"
+                      style="border: 3px solid black; border-radius: 5%; display: block; margin: 5%; width: auto; height: auto;">
+                    <div class="card-body">
+                      <h5 class="card-title text-center" style="font-weight: bold;">{{ servicio.nombre }}</h5>
+                      <p class="card-text text-center">{{ servicio.descripcion }}</p>
+                    </div>
                   </div>
-                </div>
-              </a>
-              <a href="#" style="text-decoration: none;">
-                <div class="card" style="width: 18rem;">
-                  <img src="../../../Static/img/login_celular.jpg" class="card-img-top" alt=""
-                    style="border: 3px solid black; border-radius: 5%; display: block; margin: 5%; width: auto; height: auto;">
-                  <div class="card-body">
-                    <h5 class="card-title text-center" style="font-weight: bold;">Económico</h5>
-                    <p class="card-text text-center">Autobuses cómodos y seguros a precios accesibles. Pensando para
-                      usuarios
-                      que priorizan economía sin perder calidad.
-                    </p>
-                  </div>
-                </div>
-              </a>
-              <a href="#" style="text-decoration: none;">
-                <div class="card" style="width: 18rem;">
-                  <img src="../../../Static/img/login_celular.jpg" class="card-img-top" alt=""
-                    style="border: 3px solid black; border-radius: 5%; display: block; margin: 5%; width: auto; height: auto;">
-                  <div class="card-body">
-                    <h5 class="card-title text-center" style="font-weight: bold;">Económico</h5>
-                    <p class="card-text text-center">Autobuses cómodos y seguros a precios accesibles. Pensando para
-                      usuarios
-                      que priorizan economía sin perder calidad.
-                    </p>
-                  </div>
-                </div>
-              </a>
-              <a href="#" style="text-decoration: none;">
-                <div class="card" style="width: 18rem;">
-                  <img src="../../../Static/img/login_celular.jpg" class="card-img-top" alt=""
-                    style="border: 3px solid black; border-radius: 5%; display: block; margin: 5%; width: auto; height: auto;">
-                  <div class="card-body">
-                    <h5 class="card-title text-center" style="font-weight: bold;">Económico</h5>
-                    <p class="card-text text-center">Autobuses cómodos y seguros a precios accesibles. Pensando para
-                      usuarios
-                      que priorizan economía sin perder calidad.
-                    </p>
-                  </div>
-                </div>
-              </a>
+                </a>
+              {% endfor %}
             </div>
           </div>
           <!-- Botón anterior -->
@@ -501,7 +461,6 @@
               style="filter: invert(0%) brightness(0%)"></span>
             <span class="visually-hidden">Siguiente</span>
           </button>
-
         </div>
       </div>
   </section>

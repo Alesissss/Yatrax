@@ -1125,6 +1125,10 @@ INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (74,1);
 -- Tabla apariencia
 INSERT INTO conf_plantillas (id, nombre, color_header, color_footer, logo, estado, fecha_registro, usuario) VALUES (1, 'YATRAX', '#0c336e', '#000000', '/Static/img/plantillas/logo_yatusa.png', 1, '2025-03-06 20:06:14', 'SYSTEM');
 
+insert into servicio values (1,'Premium','Los autobuses más modernos y lujosos del mercado. Asientos cama, entretenimiento a bordo, snacks incluidos, aire acondicionado y cargadores USB. Ideal para viajes de largo trayecto.',1,'2025-05-25 19:30:00','Alexis','Static/img/servicios/busPremium.png');
+insert into servicio values (2,'Económico','Autobuses cómodos y seguros a precios accesibles. Pensado para usuarios que priorizan economía sin perder calidad.',1,'2025-05-25 19:32:00','Alexis','Static/img/servicios/busEconomico.png');
+insert into servicio values (3,'Exprés','Servicios rápidos con pocas paradas. Unidades modernas y seguras para viajeros que buscan llegar en el menor tiempo posible.',1,'2025-05-25 19:40:00','Alexis','Static/img/servicios/busExpress.png');
+
 -- Crear procedimiento SP_REGISTRAR_USUARIO
 DELIMITER $$
 CREATE PROCEDURE SP_REGISTRAR_USUARIO(
