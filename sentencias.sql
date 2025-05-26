@@ -206,7 +206,7 @@ CREATE TABLE tipo_comprobante (
 CREATE TABLE tipo_herramienta(
 	id int AUTO_INCREMENT PRIMARY KEY,
     nombre varchar(50),
-    fecha_registro date DEFAULT CURRENT_DATE,
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     usuario varchar(100)
 );
 
@@ -803,35 +803,35 @@ INSERT INTO pais (id, nombre, name, iso2, iso3, phone_code, continente) VALUES (
 INSERT INTO pais (id, nombre, name, iso2, iso3, phone_code, continente) VALUES (246,'Zimbabue','Zimbabwe','ZW','ZWE','263','África');
 
 -- INSERTS IATA CIUDAD
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Arequipa','AQP');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Callao','LIM');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Chiclayo','CIX');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Cusco','CUZ');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Iquitos','IQT');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Juliaca','JUL');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Piura','PIU');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Pucallpa','PCL');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Puerto Maldonado','PEM');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Talara','TYL');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Tacna','TCQ');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Trujillo','TRU');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Andahuaylas','ANS');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Ayacucho','AYP');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Chimbote','CHM');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Huaraz','ATA');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Chachapoyas','CHH');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Cajamarca','CJA');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Jaén','JAE');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Huánuco','HUU');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Tingo María','TGI');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Pisco','PIO');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Jauja','JAU');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Mazamari','MZA');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Yurimaguas','YMS');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Ilo','ILQ');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Tarapoto','TPP');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Punta Sal','PTL');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Tumbes','TBP');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Arequipa','AQP');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Callao','LIM');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Chiclayo','CIX');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Cusco','CUZ');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Iquitos','IQT');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Juliaca','JUL');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Piura','PIU');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Pucallpa','PCL');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Puerto Maldonado','PEM');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Talara','TYL');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Tacna','TCQ');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Trujillo','TRU');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Andahuaylas','ANS');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Ayacucho','AYP');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Chimbote','CHM');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Huaraz','ATA');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Chachapoyas','CHH');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Cajamarca','CJA');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Jaén','JAE');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Huánuco','HUU');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Tingo María','TGI');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Pisco','PIO');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Jauja','JAU');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Mazamari','MZA');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Yurimaguas','YMS');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Ilo','ILQ');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Tarapoto','TPP');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Punta Sal','PTL');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Tumbes','TBP');
 
 -- Tabla Tipo Usuario
 INSERT INTO tipo_usuario (id,nombre, estado, estado_proceso,estado_registro,fecha_registro, usuario) VALUES (1,'ADMINISTRADOR', 1, 'REGISTRADO',1,'2025-03-06 20:02:56','SYSTEM');
