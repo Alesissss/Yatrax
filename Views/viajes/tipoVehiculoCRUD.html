@@ -10,17 +10,17 @@
                 <div class="card-header bg-primary text-white">
                     <h4 class="text-center mb-0">{{ tittle }}</h4>
                 </div>
-                <div class="card-body" autocomplete="off">
+                <div class="card-body">
                     <!-- Formulario para registrar el tipo de vehículo -->
                     <!-- /trabajadores/viajes/registrarTipoVehiculo -->
-                    <div id="formTipoVehiculo">
-
-                        <div class="mb-3">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
                             <label for="txt_Nombre">Nombre del tipo de vehículo</label>
-                            <input type="text" name="txt_nombre" id="txt_Nombre" class="form-control" placeholder="Nombre del tipo de vehículo" value="{{ tipoVehiculo.nombre }}" {% if btnId == "btn_Regresar" %} disabled {% endif %}>
+                            <input type="text" name="txt_Nombre" id="txt_Nombre" class="form-control"
+                                placeholder="Nombre del tipo de vehículo" value="{{ tipoVehiculo.nombre }}" {% if
+                                btnId=="btn_Regresar" %} disabled {% endif %}>
                         </div>
-
-                        <div class="mb-3">
+                        <div class="col-md-12 mb-3">
                             <label for="txt_marca">Marca</label>
                             <div class="input-group">
                                 <select id="cbx_Marca" name="txt_marca" class="form-control" {% if btnId=='btn_Regresar'
@@ -28,23 +28,31 @@
                                 </select>
                             </div>
                         </div>
-
-                        <div class="mb-3">
-                            <label for="txt_cantidad">Cantidad</label>
-                            <input type="number" name="txt_cantidad" id="txt_cantidad" class="form-control" placeholder="Ingrese la cantidad de vehiuclos de ese tipo" value="{{ tipoVehiculo.cantidad }}" {% if btnId == "btn_Regresar" %} disabled {% endif %}>
+                        <div class="col-md-12 mb-3">
+                            <label for="cbx_Servicio">Servicio</label>
+                            <div class="input-group">
+                                <select id="cbx_Servicio" name="cbx_Servicio" class="form-control" {% if btnId=='btn_Regresar'
+                                    %}disabled{% endif %}>
+                                </select>
+                            </div>
                         </div>
-
-                        <div class="mb-3">
-                            <label for="txt_Estado">Estado</label>
-                            <select id="txt_Estado" name="txt_estado" class="form-control" {% if btnId == "btn_Regresar" %} disabled {% endif %}>
-                                <option value="1" {% if tipoVehiculo.estado == 1 %}selected{% endif %}>Activo</option>
-                                <option value="0" {% if tipoVehiculo.estado == 0 %}selected{% endif %}>Inactivo</option>
+                        <div class="col-md-12 mb-3">
+                            <label for="txt_Cantidad">Cantidad</label>
+                            <input type="number" name="txt_Cantidad" id="txt_Cantidad" class="form-control"
+                                placeholder="Ingrese la cantidad de vehiuclos de ese tipo"
+                                value="{{ tipoVehiculo.cantidad }}" {% if btnId=="btn_Regresar" %} disabled {% endif %}>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label for="cbx_Estado">Estado</label>
+                            <select id="cbx_Estado" name="cbx_Estado" class="form-control" {% if btnId=="btn_Regresar"
+                                %} disabled {% endif %}>
+                                <option value="1" {% if tipoVehiculo.estado==1 %}selected{% endif %}>Vigente</option>
+                                <option value="0" {% if tipoVehiculo.estado==0 %}selected{% endif %}>No vigente</option>
                             </select>
                         </div>
-
-                        <div class="text-center">
+                        <div class="col-md-12 text-center">
                             <button id="btn_Listado" type="button" class="btn btn-danger">Volver al listado de
-                                tipo de vehiculo</button>
+                                tipos de vehículos</button>
                             <button id="{{ btnId }}" type="button" class="btn btn-primary">Aceptar</button>
                         </div>
                     </div>
@@ -58,12 +66,12 @@
 {% block scripts %}
 <script>
     function fct_GetMarcas() {
-        $.getJSON('/trabajadores/viajes/GetData_Marcas', function (response) {
+        $.getJSON('/trabajadores/viajes/GetMarcasTipoVehiculo', function (response) {
             if (response.Status === 'success') {
                 let items = '<option disabled>--SELECCIONAR--</option>';
 
                 $.each(response.data, function (index, item) {
-                    if (item.id === Number("{{ tipoVehiculo.idMarca }}")) {
+                    if (item.id === Number("{{ tipoVehiculo.id_marca }}")) {
                         items += `<option selected value="${item.id}">${item.nombre}</option>`;
                     } else {
                         items += `<option value="${item.id}">${item.nombre}</option>`;
@@ -72,53 +80,170 @@
 
                 $('#cbx_Marca').html(items);
             } else {
-                console.error('Error al obtener los tipos de usuario:', response.Msj);
+                console.error('Error al obtener las marcas:', response.Msj);
+            }
+        });
+    }
+
+    function fct_GetServicios() {
+        $.getJSON('/trabajadores/viajes/GetServiciosTipoVehiculo', function (response) {
+            if (response.Status === 'success') {
+                let items = '<option disabled>--SELECCIONAR--</option>';
+
+                $.each(response.data, function (index, item) {
+                    if (item.id === Number("{{ tipoVehiculo.id_servicio }}")) {
+                        items += `<option selected value="${item.id}">${item.nombre}</option>`;
+                    } else {
+                        items += `<option value="${item.id}">${item.nombre}</option>`;
+                    }
+                });
+
+                $('#cbx_Servicio').html(items);
+            } else {
+                console.error('Error al obtener los servicios:', response.Msj);
             }
         });
     }
     // Aquí puedes agregar cualquier script que necesites
     $(document).ready(function () {
 
-        fct_GetMarcas()
+        fct_GetMarcas();
+        fct_GetServicios();
 
-        let idTipoVehiculo = "{{ tipoVehiculo.id }}"
-
-        $("#btn_Listado").click(()=>{
-            window.location.href="/trabajadores/viajes/GestionarTipoVehiculo"
+        $("#btn_Listado").click(() => {
+            window.location.href = "/trabajadores/viajes/GestionarTipoVehiculo"
         })
 
-        $("#btn_Regresar").click(()=>{
-            window.location.href="/trabajadores/viajes/GestionarTipoVehiculo"
+        $("#btn_Regresar").click(() => {
+            window.location.href = "/trabajadores/viajes/GestionarTipoVehiculo"
         })
 
-        $('#btn_Registrar, #btn_Actualizar').click(function(){
-            // determinamos URL según el id del botón clicado
-            const action = this.id; // 'btn_Registrar' o 'btn_Actualizar'
-            const url = (action === 'btn_Registrar')
-            ? '/trabajadores/viajes/registrarTipoVehiculo'
-            : `/trabajadores/viajes/editarTipoVehiculo/${idTipoVehiculo}`;
+        $("#btn_Registrar").click(function () {
+            let nombre = $("#txt_Nombre").val().trim();
+            let marca = $("#cbx_Marca").val().trim();
+            let cantidad = $("#txt_Cantidad").val().trim();
+            let estado = $('#cbx_Estado').val();
+            let servicio = $('#cbx_Servicio').val();
 
-            // serializamos inputs y selects dentro del div#formTipoVehiculo
-            const data = $('#formTipoVehiculo')
-            .find('input[name], select[name]')
-            .serialize();
-
-            $.ajax({
-            url: url,
-            type: 'POST',
-            data: data,
-            success: resp => {
-                toastr.success(resp.Msj, 'Éxito');
-                setTimeout(()=> {
-                window.location.href = '/trabajadores/viajes/GestionarTipoVehiculo';
-                }, 1000);
-            },
-            error: xhr => {
-                const msg = xhr.responseJSON?.Msj || 'Error desconocido';
-                toastr.error(msg, 'Error');
+            if (!nombre || !estado || !marca || !cantidad) {
+                toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                return;
             }
+
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción registrará al tipo de vehículo. ¿Deseas continuar?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, registrar tipo vehículo",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    let formData = new FormData();
+                    formData.append("nombre", nombre);
+                    formData.append("estado", estado);
+                    formData.append("marca", marca);
+                    formData.append("cantidad", cantidad);
+                    formData.append("servicio", servicio);
+
+                    $.ajax({
+                        url: '/trabajadores/viajes/registrarTipoVehiculo',
+                        type: "POST",
+                        processData: false,
+                        contentType: false,
+                        data: formData,
+                        success: function (response) {
+                            if (response.Status === "success") {
+                                if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                    return;
+                                } else {
+                                    toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                                    setTimeout(() => {
+                                        window.location.href = '/trabajadores/viajes/GestionarTipoVehiculo';
+                                    }, 500);
+                                }
+                            } else {
+                                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                                console.error('Error: ' + response.Msj);
+                            }
+                        },
+                        error: function (xhr, Status, error) {
+                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                            console.error('Error:' + error);
+                        }
+                    });
+                }
             });
+        });
+
+        $("#btn_Actualizar").click(function () {
+            const id = Number("{{ tipoVehiculo.id }}");
+
+            let nombre = $("#txt_Nombre").val().trim();
+            let marca = $("#cbx_Marca").val().trim();
+            let cantidad = $("#txt_Cantidad").val().trim();
+            let estado = $('#cbx_Estado').val();
+            let servicio = $('#cbx_Servicio').val();
+
+            if (!nombre || !estado || !marca || !cantidad) {
+                toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                return;
+            }
+
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción modificará al tipo vehículo. ¿Deseas continuar?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, editar tipo vehículo",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    let formData = new FormData();
+                    formData.append("nombre", nombre);
+                    formData.append("estado", estado);
+                    formData.append("marca", marca);
+                    formData.append("cantidad", cantidad);
+                    formData.append("servicio", servicio);
+                    
+                    $.ajax({
+                        url: `/trabajadores/viajes/editarTipoVehiculo/${id}`,
+                        type: "POST",
+                        processData: false,
+                        contentType: false,
+                        data: formData,
+                        success: function (response) {
+                            if (response.Status === "success") {
+                                if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                    return;
+                                } else {
+                                    toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                                    setTimeout(() => {
+                                        window.location.href = '/trabajadores/viajes/GestionarTipoVehiculo';
+                                    }, 500);
+                                }
+                            } else {
+                                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                            }
+                        },
+                        error: function (xhr, Status, error) {
+                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                        }
+                    });
+                }
+            });
+        });
+
     });
-});
 </script>
 {% endblock %}

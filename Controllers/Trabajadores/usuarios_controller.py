@@ -91,7 +91,7 @@ def get_usuarios():
 def GetTiposUsuarios():
     try:
         tiposUsuarios = TipoUsuario.obtener_todos()
-        result = [{'id': tu['id'], 'nombre': tu['nombre']} for tu in tiposUsuarios]
+        result = [{'id': tu['id'], 'nombre': tu['nombre']} for tu in tiposUsuarios if tu['estado'] == 1]
 
         return jsonify({'data': result, 'Status': 'success', 'Msj': 'Listado de tipos de usuarios retornado exitosamente'})
     except Exception as e:

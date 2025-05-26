@@ -2,6 +2,7 @@ import hashlib
 from flask import Blueprint, request, jsonify, render_template, session, redirect, url_for, abort
 from Models.conf_plantillas import Conf_Plantillas
 from Models.api_net import ApiNetPe
+from Models.servicio import Servicio
 
 homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/home')
 
@@ -34,7 +35,10 @@ def error_general(error):
 # VIEWS
 @homeClientes_bp.route('/inicio')
 def index():
-    return render_template('Ecommerce/home/home.html', active_page="home")
+    datos_recibidos = {
+        "servicios":Servicio.obtener_todos()
+    }
+    return render_template('Ecommerce/home/home.html', active_page="home",datos=datos_recibidos)
 
 @homeClientes_bp.route("/sobreNosotros")
 def sobreNosotros():

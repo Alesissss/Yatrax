@@ -38,12 +38,31 @@
                         <div class="col-md-12 mb-3">
                             <label for="cbx_Microservicios">Microservicios</label>
                             <div class="input-group">
-                                <select id="cbx_Microservicios" class="form-control" multiple="multiple" {% if btnId=='btn_Regresar' %}disabled{%
-                                    endif %}>
+                                <select id="cbx_Microservicios" class="form-control" multiple="multiple" {% if
+                                    btnId=='btn_Regresar' %}disabled{% endif %}>
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-12 text-center">
+                        <div class="col-md-12 mb-3">
+                            <label for="file_Imagen">Imagen</label>
+                            <div class="col-12 text-left">
+                                <label class="btn btn-warning {% if btnId=='btn_Regresar' %}disabled{%
+                                    endif %} " for="file_Imagen">
+                                    <i class="bi bi-file-earmark-arrow-up-fill"></i> Subir archivo
+                                </label>
+                                <input type="file" class="d-none" id="file_Imagen" name="logo"
+                                    accept=".jpg, .jpeg, .png" {% if btnId=='btn_Regresar' %}disabled{% endif %}>
+                                <span id="checkIcon" class="d-none text-success ml-2">
+                                    <i class="bi bi-check-circle-fill"></i> Archivo subido
+                                </span>
+                            </div>
+                            <!-- Vista previa de la imagen seleccionada -->
+                            <div id="logoPreview" class="mt-3" style="display: none;">
+                                <label>Vista previa:</label>
+                                <img id="logoPreviewImage" class="img-thumbnail" style="width: 100px;">
+                            </div>
+                        </div>
+                        <div class="col-md-12 text-center pt-4">
                             <button id="btn_Listado" type="button" class="btn btn-danger">Volver al listado de
                                 servicios</button>
                             <button id="{{ btnId }}" type="submit" class="btn btn-primary">Aceptar</button>
@@ -99,10 +118,38 @@
     $(document).ready(function () {
         fct_CargarMicroservicios();
 
+        // Mostrar imagen actual si se está editando y existe imagen
+        const imagenGuardada = "{{ servicio.imagen or '' }}";
+        if (imagenGuardada && "{{ btnId }}" !== "btn_Registrar") {
+            $('#logoPreviewImage').attr('src', `/${imagenGuardada}`);
+            $('#logoPreview').show();
+        }
+
+        // Mostrar vista previa de la imagen
+        $('#file_Imagen').on('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    $('#logoPreviewImage').attr('src', e.target.result);
+                    $('#logoPreview').show();
+                    $('#checkIcon').removeClass('d-none');
+                };
+
+                reader.readAsDataURL(file);
+            } else {
+                $('#logoPreviewImage').attr('src', '');
+                $('#logoPreview').hide();
+                $('#checkIcon').addClass('d-none');
+            }
+        });
+
         $("#btn_Registrar").click(function () {
             let nombre = $("#txt_nombre").val().trim();
             let descripcion = $('#txt_descripcion').val();
             let estado = $('#cbx_Estado').val();
+            let imagen = $('#file_Imagen')[0].files[0];
 
             if (!nombre || !descripcion || !estado) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
@@ -121,7 +168,6 @@
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
-
                     let formData = new FormData();
                     let ids = $('#cbx_Microservicios').val();
                     let microservicios = ids.map(id => ({ id: parseInt(id, 10) }));
@@ -130,6 +176,7 @@
                     formData.append("descripcion", descripcion);
                     formData.append("estado", estado);
                     formData.append("microservicios", JSON.stringify(microservicios));
+                    if (imagen) formData.append("imagen", imagen);
 
                     $.ajax({
                         url: '/trabajadores/ventas/registrarServicio',
@@ -139,9 +186,8 @@
                         data: formData,
                         success: function (response) {
                             if (response.Status === "success") {
-                                if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                if (response.Msj2 !== null || response.Msj2 !== '') {
                                     toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                                    return;
                                 } else {
                                     toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                                     setTimeout(() => {
@@ -150,12 +196,11 @@
                                 }
                             } else {
                                 toastr.error(response.Msj, "MENSAJE DE SISTEMA");
-                                console.error('Error: ' + response.Msj);
                             }
                         },
                         error: function (xhr, Status, error) {
                             toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
-                            console.error('Error:' + error);
+                            console.error("Error:" + error);
                         }
                     });
                 }
@@ -164,10 +209,10 @@
 
         $("#btn_Actualizar").click(function () {
             const id = Number('{{ servicio.id }}');
-
             let nombre = $("#txt_nombre").val().trim();
             let descripcion = $('#txt_descripcion').val();
             let estado = $('#cbx_Estado').val();
+            let imagen = $('#file_Imagen')[0].files[0];
 
             if (!nombre || !descripcion || !estado) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
@@ -186,7 +231,6 @@
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
-
                     let formData = new FormData();
                     let ids = $('#cbx_Microservicios').val();
                     let microservicios = ids.map(id => ({ id: parseInt(id, 10) }));
@@ -195,6 +239,7 @@
                     formData.append("descripcion", descripcion);
                     formData.append("estado", estado);
                     formData.append("microservicios", JSON.stringify(microservicios));
+                    if (imagen) formData.append("imagen", imagen);
 
                     $.ajax({
                         url: `/trabajadores/ventas/editarServicio/${id}`,
@@ -204,9 +249,8 @@
                         data: formData,
                         success: function (response) {
                             if (response.Status === "success") {
-                                if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                if (response.Msj2 !== null || response.Msj2 !== '') {
                                     toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                                    return;
                                 } else {
                                     toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                                     setTimeout(() => {
@@ -219,6 +263,7 @@
                         },
                         error: function (xhr, Status, error) {
                             toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                            console.error('Error:' + error);
                         }
                     });
                 }
