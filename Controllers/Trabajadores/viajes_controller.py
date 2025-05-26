@@ -404,6 +404,16 @@ def eliminarTipoVehiculo(idTipoVehiculo):
 # END REGION TIPO VEHICULO
 
 # REGION VEHICULO
+@viajes_bp.route("/GetTiposVehiculo_Vehiculo", methods=['GET'])
+def get_tipovehiculo_vehiculo():
+    try:
+        tipos = TipoVehiculo.obtener_todos()
+        result = [{'id': tu['id'], 'nombre': tu['nombre']} for tu in tipos if tu['estado'] == 1]
+
+        return jsonify({"Status": "success", "data": result, "Msj": "Listado de tipos de vehículo retornado exitosamente"})
+    except Exception as e:
+        return jsonify({"Status": "error", "data": [], "Msj": f"Error al obtener los tipos de vehículo: {repr(e)}"})
+
 @viajes_bp.route("/GetData_Vehiculo")
 def get_vehiculos():
     try:
@@ -426,14 +436,15 @@ def nuevoVehiculo():
         )
     else:
         try:
-            placa = request.form['txt_placa']
-            anio = int(request.form['txt_anio'])
-            color = request.form['txt_color']
-            idTipoVehiculo = int(request.form['txt_idTipoVehiculo'])
+            placa = request.form.get('placa')
+            anio = int(request.form.get('anio'))
+            color = request.form.get('color')
+            idTipoVehiculo = int(request.form.get('idTipoVehiculo'))
+            estado = int(request.form.get('estado'))
 
             usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO')
 
-            mensajes = Vehiculo.insertarVehiculo(placa, anio, color, idTipoVehiculo, usuario_actual)
+            mensajes = Vehiculo.insertarVehiculo(placa, anio, color, idTipoVehiculo, estado, usuario_actual)
             msj1 = mensajes.get('MSJ') or mensajes.get('@MSJ')
             msj2 = mensajes.get('MSJ2') or mensajes.get('@MSJ2')
 
@@ -472,11 +483,11 @@ def editarVehiculo(idVehiculo):
         )
     else:
         try:
-            placa = request.form['txt_placa']
-            anio = int(request.form['txt_anio'])
-            color = request.form['txt_color']
-            idTipoVehiculo = int(request.form['txt_idTipoVehiculo'])
-            estado = int(request.form['txt_estado'])
+            placa = request.form.get('placa')
+            anio = int(request.form.get('anio'))
+            color = request.form.get('color')
+            idTipoVehiculo = int(request.form.get('idTipoVehiculo'))
+            estado = int(request.form.get('estado'))
 
             mensajes = Vehiculo.actualizarVehiculo(idVehiculo, placa, anio, color, idTipoVehiculo, estado)
             msj1 = mensajes.get('MSJ') or mensajes.get('@MSJ')

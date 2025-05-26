@@ -48,13 +48,13 @@ class Vehiculo:
                 conexion.cerrar()
 
     @classmethod
-    def insertarVehiculo(cls, placa, anio, color, idTipoVehiculo, usuario):
+    def insertarVehiculo(cls, placa, anio, color, idTipoVehiculo, estado, usuario):
         try:
             conexion = bd.Conexion()
             # Llamada al SP que devuelve @MSJ y @MSJ2
             conexion.ejecutar(
-                "CALL SP_INSERTAR_VEHICULO(%s, %s, %s, %s, %s);",
-                (placa, anio, color, idTipoVehiculo, usuario)
+                "CALL SP_INSERTAR_VEHICULO(%s, %s, %s, %s, %s, %s);",
+                (placa, anio, color, idTipoVehiculo, estado, usuario)
             )
             resultado = conexion.obtener("SELECT @MSJ AS MSJ, @MSJ2 AS MSJ2;")
             return resultado[0]

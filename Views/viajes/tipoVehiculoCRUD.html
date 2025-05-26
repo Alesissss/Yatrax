@@ -65,14 +65,13 @@
 
 {% block scripts %}
 <script>
-    console.log(JSON.parse('{{ tipoVehiculo | tojson }}'));
     function fct_GetMarcas() {
         $.getJSON('/trabajadores/viajes/GetMarcasTipoVehiculo', function (response) {
             if (response.Status === 'success') {
                 let items = '<option disabled>--SELECCIONAR--</option>';
 
                 $.each(response.data, function (index, item) {
-                    if (item.id === Number("{{ tipoVehiculo.idMarca }}")) {
+                    if (item.id === Number("{{ tipoVehiculo.id_marca }}")) {
                         items += `<option selected value="${item.id}">${item.nombre}</option>`;
                     } else {
                         items += `<option value="${item.id}">${item.nombre}</option>`;
@@ -92,7 +91,7 @@
                 let items = '<option disabled>--SELECCIONAR--</option>';
 
                 $.each(response.data, function (index, item) {
-                    if (item.id === Number("{{ tipoVehiculo.servicio }}")) {
+                    if (item.id === Number("{{ tipoVehiculo.id_servicio }}")) {
                         items += `<option selected value="${item.id}">${item.nombre}</option>`;
                     } else {
                         items += `<option value="${item.id}">${item.nombre}</option>`;

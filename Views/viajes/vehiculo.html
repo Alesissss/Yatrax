@@ -21,7 +21,7 @@
                             <th class="text-center">PLACA</th>
                             <th class="text-center">AÑO</th>
                             <th class="text-center">COLOR</th>
-                            <th class="text-center">TIPO VEHICULO</th>
+                            <th class="text-center">TIPO VEHÍCULO</th>
                             <th class="text-center">MARCA</th>
                             <th class="text-center">ESTADO</th>
                             <th class="text-center">ACCION</th>
@@ -196,8 +196,8 @@
                 { data: "color", name: "Color" },
                 { data: "tipoVehiculo", name: "Tipo Vehiculo" },
                 { data: "marca", name: "Marca" },
-                { 
-                    data: "estado", 
+                {
+                    data: "estado",
                     name: "estado",
                     render: function (data, type, row) {
                         let estado = data === 1 ? 'Vigente' : 'No vigente';
@@ -267,30 +267,30 @@
         });
     }
 
-    (function(){
-    // ─── 1) Función para cargar el combo ─────────────────────────────────────
-    function _getVehiculos(Id) {
-      $.getJSON('/trabajadores/viajes/GetData_Vehiculo', function(response) {
-        if (response.Status === 'success') {
-          let options = '<option disabled>--SELECCIONAR--</option>';
-          $.each(response.data, function(_, item) {
-            const sel = (item.id === Number(Id)) ? ' selected' : '';
-            options += `<option value="${item.id}"${sel}>${item.placa}</option>`;
-          });
-          $('#cbx_Vehiculo').html(options);
-        } else {
-          console.error('Error al obtener vehiculos:', response.Msj);
+    (function () {
+        // ─── 1) Función para cargar el combo ─────────────────────────────────────
+        function _getVehiculos(Id) {
+            $.getJSON('/trabajadores/viajes/GetData_Vehiculo', function (response) {
+                if (response.Status === 'success') {
+                    let options = '<option disabled>--SELECCIONAR--</option>';
+                    $.each(response.data, function (_, item) {
+                        const sel = (item.id === Number(Id)) ? ' selected' : '';
+                        options += `<option value="${item.id}"${sel}>${item.placa}</option>`;
+                    });
+                    $('#cbx_Vehiculo').html(options);
+                } else {
+                    console.error('Error al obtener vehiculos:', response.Msj);
+                }
+            });
         }
-      });
-    }
 
-    // ─── 2) Función para generar e inyectar el modal ─────────────────────────
-    function _generarModalNivel(Id) {
-      // 2.1) Remuevo cualquier modal previo
-      $('#modalNivel').remove();
+        // ─── 2) Función para generar e inyectar el modal ─────────────────────────
+        function _generarModalNivel(Id) {
+            // 2.1) Remuevo cualquier modal previo
+            $('#modalNivel').remove();
 
-      // 2.2) Inyecto el HTML
-      const html = `
+            // 2.2) Inyecto el HTML
+            const html = `
       <div class="modal fade" id="modalNivel" tabindex="-1" aria-labelledby="modalNivelLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
           <div class="modal-content">
@@ -319,88 +319,88 @@
           </div>
         </div>
       </div>`;
-      $('body').append(html);
+            $('body').append(html);
 
-      // 2.3) Ahora que existe el <select>, lo cargamos
-      _getVehiculos(Id);
-    }
+            // 2.3) Ahora que existe el <select>, lo cargamos
+            _getVehiculos(Id);
+        }
 
-    function obtenerPlacaPorId(id) {
-        let placaEncontrada = null;
+        function obtenerPlacaPorId(id) {
+            let placaEncontrada = null;
 
-        dtUsuarios.rows().every(function () {
-            const data = this.data();
-            if (String(data.id) === String(id)) {
-                placaEncontrada = data.placa;
-            }
-        });
+            dtUsuarios.rows().every(function () {
+                const data = this.data();
+                if (String(data.id) === String(id)) {
+                    placaEncontrada = data.placa;
+                }
+            });
 
-        return placaEncontrada;
-    }
+            return placaEncontrada;
+        }
 
 
-    // ─── 3) Función de alto nivel que usa las dos anteriores ────────────────
-    function _agregarNivel(Id) {
-      // 3.1) genero e inyecto modal
-      const placa = obtenerPlacaPorId(Id);
+        // ─── 3) Función de alto nivel que usa las dos anteriores ────────────────
+        function _agregarNivel(Id) {
+            // 3.1) genero e inyecto modal
+            const placa = obtenerPlacaPorId(Id);
 
-      if (placa){
-        console.log('La placa es:', placa);
-        _generarModalNivel(Id);
-      }else{
-        toastr.warning('No se encontró una placa para ese ID', 'MENSAJE DE SISTEMA');
-      }
-
-      // 3.2) seteo valores y textos
-      $('#txt_idVehiculo').val(Id);
-      $('#modalNivelLabel').text('Registrar Nivel');
-      $('#btn_Action').text('Registrar');
-      $('#formNivel')[0].reset();
-
-      // 3.3) muestro el modal
-      const modal = new bootstrap.Modal(document.getElementById('modalNivel'));
-      modal.show();
-
-      // 3.4) binding de botones / submit
-      $('#btn_Listado').off('click').on('click', () => {
-        modal.hide();
-        window.location.href = '/trabajadores/viajes/GestionarVehiculo';
-      });
-
-      $('#formNivel').off('submit').on('submit', function(e) {
-        e.preventDefault();
-        $.ajax({
-          url: '/trabajadores/viajes/registrarNivel',
-          type:"POST",
-          data: $(this).serialize(),
-          success(resp) {
-            if (resp.Status === 'success') {
-              toastr.success(resp.Msj || 'Nivel registrado correctamente','Éxito');
-              setTimeout(() => window.location.reload(), 800);
+            if (placa) {
+                console.log('La placa es:', placa);
+                _generarModalNivel(Id);
             } else {
-              toastr.error(resp.Msj || 'Ocurrió un error','Error');
+                toastr.warning('No se encontró una placa para ese ID', 'MENSAJE DE SISTEMA');
             }
-          },
-          error(xhr) {
-            const msg = xhr.responseJSON?.Msj || 'Error desconocido';
-            toastr.error(msg,'Error');
-          }
+
+            // 3.2) seteo valores y textos
+            $('#txt_idVehiculo').val(Id);
+            $('#modalNivelLabel').text('Registrar Nivel');
+            $('#btn_Action').text('Registrar');
+            $('#formNivel')[0].reset();
+
+            // 3.3) muestro el modal
+            const modal = new bootstrap.Modal(document.getElementById('modalNivel'));
+            modal.show();
+
+            // 3.4) binding de botones / submit
+            $('#btn_Listado').off('click').on('click', () => {
+                modal.hide();
+                window.location.href = '/trabajadores/viajes/GestionarVehiculo';
+            });
+
+            $('#formNivel').off('submit').on('submit', function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: '/trabajadores/viajes/registrarNivel',
+                    type: "POST",
+                    data: $(this).serialize(),
+                    success(resp) {
+                        if (resp.Status === 'success') {
+                            toastr.success(resp.Msj || 'Nivel registrado correctamente', 'Éxito');
+                            setTimeout(() => window.location.reload(), 800);
+                        } else {
+                            toastr.error(resp.Msj || 'Ocurrió un error', 'Error');
+                        }
+                    },
+                    error(xhr) {
+                        const msg = xhr.responseJSON?.Msj || 'Error desconocido';
+                        toastr.error(msg, 'Error');
+                    }
+                });
+            });
+        }
+
+        // ─── 4) Exponer globalmente y hacer binding de botones ──────────────────
+        window.fct_GetVehiculos = _getVehiculos;
+        window.fct_AgregarNivel = _agregarNivel;
+
+        // binding en document ready para cualquier botón .btn-agregar-nivel
+        $(function () {
+            $(document).on('click', '.btn-agregar-nivel', function () {
+                const id = $(this).data('id');
+                _agregarNivel(id);
+            });
         });
-      });
-    }
-
-    // ─── 4) Exponer globalmente y hacer binding de botones ──────────────────
-    window.fct_GetVehiculos = _getVehiculos;
-    window.fct_AgregarNivel = _agregarNivel;
-
-    // binding en document ready para cualquier botón .btn-agregar-nivel
-    $(function(){
-      $(document).on('click', '.btn-agregar-nivel', function(){
-        const id = $(this).data('id');
-        _agregarNivel(id);
-      });
-    });
-  })();
+    })();
 
     function fct_NuevoVehiculo() {
         window.location.href = '/trabajadores/viajes/registrarVehiculo';
@@ -417,7 +417,7 @@
     function fct_VehiculoEliminar(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción eliminará el tipo de vehiculo. ¿Deseas continuar?",
+            text: "Esta acción eliminará al vehículo. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -456,7 +456,7 @@
     function fct_VehiculoDarBaja(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción le dará de baja al tipo de vehiculo. ¿Deseas continuar?",
+            text: "Esta acción le dará de baja al vehículo. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",

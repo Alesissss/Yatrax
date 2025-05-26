@@ -2843,6 +2843,7 @@ CREATE PROCEDURE SP_INSERTAR_VEHICULO(
     IN p_anio INT,
     IN p_color VARCHAR(30),
     IN p_idTipoVehiculo INT,
+    IN P_ESTADO BOOLEAN,
     IN P_USUARIO VARCHAR(100)
 )
 BEGIN
@@ -2857,7 +2858,7 @@ BEGIN
     SET @MSJ2 = NULL;
 
     INSERT INTO vehiculo (placa, anio, color, estado, id_tipo_vehiculo, usuario)
-    VALUES (p_placa, p_anio, p_color, 1, p_idTipoVehiculo, P_USUARIO);
+    VALUES (p_placa, p_anio, p_color, P_ESTADO, p_idTipoVehiculo, P_USUARIO);
 
     SET @MSJ  = 'Vehículo insertado correctamente';
 END$$
