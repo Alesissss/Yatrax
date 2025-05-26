@@ -1,5 +1,9 @@
 -- Primero eliminamos los procedimientos por si existen
 DROP PROCEDURE IF EXISTS SP_ASIGNAR_DMENU;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_INCIDENCIA;
+DROP PROCEDURE IF EXISTS SP_EDITAR_INCIDENCIA;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_INCIDENCIA;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_INCIDENCIA;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_DMENU;
 DROP PROCEDURE IF EXISTS SP_ASIGNAR_DCLAIM;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_DCLAIM;
@@ -117,6 +121,8 @@ DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_METODOPAGO;
 
 DROP PROCEDURE IF EXISTS SP_CAMBIAR_CLAVE;
 -- Luego eliminamos las tablas, primero la que depende de la otra
+DROP TABLE IF EXISTS personal_incidencia;
+DROP TABLE IF EXISTS incidencia;
 DROP TABLE IF EXISTS servicio_microservicio;
 DROP TABLE IF EXISTS microservicio;
 DROP TABLE IF EXISTS escala;
@@ -135,14 +141,13 @@ DROP TABLE IF EXISTS ubigeo;
 DROP TABLE IF EXISTS metodo_pago;
 DROP TABLE IF EXISTS personal;
 DROP TABLE IF EXISTS tipo_personal;
-DROP TABLE IF EXISTS servicio;
-DROP TABLE IF EXISTS tipo_servicio;
 DROP TABLE IF EXISTS tipo_comprobante;
 DROP TABLE IF EXISTS tipo_documento;
 DROP TABLE IF EXISTS nivel_herramienta;
 DROP TABLE IF EXISTS nivel;
 DROP TABLE IF EXISTS vehiculo;
 DROP TABLE IF EXISTS tipo_vehiculo;
+DROP TABLE IF EXISTS servicio;
 DROP TABLE IF EXISTS marca;
 DROP TABLE IF EXISTS ruta;
 DROP TABLE IF EXISTS ciudad;
@@ -164,6 +169,18 @@ CREATE TABLE pais(
     continente VARCHAR(255)
 );
 
+-- Crear tabla incidencia
+CREATE TABLE incidencia (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR (255) NOT NULL,
+    descripcion VARCHAR (255) NOT NULL,
+    duracion_sancion INT NOT NULL,
+    estado BIT NOT NULL,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(255) NOT NULL
+
+);
+
 -- Crear tabla tipo_servicio
 CREATE TABLE microservicio (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -176,11 +193,12 @@ CREATE TABLE microservicio (
 
 CREATE TABLE servicio (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(50) not null,
-    descripcion VARCHAR(255) not null,
+    nombre VARCHAR(50) NOT NULL,
+    descripcion VARCHAR(255) NOT NULL,
     estado BOOLEAN NOT NULL,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    usuario VARCHAR(100) not null
+    usuario VARCHAR(100) NOT NULL,
+    imagen TEXT
 );
 
 CREATE TABLE servicio_microservicio (
@@ -206,7 +224,7 @@ CREATE TABLE tipo_comprobante (
 CREATE TABLE tipo_herramienta(
 	id int AUTO_INCREMENT PRIMARY KEY,
     nombre varchar(50),
-    fecha_registro date DEFAULT CURRENT_DATE,
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     usuario varchar(100)
 );
 
@@ -392,7 +410,7 @@ CREATE TABLE conf_dmenus (
     idTipoUsuario INT,
     PRIMARY KEY (idMenu, idTipoUsuario),
     FOREIGN KEY (idMenu) REFERENCES conf_menus (id),
-    FOREIGN KEY (idTipoUsuario) REFERENCES usuarios (id)
+    FOREIGN KEY (idTipoUsuario) REFERENCES tipo_usuario (id)
 );
 
 -- Crear tabla claims
@@ -440,9 +458,13 @@ CREATE TABLE tipo_vehiculo (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL,
     id_marca INT NULL,
-    estado TINYINT NOT NULL,
+    id_servicio INT NOT NULL,
+    estado BOOLEAN NOT NULL,
     cantidad INT NOT NULL,
-    CONSTRAINT fk_tipo_vehiculo_marca FOREIGN KEY (id_marca) REFERENCES marca(id)
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL,
+    CONSTRAINT fk_tipo_vehiculo_marca FOREIGN KEY (id_marca) REFERENCES marca(id),
+    FOREIGN KEY (id_servicio) REFERENCES servicio(id)
 );
 
 CREATE TABLE vehiculo (
@@ -450,8 +472,10 @@ CREATE TABLE vehiculo (
     placa VARCHAR(10),
     anio INT,
     color VARCHAR(30),
-    estado TINYINT NOT NULL,
+    estado BOOLEAN NOT NULL,
     id_tipo_vehiculo INT NOT NULL,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL,
     FOREIGN KEY (id_tipo_vehiculo)
     REFERENCES tipo_vehiculo(id)
         ON DELETE CASCADE
@@ -464,7 +488,7 @@ CREATE TABLE nivel(
     id_tipo_vehiculo int not null,
     x_dimension int not null,
     y_dimension int not null,
-    estado TINYINT not null,
+    estado BOOLEAN not null,
     foreign key (id_tipo_vehiculo) references tipo_vehiculo(id)
 );
 -- Crear tabla tipo metodo pago
@@ -506,6 +530,20 @@ CREATE TABLE personal (
     FOREIGN KEY (id_tipopersonal) REFERENCES tipo_personal(id) -- Relación con tipo_personal
 );
 
+-- Crear tabla personal_incidencia
+CREATE TABLE personal_incidencia (
+    personalid INT NOT NULL,
+    incidenciaid INT NOT NULL,
+    descripcion VARCHAR(255) NOT NULL,
+    fecha_fin DATETIME NOT NULL,
+    estado BIT NOT NULL,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(255) NOT NULL,
+    PRIMARY KEY (personalid, incidenciaid),
+    FOREIGN KEY (personalid) REFERENCES personal(id),
+    FOREIGN KEY (incidenciaid) REFERENCES incidencia(id)
+);
+
 CREATE TABLE herramienta(
 	id INT AUTO_INCREMENT PRIMARY KEY,
     nombre varchar(60),
@@ -522,6 +560,30 @@ CREATE TABLE nivel_herramienta(
  
 );
 
+
+insert into servicio values (1,'Premium','Los autobuses más modernos y lujosos del mercado. Asientos cama, entretenimiento a bordo, snacks incluidos, aire acondicionado y cargadores USB. Ideal para viajes de largo trayecto.',1,'2025-05-25 19:30:00','Alexis','Static/img/servicios/busPremium.png');
+insert into servicio values (2,'Económico','Autobuses cómodos y seguros a precios accesibles. Pensado para usuarios que priorizan economía sin perder calidad.',1,'2025-05-25 19:32:00','Alexis','Static/img/servicios/busEconomico.png');
+insert into servicio values (3,'Exprés','Servicios rápidos con pocas paradas. Unidades modernas y seguras para viajeros que buscan llegar en el menor tiempo posible.',1,'2025-05-25 19:40:00','Alexis','Static/img/servicios/busExpress.png');
+
+-- INSERT MARCA
+
+INSERT INTO `marca` (`id`,`nombre`, `logo`, `estado`, `estado_proceso`, `estado_registro`, `fecha_registro`, `usuario`) 
+VALUES (1,'Mercedes-Benz', '/Static/img/marca/MercedesBenz.png', '1', 'REGISTRADO', '1', '2025-05-26 11:40:29', 'edgar@gmail.com'), 
+(2,'Dodge', '/Static/img/marca/Dodge.png', '1', 'REGISTRADO', '1', '2025-05-26 11:40:50', 'edgar@gmail.com'), 
+(3,'Volkswagen','/Static/img/marca/Volkswagen.png', '1', 'REGISTRADO', '1', '2025-05-26 11:41:09', 'edgar@gmail.com'), 
+(4,'Hyundai','/Static/img/marca/Hyundai.png', '1', 'REGISTRADO', '1', '2025-05-26 11:41:28', 'edgar@gmail.com');
+
+-- INSERT TIPO_VEHICULO
+INSERT INTO `tipo_vehiculo` (`id`, `nombre`, `id_marca`, `id_servicio`, `estado`, `cantidad`, `fecha_registro`, `usuario`) 
+VALUES (1, 'Solati H350', '4', '1', '1', '0', '2025-05-26 11:57:29', 'edgar@gmail.com'),
+(2, 'County bus', '4', '1', '1', '0', '2025-05-26 11:58:51', 'edgar@gmail.com'),
+(3, 'Volksbus', '3', '2', '1', '0', '2025-05-26 12:01:43', 'edgar@gmail.com'),
+(4, 'eCitaro fuel cell', '1', '1', '1', '0', '2025-05-26 12:04:08', 'edgar@gmail.com'),
+(5, 'eCitaro', '1', '2', '1', '0', '2025-05-26 12:04:42', 'edgar@gmail.com'),
+(6, 'Citaro', '1', '2', '1', '0', '2025-05-26 12:05:05', 'edgar@gmail.com'),
+(7, 'Citaro U', '1', '3', '1', '0', '2025-05-26 12:05:38', 'edgar@gmail.com'),
+(8, 'Intouro', '1', '3', '1', '0', '2025-05-26 12:05:50', 'edgar@gmail.com'),
+(9, 'Tourismo', '1', '3', '1', '0', '2025-05-26 12:08:52', 'edgar@gmail.com');
 
 -- INSERT TIPO_HERRAMIENTA  
 
@@ -797,35 +859,35 @@ INSERT INTO pais (id, nombre, name, iso2, iso3, phone_code, continente) VALUES (
 INSERT INTO pais (id, nombre, name, iso2, iso3, phone_code, continente) VALUES (246,'Zimbabue','Zimbabwe','ZW','ZWE','263','África');
 
 -- INSERTS IATA CIUDAD
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Arequipa','AQP');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Callao','LIM');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Chiclayo','CIX');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Cusco','CUZ');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Iquitos','IQT');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Juliaca','JUL');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Piura','PIU');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Pucallpa','PCL');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Puerto Maldonado','PEM');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Talara','TYL');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Tacna','TCQ');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Trujillo','TRU');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Andahuaylas','ANS');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Ayacucho','AYP');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Chimbote','CHM');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Huaraz','ATA');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Chachapoyas','CHH');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Cajamarca','CJA');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Jaén','JAE');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Huánuco','HUU');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Tingo María','TGI');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Pisco','PIO');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Jauja','JAU');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Mazamari','MZA');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Yurimaguas','YMS');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Ilo','ILQ');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Tarapoto','TPP');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Punta Sal','PTL');
-INSERT INTO CIUDAD (nombre, abreviatura) VALUES ('Tumbes','TBP');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Arequipa','AQP');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Callao','LIM');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Chiclayo','CIX');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Cusco','CUZ');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Iquitos','IQT');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Juliaca','JUL');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Piura','PIU');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Pucallpa','PCL');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Puerto Maldonado','PEM');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Talara','TYL');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Tacna','TCQ');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Trujillo','TRU');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Andahuaylas','ANS');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Ayacucho','AYP');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Chimbote','CHM');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Huaraz','ATA');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Chachapoyas','CHH');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Cajamarca','CJA');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Jaén','JAE');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Huánuco','HUU');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Tingo María','TGI');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Pisco','PIO');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Jauja','JAU');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Mazamari','MZA');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Yurimaguas','YMS');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Ilo','ILQ');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Tarapoto','TPP');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Punta Sal','PTL');
+INSERT INTO ciudad (nombre, abreviatura) VALUES ('Tumbes','TBP');
 
 -- Tabla Tipo Usuario
 INSERT INTO tipo_usuario (id,nombre, estado, estado_proceso,estado_registro,fecha_registro, usuario) VALUES (1,'ADMINISTRADOR', 1, 'REGISTRADO',1,'2025-03-06 20:02:56','SYSTEM');
@@ -1123,6 +1185,133 @@ INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (74,1);
 
 -- Tabla apariencia
 INSERT INTO conf_plantillas (id, nombre, color_header, color_footer, logo, estado, fecha_registro, usuario) VALUES (1, 'YATRAX', '#0c336e', '#000000', '/Static/img/plantillas/logo_yatusa.png', 1, '2025-03-06 20:06:14', 'SYSTEM');
+
+
+-- Crear procedimiento SP_REGISTRAR_INCIDENCIA
+DELIMITER $$
+CREATE PROCEDURE SP_REGISTRAR_INCIDENCIA(
+    IN P_NOMBRE VARCHAR(255),
+    IN P_DESCRIPCION VARCHAR(255),
+    IN P_DURACION_SANCION INT,
+    IN P_ESTADO BIT,
+    IN P_USUARIO VARCHAR(255)
+)
+BEGIN
+    DECLARE cNombre INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cNombre FROM incidencia where nombre = P_NOMBRE;
+
+    IF cNombre > 0 THEN
+        SET @MSJ2 = 'La incidencia que intenga registrar ya está registrada';
+    ELSE
+        INSERT INTO incidencia (nombre, descripcion, duracion_sancion, estado, usuario)
+        VALUES (P_NOMBRE, P_DESCRIPCION, P_DURACION_SANCION, P_ESTADO, P_USUARIO);
+
+        SET @MSJ = 'Incidencia registrada correctamente';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_EDITAR_INCIDENCIA
+
+DELIMITER $$
+CREATE PROCEDURE SP_EDITAR_INCIDENCIA(
+    IN P_ID INT,
+    IN P_NOMBRE VARCHAR(255),
+    IN P_DESCRIPCION VARCHAR(255),
+    IN P_DURACION_SANCION INT,
+    IN P_ESTADO BIT
+)
+BEGIN 
+    DECLARE cNombre INT;
+    DECLARE cID INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cID FROM incidencia WHERE id = P_ID;
+    SELECT COUNT(*) INTO cNombre FROM incidencia where nombre = P_NOMBRE;
+
+    IF cID <= 0 THEN
+        SET @MSJ2 = 'La incidencia que intenta editar no existe';
+    ELSEIF cNombre !=0 THEN
+        SET @MSJ2 = 'El nombre de incidencia ya existe';
+    ELSE
+        UPDATE incidencia SET nombre = P_NOMBRE, descripcion = P_DESCRIPCION, duracion_sancion = P_DURACION_SANCION, estado = P_ESTADO WHERE id =P_ID;
+        SET @MSJ = 'Se editó correctamente la incidencia';
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Crear procedimiento SP_DARBAJA_INCIDENCIA
+DELIMITER $$
+CREATE PROCEDURE SP_DARBAJA_INCIDENCIA(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cID INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT
+        ('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cID FROM incidencia WHERE id = P_ID;
+
+    IF cID <= 0 THEN
+        SET @MSJ2 = 'La incidencia que intenta dar de baja no existe';
+    ELSE
+        UPDATE incidencia SET estado = 0 where id = P_ID;
+        SET @MSJ = 'Se dio de baja correctamente la incidencia';
+    END IF;
+
+END $$
+
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_INCIDENCIA
+
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_INCIDENCIA(
+    P_ID INT
+)
+BEGIN
+    DECLARE cID INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cID FROM incidencia WHERE id = P_ID;
+
+    IF cID <= 0 THEN
+        SET @MSJ2 = 'La incidencia que intenta eliminar no existe';
+    ELSE
+        DELETE FROM incidencia where id = P_ID;
+        SET @MSJ = 'Se eliminó correctamente la incidencia';
+    END IF;
+
+END $$
+
+DELIMITER ;
 
 -- Crear procedimiento SP_REGISTRAR_USUARIO
 DELIMITER $$
@@ -2391,7 +2580,9 @@ CREATE PROCEDURE SP_INSERTAR_TIPOVEHICULO(
     IN  p_nombre     VARCHAR(50),
     IN  p_idMarca    INT,
     IN  p_cantidad   INT,
-    OUT MSJ          VARCHAR(255)
+    IN P_ESTADO BOOLEAN,
+    IN P_SERVICIO INT,
+    IN P_USUARIO VARCHAR(100)
 )
 BEGIN
     -- 1) Declaración de variables LO PRIMERO
@@ -2399,17 +2590,26 @@ BEGIN
     DECLARE v_nuevoTipo   INT DEFAULT 0;
     DECLARE v_i           INT DEFAULT 1;
 
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SET @MSJ2 = 'Error al ejecutar el procedimiento';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
     -- 2) Verificar si la marca existe
     SELECT COUNT(*) INTO v_existeMarca
       FROM marca
      WHERE id = p_idMarca;
 
     IF v_existeMarca = 0 THEN
-        SET MSJ = 'La marca no existe';
+        SET @MSJ2 = 'La marca ingresada no existe';
     ELSE
         -- 3) Inserto el nuevo tipo de vehículo
-        INSERT INTO tipo_vehiculo (nombre, id_marca, estado, cantidad)
-        VALUES (p_nombre, p_idMarca, 1, p_cantidad);
+        INSERT INTO tipo_vehiculo (nombre, id_marca, id_servicio, estado, cantidad, usuario)
+        VALUES (p_nombre, p_idMarca, P_SERVICIO, P_ESTADO, p_cantidad, P_USUARIO);
 
         -- 4) Capturo el ID recién generado
         SET v_nuevoTipo = LAST_INSERT_ID();
@@ -2421,18 +2621,20 @@ BEGIN
                 anio,
                 color,
                 estado,
-                id_tipo_vehiculo
+                id_tipo_vehiculo,
+                usuario
             ) VALUES (
                 NULL,       -- placa como NULL
                 NULL,       -- año
                 NULL,       -- color
                 1,          -- estado activo
-                v_nuevoTipo
+                v_nuevoTipo,
+                P_USUARIO
             );
             SET v_i = v_i + 1;
         END WHILE;
 
-        SET MSJ = CONCAT('Tipo de vehículo insertado y ', p_cantidad, ' vehículos creados');
+        SET @MSJ = CONCAT('Tipo de vehículo insertado y ', p_cantidad, ' vehículos creados');
     END IF;
 END$$
 
@@ -2442,6 +2644,8 @@ CREATE PROCEDURE SP_ACTUALIZAR_TIPOVEHICULO(
     IN  p_idMarca   INT,
     IN  p_estado    TINYINT,
     IN  p_cantidad  INT,
+    IN P_SERVICIO INT,
+    IN P_USUARIO VARCHAR(100),
     OUT p_MSJ       VARCHAR(255),
     OUT p_MSJ2      VARCHAR(255)
 )
@@ -2512,9 +2716,9 @@ BEGIN
             SET v_diff = p_cantidad - v_total;
             WHILE v_diff > 0 DO
                 INSERT INTO vehiculo(
-                    placa, anio, color, estado, id_tipo_vehiculo
+                    placa, anio, color, estado, id_tipo_vehiculo, usuario
                 ) VALUES (
-                    NULL, NULL, NULL, 1, p_id
+                    NULL, NULL, NULL, 1, p_id, P_USUARIO
                 );
                 SET v_diff = v_diff - 1;
             END WHILE;
@@ -2525,6 +2729,7 @@ BEGIN
             UPDATE tipo_vehiculo
                SET nombre   = p_nombre,
                    id_marca = p_idMarca,
+                   id_servicio = P_SERVICIO,
                    estado   = p_estado,
                    cantidad = p_cantidad
              WHERE id = p_id;
@@ -2792,18 +2997,14 @@ BEGIN
     SET @MSJ  = NULL;
     SET @MSJ2 = NULL;
 
-    SELECT nroPiso, id_vehiculo
-      INTO piso_actual, vehiculo_act
+    SELECT COUNT(*) INTO piso_actual
     FROM nivel
     WHERE id = p_idNivel;
 
-    SELECT MAX(nroPiso)
-      INTO max_piso
-    FROM nivel
-    WHERE id_vehiculo = vehiculo_act;
+    DELETE FROM nivel_herramienta WHERE id_nivel = p_idNivel;
 
-    IF piso_actual < max_piso THEN
-        SET @MSJ2 = 'Solo se puede eliminar el piso más alto para evitar inconsistencias';
+    IF piso_actual <= 0 THEN
+        SET @MSJ2 = 'Intenta eliminar un nivel que no existe';
     ELSE
         DELETE FROM nivel
         WHERE id = p_idNivel;
@@ -2820,7 +3021,9 @@ CREATE PROCEDURE SP_INSERTAR_VEHICULO(
     IN p_placa VARCHAR(10),
     IN p_anio INT,
     IN p_color VARCHAR(30),
-    IN p_idTipoVehiculo INT
+    IN p_idTipoVehiculo INT,
+    IN P_ESTADO BOOLEAN,
+    IN P_USUARIO VARCHAR(100)
 )
 BEGIN
     -- Variables de salida en user variables
@@ -2833,8 +3036,8 @@ BEGIN
     SET @MSJ  = NULL;
     SET @MSJ2 = NULL;
 
-    INSERT INTO vehiculo (placa, anio, color, estado, id_tipo_vehiculo)
-    VALUES (p_placa, p_anio, p_color, 1, p_idTipoVehiculo);
+    INSERT INTO vehiculo (placa, anio, color, estado, id_tipo_vehiculo, usuario)
+    VALUES (p_placa, p_anio, p_color, P_ESTADO, p_idTipoVehiculo, P_USUARIO);
 
     SET @MSJ  = 'Vehículo insertado correctamente';
 END$$
@@ -2846,7 +3049,7 @@ CREATE PROCEDURE SP_ACTUALIZAR_VEHICULO(
     IN p_anio            INT,
     IN p_color           VARCHAR(30),
     IN p_idTipoVehiculo  INT,
-    IN p_estado          TINYINT
+    IN p_estado          BOOLEAN
 )
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -3567,48 +3770,53 @@ BEGIN
 END $$
 DELIMITER ;
 
+
+-- Procedimientos almacenados de servicios
 DELIMITER $$
 
+-- SP: Insertar Servicio
 CREATE PROCEDURE SP_INSERTAR_SERVICIO(
     IN P_NOMBRE VARCHAR(50),
     IN P_DESCRIPCION VARCHAR(255),
     IN P_ESTADO BOOLEAN,
-    IN P_USUARIO VARCHAR(100)
+    IN P_USUARIO VARCHAR(100),
+    IN P_IMAGEN TEXT
 )
 BEGIN
     DECLARE existe_nombre INT;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
-        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
     END;
 
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
-    SELECT COUNT(*) INTO existe_nombre 
-      FROM servicio 
-     WHERE nombre = P_NOMBRE;
+    SELECT COUNT(*) INTO existe_nombre FROM servicio WHERE nombre = P_NOMBRE;
 
     IF existe_nombre = 0 THEN
-        INSERT INTO servicio (nombre, descripcion, estado, usuario)
-        VALUES (P_NOMBRE, P_DESCRIPCION, P_ESTADO, P_USUARIO);
+        INSERT INTO servicio (nombre, descripcion, estado, usuario, imagen)
+        VALUES (P_NOMBRE, P_DESCRIPCION, P_ESTADO, P_USUARIO, P_IMAGEN);
         SET @MSJ = 'Se registró correctamente el servicio';
     ELSE
         SET @MSJ2 = 'Ya existe un servicio con ese nombre registrado';
     END IF;
 END$$
 
+
+-- SP: Actualizar Servicio
 CREATE PROCEDURE SP_ACTUALIZAR_SERVICIO(
     IN P_ID INT,
     IN P_NOMBRE VARCHAR(50),
     IN P_DESCRIPCION VARCHAR(255),
-    IN P_ESTADO BOOLEAN
+    IN P_ESTADO BOOLEAN,
+    IN P_IMAGEN TEXT
 )
 BEGIN
     DECLARE existe_nombre INT;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
-        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
     END;
 
     SET @MSJ = NULL;
@@ -3618,10 +3826,11 @@ BEGIN
 
     IF existe_nombre = 0 THEN
         UPDATE servicio 
-           SET nombre         = P_NOMBRE,
-               descripcion    = P_DESCRIPCION,
-               estado         = P_ESTADO
-         WHERE id  = P_ID;
+        SET nombre = P_NOMBRE,
+            descripcion = P_DESCRIPCION,
+            estado = P_ESTADO,
+            imagen = P_IMAGEN
+        WHERE id = P_ID;
 
         SET @MSJ = 'Se modificó correctamente el servicio';
     ELSE
@@ -3629,6 +3838,8 @@ BEGIN
     END IF;
 END$$
 
+
+-- SP: Dar de Baja Servicio (actualiza estado a 0)
 CREATE PROCEDURE SP_BAJA_SERVICIO(
     IN P_ID INT
 )
@@ -3636,13 +3847,14 @@ BEGIN
     DECLARE existe INT;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
-        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
     END;
 
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
     SELECT COUNT(*) INTO existe FROM servicio WHERE ID = P_ID;
+
     IF existe <= 0 THEN
         SET @MSJ2 = 'El servicio al que intenta dar de baja no existe';
     ELSE
@@ -3654,6 +3866,8 @@ BEGIN
     END IF;
 END$$
 
+
+-- SP: Eliminar Servicio (delete físico + relación)
 CREATE PROCEDURE SP_DELETE_SERVICIO(
     IN P_ID INT
 )
@@ -3661,15 +3875,16 @@ BEGIN
     DECLARE existe INT;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
-        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
     END;
 
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
     SELECT COUNT(*) INTO existe FROM servicio WHERE ID = P_ID;
+
     IF existe <= 0 THEN
-        SET @MSJ2 = 'El servicio al que intenta dar de baja no existe';
+        SET @MSJ2 = 'El servicio al que intenta eliminar no existe';
     ELSE
         DELETE FROM servicio_microservicio WHERE idServicio = P_ID;
         DELETE FROM servicio WHERE ID = P_ID;

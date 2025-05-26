@@ -59,7 +59,7 @@ class Nivel:
                 conexion.cerrar()
 
     @classmethod
-    def insertar_nivel(cls, nroPiso, id_tipo_vehiculo,cantidad,x_dimension,y_dimension,estado,lista_herramientas):
+    def insertar_nivel(cls, nroPiso, id_tipo_vehiculo,x_dimension,y_dimension,estado,lista_herramientas):
         conexion = bd.Conexion()
         try:
             conexion.conn.begin()

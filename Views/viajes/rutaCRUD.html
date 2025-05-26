@@ -141,7 +141,6 @@
     let escalas = [];
     let markers = [];
     let escalasRecibidas = JSON.parse('{{ escalas | tojson }}');
-    console.log('{{ ruta | tojson }}');
 
     const iconoAzul = L.icon({
         iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',  // Icono estándar de Leaflet
@@ -249,37 +248,67 @@
         fetch('/trabajadores/viajes/GetData_SucursalesMapaRuta')
             .then(response => response.json())
             .then(sucursales => {
-                sucursales.forEach(sucursal => {
-                    if (sucursal.latitud && sucursal.longitud) {
-                        const popupContent = `
-                        <b>${sucursal.nombre}</b><br>
-                        <small>${sucursal.direccion || 'Sin dirección'}</small>
-                    `;
-                        // Para la funcionalidad VER
-                        let esVer = '{{ btnId }}' === 'btn_Aceptar' ? true : false;
+                let esVer = '{{ btnId }}' === 'btn_Aceptar';
+                const mapaSucursales = new Map();
+                const sucursalesAgregadas = new Set(); // 👈 Aquí guardamos los IDs agregados
 
-                        // Creamos el marcador con el icono negro inicial
+                sucursales.forEach(s => mapaSucursales.set(s.id, s));
+
+                // Si hay escalas recibidas, agregarlas al mapa en orden
+                if (escalasRecibidas.length > 0) {
+                    escalasRecibidas.forEach(escala => {
+                        const sucursal = mapaSucursales.get(escala.idSucursal);
+                        if (sucursal && sucursal.latitud && sucursal.longitud) {
+                            const popupContent = `
+                                <b>${sucursal.nombre}</b><br>
+                                <small>${sucursal.direccion || 'Sin dirección'}</small>
+                            `;
+
+                            const marker = L.marker([sucursal.latitud, sucursal.longitud], { icon: iconoNegro })
+                                .addTo(map)
+                                .bindPopup(popupContent);
+
+                            if (!esVer) {
+                                marker.on('click', function () {
+                                    fct_AgregarEscala(sucursal.id, sucursal.nombre, sucursal.latitud, sucursal.longitud, marker);
+                                });
+                            }
+
+                            fct_AgregarEscala(sucursal.id, sucursal.nombre, sucursal.latitud, sucursal.longitud, marker);
+
+                            // ✅ Marcamos esta sucursal como ya agregada
+                            sucursalesAgregadas.add(sucursal.id);
+                        }
+                    });
+                }
+
+                // Mostrar solo las sucursales que no fueron agregadas ya
+                sucursales.forEach(sucursal => {
+                    if (
+                        sucursal.latitud &&
+                        sucursal.longitud &&
+                        !sucursalesAgregadas.has(sucursal.id) // 👈 No mostrar duplicados
+                    ) {
+                        const popupContent = `
+                            <b>${sucursal.nombre}</b><br>
+                            <small>${sucursal.direccion || 'Sin dirección'}</small>
+                        `;
+
                         const marker = L.marker([sucursal.latitud, sucursal.longitud], { icon: iconoNegro })
                             .addTo(map)
                             .bindPopup(popupContent);
 
-                        // Al hacer click, agregamos la sucursal y cambiamos su color a azul
                         if (!esVer) {
                             marker.on('click', function () {
                                 fct_AgregarEscala(sucursal.id, sucursal.nombre, sucursal.latitud, sucursal.longitud, marker);
                             });
-                        }
-
-                        for (i = 0; i < escalasRecibidas.length; i++) {
-                            if (escalasRecibidas[i]['idSucursal'] === sucursal.id) {
-                                fct_AgregarEscala(sucursal.id, sucursal.nombre, sucursal.latitud, sucursal.longitud, marker);
-                            }
                         }
                     }
                 });
             })
             .catch(error => console.error('Error al cargar sucursales:', error));
     }
+
 
     function fct_AgregarEscala(id, nombre, latitud, longitud, marker) {
         const existeSucursal = escalas.some(escala => escala.id === id);
@@ -300,9 +329,9 @@
             <td class="text-center style="width: 100px;"">${nroOrden}</td>
             <td class="text-left">${nombre}</td>
             <td class="text-center">
-                <button class="btn btn-primary btn-sm" onclick="moverEscala(${id}, 'subir') {% if btnId == 'btn_Aceptar' %}disabled{% endif %}">↑</button>
-                <button class="btn btn-primary btn-sm" onclick="moverEscala(${id}, 'bajar') {% if btnId == 'btn_Aceptar' %}disabled{% endif %}">↓</button>
-                <button class="btn btn-danger btn-sm" onclick="eliminarEscala(${id}) {% if btnId == 'btn_Aceptar' %}disabled{% endif %}">Eliminar</button>
+                <button class="btn btn-primary btn-sm {% if btnId == 'btn_Aceptar' %}disabled{% endif %}" onclick="moverEscala(${id}, 'subir') {% if btnId == 'btn_Aceptar' %}disabled{% endif %}">↑</button>
+                <button class="btn btn-primary btn-sm {% if btnId == 'btn_Aceptar' %}disabled{% endif %}" onclick="moverEscala(${id}, 'bajar') {% if btnId == 'btn_Aceptar' %}disabled{% endif %}">↓</button>
+                <button class="btn btn-danger btn-sm {% if btnId == 'btn_Aceptar' %}disabled{% endif %}" onclick="eliminarEscala(${id}) {% if btnId == 'btn_Aceptar' %}disabled{% endif %}">Eliminar</button>
             </td>
         </tr>
     `;

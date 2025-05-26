@@ -162,8 +162,9 @@
 
 
     let herramientaSeleccionada = null;
-    const list_herramientas = {{ herramientas | tojson }};
+    const list_herramientas = JSON.parse('{{ herramientas | tojson }}');
     $(document).ready(() => {
+        
         fct_Vehiculos()
 
         // Volver al listado
@@ -182,9 +183,8 @@
         $('#btn_Siguiente').click(function () {
             const piso = $('#txt_nroPiso').val();
             const tipo = $('#cbx_TipoVehiculo').val();
-            const cantidad = $('#txt_cantidad').val();
 
-            if (!piso || !tipo || !cantidad) {
+            if (!piso || !tipo) {
                 toastr.error("Complete todos los campos antes de continuar", "Error");
                 return;
             }
@@ -200,17 +200,13 @@
                     return;
                 }
 
-                let maxX = 0;
-                let maxY = 0;
-                herramientas.forEach(h => {
-                    if (h.x > maxX) maxX = h.x;
-                    if (h.y > maxY) maxY = h.y;
-                });
+                let maxX = 15;
+                let maxY = 6;
+                
 
                 const datos = {
                     nroPiso: $('#txt_nroPiso').val(),
                     id_tipo_vehiculo: $('#cbx_TipoVehiculo').val(),
-                    cantidad: $('#txt_cantidad').val(),
                     x_dimension: maxX,
                     y_dimension: maxY,
                     estado: $('#txt_estado').val(),
@@ -223,7 +219,6 @@
                     contentType: "application/json",
                     data: JSON.stringify(datos),
                     success: function (response) {
-                        console.log("Respuesta del servidor:", response);
                         if (response.Status === "success") {
                             toastr.success("Se ha registrado el nivel correctamente", "Éxito");
                             window.location.href = "/trabajadores/viajes/GestionarNivel";
@@ -326,7 +321,6 @@
                 let items = '<option disabled>--SELECCIONAR--</option>';
 
                 $.each(response.data, function (index, item) {
-                    console.log(Number("{{ nivel.id_tipo_vehiculo }}"));
                     if (item.id === Number("{{ nivel.id_tipo_vehiculo }}")) {
                         items += `<option selected value="${item.id}">${item.nombre}</option>`;
                     } else {

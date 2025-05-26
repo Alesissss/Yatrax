@@ -1,5 +1,6 @@
 import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort, json
+from werkzeug.utils import secure_filename
 from Models.tipoCliente import TipoCliente
 from Models.microservicio import MicroServicio
 from Models.servicio import Servicio
@@ -446,13 +447,12 @@ def get_servicios():
             'Status': 'error',
             'Msj': f'Ocurrió un error al listar los servicios: {repr(e)}'
         })
-    
+
 @ventas_bp.route("/Get_Microservicios_Servicio", methods=["GET"])
 def get_microserviicos_servicio():
     try:
         microservicios = MicroServicio.obtener_todos()
         result = [m for m in microservicios if (m.get('estado') == 1)]
-
         return jsonify({'data': result, 'Status': 'success', 'Msj': 'Listado de microservicios retornado exitosamente'})
     except Exception as e:
         return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar microservicios: {repr(e)}'})
@@ -474,14 +474,19 @@ def nuevo_servicio():
             nombre = request.form.get('nombre').strip()
             descripcion = request.form.get('descripcion').strip()
             estado = request.form.get('estado')
-
             microservicios_json = request.form.get("microservicios")
-
             microservicios = json.loads(microservicios_json) if microservicios_json else []
-
             usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
 
-            mensajes = Servicio.registrar(nombre, descripcion, estado, usuario_actual, microservicios)
+            imagen_file = request.files.get('imagen')
+            imagen_path = ''
+            if imagen_file and imagen_file.filename:
+                nombre_archivo = secure_filename(imagen_file.filename)
+                ruta_guardado = os.path.join("Static/img/servicios/", nombre_archivo)
+                imagen_file.save(ruta_guardado)
+                imagen_path = ruta_guardado
+
+            mensajes = Servicio.registrar(nombre, descripcion, estado, usuario_actual, imagen_path, microservicios)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
@@ -527,14 +532,22 @@ def editar_servicio(idServicio):
             nombre = request.form.get('nombre').strip()
             descripcion = request.form.get('descripcion').strip()
             estado = request.form.get('estado')
-
             microservicios_json = request.form.get("microservicios")
-
             microservicios = json.loads(microservicios_json) if microservicios_json else []
-
             usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
 
-            mensajes = Servicio.editar(idServicio, nombre, descripcion, estado, usuario_actual, microservicios)
+            imagen_file = request.files.get('imagen')
+            imagen_path = ''
+            if imagen_file and imagen_file.filename:
+                nombre_archivo = secure_filename(imagen_file.filename)
+                ruta_guardado = os.path.join("Static/img/servicios/", nombre_archivo)
+                imagen_file.save(ruta_guardado)
+                imagen_path = ruta_guardado
+            else:
+                servicio = Servicio.obtener_uno(idServicio)
+                imagen_path = servicio.get("imagen", "")
+
+            mensajes = Servicio.editar(idServicio, nombre, descripcion, estado, imagen_path, usuario_actual, microservicios)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
@@ -544,7 +557,6 @@ def editar_servicio(idServicio):
                 return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
             else:
                 return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar el servicio'})
-
         except Exception as e:
             return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
@@ -570,7 +582,7 @@ def eliminar_servicio(idServicio):
         mensajes = Servicio.eliminar(idServicio)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
-        
+
         if msj1:
             return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
         elif msj2:
