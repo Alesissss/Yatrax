@@ -24,23 +24,31 @@
                                 <option value="0" {% if metodo_pago.estado == 0 %}selected{% endif %}>Inactivo</option>
                             </select>
                         </div>
+                        <div class="col-md-12 mb-3">
+                            <label for="cbx_TipoMetodoPago">Tipo de método de pago</label>
+                            <div class="input-group">
+                                <select id="cbx_TipoMetodoPago" {% if ver %}disabled{% endif %} class="form-control" name="tipo_pago" {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
+                                </select>
+                            </div>
+                        </div>
+
+
+                        <!-- LOGO -->
                         <div class="mb-3">
                             <label for="txt_Logo">Logo</label>
                             <div class="col-12 text-left">
-                                <label class="btn btn-warning {% if btnId == 'btn_Aceptar' %}disabled{% endif %}" for="file_Imagen">
+                                <label class="btn btn-warning {% if btnId == 'btn_Aceptar' %}disabled{% endif %}" for="file_Logo">
                                     <i class="bi bi-file-earmark-arrow-up-fill"></i> Subir archivo
                                 </label>
-                                <input type="file" class="d-none" id="file_Imagen" name="logo" accept=".jpg, .jpeg, .png" {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
-                                <span id="checkIcon" class="d-none text-success ml-2">
+                                <input type="file" class="d-none" id="file_Logo" name="logo" accept=".jpg, .jpeg, .png" {% if ver %}disabled{% endif %} {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
+                                <span id="checkIconLogo" class="d-none text-success ml-2">
                                     <i class="bi bi-check-circle-fill"></i> Archivo subido
                                 </span>
                             </div>
-                            <!-- Vista previa de la imagen seleccionada -->
                             <div id="logoPreview" class="mt-3" style="display: none;">
                                 <label>Vista previa:</label>
                                 <img id="logoPreviewImage" class="img-thumbnail" style="width: 100px;">
                             </div>
-
                             {% if metodo_pago.logo %}
                                 <div class="mt-3">
                                     <label>Logo actual:</label>
@@ -48,6 +56,31 @@
                                 </div>
                             {% endif %}
                         </div>
+
+                        <!-- QR -->
+                        <div class="mb-3">
+                            <label for="txt_QR">QR</label>
+                            <div class="col-12 text-left">
+                                <label class="btn btn-warning {% if btnId == 'btn_Aceptar' %}disabled{% endif %}" for="file_QR">
+                                    <i class="bi bi-file-earmark-arrow-up-fill"></i> Subir archivo
+                                </label>
+                                <input type="file" class="d-none" id="file_QR" name="qr" accept=".jpg, .jpeg, .png" {% if ver %}disabled{% endif %} {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
+                                <span id="checkIconQR" class="d-none text-success ml-2">
+                                    <i class="bi bi-check-circle-fill"></i> Archivo subido
+                                </span>
+                            </div>
+                            <div id="qrPreview" class="mt-3" style="display: none;">
+                                <label>Vista previa:</label>
+                                <img id="qrPreviewImage" class="img-thumbnail" style="width: 100px;">
+                            </div>
+                            {% if metodo_pago.qr %}
+                                <div class="mt-3">
+                                    <label>QR actual:</label>
+                                    <img src="{{ metodo_pago.qr }}" class="img-thumbnail mt-2" style="width: 100px;">
+                                </div>
+                            {% endif %}
+                        </div>
+
                         <div class="text-center">
                             <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de métodos de pago</button>
                             {% if ver %}
@@ -69,6 +102,7 @@
 {% block scripts %}
 <script>
     $(document).ready(function () {
+        fct_GetTiposMetodoPago();
         // Volver al listado de métodos de pago
         $("#btn_Volver").click(function () {
             window.location.href = '/trabajadores/configuracion/GestionarMetodosPago';
@@ -76,41 +110,65 @@
 
         // Validaciones al enviar el formulario
         $("#formMetodoPago").submit(function (e) {
-            e.preventDefault(); // Evitar el envío del formulario por defecto
-
-            // Obtener los valores de los campos
+            e.preventDefault();
             var nombre = $("#txt_Nombre").val().trim();
 
-            // Validaciones de campos
             if (!nombre) {
                 toastr.warning("El nombre es obligatorio", "MENSAJE DE SISTEMA");
                 return;
             }
 
-            // Si todo está bien, se envía el formulario
-            $(this).unbind("submit").submit(); // Permite que se envíe el formulario
+            $(this).unbind("submit").submit();
         });
 
-        // Mostrar la vista previa del logo seleccionado
-        $('#file_Imagen').on('change', function () {
+        // LOGO Preview
+        $('#file_Logo').on('change', function () {
             if (this.files.length > 0) {
-                // Mostrar el icono de "Archivo subido"
-                $('#checkIcon').removeClass('d-none');
-
-                // Mostrar la vista previa de la imagen
+                $('#checkIconLogo').removeClass('d-none');
                 var reader = new FileReader();
                 reader.onload = function (e) {
-                    $('#logoPreview').show();  // Mostrar la vista previa
-                    $('#logoPreviewImage').attr('src', e.target.result);  // Establecer la imagen en la vista previa
+                    $('#logoPreview').show();
+                    $('#logoPreviewImage').attr('src', e.target.result);
                 };
-
-                reader.readAsDataURL(this.files[0]);  // Leer el archivo como una URL de datos
+                reader.readAsDataURL(this.files[0]);
             } else {
-                // Ocultar el icono y la vista previa si no hay archivo seleccionado
-                $('#checkIcon').addClass('d-none');
+                $('#checkIconLogo').addClass('d-none');
                 $('#logoPreview').hide();
             }
         });
+
+        // QR Preview
+        $('#file_QR').on('change', function () {
+            if (this.files.length > 0) {
+                $('#checkIconQR').removeClass('d-none');
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#qrPreview').show();
+                    $('#qrPreviewImage').attr('src', e.target.result);
+                };
+                reader.readAsDataURL(this.files[0]);
+            } else {
+                $('#checkIconQR').addClass('d-none');
+                $('#qrPreview').hide();
+            }
+        });
     });
+
+    function fct_GetTiposMetodoPago() {
+        $.getJSON('/trabajadores/configuracion/GetData_TipoMetodoPago', function (response) {
+            if (response.Status === 'success') {
+                let items = '<option disabled>--SELECCIONAR--</option>';
+
+                $.each(response.data, function (index, item) {
+                    const selected = item.ID === Number("{{ metodo_pago.id_tipo_metodoPago if metodo_pago else 0 }}") ? 'selected' : '';
+                    items += `<option ${selected} value="${item.ID}">${item.NOMBRE}</option>`;
+                });
+
+                $('#cbx_TipoMetodoPago').html(items);
+            } else {
+                toastr.error('Error al obtener los tipos de método de pago', response.Msj);
+            }
+        });
+    }
 </script>
 {% endblock %}
