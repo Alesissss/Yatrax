@@ -35,7 +35,7 @@ class Ruta:
     def obtener_escalas_por_ruta(cls, ruta_id):
         conexion = bd.Conexion()
         try:
-            escalas = conexion.obtener(""" SELECT id, nro_orden, idSucursal, idRuta from escala WHERE idRuta = %s""", (ruta_id,))
+            escalas = conexion.obtener(""" SELECT id, nro_orden, idSucursal, idRuta from escala WHERE idRuta = %s ORDER BY nro_orden""", (ruta_id,))
             return escalas
         finally:
             conexion.cerrar()
@@ -45,7 +45,7 @@ class Ruta:
     def registrar(cls, nombre, estado, tipo, escalas, usuario):
         try:
             conexion = bd.Conexion()
-            
+
             # Llamar al procedimiento almacenado
             conexion.ejecutar("CALL SP_REGISTRAR_RUTA(%s, %s, %s, %s);", (nombre, estado, tipo, usuario), auto_commit=False)
 
@@ -59,7 +59,7 @@ class Ruta:
 
             # Insertar las escalas
             for escala in escalas:
-                conexion.ejecutar("INSERT INTO escala (nro_orden, idSucursal, idRuta, usuario) VALUES (%s, %s, %s, %s)", 
+                conexion.ejecutar("INSERT INTO escala (nro_orden, idSucursal, idRuta, usuario) VALUES (%s, %s, %s, %s)",
                                 (escala['nroOrden'], escala['id'], idRuta, usuario), auto_commit=False)
 
             # Si todo es correcto, confirmamos la transacción
@@ -89,7 +89,7 @@ class Ruta:
 
             if msj2:  # Si hay un mensaje de error en msj2
                 raise Exception('Error al editar ruta: ' + msj2)
-            
+
             escalas_actuales = conexion.obtener(""" SELECT id, nro_orden, idSucursal, idRuta from escala WHERE idRuta = %s""", (id,))
 
             # Borrar las escalas que existen actualmente
@@ -97,7 +97,7 @@ class Ruta:
 
             # Insertar las escalas
             for escala in escalas:
-                conexion.ejecutar("INSERT INTO escala (nro_orden, idSucursal, idRuta, usuario) VALUES (%s, %s, %s, %s)", 
+                conexion.ejecutar("INSERT INTO escala (nro_orden, idSucursal, idRuta, usuario) VALUES (%s, %s, %s, %s)",
                                 (escala['nroOrden'], escala['id'], id, usuario), auto_commit=False)
 
             # Si todo es correcto, confirmamos la transacción
@@ -112,7 +112,7 @@ class Ruta:
         finally:
             # Cerramos la conexión
             conexion.cerrar()
-    
+
     #ELIMINAR
     @classmethod
     def eliminar(cls, id):
@@ -127,7 +127,7 @@ class Ruta:
             return resultado[0]  # Retorna un diccionario con los mensajes
         finally:
             conexion.cerrar()
-    
+
     #DAR DE BAJA
     @classmethod
     def darBaja(cls, id):
