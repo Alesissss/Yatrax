@@ -9,11 +9,11 @@ from Models.horario import Horario
 from Models.ubigeo import Ubigeo
 from Models.marca import Marca
 from Models.ruta import Ruta
-from Models.cliente import Cliente
 from werkzeug.utils import secure_filename
 from Models.asiento import Asiento
 from Models.tipo_herramienta import TipoHerramienta
 from Models.herramienta import Herramienta
+from Models.servicio import Servicio
 
 viajes_bp = Blueprint('viajes', __name__, url_prefix='/trabajadores/viajes')
 
@@ -257,6 +257,27 @@ def eliminar_nivel(idNivel):
 
 # REGION TIPO VEHICULO
 
+@viajes_bp.route("/GetMarcasTipoVehiculo", methods=['GET'])
+def get_tipovehiculo_marcas():
+    try:
+        marcas = Marca.obtener_todos()
+        result = [{'id': tu['id'], 'nombre': tu['nombre']} for tu in marcas if tu['estado'] == 1]
+
+        return jsonify({"Status": "success", "data": result, "Msj": "Listado de marcas retornado exitosamente"})
+    except Exception as e:
+        return jsonify({"Status": "error", "data": [], "Msj": f"Error al obtener las marcas: {repr(e)}"})
+    
+@viajes_bp.route("/GetServiciosTipoVehiculo", methods=['GET'])
+def get_tipovehiculo_servicios():
+    try:
+        servicios = Servicio.obtener_todos()
+        result = [{'id': tu['id'], 'nombre': tu['nombre']} for tu in servicios if tu['estado'] == 1]
+
+        return jsonify({"Status": "success", "data": result, "Msj": "Listado de servicios retornado exitosamente"})
+    except Exception as e:
+        return jsonify({"Status": "error", "data": [], "Msj": f"Error al obtener las marcas: {repr(e)}"})
+
+
 @viajes_bp.route("/GetData_TipoVehiculo", methods=["GET"])
 def get_tipoVehiculo():
     try:
@@ -278,11 +299,15 @@ def nuevoTipoVehiculo():
         )
     else:
         try:
-            nombre= request.form["txt_nombre"]
-            marca = request.form["txt_marca"]
-            cantidad = request.form["txt_cantidad"]
+            nombre = request.form.get("nombre")
+            marca = request.form.get("marca")
+            cantidad = request.form.get("cantidad")
+            estado = request.form.get("estado")
+            servicio = request.form.get("servicio")
 
-            mensajes = TipoVehiculo.insertarTipoVehiculo(nombre,marca,cantidad)
+            usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO')
+
+            mensajes = TipoVehiculo.insertarTipoVehiculo(nombre,marca,cantidad,estado,servicio,usuario_actual)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
@@ -313,16 +338,23 @@ def editarTipoVehiculo(idTipoVehiculo):
             "viajes/tipoVehiculoCRUD.html",
             tittle="Editar tipo de vehículo",
             tipoVehiculo = TipoVehiculo.obtenerUno(idTipoVehiculo),
-            btnId="btn_Actualizar"
+            btnId="btn_Actualizar",
+            active_page="tipoVehiculo", 
+            active_menu='mViajes'
         )
     else:
         try:
-            nombre= request.form["txt_nombre"]
-            marca = request.form["txt_marca"]
-            cantidad = request.form["txt_cantidad"]
-            estado = int(request.form["txt_estado"])
+            nombre = request.form.get("nombre")
+            marca = request.form.get("marca")
+            cantidad = request.form.get("cantidad")
+            estado = int(request.form.get("estado"))
+            servicio = request.form.get("servicio")
 
-            mensajes = TipoVehiculo.actualizarTipoVehiculo(idTipoVehiculo,nombre,marca,estado,cantidad)
+            usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO')
+
+
+            print(idTipoVehiculo)
+            mensajes = TipoVehiculo.actualizarTipoVehiculo(idTipoVehiculo,nombre,marca,estado,cantidad,servicio,usuario_actual)
 
             msj1 = mensajes.get('MSJ')
             msj2 = mensajes.get('MSJ2')
@@ -332,7 +364,7 @@ def editarTipoVehiculo(idTipoVehiculo):
             elif msj2:
                 return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
             else:
-                return jsonify({"Status": "error", 'Msj': 'Error desconocido al insertar tipo vehiculo'})
+                return jsonify({"Status": "error", 'Msj': 'Error desconocido al actualizar tipo vehiculo'})
 
         except Exception as e:
             return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
@@ -349,7 +381,7 @@ def darBajaTipoVehiculo(idTipVehiculo):
         elif msj2:
             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
         else:
-            return jsonify({"Status": "error", 'Msj': 'Error desconocido al insertar tipo vehiculo'})
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja tipo vehiculo'})
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
@@ -365,7 +397,7 @@ def eliminarTipoVehiculo(idTipoVehiculo):
         elif msj2:
             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
         else:
-            return jsonify({"Status": "error", 'Msj': 'Error desconocido al insertar tipo vehiculo'})
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al eliminar tipo vehiculo'})
         
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
@@ -373,14 +405,6 @@ def eliminarTipoVehiculo(idTipoVehiculo):
 # END REGION TIPO VEHICULO
 
 # REGION VEHICULO
-@viajes_bp.route("/GetData_Clientes")
-def get_clientes():
-    try:
-        clientes = Cliente.obtener_todos()
-        return jsonify({'data': clientes, 'Status': 'success', 'Msj': 'Listado de vehículos retornado exitosamente'})
-    except Exception as e:
-        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar los vehículos: {repr(e)}'})
-    
 @viajes_bp.route("/GetData_Vehiculo")
 def get_vehiculos():
     try:
@@ -408,7 +432,9 @@ def nuevoVehiculo():
             color = request.form['txt_color']
             idTipoVehiculo = int(request.form['txt_idTipoVehiculo'])
 
-            mensajes = Vehiculo.insertarVehiculo(placa, anio, color, idTipoVehiculo)
+            usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO')
+
+            mensajes = Vehiculo.insertarVehiculo(placa, anio, color, idTipoVehiculo, usuario_actual)
             msj1 = mensajes.get('MSJ') or mensajes.get('@MSJ')
             msj2 = mensajes.get('MSJ2') or mensajes.get('@MSJ2')
 

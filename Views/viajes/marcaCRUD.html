@@ -20,8 +20,8 @@
                         <div class="mb-3">
                             <label for="txt_Estado">Estado</label>
                             <select id="txt_Estado" name="estado" class="form-control" {% if ver %}disabled{% endif %}>
-                                <option value="1" {% if marca.estado == 1 %}selected{% endif %}>Activo</option>
-                                <option value="0" {% if marca.estado == 0 %}selected{% endif %}>Inactivo</option>
+                                <option value="1" {% if marca.estado == 1 %}selected{% endif %}>Vigente</option>
+                                <option value="0" {% if marca.estado == 0 %}selected{% endif %}>No vigente</option>
                             </select>
                         </div>
                         <div class="mb-3">

@@ -17,6 +17,7 @@ endblock %} {% block content %}
               <th class="text-center">ID</th>
               <th class="text-center">NOMBRE</th>
               <th class="text-center">MARCA</th>
+              <th class="text-center">SERVICIO</th>
               <th class="text-center">CANTIDAD</th>
               <th class="text-center">ESTADO</th>
               <th class="text-center">ACCIÓN</th>
@@ -201,7 +202,8 @@ endblock %} {% block content %}
       columns: [
         { data: "id", name: "id" },
         { data: "nombre", name: "nombre" },
-        { data: "marca", name: "Marca" },
+        { data: "marca", name: "marca" },
+        { data: "servicio", name: "servicio" },
         { data: "cantidad", name: "cantidad" },
         { 
           data: "estado", 
@@ -239,11 +241,11 @@ endblock %} {% block content %}
           className: "text-center align-middle",
         },
         {
-          targets: [1, 2, 3, 4],
+          targets: [1, 2, 3, 4, 5],
           className: "align-middle",
         },
         {
-          targets: [5],
+          targets: [6],
           orderable: false,
           width: "15%",
         },
