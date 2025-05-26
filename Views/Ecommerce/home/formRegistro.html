@@ -2,118 +2,99 @@
 {% block titulo %}YATRAX - Registro{% endblock %}
 {% block contenido %}
 <style>
-    /* Contenedor principal con posición relativa */
+
     .ytrx-register-back {
-        background: linear-gradient(135deg, #1e88e5, #0d47a1);
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         display: flex;
         justify-content: center;
         align-items: center;
         min-height: 100vh;
         padding: 20px;
-        box-sizing: border-box;
-        position: relative;
     }
 
-    /* Contenedor del formulario con margen superior fijo */
     .ytrx-register-container {
-        background-color: white;
-        border-radius: 30px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        margin-top: 100px;
+        background: #ffffff;
+        padding: 40px 30px;
+        border-radius: 12px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.08);
+        max-width: 500px;
         width: 100%;
-        max-width: 600px;
-        padding: 40px;
-        margin: 80px auto 40px;
-        /* Margen superior fijo para el navbar */
-        position: relative;
     }
 
-    /* Títulos */
     .ytrx-register-title {
-        color: #333;
-        margin-bottom: 20px;
         font-size: 28px;
-        text-align: center;
         font-weight: 600;
+        text-align: center;
+        margin-bottom: 10px;
+        color: #333;
     }
 
     .ytrx-register-subtitle {
-        color: #666;
-        margin-bottom: 30px;
-        line-height: 1.6;
-        font-size: 16px;
+        font-size: 14px;
         text-align: center;
+        color: #777;
+        margin-bottom: 30px;
     }
 
-    /* Grupos de input */
     .ytrx-input-group {
-        position: relative;
-        margin-bottom: 20px;
+        margin-bottom: 18px;
+        width: 100%;
     }
 
-    /* Campos de formulario */
-    .ytrx-form-input {
+    .ytrx-form-input,
+    select {
         width: 100%;
-        padding: 15px 15px 15px 10px;
+        padding: 12px 14px;
         border: 1px solid #ddd;
         border-radius: 8px;
-        font-size: 16px;
+        font-size: 14px;
+        background-color: #fff;
+        color: #333;
+        transition: border-color 0.3s ease;
+    }
+
+    .ytrx-form-input:focus,
+    select:focus {
         outline: none;
-        transition: border-color 0.3s;
+        border-color: #1e88e5;
+        box-shadow: 0 0 0 2px rgba(30, 136, 229, 0.2);
     }
 
-    .ytrx-form-input:focus {
-        border-color: #1976d2;
-    }
-
-    /* Contenedor de documento */
-    .ytrx-doc-container {
+    .row {
         display: flex;
-        gap: 10px;
+        gap: 12px;
     }
 
-    #ytrx-doc-type {
-        width: 30%;
-        padding: 15px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        font-size: 16px;
-        outline: none;
+    .col {
+        flex: 1;
     }
 
-    #ytrx-doc-number {
-        width: 70%
-    }
-
-    /* Botón de submit */
     .ytrx-submit-btn {
-        background-color: #1976d2;
-        color: white;
-        border: none;
-        padding: 15px;
-        border-radius: 8px;
-        font-size: 16px;
-        cursor: pointer;
-        transition: all 0.3s;
         width: 100%;
-        margin-top: 10px;
+        padding: 12px;
+        background-color: #1e88e5;
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-weight: 500;
+        font-size: 15px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
     }
 
     .ytrx-submit-btn:hover {
-        background-color: #1565c0;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        background-color: #1669c1;
     }
 
-    /* Enlace de login */
     .ytrx-login-link {
         text-align: center;
-        margin-top: 20px;
-        color: #666;
+        margin-top: 25px;
+        font-size: 14px;
+        color: #555;
     }
 
     .ytrx-login-link a {
-        color: #1976d2;
+        color: #1e88e5;
         text-decoration: none;
         font-weight: 500;
     }
@@ -122,12 +103,23 @@
         text-decoration: underline;
     }
 
-    /* Ajustes para móviles */
-    @media (max-width: 768px) {
-        .ytrx-register-container {
-            padding: 30px;
-            margin: 60px auto 20px;
-        }
+    .social-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 10px;
+    }
+
+    .social-buttons button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        transition: transform 0.2s ease;
+    }
+
+    .social-buttons button:hover {
+        transform: scale(1.1);
     }
 </style>
 
@@ -137,28 +129,52 @@
         <p class="ytrx-register-subtitle">Únete a nuestra comunidad y disfruta de todos los beneficios</p>
 
         <form id="ytrx-register-form">
-            <!-- Nombre completo -->
-            <div class="ytrx-input-group">
-                <input type="text" id="ytrx-fullname" class="ytrx-form-input" placeholder="Nombre y Apellidos" required>
+            <!-- Tipo de documento y número -->
+            <div class="ytrx-input-group row">
+                <div class="col">
+                    <select id="tipo-doc" name="tipo-doc" required>
+                        <option value="" disabled selected>Tipo</option>
+                        {% for tipo in TipoDocumento %}
+                            <option value="{{ tipo.abreviatura }}">{{ tipo.abreviatura }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col">
+                    <input type="text" id="ytrx-doc-number" class="ytrx-form-input" placeholder="Número de documento" required>
+                </div>
             </div>
 
-            <div class="ytrx-input-group">
-                <input type="date" id="ytrx-birthdate" class="ytrx-form-input" placeholder="Fecha de nacimiento"
-                    required>
+            <!-- Nombre o razón social -->
+            <div class="ytrx-input-group" id="grupo-nombres">
+                <input type="text" id="ytrx-fullname" class="ytrx-form-input" placeholder="Nombres" required>
+            </div>
+            <div class="ytrx-input-group" id="grupo-razon-social" style="display: none;">
+                <input type="text" id="ytrx-razon-social" class="ytrx-form-input" placeholder="Razón social">
             </div>
 
+            <!-- Apellidos -->
+            <div class="row" id="grupo-apellidos">
+                <div class="ytrx-input-group col">
+                    <input type="text" id="ytrx-lastname-father" class="ytrx-form-input" placeholder="Apellido Paterno">
+                </div>
+                <div class="ytrx-input-group col">
+                    <input type="text" id="ytrx-lastname-mother" class="ytrx-form-input" placeholder="Apellido Materno">
+                </div>
+            </div>
 
-            <!-- Documento -->
-            <div class="ytrx-input-group ytrx-doc-container">
-                <select id="ytrx-doc-type" required>
-                    <option value="" disabled selected>Tipo</option>
-                    <option value="dni">DNI</option>
-                    <option value="ce">CE</option>
-                    <option value="pasaporte">Pasaporte</option>
-                </select>
-                <div style="position: relative; width: 70%;">
-                    <input type="text" id="ytrx-doc-number" class="ytrx-form-input" style="width: 100%;" placeholder="Número de documento"
-                        required>
+            <!-- Fecha nacimiento -->
+            <div class="ytrx-input-group" id="grupo-fecha-nacimiento">
+                <input type="date" id="ytrx-birthdate" class="ytrx-form-input">
+            </div>
+
+            <!-- Sexo -->
+            <div class="row" id="grupo-sexo">
+                <div class="ytrx-input-group col">
+                    <select id="ytrx-gender">
+                        <option value="" disabled selected>Sexo</option>
+                        <option value="M">Masculino</option>
+                        <option value="F">Femenino</option>
+                    </select>
                 </div>
             </div>
 
@@ -167,7 +183,22 @@
                 <input type="tel" id="ytrx-phone" class="ytrx-form-input" placeholder="Número de teléfono" required>
             </div>
 
-            <!-- Email -->
+            <!-- País -->
+            <div class="ytrx-input-group">
+                <select id="ytrx-country" required>
+                    <option value="" disabled selected>País</option>
+                    {% for pais in Paises %}
+                            <option value="{{ pais.id }}">{{ pais.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Dirección -->
+            <div class="ytrx-input-group">
+                <input type="text" id="ytrx-address" class="ytrx-form-input" placeholder="Dirección" required>
+            </div>
+
+            <!-- Correo -->
             <div class="ytrx-input-group">
                 <input type="email" id="ytrx-email" class="ytrx-form-input" placeholder="Correo electrónico" required>
             </div>
@@ -179,27 +210,27 @@
 
             <!-- Confirmar contraseña -->
             <div class="ytrx-input-group">
-                <input type="password" id="ytrx-confirm-password" class="ytrx-form-input"
-                    placeholder="Confirma contraseña" required>
+                <input type="password" id="ytrx-confirm-password" class="ytrx-form-input" placeholder="Confirma contraseña" required>
+                <div id="password-error" style="color: red; font-size: 13px; display: none; margin-top: 5px;">
+                    Las contraseñas no coinciden.
+                </div>
             </div>
+
 
             <button type="submit" class="ytrx-submit-btn">Registrarse</button>
 
-            <!-- Registro con redes sociales -->
+            <!-- Redes sociales -->
             <div style="text-align: center; margin-top: 30px;">
                 <p style="margin-bottom: 15px; color: #666;">O conéctate con</p>
-                <div style="display: flex; justify-content: center; gap: 15px;">
-                    <button type="button" style="border: none; background: none; cursor: pointer;">
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
-                            alt="Google" width="32" height="32">
+                <div class="social-buttons">
+                    <button type="button">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google" width="32" height="32">
                     </button>
-                    <button type="button" style="border: none; background: none; cursor: pointer;">
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/facebook/facebook-original.svg"
-                            alt="Facebook" width="32" height="32">
+                    <button type="button">
+                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/facebook/facebook-original.svg" alt="Facebook" width="32" height="32">
                     </button>
-                    <button type="button" style="border: none; background: none; cursor: pointer;">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg"
-                            alt="Microsoft" width="32" height="32">
+                    <button type="button">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" alt="Microsoft" width="32" height="32">
                     </button>
                 </div>
             </div>
@@ -210,4 +241,70 @@
         </p>
     </div>
 </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const tipoDoc = document.getElementById('tipo-doc');
+    const form = document.getElementById('ytrx-register-form');
+
+    const grupoNombres = document.getElementById('grupo-nombres');
+    const razonSocial = document.getElementById('grupo-razon-social');
+    const grupoApellidos = document.getElementById('grupo-apellidos');
+    const grupoSexo = document.getElementById('grupo-sexo');
+    const grupoNacimiento = document.getElementById('grupo-fecha-nacimiento');
+
+    const campoPassword = document.getElementById('ytrx-password');
+    const campoConfirmPassword = document.getElementById('ytrx-confirm-password');
+
+    tipoDoc.addEventListener('change', function () {
+        const seleccionado = tipoDoc.value;
+
+        if (seleccionado === 'RUC') {
+            razonSocial.style.display = 'block';
+            grupoNombres.style.display = 'none';
+            grupoApellidos.style.display = 'none';
+            grupoSexo.style.display = 'none';
+            grupoNacimiento.style.display = 'none';
+
+            document.getElementById('ytrx-fullname').value = '';
+            document.getElementById('ytrx-lastname-father').value = '';
+            document.getElementById('ytrx-lastname-mother').value = '';
+            document.getElementById('ytrx-gender').selectedIndex = 0;
+            document.getElementById('ytrx-birthdate').value = '';
+
+            document.getElementById('ytrx-razon-social').required = true;
+            document.getElementById('ytrx-fullname').required = false;
+        } else {
+            razonSocial.style.display = 'none';
+            grupoNombres.style.display = 'block';
+            grupoApellidos.style.display = 'flex';
+            grupoSexo.style.display = 'flex';
+            grupoNacimiento.style.display = 'block';
+
+            document.getElementById('ytrx-razon-social').value = '';
+
+            document.getElementById('ytrx-razon-social').required = false;
+            document.getElementById('ytrx-fullname').required = true;
+        }
+    });
+
+    form.addEventListener('submit', function (e) {
+        const errorMsg = document.getElementById('password-error');
+        if (campoPassword.value !== campoConfirmPassword.value) {
+            e.preventDefault();
+            errorMsg.style.display = 'block';
+            campoConfirmPassword.focus();
+            return;
+        } else {
+            errorMsg.style.display = 'none';
+        }
+
+        if (tipoDoc.value === 'RUC' && document.getElementById('ytrx-razon-social').value.trim() === '') {
+            e.preventDefault();
+            alert('Debe ingresar la Razón Social para RUC.');
+            return;
+        }
+    });
+});
+</script>
 {% endblock %}
