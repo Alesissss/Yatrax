@@ -379,115 +379,15 @@
       <h2 class="subtitulo">Inicio de sesión</h2>
       <p class="descripcion">Ingresa tus credenciales para acceder a tu cuenta de forma segura.</p>
       
-      <form>
+      <form id="formLogin" action="{{ url_for('homeClientes.login_cliente') }}" method="post">
         <div class="input-group">
           <i class="fas fa-envelope"></i>
-          <input class="entrada" type="email" placeholder="Correo electrónico" required />
+          <input class="entrada" type="email" name="correo" placeholder="Correo electrónico" required />
         </div>
         
         <div class="input-group">
           <i class="fas fa-lock"></i>
-          <input class="ent
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          rada" type="password" placeholder="Contraseña" required />
+          <input class="entrada" type="password" name="contrasena" placeholder="Contraseña" required />
         </div>
         
         <a href="#" class="forgot" onclick="fct_forgotPass(event)">¿Olvidaste tu contraseña?</a>
@@ -512,6 +412,52 @@
     </div>
   </div>
 </div>
+<!--JQuery-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<!-- Toastr CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+<!-- Toastr JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+<script>
+  $(document).ready(function () {
+    $("#formLogin").submit(function (e) {
+      e.preventDefault();
+
+      // Crear FormData desde el formulario directamente
+      const formData = new FormData(this);
+
+      $.ajax({
+        url: "/ecommerce/home/login",
+        method: "POST",
+        data: formData,
+        processData: false, // Necesario para enviar FormData
+        contentType: false, // Necesario para enviar FormData
+        dataType: "text", // No lo fuerces a JSON, porque puede venir HTML
+        success: function (response) {
+          let json = null;
+          try {
+            json = JSON.parse(response);
+          } catch (e) {
+            // Si no es JSON, asumimos que fue redirección
+            window.location.href = "/ecommerce/home/inicio";
+            return;
+          }
+
+          // Si es JSON con mensaje de error
+          if (json && json.msj) {
+            toastr.warning(json.msj, 'Inicio de sesión fallido');
+          }
+        },
+        error: function (xhr, status, errorThrown) {
+          let mensajeError = `Código: ${xhr.status} | Estado: ${status} | Error: ${errorThrown}`;
+          toastr.error(mensajeError, 'Error del servidor');
+          console.error("Detalles del error:", xhr.responseText);
+        }
+      });
+    });
+  });
+</script>
 
 <script>
   function fct_forgotPass(event) {
