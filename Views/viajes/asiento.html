@@ -18,9 +18,10 @@
                     <thead class="bg-gray">
                         <tr>
                             <th class="text-center">ID</th>
-                            <th class="text-center">NUMERO DE ASIENTO</th>
-                            <th class="text-center">NIVEL</th>
+                            <th class="text-center">NOMBRE</th>
+                            <th class="text-center">VEHÍCULO</th>
                             <th class="text-center">TIPO DE ASIENTO</th>
+                            <th class="text-center">PISO</th>
                             <th class="text-center">ESTADO</th>
 
                             <th class="text-center">ACCIÓN</th>
@@ -191,8 +192,10 @@
             },
             columns: [
                 { data: "id", name: "id" },
-                { data: "nro_asiento", name: "nro_asiento" },
-                { data: "nivel", name: "nivel" },
+                
+                { data: "nombre", name: "nombre" },
+                { data: "vehiculo", name: "vehiculo" },
+                { data: "piso", name: "piso" },
                 { data: "tipo_asiento", name: "tipo_asiento" },
                 {
                     data: "estado",
@@ -228,11 +231,11 @@
                     className: "text-center align-middle",
                 },
                 {
-                    targets: [1, 2, 3, 4],
+                    targets: [1, 2, 3, 4,5],
                     className: 'text-center align-middle',
                 },
                 {
-                    targets: [5],
+                    targets: [6],
                     orderable: false,
                     className: 'text-center align-middle',
                     width: '10%',

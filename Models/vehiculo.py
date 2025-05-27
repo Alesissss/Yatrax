@@ -49,21 +49,39 @@ class Vehiculo:
 
     @classmethod
     def insertarVehiculo(cls, placa, anio, color, idTipoVehiculo, estado, usuario):
+        conexion = bd.Conexion()
         try:
-            conexion = bd.Conexion()
-            # Llamada al SP que devuelve @MSJ y @MSJ2
-            conexion.ejecutar(
-                "CALL SP_INSERTAR_VEHICULO(%s, %s, %s, %s, %s, %s);",
-                (placa, anio, color, idTipoVehiculo, estado, usuario)
-            )
-            resultado = conexion.obtener("SELECT @MSJ AS MSJ, @MSJ2 AS MSJ2;")
-            return resultado[0]
+            conexion.conn.begin()
+            cursor = conexion.ejecutar("INSERT INTO vehiculo(placa, anio, color, id_tipo_vehiculo, estado, usuario) VALUES (%s,%s,%s,%s,%s,%s)",(placa, anio, color, idTipoVehiculo, estado, usuario),auto_commit=False)
+            ultimo_id = cursor.lastrowid
+            cursor = conexion.ejecutar("""
+                SELECT nh.id AS id, nh.x_dimension AS x, nh.y_dimension AS y
+                FROM tipo_vehiculo tv
+                INNER JOIN nivel n ON tv.id = n.id_tipo_vehiculo
+                INNER JOIN nivel_herramienta nh ON nh.id_nivel = n.id
+                INNER JOIN herramienta h ON nh.id_herramienta = h.id
+                WHERE h.id_tipo = 1 and tv.id = %s
+                                       """,(idTipoVehiculo,),auto_commit=False)
+            lista_codigos = cursor.fetchall()
+            if not lista_codigos:print(f"No se encontraron herramientas del tipo 1 para el tipo de vehículo {idTipoVehiculo}")
+
+            for codigo in lista_codigos:
+                id_nh = codigo['id']
+                fila = codigo['x']
+                columna = int(codigo['y'])
+
+                letra = chr(64+columna)
+                nombre = f"{letra}{fila}"
+
+                cursor = conexion.ejecutar("INSERT INTO asiento (nombre,id_vehiculo,id_nivel_herramienta,estado,usuario) VALUES (%s,%s,%s,%s,%s)",(nombre,ultimo_id,id_nh,1,usuario),auto_commit=False)
+            conexion.conn.commit()
+            return True
         except Exception as e:
-            print(f"Error en insertarVehiculo: {str(e)}")
-            raise
+            print(f"Error: {e}")
+            conexion.conn.rollback()
+            return False
         finally:
-            if conexion:
-                conexion.cerrar()
+            conexion.cerrar()
 
     @classmethod
     def actualizarVehiculo(cls, idVehiculo, placa, anio, color, idTipoVehiculo, estado):

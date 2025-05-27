@@ -6,6 +6,7 @@ from Models.servicio import Servicio
 from Models.cliente import Cliente
 
 from Models.tipoDocumento import TipoDocumento
+from Models.tipoCliente import TipoCliente
 from Models.pais import Pais
 from Models.cliente import Cliente
 homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/home')
@@ -68,6 +69,37 @@ def login_cliente():
         else:
             return jsonify({"msj": "Ingreso de credenciales incorrecto. Vuelva a intentarlo"})
 
+@homeClientes_bp.route("/logout")
+def logoutCliente():
+    if 'cliente' in session:
+        session.pop('cliente',None)
+        return redirect("/ecommerce/home/inicio")
+    
+#REGION POR TERMINAR    
+@homeClientes_bp.route("/miPerfil",methods=["GET","POST"])
+def perfilCliente():
+    if request.method == "GET":
+        paises = Pais.obtener_todos()
+        tipoCliente = TipoCliente.obtener_todos()
+        tipoDocumentos = TipoDocumento.obtener_todos()
+        return render_template("Ecommerce/home/miPerfil.html",paises=paises,tiposCliente=tipoCliente,tipoDocumentos=tipoDocumentos)
+    else:
+        pass
+
+#Los HTML para recuperar contraseña del lado del cliente aun no existen
+@homeClientes_bp.route("",methods=["GET","POST"])
+def cambiarContrasena():
+    if request.method == "GET":
+        return render_template("Ecommerce/home/forgotPassword.html")
+    else:
+        email = request.form["correo"]
+        respuesta = Cliente.verificar_correo_cliente(email)
+        if respuesta == 1:
+            return jsonify({"mensaje":"Correo valido, a continuación se enviará el código de verificación","status":1})
+        else:
+            return jsonify({"mensaje":"Correo no valido, vuelva a intentarlo","status":0})
+            
+# END POR TERMINAR
 @homeClientes_bp.route('/forgotPass')
 def forgot_password():
     return render_template('Ecommerce/home/forgotPassword.html')

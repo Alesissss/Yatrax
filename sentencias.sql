@@ -96,6 +96,7 @@ DROP PROCEDURE IF EXISTS SP_EDITAR_CLIENTE_JURIDICO;
 
 DROP PROCEDURE IF EXISTS SP_DARBAJA_CLIENTE;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_CLIENTE;
+DROP PROCEDURE IF EXISTS SP_VERIFICAR_CORREO_CLIENTE;
 
 -- Eliminar procedimientos si existen
 DROP PROCEDURE IF EXISTS SP_INSERTAR_NIVEL;
@@ -383,11 +384,9 @@ CREATE TABLE cliente (
 CREATE TABLE asiento (
     id INT AUTO_INCREMENT PRIMARY KEY,
 
-    nro_asiento SMALLINT  NOT NULL,  -- Hasta 9999
-    id_nivel TINYINT NOT NULL,
-
-    tipo_asiento VARCHAR(30) NOT NULL,
-
+    nombre varchar(5) NOT NULL,
+    id_vehiculo INT REFERENCES vehiculo(id),
+    id_nivel_herramienta INT NOT NULL,
     estado TINYINT NOT NULL CHECK (estado IN (0, 1, 2, 3)),
 
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -1756,10 +1755,30 @@ BEGIN
     END IF;
 END $$
 DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE SP_VERIFICAR_CORREO_CLIENTE (
+    IN p_email VARCHAR(100),
+    OUT p_resultado INT
+)
+BEGIN
+    DECLARE v_total INT;
+
+    SELECT COUNT(*) INTO v_total
+    FROM cliente
+    WHERE email = p_email AND estado = 1;
+
+    IF v_total > 0 THEN
+        SET p_resultado = 1;
+    ELSE
+        SET p_resultado = -1;
+    END IF;
+END $$
+
+DELIMITER ;
+
 -- aaaaaaaaaaaaaaa
-
-
-
 
 DELIMITER $$
 CREATE PROCEDURE SP_REGISTRAR_ABREVIATURA_CIUDAD(
