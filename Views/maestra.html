@@ -64,7 +64,7 @@
                     {{ cliente['nombres'] }}
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a href="#" class="dropdown-item">Mi Perfil</a></li>
+                    <li><a href="{{ url_for('homeClientes.perfilCliente') }}" class="dropdown-item">Mi Perfil</a></li>
                     <li><a class="dropdown-item" href="#">Mis viajes</a></li>
                     <li><a class="dropdown-item" href="{{ url_for('homeClientes.logoutCliente') }}">Cerrar Sesión</a></li>
                 </ul>
