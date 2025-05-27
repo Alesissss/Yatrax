@@ -294,10 +294,16 @@ def get_tipoVehiculo():
 @viajes_bp.route('/registrarTipoVehiculo',methods=["GET","POST"])
 def nuevoTipoVehiculo():
     if request.method == "GET":
+        lista_tipo_herramienta = TipoHerramienta.obtener_todos()
+        lista_herramienta = Herramienta.obtener_todos()
         return render_template(
             "viajes/tipoVehiculoCRUD.html",
-            tittle="Nuevo tipo de vehículo",
+            title="Nuevo tipo de vehículo",
+            nivel={},
             tipoVehiculo={},
+            tipo_herramientas = lista_tipo_herramienta,
+            herramientas = lista_herramienta,
+            botones = [],
             btnId="btn_Registrar",
             active_page="tipoVehiculo", 
             active_menu='mViajes'
@@ -329,7 +335,7 @@ def nuevoTipoVehiculo():
 def verTipoVehiculo(idVehiculo):
     return render_template(
         "viajes/tipoVehiculoCRUD.html",
-        tittle="Ver tipo de vehículo",
+        title="Ver tipo de vehículo",
         tipoVehiculo = TipoVehiculo.obtenerUno(idVehiculo),
         btnId="btn_Regresar",
         active_page="tipoVehiculo", 
@@ -341,7 +347,7 @@ def editarTipoVehiculo(idTipoVehiculo):
     if request.method == "GET":
         return render_template(
             "viajes/tipoVehiculoCRUD.html",
-            tittle="Editar tipo de vehículo",
+            title="Editar tipo de vehículo",
             tipoVehiculo = TipoVehiculo.obtenerUno(idTipoVehiculo),
             btnId="btn_Actualizar",
             active_page="tipoVehiculo", 
