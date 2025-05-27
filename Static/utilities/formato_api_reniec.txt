@@ -1,0 +1,34 @@
+##Para RUC
+
+{   "razonSocial":"HUAMANI MENDOZA ERACLEO JUAN",
+    "tipoDocumento":"6",
+    "numeroDocumento":"10460278975",
+    "estado":"ACTIVO",
+    "condicion":"HABIDO",
+    "direccion":"-",
+    "ubigeo":"-",
+    "viaTipo":"-",
+    "viaNombre":"-",
+    "zonaCodigo":"-",
+    "zonaTipo":"-",
+    "numero":"-",
+    "interior":"-",
+    "lote":"-",
+    "dpto":"-",
+    "manzana":"-",
+    "kilometro":"-",
+    "distrito":"",
+    "provincia":"",
+    "departamento":"",
+    "EsAgenteRetencion":false,
+    "EsBuenContribuyente":false,
+    "localesAnexos":null}
+
+## Para DNI
+{   "nombres":"ERACLEO JUAN",
+    "apellidoPaterno":"HUAMANI",
+    "apellidoMaterno":"MENDOZA",
+    "nombreCompleto":"ERACLEO JUAN HUAMANI MENDOZA",
+    "tipoDocumento":"1",
+    "numeroDocumento":"46027897",
+    "digitoVerificador":"5"}
