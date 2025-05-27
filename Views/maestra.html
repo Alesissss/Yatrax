@@ -17,7 +17,72 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-custom" id="maestra_header">
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #0b3270;" id="maestra_header">
+        <div class="container-fluid">
+            <!-- Logo -->
+            <a class="navbar-brand" href="#">
+            <img src="..." alt="logo_yatrax" id="maestra_logo" style="width: 70px; height: 70px;">
+            </a>
+
+            <!-- Botón para menú responsive -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Contenido del navbar -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+            <!-- Menú central -->
+            <ul class="navbar-nav mx-auto gap-4">
+                <li class="nav-item active">
+                <a class="navbar-brand text-white" href="#">Inicio</a>
+                </li>
+                <li class="nav-item">
+                <a class="navbar-brand text-white" href="#">Servicios</a>
+                </li>
+                <li class="nav-item">
+                <a class="navbar-brand text-white" href="#">Sucursales</a>
+                </li>
+                <li class="nav-item dropdown">
+                <a class="navbar-brand text-white" href="#" id="navbarDropdown" role="button"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    Pasajes
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{{ url_for('homeClientes.transferencia_pasaje') }}">Transferencia de pasaje</a></li>
+                    <li><a class="dropdown-item" href="#">Cambio de pasaje</a></li>
+                </ul>
+                </li>
+            </ul>
+            <br>
+            <!-- Cliente/Login a la derecha -->
+            <div class="dropdown ms-auto me-3">
+                {% if 'cliente' in session %}
+                {% set cliente = session["cliente"] %}
+                <button class="btn text-white" type="button" data-bs-toggle="dropdown"
+                    style="background:#0d6efd; border:#000 1px solid; border-radius: 5px;">
+                    {{ cliente['nombres'] }}
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a href="#" class="dropdown-item">Mi Perfil</a></li>
+                    <li><a class="dropdown-item" href="#">Mis viajes</a></li>
+                    <li><a class="dropdown-item" href="#">Cerrar Sesión</a></li>
+                </ul>
+                {% else %}
+                <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                    <i class="bi bi-person fs-3" style="color:white;"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a href="{{ url_for('homeClientes.login_cliente') }}" class="dropdown-item">Iniciar sesión</a></li>
+                    <li><a class="dropdown-item" href="#">Registrar</a></li>
+                </ul>
+                {% endif %}
+            </div>
+            </div>
+        </div>
+    </nav>
+    <!-- <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-custom" id="maestra_header">
         <div class="container-fluid align-items-center">
             <div class="col-md-3 d-flex align-items-center justify-content-center">
                 <img src="..." alt="logo_yatrax" id="maestra_logo" style="  max-height: 80px; /* coincide con la altura del navbar */
@@ -72,7 +137,7 @@
                 </div>
             </div>
         </div>
-    </nav>
+    </nav> -->
     {% block contenido %}{% endblock %}
     <footer>
         <div class="container-fluid bg-info py-3 py-md-6 py-xl-9 py-xxl-10" id="maestra_footer">
