@@ -164,7 +164,7 @@
     let herramientaSeleccionada = null;
     const list_herramientas = JSON.parse('{{ herramientas | tojson }}');
     $(document).ready(() => {
-        
+
         fct_Vehiculos()
 
         // Volver al listado
@@ -202,7 +202,7 @@
 
                 let maxX = 15;
                 let maxY = 6;
-                
+
 
                 const datos = {
                     nroPiso: $('#txt_nroPiso').val(),
@@ -221,7 +221,10 @@
                     success: function (response) {
                         if (response.Status === "success") {
                             toastr.success("Se ha registrado el nivel correctamente", "Éxito");
-                            window.location.href = "/trabajadores/viajes/GestionarNivel";
+                            setTimeout(() => {
+                                window.location.href = "/trabajadores/viajes/GestionarNivel";
+                            }, 500);
+                            
                         } else {
                             toastr.error("Ocurrió un error al registrar el nivel: " + response.Msj, "Error")
                         }

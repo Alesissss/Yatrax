@@ -444,14 +444,12 @@ def nuevoVehiculo():
 
             usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO')
 
-            mensajes = Vehiculo.insertarVehiculo(placa, anio, color, idTipoVehiculo, estado, usuario_actual)
-            msj1 = mensajes.get('MSJ') or mensajes.get('@MSJ')
-            msj2 = mensajes.get('MSJ2') or mensajes.get('@MSJ2')
+            valor = Vehiculo.insertarVehiculo(placa, anio, color, idTipoVehiculo, estado, usuario_actual)
 
-            if msj1:
-                return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
-            elif msj2:
-                return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+            if valor:
+                return jsonify({"Status": "success", 'Msj': "Insertado con éxito", 'Msj2': ''})
+            elif valor:
+                return jsonify({"Status": "success", 'Msj': '', 'Msj2': "Error al insertar el vehículo"})
             else:
                 return jsonify({"Status": "error", 'Msj': 'Error desconocido al insertar vehículo'})
         except Exception as e:

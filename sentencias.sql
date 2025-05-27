@@ -383,11 +383,9 @@ CREATE TABLE cliente (
 CREATE TABLE asiento (
     id INT AUTO_INCREMENT PRIMARY KEY,
 
-    nro_asiento SMALLINT  NOT NULL,  -- Hasta 9999
-    id_nivel TINYINT NOT NULL,
-
-    tipo_asiento VARCHAR(30) NOT NULL,
-
+    nombre varchar(5) NOT NULL,
+    id_vehiculo INT REFERENCES vehiculo(id),
+    id_nivel_herramienta INT NOT NULL,
     estado TINYINT NOT NULL CHECK (estado IN (0, 1, 2, 3)),
 
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,

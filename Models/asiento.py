@@ -19,8 +19,11 @@ class Asiento:
         conexion = bd.Conexion()
         try:
             asientos = conexion.obtener("""
-                SELECT a.id, a.nro_asiento, n.nroPiso AS nivel, a.tipo_asiento, a.estado 
-                FROM asiento a LEFT JOIN nivel n ON a.id_nivel = n.id
+                SELECT a.id AS id, a.nombre AS nombre, v.placa AS vehiculo ,n.nroPiso AS piso,h.nombre as tipo_asiento, a.estado AS estado
+                FROM asiento a inner join vehiculo v on a.id_vehiculo = v.id
+                inner join nivel_herramienta nh on nh.id = a.id_nivel_herramienta
+                inner join nivel n on n.id = nh.id_nivel
+                inner join herramienta h on h.id = nh.id_herramienta;
             """)
             return asientos
         finally:
