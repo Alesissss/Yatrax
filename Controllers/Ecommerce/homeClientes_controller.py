@@ -68,6 +68,12 @@ def login_cliente():
         else:
             return jsonify({"msj": "Ingreso de credenciales incorrecto. Vuelva a intentarlo"})
 
+@homeClientes_bp.route("/logout")
+def logoutCliente():
+    if 'cliente' in session:
+        session.pop('cliente',None)
+        return redirect("/ecommerce/home/inicio")
+
 @homeClientes_bp.route('/forgotPass')
 def forgot_password():
     return render_template('Ecommerce/home/forgotPassword.html')
