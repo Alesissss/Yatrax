@@ -1,418 +1,459 @@
 <!-- Modal del Login - Versión corregida para AJAX -->
-<style>
-  /* Estructura para el modal - Forzamos la visibilidad */
-  .modal-login {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    background: rgba(0, 0, 0, 0.6) !important;
-    backdrop-filter: blur(5px) !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    z-index: 9999 !important;
-    padding: 20px !important;
-    animation: modalFadeIn 0.3s ease-out !important;
-  }
 
-  @keyframes modalFadeIn {
-    from {
-      opacity: 0;
-      backdrop-filter: blur(0px);
-    }
-    to {
-      opacity: 1;
-      backdrop-filter: blur(5px);
-    }
-  }
+<!DOCTYPE html>
+<html lang="es">
 
-  /* Contenedor principal del modal */
-  .container_log {
-    background-color: white !important;
-    border-radius: 20px !important;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15) !important;
-    width: 100% !important;
-    max-width: 900px !important;
-    display: flex !important;
-    overflow: hidden !important;
-    position: relative !important;
-    backdrop-filter: blur(10px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    animation: slideIn 0.4s ease-out !important;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-    margin: auto !important;
-  }
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YATRAX - Iniciar Sesión</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='/img/yatrax_icon.ico') }}">
 
-  @keyframes slideIn {
-    from {
-      opacity: 0;
-      transform: scale(0.9) translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-    }
-  }
+    <!-- AdminLTE -->
+    <link rel="stylesheet" href="/Static/css/adminlte.min.css">
+    <link rel="stylesheet" href="/Static/css/all.min.css">
 
-  .left_log {
-    position: relative !important;
-    width: 50% !important;
-    background: linear-gradient(45deg, #0C336E, #1a4a8a) !important;
-    background-image: url("{{url_for('static',filename='img/login_pc.jpg')}}") !important;
-    background-size: cover !important;
-    background-position: center !important;
-    background-repeat: no-repeat !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    overflow: hidden !important;
-    min-height: 550px !important;
-  }
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 
-  .left_log::before {
-    content: '' !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    background: rgba(12, 51, 110, 0.7) !important;
-    z-index: 1 !important;
-  }
-
-  .left-content {
-    position: relative !important;
-    z-index: 2 !important;
-    text-align: center !important;
-    color: white !important;
-    padding: 40px !important;
-  }
-
-  .left-content i {
-    font-size: 70px !important;
-    margin-bottom: 25px !important;
-    opacity: 0.9 !important;
-  }
-
-  .left-content h2 {
-    font-size: 26px !important;
-    margin-bottom: 15px !important;
-    font-weight: 300 !important;
-  }
-
-  .left-content p {
-    font-size: 15px !important;
-    opacity: 0.9 !important;
-    line-height: 1.6 !important;
-  }
-
-  .right_log {
-    width: 50% !important;
-    padding: 50px 40px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: center !important;
-    background: linear-gradient(to bottom, #ffffff, #f8fafc) !important;
-    position: relative !important;
-  }
-
-  .close {
-    position: absolute !important;
-    top: 20px !important;
-    right: 20px !important;
-    background: none !important;
-    border: none !important;
-    color: #718096 !important;
-    font-size: 24px !important;
-    cursor: pointer !important;
-    outline: none !important;
-    width: 40px !important;
-    height: 40px !important;
-    border-radius: 50% !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    transition: all 0.3s ease !important;
-    z-index: 10 !important;
-  }
-
-  .close:hover {
-    background: #f7fafc !important;
-    color: #0C336E !important;
-    transform: rotate(90deg) !important;
-  }
-
-  .subtitulo {
-    color: #2d3748 !important;
-    margin-bottom: 15px !important;
-    font-size: 28px !important;
-    font-weight: 600 !important;
-    background: linear-gradient(135deg, #0C336E, #1a4a8a) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    background-clip: text !important;
-  }
-
-  .descripcion {
-    color: #718096 !important;
-    margin-bottom: 35px !important;
-    line-height: 1.6 !important;
-    font-size: 15px !important;
-  }
-
-  .input-group {
-    position: relative !important;
-    margin-bottom: 25px !important;
-  }
-
-  .input-group i {
-    position: absolute !important;
-    left: 18px !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    color: #0C336E !important;
-    font-size: 16px !important;
-    z-index: 2 !important;
-  }
-
-  .entrada {
-    width: 100% !important;
-    padding: 18px 18px 18px 55px !important;
-    border: 2px solid #e2e8f0 !important;
-    border-radius: 12px !important;
-    font-size: 16px !important;
-    outline: none !important;
-    transition: all 0.3s ease !important;
-    background: white !important;
-    box-sizing: border-box !important;
-    font-family: inherit !important;
-  }
-
-  .entrada:focus {
-    border-color: #0C336E !important;
-    box-shadow: 0 0 0 3px rgba(12, 51, 110, 0.1) !important;
-    transform: translateY(-2px) !important;
-  }
-
-  .entrada::placeholder {
-    color: #a0aec0 !important;
-  }
-
-  .forgot {
-    display: block !important;
-    margin: 10px 0 25px 0 !important;
-    text-align: right !important;
-    color: #718096 !important;
-    font-size: 14px !important;
-    text-decoration: none !important;
-    transition: all 0.3s ease !important;
-  }
-
-  .forgot:hover {
-    color: #0C336E !important;
-    text-decoration: underline !important;
-  }
-
-  .login-btn {
-    background: linear-gradient(135deg, #0C336E, #1a4a8a) !important;
-    color: white !important;
-    border: none !important;
-    padding: 18px 30px !important;
-    border-radius: 12px !important;
-    font-size: 16px !important;
-    font-weight: 600 !important;
-    cursor: pointer !important;
-    transition: all 0.3s ease !important;
-    margin-bottom: 25px !important;
-    position: relative !important;
-    overflow: hidden !important;
-    width: 100% !important;
-  }
-
-  .login-btn::before {
-    content: '' !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: -100% !important;
-    width: 100% !important;
-    height: 100% !important;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent) !important;
-    transition: left 0.5s !important;
-  }
-
-  .login-btn:hover::before {
-    left: 100% !important;
-  }
-
-  .login-btn:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 0 10px 25px rgba(12, 51, 110, 0.4) !important;
-  }
-
-  .divider {
-    height: 1px !important;
-    background: linear-gradient(to right, transparent, #e2e8f0, transparent) !important;
-    margin: 25px 0 20px 0 !important;
-  }
-
-  .social-login {
-    text-align: center !important;
-  }
-
-  .social-login p {
-    color: #718096 !important;
-    margin-bottom: 15px !important;
-    font-size: 14px !important;
-  }
-
-  .icons {
-    display: flex !important;
-    justify-content: center !important;
-    gap: 15px !important;
-  }
-
-  .icons img {
-    width: 40px !important;
-    height: 40px !important;
-    cursor: pointer !important;
-    transition: all 0.3s ease !important;
-    border-radius: 50% !important;
-    padding: 8px !important;
-    background: #f7fafc !important;
-    border: 1px solid #e2e8f0 !important;
-  }
-
-  .icons img:hover {
-    transform: translateY(-3px) !important;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1) !important;
-    background: white !important;
-  }
-
-  /* Responsive Design */
-  @media (max-width: 768px) {
-    .modal-login {
-      padding: 10px !important;
-    }
-
-    .container_log {
-      flex-direction: column !important;
-      max-width: 400px !important;
-      border-radius: 15px !important;
-    }
-
-    .left_log {
-      width: 100% !important;
-      min-height: 200px !important;
-      background-image: url("{{url_for('static',filename='img/login_celular.jpg')}}") !important;
-    }
-
-    .left-content h2 {
-      font-size: 22px !important;
-    }
-
-    .left-content p {
-      font-size: 14px !important;
-    }
-
-    .left-content i {
-      font-size: 50px !important;
-      margin-bottom: 15px !important;
-    }
-
-    .right_log {
-      width: 100% !important;
-      padding: 35px 25px !important;
-    }
-
-    .subtitulo {
-      font-size: 24px !important;
-    }
-
-    .descripcion {
-      font-size: 14px !important;
-    }
-
-    .close {
-      top: 15px !important;
-      right: 15px !important;
-      font-size: 20px !important;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .right_log {
-      padding: 25px 20px !important;
-    }
-
-    .subtitulo {
-      font-size: 22px !important;
-    }
-
-    .entrada, .login-btn {
-      padding: 15px 15px 15px 50px !important;
-    }
-
-    .icons img {
-      width: 35px !important;
-      height: 35px !important;
-    }
-  }
-</style>
-
-<div class="modal-login">
-  <div class="container_log">
-    <div class="left_log">
-      <div class="left-content">
-        <i class="fas fa-user-shield"></i>
-        <h2>Bienvenido de vuelta</h2>
-        <p>Inicia sesión en tu cuenta para acceder a todas las funcionalidades de YATRAX.</p>
-      </div>
-    </div>
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="/Static/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
+    <!-- Toastr -->
+    <link rel="stylesheet" href="/Static/plugins/toastr/toastr.min.css">
+    <!-- Select2 -->
+    <link rel="stylesheet" href="/Static/plugins/select2/css/select2.min.css">
+    <link rel="stylesheet" href="/Static/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
+    <!-- Tempusdominus Bootstrap 4 -->
+    <link rel="stylesheet" href="/Static/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
+    <!-- Google Font: Source Sans Pro -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700">
     
-    <div class="right_log">
-      <button type="button" id="closeModal" class="close" data-dismiss="modal" aria-label="Close">
-        <span>×</span>
-      </button>
-      
-      <h2 class="subtitulo">Inicio de sesión</h2>
-      <p class="descripcion">Ingresa tus credenciales para acceder a tu cuenta de forma segura.</p>
-      
-      <form action="{{ url_for('homeClientes.login_cliente') }}" method="post" id="formLogin">
-        <div class="input-group">
-          <i class="fas fa-envelope"></i>
-          <input class="entrada" type="email" name="correo" placeholder="Correo electrónico" required />
-        </div>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Source Sans Pro', sans-serif;
+            min-height: 100vh;
+            background-image: url('/Static/img/WallpaperLogin.jpeg');
+            /* background-color: #c1c7d8; */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            display: flex;
+            width: 100%;
+            max-width: 1000px;
+            height: auto;
+            min-height: 600px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            animation: slideIn 0.8s ease-out;
+            margin: auto;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(50px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Left Side - Illustration */
+        .left-side {
+            flex: 1;
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #06b6d4 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            position: relative;
+            color: white;
+            text-align: center;
+        }
+
+        .left-side::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(30, 64, 175, 0.9) 0%, rgba(59, 130, 246, 0.8) 50%, rgba(6, 182, 212, 0.7) 100%);
+            z-index: 1;
+        }
+
+        .illustration {
+            position: relative;
+            z-index: 2;
+            margin-bottom: 30px;
+        }
+
+        .user-icon {
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .user-icon i {
+            font-size: 48px;
+            color: white;
+        }
+
+        .shield-icon {
+            position: absolute;
+            bottom: -10px;
+            right: -10px;
+            width: 40px;
+            height: 40px;
+            background: #10b981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid white;
+        }
+
+        .shield-icon i {
+            font-size: 18px;
+            color: white;
+        }
+
+        .bus-illustration {
+            width: 100%;
+            max-width: 300px;
+            margin: 20px 0;
+            opacity: 0.3;
+        }
+
+        .welcome-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .welcome-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+            line-height: 1.5;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Right Side - Form */
+        .right-side {
+            flex: 1;
+            padding: 60px 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-header {
+            margin-bottom: 40px;
+        }
+
+        .form-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .form-subtitle {
+            color: #64748b;
+            font-size: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px 20px 16px 50px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .form-input::placeholder {
+            color: #94a3b8;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            transition: color 0.3s ease;
+            font-size: 16px;
+        }
+
+        .form-input:focus ~ .input-icon {
+            color: #3b82f6;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            margin-bottom: 24px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .forgot-password {
+            text-align: center;
+        }
+
+        .forgot-password a {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-password a:hover {
+            color: #1e40af;
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .login-container {
+                flex-direction: column;
+                width: 100%;
+                max-width: 500px;
+                height: auto;
+                min-height: auto;
+            }
+            
+            .left-side {
+                padding: 30px 20px;
+                min-height: 250px;
+            }
+            
+            .welcome-title {
+                font-size: 24px;
+            }
+            
+            .welcome-subtitle {
+                font-size: 14px;
+            }
+            
+            .user-icon {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .user-icon i {
+                font-size: 32px;
+            }
+            
+            .right-side {
+                padding: 30px 25px;
+            }
+            
+            .form-title {
+                font-size: 24px;
+            }
+        }
+
+        /* Toast customization */
+        .toast-success {
+            background-color: #10b981 !important;
+        }
         
-        <div class="input-group">
-          <i class="fas fa-lock"></i>
-          <input class="entrada" type="password" name="contrasena" placeholder="Contraseña" required />
-        </div>
+        .toast-error {
+            background-color: #ef4444 !important;
+        }
         
-        <a href="#" class="forgot" onclick="fct_forgotPass(event)">¿Olvidaste tu contraseña?</a>
-        
-        <button type="submit" class="login-btn">
-          <i class="fas fa-sign-in-alt" style="margin-right: 8px;"></i>
-          Iniciar sesión
-        </button>
-      </form>
-      
-      <div class="divider"></div>
-      
-      <div class="social-login">
-        <p>o ingresa con</p>
-        <div class="icons">
-          <img src="https://cdn-icons-png.flaticon.com/512/300/300221.png" alt="Google" />
-          <img src="https://cdn-icons-png.flaticon.com/512/732/732221.png" alt="Outlook" />
-          <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook" />
-          <img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" alt="Twitter" />
+        .toast-warning {
+            background-color: #f59e0b !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <!-- Left Side - Illustration -->
+        <div class="left-side">
+            <div class="illustration">
+                <div class="user-icon">
+                    <i class="fas fa-user"></i>
+                    <div class="shield-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                </div>
+                
+                <!-- Bus illustration using font awesome -->
+                <div class="bus-illustration">
+                    <i class="fas fa-bus" style="font-size: 120px; opacity: 0.2; color: white;"></i>
+                </div>
+            </div>
+            
+            <h1 class="welcome-title">Bienvenido de vuelta</h1>
+            <p class="welcome-subtitle">
+                Inicia sesión en tu cuenta para acceder a todas las funcionalidades de YATRAX.
+            </p>
         </div>
-      </div>
+
+        <!-- Right Side - Form -->
+        <div class="right-side">
+            <div class="form-header">
+                <h2 class="form-title">Inicio de sesión</h2>
+                <p class="form-subtitle">Ingresa tus credenciales para acceder a tu cuenta de forma segura.</p>
+            </div>
+
+            <form action="{{ url_for('homeClientes.login_cliente') }}" method="post" id="loginForm">
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <input type="email" id="txt_Email" name="correo" class="form-input" placeholder="ejemplo@gmail.com" required>
+                        <i class="fas fa-envelope input-icon"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <input type="password" id="txt_Password" name="contrasena" class="form-input" placeholder="••••••••••" required>
+                        <i class="fas fa-lock input-icon"></i>
+                    </div>
+                </div>
+
+                <button type="submit" id="btn_Login" class="login-btn">
+                    <div class="btn-content">
+                        <div class="spinner" id="loginSpinner"></div>
+                        <i class="fas fa-sign-in-alt" id="loginIcon"></i>
+                        <span id="loginText">Iniciar sesión</span>
+                    </div>
+                </button>
+            </form>
+
+            <div class="forgot-password">
+                <a href="{{ url_for('home.cambiarContrasena') }}">¿Olvidaste tu contraseña?</a>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
-<!-- jQuery -->
+
+    <!-- Scripts -->
+    <!-- jQuery -->
+    <script src="/Static/js/jquery.min.js"></script>
+    <!-- Bootstrap JS -->
+    <!-- AdminLTE JS -->
+    <script src="/Static/js/adminlte.min.js"></script>
+
+    <!-- Moment.js (para formateo de fechas) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+
+    <!-- SweetAlert2 -->
+    <script src="/Static/plugins/sweetalert2/sweetalert2.min.js"></script>
+    <!-- Toastr -->
+    <script src="/Static/plugins/toastr/toastr.min.js"></script>
+    <!-- Select2 -->
+    <script src="/Static/plugins/select2/js/select2.full.min.js"></script>
+    <!-- InputMask -->
+    <script src="/Static/plugins/inputmask/jquery.inputmask.min.js"></script>
+    <!-- Tempusdominus Bootstrap 4 -->
+    <script src="/Static/plugins/moment/moment.min.js"></script>
+    <script src="/Static/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+
+    <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <!-- Toastr -->
@@ -421,7 +462,7 @@
 
 <script>
   $(document).ready(function () {
-    $('#formLogin').on('submit', function (e) {
+    $('#loginForm').on('submit', function (e) {
       e.preventDefault(); // Previene el envío tradicional
 
       $.ajax({
@@ -449,3 +490,6 @@
     window.location.href = '/ecommerce/home/forgotPass';
   }
 </script>
+</body>
+
+</html>
