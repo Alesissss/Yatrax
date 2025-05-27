@@ -146,6 +146,7 @@ def nuevo_nivel():
             nivel={},
             tipo_herramientas = lista_tipo_herramienta,
             herramientas = lista_herramienta,
+            botones = [],
             btnId="btn_Registrar",
             active_page="nivel",
             active_menu='mViajes'
@@ -175,12 +176,16 @@ def nuevo_nivel():
 @viajes_bp.route("/verNivel/<int:idNivel>")
 def ver_nivel(idNivel):
     try:
-        nivel = Nivel.obtener_uno_por_idNivel(idNivel)
-
+        datos_nivel,datos_botones = Nivel.obtener_uno_por_idNivel(idNivel)
+        lista_tipo_herramienta = TipoHerramienta.obtener_todos()
+        lista_herramienta = Herramienta.obtener_todos()
         return render_template(
             "viajes/nivelCRUD.html",
-            tittle="Ver nivel",
-            nivel=nivel,
+            title="Ver nivel",
+            tipo_herramientas = lista_tipo_herramienta,
+            herramientas = lista_herramienta,
+            nivel=datos_nivel,
+            botones=datos_botones,
             btnId="btn_Regresar",
             active_page="nivel",
             active_menu='mViajes'
@@ -192,12 +197,16 @@ def ver_nivel(idNivel):
 def editar_nivel(idNivel):
     if request.method == "GET":
         try:
-            nivel = Nivel.obtener_uno_por_idNivel(idNivel)
-
+            datos_nivel,datos_botones = Nivel.obtener_uno_por_idNivel(idNivel)
+            lista_tipo_herramienta = TipoHerramienta.obtener_todos()
+            lista_herramienta = Herramienta.obtener_todos()
             return render_template(
                 "viajes/nivelCRUD.html",
-                tittle="Editar nivel",
-                nivel=nivel,
+                title="Editar nivel",
+                tipo_herramientas = lista_tipo_herramienta,
+                herramientas = lista_herramienta,
+                nivel=datos_nivel,
+                botones = datos_botones,
                 btnId="btn_Actualizar",
                 active_page="nivel",
                 active_menu='mViajes'
@@ -206,22 +215,19 @@ def editar_nivel(idNivel):
             return f"Error al obtener nivel: {repr(e)}", 500
     else:
         try:
-            nroPiso = int(request.form["txt_nroPiso"])
-            vehiculo = int(request.form["txt_vehiculo"])
-            cantidad = int(request.form["txt_cantidad"])
-            estado = request.form["txt_estado"]
+            data = request.get_json()
+            nroPiso = int(data.get("nroPiso"))
+            tipo_vehiculo = int(data.get("id_tipo_vehiculo"))
+            x_dimension = int(data.get("x_dimension"))
+            y_dimension = int(data.get("y_dimension"))
+            estado = int(data.get("estado"))
+            herramientas = data.get("herramientas", [])
 
-            msj1, msj2 = Nivel.actualizar_nivel(idNivel, nroPiso, vehiculo, cantidad,estado)
+            Nivel.actualizar_nivel(idNivel, nroPiso, tipo_vehiculo, x_dimension, y_dimension, estado, herramientas)
 
-            if msj1:
-                return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
-            elif msj2:
-                return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
-            else:
-                return jsonify({"Status": "error", 'Msj': 'Error desconocido al actualizar nivel'})
-
+            return jsonify({"Status": "success", "Msj": "Nivel actualizado correctamente"})
         except Exception as e:
-            return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+            return jsonify({"Status": "error", "Msj": f"Error al actualizar: {repr(e)}"})
 
 @viajes_bp.route("/DarBajaNivel/<int:idNivel>", methods=["POST"])
 def dar_baja_nivel(idNivel):
