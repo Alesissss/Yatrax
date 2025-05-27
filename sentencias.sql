@@ -560,6 +560,12 @@ CREATE TABLE nivel_herramienta(
  
 );
 
+-- INSERT TIPO CLIENTE
+INSERT INTO tipo_cliente (nombre, estado, usuario)
+VALUES 
+('Bebé', TRUE, 'admin'),
+('Niño', TRUE, 'admin'),
+('Adulto', TRUE, 'admin');
 
 -- INSERT TIPO DOCUMENTO
 INSERT INTO tipo_documento (nombre, abreviatura, estado, usuario)
