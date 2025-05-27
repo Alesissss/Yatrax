@@ -51,6 +51,32 @@ class Cliente:
         finally:
             conexion.cerrar()
 
+    @classmethod
+    def verificar_correo_cliente(cls,correo):
+        conexion = Conexion()
+        status = -1
+        try:
+            conn = conexion.obtener_conexion()
+            cursor = conn.cursor()
+
+            # Declarar variable de salida
+            cursor.callproc('SP_VERIFICAR_CORREO_CLIENTE', (correo, 0))
+
+            # Obtener el valor de la variable OUT
+            resultado = -1
+            for res in cursor.stored_results():
+                row = res.fetchone()
+                if row:
+                    resultado = row[0]
+
+            status = 1 if resultado == 1 else 0
+            return status
+
+        except Exception as e:
+            return status
+        finally:
+            conexion.cerrar()
+
     #REGISTRAR
         #REGISTRAR
     @classmethod
