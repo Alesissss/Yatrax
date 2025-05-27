@@ -418,6 +418,18 @@ pasaje{%endblock %} {% block contenido %}
     });
 
     document
+      .getElementById("comprobante")
+      .addEventListener("input", function (e) {
+        this.value = this.value.replace(/[^A-Za-z0-9-]/g, "");
+        if (this.value.length > 4 && !this.value.includes("-")) {
+          this.value = this.value.slice(0, 4) + "-" + this.value.slice(4);
+        }
+        if (this.value.length > 13) {
+          this.value = this.value.slice(0, 13);
+        }
+      });
+
+    document
       .getElementById("numeroDocNuevo")
       .addEventListener("input", function (e) {
         this.value = this.value.replace(/[^0-9]/g, "");
@@ -465,6 +477,41 @@ pasaje{%endblock %} {% block contenido %}
 
     let debounceTimer;
 
+    // funcion para validar la edad del nuevo pasajero
+    function validarEdadNuevoPasajero() {
+      const fechaNacimiento = document.getElementById("fechaNacimientoNuevo").value;
+      if (!fechaNacimiento) return;
+
+      let fechaActual = new Date();
+      let fechaNac = new Date(fechaNacimiento);
+      let edad = fechaActual.getFullYear() - fechaNac.getFullYear();
+      let mes = fechaActual.getMonth() - fechaNac.getMonth();
+
+      if (
+        mes < 0 ||
+        (mes === 0 && fechaActual.getDate() < fechaNac.getDate())
+      ) {
+        edad--;
+      }
+
+      if (edad < 18) {
+        toastr.warning(
+          "Menores a 18 años necesitan autorización de sus padres o tutores",
+          "MENSAJE DEL SISTEMA"
+        );
+        //marcar el checkbox de menor
+        document.getElementById("esMenor").checked = true;
+      }else{
+        // Si es mayor de edad, desmarcar el checkbox de menor
+        document.getElementById("esMenor").checked = false;
+      }
+    }
+
+    // escuchar el input de la fecha de nacimiento del nuevo pasajero
+    document
+      .getElementById("fechaNacimientoNuevo")
+      .addEventListener("change", validarEdadNuevoPasajero);
+
     // Escucha el input y retrasa 500 ms antes de buscar
     document
       .getElementById("numeroDocNuevo")
@@ -487,7 +534,7 @@ pasaje{%endblock %} {% block contenido %}
     document
       .getElementById("tipoDocMenor")
       .addEventListener("change", buscarPersonaMenor);
-
+    
     // Función de búsqueda para el menor
     function buscarPersonaMenor() {
       const tipoDoc = document.getElementById("tipoDocMenor").value;
