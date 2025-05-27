@@ -10,8 +10,11 @@
       <label for="id_pais" class="form-label">País</label>
       <select id="id_pais" name="id_pais" class="form-select" required>
         <!-- Opciones dinámicas -->
-         {% for pais in paises%}
-            <option>{{ pais.nombre }}</option>
+         {% for pais in paises %}
+          <option value="{{ pais.id }}"
+            {% if pais.id == datosUsuario.id_pais %}selected{% endif %}>
+            {{ pais.nombre }}
+          </option>
          {% endfor %}
       </select>
     </div>
@@ -22,7 +25,10 @@
       <select id="id_tipo_cliente" name="id_tipo_cliente" class="form-select" required>
         <!-- Opciones dinámicas -->
          {% for tipoCliente in tiposCliente %}
-            <option>{{ tipoCliente.TIPO }}</option>
+          <option value="{{ tipoCliente.id }}"
+            {% if tipoCliente.id == datosUsuario.id_tipo_cliente %}selected{% endif %}>
+            {{ tipoCliente.TIPO }}
+          </option>
          {% endfor %}
       </select>
     </div>
@@ -30,11 +36,13 @@
     <!-- Tipo Documento -->
     <div class="col-md-6 mb-3">
       <label for="id_tipo_doc" class="form-label">Tipo de Documento</label>
-      <select id="id_tipo_doc" name="id_tipo_doc" class="form-select" value="" required>
-        <!-- Opciones dinámicas -->
-         {% for tipoDocumento in tipoDocumentos %}
-            <option>{{ tipoDocumento.nombre }}</option>
-         {% endfor %}
+      <select name="id_tipo_doc" id="id_tipo_doc" class="form-select">
+        {% for tipoDocumento in tipoDocumentos %}
+          <option value="{{ tipoDocumento.id }}"
+            {% if tipoDocumento.id == datosUsuario.id_tipo_doc %}selected{% endif %}>
+            {{ tipoDocumento.nombre }}
+          </option>
+        {% endfor %}
       </select>
     </div>
 
