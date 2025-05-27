@@ -909,6 +909,8 @@ INSERT INTO tipo_usuario (id,nombre, estado, estado_proceso,estado_registro,fech
 -- Tabla Usuario
 INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (1,'Alexis','alexis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/alexis.jpeg', 1, 1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
 INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (2,'Edgar','edgar@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/edgar.png', 1, 1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
+INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (3,'Ander','ander@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/ander.jpg', 1, 1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
+
 
 -- Tabla menus
 INSERT INTO conf_menus (id, nombre, estado) VALUES (1, 'M_USUARIOS', 1);
