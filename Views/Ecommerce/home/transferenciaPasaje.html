@@ -1,6 +1,6 @@
-{% extends "maestra.html" %}
-{% block titulo %}YATRAX - Tranferencia de pasaje{%endblock %}
-{% block contenido %}
+{% extends "maestra.html" %} {% block titulo %}YATRAX - Tranferencia de
+pasaje{%endblock %} {% block contenido %}
+
 <style>
   /* Un poco de espacio extra para el edit-icon */
   #editMenor {
@@ -10,9 +10,13 @@
   .bgcustom {
     background-color: #d2d3ce;
   }
+
+  .form-label {
+    margin-bottom: 0;
+  }
 </style>
 
-<div class="container p-8 mt-4">
+<div class="container p-5 mt-4">
   <!-- Header -->
   <h2 class="bg-secondary text-white p-2">Transferencia de pasaje</h2>
 
@@ -183,9 +187,9 @@
         />
       </div>
       <div class="col-md-4">
-          <label class="form-label">Fecha de nacimiento</label>
-          <input type="date" id="fechaNacimientoNuevo" class="form-control" />
-        </div>
+        <label class="form-label">Fecha de nacimiento</label>
+        <input type="date" id="fechaNacimientoNuevo" class="form-control" />
+      </div>
       <div class="col-md-4 align-content-center">
         <div class="form-label">Sexo</div>
         <div class="form-check form-check-inline">
@@ -225,7 +229,7 @@
     </div>
 
     <!-- Bloque extra del menor -->
-    <div id="MenorBlock" class="border p-3 mt-3 d-none">
+    <div id="MenorBlock" class="border p-3 mt-3 d-none bg-secondary">
       <div class="row gy-3">
         <div class="col-md-4">
           <label class="form-label">Tipo documento</label>
@@ -244,7 +248,7 @@
             placeholder="Número de documento"
           />
         </div>
-        <div class="col-md-4 align-content-center">
+        <div class="col-md-4">
           <label class="form-label">Fecha de nacimiento</label>
           <input type="date" id="fechaNacimientoMenor" class="form-control" />
         </div>
@@ -284,7 +288,7 @@
             <option>Otro</option>
           </select>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-4 align-content-center">
           <div class="form-label">Sexo</div>
           <div class="form-check form-check-inline">
             <input
@@ -312,8 +316,13 @@
 
     <!-- Checkbox restantes -->
     <div class="form-check mt-3">
-      <input class="form-check-input" type="checkbox" id="esMenor" />
-      <label class="form-check-label" for="esMenor">Es menor de edad</label>
+      <input class="form-check-input" type="checkbox" id="esMenor" disabled />
+      <label
+        class="form-check-label disabled"
+        for="esMenor"
+        style="color: rgb(0, 0, 0)"
+        >Es menor de edad</label
+      >
     </div>
     <div class="form-check mt-3">
       <input class="form-check-input" type="checkbox" id="aceptoTerminos" />
@@ -324,7 +333,7 @@
         >
       </label>
     </div>
-    <div class="form-check mt-2">
+    <div class="form-check mt-3">
       <input class="form-check-input" type="checkbox" id="aceptoCargo" />
       <label class="form-check-label" for="aceptoCargo">
         Estoy de acuerdo con el cargo extra por la transferencia de pasaje
@@ -337,8 +346,6 @@
   </div>
 </div>
 
-<!-- Bootstrap Bundle (Popper + JS) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const conMenor = document.getElementById("conMenor");
@@ -416,6 +423,46 @@
         this.value = this.value.replace(/[^0-9]/g, "");
       });
 
+    document
+      .getElementById("numeroDocMenor")
+      .addEventListener("input", function (e) {
+        this.value = this.value.replace(/[^0-9]/g, "");
+      });
+
+    // Función para validad edad del menor
+    function validarEdadMenor() {
+      const fechaNacimiento = document.getElementById(
+        "fechaNacimientoMenor"
+      ).value;
+      if (!fechaNacimiento) return;
+
+      let fechaActual = new Date();
+      let fechaNac = new Date(fechaNacimiento);
+      let edad = fechaActual.getFullYear() - fechaNac.getFullYear();
+      let mes = fechaActual.getMonth() - fechaNac.getMonth();
+
+      if (
+        mes < 0 ||
+        (mes === 0 && fechaActual.getDate() < fechaNac.getDate())
+      ) {
+        edad--;
+      }
+
+      if (edad > 2) {
+        toastr.warning(
+          "Solo se puede viajar con menores de 2 años",
+          "MENSAJE DEL SISTEMA"
+        );
+        //borrar campos de la fecha de nacimiento del menor
+        document.getElementById("fechaNacimientoMenor").value = "";
+      }
+    }
+
+    // escuchar el input de la fecha de nacimiento del menor
+    document
+      .getElementById("fechaNacimientoMenor")
+      .addEventListener("change", validarEdadMenor);
+
     let debounceTimer;
 
     // Escucha el input y retrasa 500 ms antes de buscar
@@ -429,6 +476,88 @@
     document
       .getElementById("tipoDocNuevo")
       .addEventListener("change", buscarPersona);
+
+    document
+      .getElementById("numeroDocMenor")
+      .addEventListener("input", function () {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(buscarPersonaMenor, 1000);
+      });
+
+    document
+      .getElementById("tipoDocMenor")
+      .addEventListener("change", buscarPersonaMenor);
+
+    // Función de búsqueda para el menor
+    function buscarPersonaMenor() {
+      const tipoDoc = document.getElementById("tipoDocMenor").value;
+      const numDoc = document.getElementById("numeroDocMenor").value.trim();
+
+      if (!tipoDoc) {
+        toastr.warning(
+          "El tipo de documento es obligatorio",
+          "MENSAJE DEL SISTEMA"
+        );
+        return;
+      }
+      if (!numDoc) {
+        toastr.warning(
+          "El número de documento es obligatorio",
+          "MENSAJE DEL SISTEMA"
+        );
+        return;
+      }
+
+      if (tipoDoc === "DNI" && numDoc.length == 8) {
+        fetch(
+          `/ecommerce/home/api/get_persona_data?tipoDoc=${encodeURIComponent(
+            tipoDoc
+          )}&numDoc=${encodeURIComponent(numDoc)}`
+        )
+          .then((r) => r.json())
+          .then((json) => {
+            if (json.Status === "success") {
+              const d = json.data;
+              if (d.nombres)
+                document.getElementById("nombresMenor").value = d.nombres;
+              else document.getElementById("nombresMenor").value = "Nombres";
+
+              if (d.apellidoPaterno)
+                document.getElementById("apellidoPaternoMenor").value =
+                  d.apellidoPaterno;
+              else
+                document.getElementById("apellidoPaternoMenor").value =
+                  "Apellido paterno";
+
+              if (d.apellidoMaterno)
+                document.getElementById("apellidoMaternoMenor").value =
+                  d.apellidoMaterno;
+              else
+                document.getElementById("apellidoMaternoMenor").value =
+                  "Apellido materno";
+              toastr.success(json.Msj, "OK");
+            } else {
+              document.getElementById("nombresMenor").value = "Nombres";
+              document.getElementById("apellidoPaternoMenor").value =
+                "Apellido paterno";
+              document.getElementById("apellidoMaternoMenor").value =
+                "Apellido materno";
+              toastr.error(json.Msj, "ERROR");
+            }
+          })
+          .catch(() =>
+            toastr.error("No se ha podido conectar con el servidor", "ERROR")
+          );
+        return;
+      }
+
+      if (tipoDoc === "CE" && numDoc.length !== 11) {
+        toastr.warning(
+          "El número de CE debe tener al menos 7 dígitos",
+          "MENSAJE DEL SISTEMA"
+        );
+      }
+    }
 
     // Función de búsqueda
     function buscarPersona() {
