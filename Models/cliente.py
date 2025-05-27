@@ -42,21 +42,51 @@ class Cliente:
             conexion.cerrar()
 
     #REGISTRAR
+        #REGISTRAR
     @classmethod
     def registrar(cls, nombre, email, password, imagen, estado, idTipoUsuario, usuario):
         conexion = bd.Conexion()
-
         try:
             password_hash = hashlib.sha256(password.encode()).hexdigest()
-
             # Llamar al procedimiento almacenado
             conexion.ejecutar("CALL SP_REGISTRAR_USUARIO(%s, %s, %s, %s, %s, %s, %s);", (nombre, email, password_hash, imagen, estado, idTipoUsuario, usuario))
-
             # Obtener mensajes de salida
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
             return resultado[0]  # Retorna un diccionario con los mensajes
         finally:
             conexion.cerrar()
+    
+    
+    
+    @classmethod
+    def registrarForm(cls, id_pais, id_tipo_cliente, id_tipo_doc, numero_documento, nombres,
+                ape_paterno, ape_materno, sexo, f_nacimiento, razon_social,
+                direccion, telefono, email, password, usuario):
+        conexion = bd.Conexion()
+        try:
+            password_hash = hashlib.sha256(password.encode()).hexdigest()
+            query = """
+            INSERT INTO cliente (
+                id_pais, id_tipo_cliente, id_tipo_doc, numero_documento, 
+                nombres, ape_paterno, ape_materno, sexo, f_nacimiento, 
+                razon_social, direccion, telefono, email, password, usuario
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+            """
+
+            conexion.ejecutar(query, (
+                id_pais, id_tipo_cliente, id_tipo_doc, numero_documento,
+                nombres, ape_paterno, ape_materno, sexo, f_nacimiento,
+                razon_social, direccion, telefono, email, password_hash, usuario
+            ))
+
+            # Simular respuesta exitosa como los otros métodos
+            return {'@MSJ': 'Cliente registrado con éxito', '@MSJ2': ''}
+        except Exception as e:
+            print("ERROR en Cliente.registrar:", e)
+            return {'@MSJ': '', '@MSJ2': f'Error: {str(e)}'}
+        finally:
+            conexion.cerrar()
+
 
     #EDITAR
     @classmethod
