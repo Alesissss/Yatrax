@@ -2,6 +2,7 @@ import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort
 from Models.tipoPersonal import TipoPersonal
 from Models.personal import Personal
+from Models.sancion import Sancion
 
 personal_bp = Blueprint('personal', __name__, url_prefix='/trabajadores/personal')
 
@@ -67,6 +68,14 @@ def Menu_Personal():
 @personal_bp.route('/PersonalNuevo')
 def PersonalNuevo():
     return render_template('personal/personalCRUD.html', active_page="personal", active_menu='mPersonal', personal={}, tittle='Registrar personal', btnId='btn_Registrar')
+
+@personal_bp.route('/GestionarSancion')
+def Menu_Incidencia():
+    return render_template('personal/sancion.html', active_page="sancion", active_menu='mPersonal')
+
+@personal_bp.route('/SancionNuevo')
+def SancionNuevo():
+    return render_template('personal/sancionCRUD.html', active_page="sancion", active_menu="mPersonal", sancion = {}, tittle='Registrar sanción', btnId='btn_Registrar')
 
 # END VIEWS
 
@@ -174,6 +183,112 @@ def darBaja_tipoPersonal(id):
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
 # END REGION TIPO PERSONAL
+
+# REGION SANCION #
+
+@personal_bp.route("/GetData_Sancion", methods=["GET"])
+def get_Sancion():
+    try:
+        sancion = Sancion.obtener_todos()
+        return jsonify({'data': sancion, 'Status': 'success', 'Msj': 'Listado de sanciones retornada exitosamente'})
+    except Exception as e:
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error inesperado al listar sanciones: {repr(e)}'})
+    
+@personal_bp.route("/RegistrarSancion", methods=["POST"])
+def registrar_sancion():
+    try:
+        nombre = request.form.get("nombre").strip()
+        descripcion = request.form.get("descripcion").strip()
+        duracion = request.form.get("duracion").strip()
+        estado = request.form.get("estado")
+        usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
+        
+        mensajes = Sancion.registrar(nombre, descripcion, duracion, estado, usuario_actual)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar sanción'})
+    except Exception as e:
+            return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@personal_bp.route("/EliminarSancion/<int:id>", methods=["POST"])
+def eliminar_sancion(id):
+    try:
+        mensajes = Sancion.eliminar_sancion(id)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al eliminar tipo de usuario'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+    
+@personal_bp.route("/EditarSancion/<int:id>", methods=["POST", "GET"])
+def editar_sancion(id):
+    try:
+        sancion = Sancion.obtener_por_id(id)
+
+        if request.method == 'POST':
+            nombre = request.form.get("nombre").strip()
+            descripcion = request.form.get("descripcion").strip()
+            duracion = request.form.get("duracion").strip()
+            estado = request.form.get("estado")
+            
+            mensajes = Sancion.editar(id, nombre, descripcion, duracion, estado)
+            msj1 = mensajes.get('@MSJ')
+            msj2 = mensajes.get('@MSJ2')
+
+            if msj1:
+                return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+            elif msj2:
+                return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+            else:
+                return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar sanción'})
+        if sancion:
+            return render_template('personal/sancionCRUD.html', active_page = "sancion", active_menu = "mPersonal", sancion = sancion, tittle = 'Editar sanción', btnId = 'btn_Editar')
+        return render_template('personal/sancionCRUD.html', active_page = "sancion", active_menu = "mPersonal", sancion = {}, tittle = 'Editar sanción', btnId = 'btn_Editar')
+
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@personal_bp.route("/VerSancion/<int:id>", methods=['GET'])
+def ver_sancion(id):
+    try:
+        sancion = Sancion.obtener_por_id(id)
+        if sancion:
+            return render_template('personal/sancionCRUD.html', active_page = "sancion", active_menu = "mPersonal", sancion = sancion, tittle = 'Ver sanción', btnId = 'btn_Editar')
+        return render_template('personal/sancionCRUD.html', active_page = "sancion", active_menu = "mPersonal", sancion = {}, tittle = 'Ver sanción', btnId = 'btn_Editar')
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+    
+@personal_bp.route("/DarBajaSancion/<int:id>", methods=['POST'])
+def darBajaSancion(id):
+    try:
+        mensajes = Sancion.darBaja(id)  
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja a la sanción'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+    
+
+
+# END REGION SANCION #
 
 # REGION PERSONAL
 

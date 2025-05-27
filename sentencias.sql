@@ -176,7 +176,7 @@ CREATE TABLE incidencia (
     nombre VARCHAR (255) NOT NULL,
     descripcion VARCHAR (255) NOT NULL,
     duracion_sancion INT NOT NULL,
-    estado BIT NOT NULL,
+    estado boolean NOT NULL,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(255) NOT NULL
 
@@ -535,7 +535,7 @@ CREATE TABLE personal_incidencia (
     incidenciaid INT NOT NULL,
     descripcion VARCHAR(255) NOT NULL,
     fecha_fin DATETIME NOT NULL,
-    estado BIT NOT NULL,
+    estado boolean NOT NULL,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(255) NOT NULL,
     PRIMARY KEY (personalid, incidenciaid),
@@ -1201,6 +1201,41 @@ INSERT INTO conf_dclaims (idClaim, idTipoUsuario) VALUES (74,1);
 -- Tabla apariencia
 INSERT INTO conf_plantillas (id, nombre, color_header, color_footer, logo, estado, fecha_registro, usuario) VALUES (1, 'YATRAX', '#0c336e', '#000000', '/Static/img/plantillas/logo_yatusa.png', 1, '2025-03-06 20:06:14', 'SYSTEM');
 
+INSERT INTO cliente (
+    id_pais,
+    id_tipo_cliente,
+    id_tipo_doc,
+    numero_documento,
+    nombres,
+    ape_paterno,
+    ape_materno,
+    sexo,
+    f_nacimiento,
+    razon_social,
+    direccion,
+    telefono,
+    email,
+    password,
+    estado,
+    usuario
+) VALUES (
+    1,                          -- id_pais
+    2,                          -- id_tipo_cliente
+    1,                          -- id_tipo_doc
+    '12345678',                 -- numero_documento
+    'Christian Cubas',             -- nombres
+    'García',                   -- ape_paterno
+    'Torres',                   -- ape_materno
+    1,                          -- sexo
+    '1990-05-20',               -- f_nacimiento
+    'Luis García S.A.C',        -- razon_social
+    'Av. Perú 123',             -- direccion
+    '987654321',                -- telefono
+    'christiancubasjaramillo@gmail.com',         -- email
+    SHA2('123', 256), -- password encriptada con SHA-256
+    1,                          -- estado
+    'admin'                     -- usuario que registró
+);
 
 -- Crear procedimiento SP_REGISTRAR_INCIDENCIA
 DELIMITER $$
@@ -1208,7 +1243,7 @@ CREATE PROCEDURE SP_REGISTRAR_INCIDENCIA(
     IN P_NOMBRE VARCHAR(255),
     IN P_DESCRIPCION VARCHAR(255),
     IN P_DURACION_SANCION INT,
-    IN P_ESTADO BIT,
+    IN P_ESTADO boolean,
     IN P_USUARIO VARCHAR(255)
 )
 BEGIN
@@ -1242,7 +1277,7 @@ CREATE PROCEDURE SP_EDITAR_INCIDENCIA(
     IN P_NOMBRE VARCHAR(255),
     IN P_DESCRIPCION VARCHAR(255),
     IN P_DURACION_SANCION INT,
-    IN P_ESTADO BIT
+    IN P_ESTADO boolean
 )
 BEGIN 
     DECLARE cNombre INT;
