@@ -36,7 +36,7 @@
                         <a class="navbar-brand text-white" href="#">Pasajes</a>
                     </button>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Transferencia de pasaje</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('homeClientes.transferencia_pasaje') }}">Transferencia de pasaje</a></li>
                         <li><a class="dropdown-item" href="#">Cambio de pasaje</a></li>
                     </ul>
                 </div>
@@ -90,7 +90,7 @@
                         <a class="text-decoration-none text-black text-white" href="">
                             <li>Preguntas frecuentes</li>
                         </a>
-                        <a class="text-decoration-none text-black text-white" href="">
+                        <a class="text-decoration-none text-black text-white" href="{{ url_for('homeClientes.terminos_y_condiciones') }}">
                             <li>Término y Condiciones</li>
                         </a>
                         <a class="text-decoration-none text-black text-white" href="">
@@ -131,7 +131,7 @@
                 <div class="row gy-3 align-items-center">
                     <div class="col-12 col-md-6">
                         <div class="copyright-wrapper d-block mb-1 fs-8 text-center text-md-start">
-                            &copy; 2024. Reservados todos los derechos
+                            &copy; 2025. Reservados todos los derechos
                         </div>
                     </div>
                 </div>
