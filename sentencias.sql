@@ -176,7 +176,7 @@ CREATE TABLE incidencia (
     nombre VARCHAR (255) NOT NULL,
     descripcion VARCHAR (255) NOT NULL,
     duracion_sancion INT NOT NULL,
-    estado BIT NOT NULL,
+    estado boolean NOT NULL,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(255) NOT NULL
 
@@ -535,7 +535,7 @@ CREATE TABLE personal_incidencia (
     incidenciaid INT NOT NULL,
     descripcion VARCHAR(255) NOT NULL,
     fecha_fin DATETIME NOT NULL,
-    estado BIT NOT NULL,
+    estado boolean NOT NULL,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(255) NOT NULL,
     PRIMARY KEY (personalid, incidenciaid),
@@ -1208,7 +1208,7 @@ CREATE PROCEDURE SP_REGISTRAR_INCIDENCIA(
     IN P_NOMBRE VARCHAR(255),
     IN P_DESCRIPCION VARCHAR(255),
     IN P_DURACION_SANCION INT,
-    IN P_ESTADO BIT,
+    IN P_ESTADO boolean,
     IN P_USUARIO VARCHAR(255)
 )
 BEGIN
@@ -1242,7 +1242,7 @@ CREATE PROCEDURE SP_EDITAR_INCIDENCIA(
     IN P_NOMBRE VARCHAR(255),
     IN P_DESCRIPCION VARCHAR(255),
     IN P_DURACION_SANCION INT,
-    IN P_ESTADO BIT
+    IN P_ESTADO boolean
 )
 BEGIN 
     DECLARE cNombre INT;
