@@ -50,11 +50,15 @@
                 <div class="dropdown">
                     {% if 'cliente' in session %}
                         {% set cliente = session["cliente"] %}
-                        <a href="#">
-                            <div class="bg-primary d-flex justify-content-center align-items-center text-white pt-3 px-3">
-                                <p>{{ cliente.nombres }}</p>
-                            </div>
-                        </a>
+                        <button class="d-flex justify-content-center align-items-center   text-white pt-3 px-3" type="button" data-bs-toggle="dropdown"
+                            aria-expanded="false" style="background:#0d6efd;border:#000 1px solid;border-radius: 5px;">
+                            <p>{{ cliente.nombres }}</p>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" class="dropdown-item" id="abrirModalLogin">Mi Perfil</a></li>
+                            <li><a class="dropdown-item" href="#">Mis viajes</a></li>
+                            <li><a class="dropdown-item" href="#">Cerrar Sesión</a></li>
+                        </ul>
                     {% else %}
                         <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
                             aria-expanded="false">
