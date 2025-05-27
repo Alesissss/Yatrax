@@ -41,6 +41,16 @@ class Cliente:
         finally:
             conexion.cerrar()
 
+    @classmethod
+    def logear_cliente(cls, email,contrasena):
+        conexion = bd.Conexion()
+        try:
+            contrasena_hasheada = hashlib.sha256(contrasena.encode()).hexdigest()
+            usuario = conexion.obtener("SELECT * FROM cliente WHERE email=%s AND password=%s",(email,contrasena_hasheada))
+            return usuario[0] if usuario else None
+        finally:
+            conexion.cerrar()
+
     #REGISTRAR
         #REGISTRAR
     @classmethod

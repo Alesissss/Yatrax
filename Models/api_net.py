@@ -1,38 +1,61 @@
-from typing import List, Optional
-import logging
-import requests
-
 # Models/api_net.py
 import logging
 import requests
 from typing import Optional, List
 
 class ApiNetPe:
+    # Lista de tokens disponibles
+    tokens = [
+        'apis-token-15226.KoJhSj8sr3mnQTWvEi86Xgnxftmah4xO',
+        'apis-token-10876.yALxWPL9iXoRctMHIOMkvy5IkVprqb1s',
+        'apis-token-11385.NY0mPBbdLdYOVIDVR8zBj1YGTRAQuwfu',
+        'apis-token-10991.GVT9dx9z8fHX6mk6aLB28EJJ0HOOjRk7',
+        'apis-token-9660.UmHcExv7ZPMtri7UOubK5dro3zqMUrH8',
+        'apis-token-7946.-LODBsCL6vKrK7tS4sh0l3fgi6wK6ElW',
+        'apis-token-11030.SCSv4kKYWlHpNtJT2xmm5h0Wd4NEHhOw'
+    ]
+    
     def __init__(self, token: str = None) -> None:
-        self._api_token = token or 'apis-token-15226.KoJhSj8sr3mnQTWvEi86Xgnxftmah4xO'
-        self._api_url = "https://api.apis.net.pe"
+        # Empieza con el token explícito o el primero de la lista
+        self._api_token = token or self.tokens[0]
+        self._api_url   = "https://api.apis.net.pe"
 
-    def _get(self, path: str, params: dict):
+    def _get(self, path: str, params: dict) -> Optional[dict]:
         url = f"{self._api_url}{path}"
         headers = {
             "Authorization": f"Bearer {self._api_token}",
             "Referer": "python-requests"
         }
 
-        response = requests.get(url, headers=headers, params=params)
+        try:
+            response = requests.get(url, headers=headers, params=params, timeout=5)
+        except requests.RequestException as e:
+            logging.warning(f"Request failed for token {self._api_token}: {e}")
+            return None
+
         if response.status_code == 200:
             return response.json()
         else:
-            logging.warning(f"API Error {response.status_code}: {response.text}")
+            logging.warning(f"API Error {response.status_code} with token {self._api_token}: {response.text}")
             return None
 
     def get_person(self, dni: str) -> Optional[dict]:
-        return self._get("/v2/reniec/dni", {"numero": dni})
+        # Intenta con cada token hasta que uno devuelva datos
+        for tok in self.tokens:
+            self._api_token = tok
+            data = self._get("/v2/reniec/dni", {"numero": dni})
+            if data:
+                return data
+        # Si ninguno funcionó, devuelve None
+        logging.error(f"Todos los tokens fallaron al consultar RENIEC DNI {dni}")
+        return None
 
     def get_company(self, ruc: str) -> Optional[dict]:
-        return self._get("/v2/sunat/ruc", {"numero": ruc})
-
-        
-        
-        
-    
+        # Intenta con cada token hasta que uno devuelva datos
+        for tok in self.tokens:
+            self._api_token = tok
+            data = self._get("/v2/sunat/ruc", {"numero": ruc})
+            if data:
+                return data
+        logging.error(f"Todos los tokens fallaron al consultar SUNAT RUC {ruc}")
+        return None  

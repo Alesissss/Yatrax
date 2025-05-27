@@ -379,15 +379,15 @@
       <h2 class="subtitulo">Inicio de sesión</h2>
       <p class="descripcion">Ingresa tus credenciales para acceder a tu cuenta de forma segura.</p>
       
-      <form>
+      <form action="{{ url_for('homeClientes.login_cliente') }}" method="post" id="formLogin">
         <div class="input-group">
           <i class="fas fa-envelope"></i>
-          <input class="entrada" type="email" placeholder="Correo electrónico" required />
+          <input class="entrada" type="email" name="correo" placeholder="Correo electrónico" required />
         </div>
         
         <div class="input-group">
           <i class="fas fa-lock"></i>
-          <input class="entrada" type="password" placeholder="Contraseña" required />
+          <input class="entrada" type="password" name="contrasena" placeholder="Contraseña" required />
         </div>
         
         <a href="#" class="forgot" onclick="fct_forgotPass(event)">¿Olvidaste tu contraseña?</a>
@@ -412,7 +412,37 @@
     </div>
   </div>
 </div>
-  
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Toastr -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+<script>
+  $(document).ready(function () {
+    $('#formLogin').on('submit', function (e) {
+      e.preventDefault(); // Previene el envío tradicional
+
+      $.ajax({
+        url: "{{ url_for('homeClientes.login_cliente') }}",
+        type: "POST",
+        data: $(this).serialize(),
+        success: function (response) {
+          if (response.msj) {
+            toastr.warning(response.msj);
+          } else {
+            window.location.href = "/ecommerce/home/inicio";
+          }
+        }
+        ,error: function () {
+          toastr.error("Error del servidor. Intente nuevamente.");
+        }
+      });
+    });
+  });
+</script>
+
 <script>
   function fct_forgotPass(event) {
     event.preventDefault();

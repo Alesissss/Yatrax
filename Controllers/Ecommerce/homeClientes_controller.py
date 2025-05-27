@@ -3,6 +3,8 @@ from flask import Blueprint, request, jsonify, render_template, session, redirec
 from Models.conf_plantillas import Conf_Plantillas
 from Models.api_net import ApiNetPe
 from Models.servicio import Servicio
+from Models.cliente import Cliente
+
 from Models.tipoDocumento import TipoDocumento
 from Models.pais import Pais
 from Models.cliente import Cliente
@@ -50,9 +52,21 @@ def sobreNosotros():
 def error():
     return render_template('Ecommerce/error.html')
 
-@homeClientes_bp.route('/login')
+@homeClientes_bp.route('/login',methods=["GET","POST"])
 def login_cliente():
-    return render_template('Ecommerce/home/modalLogin.html')
+    if request.method == "GET":
+        return render_template('Ecommerce/home/modalLogin.html')
+    else:
+        correo = request.form["correo"]
+        contrasena = request.form["contrasena"]
+
+        cliente = Cliente.logear_cliente(correo,contrasena)
+
+        if cliente != None:
+            session["cliente"] = cliente
+            return redirect("/ecommerce/home/inicio")
+        else:
+            return jsonify({"msj": "Ingreso de credenciales incorrecto. Vuelva a intentarlo"})
 
 @homeClientes_bp.route('/forgotPass')
 def forgot_password():

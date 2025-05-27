@@ -48,14 +48,21 @@
             </div>
             <div class="col-md-3 d-flex justify-content-center align-items-center">
                 <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                        aria-expanded="false">
-                        <i class="bi bi-person fs-3" style="color:white;"></i>
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" id="abrirModalLogin">Iniciar sesión</a></li>
-                        <li><a class="dropdown-item" href="#">Registrar</a></li>
-                    </ul>
+                    {% if cliente in session %}
+                        {% set cliente = session["cliente"] %}
+                        <div class="round-2 bg-primary text-white">
+                            <a>{{ cliente.nombres[0:1] }}</a>
+                        </div>
+                    {% else %}
+                        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            <i class="bi bi-person fs-3" style="color:white;"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a href="{{ url_for('homeClientes.login_cliente')  }}" class="dropdown-item" id="abrirModalLogin">Iniciar sesión</a></li>
+                            <li><a class="dropdown-item" href="#">Registrar</a></li>
+                        </ul>
+                    {% endif %}
                 </div>
             </div>
         </div>
