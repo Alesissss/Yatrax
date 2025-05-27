@@ -1,5 +1,5 @@
-{% extends "maestra.html" %} 
-{% block titulo %}YATRAX - Tranferencia de pasaje{%endblock %} 
+{% extends "maestra.html" %}
+{% block titulo %}YATRAX - Tranferencia de pasaje{%endblock %}
 {% block contenido %}
 <style>
   /* Un poco de espacio extra para el edit-icon */
@@ -183,6 +183,10 @@
         />
       </div>
       <div class="col-md-4">
+          <label class="form-label">Fecha de nacimiento</label>
+          <input type="date" id="fechaNacimientoNuevo" class="form-control" />
+        </div>
+      <div class="col-md-4 align-content-center">
         <div class="form-label">Sexo</div>
         <div class="form-check form-check-inline">
           <input
@@ -240,6 +244,10 @@
             placeholder="Número de documento"
           />
         </div>
+        <div class="col-md-4 align-content-center">
+          <label class="form-label">Fecha de nacimiento</label>
+          <input type="date" id="fechaNacimientoMenor" class="form-control" />
+        </div>
         <div class="col-md-4">
           <label class="form-label">Nombres</label>
           <input
@@ -248,10 +256,6 @@
             class="form-control"
             placeholder="Nombres"
           />
-        </div>
-        <div class="col-md-4">
-          <label class="form-label">Fecha de nacimiento</label>
-          <input type="date" id="fechaNacimientoMenor" class="form-control" />
         </div>
         <div class="col-md-4">
           <label class="form-label">Apellido paterno</label>
@@ -263,15 +267,6 @@
           />
         </div>
         <div class="col-md-4">
-          <label class="form-label">Relación con el menor</label>
-          <select id="relacionMenor" class="form-select">
-            <option value="">Relación</option>
-            <option>Madre</option>
-            <option>Padre</option>
-            <option>Otro</option>
-          </select>
-        </div>
-        <div class="col-md-4">
           <label class="form-label">Apellido materno</label>
           <input
             type="text"
@@ -279,6 +274,15 @@
             class="form-control"
             placeholder="Apellido materno"
           />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Relación con el menor</label>
+          <select id="relacionMenor" class="form-select">
+            <option value="">Relación</option>
+            <option>Madre</option>
+            <option>Padre</option>
+            <option>Otro</option>
+          </select>
         </div>
         <div class="col-md-4">
           <div class="form-label">Sexo</div>
@@ -406,6 +410,12 @@
       MenorBlock.querySelector("select, input").focus();
     });
 
+    document
+      .getElementById("numeroDocNuevo")
+      .addEventListener("input", function (e) {
+        this.value = this.value.replace(/[^0-9]/g, "");
+      });
+
     let debounceTimer;
 
     // Escucha el input y retrasa 500 ms antes de buscar
@@ -413,10 +423,9 @@
       .getElementById("numeroDocNuevo")
       .addEventListener("input", function () {
         clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(buscarPersona, 1500);
+        debounceTimer = setTimeout(buscarPersona, 1000);
       });
 
-    // (Opcional) si quieres que también réaccione al cambiar el tipo de documento
     document
       .getElementById("tipoDocNuevo")
       .addEventListener("change", buscarPersona);
@@ -441,44 +450,56 @@
         return;
       }
 
-      fetch(
-        `/ecommerce/home/api/get_persona_data?tipoDoc=${encodeURIComponent(
-          tipoDoc
-        )}&numDoc=${encodeURIComponent(numDoc)}`
-      )
-        .then((r) => r.json())
-        .then((json) => {
-          if (json.Status === "success") {
-            const d = json.data;
-            if (d.nombres) document.getElementById("nombres").value = d.nombres;
-            else document.getElementById("nombres").value = "Nombres";
+      if (tipoDoc === "DNI" && numDoc.length == 8) {
+        fetch(
+          `/ecommerce/home/api/get_persona_data?tipoDoc=${encodeURIComponent(
+            tipoDoc
+          )}&numDoc=${encodeURIComponent(numDoc)}`
+        )
+          .then((r) => r.json())
+          .then((json) => {
+            if (json.Status === "success") {
+              const d = json.data;
+              if (d.nombres)
+                document.getElementById("nombres").value = d.nombres;
+              else document.getElementById("nombres").value = "Nombres";
 
-            if (d.apellidoPaterno)
-              document.getElementById("apellidoPaterno").value =
-                d.apellidoPaterno;
-            else
+              if (d.apellidoPaterno)
+                document.getElementById("apellidoPaterno").value =
+                  d.apellidoPaterno;
+              else
+                document.getElementById("apellidoPaterno").value =
+                  "Apellido paterno";
+
+              if (d.apellidoMaterno)
+                document.getElementById("apellidoMaterno").value =
+                  d.apellidoMaterno;
+              else
+                document.getElementById("apellidoMaterno").value =
+                  "Apellido materno";
+              toastr.success(json.Msj, "OK");
+            } else {
+              document.getElementById("nombres").value = "Nombres";
               document.getElementById("apellidoPaterno").value =
                 "Apellido paterno";
-
-            if (d.apellidoMaterno)
-              document.getElementById("apellidoMaterno").value =
-                d.apellidoMaterno;
-            else
               document.getElementById("apellidoMaterno").value =
                 "Apellido materno";
-            toastr.success(json.Msj, "OK");
-          } else {
-            document.getElementById("nombres").value = "Nombres";
-            document.getElementById("apellidoPaterno").value =
-              "Apellido paterno";
-            document.getElementById("apellidoMaterno").value =
-              "Apellido materno";
-            toastr.error(json.Msj, "ERROR");
-          }
-        })
-        .catch(() =>
-          toastr.error("No se ha podido conectar con el servidor", "ERROR")
+              toastr.error(json.Msj, "ERROR");
+            }
+          })
+          .catch(() =>
+            toastr.error("No se ha podido conectar con el servidor", "ERROR")
+          );
+        return;
+      }
+
+      if (tipoDoc === "CE" && numDoc.length !== 11) {
+        toastr.warning(
+          "El número de CE debe tener al menos 7 dígitos",
+          "MENSAJE DEL SISTEMA"
         );
+        return;
+      }
     }
   });
 </script>
