@@ -117,7 +117,16 @@
   </div>
 
   <div class="mt-4 text-end">
+    <button type="button" id="regresar" class="btn btn-primary">Regresar al inicio</button>
     <button type="submit" class="btn btn-primary">Actualizar Perfil</button>
   </div>
 </form>
+{% endblock %}
+{% block scripts %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+  $("#regresar").click(function() {
+    window.location.href = "/ecommerce/home/inicio";
+  });
+</script>
 {% endblock %}

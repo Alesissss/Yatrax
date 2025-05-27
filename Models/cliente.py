@@ -53,7 +53,7 @@ class Cliente:
 
     @classmethod
     def verificar_correo_cliente(cls,correo):
-        conexion = Conexion()
+        conexion = bd.Conexion()
         status = -1
         try:
             conn = conexion.obtener_conexion()
