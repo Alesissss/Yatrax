@@ -560,7 +560,21 @@ CREATE TABLE nivel_herramienta(
  
 );
 
+-- INSERT TIPO CLIENTE
+INSERT INTO tipo_cliente (nombre, estado, usuario)
+VALUES 
+('Bebé', TRUE, 'admin'),
+('Niño', TRUE, 'admin'),
+('Adulto', TRUE, 'admin');
 
+-- INSERT TIPO DOCUMENTO
+INSERT INTO tipo_documento (nombre, abreviatura, estado, usuario)
+VALUES ('DOCUMENTO NACIONAL DE IDENTIFICACION', 'DNI', TRUE, 'admin');
+INSERT INTO tipo_documento (nombre, abreviatura, estado, usuario)
+VALUES ('REGISTRO UNICO DE CONTRIBUYENTE', 'RUC', TRUE, 'admin');
+
+
+-- INSERT SERVICIO
 insert into servicio values (1,'Premium','Los autobuses más modernos y lujosos del mercado. Asientos cama, entretenimiento a bordo, snacks incluidos, aire acondicionado y cargadores USB. Ideal para viajes de largo trayecto.',1,'2025-05-25 19:30:00','Alexis','Static/img/servicios/busPremium.png');
 insert into servicio values (2,'Económico','Autobuses cómodos y seguros a precios accesibles. Pensado para usuarios que priorizan economía sin perder calidad.',1,'2025-05-25 19:32:00','Alexis','Static/img/servicios/busEconomico.png');
 insert into servicio values (3,'Exprés','Servicios rápidos con pocas paradas. Unidades modernas y seguras para viajeros que buscan llegar en el menor tiempo posible.',1,'2025-05-25 19:40:00','Alexis','Static/img/servicios/busExpress.png');

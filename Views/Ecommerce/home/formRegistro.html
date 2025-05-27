@@ -135,42 +135,42 @@
                     <select id="tipo-doc" name="tipo-doc" required>
                         <option value="" disabled selected>Tipo</option>
                         {% for tipo in TipoDocumento %}
-                            <option value="{{ tipo.abreviatura }}">{{ tipo.abreviatura }}</option>
+                            <option value="{{ tipo.id }}">{{ tipo.abreviatura }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div class="col">
-                    <input type="text" id="ytrx-doc-number" class="ytrx-form-input" placeholder="Número de documento" required>
+                    <input type="text" id="ytrx-doc-number" name="ytrx-doc-number" class="ytrx-form-input" placeholder="Número de documento" required>
                 </div>
             </div>
 
             <!-- Nombre o razón social -->
             <div class="ytrx-input-group" id="grupo-nombres">
-                <input type="text" id="ytrx-fullname" class="ytrx-form-input" placeholder="Nombres" required>
+                <input type="text" id="ytrx-fullname" name="ytrx-fullname" class="ytrx-form-input" placeholder="Nombres" required>
             </div>
             <div class="ytrx-input-group" id="grupo-razon-social" style="display: none;">
-                <input type="text" id="ytrx-razon-social" class="ytrx-form-input" placeholder="Razón social">
+                <input type="text" id="ytrx-razon-social" name="ytrx-razon-social" class="ytrx-form-input" placeholder="Razón social">
             </div>
 
             <!-- Apellidos -->
             <div class="row" id="grupo-apellidos">
                 <div class="ytrx-input-group col">
-                    <input type="text" id="ytrx-lastname-father" class="ytrx-form-input" placeholder="Apellido Paterno">
+                    <input type="text" id="ytrx-lastname-father" name="ytrx-lastname-father" class="ytrx-form-input" placeholder="Apellido Paterno">
                 </div>
                 <div class="ytrx-input-group col">
-                    <input type="text" id="ytrx-lastname-mother" class="ytrx-form-input" placeholder="Apellido Materno">
+                    <input type="text" id="ytrx-lastname-mother" name="ytrx-lastname-mother" class="ytrx-form-input" placeholder="Apellido Materno">
                 </div>
             </div>
 
             <!-- Fecha nacimiento -->
             <div class="ytrx-input-group" id="grupo-fecha-nacimiento">
-                <input type="date" id="ytrx-birthdate" class="ytrx-form-input">
+                <input type="date" id="ytrx-birthdate"  name="ytrx-birthdate" class="ytrx-form-input">
             </div>
 
             <!-- Sexo -->
             <div class="row" id="grupo-sexo">
                 <div class="ytrx-input-group col">
-                    <select id="ytrx-gender">
+                    <select id="ytrx-gender" name="ytrx-gender">
                         <option value="" disabled selected>Sexo</option>
                         <option value="M">Masculino</option>
                         <option value="F">Femenino</option>
@@ -180,12 +180,12 @@
 
             <!-- Teléfono -->
             <div class="ytrx-input-group">
-                <input type="tel" id="ytrx-phone" class="ytrx-form-input" placeholder="Número de teléfono" required>
+                <input type="tel" id="ytrx-phone" name="ytrx-phone" class="ytrx-form-input" placeholder="Número de teléfono" >
             </div>
 
             <!-- País -->
             <div class="ytrx-input-group">
-                <select id="ytrx-country" required>
+                <select id="ytrx-country" name="ytrx-country">
                     <option value="" disabled selected>País</option>
                     {% for pais in Paises %}
                             <option value="{{ pais.id }}">{{ pais.nombre }}</option>
@@ -195,22 +195,22 @@
 
             <!-- Dirección -->
             <div class="ytrx-input-group">
-                <input type="text" id="ytrx-address" class="ytrx-form-input" placeholder="Dirección" required>
+                <input type="text" id="ytrx-address" name="ytrx-address" class="ytrx-form-input" placeholder="Dirección">
             </div>
 
             <!-- Correo -->
             <div class="ytrx-input-group">
-                <input type="email" id="ytrx-email" class="ytrx-form-input" placeholder="Correo electrónico" required>
+                <input type="email" id="ytrx-email" name="ytrx-email"  class="ytrx-form-input" placeholder="Correo electrónico" required>
             </div>
 
             <!-- Contraseña -->
             <div class="ytrx-input-group">
-                <input type="password" id="ytrx-password" class="ytrx-form-input" placeholder="Contraseña" required>
+                <input type="password" id="ytrx-password" name="ytrx-password" class="ytrx-form-input" placeholder="Contraseña" required>
             </div>
 
             <!-- Confirmar contraseña -->
             <div class="ytrx-input-group">
-                <input type="password" id="ytrx-confirm-password" class="ytrx-form-input" placeholder="Confirma contraseña" required>
+                <input type="password" id="ytrx-confirm-password" name="ytrx-confirm-password" class="ytrx-form-input" placeholder="Confirma contraseña" required>
                 <div id="password-error" style="color: red; font-size: 13px; display: none; margin-top: 5px;">
                     Las contraseñas no coinciden.
                 </div>
@@ -256,8 +256,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const campoPassword = document.getElementById('ytrx-password');
     const campoConfirmPassword = document.getElementById('ytrx-confirm-password');
 
+    // Mostrar/ocultar campos según tipo de documento
     tipoDoc.addEventListener('change', function () {
-        const seleccionado = tipoDoc.value;
+        const seleccionado = tipoDoc.options[tipoDoc.selectedIndex].text;
 
         if (seleccionado === 'RUC') {
             razonSocial.style.display = 'block';
@@ -271,7 +272,6 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('ytrx-lastname-mother').value = '';
             document.getElementById('ytrx-gender').selectedIndex = 0;
             document.getElementById('ytrx-birthdate').value = '';
-
             document.getElementById('ytrx-razon-social').required = true;
             document.getElementById('ytrx-fullname').required = false;
         } else {
@@ -288,10 +288,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    form.addEventListener('submit', function (e) {
+    // Envío del formulario con AJAX
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
         const errorMsg = document.getElementById('password-error');
         if (campoPassword.value !== campoConfirmPassword.value) {
-            e.preventDefault();
             errorMsg.style.display = 'block';
             campoConfirmPassword.focus();
             return;
@@ -299,12 +301,34 @@ document.addEventListener('DOMContentLoaded', function () {
             errorMsg.style.display = 'none';
         }
 
-        if (tipoDoc.value === 'RUC' && document.getElementById('ytrx-razon-social').value.trim() === '') {
-            e.preventDefault();
+        if (tipoDoc.options[tipoDoc.selectedIndex].text === 'RUC' &&
+            document.getElementById('ytrx-razon-social').value.trim() === '') {
             alert('Debe ingresar la Razón Social para RUC.');
             return;
+        }
+
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch("RegistrarClienteForm", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.Status === "success") {
+                alert("✅ Registro exitoso: " + (data.Msj || data.Msj2));
+                form.reset();
+            } else {
+                alert("❌ Error: " + data.Msj);
+            }
+        } catch (error) {
+            alert("❌ Error al enviar el formulario."+error);
+            console.error(error);
         }
     });
 });
 </script>
+
 {% endblock %}

@@ -7,6 +7,7 @@ from Models.cliente import Cliente
 
 from Models.tipoDocumento import TipoDocumento
 from Models.pais import Pais
+from Models.cliente import Cliente
 homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/home')
 
 # # ERRORES 
@@ -132,7 +133,64 @@ def get_persona_data():
             return jsonify({'data': {}, 'Status': 'success', 'Msj': 'No hay datos para el tipo de documento ingresado'})
     except Exception as e:
         return jsonify({'data': {}, 'Status': 'error', 'Msj': f'Error en el servidor: {repr(e)}'})
+    
 
 # FIN API NET RENIEC
 
+
+@homeClientes_bp.route("/RegistrarClienteForm", methods=["POST"])
+def registrar_cliente_form():
+    try:
+        # Obtener datos del formulario (coinciden con los IDs en tu HTML)
+        id_tipo_doc = request.form.get("tipo-doc")
+        numero_documento = request.form.get("ytrx-doc-number", "").strip()
+        razon_social = request.form.get("ytrx-razon-social", "").strip()
+        nombres = request.form.get("ytrx-fullname", "").strip()
+        ape_paterno = request.form.get("ytrx-lastname-father", "").strip()
+        ape_materno = request.form.get("ytrx-lastname-mother", "").strip()
+        sexo = request.form.get("ytrx-gender")
+        f_nacimiento = request.form.get("ytrx-birthdate")
+        telefono = request.form.get("ytrx-phone", "").strip()
+        direccion = request.form.get("ytrx-address", "").strip()
+        id_pais = request.form.get("ytrx-country")
+        email = request.form.get("ytrx-email", "").strip()
+        password_raw = request.form.get("ytrx-password", "").strip()
+
+        # Validaciones básicas
+
+        # Hash de la contraseña (SHA-256)
+        import hashlib
+        password = hashlib.sha256(password_raw.encode()).hexdigest()
+
+        # Determinar tipo de cliente
+
+        # Registrar cliente
+        mensajes = Cliente.registrarForm(
+            id_pais=id_pais,
+            id_tipo_cliente=1,
+            id_tipo_doc=id_tipo_doc,
+            numero_documento=numero_documento,
+            nombres=nombres,
+            ape_paterno=ape_paterno,
+            ape_materno=ape_materno,
+            sexo=sexo,
+            f_nacimiento=f_nacimiento,
+            razon_social=razon_social,
+            direccion=direccion,
+            telefono=telefono,
+            email=email,
+            password=password,
+            usuario=email
+        )
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+        if msj1:
+            return jsonify({"Status": "success", "Msj": msj1, "Msj2": ""})
+        elif msj2:
+            return jsonify({"Status": "success", "Msj": "", "Msj2": msj2})
+        else:
+            return jsonify({"Status": "error", "Msj": "Error desconocido al registrar cliente"})
+
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
 # END FUNCIONES
