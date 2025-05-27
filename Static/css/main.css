@@ -1,3 +1,10 @@
+body{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
 header {
   background-image: url("../img/fondo_banner.webp");
   background-repeat: no-repeat;
