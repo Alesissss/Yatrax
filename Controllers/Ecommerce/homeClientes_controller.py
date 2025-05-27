@@ -75,6 +75,7 @@ def logoutCliente():
         session.pop('cliente',None)
         return redirect("/ecommerce/home/inicio")
     
+#REGION POR TERMINAR    
 @homeClientes_bp.route("/miPerfil",methods=["GET","POST"])
 def perfilCliente():
     if request.method == "GET":
@@ -85,6 +86,20 @@ def perfilCliente():
     else:
         pass
 
+#Los HTML para recuperar contraseña del lado del cliente aun no existen
+@homeClientes_bp.route("",methods=["GET","POST"])
+def cambiarContrasena():
+    if request.method == "GET":
+        return render_template("Ecommerce/home/forgotPassword.html")
+    else:
+        email = request.form["correo"]
+        respuesta = Cliente.verificar_correo_cliente(email)
+        if respuesta == 1:
+            return jsonify({"mensaje":"Correo valido, a continuación se enviará el código de verificación","status":1})
+        else:
+            return jsonify({"mensaje":"Correo no valido, vuelva a intentarlo","status":0})
+            
+# END POR TERMINAR
 @homeClientes_bp.route('/forgotPass')
 def forgot_password():
     return render_template('Ecommerce/home/forgotPassword.html')
