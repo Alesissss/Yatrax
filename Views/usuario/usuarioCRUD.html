@@ -106,7 +106,7 @@
     function fct_GetTiposUsuarios() {
         $.getJSON('/trabajadores/usuarios/GetTiposUsuarios', function (response) {
             if (response.Status === 'success') {
-                let items = '<option disabled>--SELECCIONAR--</option>';
+                let items = '<option disabled selected>--SELECCIONAR--</option>';
 
                 $.each(response.data, function (index, item) {
                     if (item.id === Number("{{ usuario.id_tipousuario }}")) {

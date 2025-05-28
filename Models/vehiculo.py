@@ -20,10 +20,13 @@ class Vehiculo:
                     v.placa as placa,
                     v.anio as anio,
                     v.color as color,
+                    tpve.id as idTipoVehiculo,
                     tpve.nombre as tipoVehiculo,
+                    s.id as idServicio,
+                    s.nombre as servicio,
                     m.nombre as marca,
                     v.estado as estado
-                FROM vehiculo v left join tipo_vehiculo tpve on v.id_tipo_vehiculo=tpve.id inner join marca m on tpve.id_marca=m.id;
+                FROM vehiculo v left join tipo_vehiculo tpve on v.id_tipo_vehiculo=tpve.id inner join marca m on tpve.id_marca=m.id inner join servicio s on tpve.id_servicio = s.id;
             """)
             return listado
         except Exception as e:

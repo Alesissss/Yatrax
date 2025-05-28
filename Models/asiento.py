@@ -41,6 +41,21 @@ class Asiento:
             return asiento[0] if asiento else None
         finally:
             conexion.cerrar()
+            
+    @classmethod
+    def obtener_por_id_vehiculo(cls, vehiculo_id):
+        conexion = bd.Conexion()
+        try:
+            asientos = conexion.obtener(""" SELECT a.id, a.nro_asiento, n.nroPiso AS nivel, a.tipo_asiento, a.estado 
+                FROM asiento a 
+                INNER JOIN nivel n ON a.id_nivel = n.id 
+                INNER JOIN nivel_herramienta nh ON n.id = nh.id_nivel 
+                INNER JOIN herramienta h ON h.id = nh.id_herramienta
+                INNER JOIN tipo_herramienta th ON th.id = h.id_tipo
+                WHERE th.id = 1 AND a.id_vehiculo = %s """, (vehiculo_id,))
+            return asientos
+        finally:
+            conexion.cerrar()
 
     @classmethod
     def registrar(cls, nro_asiento, id_nivel, tipo_asiento, estado, usuario):
