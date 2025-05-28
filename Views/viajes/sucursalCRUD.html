@@ -23,7 +23,7 @@
                                 <label for="txt_nombre">Nombre</label>
                                 <div class="input-group">
                                     <input type="text" id="txt_nombre" class="form-control" placeholder="Nombre"
-                                        value="{{ sucursal.nombre }}" oninput="this.value = this.value;" {% if
+                                        value="{{ sucursal.nombre }}" oninput="this.value = this.value.toUpperCase();" {% if
                                         btnId=='btn_Aceptar' %}disabled{% endif %}>
                                     <div class="input-group-append">
                                         <div class="input-group-text"><i class="fas fa-home"></i></div>
@@ -34,7 +34,7 @@
                                 <label for="txt_direccion">Dirección</label>
                                 <div class="input-group">
                                     <input type="text" id="txt_direccion" class="form-control" placeholder="Dirección"
-                                        value="{{ sucursal.direccion }}" oninput="this.value = this.value;" {% if
+                                        value="{{ sucursal.direccion }}" oninput="this.value = this.value.toUpperCase();" {% if
                                         btnId=='btn_Aceptar' %}disabled{% endif %}>
                                     <div class="input-group-append">
                                         <div class="input-group-text"><i class="fa fa-map"></i></div>
@@ -45,7 +45,7 @@
                                 <label for="txt_ubicacion">Ubicación</label>
                                 <div class="input-group">
                                     <input type="text" id="txt_ubicacion" class="form-control" placeholder="Ubicación"
-                                        readonly value="{{ ubicacion }}" oninput="this.value = this.value;">
+                                        readonly value="{{ ubicacion }}" oninput="this.value = this.value.toUpperCase();">
                                     <div class="input-group-append">
                                         <div class="input-group-text"><i class="fa fa-map"></i></div>
                                     </div>
@@ -68,7 +68,7 @@
                                 <label for="txt_abreviatura">Abreviatura</label>
                                 <div class="input-group">
                                     <input type="text" id="txt_abreviatura" class="form-control" readonly
-                                        value="{{ sucursal.abreviatura }}" oninput="this.value = this.value;">
+                                        value="{{ sucursal.abreviatura }}" oninput="this.value = this.value.toUpperCase();">
                                     <div class="input-group-append">
                                         <div class="input-group-text"><i class="fa fa-map"></i></div>
                                     </div>
@@ -279,7 +279,7 @@
 
                     // Obtener los componentes de la dirección
                     const departamento = address.state || '';
-                    const provincia = address.region || '';
+                    const provincia = address.region || address.state || '';
                     const distrito = address.village || address.town || address.suburb || address.city || address.hamlet || '';
                     const direccionCompleta = data.display_name || 'Dirección no disponible';
                     const country = address.country || '';

@@ -460,7 +460,7 @@ pasaje{%endblock %} {% block contenido %}
         edad--;
       }
 
-      if (edad > 2) {
+      if (edad >= 3) {
         toastr.warning(
           "Solo se puede viajar con menores de 2 años",
           "MENSAJE DEL SISTEMA"
@@ -496,7 +496,7 @@ pasaje{%endblock %} {% block contenido %}
 
       if (edad < 18) {
         toastr.warning(
-          "Menores a 18 años necesitan autorización de sus padres o tutores",
+          "Menores a 18 años necesitan presentar autorización de sus padres o tutores para viajar",
           "MENSAJE DEL SISTEMA"
         );
         //marcar el checkbox de menor
@@ -512,7 +512,7 @@ pasaje{%endblock %} {% block contenido %}
       .getElementById("fechaNacimientoNuevo")
       .addEventListener("change", validarEdadNuevoPasajero);
 
-    // Escucha el input y retrasa 500 ms antes de buscar
+    // Escucha el input y retrasa 1000 ms antes de buscar
     document
       .getElementById("numeroDocNuevo")
       .addEventListener("input", function () {
@@ -669,9 +669,9 @@ pasaje{%endblock %} {% block contenido %}
         return;
       }
 
-      if (tipoDoc === "CE" && numDoc.length !== 11) {
+      if (tipoDoc === "CE" && numDoc.length !== 12) {
         toastr.warning(
-          "El número de CE debe tener al menos 7 dígitos",
+          "El número de CE debe tener al menos 11 dígitos",
           "MENSAJE DEL SISTEMA"
         );
         return;

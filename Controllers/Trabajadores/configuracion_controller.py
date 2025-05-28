@@ -78,6 +78,14 @@ def Menu_TipoMetodoPago():
 def Menu_TipoServicioNuevo():
     return render_template('configuracion/tipoMetodoPagoCRUD.html', active_page="tipoMetodoPago", active_menu = 'mConfiguracion', tipoMetodoPago = {}, tittle = 'Registrar tipo de metodo de Pago', btnId = 'btn_Registrar')
 
+@configuracion_bp.route('/Menu_TerminosCondiciones')
+def Menu_TerminosCondiciones():
+    return render_template('configuracion/terminosYCondiciones.html', active_page="terminosCondiciones", active_menu='mConfiguracion')
+
+@configuracion_bp.route('/TerminosCondicionesNuevo')
+def TerminosCondiciones_Nuevo():
+    return render_template('configuracion/terminosYCondicionesCRUD.html', active_page="terminosCondiciones", active_menu='mConfiguracion', terminosCondiciones={}, tittle = 'Registrar términos y condiciones', btnId = 'btn_Registrar')
+
 # END VIEWS
 
 # FUNCIONES
@@ -613,4 +621,9 @@ def get_tipo_metodos_pago():
         return jsonify({"Status": "error", "Msj": f"Error al obtener los tipos de métodos de pago: {repr(e)}", "data": []})
 
 # END REGION TIPO METODO PAGO
+
+# REGION TERMINOS Y CONDICIONES
+
+# END REGION TERMINOS Y CONDICIONES
+
 # END FUNCIONES
