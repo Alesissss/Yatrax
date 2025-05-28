@@ -17,7 +17,9 @@ class TipoVehiculo:
                 SELECT 
                     tv.id AS id,
                     tv.nombre AS nombre,
+                    m.id as id_marca,
                     m.nombre AS marca,
+                    s.id as id_servicio,
                     s.nombre AS servicio,
                     tv.cantidad,
                     tv.estado
@@ -26,8 +28,10 @@ class TipoVehiculo:
                 LEFT JOIN servicio s ON tv.id_servicio = s.id 
                 GROUP BY 
                     tv.id, 
-                    tv.nombre, 
+                    tv.nombre,
+                    m.id,
                     m.nombre,
+                    s.id,
                     s.nombre,
                     tv.cantidad, 
                     tv.estado;

@@ -131,7 +131,7 @@
     function fct_GetMarcas() {
         $.getJSON('/trabajadores/viajes/GetMarcasTipoVehiculo', function (response) {
             if (response.Status === 'success') {
-                let items = '<option disabled>--SELECCIONAR--</option>';
+                let items = '<option disabled selected>--SELECCIONAR--</option>';
 
                 $.each(response.data, function (index, item) {
                     if (item.id === Number("{{ tipoVehiculo.id_marca }}")) {
@@ -151,7 +151,7 @@
     function fct_GetServicios() {
         $.getJSON('/trabajadores/viajes/GetServiciosTipoVehiculo', function (response) {
             if (response.Status === 'success') {
-                let items = '<option disabled>--SELECCIONAR--</option>';
+                let items = '<option disabled selected>--SELECCIONAR--</option>';
 
                 $.each(response.data, function (index, item) {
                     if (item.id === Number("{{ tipoVehiculo.id_servicio }}")) {
@@ -183,12 +183,12 @@
 
         $("#btn_Registrar").click(function () {
             let nombre = $("#txt_Nombre").val().trim();
-            let marca = $("#cbx_Marca").val().trim();
+            let marca = $("#cbx_Marca").val();
             let cantidad = $("#txt_Cantidad").val().trim();
             let estado = $('#cbx_Estado').val();
             let servicio = $('#cbx_Servicio').val();
 
-            if (!nombre || !estado || !marca || !cantidad) {
+            if (!nombre || !estado || !marca || !cantidad || !servicio) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
@@ -248,12 +248,12 @@
             const id = Number("{{ tipoVehiculo.id }}");
 
             let nombre = $("#txt_Nombre").val().trim();
-            let marca = $("#cbx_Marca").val().trim();
+            let marca = $("#cbx_Marca").val();
             let cantidad = $("#txt_Cantidad").val().trim();
             let estado = $('#cbx_Estado').val();
             let servicio = $('#cbx_Servicio').val();
 
-            if (!nombre || !estado || !marca || !cantidad) {
+            if (!nombre || !estado || !marca || !cantidad || !servicio) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
