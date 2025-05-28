@@ -1370,9 +1370,9 @@ def get_asientos_viaje():
         id = request.args.get('id', type=int)
         asientos = Asiento.obtener_por_id_vehiculo(id)
 
-        return jsonify({'data': asientos, 'Status': 'success', 'Msj': 'Listado de vehículos retornado exitosamente'})
+        return jsonify({'data': asientos, 'Status': 'success', 'Msj': 'Listado de asientos retornado exitosamente'})
     except Exception as e:
-        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar vehículos: + {repr(e)}'})
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar asientos: + {repr(e)}'})
 
 @viajes_bp.route("/RegistrarViaje", methods=["POST"])
 def registrar_viaje():

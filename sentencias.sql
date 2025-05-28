@@ -122,6 +122,7 @@ DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_METODOPAGO;
 
 DROP PROCEDURE IF EXISTS SP_CAMBIAR_CLAVE;
 -- Luego eliminamos las tablas, primero la que depende de la otra
+DROP TABLE IF EXISTS conf_general;
 DROP TABLE IF EXISTS detalle_personal;
 DROP TABLE IF EXISTS viaje;
 DROP TABLE IF EXISTS estado_viaje;
@@ -616,10 +617,10 @@ INSERT INTO tipo_personal (id, nombre, estado, usuario) VALUES (1, 'CHOFER', 1, 
 INSERT INTO tipo_personal (id, nombre, estado, usuario) VALUES (2, 'TRIPULANTE', 1, 'SYSTEM');
 
 -- INSERTS personal
-INSERT INTO tipo_personal (id, nombre, imagen, estado, id_tipopersonal) VALUES (1, 'Louis Requejo Chirinos', "/Static/img/trabajadores/default-user.png", 1);
-INSERT INTO tipo_personal (id, nombre, imagen, estado, id_tipopersonal) VALUES (2, 'Anderson Baca Chuquimanco', "/Static/img/trabajadores/default-user.png", 1);
-INSERT INTO tipo_personal (id, nombre, imagen, estado, id_tipopersonal) VALUES (3, 'Edgar Alarcón Chapoñan', "/Static/img/trabajadores/default-user.png", 2);
-INSERT INTO tipo_personal (id, nombre, imagen, estado, id_tipopersonal) VALUES (4, 'Luis Cruz Chinchay', "/Static/img/trabajadores/default-user.png", 2);
+INSERT INTO personal (id, nombre, imagen, estado, id_tipopersonal) VALUES (1, 'Louis Requejo Chirinos', "/Static/img/trabajadores/default-user.png", 1, 1);
+INSERT INTO personal (id, nombre, imagen, estado, id_tipopersonal) VALUES (2, 'Anderson Baca Chuquimanco', "/Static/img/trabajadores/default-user.png", 1, 1);
+INSERT INTO personal (id, nombre, imagen, estado, id_tipopersonal) VALUES (3, 'Edgar Alarcón Chapoñan', "/Static/img/trabajadores/default-user.png", 1, 2);
+INSERT INTO personal (id, nombre, imagen, estado, id_tipopersonal) VALUES (4, 'Luis Cruz Chinchay', "/Static/img/trabajadores/default-user.png", 1, 2);
 
 -- INSERT TIPO CLIENTE
 INSERT INTO tipo_cliente (nombre, estado, usuario)

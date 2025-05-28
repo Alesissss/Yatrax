@@ -206,7 +206,49 @@
     }
 
     function fct_GetPersonal() {
+        $.getJSON('/trabajadores/viajes/GetData_PersonalViajes', function (response) {
+            if (response && response.Status === "success") {
+                const personal = response.data;
 
+                const choferes = personal.filter(p => p.id_tipopersonal == 1);
+                const tripulantes = personal.filter(p => p.id_tipopersonal == 2);
+
+                let itemsChofer = '';
+                choferes.forEach(c => {
+                    itemsChofer += `<option value="${c.id}">${c.nombre}</option>`;
+                });
+
+                let itemsTripulante = '';
+                tripulantes.forEach(t => {
+                    itemsTripulante += `<option value="${t.id}">${t.nombre}</option>`;
+                });
+
+                $('#cbx_Chofer').html(itemsChofer).select2({
+                    theme: 'bootstrap4',
+                    placeholder: "Buscar chofer(es)...",
+                    language: {
+                        noResults: function () {
+                            return "No se encontraron resultados";
+                        }
+                    },
+                    allowClear: true
+                });
+
+                $('#cbx_Tripulante').html(itemsTripulante).select2({
+                    theme: 'bootstrap4',
+                    placeholder: "Buscar tripulante(s)...",
+                    language: {
+                        noResults: function () {
+                            return "No se encontraron resultados";
+                        }
+                    },
+                    allowClear: true
+                });
+
+            } else {
+                console.error('Error al obtener al personal:', response.Msj);
+            }
+        });
     }
 
     function fct_LlenarCombos() {
@@ -299,36 +341,6 @@
         fct_GetRutas();
         fct_GetPersonal();
         fct_LlenarCombos();
-
-        $('#cbx_Chofer').select2({
-            theme: 'bootstrap4',
-            containerCss: {
-                'background-color': '#1f2d3d',
-            },
-            placeholder: "Buscar...",
-            language: {
-                noResults: function () {
-                    return "No se encontraron resultados";
-                }
-            },
-            allowClear: true
-        });
-
-        $('#cbx_Chofer').val(0);
-
-        $('#cbx_Tripulante').select2({
-            theme: 'bootstrap4',
-            containerCss: {
-                'background-color': '#1f2d3d',
-            },
-            placeholder: "Buscar...",
-            language: {
-                noResults: function () {
-                    return "No se encontraron resultados";
-                }
-            },
-            allowClear: true
-        });
     });
 </script>
 {% endblock %}
