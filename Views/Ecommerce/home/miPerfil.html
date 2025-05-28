@@ -4,120 +4,124 @@
   <h4 class="mb-4">Mi Perfil</h4>
   {% set datosUsuario = session['cliente'] %}
 
+  <!-- Sección: Datos del cliente -->
+  <h5 class="text-primary mt-3 mb-3">Datos del Cliente</h5>
   <div class="row">
-    <!-- País -->
-    <div class="col-md-6 mb-3">
+    <div class="col-md-4 mb-3">
       <label for="id_pais" class="form-label">País</label>
       <select id="id_pais" name="id_pais" class="form-select" required>
-        <!-- Opciones dinámicas -->
-         {% for pais in paises%}
-            <option>{{ pais.nombre }}</option>
-         {% endfor %}
+        {% for pais in paises %}
+          <option value="{{ pais.id }}" {% if pais.id == datosUsuario.id_pais %}selected{% endif %}>{{ pais.nombre }}</option>
+        {% endfor %}
       </select>
     </div>
 
-    <!-- Tipo Cliente -->
-    <div class="col-md-6 mb-3">
+    <div class="col-md-4 mb-3">
       <label for="id_tipo_cliente" class="form-label">Tipo de Cliente</label>
       <select id="id_tipo_cliente" name="id_tipo_cliente" class="form-select" required>
-        <!-- Opciones dinámicas -->
-         {% for tipoCliente in tiposCliente %}
-            <option>{{ tipoCliente.TIPO }}</option>
-         {% endfor %}
-      </select>
-    </div>
-    
-    <!-- Tipo Documento -->
-    <div class="col-md-6 mb-3">
-      <label for="id_tipo_doc" class="form-label">Tipo de Documento</label>
-      <select id="id_tipo_doc" name="id_tipo_doc" class="form-select" value="" required>
-        <!-- Opciones dinámicas -->
-         {% for tipoDocumento in tipoDocumentos %}
-            <option>{{ tipoDocumento.nombre }}</option>
-         {% endfor %}
+        {% for tipoCliente in tiposCliente %}
+          <option value="{{ tipoCliente.id }}" {% if tipoCliente.id == datosUsuario.id_tipo_cliente %}selected{% endif %}>{{ tipoCliente.TIPO }}</option>
+        {% endfor %}
       </select>
     </div>
 
-    <!-- Número de Documento -->
-    <div class="col-md-6 mb-3">
+    <div class="col-md-4 mb-3">
+      <label for="razon_social" class="form-label">Razón Social</label>
+      <input type="text" id="razon_social" name="razon_social" value="{{ datosUsuario.razon_social if datosUsuario.razon_social else '' }}" class="form-control">
+    </div>
+  </div>
+
+  <!-- Sección: Documento de Identidad -->
+  <h5 class="text-primary mt-4 mb-3">Documento de Identidad</h5>
+  <div class="row">
+    <div class="col-md-4 mb-3">
+      <label for="id_tipo_doc" class="form-label">Tipo de Documento</label>
+      <select name="id_tipo_doc" id="id_tipo_doc" class="form-select">
+        {% for tipoDocumento in tipoDocumentos %}
+          <option value="{{ tipoDocumento.id }}" {% if tipoDocumento.id == datosUsuario.id_tipo_doc %}selected{% endif %}>{{ tipoDocumento.nombre }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-4 mb-3">
       <label for="numero_documento" class="form-label">Número de Documento</label>
       <input type="text" id="numero_documento" name="numero_documento" value="{{ datosUsuario.numero_documento }}" class="form-control" required>
     </div>
 
-    <!-- Nombres -->
-    <div class="col-md-6 mb-3">
-      <label for="nombres" class="form-label">Nombres</label>
-      <input type="text" id="nombres" name="nombres" class="form-control" value="{{datosUsuario.nombres}}" required>
-    </div>
-
-    <!-- Apellido Paterno -->
-    <div class="col-md-6 mb-3">
-      <label for="ape_paterno" class="form-label">Apellido Paterno</label>
-      <input type="text" id="ape_paterno" name="ape_paterno" value="{{datosUsuario.ape_paterno}}" class="form-control">
-    </div>
-
-    <!-- Apellido Materno -->
-    <div class="col-md-6 mb-3">
-      <label for="ape_materno" class="form-label">Apellido Materno</label>
-      <input type="text" id="ape_materno" name="ape_materno" value="{{datosUsuario.ape_materno}}" class="form-control">
-    </div>
-
-    <!-- Fecha de nacimiento -->
-    <div class="col-md-6 mb-3">
+    <div class="col-md-4 mb-3">
       <label for="f_nacimiento" class="form-label">Fecha de Nacimiento</label>
-        {% set meses = {
-            'Jan':'01', 'Feb':'02', 'Mar':'03', 'Apr':'04',
-            'May':'05', 'Jun':'06', 'Jul':'07', 'Aug':'08',
-            'Sep':'09', 'Oct':'10', 'Nov':'11', 'Dec':'12'
-        } %}
-        {% set partes = datosUsuario.f_nacimiento.split() %}
-        <input type="date" id="f_nacimiento" name="f_nacimiento"
-            value="{% if partes|length >= 4 %}{{ partes[3] }}-{{ meses[partes[2]] }}-{{ partes[1] }}{% endif %}"
-            class="form-control">
+      {% set meses = {'Jan':'01', 'Feb':'02', 'Mar':'03', 'Apr':'04', 'May':'05', 'Jun':'06', 'Jul':'07', 'Aug':'08', 'Sep':'09', 'Oct':'10', 'Nov':'11', 'Dec':'12'} %}
+      {% set partes = datosUsuario.f_nacimiento.split() %}
+      <input type="date" id="f_nacimiento" name="f_nacimiento"
+             value="{% if partes|length >= 4 %}{{ partes[3] }}-{{ meses[partes[2]] }}-{{ partes[1] }}{% endif %}"
+             class="form-control">
+    </div>
+  </div>
+
+  <!-- Sección: Datos Personales -->
+  <h5 class="text-primary mt-4 mb-3">Datos Personales</h5>
+  <div class="row">
+    <div class="col-md-4 mb-3">
+      <label for="nombres" class="form-label">Nombres</label>
+      <input type="text" id="nombres" name="nombres" class="form-control" value="{{ datosUsuario.nombres }}" required>
     </div>
 
-    <!-- Sexo -->
-    <div class="col-md-6 mb-3">
-        <label for="sexo" class="form-label">Sexo</label>
-        <select id="sexo" name="sexo" class="form-select">
-            <option value="1" {% if datosUsuario.sexo == 1 or datosUsuario.sexo == '1' %}selected{% endif %}>Masculino</option>
-            <option value="0" {% if datosUsuario.sexo == 0 or datosUsuario.sexo == '0' %}selected{% endif %}>Femenino</option>
-        </select>
+    <div class="col-md-4 mb-3">
+      <label for="ape_paterno" class="form-label">Apellido Paterno</label>
+      <input type="text" id="ape_paterno" name="ape_paterno" value="{{ datosUsuario.ape_paterno }}" class="form-control">
     </div>
 
-    <!-- Razon Social -->
-    <div class="col-md-6 mb-3">
-      <label for="razon_social" class="form-label">Razón Social</label>
-      <input type="text" id="razon_social" name="razon_social" value="{{ datosUsuario.razon_social if datosUsuario.razon_social else '' }}" class="form-control">
+    <div class="col-md-4 mb-3">
+      <label for="ape_materno" class="form-label">Apellido Materno</label>
+      <input type="text" id="ape_materno" name="ape_materno" value="{{ datosUsuario.ape_materno }}" class="form-control">
     </div>
 
-    <!-- Dirección -->
-    <div class="col-md-6 mb-3">
+    <div class="col-md-4 mb-3">
+      <label for="sexo" class="form-label">Sexo</label>
+      <select id="sexo" name="sexo" class="form-select">
+        <option value="1" {% if datosUsuario.sexo == 1 or datosUsuario.sexo == '1' %}selected{% endif %}>Masculino</option>
+        <option value="0" {% if datosUsuario.sexo == 0 or datosUsuario.sexo == '0' %}selected{% endif %}>Femenino</option>
+      </select>
+    </div>
+
+    <div class="col-md-4 mb-3">
       <label for="direccion" class="form-label">Dirección</label>
-      <input type="text" id="direccion" name="direccion" value="{{datosUsuario.direccion}}" class="form-control">
+      <input type="text" id="direccion" name="direccion" value="{{ datosUsuario.direccion }}" class="form-control">
     </div>
 
-    <!-- Teléfono -->
-    <div class="col-md-6 mb-3">
+    <div class="col-md-4 mb-3">
       <label for="telefono" class="form-label">Teléfono</label>
-      <input type="text" id="telefono" name="telefono" value="{{datosUsuario.telefono}}" class="form-control">
+      <input type="text" id="telefono" name="telefono" value="{{ datosUsuario.telefono }}" class="form-control">
     </div>
+  </div>
 
-    <!-- Email -->
+  <!-- Sección: Acceso -->
+  <h5 class="text-primary mt-4 mb-3">Datos de Acceso</h5>
+  <div class="row">
     <div class="col-md-6 mb-3">
       <label for="email" class="form-label">Correo electrónico</label>
-      <input type="email" id="email" name="email" value="{{datosUsuario.email}}" class="form-control" required>
+      <input type="email" id="email" name="email" value="{{ datosUsuario.email }}" class="form-control" required>
     </div>
 
-    <!-- Contraseña -->
     <div class="col-md-6 mb-3">
       <label for="password" class="form-label">Contraseña</label>
       <input type="password" id="password" name="password" value="***********" class="form-control" placeholder="Dejar en blanco para no cambiar">
     </div>
   </div>
 
+  <!-- Botones -->
   <div class="mt-4 text-end">
+    <button type="button" id="regresar" class="btn btn-secondary">Regresar al inicio</button>
     <button type="submit" class="btn btn-primary">Actualizar Perfil</button>
   </div>
 </form>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+  $("#regresar").click(function () {
+    window.location.href = "/ecommerce/home/inicio";
+  });
+</script>
 {% endblock %}
