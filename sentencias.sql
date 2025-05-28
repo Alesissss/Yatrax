@@ -126,6 +126,10 @@ DROP PROCEDURE IF EXISTS SP_ELIMINAR_TERMINOS_CONDICIONES;
 
 DROP PROCEDURE IF EXISTS SP_CAMBIAR_CLAVE;
 -- Luego eliminamos las tablas, primero la que depende de la otra
+DROP TABLE IF EXISTS conf_general;
+DROP TABLE IF EXISTS detalle_personal;
+DROP TABLE IF EXISTS viaje;
+DROP TABLE IF EXISTS estado_viaje;
 DROP TABLE IF EXISTS personal_incidencia;
 DROP TABLE IF EXISTS incidencia;
 DROP TABLE IF EXISTS servicio_microservicio;
@@ -190,7 +194,7 @@ CREATE TABLE incidencia (
     nombre VARCHAR (255) NOT NULL,
     descripcion VARCHAR (255) NOT NULL,
     duracion_sancion INT NOT NULL,
-    estado BIT NOT NULL,
+    estado BOOLEAN NOT NULL,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(255) NOT NULL
 
@@ -407,6 +411,13 @@ CREATE TABLE asiento (
     usuario VARCHAR(100) NOT NULL
 );
 
+-- Crear tabla conf_general
+CREATE TABLE conf_general (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    igv DECIMAL(9,2) NOT NULL,
+    max_pasajes_venta INT NOT NULL,
+    viajesReprogramables BOOLEAN NOT NULL
+);
 
 -- Crear tabla menus
 CREATE TABLE conf_menus (
@@ -549,7 +560,7 @@ CREATE TABLE personal_incidencia (
     incidenciaid INT NOT NULL,
     descripcion VARCHAR(255) NOT NULL,
     fecha_fin DATETIME NOT NULL,
-    estado BIT NOT NULL,
+    estado BOOLEAN NOT NULL,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(255) NOT NULL,
     PRIMARY KEY (personalid, incidenciaid),
@@ -573,6 +584,58 @@ CREATE TABLE nivel_herramienta(
  
 );
 
+CREATE TABLE estado_viaje (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR (100) NOT NULL  
+);
+
+CREATE TABLE viaje (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idRuta INT NOT NULL,
+    idVehiculo INT NOT NULL,
+    estado BOOLEAN NOT NULL,
+    estadoViaje INT NOT NULL,
+    esReprogramado BOOLEAN DEFAULT 0,
+    esPostergado BOOLEAN DEFAULT 0,
+    fecha_salida_estimada DATETIME NOT NULL,
+    fecha_salida_real DATETIME NULL,
+    fecha_llegada_estimada DATETIME NOT NULL,
+    fecha_llegada_real DATETIME NULL,
+
+    -- Auditoría
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL,
+    FOREIGN KEY (idVehiculo) REFERENCES vehiculo(id),
+    FOREIGN KEY (idRuta) REFERENCES ruta(id),
+    FOREIGN KEY (estadoViaje) REFERENCES estado_viaje(id)
+);
+
+CREATE TABLE detalle_personal (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idPersonal INT NOT NULL,
+    idTipoPersonal INT NOT NULL,
+    idViaje INT NOT NULL,
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL,
+    FOREIGN KEY (idPersonal) REFERENCES personal(id),
+    FOREIGN KEY (idViaje) REFERENCES viaje(id)
+);
+
+-- INSERTS estado_viaje
+INSERT INTO estado_viaje (id, nombre) VALUES (1, 'PENDIENTE');
+INSERT INTO estado_viaje (id, nombre) VALUES (2, 'EN CURSO');
+INSERT INTO estado_viaje (id, nombre) VALUES (3, 'FINALIZADO');
+
+-- INSERTS tipo_personal
+INSERT INTO tipo_personal (id, nombre, estado, usuario) VALUES (1, 'CHOFER', 1, 'SYSTEM');
+INSERT INTO tipo_personal (id, nombre, estado, usuario) VALUES (2, 'TRIPULANTE', 1, 'SYSTEM');
+
+-- INSERTS personal
+INSERT INTO personal (id, nombre, imagen, estado, id_tipopersonal) VALUES (1, 'Louis Requejo Chirinos', "/Static/img/trabajadores/default-user.png", 1, 1);
+INSERT INTO personal (id, nombre, imagen, estado, id_tipopersonal) VALUES (2, 'Anderson Baca Chuquimanco', "/Static/img/trabajadores/default-user.png", 1, 1);
+INSERT INTO personal (id, nombre, imagen, estado, id_tipopersonal) VALUES (3, 'Edgar Alarcón Chapoñan', "/Static/img/trabajadores/default-user.png", 1, 2);
+INSERT INTO personal (id, nombre, imagen, estado, id_tipopersonal) VALUES (4, 'Luis Cruz Chinchay', "/Static/img/trabajadores/default-user.png", 1, 2);
+
 -- INSERT TIPO CLIENTE
 INSERT INTO tipo_cliente (nombre, estado, usuario)
 VALUES 
@@ -585,7 +648,6 @@ INSERT INTO tipo_documento (nombre, abreviatura, estado, usuario)
 VALUES ('DOCUMENTO NACIONAL DE IDENTIFICACION', 'DNI', TRUE, 'admin');
 INSERT INTO tipo_documento (nombre, abreviatura, estado, usuario)
 VALUES ('REGISTRO UNICO DE CONTRIBUYENTE', 'RUC', TRUE, 'admin');
-
 
 -- INSERT SERVICIO
 insert into servicio values (1,'Premium','Los autobuses más modernos y lujosos del mercado. Asientos cama, entretenimiento a bordo, snacks incluidos, aire acondicionado y cargadores USB. Ideal para viajes de largo trayecto.',1,'2025-05-25 19:30:00','Alexis','Static/img/servicios/busPremium.png');
@@ -614,28 +676,23 @@ VALUES (1, 'Solati H350', '4', '1', '1', '0', '2025-05-26 11:57:29', 'edgar@gmai
 
 -- INSERT TIPO_HERRAMIENTA  
 
-INSERT INTO tipo_herramienta (nombre) VALUES ('Asientos');
-INSERT INTO tipo_herramienta (nombre) VALUES ('Acceso');
-INSERT INTO tipo_herramienta (nombre) VALUES ('Seguridad');
-INSERT INTO tipo_herramienta (nombre) VALUES ('Multimedia');
+INSERT INTO tipo_herramienta (id, nombre) VALUES (1, 'Asientos');
+INSERT INTO tipo_herramienta (id, nombre) VALUES (2, 'Acceso');
+INSERT INTO tipo_herramienta (id, nombre) VALUES (3, 'Seguridad');
+INSERT INTO tipo_herramienta (id, nombre) VALUES (4, 'Multimedia');
 
 -- INSERT HERRAMIENTA
 
-INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Asiento a 140°','fas fa-chair',1);
-INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Asiento a 160°','fas fa-chair',1);
-INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Asiento cama','fas fa-chair',1);
+INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (1, 'Asiento a 140°','fas fa-chair',1);
+INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (2, 'Asiento a 160°','fas fa-chair',1);
+INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (3, 'Asiento cama','fas fa-chair',1);
 
+INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (4, 'Televisor','fas fa-desktop',4);
 
-INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Televisor','fas fa-desktop',4);
+INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (5, 'Baño','fas fa-restroom',3);
+INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (6, 'Extintor','fas fa-fire-extinguisher',3);
 
-
-INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Baño','fas fa-restroom',3);
-INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Extintor','fas fa-fire-extinguisher',3);
-
-
-INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Puerta','fas fa-door-closed',2	);
-
-
+INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (7, 'Puerta','fas fa-door-closed',2);
 
 -- INSERTS PAIS
 INSERT INTO pais (id, nombre, name, iso2, iso3, phone_code, continente) VALUES (1,'Afganistán','Afghanistan','AF','AFG','93','Asia');
@@ -1257,7 +1314,7 @@ CREATE PROCEDURE SP_REGISTRAR_INCIDENCIA(
     IN P_NOMBRE VARCHAR(255),
     IN P_DESCRIPCION VARCHAR(255),
     IN P_DURACION_SANCION INT,
-    IN P_ESTADO BIT,
+    IN P_ESTADO BOOLEAN,
     IN P_USUARIO VARCHAR(255)
 )
 BEGIN
@@ -1291,7 +1348,7 @@ CREATE PROCEDURE SP_EDITAR_INCIDENCIA(
     IN P_NOMBRE VARCHAR(255),
     IN P_DESCRIPCION VARCHAR(255),
     IN P_DURACION_SANCION INT,
-    IN P_ESTADO BIT
+    IN P_ESTADO BOOLEAN
 )
 BEGIN 
     DECLARE cNombre INT;

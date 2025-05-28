@@ -165,8 +165,6 @@ def get_persona_data():
             return jsonify({'data': {}, 'Status': 'success', 'Msj': 'No hay datos para el tipo de documento ingresado'})
     except Exception as e:
         return jsonify({'data': {}, 'Status': 'error', 'Msj': f'Error en el servidor: {repr(e)}'})
-    
-
 # FIN API NET RENIEC
 
 
@@ -193,8 +191,6 @@ def registrar_cliente_form():
         # Hash de la contraseña (SHA-256)
         import hashlib
         password = hashlib.sha256(password_raw.encode()).hexdigest()
-
-        # Determinar tipo de cliente
 
         # Registrar cliente
         mensajes = Cliente.registrarForm(

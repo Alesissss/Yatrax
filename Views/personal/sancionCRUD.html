@@ -13,42 +13,55 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-12 mb-3">
-                            <label for="txt_placa">Placa</label>
-                            <input type="text" name="txt_placa" id="txt_placa" class="form-control"
-                                placeholder="Ingrese número de placa" value="{{ vehiculo.placa }}" {% if
-                                btnId=="btn_Regresar" %} disabled {% endif %}>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <label for="txt_anio">Año</label>
-                            <input type="text" name="txt_anio" id="txt_anio" class="form-control"
-                                placeholder="Ingrese el año del vehículo" value="{{ vehiculo.anio }}" {% if
-                                btnId=="btn_Regresar" %} disabled {% endif %}>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <label for="txt_color">Color</label>
-                            <input type="text" name="txt_color" id="txt_color" class="form-control"
-                                placeholder="Ingrese el color del vehículo" value="{{ vehiculo.color }}" {% if
-                                btnId=="btn_Regresar" %} disabled {% endif %}>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <label for="txt_idTipoVehiculo">Tipo Vehículo</label>
+                            <label for="txt_Nombre">Nombre</label>
                             <div class="input-group">
-                                <select id="cbx_Tipo" name="txt_idTipoVehiculo" class="form-control" {% if
-                                    btnId=='btn_Regresar' %}disabled{% endif %}>
+                                <input type="text" id="txt_Nombre" class="form-control" placeholder="Nombre completo" {%
+                                    if btnId=='btn_Aceptar' %}disabled{% endif %} value="{{ sancion.nombre }}">
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><i class="fas fa-user"></i></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label for="txt_Nombre">Descripción</label>
+                            <div class="input-group">
+                                <input type="text" id="txt_Descripcion" class="form-control"
+                                    placeholder="Descripción de sanción..." {% if btnId=='btn_Aceptar' %}disabled{%
+                                    endif %} value="{{ sancion.descripcion }}">
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><i class="fas fa-user"></i></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label for="txt_Nombre">Duración de sanción</label>
+                            <div class="input-group">
+                                <input type="number" min="0" id="txt_Duracion" class="form-control"
+                                    placeholder="Duración de sanción en días..." {% if btnId=='btn_Aceptar' %}disabled{%
+                                    endif %} value="{{ sancion.duracion }}">
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><i class="fas fa-user"></i></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label for="cbx_Estado">Estado</label>
+                            <div class="input-group">
+                                <select id="cbx_Estado" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{%
+                                    endif %}>
+                                    <option disabled>--SELECCIONAR--</option>
+                                    <option {% if sancion.estado==1 %}selected{% endif %} value="1">Vigente</option>
+                                    <option {% if sancion.estado==0 %}selected{% endif %} value="0">No vigente</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-12 mb-3">
-                            <label for="txt_estado">Estado</label>
-                            <select id="cbx_Estado" name="txt_estado" class="form-control" {% if btnId=="btn_Regresar"
-                                %} disabled {% endif %}>
-                                <option value="1" {% if vehiculo.estado==1 %}selected{% endif %}>Vigente</option>
-                                <option value="0" {% if vehiculo.estado==0 %}selected{% endif %}>No vigente</option>
-                            </select>
-                        </div>
+
                         <div class="col-md-12 text-center">
-                            <button id="btn_Listado" type="button" class="btn btn-danger">Volver al listado de
-                                vehículos</button>
+                            <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de
+                                sanciones</button>
                             <button id="{{ btnId }}" type="button" class="btn btn-primary">Aceptar</button>
                         </div>
                     </div>
@@ -57,75 +70,43 @@
         </div>
     </div>
 </div>
+
 {% endblock %}
 
 {% block scripts %}
 <script>
-    function fct_GetTipos() {
-        $.getJSON('/trabajadores/viajes/GetTiposVehiculo_Vehiculo', function (response) {
-            if (response.Status === 'success') {
-                let items = '<option disabled selected>--SELECCIONAR--</option>';
-
-                $.each(response.data, function (index, item) {
-                    if (item.id === Number("{{ vehiculo.id_tipo_vehiculo }}")) {
-                        items += `<option selected value="${item.id}">${item.nombre}</option>`;
-                    } else {
-                        items += `<option value="${item.id}">${item.nombre}</option>`;
-                    }
-                });
-
-                $('#cbx_Tipo').html(items);
-            } else {
-                console.error('Error al obtener los tipos de usuario:', response.Msj);
-            }
-        });
-    }
-    // Aquí puedes agregar cualquier script que necesites
     $(document).ready(function () {
-        fct_GetTipos();
-
-        $("#btn_Listado").click(() => {
-            window.location.href = "/trabajadores/viajes/GestionarVehiculo"
-        })
-
-        $("#btn_Regresar").click(() => {
-            window.location.href = "/trabajadores/viajes/Gestionarvehiculo"
-        })
 
         $("#btn_Registrar").click(function () {
-            let placa = $("#txt_placa").val().trim();
-            let anio = $("#txt_anio").val();
-            let color = $("#txt_color").val().trim();
-            let idTipoVehiculo = $("#cbx_Tipo").val();
+            let nombre = $("#txt_Nombre").val().trim();
+            let descripcion = $("#txt_Descripcion").val().trim();
+            let duracion = $("#txt_Duracion").val();
             let estado = $('#cbx_Estado').val();
 
-            if (!placa || !anio || !color || !idTipoVehiculo || !estado) {
+            if (!nombre || !estado || !descripcion || !duracion) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
 
             Swal.fire({
                 title: "¿Estás seguro?",
-                text: "Esta acción registrará al vehículo. ¿Deseas continuar?",
+                text: "Esta acción registrará la sanción. ¿Deseas continuar?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
                 cancelButtonColor: "#d33",
-                confirmButtonText: "Sí, registrar vehículo",
+                confirmButtonText: "Sí, registrar personal",
                 cancelButtonText: "Cancelar",
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
-
                     let formData = new FormData();
-                    formData.append("placa", placa);
-                    formData.append("anio", anio);
-                    formData.append("color", color);
-                    formData.append("idTipoVehiculo", idTipoVehiculo);
+                    formData.append("nombre", nombre);
+                    formData.append("descripcion", descripcion);
+                    formData.append("duracion", duracion);
                     formData.append("estado", estado);
-
                     $.ajax({
-                        url: "/trabajadores/viajes/registrarVehiculo",
+                        url: "/trabajadores/personal/RegistrarSancion",
                         type: "POST",
                         processData: false,
                         contentType: false,
@@ -138,7 +119,7 @@
                                 } else {
                                     toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                                     setTimeout(() => {
-                                        window.location.href = "/trabajadores/viajes/GestionarVehiculo";
+                                        window.location.href = "/trabajadores/personal/GestionarSancion";
                                     }, 500);
                                 }
                             } else {
@@ -155,42 +136,41 @@
             });
         });
 
-        $("#btn_Actualizar").click(function () {
-            const id = Number("{{ vehiculo.id }}");
+        $("#btn_Editar").click(function () {
+            const id = Number("{{ sancion.id }}");
 
-            let placa = $("#txt_placa").val().trim();
-            let anio = $("#txt_anio").val();
-            let color = $("#txt_color").val().trim();
-            let idTipoVehiculo = $("#cbx_Tipo").val();
+            let nombre = $("#txt_Nombre").val().trim();
+            let descripcion = $("#txt_Descripcion").val().trim();
+            let duracion = $("#txt_Duracion").val();
             let estado = $('#cbx_Estado').val();
 
-            if (!placa || !anio || !color || !idTipoVehiculo) {
+
+
+            if (!nombre || !estado || !descripcion || !duracion) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
 
             Swal.fire({
                 title: "¿Estás seguro?",
-                text: "Esta acción modificará al vehículo. ¿Deseas continuar?",
+                text: "Esta acción modificará la sanción. ¿Deseas continuar?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
                 cancelButtonColor: "#d33",
-                confirmButtonText: "Sí, editar vehículo",
+                confirmButtonText: "Sí, editar personal",
                 cancelButtonText: "Cancelar",
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
-
                     let formData = new FormData();
-                    formData.append("placa", placa);
-                    formData.append("anio", anio);
-                    formData.append("color", color);
-                    formData.append("idTipoVehiculo", idTipoVehiculo);
+                    formData.append("nombre", nombre);
+                    formData.append("descripcion", descripcion);
+                    formData.append("duracion", duracion);
                     formData.append("estado", estado);
 
                     $.ajax({
-                        url: `/trabajadores/viajes/editarVehiculo/${id}`,
+                        url: `/trabajadores/personal/EditarSancion/${id}`,
                         type: "POST",
                         processData: false,
                         contentType: false,
@@ -203,7 +183,7 @@
                                 } else {
                                     toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                                     setTimeout(() => {
-                                        window.location.href = "/trabajadores/viajes/GestionarVehiculo";
+                                        window.location.href = "/trabajadores/personal/GestionarSancion";
                                     }, 500);
                                 }
                             } else {
@@ -216,6 +196,14 @@
                     });
                 }
             });
+        });
+
+        $("#btn_Aceptar").click(function () {
+            window.location.href = "/trabajadores/personal/GestionarSancion";
+        });
+
+        $("#btn_Volver").click(function () {
+            window.location.href = "/trabajadores/personal/GestionarSancion";
         });
     });
 </script>
