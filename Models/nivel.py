@@ -49,7 +49,7 @@ class Nivel:
         try:
             conexion = bd.Conexion()
             listado = conexion.obtener(
-                "SELECT * FROM nivel WHERE id_vehiculo = %s ORDER BY nroPiso",
+                "SELECT * FROM nivel WHERE id_tipo_vehiculo = %s ORDER BY nroPiso",
                 (vehiculo,)
             )
             return listado

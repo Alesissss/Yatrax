@@ -1368,9 +1368,12 @@ def get_vehiculo_viaje():
 def get_asientos_viaje():
     try:
         id = request.args.get('id', type=int)
-        asientos = Asiento.obtener_por_id_vehiculo(id)
+        idTipo = request.args.get('idTipo', type=int)
 
-        return jsonify({'data': asientos, 'Status': 'success', 'Msj': 'Listado de asientos retornado exitosamente'})
+        asientos = len(Asiento.obtener_por_id_vehiculo(id))
+        niveles = len([{'id': ni['id']} for ni in Nivel.obtener_por_tipo_vehiculo(idTipo) if ni['estado'] == 1])
+
+        return jsonify({'data': [{'asientos': asientos, 'niveles': niveles}], 'Status': 'success', 'Msj': 'Listado de asientos retornado exitosamente'})
     except Exception as e:
         return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar asientos: + {repr(e)}'})
 

@@ -269,7 +269,7 @@
                                 const idServicio = tipoSeleccionado?.id_servicio;
                                 const idTipo = tipoSeleccionado?.id;
 
-                                let htmlServicios = '<option disabled value="">--SELECCIONAR--</option>';
+                                let htmlServicios = '<option disabled selected value="">--SELECCIONAR--</option>';
                                 servicios.forEach(s => {
                                     const selected = s.id == idServicio ? 'selected' : '';
                                     htmlServicios += `<option value="${s.id}" ${selected}>${s.nombre}</option>`;
@@ -277,7 +277,7 @@
                                 $('#cbx_Servicio').html(htmlServicios);
 
                                 const tiposFiltrados = tiposVehiculos.filter(tv => tv.id_servicio == idServicio);
-                                let htmlTipos = '<option disabled value="">--SELECCIONAR--</option>';
+                                let htmlTipos = '<option disabled selected value="">--SELECCIONAR--</option>';
                                 tiposFiltrados.forEach(tv => {
                                     const selected = tv.id == idTipo ? 'selected' : '';
                                     htmlTipos += `<option value="${tv.id}" ${selected}>${tv.nombre}</option>`;
@@ -285,7 +285,7 @@
                                 $('#cbx_TipoVehiculo').html(htmlTipos);
 
                                 const vehiculosFiltrados = vehiculos.filter(v => v.id_tipo_vehiculo == idTipo);
-                                let htmlVehiculos = '<option disabled value="">--SELECCIONAR--</option>';
+                                let htmlVehiculos = '<option disabled selected value="">--SELECCIONAR--</option>';
                                 vehiculosFiltrados.forEach(v => {
                                     const selected = v.id == idVehiculo ? 'selected' : '';
                                     htmlVehiculos += `<option value="${v.id}" ${selected}>${v.placa}</option>`;
@@ -318,7 +318,7 @@
                                 });
 
                                 $('#cbx_Vehiculo').on('change', function () {
-                                    $.getJSON('/trabajadores/viajes/GetData_AsientosViajes', { id: $(this).val() }, function (response) {
+                                    $.getJSON('/trabajadores/viajes/GetData_AsientosViajes', { id: $(this).val(), idTipo: $('#cbx_TipoVehiculo').val() }, function (response) {
                                         console.log(response);
                                     });
                                 });
