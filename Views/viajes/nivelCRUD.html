@@ -45,7 +45,8 @@
                                 <div class="mb-3">
                                     <label for="txt_nroPiso" class="form-label">Número de piso</label>
                                     <input type="number" name="txt_nroPiso" id="txt_nroPiso" class="form-control"
-                                        placeholder="Número de piso" value="{{ nivel.nroPiso }}">
+                                        placeholder="Número de piso" value="{{ nivel.nroPiso }}" {% if
+                                        btnId=='btn_Regresar' %}disabled{% endif %}>
                                 </div>
                                 <div class="mb-3">
                                     <label for="txt_vehiculo" class="form-label">Tipo vehículo</label>
@@ -163,6 +164,7 @@
 
     let herramientaSeleccionada = null;
     const list_herramientas = JSON.parse('{{ herramientas | tojson }}');
+    const botones_guardados = JSON.parse('{{ botones | tojson }}');
     $(document).ready(() => {
 
         fct_Vehiculos()
@@ -172,13 +174,18 @@
             window.location.href = "/trabajadores/viajes/GestionarNivel";
         });
         generarMatriz();
+        activarEventosDrag();
 
-        // Eventos de herramientas (drag)
-        document.querySelectorAll('.control').forEach(icono => {
-            icono.addEventListener('dragstart', function (e) {
-                herramientaSeleccionada = this.getAttribute('data-tipo');
+        if ("{{ btnId }}" === "btn_Regresar") {
+            document.querySelectorAll('.control').forEach(icono => {
+                icono.setAttribute('draggable', 'false');
             });
-        });
+        }
+        if (herramientaSeleccionada && "{{ btnId }}" !== "btn_Regresar") {
+            this.setAttribute('data-tipo', herramientaSeleccionada);
+            this.innerHTML = obtenerIcono(herramientaSeleccionada);
+        }
+
 
         $('#btn_Siguiente').click(function () {
             const piso = $('#txt_nroPiso').val();
@@ -224,7 +231,7 @@
                             setTimeout(() => {
                                 window.location.href = "/trabajadores/viajes/GestionarNivel";
                             }, 500);
-                            
+
                         } else {
                             toastr.error("Ocurrió un error al registrar el nivel: " + response.Msj, "Error")
                         }
@@ -238,21 +245,70 @@
                 toastr.error("Se produjo un error inesperado: " + error.message, "Error");
             }
         });
+        $('#btn_Actualizar').click(function (e) {
+
+            e.preventDefault();
+
+            try {
+                const id = Number("{{ nivel.id }}");
+                const herramientas = dict_botones();
+                if (herramientas.length == 0) {
+                    toastr.error("Debe diseñar el nivel para continuar", 'Error');
+                    return;
+                }
+
+                let maxX = 15;
+                let maxY = 6;
+
+                const datos = {
+                    nroPiso: $('#txt_nroPiso').val(),
+                    id_tipo_vehiculo: $('#cbx_TipoVehiculo').val(),
+                    x_dimension: maxX,
+                    y_dimension: maxY,
+                    estado: $('#txt_estado').val(),
+                    herramientas: herramientas
+                };
+
+                $.ajax({
+                    url: `/trabajadores/viajes/editarNivel/${id}`,  // Envia a /editarNivel/<idNivel>
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(datos),
+                    success: function (response) {
+                        if (response.Status === "success") {
+                            toastr.success("Se ha actualizado el nivel correctamente", "Éxito");
+                            setTimeout(() => {
+                                window.location.href = "/trabajadores/viajes/GestionarNivel";
+                            }, 500);
+                        } else {
+                            toastr.error("Error al actualizar el nivel: " + response.Msj, "Error");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Error en el servidor", "Error");
+                    }
+                });
+            } catch (error) {
+                console.error("Error capturado en try-catch:", error);
+                toastr.error("Se produjo un error inesperado: " + error.message, "Error");
+            }
+        });
+
 
 
     });
+    function activarEventosDrag() {
+        document.querySelectorAll('.control').forEach(icono => {
+            icono.addEventListener('dragstart', function (e) {
+                herramientaSeleccionada = this.getAttribute('data-tipo');
+            });
+        });
+    }
+
 
     function generarMatriz() {
-
-        // Filas x Columnas reales
         const filas = 15;
         const columnas = 6;
-
-        // Filas x Columnas con las opciones
-        // filas += 2
-        // columnas
-
-        // const cantidad = parseInt("{{ nivel.cantidad }}");
         const contenedor = document.getElementById('matrizContainer');
         contenedor.innerHTML = '';
 
@@ -271,34 +327,48 @@
                 btn.setAttribute('data-y', i);
                 btn.setAttribute('data-tipo', '');
 
+                // Verificar si hay un botón en esta posición
+                const boton_existente = botones_guardados.find(b =>
+                    parseInt(b.x_dimension) === j && parseInt(b.y_dimension) === i
+                );
+
+                if (boton_existente) {
+                    const iconoHTML = obtenerIcono(boton_existente.id_herramienta);
+                    btn.innerHTML = iconoHTML;
+                    btn.setAttribute('data-tipo', boton_existente.id_herramienta);
+                }
+
                 // Drag-over y drop
                 btn.addEventListener('dragover', e => e.preventDefault());
                 btn.addEventListener('drop', function (e) {
                     e.preventDefault();
-                    if (herramientaSeleccionada) {
+                    if (herramientaSeleccionada && "{{ btnId }}" !== "btn_Regresar") {
                         this.setAttribute('data-tipo', herramientaSeleccionada);
                         this.innerHTML = obtenerIcono(herramientaSeleccionada);
                     }
                 });
 
-                // Click: alterna entre asiento y vacío
-                btn.addEventListener('click', function () {
-                    let idAsiento = 1;
-                    let herramienta_dict = list_herramientas.find(h => h.id === parseInt(idAsiento));
-                    const tipoActual = this.getAttribute('data-tipo');
-                    if (tipoActual === '') {
-                        this.setAttribute('data-tipo', `${idAsiento}`);
-                        this.innerHTML = `<i class="${herramienta_dict.icono}"></i>`;
-                    } else {
-                        this.setAttribute('data-tipo', '');
-                        this.innerHTML = '';
-                    }
-                });
+                // Click (solo si no es modo ver)
+                if ("{{ btnId }}" !== "btn_Regresar") {
+                    btn.addEventListener('click', function () {
+                        let idAsiento = 1;
+                        let herramienta_dict = list_herramientas.find(h => h.id === parseInt(idAsiento));
+                        const tipoActual = this.getAttribute('data-tipo');
+                        if (tipoActual === '') {
+                            this.setAttribute('data-tipo', `${idAsiento}`);
+                            this.innerHTML = `<i class="${herramienta_dict.icono}"></i>`;
+                        } else {
+                            this.setAttribute('data-tipo', '');
+                            this.innerHTML = '';
+                        }
+                    });
+                }
 
                 contenedor.appendChild(btn);
             }
         }
     }
+
 
     function obtenerIcono(idHerramienta) {
         const herramienta_dict = list_herramientas.find(h => h.id === parseInt(idHerramienta));
@@ -324,7 +394,7 @@
                 let items = '<option disabled>--SELECCIONAR--</option>';
 
                 $.each(response.data, function (index, item) {
-                    if (item.id === Number("{{ nivel.id_tipo_vehiculo }}")) {
+                    if (item.id === Number('{{ nivel.id_tipo_vehiculo }}')) {
                         items += `<option selected value="${item.id}">${item.nombre}</option>`;
                     } else {
                         items += `<option value="${item.id}">${item.nombre}</option>`;
