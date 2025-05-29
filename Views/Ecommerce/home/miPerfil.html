@@ -1,9 +1,11 @@
 {% extends "maestra.html" %}
 {% block contenido %}
-<form method="POST" action="#" class="p-4 rounded bg-white shadow-sm">
+<form id="formPerfil" class="p-4 rounded bg-white shadow-sm">
   <h4 class="mb-4">Mi Perfil</h4>
   {% set datosUsuario = session['cliente'] %}
 
+  <input type="hidden" name="id_cliente" value="{{ datosUsuario.id }}">
+  <input type="hidden" name="usuario" value="{{ datosUsuario.usuario }}">
   <!-- Sección: Datos del cliente -->
   <h5 class="text-primary mt-3 mb-3">Datos del Cliente</h5>
   <div class="row">
@@ -20,7 +22,7 @@
       <label for="id_tipo_cliente" class="form-label">Tipo de Cliente</label>
       <select id="id_tipo_cliente" name="id_tipo_cliente" class="form-select" required>
         {% for tipoCliente in tiposCliente %}
-          <option value="{{ tipoCliente.id }}" {% if tipoCliente.id == datosUsuario.id_tipo_cliente %}selected{% endif %}>{{ tipoCliente.TIPO }}</option>
+          <option value="{{ tipoCliente.ID }}" {% if tipoCliente.ID == datosUsuario.id_tipo_cliente %}selected{% endif %}>{{ tipoCliente.TIPO }}</option>
         {% endfor %}
       </select>
     </div>
@@ -105,7 +107,7 @@
 
     <div class="col-md-6 mb-3">
       <label for="password" class="form-label">Contraseña</label>
-      <input type="password" id="password" name="password" value="***********" class="form-control" placeholder="Dejar en blanco para no cambiar">
+      <input type="password" id="password" name="password" value="" class="form-control" placeholder="•••••••••••••">
     </div>
   </div>
 
@@ -119,6 +121,35 @@
 
 {% block scripts %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<!-- Toastr CSS y JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+
+<script>
+$(document).ready(function () {
+    $('#formPerfil').submit(function (e) {
+        e.preventDefault(); // Evita que se envíe el formulario de forma tradicional
+
+        var form = $(this);
+        var actionUrl = form.attr('action');
+        var formData = form.serialize(); // Serializa los datos del formulario
+
+        $.post(actionUrl, formData, function (response) {
+            if (response.Status == 1) {
+                toastr.success(response.Mensaje);
+                setTimeout(()=>{
+                  window.location.href = "/ecommerce/home/logout";
+                },1000)
+            } else {
+                toastr.error(response.Mensaje);
+            }
+        }).fail(function () {
+            toastr.error('Error inesperado al enviar el formulario.');
+        });
+    });
+});
+</script>
+
 <script>
   $("#regresar").click(function () {
     window.location.href = "/ecommerce/home/inicio";
