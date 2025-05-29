@@ -351,6 +351,8 @@ CREATE TABLE sucursal (
 CREATE TABLE ruta (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
+    distancia_estimada DECIMAL(9,2),
+    tiempo_estimado DECIMAL(9,2),
     tipo VARCHAR(100) NOT NULL,
     estado BOOLEAN NOT NULL DEFAULT 1,
     estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
@@ -4500,6 +4502,8 @@ END $$
 DELIMITER $$
 CREATE PROCEDURE SP_REGISTRAR_RUTA(
     IN P_NOMBRE VARCHAR(255),
+    IN P_DISTANCIA DECIMAL(9,2),
+    IN P_TIEMPO DECIMAL(9,2),
     IN P_ESTADO BOOLEAN,
     IN P_TIPO VARCHAR(255),
     IN P_USUARIO VARCHAR(255)
@@ -4519,8 +4523,8 @@ BEGIN
     IF cNombre > 0 THEN
         SET @MSJ2 = 'El nombre de ruta que intenta registrar ya está registrado';
     ELSE
-        INSERT INTO ruta (NOMBRE, TIPO, ESTADO, USUARIO) 
-        VALUES (P_NOMBRE, P_TIPO, P_ESTADO, P_USUARIO);
+        INSERT INTO ruta (NOMBRE, DISTANCIA_ESTIMADA, TIEMPO_ESTIMADO, TIPO, ESTADO, USUARIO) 
+        VALUES (P_NOMBRE, P_DISTANCIA, P_TIEMPO, P_TIPO, P_ESTADO, P_USUARIO);
 
         SET @MSJ = 'Se registró correctamente la ruta';
     END IF;
@@ -4532,6 +4536,8 @@ DELIMITER $$
 CREATE PROCEDURE SP_EDITAR_RUTA(
     IN P_ID INT,
     IN P_NOMBRE VARCHAR(255),
+    IN P_DISTANCIA DECIMAL(9,2),
+    IN P_TIEMPO DECIMAL(9,2),
     IN P_TIPO VARCHAR(255),
     IN P_ESTADO BOOLEAN
 )
@@ -4556,6 +4562,8 @@ BEGIN
     ELSE
         UPDATE ruta 
         SET NOMBRE = P_NOMBRE,
+            DISTANCIA_ESTIMADA = P_DISTANCIA,
+            TIEMPO_ESTIMADO = P_TIEMPO,
             TIPO = P_TIPO,
             ESTADO = P_ESTADO, 
             estado_proceso = 'MODIFICADO' 

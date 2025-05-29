@@ -1107,6 +1107,8 @@ def obtener_sucursales_mapa_ruta():
 def registrar_ruta():
     try:
         nombre = request.form.get("nombre").strip()
+        distancia = float(request.form.get("distancia"))
+        tiempo = float(request.form.get("tiempo"))
         estado = request.form.get("estado")
         escalas_json = request.form.get("escalas")
 
@@ -1115,7 +1117,7 @@ def registrar_ruta():
 
         usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
 
-        mensajes = Ruta.registrar(nombre, estado, tipo, escalas, usuario_actual)
+        mensajes = Ruta.registrar(nombre, distancia, tiempo, estado, tipo, escalas, usuario_actual)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 
@@ -1153,6 +1155,8 @@ def editar_ruta(id):
 
         if request.method == 'POST':
             nombre = request.form.get("nombre").strip()
+            distancia = float(request.form.get("distancia"))
+            tiempo = float(request.form.get("tiempo"))
             estado = request.form.get("estado")
             escalas_json = request.form.get("escalas")
 
@@ -1161,7 +1165,7 @@ def editar_ruta(id):
             escalas = json.loads(escalas_json) if escalas_json else []
             tipo = "ESCALA" if len(escalas) > 2 else "DIRECTO"
             
-            mensajes = Ruta.editar(id, nombre, tipo, estado, escalas, usuario_actual)
+            mensajes = Ruta.editar(id, nombre, distancia, tiempo, tipo, estado, escalas, usuario_actual)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
