@@ -721,16 +721,18 @@
           <div class="carousel-item active">
             <div class="d-flex justify-content-center gap-5">
               {% for servicio in datos["servicios"] %}
-              <a href="#" style="text-decoration: none;">
-                <div class="card" style="width: 18rem; height: 420px;">
-                  <img src="/{{ servicio.imagen }}" class="card-img-top" alt="Imagen de servicio"
-                    style="border: 3px solid black; border-radius: 5%; display: block; margin: 5%; width: auto; height: auto;">
-                  <div class="card-body">
-                    <h5 class="card-title text-center" style="font-weight: bold;">{{ servicio.nombre }}</h5>
-                    <p class="card-text text-center">{{ servicio.descripcion }}</p>
-                  </div>
-                </div>
-              </a>
+                {% if servicio.estado == 1 %}
+                  <a href="#" style="text-decoration: none;">
+                    <div class="card" style="width: 18rem; height: 420px;">
+                      <img src="/{{ servicio.imagen }}" class="card-img-top" alt="Imagen de servicio"
+                        style="border: 3px solid black; border-radius: 5%; display: block; margin: 5%; width: auto; height: auto;">
+                      <div class="card-body">
+                        <h5 class="card-title text-center" style="font-weight: bold;">{{ servicio.nombre }}</h5>
+                        <p class="card-text text-center">{{ servicio.descripcion }}</p>
+                      </div>
+                    </div>
+                  </a>
+                {% endif %}
               {% endfor %}
             </div>
           </div>
