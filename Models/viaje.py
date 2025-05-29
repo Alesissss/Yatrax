@@ -69,34 +69,33 @@ class Viaje:
             conexion.cerrar()
     # REGISTRAR
     @classmethod
-    def registrar(cls, nombre, estado, tipo, escalas, usuario):
+    def registrar(cls, idRuta, idVehiculo, estado, fecha_salida_estimada, fecha_llegada_estimada, choferes, tripulantes, usuario):
         try:
             conexion = bd.Conexion()
 
-            # Llamar al procedimiento almacenado
-            conexion.ejecutar("CALL SP_REGISTRAR_RUTA(%s, %s, %s, %s);", (nombre, estado, tipo, usuario), auto_commit=False)
+            conexion.ejecutar(""" INSERT INTO viaje (idRuta, idVehiculo, estado, estadoViaje, esReprogramado, esPostergado, fecha_salida_estimada, fecha_llegada_estimada, usuario) VALUES (%s, %s, %s, 1, 0, 0, %s, %s, %s) """, (idRuta, idVehiculo, estado, fecha_salida_estimada, fecha_llegada_estimada, usuario), auto_commit=False)
 
-            # Obtener el mensaje de error y el último idRuta generado
-            resultado = conexion.obtener("SELECT @MSJ, @MSJ2, LAST_INSERT_ID() AS idRuta;")
-            idRuta = resultado[0]['idRuta']  # Obtener el último ID generado por la ruta
-            msj2 = resultado[0]['@MSJ2']
+            resultado = conexion.obtener("SELECT @MSJ, @MSJ2, LAST_INSERT_ID() AS idViaje;")
+            idViaje = resultado[0]['idViaje'] 
 
-            if msj2:  # Si hay un mensaje de error en msj2
-                raise Exception('Error al registrar ruta: ' + msj2)
-
-            # Insertar las escalas
-            for escala in escalas:
-                conexion.ejecutar("INSERT INTO escala (nro_orden, idSucursal, idRuta, usuario) VALUES (%s, %s, %s, %s)",
-                                (escala['nroOrden'], escala['id'], idRuta, usuario), auto_commit=False)
+            # Insertar los choferes
+            for chofer in choferes:
+                conexion.ejecutar("INSERT INTO detalle_personal (idPersonal, idTipoPersonal, idViaje, usuario) VALUES (%s, %s, %s, %s)",
+                                (chofer['id'], chofer['id_tipopersonal'], idViaje, usuario), auto_commit=False)
+            
+            # Insertar los tripulantes
+            for tripulante in tripulantes:
+                conexion.ejecutar("INSERT INTO detalle_personal (idPersonal, idTipoPersonal, idViaje, usuario) VALUES (%s, %s, %s, %s)",
+                                (tripulante['id'], tripulante['id_tipopersonal'], idViaje, usuario), auto_commit=False)
 
             # Si todo es correcto, confirmamos la transacción
             conexion.conn.commit()
-            return resultado[0]  # Retorna un diccionario con los mensajes
+            return {'@MSJ': 'Se programó el viaje correctamente', '@MSJ2': ''}  # Retorna un diccionario con los mensajes
 
         except Exception as e:
             # Si algo falla, hacemos un rollback
             conexion.conn.rollback()
-            return {'@MSJ': '', '@MSJ2': f'Error al ejecutar la transacción de registro de ruta: {repr(e)}'}
+            return {'@MSJ': '', '@MSJ2': f'Error al ejecutar la transacción de registro de viaje: {repr(e)}'}
 
         finally:
             # Cerramos la conexión

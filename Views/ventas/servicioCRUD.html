@@ -150,8 +150,10 @@
             let descripcion = $('#txt_descripcion').val();
             let estado = $('#cbx_Estado').val();
             let imagen = $('#file_Imagen')[0].files[0];
+            let ids = $('#cbx_Microservicios').val();
+            let microservicios = ids.map(id => ({ id: parseInt(id, 10) }));
 
-            if (!nombre || !descripcion || !estado) {
+            if (!nombre || !descripcion || !estado || microservicios.length <= 0) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
@@ -169,8 +171,6 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     let formData = new FormData();
-                    let ids = $('#cbx_Microservicios').val();
-                    let microservicios = ids.map(id => ({ id: parseInt(id, 10) }));
 
                     formData.append("nombre", nombre);
                     formData.append("descripcion", descripcion);
@@ -186,7 +186,7 @@
                         data: formData,
                         success: function (response) {
                             if (response.Status === "success") {
-                                if (response.Msj2 !== null || response.Msj2 !== '') {
+                                if (response.Msj2 !== null && response.Msj2 !== '') {
                                     toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
                                 } else {
                                     toastr.success(response.Msj, "MENSAJE DE SISTEMA");
@@ -213,8 +213,10 @@
             let descripcion = $('#txt_descripcion').val();
             let estado = $('#cbx_Estado').val();
             let imagen = $('#file_Imagen')[0].files[0];
+            let ids = $('#cbx_Microservicios').val();
+            let microservicios = ids.map(id => ({ id: parseInt(id, 10) }));
 
-            if (!nombre || !descripcion || !estado) {
+            if (!nombre || !descripcion || !estado || microservicios.length <= 0) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
@@ -232,8 +234,6 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     let formData = new FormData();
-                    let ids = $('#cbx_Microservicios').val();
-                    let microservicios = ids.map(id => ({ id: parseInt(id, 10) }));
 
                     formData.append("nombre", nombre);
                     formData.append("descripcion", descripcion);
@@ -249,7 +249,7 @@
                         data: formData,
                         success: function (response) {
                             if (response.Status === "success") {
-                                if (response.Msj2 !== null || response.Msj2 !== '') {
+                                if (response.Msj2 !== null && response.Msj2 !== '') {
                                     toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
                                 } else {
                                     toastr.success(response.Msj, "MENSAJE DE SISTEMA");

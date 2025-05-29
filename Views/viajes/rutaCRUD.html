@@ -469,7 +469,7 @@
             let tiempo = $('#tiempoRuta').text();
             let estado = $('#cbx_Estado').val();
 
-            if (!nombre || !estado || !escalas) {
+            if (!nombre || !estado || !escalas || !distancia || !tiempo) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
@@ -537,7 +537,7 @@
             let tiempo = $('#tiempoRuta').text();
             let estado = $('#cbx_Estado').val();
 
-            if (!nombre || !estado || !escalas) {
+            if (!nombre || !estado || !escalas || !distancia || !tiempo) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
