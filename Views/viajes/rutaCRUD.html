@@ -465,8 +465,8 @@
     $(document).ready(function () {
         $("#btn_Registrar").click(function () {
             let nombre = $("#txt_Ruta").val().trim();
-            let distancia = $('#distanciaRuta').val();
-            let tiempo = $('#tiempoRuta').val();
+            let distancia = $('#distanciaRuta').text();
+            let tiempo = $('#tiempoRuta').text();
             let estado = $('#cbx_Estado').val();
 
             if (!nombre || !estado || !escalas) {
@@ -533,8 +533,8 @@
             const id = Number("{{ ruta.id }}");
 
             let nombre = $("#txt_Ruta").val().trim();
-            let distancia = $('#distanciaRuta').val();
-            let tiempo = $('#tiempoRuta').val();
+            let distancia = $('#distanciaRuta').text();
+            let tiempo = $('#tiempoRuta').text();
             let estado = $('#cbx_Estado').val();
 
             if (!nombre || !estado || !escalas) {

@@ -20,13 +20,6 @@
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-md-12 mb-3">
-                                            <label for="txt_hora_salida">Fecha y hora de salida:</label>
-                                            <div class="input-group">
-                                                <input class="form-control" type="datetime-local" id="fechaHora"
-                                                    name="fechaHora">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12 mb-3">
                                             <label for="cbx_Ruta">Ruta</label>
                                             <div class="input-group">
                                                 <select id="cbx_Ruta" class="form-control">
@@ -47,22 +40,20 @@
                                                 </tbody>
                                             </table>
                                         </div>
-                                        <!-- <div class="col-md-12 mb-3">
-                                            <label for="txt_Origen">Origen</label>
+                                        <div class="col-md-12 mb-3">
+                                            <label for="txt_hora_salida">Fecha y hora de salida:</label>
                                             <div class="input-group">
-                                                <input type="text" id="txt_Origen" class="form-control"
-                                                    placeholder="Origen"
-                                                    oninput="this.value = this.value.toUpperCase();" disabled>
+                                                <input class="form-control" type="datetime-local" id="txt_hora_salida"
+                                                    name="fechaHoraSalida">
                                             </div>
                                         </div>
                                         <div class="col-md-12 mb-3">
-                                            <label for="txt_Origen">Destino</label>
+                                            <label for="txt_hora_llegada">Fecha y hora de llegada:</label>
                                             <div class="input-group">
-                                                <input type="text" id="txt_Destino" class="form-control"
-                                                    placeholder="Destino"
-                                                    oninput="this.value = this.value.toUpperCase();" disabled>
+                                                <input class="form-control" type="datetime-local" id="txt_hora_llegada"
+                                                    name="fechaHoraLlegada" disabled>
                                             </div>
-                                        </div> -->
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -349,7 +340,8 @@
         fct_LlenarCombos();
 
         $("#btn_Registrar").click(function () {
-            let fechaHora = moment($('#fechaHora').val()).format('YYYY-MM-DD HH:mm:ss');
+            let fechaHoraSalida = moment($('#txt_hora_salida').val()).format('YYYY-MM-DD HH:mm:ss');
+            let fechaHoraLlegada = moment($('#txt_hora_llegada').val()).format('YYYY-MM-DD HH:mm:ss');
             let nombre = $("#txt_TipoUsuario").val().trim();
             let estado = $('#cbx_Estado').val();
 

@@ -17,7 +17,7 @@ class Ruta:
     def obtener_todos(cls):
         conexion = bd.Conexion()
         try:
-            rutas = conexion.obtener(""" SELECT r.id, r.nombre, r.tipo, r.estado FROM ruta r""")
+            rutas = conexion.obtener(""" SELECT r.id, r.nombre, r.distancia_estimada, r.tiempo_estimado, r.tipo, r.estado FROM ruta r""")
             return rutas
         finally:
             conexion.cerrar()
@@ -26,7 +26,7 @@ class Ruta:
     def obtener_por_id(cls, ruta_id):
         conexion = bd.Conexion()
         try:
-            ruta = conexion.obtener("SELECT r.id, r.nombre, r.tipo, r.estado FROM ruta r WHERE r.id = %s", (ruta_id,))
+            ruta = conexion.obtener("SELECT r.id, r.nombre, r.distancia_estimada, r.tiempo_estimado, r.tipo, r.estado FROM ruta r WHERE r.id = %s", (ruta_id,))
             return ruta[0] if ruta else None
         finally:
             conexion.cerrar()
