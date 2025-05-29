@@ -3774,6 +3774,68 @@ END $$
 
 DELIMITER ;
 
+-- Procedimiento almacenado para la actualizacion de datos
+
+DELIMITER $$
+
+CREATE PROCEDURE SP_ACTUALIZAR_CLIENTE (
+    IN p_id INT,
+    IN p_id_pais INT,
+    IN p_id_tipo_cliente INT,
+    IN p_id_tipo_doc INT,
+    IN p_numero_documento VARCHAR(20),
+    IN p_nombres VARCHAR(90),
+    IN p_ape_paterno VARCHAR(50),
+    IN p_ape_materno VARCHAR(50),
+    IN p_sexo TINYINT,
+    IN p_f_nacimiento DATE,
+    IN p_razon_social VARCHAR(90),
+    IN p_direccion VARCHAR(70),
+    IN p_telefono VARCHAR(13),
+    IN p_email VARCHAR(100),
+    IN p_password VARCHAR(256),
+    IN p_usuario VARCHAR(100),
+    OUT MSJ VARCHAR(100),
+    OUT MSJ2 VARCHAR(100)
+)
+BEGIN
+    DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET MSJ = NULL;
+        SET MSJ2 = 'Error al actualizar cliente';
+    END;
+
+    -- Actualiza todos los campos menos la contraseña
+    UPDATE cliente
+    SET
+        id_pais = p_id_pais,
+        id_tipo_cliente = p_id_tipo_cliente,
+        id_tipo_doc = p_id_tipo_doc,
+        numero_documento = p_numero_documento,
+        nombres = p_nombres,
+        ape_paterno = p_ape_paterno,
+        ape_materno = p_ape_materno,
+        sexo = p_sexo,
+        f_nacimiento = p_f_nacimiento,
+        razon_social = p_razon_social,
+        direccion = p_direccion,
+        telefono = p_telefono,
+        email = p_email,
+        usuario = p_usuario
+    WHERE id = p_id;
+
+    -- Actualiza la contraseña si se ha enviado
+    IF p_password IS NOT NULL AND LENGTH(p_password) > 0 THEN
+        UPDATE cliente
+        SET password = p_password
+        WHERE id = p_id;
+    END IF;
+
+    SET MSJ = 'Cliente actualizado correctamente';
+    SET MSJ2 = NULL;
+END$$
+
+DELIMITER ;
 
 -- Crear procedimiento SP_INSERTAR_TIPO_COMPROBANTE
 

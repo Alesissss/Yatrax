@@ -84,7 +84,38 @@ def perfilCliente():
         tipoDocumentos = TipoDocumento.obtener_todos()
         return render_template("Ecommerce/home/miPerfil.html",paises=paises,tiposCliente=tipoCliente,tipoDocumentos=tipoDocumentos)
     else:
-        pass
+        try:
+            id_cliente = request.form["id_cliente"]
+            usuario = request.form["usuario"]
+            id_pais = request.form["id_pais"]
+            id_tipo_cliente = request.form["id_tipo_cliente"]
+            razon_social = request.form["razon_social"]
+
+            id_tipo_doc = request.form["id_tipo_doc"]
+            numero_documento = request.form["numero_documento"]
+            f_nacimiento = request.form["f_nacimiento"]
+
+            nombres = request.form["nombres"]
+            ape_paterno = request.form["ape_paterno"]
+            ape_materno = request.form["ape_materno"]
+            sexo = request.form["sexo"]
+            direccion = request.form["direccion"]
+            telefono = request.form["telefono"]
+
+            email = request.form["email"]
+            password = request.form["password"]
+
+            if password.strip():
+                password_hash = hashlib.sha256(password.encode()).hexdigest()
+            else:
+                password_hash = None
+            
+            Cliente.actualizar_cliente(id_cliente,id_pais,id_tipo_cliente,id_tipo_doc,numero_documento,nombres,ape_paterno,ape_materno,sexo,f_nacimiento,razon_social,direccion,telefono,email,password_hash,usuario)
+
+            return jsonify({"Status":1,"Mensaje":"Se ha actualizado los datos del cliente correctamente"})
+        except Exception as e:
+            return jsonify({"Status":0,"Mensaje":"Error: "+str(e)})
+
 
 #Los HTML para recuperar contraseña del lado del cliente aun no existen
 @homeClientes_bp.route("",methods=["GET","POST"])
