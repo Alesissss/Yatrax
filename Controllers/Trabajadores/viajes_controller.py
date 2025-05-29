@@ -314,30 +314,62 @@ def nuevoTipoVehiculo():
         try:
             nombre = request.form.get("nombre")
             marca = request.form.get("marca")
-            cantidad = request.form.get("cantidad")
             estado = request.form.get("estado")
             servicio = request.form.get("servicio")
+            cantidad_pisos = request.form.get("cantidadPisos")
+
+            niveles_json = request.form.get("niveles")
+            niveles = json.loads(niveles_json) if niveles_json else []
 
             usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO')
 
-            mensajes = TipoVehiculo.insertarTipoVehiculo(nombre,marca,cantidad,estado,servicio,usuario_actual)
-            msj1 = mensajes.get('@MSJ')
-            msj2 = mensajes.get('@MSJ2')
+            # Convertir tipos si es necesario
+            marca = int(marca) if marca else None
+            estado = int(estado) if estado else None
+            servicio = int(servicio) if servicio else None
+            cantidad_pisos = int(cantidad_pisos) if cantidad_pisos else 0
 
-            if msj1:
-                return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
-            elif msj2:
-                return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
-            else:
-                return jsonify({"Status": "error", 'Msj': 'Error desconocido al insertar tipo vehiculo'})
+            # Llamar al método de inserción
+            TipoVehiculo.insertarTipoVehiculo(
+                nombre=nombre,
+                idmarca=marca,
+                estado=estado,
+                servicio=servicio,
+                usuario=usuario_actual,
+                niveles=niveles
+            )
+
+            return jsonify({"Status": "success", 'Msj': 'Tipo de vehículo registrado con éxito', 'Msj2': ''})
+
         except Exception as e:
-            return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+            return jsonify({
+                "Status": "error",
+                "Msj": f"Ocurrió un error inesperado: {str(e)}"
+            })
 
 @viajes_bp.route("/verTipoVehiculo/<int:idVehiculo>")
 def verTipoVehiculo(idVehiculo):
+    niveles = TipoVehiculo.obtener_niveles_por_tipoVehiculo(idVehiculo)
+
+    botones = []
+    for nivel in niveles:
+        for herramienta in nivel["herramientas"]:
+            botones.append({
+                "x_dimension": herramienta["x_dimension"],
+                "y_dimension": herramienta["y_dimension"],
+                "id_herramienta": herramienta["id_herramienta"],
+                "piso": nivel["nroPiso"]
+            })
+
+    lista_tipo_herramienta = TipoHerramienta.obtener_todos()
+    lista_herramienta = Herramienta.obtener_todos()
     return render_template(
         "viajes/tipoVehiculoCRUD.html",
         title="Ver tipo de vehículo",
+        tipo_herramientas = lista_tipo_herramienta,
+        herramientas = lista_herramienta,
+        niveles=niveles,
+        botones = botones,
         tipoVehiculo = TipoVehiculo.obtenerUno(idVehiculo),
         btnId="btn_Regresar",
         active_page="tipoVehiculo", 
@@ -347,10 +379,26 @@ def verTipoVehiculo(idVehiculo):
 @viajes_bp.route("/editarTipoVehiculo/<int:idTipoVehiculo>",methods=["GET","POST"])
 def editarTipoVehiculo(idTipoVehiculo):
     if request.method == "GET":
+        niveles = TipoVehiculo.obtener_niveles_por_tipoVehiculo(idTipoVehiculo)
+        botones = []
+        for nivel in niveles:
+            for herramienta in nivel["herramientas"]:
+                botones.append({
+                    "x_dimension": herramienta["x_dimension"],
+                    "y_dimension": herramienta["y_dimension"],
+                    "id_herramienta": herramienta["id_herramienta"],
+                    "piso": nivel["nroPiso"]
+                })
+        lista_tipo_herramienta = TipoHerramienta.obtener_todos()
+        lista_herramienta = Herramienta.obtener_todos()
         return render_template(
             "viajes/tipoVehiculoCRUD.html",
             title="Editar tipo de vehículo",
+            tipo_herramientas = lista_tipo_herramienta,
+            herramientas = lista_herramienta,
+            niveles=niveles,
             tipoVehiculo = TipoVehiculo.obtenerUno(idTipoVehiculo),
+            botones = botones,
             btnId="btn_Actualizar",
             active_page="tipoVehiculo", 
             active_menu='mViajes'
@@ -359,16 +407,21 @@ def editarTipoVehiculo(idTipoVehiculo):
         try:
             nombre = request.form.get("nombre")
             marca = request.form.get("marca")
-            cantidad = request.form.get("cantidad")
+            cantidad = int(request.form.get("cantidadPisos"))
             estado = int(request.form.get("estado"))
             servicio = request.form.get("servicio")
 
             usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO')
 
+            # Parsear niveles desde el formData
+            niveles_json = request.form.get("niveles")
+            niveles = json.loads(niveles_json) if niveles_json else []
 
-            print(idTipoVehiculo)
-            mensajes = TipoVehiculo.actualizarTipoVehiculo(idTipoVehiculo,nombre,marca,estado,cantidad,servicio,usuario_actual)
-
+            # 1. Actualizar tipo vehículo
+            mensajes = TipoVehiculo.actualizarTipoVehiculo(
+                idTipoVehiculo, nombre, marca, estado, servicio,niveles
+            )
+            
             msj1 = mensajes.get('MSJ')
             msj2 = mensajes.get('MSJ2')
 
@@ -377,11 +430,11 @@ def editarTipoVehiculo(idTipoVehiculo):
             elif msj2:
                 return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
             else:
-                return jsonify({"Status": "error", 'Msj': 'Error desconocido al actualizar tipo vehiculo'})
+                return jsonify({"Status": "error", 'Msj': 'Error desconocido al actualizar tipo vehículo'})
 
         except Exception as e:
-            return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
-
+            print(f"Error en editarTipoVehiculo: {e}")
+            return jsonify({"Status": "error", 'Msj': 'Error interno en el servidor'})
 @viajes_bp.route("/DarBajaTipoVehiculo/<int:idTipVehiculo>",methods=["POST"])
 def darBajaTipoVehiculo(idTipVehiculo):
     try:

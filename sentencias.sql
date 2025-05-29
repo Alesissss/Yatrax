@@ -484,7 +484,6 @@ CREATE TABLE tipo_vehiculo (
     id_marca INT NULL,
     id_servicio INT NOT NULL,
     estado BOOLEAN NOT NULL,
-    cantidad INT NOT NULL,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NOT NULL,
     CONSTRAINT fk_tipo_vehiculo_marca FOREIGN KEY (id_marca) REFERENCES marca(id),
