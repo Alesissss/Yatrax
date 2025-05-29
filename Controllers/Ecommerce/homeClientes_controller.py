@@ -1,4 +1,6 @@
 import hashlib
+import os
+import re
 from flask import Blueprint, request, jsonify, render_template, session, redirect, url_for, abort
 from Models.conf_plantillas import Conf_Plantillas
 from Models.api_net import ApiNetPe
@@ -8,7 +10,8 @@ from Models.cliente import Cliente
 from Models.tipoDocumento import TipoDocumento
 from Models.tipoCliente import TipoCliente
 from Models.pais import Pais
-from Models.cliente import Cliente
+from Models.terminos_condiciones import TerminosCondiciones
+
 homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/home')
 
 # # ERRORES 
@@ -221,4 +224,63 @@ def registrar_cliente_form():
 
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
+    
+# REGION TERMINOS Y CONDICIONES
+@homeClientes_bp.route('/ApiTerminosCondicionesActivo', methods=['GET'])
+def api_terminos_condiciones_activo():
+    try:
+        UPLOAD_FOLDER = "Static/utilities/terminos_condiciones/"
+
+        activo = TerminosCondiciones.obtener_activos()
+        if not activo:
+            return jsonify({
+                "Status": "error",
+                "data": {},
+                "Msj": "No hay términos y condiciones activos."
+            })
+        
+        termino = activo[0]
+        filename = termino['archivo']
+        file_path = os.path.join(UPLOAD_FOLDER, filename)
+        
+        if not os.path.exists(file_path):
+            return jsonify({
+                "Status": "error",
+                "data": {},
+                "Msj": f"El archivo {filename} no existe en el servidor."
+            })
+        
+        texto = open(file_path, encoding='utf-8').read()
+        
+        # Regex que captura cada sección y su contenido hasta la siguiente sección o fin de texto
+        pattern = re.compile(
+            r"\*(COMPRAS EN INTERNET|PASAJES|ENCOMIENDAS|BASE LEGAL)\*\s*([\s\S]*?)(?=\*(?:COMPRAS EN INTERNET|PASAJES|ENCOMIENDAS|BASE LEGAL)\*|$)",
+            re.IGNORECASE
+        )
+        matches = {m[0].upper(): m[1].strip() for m in pattern.findall(texto)}
+
+        # Aseguramos el orden fijo
+        secciones = ["COMPRAS EN INTERNET", "PASAJES", "ENCOMIENDAS", "BASE LEGAL"]
+        resultado = []
+        for sec in secciones:
+            resultado.append({
+                "seccion":  sec,
+                "contenido": matches.get(sec, "")
+            })
+
+        return jsonify({
+            "Status": "success",
+            "data":   resultado
+        })
+
+    except Exception as e:
+        return jsonify({
+            "Status": "error",
+            "Msj":    f"Ocurrió un error al obtener términos: {e}",
+            "data":   []
+        })
+
+
+# END REGION TERMINOS Y CONDICIONES
+
 # END FUNCIONES

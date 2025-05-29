@@ -1,10 +1,10 @@
 import bd
 
 class TerminosCondiciones:
-    def __init__(self, id=None, nombre=None, contenido=None, estado=1, fecha_registro=None, usuario=None):
+    def __init__(self, id=None, nombre=None, archivo=None, estado=1, fecha_registro=None, usuario=None):
         self.id = id
         self.nombre = nombre
-        self.contenido = contenido
+        self.archivo = archivo
         self.estado = estado
         self.fecha_registro = fecha_registro
         self.usuario = usuario
@@ -14,7 +14,7 @@ class TerminosCondiciones:
         conexion = bd.Conexion()
         try:
             query = """
-                SELECT id, nombre, contenido, estado, fecha_registro, usuario
+                SELECT id, nombre, archivo, estado, fecha_registro, usuario
                 FROM terminos_condiciones
             """
             return conexion.obtener(query)
@@ -26,7 +26,7 @@ class TerminosCondiciones:
         conexion = bd.Conexion()
         try:
             query = """
-                SELECT id, nombre, contenido, estado, fecha_registro, usuario
+                SELECT id, nombre, archivo, estado, fecha_registro, usuario
                 FROM terminos_condiciones
                 WHERE id = %s
             """
@@ -34,14 +34,27 @@ class TerminosCondiciones:
             return resultado[0] if resultado else None
         finally:
             conexion.cerrar()
+            
+    @classmethod
+    def obtener_activos(cls):
+        conexion = bd.Conexion()
+        try:
+            query = """
+                SELECT id, nombre, archivo, estado, fecha_registro, usuario
+                FROM terminos_condiciones
+                WHERE estado = 1
+            """
+            return conexion.obtener(query)
+        finally:
+            conexion.cerrar()
     
     @classmethod
-    def registrar(cls, nombre, contenido, estado, usuario_actual):
+    def registrar(cls, nombre, archivo, usuario_actual):
         conexion = bd.Conexion()
         try:
             conexion.ejecutar(
-                "CALL SP_REGISTRAR_TERMINOS_CONDICIONES(%s, %s, %s, %s);",
-                (nombre, contenido, estado, usuario_actual)
+                "CALL SP_REGISTRAR_TERMINOS_CONDICIONES(%s, %s, %s);",
+                (nombre, archivo, usuario_actual)
             )
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
             return resultado[0]
@@ -50,12 +63,12 @@ class TerminosCondiciones:
             conexion.cerrar()
             
     @classmethod
-    def editar(cls, id, nombre, contenido, estado, usuario_actual):
+    def editar(cls, id, nombre, archivo, usuario_actual):
         conexion = bd.Conexion()
         try:
             conexion.ejecutar(
-                "CALL SP_EDITAR_TERMINOS_CONDICIONES(%s, %s, %s, %s, %s);",
-                (id, nombre, contenido, estado, usuario_actual)
+                "CALL SP_EDITAR_TERMINOS_CONDICIONES(%s, %s, %s, %s);",
+                (id, nombre, archivo, usuario_actual)
             )
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
             return resultado[0]
@@ -77,11 +90,11 @@ class TerminosCondiciones:
             conexion.cerrar()
             
     @classmethod
-    def dar_baja(cls, id):
+    def activar(cls, id):
         conexion = bd.Conexion()
         try:
             conexion.ejecutar(
-                "CALL SP_DAR_BAJA_TERMINOS_CONDICIONES(%s);",
+                "CALL SP_ACTIVAR_TERMINOS_CONDICIONES(%s);",
                 (id,)
             )
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")

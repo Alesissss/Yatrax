@@ -121,8 +121,8 @@ DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_METODOPAGO;
 
 DROP PROCEDURE IF EXISTS SP_REGISTRAR_TERMINOS_CONDICIONES;
 DROP PROCEDURE IF EXISTS SP_EDITAR_TERMINOS_CONDICIONES;
-DROP PROCEDURE IF EXISTS SP_DARBAJA_TERMINOS_CONDICIONES;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_TERMINOS_CONDICIONES;
+DROP PROCEDURE IF EXISTS SP_ACTIVAR_TERMINOS_CONDICIONES;
 
 DROP PROCEDURE IF EXISTS SP_CAMBIAR_CLAVE;
 -- Luego eliminamos las tablas, primero la que depende de la otra
@@ -170,11 +170,11 @@ DROP TABLE IF EXISTS terminos_condiciones;
 -- Crear tabla terminos_condiciones
 CREATE TABLE terminos_condiciones (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    contenido TEXT,
+    nombre VARCHAR(255) NOT NULL,
+    archivo VARCHAR(255) NOT NULL,
     estado BOOLEAN NOT NULL,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    usuario VARCHAR(100) NOT NULL
+    usuario VARCHAR(255) NOT NULL
 );
 
 -- Crear tabla pais
@@ -620,6 +620,9 @@ CREATE TABLE detalle_personal (
     FOREIGN KEY (idPersonal) REFERENCES personal(id),
     FOREIGN KEY (idViaje) REFERENCES viaje(id)
 );
+
+-- INSERTS terminos y condicones
+INSERT INTO terminos_condiciones(id, nombre, archivo, estado, fecha_registro, usuario) VALUES (1,'TyC-v2025-001','TyC_v2025-001.txt',1,'2025-05-29 01:51:30','ander@gmail.com');
 
 -- INSERTS estado_viaje
 INSERT INTO estado_viaje (id, nombre) VALUES (1, 'PENDIENTE');
@@ -1438,15 +1441,14 @@ DELIMITER ;
 DELIMITER $$
 CREATE PROCEDURE SP_REGISTRAR_TERMINOS_CONDICIONES(
     IN P_NOMBRE VARCHAR(255),
-    IN P_CONTENIDO TEXT,
-    IN P_ESTADO BOOLEAN,
+    IN P_ARCHIVO VARCHAR(255),
     IN P_USUARIO VARCHAR(255)
 )
 BEGIN
     DECLARE cNombre INT;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION 
     BEGIN
-        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
     END;
 
     SET @MSJ = NULL;
@@ -1455,12 +1457,12 @@ BEGIN
     SELECT COUNT(*) INTO cNombre FROM terminos_condiciones WHERE nombre = P_NOMBRE;
 
     IF cNombre > 0 THEN
-        SET @MSJ2 = 'El término y condiciones que intenta registrar ya está registrado';
+        SET @MSJ2 = 'El nombre de términos y condiciones ya existe';
     ELSE
-        INSERT INTO terminos_condiciones (nombre, contenido, estado, usuario) 
-        VALUES (P_NOMBRE, P_CONTENIDO, P_ESTADO, P_USUARIO);
+        INSERT INTO terminos_condiciones (nombre, archivo, estado, usuario)
+        VALUES (P_NOMBRE, P_ARCHIVO, 0, P_USUARIO);
 
-        SET @MSJ = 'Término y condiciones registrado correctamente';
+        SET @MSJ = 'Se registró correctamente el término y condición';
     END IF;
 END $$
 DELIMITER ;
@@ -1469,58 +1471,36 @@ DELIMITER ;
 DELIMITER $$
 CREATE PROCEDURE SP_EDITAR_TERMINOS_CONDICIONES(
     IN P_ID INT,
-    IN P_NOMBRE VARCHAR(100),
-    IN P_CONTENIDO TEXT,
-    IN P_ESTADO BOOLEAN,
-    IN P_USUARIO VARCHAR(100)
+    IN P_NOMBRE VARCHAR(255),
+    IN P_ARCHIVO VARCHAR(255),
+    IN P_USUARIO VARCHAR(255)
 )
 BEGIN
-    DECLARE cID INT;
+    DECLARE cTermino INT;
     DECLARE cNombre INT;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
-        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
     END;
 
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
-    SELECT COUNT(*) INTO cID FROM terminos_condiciones WHERE id = P_ID;
-    SELECT COUNT(*) INTO cNombre FROM terminos_condiciones WHERE nombre = P_NOMBRE;
+    SELECT COUNT(*) INTO cTermino FROM terminos_condiciones WHERE id = P_ID;
+    SELECT COUNT(*) INTO cNombre FROM terminos_condiciones WHERE nombre = P_NOMBRE AND id != P_ID;
 
-    IF cID <= 0 THEN
-        SET @MSJ2 = 'El término y condiciones que intenta editar no existe';
-    ELSEIF cNombre != 0 THEN
-        SET @MSJ2 = 'El nombre de término y condiciones ya existe';
+    IF cTermino <= 0 THEN
+        SET @MSJ2 = 'El término y condición que intenta editar no existe';
+    ELSEIF cNombre > 0 THEN
+        SET @MSJ2 = 'El nombre ingresado ya existe en otro término y condición';
     ELSE
-        UPDATE terminos_condiciones SET nombre = P_NOMBRE, contenido = P_CONTENIDO, estado = P_ESTADO, usuario = P_USUARIO WHERE id = P_ID;
-        SET @MSJ = 'Se editó correctamente el término y condiciones';
-    END IF;
-END $$
-DELIMITER ;
+        UPDATE terminos_condiciones 
+        SET nombre = P_NOMBRE, 
+            archivo = P_ARCHIVO,
+            usuario = P_USUARIO
+        WHERE id = P_ID;
 
--- Crear procedimiento SP_DARBAJA_TERMINOS_CONDICIONES;
-DELIMITER $$
-CREATE PROCEDURE SP_DARBAJA_TERMINOS_CONDICIONES(
-    IN P_ID INT
-)
-BEGIN
-    DECLARE cID INT;
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
-    END;
-
-    SET @MSJ = NULL;
-    SET @MSJ2 = NULL;
-
-    SELECT COUNT(*) INTO cID FROM terminos_condiciones WHERE id = P_ID;
-
-    IF cID <= 0 THEN
-        SET @MSJ2 = 'El término y condiciones que intenta dar de baja no existe';
-    ELSE
-        UPDATE terminos_condiciones SET estado = 0 WHERE id = P_ID;
-        SET @MSJ = 'Se dio de baja correctamente el término y condiciones';
+        SET @MSJ = 'Se modificó correctamente el término y condición';
     END IF;
 END $$
 DELIMITER ;
@@ -1531,8 +1511,9 @@ CREATE PROCEDURE SP_ELIMINAR_TERMINOS_CONDICIONES(
     IN P_ID INT
 )
 BEGIN
-    DECLARE cID INT;
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    DECLARE cTermino INT;
+    DECLARE flagTermino BOOLEAN;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
     BEGIN
         SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
     END;
@@ -1540,13 +1521,45 @@ BEGIN
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
-    SELECT COUNT(*) INTO cID FROM terminos_condiciones WHERE id = P_ID;
+    SELECT COUNT(*) INTO cTermino FROM terminos_condiciones WHERE id = P_ID;
+    SELECT estado INTO flagTermino FROM terminos_condiciones WHERE id = P_ID;
 
-    IF cID <= 0 THEN
-        SET @MSJ2 = 'El término y condiciones que intenta eliminar no existe';
+    IF cTermino <= 0 THEN
+        SET @MSJ2 = 'El término y condición que intenta eliminar no existe';
+    ELSEIF flagTermino = 1 THEN
+        SET @MSJ2 = 'El término y condición activo no puede ser eliminado';
     ELSE
         DELETE FROM terminos_condiciones WHERE id = P_ID;
-        SET @MSJ = 'Se eliminó correctamente el término y condiciones';
+        SET @MSJ = 'Se eliminó correctamente el término y condición';
+    END IF;
+END $$
+DELIMITER ;
+
+
+-- Crear procedimiento SP_ACTIVAR_TERMINOS_CONDICIONES;
+DELIMITER $$
+CREATE PROCEDURE SP_ACTIVAR_TERMINOS_CONDICIONES(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cTermino INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cTermino FROM terminos_condiciones WHERE id = P_ID;
+
+    IF cTermino <= 0 THEN
+        SET @MSJ2 = 'El término y condición que intenta activar no existe';
+    ELSE
+        UPDATE terminos_condiciones SET estado = 0;
+        UPDATE terminos_condiciones SET estado = 1 WHERE id = P_ID;
+
+        SET @MSJ = 'Se activó correctamente el término y condición';
     END IF;
 END $$
 DELIMITER ;

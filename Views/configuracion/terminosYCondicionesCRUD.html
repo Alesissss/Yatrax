@@ -1,0 +1,348 @@
+{% extends "index.html" %}
+
+{% block title %}YATRAX - {{ tittle }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4">
+    <div class="row">
+        <!-- Formulario de edición/registro/ver -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="text-center mb-0">{{ tittle }}</h4>
+                </div>
+                <div class="card-body">
+                    <form id="formTerminos" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="txt_Nombre" class="form-label">Nombre de los términos y condiciones</label>
+                            <input
+                                type="text"
+                                id="txt_Nombre"
+                                name="nombre"                                   {# <- agregamos name #}
+                                class="form-control"
+                                placeholder="Ingrese el nombre"
+                                value="{{ termino.nombre if termino else '' }}"
+                                maxlength="100"
+                                {% if btnId=='btn_Aceptar' %}disabled{% endif %}
+                                required
+                            >
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="file_Archivo" class="form-label">Archivo TXT</label>
+                            <div class="col-12 text-left">
+                                <label
+                                    class="btn btn-warning {% if btnId == 'btn_Aceptar' %}disabled{% endif %}"
+                                    for="file_Archivo"
+                                >
+                                    <i class="bi bi-file-earmark-arrow-up-fill"></i>
+                                    Seleccionar archivo
+                                </label>
+                                <input
+                                    type="file"
+                                    class="d-none"
+                                    id="file_Archivo"
+                                    name="archivo"
+                                    accept=".txt"
+                                    {% if btnId=='btn_Aceptar' %}disabled{% endif %}
+                                >
+                                <span id="checkIcon" class="d-none text-success ml-2">
+                                    <i class="bi bi-check-circle-fill"></i> Archivo cargado
+                                </span>
+                                <span id="fileName" class="d-block mt-2 text-muted small"></span>
+                            </div>
+                            <small class="form-text text-muted">
+                                Sólo .txt (UTF-8 recomendado). Máx. 5 MB.
+                            </small>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button
+                                id="btn_Volver"
+                                type="button"
+                                class="btn btn-danger"
+                            >
+                                Volver al listado de términos y condiciones
+                            </button>
+                            <p></p>
+                            <button
+                                id="{{ btnId }}"
+                                type="button"
+                                class="btn btn-primary"
+                            >
+                                {% if btnId == 'btn_Registrar' %}
+                                    Registrar
+                                {% elif btnId == 'btn_Editar' %}
+                                    Actualizar
+                                {% else %}
+                                    Aceptar
+                                {% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Previsualización -->
+        <div class="col-md-8">
+            <div class="card h-100">
+                <div class="card-header d-flex align-items-center bg-info text-white">
+                    <h2 class="mx-auto text-center mb-0" id="previewName">
+                        {{ termino.nombre if termino and termino.nombre else 'Previsualización' }}
+                    </h2>
+                </div>
+                <div
+                    class="card-body"
+                    id="previewContent"
+                    style="max-height: 70vh; overflow-y: auto;"
+                >
+                    {% if contenido %}
+                        <pre style="white-space: pre-wrap; word-wrap: break-word; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+                    {{ contenido }}
+                        </pre>
+                    {% else %}
+                        <div class="text-center" style="color: #000000;">
+                            <i class="bi bi-file-text" style="font-size: 2rem;"></i>
+                            <p class="mt-3">Seleccione un archivo para ver su contenido aquí</p>
+                        </div>
+                        <div class="text-left" style="color: #000000;">
+                            <p>
+                                Considere que el formato de las <strong>secciones</strong> debe estar estructurado de la siguiente manera:
+                            </p>
+                                <strong>*COMPRAS EN INTERNET*</strong>
+                                <ol>
+                                    <li>contenido</li>
+                                    <li>contenido</li>
+                                </ol>
+
+                                <strong>*PASAJES*</strong>
+                                <ol>
+                                    <li>contenido</li>
+                                    <li>contenido</li>
+                                </ol>
+
+                                <strong>*ENCOMIENDAS*</strong>
+                                <ol>
+                                    <li>contenido</li>
+                                    <li>contenido</li>
+                                </ol>
+
+                                <strong>*BASE LEGAL*</strong>
+                                <ol>
+                                    <li>contenido</li>
+                                    <li>contenido</li>
+                                </ol>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer text-center">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle"></i>
+                        La previsualización se actualiza automáticamente al cargar un archivo
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function () {
+    let isFileSelected = false;
+    const terminoId = "{{ termino.id if termino else '' }}";
+    const listRoute = '/trabajadores/configuracion/GestionarTerminosCondiciones';
+
+    function updatePreview() {
+        const name         = $('#txt_Nombre').val().trim();
+        const fileInput    = $('#file_Archivo')[0];
+        const previewName  = $('#previewName');
+        const previewBody  = $('#previewContent');
+        const checkIcon    = $('#checkIcon');
+        const fileNameSpan = $('#fileName');
+
+        previewName.text(name || 'Previsualización');
+
+        if (fileInput.files && fileInput.files[0]) {
+            const file = fileInput.files[0];
+            if (!file.name.toLowerCase().endsWith('.txt')) {
+                toastr.error("Solo se permiten archivos .txt", "MENSAJE DE SISTEMA");
+                resetPreview(); return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                toastr.error("El archivo es demasiado grande. Máx. 5 MB", "MENSAJE DE SISTEMA");
+                resetPreview(); return;
+            }
+            const reader = new FileReader();
+            reader.onload = e => {
+                const content = e.target.result;
+                if (content.trim()) {
+                    previewBody.html(`<pre style="white-space: pre-wrap; word-wrap: break-word;">${content}</pre>`);
+                    checkIcon.removeClass('d-none');
+                    fileNameSpan.text(`Archivo: ${file.name} (${(file.size/1024).toFixed(2)} KB)`);
+                    isFileSelected = true;
+                } else {
+                    toastr.warning("El archivo está vacío", "MENSAJE DE SISTEMA");
+                    resetPreview();
+                }
+            };
+            reader.onerror = () => {
+                toastr.error("Error al leer el archivo", "MENSAJE DE SISTEMA");
+                resetPreview();
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+    }
+
+    function resetPreview() {
+        const existing = `{{ contenido|e if contenido else '' }}`;
+        const previewBody = $('#previewContent');
+        const checkIcon   = $('#checkIcon');
+        const fileName    = $('#fileName');
+
+        if (existing) {
+            previewBody.html(`<pre style="white-space: pre-wrap; word-wrap: break-word;">${existing}</pre>`);
+        } else {
+            previewBody.html(`
+                <div class="text-center text-muted">
+                    <i class="bi bi-file-text" style="font-size: 3rem;"></i>
+                    <p class="mt-3">Seleccione un archivo para ver su contenido aquí</p>
+                </div>
+            `);
+        }
+        checkIcon.addClass('d-none');
+        fileName.text('');
+        isFileSelected = false;
+    }
+
+    function validateForm(requireFile = true) {
+        const nombre = $('#txt_Nombre').val().trim();
+        const file   = $('#file_Archivo')[0].files[0];
+
+        if (!nombre) {
+            toastr.warning("El nombre es obligatorio", "MENSAJE DE SISTEMA");
+            $('#txt_Nombre').focus();
+            return false;
+        }
+        if (nombre.length > 100) {
+            toastr.warning("El nombre no puede exceder 100 caracteres", "MENSAJE DE SISTEMA");
+            $('#txt_Nombre').focus();
+            return false;
+        }
+        if (requireFile && !file) {
+            toastr.warning("Debe seleccionar un archivo TXT", "MENSAJE DE SISTEMA");
+            return false;
+        }
+        return true;
+    }
+
+    function showLoader(on) {
+        if (on) {
+            $('body').append(`
+                <div id="loader" class="position-fixed w-100 h-100 d-flex 
+                    justify-content-center align-items-center" 
+                    style="top:0;left:0;background:rgba(0,0,0,0.5);z-index:9999;">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Cargando...</span>
+                  </div>
+                </div>`);
+        } else {
+            $('#loader').remove();
+        }
+    }
+
+    // Listeners
+    $('#txt_Nombre').on('input', updatePreview);
+    $('#file_Archivo').on('change', updatePreview);
+
+    // Volver / Aceptar (modo ver)
+    $('#btn_Volver, #btn_Aceptar').click(() => {
+        window.location.href = listRoute;
+    });
+
+    // Registrar
+    $('#btn_Registrar').click(() => {
+        if (!validateForm(true)) return;
+        const formData = new FormData($('#formTerminos')[0]);
+
+        Swal.fire({
+            title: "¿Confirmar registro?",
+            text:  "Se registrará el término y condición. ¿Continuar?",
+            icon:  "question",
+            showCancelButton: true,
+            confirmButtonText: "Sí, registrar",
+            cancelButtonText: "Cancelar"
+        }).then(res => {
+            if (!res.isConfirmed) return;
+            showLoader(true);
+            $.ajax({
+                url:       "/trabajadores/configuracion/RegistrarTerminos",
+                method:    "POST",
+                data:      formData,
+                processData: false,
+                contentType: false,
+                success(resp) {
+                    showLoader(false);
+                    const msgType = resp.Status === "success" ? toastr.success : toastr.error;
+                    msgType(resp.Msj || resp.Msj2, "MENSAJE DE SISTEMA");
+                    if (resp.Status === "success") {
+                        setTimeout(() => window.location = listRoute, 1500);
+                    }
+                },
+                error(xhr) {
+                    showLoader(false);
+                    let err = "Error en servidor";
+                    try { err = JSON.parse(xhr.responseText).Msj; } catch{}
+                    toastr.error(err, "MENSAJE DE SISTEMA");
+                }
+            });
+        });
+    });
+
+    // Editar
+    $('#btn_Editar').click(() => {
+        if (!validateForm(false)) return;
+        if (!terminoId) {
+            toastr.error("ID inválido", "MENSAJE DE SISTEMA");
+            return;
+        }
+        const formData = new FormData($('#formTerminos')[0]);
+
+        Swal.fire({
+            title: "¿Confirmar actualización?",
+            text:  "Se modificarán los términos y condiciones. ¿Continuar?",
+            icon:  "question",
+            showCancelButton: true,
+            confirmButtonText: "Sí, actualizar",
+            cancelButtonText: "Cancelar"
+        }).then(res => {
+            if (!res.isConfirmed) return;
+            showLoader(true);
+            $.ajax({
+                url:       `/trabajadores/configuracion/EditarTerminos/${terminoId}`,
+                method:    "POST",
+                data:      formData,
+                processData: false,
+                contentType: false,
+                success(resp) {
+                    showLoader(false);
+                    const msgType = resp.Status === "success" ? toastr.success : toastr.error;
+                    msgType(resp.Msj || resp.Msj2, "MENSAJE DE SISTEMA");
+                    if (resp.Status === "success") {
+                        setTimeout(() => window.location = listRoute, 1500);
+                    }
+                },
+                error(xhr) {
+                    showLoader(false);
+                    let err = "Error en servidor";
+                    try { err = JSON.parse(xhr.responseText).Msj; } catch{}
+                    toastr.error(err, "MENSAJE DE SISTEMA");
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}
