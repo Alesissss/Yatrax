@@ -313,5 +313,12 @@ def api_terminos_condiciones_activo():
 
 
 # END REGION TERMINOS Y CONDICIONES
+@homeClientes_bp.route('/obtenerOrigenesDestinos',methods=['GET'])
+def obtenerOrigenesDestinos():
+    try:
+
+        return {"data":[],"Msj":"Se ha obtenido correctamente los datos","Status":"success"}
+    except Exception as e:
+        return {"data":[],"Msj":f"Error al obtener los origenes:{repr(e)}","Status":"error"}
 
 # END FUNCIONES

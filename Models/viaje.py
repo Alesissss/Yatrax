@@ -169,3 +169,20 @@ class Viaje:
             return resultado[0]  # Retorna un diccionario con los mensajes
         finally:
             conexion.cerrar()
+    
+    @classmethod
+    def obtenerOrigenes():
+        conexion = bd.Conexion()
+        try:
+            lista_origenes = conexion.obtener("""
+                SELECT s.ciudad AS ciudad
+                FROM viaje v INNER JOIN ruta r on v.idRuta = r.id
+                INNER JOIN escala e on e.idRuta = r.id
+                INNER JOIN sucursal s on s.id = e.idSucursal
+                WHERE e.nro_orden = 1
+            """                 
+            )
+            return lista_origenes
+        finally:
+            conexion.cerrar()
+    def obtenerDestinosPorOrigen(id)
