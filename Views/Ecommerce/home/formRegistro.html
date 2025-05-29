@@ -1,346 +1,452 @@
-{% extends "maestra.html" %}
-{% block titulo %}YATRAX - Registro{% endblock %}
+{% extends "maestra.html" %} {% block titulo %}YATRAX - Registro{% endblock %}
 {% block contenido %}
 <style>
+  .ytrx-register-back {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
 
-    .ytrx-register-back {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        padding: 20px;
-    }
+  .ytrx-register-container {
+    margin-top: 1vw;
+    background: #ffffff;
+    padding: 40px 30px;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    max-width: 50vw;
+    width: 100%;
+  }
 
-    .ytrx-register-container {
-        margin-top: 1vw;
-        background: #ffffff;
-        padding: 40px 30px;
-        border-radius: 12px;
-        box-shadow: 0 0 20px rgba(0,0,0,0.3);
-        max-width: 500px;
-        width: 100%;
-    }
+  .ytrx-register-title {
+    font-size: 28px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 10px;
+    color: #333;
+  }
 
-    .ytrx-register-title {
-        font-size: 28px;
-        font-weight: 600;
-        text-align: center;
-        margin-bottom: 10px;
-        color: #333;
-    }
+  .ytrx-register-subtitle {
+    font-size: 14px;
+    text-align: center;
+    color: #777;
+    margin-bottom: 30px;
+  }
 
-    .ytrx-register-subtitle {
-        font-size: 14px;
-        text-align: center;
-        color: #777;
-        margin-bottom: 30px;
-    }
+  .ytrx-input-group {
+    margin-bottom: 18px;
+    width: 100%;
+  }
 
-    .ytrx-input-group {
-        margin-bottom: 18px;
-        width: 100%;
-    }
+  .ytrx-form-input,
+  select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    background-color: #fff;
+    color: #333;
+    transition: border-color 0.3s ease;
+  }
 
-    .ytrx-form-input,
-    select {
-        width: 100%;
-        padding: 12px 14px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        font-size: 14px;
-        background-color: #fff;
-        color: #333;
-        transition: border-color 0.3s ease;
-    }
+  .ytrx-form-input:focus,
+  select:focus {
+    outline: none;
+    border-color: #1e88e5;
+    box-shadow: 0 0 0 2px rgba(30, 136, 229, 0.2);
+  }
 
-    .ytrx-form-input:focus,
-    select:focus {
-        outline: none;
-        border-color: #1e88e5;
-        box-shadow: 0 0 0 2px rgba(30, 136, 229, 0.2);
-    }
+  .row {
+    display: flex;
+    gap: 12px;
+  }
 
-    .row {
-        display: flex;
-        gap: 12px;
-    }
+  .col {
+    flex: 1;
+  }
 
-    .col {
-        flex: 1;
-    }
+  .ytrx-submit-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #1e88e5;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
 
-    .ytrx-submit-btn {
-        width: 100%;
-        padding: 12px;
-        background-color: #1e88e5;
-        border: none;
-        border-radius: 8px;
-        color: white;
-        font-weight: 500;
-        font-size: 15px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
+  .ytrx-submit-btn:hover {
+    background-color: #1669c1;
+  }
 
-    .ytrx-submit-btn:hover {
-        background-color: #1669c1;
-    }
+  .ytrx-login-link {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 14px;
+    color: #555;
+  }
 
-    .ytrx-login-link {
-        text-align: center;
-        margin-top: 25px;
-        font-size: 14px;
-        color: #555;
-    }
+  .ytrx-login-link a {
+    color: #1e88e5;
+    text-decoration: none;
+    font-weight: 500;
+  }
 
-    .ytrx-login-link a {
-        color: #1e88e5;
-        text-decoration: none;
-        font-weight: 500;
-    }
+  .ytrx-login-link a:hover {
+    text-decoration: underline;
+  }
 
-    .ytrx-login-link a:hover {
-        text-decoration: underline;
-    }
+  .social-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 10px;
+  }
 
-    .social-buttons {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-        margin-top: 10px;
-    }
+  .social-buttons button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.2s ease;
+  }
 
-    .social-buttons button {
-        background: none;
-        border: none;
-        cursor: pointer;
-        padding: 0;
-        transition: transform 0.2s ease;
-    }
-
-    .social-buttons button:hover {
-        transform: scale(1.1);
-    }
+  .social-buttons button:hover {
+    transform: scale(1.1);
+  }
 </style>
 
 <main class="ytrx-register-back">
-    <div class="ytrx-register-container">
-        <h1 class="ytrx-register-title">Crea una cuenta</h1>
-        <p class="ytrx-register-subtitle">Únete a nuestra comunidad y disfruta de todos los beneficios</p>
+  <div class="ytrx-register-container">
+    <h1 class="ytrx-register-title">Crea una cuenta</h1>
+    <p class="ytrx-register-subtitle">
+      Únete a nuestra comunidad y disfruta de todos los beneficios
+    </p>
 
-        <form id="ytrx-register-form">
-            <!-- Tipo de documento y número -->
-             <div class="ytrx-input-group">
-                <div class="row">
-                <div class="col">
-                    <select id="tipo-doc" name="tipo-doc" required>
-                        <option value="" disabled selected>Tipo</option>
-                        {% for tipo in TipoDocumento %}
-                            <option value="{{ tipo.id }}">{{ tipo.abreviatura }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col">
-                    <input type="text" id="ytrx-doc-number" name="ytrx-doc-number" class="ytrx-form-input" placeholder="Número de documento" required>
-                </div>
-            </div>
-             </div>
-            
+    <form id="ytrx-register-form">
+      <!-- Tipo de documento y número -->
+      <div class="ytrx-input-group">
+        <div class="row">
+          <div class="col">
+            <select id="tipo-doc" name="tipo-doc" required>
+              <option value="" disabled selected>Tipo</option>
+              {% for tipo in TipoDocumento %}
+              <option value="{{ tipo.id }}">{{ tipo.abreviatura }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col">
+            <input
+              type="text"
+              id="ytrx-doc-number"
+              name="ytrx-doc-number"
+              class="ytrx-form-input"
+              placeholder="Número de documento"
+              required
+            />
+          </div>
+        </div>
+      </div>
 
-            <!-- Nombre o razón social -->
-            <div class="ytrx-input-group" id="grupo-nombres">
-                <input type="text" id="ytrx-fullname" name="ytrx-fullname" class="ytrx-form-input" placeholder="Nombres" required>
-            </div>
-            <div class="ytrx-input-group" id="grupo-razon-social" style="display: none;">
-                <input type="text" id="ytrx-razon-social" name="ytrx-razon-social" class="ytrx-form-input" placeholder="Razón social">
-            </div>
+      <!-- Nombre o razón social -->
+      <div class="ytrx-input-group" id="grupo-nombres">
+        <input
+          type="text"
+          id="ytrx-fullname"
+          name="ytrx-fullname"
+          class="ytrx-form-input"
+          placeholder="Nombres"
+          required
+        />
+      </div>
+      <div
+        class="ytrx-input-group"
+        id="grupo-razon-social"
+        style="display: none"
+      >
+        <input
+          type="text"
+          id="ytrx-razon-social"
+          name="ytrx-razon-social"
+          class="ytrx-form-input"
+          placeholder="Razón social"
+        />
+      </div>
 
-            <!-- Apellidos -->
-            <div class="row" id="grupo-apellidos">
-                <div class="ytrx-input-group col">
-                    <input type="text" id="ytrx-lastname-father" name="ytrx-lastname-father" class="ytrx-form-input" placeholder="Apellido Paterno">
-                </div>
-                <div class="ytrx-input-group col">
-                    <input type="text" id="ytrx-lastname-mother" name="ytrx-lastname-mother" class="ytrx-form-input" placeholder="Apellido Materno">
-                </div>
-            </div>
+      <!-- Apellidos -->
+      <div class="row" id="grupo-apellidos">
+        <div class="ytrx-input-group col">
+          <input
+            type="text"
+            id="ytrx-lastname-father"
+            name="ytrx-lastname-father"
+            class="ytrx-form-input"
+            placeholder="Apellido Paterno"
+          />
+        </div>
+        <div class="ytrx-input-group col">
+          <input
+            type="text"
+            id="ytrx-lastname-mother"
+            name="ytrx-lastname-mother"
+            class="ytrx-form-input"
+            placeholder="Apellido Materno"
+          />
+        </div>
+      </div>
 
-            <!-- Fecha nacimiento -->
-            <div class="ytrx-input-group" id="grupo-fecha-nacimiento">
-                <input type="date" id="ytrx-birthdate"  name="ytrx-birthdate" class="ytrx-form-input">
-            </div>
+      <!-- Fecha nacimiento -->
+      <div class="ytrx-input-group" id="grupo-fecha-nacimiento">
+        <input
+          type="date"
+          id="ytrx-birthdate"
+          name="ytrx-birthdate"
+          class="ytrx-form-input"
+        />
+      </div>
 
-            <!-- Sexo -->
-            <div class="row" id="grupo-sexo">
-                <div class="ytrx-input-group col">
-                    <select id="ytrx-gender" name="ytrx-gender">
-                        <option value="" disabled selected>Sexo</option>
-                        <option value="M">Masculino</option>
-                        <option value="F">Femenino</option>
-                    </select>
-                </div>
-            </div>
+      <!-- Sexo -->
+      <div class="row" id="grupo-sexo">
+        <div class="ytrx-input-group col">
+          <select id="ytrx-gender" name="ytrx-gender">
+            <option value="" disabled selected>Sexo</option>
+            <option value="M">Masculino</option>
+            <option value="F">Femenino</option>
+          </select>
+        </div>
+      </div>
 
-            <!-- Teléfono -->
-            <div class="ytrx-input-group">
-                <input type="tel" id="ytrx-phone" name="ytrx-phone" class="ytrx-form-input" placeholder="Número de teléfono" >
-            </div>
+      <!-- Teléfono -->
+      <div class="ytrx-input-group">
+        <input
+          type="tel"
+          id="ytrx-phone"
+          name="ytrx-phone"
+          class="ytrx-form-input"
+          placeholder="Número de teléfono"
+        />
+      </div>
 
-            <!-- País -->
-            <div class="ytrx-input-group">
-                <select id="ytrx-country" name="ytrx-country">
-                    <option value="" disabled selected>País</option>
-                    {% for pais in Paises %}
-                            <option value="{{ pais.id }}">{{ pais.nombre }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+      <!-- País -->
+      <div class="ytrx-input-group">
+        <select id="ytrx-country" name="ytrx-country">
+          <option value="" disabled selected>País</option>
+          {% for pais in Paises %}
+          <option value="{{ pais.id }}">{{ pais.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
 
-            <!-- Dirección -->
-            <div class="ytrx-input-group">
-                <input type="text" id="ytrx-address" name="ytrx-address" class="ytrx-form-input" placeholder="Dirección">
-            </div>
+      <!-- Dirección -->
+      <div class="ytrx-input-group">
+        <input
+          type="text"
+          id="ytrx-address"
+          name="ytrx-address"
+          class="ytrx-form-input"
+          placeholder="Dirección"
+        />
+      </div>
 
-            <!-- Correo -->
-            <div class="ytrx-input-group">
-                <input type="email" id="ytrx-email" name="ytrx-email"  class="ytrx-form-input" placeholder="Correo electrónico" required>
-            </div>
+      <!-- Correo -->
+      <div class="ytrx-input-group">
+        <input
+          type="email"
+          id="ytrx-email"
+          name="ytrx-email"
+          class="ytrx-form-input"
+          placeholder="Correo electrónico"
+          required
+        />
+      </div>
 
-            <!-- Contraseña -->
-            <div class="ytrx-input-group">
-                <input type="password" id="ytrx-password" name="ytrx-password" class="ytrx-form-input" placeholder="Contraseña" required>
-            </div>
+      <!-- Contraseña -->
+      <div class="ytrx-input-group">
+        <input
+          type="password"
+          id="ytrx-password"
+          name="ytrx-password"
+          class="ytrx-form-input"
+          placeholder="Contraseña"
+          required
+        />
+      </div>
 
-            <!-- Confirmar contraseña -->
-            <div class="ytrx-input-group">
-                <input type="password" id="ytrx-confirm-password" name="ytrx-confirm-password" class="ytrx-form-input" placeholder="Confirma contraseña" required>
-                <div id="password-error" style="color: red; font-size: 13px; display: none; margin-top: 5px;">
-                    Las contraseñas no coinciden.
-                </div>
-            </div>
+      <!-- Confirmar contraseña -->
+      <div class="ytrx-input-group">
+        <input
+          type="password"
+          id="ytrx-confirm-password"
+          name="ytrx-confirm-password"
+          class="ytrx-form-input"
+          placeholder="Confirma contraseña"
+          required
+        />
+        <div
+          id="password-error"
+          style="color: red; font-size: 13px; display: none; margin-top: 5px"
+        >
+          Las contraseñas no coinciden.
+        </div>
+      </div>
 
+      <button type="submit" class="ytrx-submit-btn">Registrarse</button>
 
-            <button type="submit" class="ytrx-submit-btn">Registrarse</button>
+      <!-- Redes sociales -->
+      <div style="text-align: center; margin-top: 30px">
+        <p style="margin-bottom: 15px; color: #666">O conéctate con</p>
+        <div class="social-buttons">
+          <button type="button">
+            <img
+              src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
+              alt="Google"
+              width="32"
+              height="32"
+            />
+          </button>
+          <button type="button">
+            <img
+              src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/facebook/facebook-original.svg"
+              alt="Facebook"
+              width="32"
+              height="32"
+            />
+          </button>
+          <button type="button">
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg"
+              alt="Microsoft"
+              width="32"
+              height="32"
+            />
+          </button>
+        </div>
+      </div>
+    </form>
 
-            <!-- Redes sociales -->
-            <div style="text-align: center; margin-top: 30px;">
-                <p style="margin-bottom: 15px; color: #666;">O conéctate con</p>
-                <div class="social-buttons">
-                    <button type="button">
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google" width="32" height="32">
-                    </button>
-                    <button type="button">
-                        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/facebook/facebook-original.svg" alt="Facebook" width="32" height="32">
-                    </button>
-                    <button type="button">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" alt="Microsoft" width="32" height="32">
-                    </button>
-                </div>
-            </div>
-        </form>
-
-        <p class="ytrx-login-link">
-            ¿Ya tienes una cuenta? <a href="/login">Inicia sesión</a>
-        </p>
-    </div>
+    <p class="ytrx-login-link">
+      ¿Ya tienes una cuenta? <a href="/login">Inicia sesión</a>
+    </p>
+  </div>
 </main>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const tipoDoc = document.getElementById('tipo-doc');
-    const form = document.getElementById('ytrx-register-form');
+  document.addEventListener("DOMContentLoaded", function () {
+    const tipoDoc = document.getElementById("tipo-doc");
+    const form = document.getElementById("ytrx-register-form");
 
-    const grupoNombres = document.getElementById('grupo-nombres');
-    const razonSocial = document.getElementById('grupo-razon-social');
-    const grupoApellidos = document.getElementById('grupo-apellidos');
-    const grupoSexo = document.getElementById('grupo-sexo');
-    const grupoNacimiento = document.getElementById('grupo-fecha-nacimiento');
+    const grupoNombres = document.getElementById("grupo-nombres");
+    const razonSocial = document.getElementById("grupo-razon-social");
+    const grupoApellidos = document.getElementById("grupo-apellidos");
+    const grupoSexo = document.getElementById("grupo-sexo");
+    const grupoNacimiento = document.getElementById("grupo-fecha-nacimiento");
 
-    const campoPassword = document.getElementById('ytrx-password');
-    const campoConfirmPassword = document.getElementById('ytrx-confirm-password');
+    const campoPassword = document.getElementById("ytrx-password");
+    const campoConfirmPassword = document.getElementById(
+      "ytrx-confirm-password"
+    );
 
     // Mostrar/ocultar campos según tipo de documento
-    tipoDoc.addEventListener('change', function () {
-        const seleccionado = tipoDoc.options[tipoDoc.selectedIndex].text;
+    tipoDoc.addEventListener("change", function () {
+      const seleccionado = tipoDoc.options[tipoDoc.selectedIndex].text;
 
-        if (seleccionado === 'RUC') {
-            razonSocial.style.display = 'block';
-            grupoNombres.style.display = 'none';
-            grupoApellidos.style.display = 'none';
-            grupoSexo.style.display = 'none';
-            grupoNacimiento.style.display = 'none';
+      if (seleccionado === "RUC") {
+        razonSocial.style.display = "block";
+        grupoNombres.style.display = "none";
+        grupoApellidos.style.display = "none";
+        grupoSexo.style.display = "none";
+        grupoNacimiento.style.display = "none";
 
-            document.getElementById('ytrx-fullname').value = '';
-            document.getElementById('ytrx-lastname-father').value = '';
-            document.getElementById('ytrx-lastname-mother').value = '';
-            document.getElementById('ytrx-gender').selectedIndex = 0;
-            document.getElementById('ytrx-birthdate').value = '';
-            document.getElementById('ytrx-razon-social').required = true;
-            document.getElementById('ytrx-fullname').required = false;
-        } else {
-            razonSocial.style.display = 'none';
-            grupoNombres.style.display = 'block';
-            grupoApellidos.style.display = 'flex';
-            grupoSexo.style.display = 'flex';
-            grupoNacimiento.style.display = 'block';
+        document.getElementById("ytrx-fullname").value = "";
+        document.getElementById("ytrx-lastname-father").value = "";
+        document.getElementById("ytrx-lastname-mother").value = "";
+        document.getElementById("ytrx-gender").selectedIndex = 0;
+        document.getElementById("ytrx-birthdate").value = "";
+        document.getElementById("ytrx-razon-social").required = true;
+        document.getElementById("ytrx-fullname").required = false;
+      } else if (seleccionado === "DNI") {
+        razonSocial.style.display = "none";
+        grupoNombres.style.display = "block";
+        grupoApellidos.style.display = "flex";
+        grupoSexo.style.display = "flex";
+        grupoNacimiento.style.display = "block";
 
-            document.getElementById('ytrx-razon-social').value = '';
+        document.getElementById("ytrx-razon-social").value = "";
 
-            document.getElementById('ytrx-razon-social').required = false;
-            document.getElementById('ytrx-fullname').required = true;
-        }
+        document.getElementById("ytrx-razon-social").required = false;
+        document.getElementById("ytrx-fullname").required = true;
+      } else {
+        razonSocial.style.display = "none";
+        grupoNombres.style.display = "block";
+        grupoApellidos.style.display = "flex";
+        grupoSexo.style.display = "flex";
+        grupoNacimiento.style.display = "block";
+        document.getElementById("ytrx-razon-social").value = "";
+        document.getElementById("ytrx-razon-social").required = false;
+        document.getElementById("ytrx-fullname").required = true;
+        document.getElementById("ytrx-lastname-father").value = "";
+        document.getElementById("ytrx-lastname-mother").style.display = "block";
+        document.getElementById("ytrx-lastname-mother").style.width = "100%";
+      }
     });
 
     // Envío del formulario con AJAX
-    form.addEventListener('submit', async function (e) {
-        e.preventDefault();
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
 
-        const errorMsg = document.getElementById('password-error');
-        if (campoPassword.value !== campoConfirmPassword.value) {
-            errorMsg.style.display = 'block';
-            campoConfirmPassword.focus();
-            return;
-        } else {
-            errorMsg.style.display = 'none';
-        }
+      const errorMsg = document.getElementById("password-error");
+      if (campoPassword.value !== campoConfirmPassword.value) {
+        errorMsg.style.display = "block";
+        campoConfirmPassword.focus();
+        return;
+      } else {
+        errorMsg.style.display = "none";
+      }
 
-        if (tipoDoc.options[tipoDoc.selectedIndex].text === 'RUC' &&
-            document.getElementById('ytrx-razon-social').value.trim() === '') {
-            alert('Debe ingresar la Razón Social para RUC.');
-            return;
-        }
+      if (
+        tipoDoc.options[tipoDoc.selectedIndex].text === "RUC" &&
+        document.getElementById("ytrx-razon-social").value.trim() === ""
+      ) {
+        alert("Debe ingresar la Razón Social para RUC.");
+        return;
+      }
 
-        const formData = new FormData(form);
+      const formData = new FormData(form);
 
-        try {
-            const response = await fetch("RegistrarClienteForm", {
-                method: "POST",
-                body: formData
-            });
-
-            const data = await response.json();
-
-            if (data.Status === "success") {
-                alert("✅ Registro exitoso: " + (data.Msj || data.Msj2));
-                toastr.success("Registro exitoso");
-                form.reset();
-            } else {
-                alert("❌ Error: " + data.Msj);
-            }
-        } catch (error) {
-            alert("❌ Error al enviar el formulario."+error);
-            console.error(error);
-        }
+      $.ajax({
+        url: "/ecommerce/home/RegistrarClienteForm",
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (data) {
+          if (data.Status === "success") {
+            toastr.success("Registro exitoso"+ (data.Msj || data.Msj2));
+            form.reset();
+          } else {
+            alert("❌ Error: " + (data.Msj || data.Msj2));
+          }
+        },
+        error: function (xhr, status, error) {
+          alert("❌ Error al enviar el formulario. " + error);
+          console.error("Error AJAX:", error);
+        },
+      });
     });
-let debounceTimer;
-     document
+    let debounceTimer;
+    document
       .getElementById("ytrx-doc-number")
       .addEventListener("input", function () {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(buscarPersona, 1000);
       });
 
-      document
+    document
       .getElementById("ytrx-birthdate")
       .addEventListener("input", function () {
         clearTimeout(debounceTimer);
@@ -350,7 +456,7 @@ let debounceTimer;
     function buscarPersona() {
       const tipoDoc = document.getElementById("tipo-doc");
       const numDoc = document.getElementById("ytrx-doc-number").value.trim();
-    const seleccionado = tipoDoc.options[tipoDoc.selectedIndex].text;
+      const seleccionado = tipoDoc.options[tipoDoc.selectedIndex].text;
       if (!seleccionado) {
         toastr.warning(
           "El tipo de documento es obligatorio",
@@ -410,7 +516,7 @@ let debounceTimer;
       }
 
       if (seleccionado === "RUC" && numDoc.length == 11) {
-          fetch(
+        fetch(
           `/ecommerce/home/api/get_persona_data?tipoDoc=${encodeURIComponent(
             seleccionado
           )}&numDoc=${encodeURIComponent(numDoc)}`
@@ -420,10 +526,14 @@ let debounceTimer;
             if (json.Status === "success") {
               const d = json.data;
               if (d.razonSocial)
-                document.getElementById("ytrx-razon-social").value = d.razonSocial;
-              else document.getElementById("ytrx-razon-social").value = "RazonSocial";
+                document.getElementById("ytrx-razon-social").value =
+                  d.razonSocial;
+              else
+                document.getElementById("ytrx-razon-social").value =
+                  "RazonSocial";
             } else {
-              document.getElementById("ytrx-razon-social").value = "RazonSocial";
+              document.getElementById("ytrx-razon-social").value =
+                "RazonSocial";
               toastr.error(json.Msj, "ERROR");
             }
           })
@@ -433,22 +543,22 @@ let debounceTimer;
         return;
       }
     }
-    function clearfields(){
-        document.getElementById("ytrx-fullname").value = "";
-        document.getElementById("ytrx-lastname-father").value = "";
-        document.getElementById("ytrx-lastname-mother").value = "";
-        document.getElementById("ytrx-razon-social").value = "";
-        document.getElementById("ytrx-birthdate").value = "";
-        document.getElementById("ytrx-phone").value = "";
-        document.getElementById("ytrx-country").value = "";
-        document.getElementById("ytrx-address").value = "";
-        document.getElementById("ytrx-email").value = "";
-        document.getElementById("ytrx-password").value = "";
-        document.getElementById("ytrx-confirm-password").value = "";
-        document.getElementById("tipo-doc").selectedIndex = 0;
-        document.getElementById("ytrx-doc-number").value = "";
+    function clearfields() {
+      document.getElementById("ytrx-fullname").value = "";
+      document.getElementById("ytrx-lastname-father").value = "";
+      document.getElementById("ytrx-lastname-mother").value = "";
+      document.getElementById("ytrx-razon-social").value = "";
+      document.getElementById("ytrx-birthdate").value = "";
+      document.getElementById("ytrx-phone").value = "";
+      document.getElementById("ytrx-country").value = "";
+      document.getElementById("ytrx-address").value = "";
+      document.getElementById("ytrx-email").value = "";
+      document.getElementById("ytrx-password").value = "";
+      document.getElementById("ytrx-confirm-password").value = "";
+      document.getElementById("tipo-doc").selectedIndex = 0;
+      document.getElementById("ytrx-doc-number").value = "";
     }
-        // funcion para validar la edad del nuevo pasajero
+    // funcion para validar la edad del nuevo pasajero
     function validarEdadNuevoPasajero() {
       const fechaNacimiento = document.getElementById("ytrx-birthdate").value;
       if (!fechaNacimiento) return;
@@ -469,11 +579,11 @@ let debounceTimer;
           "Menores a 18 años no pueden registrarse",
           "MENSAJE DEL SISTEMA"
         );
-        clearfields();
-      }else{
+        document.getElementById("ytrx-birthdate").value = "";
+      } else {
       }
     }
-});
+  });
 </script>
 
 {% endblock %}
