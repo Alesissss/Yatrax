@@ -69,7 +69,7 @@
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
             <!-- Brand Logo -->
             <a href="#" class="brand-link">
-                <img src="/Static/img/yatrax_icon.ico" alt="YATRAX Logo" class="brand-image img-circle elevation-3"
+                <img src="/Static/img/icono_yatrax.ico" alt="YATRAX Logo" class="brand-image img-circle elevation-3"
                     style="opacity: .8">
                 <span class="brand-text font-weight-light">YATRAX</span>
             </a>
@@ -407,6 +407,14 @@
                                         <p>Gestionar métodos de pago</p>
                                     </a>
                                 </li>
+
+                                <li class="nav-item">
+                                    <a href="{{ url_for('configuracion.Menu_TerminosCondiciones')}}"
+                                        class="nav-link {% if active_page == 'terminosCondiciones' %}active{% endif %}">
+                                        <i class="bi bi-file-earmark-text nav-icon"></i>
+                                        <p>Gestionar términos y condiciones</p>
+                                    </a>
+                                </li>
                                 {% endif %}
                             </ul>
                         </li>
@@ -481,6 +489,24 @@
         // window.addEventListener('beforeunload', function () {
         //     document.querySelector('.preloader').style.display = 'flex';
         // });
+
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "5000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        };
 
         document.addEventListener('DOMContentLoaded', function () {
             const btnDarkMode = document.getElementById('btn-darkmode');

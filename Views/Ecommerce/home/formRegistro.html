@@ -12,11 +12,11 @@
     }
 
     .ytrx-register-container {
-        margin-top: 100px;
+        margin-top: 1vw;
         background: #ffffff;
         padding: 40px 30px;
         border-radius: 12px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.08);
+        box-shadow: 0 0 20px rgba(0,0,0,0.3);
         max-width: 500px;
         width: 100%;
     }
@@ -130,7 +130,8 @@
 
         <form id="ytrx-register-form">
             <!-- Tipo de documento y número -->
-            <div class="ytrx-input-group row">
+             <div class="ytrx-input-group">
+                <div class="row">
                 <div class="col">
                     <select id="tipo-doc" name="tipo-doc" required>
                         <option value="" disabled selected>Tipo</option>
@@ -143,6 +144,8 @@
                     <input type="text" id="ytrx-doc-number" name="ytrx-doc-number" class="ytrx-form-input" placeholder="Número de documento" required>
                 </div>
             </div>
+             </div>
+            
 
             <!-- Nombre o razón social -->
             <div class="ytrx-input-group" id="grupo-nombres">
@@ -319,6 +322,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (data.Status === "success") {
                 alert("✅ Registro exitoso: " + (data.Msj || data.Msj2));
+                toastr.success("Registro exitoso");
                 form.reset();
             } else {
                 alert("❌ Error: " + data.Msj);
@@ -328,6 +332,147 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error(error);
         }
     });
+let debounceTimer;
+     document
+      .getElementById("ytrx-doc-number")
+      .addEventListener("input", function () {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(buscarPersona, 1000);
+      });
+
+      document
+      .getElementById("ytrx-birthdate")
+      .addEventListener("input", function () {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(validarEdadNuevoPasajero, 1000);
+      });
+
+    function buscarPersona() {
+      const tipoDoc = document.getElementById("tipo-doc");
+      const numDoc = document.getElementById("ytrx-doc-number").value.trim();
+    const seleccionado = tipoDoc.options[tipoDoc.selectedIndex].text;
+      if (!seleccionado) {
+        toastr.warning(
+          "El tipo de documento es obligatorio",
+          "MENSAJE DEL SISTEMA"
+        );
+        return;
+      }
+      if (!numDoc) {
+        toastr.warning(
+          "El número de documento es obligatorio",
+          "MENSAJE DEL SISTEMA"
+        );
+        return;
+      }
+
+      if (seleccionado === "DNI" && numDoc.length == 8) {
+        fetch(
+          `/ecommerce/home/api/get_persona_data?tipoDoc=${encodeURIComponent(
+            seleccionado
+          )}&numDoc=${encodeURIComponent(numDoc)}`
+        )
+          .then((r) => r.json())
+          .then((json) => {
+            if (json.Status === "success") {
+              const d = json.data;
+              if (d.nombres)
+                document.getElementById("ytrx-fullname").value = d.nombres;
+              else document.getElementById("ytrx-fullname").value = "Nombres";
+
+              if (d.apellidoPaterno)
+                document.getElementById("ytrx-lastname-father").value =
+                  d.apellidoPaterno;
+              else
+                document.getElementById("ytrx-lastname-father").value =
+                  "Apellido paterno";
+
+              if (d.apellidoMaterno)
+                document.getElementById("ytrx-lastname-mother").value =
+                  d.apellidoMaterno;
+              else
+                document.getElementById("ytrx-lastname-mother").value =
+                  "Apellido materno";
+              toastr.success(json.Msj, "OK");
+            } else {
+              document.getElementById("ytrx-fullname").value = "Nombres";
+              document.getElementById("ytrx-lastname-father").value =
+                "Apellido paterno";
+              document.getElementById("ytrx-lastname-mother").value =
+                "Apellido materno";
+              toastr.error(json.Msj, "ERROR");
+            }
+          })
+          .catch(() =>
+            toastr.error("No se ha podido conectar con el servidor", "ERROR")
+          );
+        return;
+      }
+
+      if (seleccionado === "RUC" && numDoc.length == 11) {
+          fetch(
+          `/ecommerce/home/api/get_persona_data?tipoDoc=${encodeURIComponent(
+            seleccionado
+          )}&numDoc=${encodeURIComponent(numDoc)}`
+        )
+          .then((r) => r.json())
+          .then((json) => {
+            if (json.Status === "success") {
+              const d = json.data;
+              if (d.razonSocial)
+                document.getElementById("ytrx-razon-social").value = d.razonSocial;
+              else document.getElementById("ytrx-razon-social").value = "RazonSocial";
+            } else {
+              document.getElementById("ytrx-razon-social").value = "RazonSocial";
+              toastr.error(json.Msj, "ERROR");
+            }
+          })
+          .catch(() =>
+            toastr.error("No se ha podido conectar con el servidor", "ERROR")
+          );
+        return;
+      }
+    }
+    function clearfields(){
+        document.getElementById("ytrx-fullname").value = "";
+        document.getElementById("ytrx-lastname-father").value = "";
+        document.getElementById("ytrx-lastname-mother").value = "";
+        document.getElementById("ytrx-razon-social").value = "";
+        document.getElementById("ytrx-birthdate").value = "";
+        document.getElementById("ytrx-phone").value = "";
+        document.getElementById("ytrx-country").value = "";
+        document.getElementById("ytrx-address").value = "";
+        document.getElementById("ytrx-email").value = "";
+        document.getElementById("ytrx-password").value = "";
+        document.getElementById("ytrx-confirm-password").value = "";
+        document.getElementById("tipo-doc").selectedIndex = 0;
+        document.getElementById("ytrx-doc-number").value = "";
+    }
+        // funcion para validar la edad del nuevo pasajero
+    function validarEdadNuevoPasajero() {
+      const fechaNacimiento = document.getElementById("ytrx-birthdate").value;
+      if (!fechaNacimiento) return;
+
+      let fechaActual = new Date();
+      let fechaNac = new Date(fechaNacimiento);
+      let edad = fechaActual.getFullYear() - fechaNac.getFullYear();
+      let mes = fechaActual.getMonth() - fechaNac.getMonth();
+
+      if (
+        mes < 0 ||
+        (mes === 0 && fechaActual.getDate() < fechaNac.getDate())
+      ) {
+        edad--;
+      }
+      if (edad < 18) {
+        toastr.warning(
+          "Menores a 18 años no pueden registrarse",
+          "MENSAJE DEL SISTEMA"
+        );
+        clearfields();
+      }else{
+      }
+    }
 });
 </script>
 

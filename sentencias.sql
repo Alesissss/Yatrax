@@ -123,9 +123,17 @@ DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPO_METODOPAGO;
 DROP PROCEDURE IF EXISTS SP_DAR_BAJA_TIPO_METODOPAGO;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_METODOPAGO;
 
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_TERMINOS_CONDICIONES;
+DROP PROCEDURE IF EXISTS SP_EDITAR_TERMINOS_CONDICIONES;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_TERMINOS_CONDICIONES;
+DROP PROCEDURE IF EXISTS SP_ACTIVAR_TERMINOS_CONDICIONES;
 
 DROP PROCEDURE IF EXISTS SP_CAMBIAR_CLAVE;
 -- Luego eliminamos las tablas, primero la que depende de la otra
+DROP TABLE IF EXISTS conf_general;
+DROP TABLE IF EXISTS detalle_personal;
+DROP TABLE IF EXISTS viaje;
+DROP TABLE IF EXISTS estado_viaje;
 DROP TABLE IF EXISTS personal_incidencia;
 DROP TABLE IF EXISTS incidencia;
 DROP TABLE IF EXISTS servicio_microservicio;
@@ -161,7 +169,17 @@ DROP TABLE IF EXISTS pais;
 DROP TABLE IF EXISTS herramienta;
 DROP TABLE IF EXISTS tipo_herramienta;
 DROP TABLE IF EXISTS tipo_metodoPago;
+DROP TABLE IF EXISTS terminos_condiciones;
 
+-- Crear tabla terminos_condiciones
+CREATE TABLE terminos_condiciones (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    archivo VARCHAR(255) NOT NULL,
+    estado BOOLEAN NOT NULL,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(255) NOT NULL
+);
 
 -- Crear tabla pais
 CREATE TABLE pais(
@@ -180,7 +198,7 @@ CREATE TABLE incidencia (
     nombre VARCHAR (255) NOT NULL,
     descripcion VARCHAR (255) NOT NULL,
     duracion_sancion INT NOT NULL,
-    estado boolean NOT NULL,
+    estado BOOLEAN NOT NULL,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(255) NOT NULL
 
@@ -397,6 +415,13 @@ CREATE TABLE asiento (
     usuario VARCHAR(100) NOT NULL
 );
 
+-- Crear tabla conf_general
+CREATE TABLE conf_general (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    igv DECIMAL(9,2) NOT NULL,
+    max_pasajes_venta INT NOT NULL,
+    viajesReprogramables BOOLEAN NOT NULL
+);
 
 -- Crear tabla menus
 CREATE TABLE conf_menus (
@@ -463,7 +488,6 @@ CREATE TABLE tipo_vehiculo (
     id_marca INT NULL,
     id_servicio INT NOT NULL,
     estado BOOLEAN NOT NULL,
-    cantidad INT NOT NULL,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NOT NULL,
     CONSTRAINT fk_tipo_vehiculo_marca FOREIGN KEY (id_marca) REFERENCES marca(id),
@@ -539,7 +563,7 @@ CREATE TABLE personal_incidencia (
     incidenciaid INT NOT NULL,
     descripcion VARCHAR(255) NOT NULL,
     fecha_fin DATETIME NOT NULL,
-    estado boolean NOT NULL,
+    estado BOOLEAN NOT NULL,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(255) NOT NULL,
     PRIMARY KEY (personalid, incidenciaid),
@@ -563,6 +587,61 @@ CREATE TABLE nivel_herramienta(
  
 );
 
+CREATE TABLE estado_viaje (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR (100) NOT NULL  
+);
+
+CREATE TABLE viaje (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idRuta INT NOT NULL,
+    idVehiculo INT NOT NULL,
+    estado BOOLEAN NOT NULL,
+    estadoViaje INT NOT NULL,
+    esReprogramado BOOLEAN DEFAULT 0,
+    esPostergado BOOLEAN DEFAULT 0,
+    fecha_salida_estimada DATETIME NOT NULL,
+    fecha_salida_real DATETIME NULL,
+    fecha_llegada_estimada DATETIME NOT NULL,
+    fecha_llegada_real DATETIME NULL,
+
+    -- Auditoría
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL,
+    FOREIGN KEY (idVehiculo) REFERENCES vehiculo(id),
+    FOREIGN KEY (idRuta) REFERENCES ruta(id),
+    FOREIGN KEY (estadoViaje) REFERENCES estado_viaje(id)
+);
+
+CREATE TABLE detalle_personal (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idPersonal INT NOT NULL,
+    idTipoPersonal INT NOT NULL,
+    idViaje INT NOT NULL,
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL,
+    FOREIGN KEY (idPersonal) REFERENCES personal(id),
+    FOREIGN KEY (idViaje) REFERENCES viaje(id)
+);
+
+-- INSERTS terminos y condicones
+INSERT INTO terminos_condiciones(id, nombre, archivo, estado, fecha_registro, usuario) VALUES (1,'TyC-v2025-001','TyC_v2025-001.txt',1,'2025-05-29 01:51:30','ander@gmail.com');
+
+-- INSERTS estado_viaje
+INSERT INTO estado_viaje (id, nombre) VALUES (1, 'PENDIENTE');
+INSERT INTO estado_viaje (id, nombre) VALUES (2, 'EN CURSO');
+INSERT INTO estado_viaje (id, nombre) VALUES (3, 'FINALIZADO');
+
+-- INSERTS tipo_personal
+INSERT INTO tipo_personal (id, nombre, estado, usuario) VALUES (1, 'CHOFER', 1, 'SYSTEM');
+INSERT INTO tipo_personal (id, nombre, estado, usuario) VALUES (2, 'TRIPULANTE', 1, 'SYSTEM');
+
+-- INSERTS personal
+INSERT INTO personal (id, nombre, imagen, estado, id_tipopersonal) VALUES (1, 'Louis Requejo Chirinos', "/Static/img/trabajadores/default-user.png", 1, 1);
+INSERT INTO personal (id, nombre, imagen, estado, id_tipopersonal) VALUES (2, 'Anderson Baca Chuquimanco', "/Static/img/trabajadores/default-user.png", 1, 1);
+INSERT INTO personal (id, nombre, imagen, estado, id_tipopersonal) VALUES (3, 'Edgar Alarcón Chapoñan', "/Static/img/trabajadores/default-user.png", 1, 2);
+INSERT INTO personal (id, nombre, imagen, estado, id_tipopersonal) VALUES (4, 'Luis Cruz Chinchay', "/Static/img/trabajadores/default-user.png", 1, 2);
+
 -- INSERT TIPO CLIENTE
 INSERT INTO tipo_cliente (nombre, estado, usuario)
 VALUES 
@@ -575,7 +654,6 @@ INSERT INTO tipo_documento (nombre, abreviatura, estado, usuario)
 VALUES ('DOCUMENTO NACIONAL DE IDENTIFICACION', 'DNI', TRUE, 'admin');
 INSERT INTO tipo_documento (nombre, abreviatura, estado, usuario)
 VALUES ('REGISTRO UNICO DE CONTRIBUYENTE', 'RUC', TRUE, 'admin');
-
 
 -- INSERT SERVICIO
 insert into servicio values (1,'Premium','Los autobuses más modernos y lujosos del mercado. Asientos cama, entretenimiento a bordo, snacks incluidos, aire acondicionado y cargadores USB. Ideal para viajes de largo trayecto.',1,'2025-05-25 19:30:00','Alexis','Static/img/servicios/busPremium.png');
@@ -591,41 +669,36 @@ VALUES (1,'Mercedes-Benz', '/Static/img/marca/MercedesBenz.png', '1', 'REGISTRAD
 (4,'Hyundai','/Static/img/marca/Hyundai.png', '1', 'REGISTRADO', '1', '2025-05-26 11:41:28', 'edgar@gmail.com');
 
 -- INSERT TIPO_VEHICULO
-INSERT INTO `tipo_vehiculo` (`id`, `nombre`, `id_marca`, `id_servicio`, `estado`, `cantidad`, `fecha_registro`, `usuario`) 
-VALUES (1, 'Solati H350', '4', '1', '1', '0', '2025-05-26 11:57:29', 'edgar@gmail.com'),
-(2, 'County bus', '4', '1', '1', '0', '2025-05-26 11:58:51', 'edgar@gmail.com'),
-(3, 'Volksbus', '3', '2', '1', '0', '2025-05-26 12:01:43', 'edgar@gmail.com'),
-(4, 'eCitaro fuel cell', '1', '1', '1', '0', '2025-05-26 12:04:08', 'edgar@gmail.com'),
-(5, 'eCitaro', '1', '2', '1', '0', '2025-05-26 12:04:42', 'edgar@gmail.com'),
-(6, 'Citaro', '1', '2', '1', '0', '2025-05-26 12:05:05', 'edgar@gmail.com'),
-(7, 'Citaro U', '1', '3', '1', '0', '2025-05-26 12:05:38', 'edgar@gmail.com'),
-(8, 'Intouro', '1', '3', '1', '0', '2025-05-26 12:05:50', 'edgar@gmail.com'),
-(9, 'Tourismo', '1', '3', '1', '0', '2025-05-26 12:08:52', 'edgar@gmail.com');
+INSERT INTO `tipo_vehiculo` (`id`, `nombre`, `id_marca`, `id_servicio`, `estado`, `fecha_registro`, `usuario`) 
+VALUES (1, 'Solati H350', '4', '1', '1', '2025-05-26 11:57:29', 'edgar@gmail.com'),
+(2, 'County bus', '4', '1', '1', '2025-05-26 11:58:51', 'edgar@gmail.com'),
+(3, 'Volksbus', '3', '2', '1', '2025-05-26 12:01:43', 'edgar@gmail.com'),
+(4, 'eCitaro fuel cell', '1', '1', '1', '2025-05-26 12:04:08', 'edgar@gmail.com'),
+(5, 'eCitaro', '1', '2', '1', '2025-05-26 12:04:42', 'edgar@gmail.com'),
+(6, 'Citaro', '1', '2', '1', '2025-05-26 12:05:05', 'edgar@gmail.com'),
+(7, 'Citaro U', '1', '3', '1', '2025-05-26 12:05:38', 'edgar@gmail.com'),
+(8, 'Intouro', '1', '3', '1', '2025-05-26 12:05:50', 'edgar@gmail.com'),
+(9, 'Tourismo', '1', '3', '1', '2025-05-26 12:08:52', 'edgar@gmail.com');
 
 -- INSERT TIPO_HERRAMIENTA  
 
-INSERT INTO tipo_herramienta (nombre) VALUES ('Asientos');
-INSERT INTO tipo_herramienta (nombre) VALUES ('Acceso');
-INSERT INTO tipo_herramienta (nombre) VALUES ('Seguridad');
-INSERT INTO tipo_herramienta (nombre) VALUES ('Multimedia');
+INSERT INTO tipo_herramienta (id, nombre) VALUES (1, 'Asientos');
+INSERT INTO tipo_herramienta (id, nombre) VALUES (2, 'Acceso');
+INSERT INTO tipo_herramienta (id, nombre) VALUES (3, 'Seguridad');
+INSERT INTO tipo_herramienta (id, nombre) VALUES (4, 'Multimedia');
 
 -- INSERT HERRAMIENTA
 
-INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Asiento a 140°','fas fa-chair',1);
-INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Asiento a 160°','fas fa-chair',1);
-INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Asiento cama','fas fa-chair',1);
+INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (1, 'Asiento a 140°','fas fa-chair',1);
+INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (2, 'Asiento a 160°','fas fa-chair',1);
+INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (3, 'Asiento cama','fas fa-chair',1);
 
+INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (4, 'Televisor','fas fa-desktop',4);
 
-INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Televisor','fas fa-desktop',4);
+INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (5, 'Baño','fas fa-restroom',3);
+INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (6, 'Extintor','fas fa-fire-extinguisher',3);
 
-
-INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Baño','fas fa-restroom',3);
-INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Extintor','fas fa-fire-extinguisher',3);
-
-
-INSERT INTO herramienta (nombre, icono,id_tipo) VALUES ('Puerta','fas fa-door-closed',2	);
-
-
+INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (7, 'Puerta','fas fa-door-closed',2);
 
 -- INSERTS PAIS
 INSERT INTO pais (id, nombre, name, iso2, iso3, phone_code, continente) VALUES (1,'Afganistán','Afghanistan','AF','AFG','93','Asia');
@@ -1373,7 +1446,7 @@ CREATE PROCEDURE SP_REGISTRAR_INCIDENCIA(
     IN P_NOMBRE VARCHAR(255),
     IN P_DESCRIPCION VARCHAR(255),
     IN P_DURACION_SANCION INT,
-    IN P_ESTADO boolean,
+    IN P_ESTADO BOOLEAN,
     IN P_USUARIO VARCHAR(255)
 )
 BEGIN
@@ -1407,7 +1480,7 @@ CREATE PROCEDURE SP_EDITAR_INCIDENCIA(
     IN P_NOMBRE VARCHAR(255),
     IN P_DESCRIPCION VARCHAR(255),
     IN P_DURACION_SANCION INT,
-    IN P_ESTADO boolean
+    IN P_ESTADO BOOLEAN
 )
 BEGIN 
     DECLARE cNombre INT;
@@ -1491,6 +1564,133 @@ BEGIN
 
 END $$
 
+DELIMITER ;
+
+-- Crear procedimiento SP_REGISTRAR_TERMINOS_CONDICIONES;
+DELIMITER $$
+CREATE PROCEDURE SP_REGISTRAR_TERMINOS_CONDICIONES(
+    IN P_NOMBRE VARCHAR(255),
+    IN P_ARCHIVO VARCHAR(255),
+    IN P_USUARIO VARCHAR(255)
+)
+BEGIN
+    DECLARE cNombre INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cNombre FROM terminos_condiciones WHERE nombre = P_NOMBRE;
+
+    IF cNombre > 0 THEN
+        SET @MSJ2 = 'El nombre de términos y condiciones ya existe';
+    ELSE
+        INSERT INTO terminos_condiciones (nombre, archivo, estado, usuario)
+        VALUES (P_NOMBRE, P_ARCHIVO, 0, P_USUARIO);
+
+        SET @MSJ = 'Se registró correctamente el término y condición';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_EDITAR_TERMINOS_CONDICIONES;
+DELIMITER $$
+CREATE PROCEDURE SP_EDITAR_TERMINOS_CONDICIONES(
+    IN P_ID INT,
+    IN P_NOMBRE VARCHAR(255),
+    IN P_ARCHIVO VARCHAR(255),
+    IN P_USUARIO VARCHAR(255)
+)
+BEGIN
+    DECLARE cTermino INT;
+    DECLARE cNombre INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cTermino FROM terminos_condiciones WHERE id = P_ID;
+    SELECT COUNT(*) INTO cNombre FROM terminos_condiciones WHERE nombre = P_NOMBRE AND id != P_ID;
+
+    IF cTermino <= 0 THEN
+        SET @MSJ2 = 'El término y condición que intenta editar no existe';
+    ELSEIF cNombre > 0 THEN
+        SET @MSJ2 = 'El nombre ingresado ya existe en otro término y condición';
+    ELSE
+        UPDATE terminos_condiciones 
+        SET nombre = P_NOMBRE, 
+            archivo = P_ARCHIVO,
+            usuario = P_USUARIO
+        WHERE id = P_ID;
+
+        SET @MSJ = 'Se modificó correctamente el término y condición';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_TERMINOS_CONDICIONES;
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_TERMINOS_CONDICIONES(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cTermino INT;
+    DECLARE flagTermino BOOLEAN;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cTermino FROM terminos_condiciones WHERE id = P_ID;
+    SELECT estado INTO flagTermino FROM terminos_condiciones WHERE id = P_ID;
+
+    IF cTermino <= 0 THEN
+        SET @MSJ2 = 'El término y condición que intenta eliminar no existe';
+    ELSEIF flagTermino = 1 THEN
+        SET @MSJ2 = 'El término y condición activo no puede ser eliminado';
+    ELSE
+        DELETE FROM terminos_condiciones WHERE id = P_ID;
+        SET @MSJ = 'Se eliminó correctamente el término y condición';
+    END IF;
+END $$
+DELIMITER ;
+
+
+-- Crear procedimiento SP_ACTIVAR_TERMINOS_CONDICIONES;
+DELIMITER $$
+CREATE PROCEDURE SP_ACTIVAR_TERMINOS_CONDICIONES(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cTermino INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cTermino FROM terminos_condiciones WHERE id = P_ID;
+
+    IF cTermino <= 0 THEN
+        SET @MSJ2 = 'El término y condición que intenta activar no existe';
+    ELSE
+        UPDATE terminos_condiciones SET estado = 0;
+        UPDATE terminos_condiciones SET estado = 1 WHERE id = P_ID;
+
+        SET @MSJ = 'Se activó correctamente el término y condición';
+    END IF;
+END $$
 DELIMITER ;
 
 -- Crear procedimiento SP_REGISTRAR_USUARIO
@@ -3716,6 +3916,68 @@ END $$
 
 DELIMITER ;
 
+-- Procedimiento almacenado para la actualizacion de datos
+
+DELIMITER $$
+
+CREATE PROCEDURE SP_ACTUALIZAR_CLIENTE (
+    IN p_id INT,
+    IN p_id_pais INT,
+    IN p_id_tipo_cliente INT,
+    IN p_id_tipo_doc INT,
+    IN p_numero_documento VARCHAR(20),
+    IN p_nombres VARCHAR(90),
+    IN p_ape_paterno VARCHAR(50),
+    IN p_ape_materno VARCHAR(50),
+    IN p_sexo TINYINT,
+    IN p_f_nacimiento DATE,
+    IN p_razon_social VARCHAR(90),
+    IN p_direccion VARCHAR(70),
+    IN p_telefono VARCHAR(13),
+    IN p_email VARCHAR(100),
+    IN p_password VARCHAR(256),
+    IN p_usuario VARCHAR(100),
+    OUT MSJ VARCHAR(100),
+    OUT MSJ2 VARCHAR(100)
+)
+BEGIN
+    DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET MSJ = NULL;
+        SET MSJ2 = 'Error al actualizar cliente';
+    END;
+
+    -- Actualiza todos los campos menos la contraseña
+    UPDATE cliente
+    SET
+        id_pais = p_id_pais,
+        id_tipo_cliente = p_id_tipo_cliente,
+        id_tipo_doc = p_id_tipo_doc,
+        numero_documento = p_numero_documento,
+        nombres = p_nombres,
+        ape_paterno = p_ape_paterno,
+        ape_materno = p_ape_materno,
+        sexo = p_sexo,
+        f_nacimiento = p_f_nacimiento,
+        razon_social = p_razon_social,
+        direccion = p_direccion,
+        telefono = p_telefono,
+        email = p_email,
+        usuario = p_usuario
+    WHERE id = p_id;
+
+    -- Actualiza la contraseña si se ha enviado
+    IF p_password IS NOT NULL AND LENGTH(p_password) > 0 THEN
+        UPDATE cliente
+        SET password = p_password
+        WHERE id = p_id;
+    END IF;
+
+    SET MSJ = 'Cliente actualizado correctamente';
+    SET MSJ2 = NULL;
+END$$
+
+DELIMITER ;
 
 -- Crear procedimiento SP_INSERTAR_TIPO_COMPROBANTE
 

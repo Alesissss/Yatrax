@@ -7,6 +7,7 @@ from Models.conf_menus import Conf_Menus
 from Models.conf_claims import Conf_Claims
 from Models.conf_plantillas import Conf_Plantillas
 from Models.tipoMetodoPago import TipoMetodoPago
+from Models.terminos_condiciones import TerminosCondiciones
 from werkzeug.utils import secure_filename
 
 configuracion_bp = Blueprint('configuracion', __name__, url_prefix='/trabajadores/configuracion')
@@ -77,6 +78,14 @@ def Menu_TipoMetodoPago():
 @configuracion_bp.route('/TipoMetodoPagoNuevo')
 def Menu_TipoServicioNuevo():
     return render_template('configuracion/tipoMetodoPagoCRUD.html', active_page="tipoMetodoPago", active_menu = 'mConfiguracion', tipoMetodoPago = {}, tittle = 'Registrar tipo de metodo de Pago', btnId = 'btn_Registrar')
+
+@configuracion_bp.route('/GestionarTerminosCondiciones')
+def Menu_TerminosCondiciones():
+    return render_template('configuracion/terminosYCondiciones.html', active_page="terminosCondiciones", active_menu='mConfiguracion')
+
+@configuracion_bp.route('/TerminosCondicionesNuevo')
+def TerminosCondiciones_Nuevo():
+    return render_template('configuracion/terminosYCondicionesCRUD.html', active_page="terminosCondiciones", active_menu='mConfiguracion', terminosCondiciones={}, tittle = 'Registrar términos y condiciones', btnId = 'btn_Registrar')
 
 # END VIEWS
 
@@ -613,4 +622,204 @@ def get_tipo_metodos_pago():
         return jsonify({"Status": "error", "Msj": f"Error al obtener los tipos de métodos de pago: {repr(e)}", "data": []})
 
 # END REGION TIPO METODO PAGO
+
+# REGION TERMINOS Y CONDICIONES
+def allowed_file_txt(filename):
+    ALLOWED_EXTENSIONS = {"txt"}
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def validar_estructura_txt(texto):
+    """
+    Verifica que el texto contenga exactamente, en este orden,
+    las cuatro secciones marcadas con asteriscos.
+    """
+    secciones = ["COMPRAS EN INTERNET", "PASAJES", "ENCOMIENDAS", "BASE LEGAL"]
+    indices = []
+    for sec in secciones:
+        marcador = f"*{sec}*"
+        pos = texto.find(marcador)
+        if pos == -1:
+            return False, f"No se encontró la sección «{marcador}»."
+        indices.append(pos)
+    # Comprueba el orden
+    if indices != sorted(indices):
+        return False, "Las secciones no están en el orden correcto."
+    return True, ""
+
+@configuracion_bp.route("/GetData_Terminos", methods=["GET"])
+def get_terminos():
+    try:
+        terminos = TerminosCondiciones.obtener_todos()
+        return jsonify({'data': terminos, 'Status': 'success', 'Msj': 'Listado de términos y condiciones retornado exitosamente'})
+    except Exception as e:
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar términos y condiciones: + {repr(e)}'})
+
+@configuracion_bp.route("/RegistrarTerminos", methods=["POST"])
+def registrar_terminos():
+    try:
+        UPLOAD_FOLDER = "Static/utilities/terminos_condiciones/"
+        nombre         = request.form.get("nombre", "").strip()
+        archivo_file   = request.files.get('archivo')
+        usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO')
+
+        if not nombre:
+            return jsonify({"Status": "error", "Msj": "El nombre es obligatorio"})
+        if not archivo_file or not allowed_file_txt(archivo_file.filename):
+            return jsonify({"Status": "error", "Msj": "Debe seleccionar un archivo TXT válido"})
+
+        # Leer el contenido del archivo para validar la estructura
+        contenido = archivo_file.read().decode('utf-8')
+        valido, mensaje = validar_estructura_txt(contenido)
+        if not valido:
+            return jsonify({"Status": "error", "Msj": mensaje})
+        
+        # Guardar el fichero físico
+        archivo_file.seek(0)  # Reiniciar el puntero del archivo
+        extension = archivo_file.filename.rsplit(".", 1)[1].lower()
+        filename  = f"{nombre}.{extension}"
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+        path      = os.path.join(UPLOAD_FOLDER, filename)
+        archivo_file.save(path)
+
+        # Registrar en BD sólo el nombre de fichero
+        mensajes = TerminosCondiciones.registrar(nombre, filename, usuario_actual)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+        if msj1:
+            return jsonify({"Status": "success", "Msj": msj1, "Msj2": ""})
+        else:
+            return jsonify({"Status": "error", "Msj": "", "Msj2": msj2})
+
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {e}"})
+    
+@configuracion_bp.route("/EliminarTerminos/<int:id>", methods=['POST'])
+def eliminar_terminos(id):
+    try:
+        mensajes = TerminosCondiciones.eliminar(id)
+        msj = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj:
+            return jsonify({"Status": "success", 'Msj': msj, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al eliminar términos y condiciones'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@configuracion_bp.route('/EditarTerminos/<int:id>', methods=['GET', 'POST'])
+def editar_terminos(id):
+    try:
+        UPLOAD_FOLDER = "Static/utilities/terminos_condiciones/"
+        
+        termino = TerminosCondiciones.obtener_por_id(id)  # método correcto
+        contenido = ""
+        
+        if request.method == "GET" and termino and termino.get('archivo'):
+            path = os.path.join(UPLOAD_FOLDER, termino['archivo'])
+            if os.path.exists(path):
+                with open(path, encoding="utf-8") as f:
+                    contenido = f.read()
+        
+        if request.method == 'POST':
+            nombre       = request.form.get("nombre", "").strip()
+            archivo_file = request.files.get('archivo')
+            usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO')
+
+            if not nombre:
+                return jsonify({"Status": "error", "Msj": "El nombre es obligatorio"})
+
+            # Determinar si subieron un nuevo TXT o mantenemos el existente
+            if archivo_file and allowed_file_txt(archivo_file.filename):
+                contenido_txt = archivo_file.read().decode('utf-8')
+                valido, mensaje = validar_estructura_txt(contenido_txt)
+                if not valido:
+                    return jsonify({"Status": "error", "Msj": mensaje})
+                archivo_file.seek(0)
+                extension = archivo_file.filename.rsplit(".", 1)[1].lower()
+                filename  = f"{nombre}.{extension}"
+                os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+                archivo_file.save(os.path.join(UPLOAD_FOLDER, filename))
+            else:
+                filename = termino['archivo']
+
+            mensajes = TerminosCondiciones.editar(id, nombre, filename, usuario_actual)
+            msj = mensajes.get('@MSJ')
+            msj2 = mensajes.get('@MSJ2')
+            if msj:
+                return jsonify({"Status": "success", "Msj": msj})
+            else:
+                return jsonify({"Status": "success", "Msj2": msj2})
+        
+        if termino:
+            return render_template('configuracion/terminosYCondicionesCRUD.html', 
+                                 active_page="terminosCondiciones", 
+                                 active_menu='mConfiguracion', 
+                                 termino=termino,
+                                 contenido=contenido, 
+                                 tittle='Editar términos y condiciones', 
+                                 btnId='btn_Editar')
+        return render_template('configuracion/terminosYCondicionesCRUD.html', 
+                             active_page="terminosCondiciones", 
+                             active_menu='mConfiguracion', 
+                             termino={}, 
+                             contenido={}, 
+                             tittle='Editar términos y condiciones', 
+                             btnId='btn_Editar')
+
+    except Exception as e:
+        return jsonify({"Status": "error", 
+                        'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@configuracion_bp.route("/VerTerminos/<int:id>", methods=['GET'])
+def ver_terminos(id):
+    try:
+        UPLOAD_FOLDER = "Static/utilities/terminos_condiciones/"
+        termino = TerminosCondiciones.obtener_por_id(id)
+        contenido = ""
+
+        if termino and termino.get('archivo'):
+            path = os.path.join(UPLOAD_FOLDER, termino['archivo'])
+            if os.path.exists(path):
+                with open(path, encoding="utf-8") as f:
+                    contenido = f.read()
+        if termino:
+            return render_template('configuracion/terminosYCondicionesCRUD.html', 
+                                 active_page="terminosCondiciones", 
+                                 active_menu='mConfiguracion', 
+                                 termino=termino, 
+                                 contenido=contenido,
+                                 tittle='Ver términos y condiciones', 
+                                 btnId='btn_Aceptar')
+        return render_template('configuracion/terminosYCondicionesCRUD.html', 
+                             active_page="terminosCondiciones", 
+                             active_menu='mConfiguracion', 
+                             termino={},
+                             contenido={},
+                             tittle='Ver términos y condiciones', 
+                             btnId='btn_Aceptar')
+        
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@configuracion_bp.route("/ActivarTerminos/<int:id>", methods=['POST'])
+def activar_terminos(id):
+    try:
+        mensajes = TerminosCondiciones.activar(id)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al activar términos y condiciones'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+# END REGION TERMINOS Y CONDICIONES
+
 # END FUNCIONES

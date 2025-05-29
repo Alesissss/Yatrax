@@ -35,11 +35,10 @@ class Nivel:
         conexion = None
         try:
             conexion = bd.Conexion()
-            listado = conexion.obtener(
-                "SELECT * FROM nivel WHERE id = %s",
-                (idNivel,)
-            )
-            return listado[0]
+            cursor = conexion.ejecutar("SELECT id,nroPiso,id_tipo_vehiculo,x_dimension,y_dimension,estado FROM nivel WHERE id=%s",(idNivel,))
+            datos_nivel = cursor.fetchone()
+            datos_botones = conexion.obtener("select id_herramienta,id_nivel,x_dimension,y_dimension from nivel_herramienta where id_nivel = %s",(idNivel,))
+            return datos_nivel, datos_botones
         finally:
             if conexion:
                 conexion.cerrar()
@@ -50,7 +49,7 @@ class Nivel:
         try:
             conexion = bd.Conexion()
             listado = conexion.obtener(
-                "SELECT * FROM nivel WHERE id_vehiculo = %s ORDER BY nroPiso",
+                "SELECT * FROM nivel WHERE id_tipo_vehiculo = %s ORDER BY nroPiso",
                 (vehiculo,)
             )
             return listado
@@ -77,25 +76,48 @@ class Nivel:
         finally:
             conexion.cerrar()
 
-
     @classmethod
-    def actualizar_nivel(cls, idNivel, nroPiso, vehiculo, cantidad,estado):
-        conexion = None
+    def actualizar_nivel(cls, idNivel, nroPiso, tipo_vehiculo, x_dimension, y_dimension, estado, lista_herramientas):
+        conexion = bd.Conexion()
         try:
-            conexion = bd.Conexion()
+            conexion.conn.begin()
+
             conexion.ejecutar(
-                "CALL SP_ACTUALIZAR_NIVEL(%s, %s, %s, %s,%s)",
-                (idNivel, nroPiso, vehiculo, cantidad,estado)
+            """
+            UPDATE nivel
+            SET nroPiso = %s,
+                id_tipo_vehiculo = %s,
+                x_dimension = %s,
+                y_dimension = %s,
+                estado = %s
+            WHERE id = %s
+            """,
+            (nroPiso, tipo_vehiculo, x_dimension, y_dimension, estado, idNivel),
+            auto_commit=False)
+
+            conexion.ejecutar(
+                "DELETE FROM nivel_herramienta WHERE id_nivel = %s",
+                (idNivel,),
+                auto_commit=False
             )
-            resultado = conexion.obtener("SELECT @MSJ as MSJ, @MSJ2 as MSJ2;")
-            return resultado[0]["MSJ"], resultado[0]["MSJ2"]
+
+            for herramienta in lista_herramientas:
+                conexion.ejecutar(
+                    "INSERT INTO nivel_herramienta (id_herramienta, id_nivel, x_dimension, y_dimension) VALUES (%s, %s, %s, %s)",
+                    (herramienta['tipo'], idNivel, herramienta['x'], herramienta['y']),
+                    auto_commit=False
+                )
+
+            conexion.conn.commit()
+            print("Nivel actualizado correctamente.")
+
         except Exception as e:
             print(f"Error en actualizar_nivel: {e}")
+            conexion.conn.rollback()
             raise
         finally:
             if conexion:
                 conexion.cerrar()
-
     @classmethod
     def dar_baja_piso(cls, idNivel):
         conexion = None
@@ -116,18 +138,20 @@ class Nivel:
 
     @classmethod
     def eliminar_nivel(cls, idNivel):
-        conexion = None
+        conexion = bd.Conexion()
         try:
-            conexion = bd.Conexion()
+            conexion.conn.begin()
+            conexion.ejecutar("DELETE FROM nivel_herramienta where id_nivel = %s",(idNivel,),auto_commit=False)
             conexion.ejecutar(
                 "CALL SP_ELIMINAR_NIVEL(%s)",
-                (idNivel,)
+                (idNivel,),
+                auto_commit=False
             )
             resultado = conexion.obtener("SELECT @MSJ as MSJ, @MSJ2 as MSJ2;")
+            conexion.conn.commit()
             return resultado[0]["MSJ"], resultado[0]["MSJ2"]
         except Exception as e:
-            print(f"Error en eliminar_nivel: {e}")
-            raise
+            conexion.conn.rollback()
+            print(f"Error: {e}")
         finally:
-            if conexion:
-                conexion.cerrar()
+            conexion.cerrar()

@@ -1,0 +1,107 @@
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="text-center mb-0">{{ tittle }}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="txt_Nombre">Nombre del tipo de vehículo</label>
+                            <input type="text" name="txt_Nombre" id="txt_Nombre" class="form-control"
+                                placeholder="Nombre del tipo de vehículo" value="{{ tipoVehiculo.nombre }}" {% if
+                                btnId=="btn_Regresar" %} disabled {% endif %}>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label for="txt_marca">Marca</label>
+                            <div class="input-group">
+                                <select id="cbx_Marca" name="txt_marca" class="form-control" {% if btnId=='btn_Regresar'
+                                    %}disabled{% endif %}>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label for="cbx_Servicio">Servicio</label>
+                            <div class="input-group">
+                                <select id="cbx_Servicio" name="cbx_Servicio" class="form-control" {% if
+                                    btnId=='btn_Regresar' %}disabled{% endif %}>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label for="txt_Cantidad">Cantidad</label>
+                            <input type="number" name="txt_Cantidad" id="txt_Cantidad" class="form-control"
+                                placeholder="Ingrese la cantidad de vehiuclos de ese tipo"
+                                value="{{ tipoVehiculo.cantidad }}" {% if btnId=="btn_Regresar" %} disabled {% endif %}>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label for="cbx_Estado">Estado</label>
+                            <select id="cbx_Estado" name="cbx_Estado" class="form-control" {% if btnId=="btn_Regresar"
+                                %} disabled {% endif %}>
+                                <option value="1" {% if tipoVehiculo.estado==1 %}selected{% endif %}>Vigente</option>
+                                <option value="0" {% if tipoVehiculo.estado==0 %}selected{% endif %}>No vigente</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12 text-center">
+                            <button id="btn_Listado" type="button" class="btn btn-danger">Volver al listado de
+                                tipos de vehículos</button>
+                            <button id="{{ btnId }}" type="button" class="btn btn-primary">Aceptar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Controles</h3>
+            </div>
+            <div class="card-body">
+                <div id="accordion">
+                    {% for tipo_herramienta in tipo_herramientas %}
+                    <div class="card card-{{ loop.cycle('info','primary') }}">
+                        <div class="card-header">
+                            <h4 class="card-title w-100">
+                                <a class="d-block w-100 collapsed" data-toggle="collapse"
+                                    href="#collapse{{ loop.index }}" aria-expanded="false">{{ tipo_herramienta.nombre
+                                    }}</a>
+                            </h4>
+                        </div>
+                        <div id="collapse{{ loop.index }}" class="collapse" data-parent="#accordion">
+                            <div class="card-body d-flex flex-wrap bg-white">
+                                {% for herramienta in herramientas %}
+                                {% if herramienta.id_tipo==tipo_herramienta.id %}
+                                <i class="{{ herramienta.icono }} fa-lg m-2 control" draggable="true"
+                                    data-tipo="{{ herramienta.id }}" title="{{ herramienta.nombre }}"></i>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Diseño</h3>
+            </div>
+            <div class="card-body">
+                <div class="row justify-content-center" id="matrizContainer"></div>
+            </div>
+        </div>
+    </div>
+</div>
+    {% endblock %}
+
+    {% block scripts %}
+
+    {% endblock %}
