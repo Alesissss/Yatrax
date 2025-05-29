@@ -20,13 +20,6 @@
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-md-12 mb-3">
-                                            <label for="txt_hora_salida">Fecha y hora de salida:</label>
-                                            <div class="input-group">
-                                                <input class="form-control" type="datetime-local" id="fechaHora"
-                                                    name="fechaHora">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12 mb-3">
                                             <label for="cbx_Ruta">Ruta</label>
                                             <div class="input-group">
                                                 <select id="cbx_Ruta" class="form-control">
@@ -47,22 +40,20 @@
                                                 </tbody>
                                             </table>
                                         </div>
-                                        <!-- <div class="col-md-12 mb-3">
-                                            <label for="txt_Origen">Origen</label>
+                                        <div class="col-md-12 mb-3">
+                                            <label for="txt_hora_salida">Fecha y hora de salida:</label>
                                             <div class="input-group">
-                                                <input type="text" id="txt_Origen" class="form-control"
-                                                    placeholder="Origen"
-                                                    oninput="this.value = this.value.toUpperCase();" disabled>
+                                                <input class="form-control" type="datetime-local" id="txt_hora_salida"
+                                                    name="fechaHoraSalida">
                                             </div>
                                         </div>
                                         <div class="col-md-12 mb-3">
-                                            <label for="txt_Origen">Destino</label>
+                                            <label for="txt_hora_llegada">Fecha y hora de llegada:</label>
                                             <div class="input-group">
-                                                <input type="text" id="txt_Destino" class="form-control"
-                                                    placeholder="Destino"
-                                                    oninput="this.value = this.value.toUpperCase();" disabled>
+                                                <input class="form-control" type="datetime-local" id="txt_hora_llegada"
+                                                    name="fechaHoraLlegada" disabled>
                                             </div>
-                                        </div> -->
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -252,7 +243,7 @@
     }
 
     function fct_LlenarCombos() {
-        let idVehiculo = 1;
+        let idVehiculo = null;
 
         $.getJSON('/trabajadores/viajes/GetData_ServiciosViajes', function (resServicios) {
             if (resServicios.Status === "success") {
@@ -319,7 +310,13 @@
 
                                 $('#cbx_Vehiculo').on('change', function () {
                                     $.getJSON('/trabajadores/viajes/GetData_AsientosViajes', { id: $(this).val(), idTipo: $('#cbx_TipoVehiculo').val() }, function (response) {
-                                        console.log(response);
+                                        if (response && response.Status === "success") {
+                                            let data = response.data[0];
+                                            $("#txt_Niveles").val(data.niveles);
+                                            $("#txt_Asientos").val(data.asientos);
+                                        } else {
+                                            console.error("Error:", response.Msj);
+                                        }
                                     });
                                 });
 
@@ -341,6 +338,65 @@
         fct_GetRutas();
         fct_GetPersonal();
         fct_LlenarCombos();
+
+        $("#btn_Registrar").click(function () {
+            let fechaHoraSalida = moment($('#txt_hora_salida').val()).format('YYYY-MM-DD HH:mm:ss');
+            let fechaHoraLlegada = moment($('#txt_hora_llegada').val()).format('YYYY-MM-DD HH:mm:ss');
+            let nombre = $("#txt_TipoUsuario").val().trim();
+            let estado = $('#cbx_Estado').val();
+
+            if (!nombre || !estado) {
+                toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                return;
+            }
+
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción registrará al tipo usuario. ¿Deseas continuar?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, registrar tipo usuario",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    let formData = new FormData();
+                    formData.append("nombre", nombre);
+                    formData.append("estado", estado);
+
+                    $.ajax({
+                        url: "/trabajadores/usuarios/RegistrarTipoUsuario",
+                        type: "POST",
+                        processData: false,
+                        contentType: false,
+                        data: formData,
+                        success: function (response) {
+                            if (response.Status === "success") {
+                                if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                    return;
+                                } else {
+                                    toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                                    setTimeout(() => {
+                                        window.location.href = "/trabajadores/usuarios/GestionarTipoUsuario";
+                                    }, 500);
+                                }
+                            } else {
+                                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                                console.error('Error: ' + response.Msj);
+                            }
+                        },
+                        error: function (xhr, Status, error) {
+                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                            console.error('Error:' + error);
+                        }
+                    });
+                }
+            });
+        });
     });
 </script>
 {% endblock %}
