@@ -665,16 +665,16 @@ VALUES (1,'Mercedes-Benz', '/Static/img/marca/MercedesBenz.png', '1', 'REGISTRAD
 (4,'Hyundai','/Static/img/marca/Hyundai.png', '1', 'REGISTRADO', '1', '2025-05-26 11:41:28', 'edgar@gmail.com');
 
 -- INSERT TIPO_VEHICULO
-INSERT INTO `tipo_vehiculo` (`id`, `nombre`, `id_marca`, `id_servicio`, `estado`, `cantidad`, `fecha_registro`, `usuario`) 
-VALUES (1, 'Solati H350', '4', '1', '1', '0', '2025-05-26 11:57:29', 'edgar@gmail.com'),
-(2, 'County bus', '4', '1', '1', '0', '2025-05-26 11:58:51', 'edgar@gmail.com'),
-(3, 'Volksbus', '3', '2', '1', '0', '2025-05-26 12:01:43', 'edgar@gmail.com'),
-(4, 'eCitaro fuel cell', '1', '1', '1', '0', '2025-05-26 12:04:08', 'edgar@gmail.com'),
-(5, 'eCitaro', '1', '2', '1', '0', '2025-05-26 12:04:42', 'edgar@gmail.com'),
-(6, 'Citaro', '1', '2', '1', '0', '2025-05-26 12:05:05', 'edgar@gmail.com'),
-(7, 'Citaro U', '1', '3', '1', '0', '2025-05-26 12:05:38', 'edgar@gmail.com'),
-(8, 'Intouro', '1', '3', '1', '0', '2025-05-26 12:05:50', 'edgar@gmail.com'),
-(9, 'Tourismo', '1', '3', '1', '0', '2025-05-26 12:08:52', 'edgar@gmail.com');
+INSERT INTO `tipo_vehiculo` (`id`, `nombre`, `id_marca`, `id_servicio`, `estado`, `fecha_registro`, `usuario`) 
+VALUES (1, 'Solati H350', '4', '1', '1', '2025-05-26 11:57:29', 'edgar@gmail.com'),
+(2, 'County bus', '4', '1', '1', '2025-05-26 11:58:51', 'edgar@gmail.com'),
+(3, 'Volksbus', '3', '2', '1', '2025-05-26 12:01:43', 'edgar@gmail.com'),
+(4, 'eCitaro fuel cell', '1', '1', '1', '2025-05-26 12:04:08', 'edgar@gmail.com'),
+(5, 'eCitaro', '1', '2', '1', '2025-05-26 12:04:42', 'edgar@gmail.com'),
+(6, 'Citaro', '1', '2', '1', '2025-05-26 12:05:05', 'edgar@gmail.com'),
+(7, 'Citaro U', '1', '3', '1', '2025-05-26 12:05:38', 'edgar@gmail.com'),
+(8, 'Intouro', '1', '3', '1', '2025-05-26 12:05:50', 'edgar@gmail.com'),
+(9, 'Tourismo', '1', '3', '1', '2025-05-26 12:08:52', 'edgar@gmail.com');
 
 -- INSERT TIPO_HERRAMIENTA  
 
