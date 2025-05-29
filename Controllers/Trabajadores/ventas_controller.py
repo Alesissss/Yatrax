@@ -457,6 +457,12 @@ def get_microserviicos_servicio():
     except Exception as e:
         return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar microservicios: {repr(e)}'})
 
+EXTENSIONES_PERMITIDAS = {'jpg', 'jpeg', 'png'}
+
+def extension_valida(nombre_archivo):
+    return '.' in nombre_archivo and \
+           nombre_archivo.rsplit('.', 1)[1].lower() in EXTENSIONES_PERMITIDAS
+
 @ventas_bp.route('/registrarServicio', methods=["GET", "POST"])
 def nuevo_servicio():
     if request.method == "GET":
@@ -480,7 +486,11 @@ def nuevo_servicio():
 
             imagen_file = request.files.get('imagen')
             imagen_path = ''
+
             if imagen_file and imagen_file.filename:
+                if not extension_valida(imagen_file.filename):
+                    return jsonify({"Status": "warning", "Msj": "Formato de imagen no permitido. Solo JPG y PNG."})
+
                 nombre_archivo = secure_filename(imagen_file.filename)
                 ruta_guardado = os.path.join("Static/img/servicios/", nombre_archivo)
                 imagen_file.save(ruta_guardado)

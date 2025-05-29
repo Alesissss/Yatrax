@@ -650,13 +650,16 @@ INSERT INTO tipo_cliente (nombre, estado, usuario)
 VALUES 
 ('Bebé', TRUE, 'admin'),
 ('Niño', TRUE, 'admin'),
-('Adulto', TRUE, 'admin');
+('Adulto', TRUE, 'admin'),
+('Empresa', TRUE, 'admin');
 
 -- INSERT TIPO DOCUMENTO
 INSERT INTO tipo_documento (nombre, abreviatura, estado, usuario)
 VALUES ('DOCUMENTO NACIONAL DE IDENTIFICACION', 'DNI', TRUE, 'admin');
 INSERT INTO tipo_documento (nombre, abreviatura, estado, usuario)
 VALUES ('REGISTRO UNICO DE CONTRIBUYENTE', 'RUC', TRUE, 'admin');
+INSERT INTO tipo_documento (nombre, abreviatura, estado, usuario)
+VALUES ('CARNET DE EXTRANJERIA', 'CE', TRUE, 'admin');
 
 -- INSERT SERVICIO
 insert into servicio values (1,'Premium','Los autobuses más modernos y lujosos del mercado. Asientos cama, entretenimiento a bordo, snacks incluidos, aire acondicionado y cargadores USB. Ideal para viajes de largo trayecto.',1,'2025-05-25 19:30:00','Alexis','Static/img/servicios/busPremium.png');
@@ -989,6 +992,7 @@ INSERT INTO tipo_usuario (id,nombre, estado, estado_proceso,estado_registro,fech
 INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (1,'Alexis','alexis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/alexis.jpeg', 1, 1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
 INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (2,'Edgar','edgar@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/edgar.png', 1, 1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
 INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (3,'Ander','ander@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/ander.jpg', 1, 1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
+INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (4,'Luis','luis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/luis.jpg', 1, 1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
 
 
 -- Tabla menus
@@ -1319,39 +1323,57 @@ INSERT INTO cliente (
 
 -- Crear procedimiento SP_REGISTRAR_PERSONAL_INCIDENCIA
 DELIMITER $$
+
 CREATE PROCEDURE SP_REGISTRAR_PERSONAL_INCIDENCIA(
     IN P_PERSONAL_ID INT,
     IN P_INCIDENCIA_ID INT,
     IN P_DESCRIPCION VARCHAR(255),
     IN P_ESTADO BOOLEAN, 
     IN P_USUARIO VARCHAR(255)
-
 )
 BEGIN
-    DECLARE cIncidencia INT;
+    DECLARE cIncidencia INT DEFAULT 0;
+    DECLARE duracion INT DEFAULT 0;
+    DECLARE fecha_fin DATETIME;
+    
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
-        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
     END;
 
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
-    SELECT COUNT(*) INTO cIncidencia FROM personal_incidencia where personalid = P_PERSONAL_ID and incidenciaid = P_INCIDENCIA_ID;
+    -- Verificar si ya existe la incidencia para ese personal
+    SELECT COUNT(*) INTO cIncidencia 
+    FROM personal_incidencia 
+    WHERE personalid = P_PERSONAL_ID AND incidenciaid = P_INCIDENCIA_ID;
 
     IF cIncidencia > 0 THEN
         SET @MSJ2 = 'Ya se encuentra registrada esa sanción para ese personal';
     ELSE
-        INSERT INTO personal_incidencia (personalid, incidenciaid, descripcion, estado, usuario)
-        VALUES (P_PERSONAL_ID, P_INCIDENCIA_ID, P_DESCRIPCION, P_ESTADO, P_USUARIO);
+        -- Recuperar la duración de la sanción en días
+        SELECT duracion_sancion INTO duracion
+        FROM incidencia 
+        WHERE id = P_INCIDENCIA_ID;
+
+        -- Calcular la fecha de fin sumando los días a la fecha actual
+        SET fecha_fin = DATE_ADD(NOW(), INTERVAL duracion DAY);
+
+        -- Insertar el registro en la tabla
+        INSERT INTO personal_incidencia (
+            personalid, incidenciaid, descripcion, fecha_fin, estado, usuario
+        ) VALUES (
+            P_PERSONAL_ID, P_INCIDENCIA_ID, P_DESCRIPCION, fecha_fin, P_ESTADO, P_USUARIO
+        );
 
         SET @MSJ = 'Sanción registrada al personal correctamente';
-
     END IF;
 
 END $$
 
 DELIMITER ;
+
 
 -- Crear procedimiento SP_EDITAR_PERSONAL_INCIDENCIA
 DELIMITER $$
@@ -1865,6 +1887,9 @@ BEGIN
     END IF;
 END $$
 DELIMITER ;
+
+
+
 
 -- Crear procedimiento SP_REGISTRAR_CLIENTE
 DELIMITER $$
