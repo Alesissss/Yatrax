@@ -54,6 +54,11 @@ DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPOVEHICULO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_PERSONAL_INCIDENCIA;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_PERSONAL_INCIDENCIA;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_PERSONAL_INCIDENCIA;
+DROP PROCEDURE IF EXISTS SP_EDITAR_PERSONAL_INCIDENCIA;
+DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_CLIENTE;
 
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_ASIENTO;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_ASIENTO;
@@ -351,6 +356,8 @@ CREATE TABLE sucursal (
 CREATE TABLE ruta (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
+    distancia_estimada DECIMAL(9,2),
+    tiempo_estimado DECIMAL(9,2),
     tipo VARCHAR(100) NOT NULL,
     estado BOOLEAN NOT NULL DEFAULT 1,
     estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
@@ -1309,6 +1316,132 @@ INSERT INTO cliente (
     1,                          -- estado
     'admin'                     -- usuario que registró
 );
+
+-- Crear procedimiento SP_REGISTRAR_PERSONAL_INCIDENCIA
+DELIMITER $$
+CREATE PROCEDURE SP_REGISTRAR_PERSONAL_INCIDENCIA(
+    IN P_PERSONAL_ID INT,
+    IN P_INCIDENCIA_ID INT,
+    IN P_DESCRIPCION VARCHAR(255),
+    IN P_ESTADO BOOLEAN, 
+    IN P_USUARIO VARCHAR(255)
+
+)
+BEGIN
+    DECLARE cIncidencia INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cIncidencia FROM personal_incidencia where personalid = P_PERSONAL_ID and incidenciaid = P_INCIDENCIA_ID;
+
+    IF cIncidencia > 0 THEN
+        SET @MSJ2 = 'Ya se encuentra registrada esa sanción para ese personal';
+    ELSE
+        INSERT INTO personal_incidencia (personalid, incidenciaid, descripcion, estado, usuario)
+        VALUES (P_PERSONAL_ID, P_INCIDENCIA_ID, P_DESCRIPCION, P_ESTADO, P_USUARIO);
+
+        SET @MSJ = 'Sanción registrada al personal correctamente';
+
+    END IF;
+
+END $$
+
+DELIMITER ;
+
+-- Crear procedimiento SP_EDITAR_PERSONAL_INCIDENCIA
+DELIMITER $$
+CREATE PROCEDURE SP_EDITAR_PERSONAL_INCIDENCIA(
+    IN P_PERSONAL_ID INT,
+    IN P_INCIDENCIA_ID INT,
+    IN P_DESCRIPCION VARCHAR(255),
+    IN P_ESTADO BOOLEAN, 
+    IN P_USUARIO VARCHAR(255)
+)
+BEGIN
+    DECLARE cPersonal INT;
+    DECLARE cIncidencia INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cPersonal FROM personal_incidencia where personalid = P_PERSONAL_ID;
+    SELECT COUNT(*) INTO cIncidencia FROM personal_incidencia where incidenciaid = P_INCIDENCIA_ID;
+
+    IF cPersonal <= 0 AND cIncidencia <= 0 THEN
+        SET @MSJ2 = 'El personal que intenta sancionar editar no existe';
+    ELSEIF cIncidencia !=0 AND cPersonal !=0 THEN
+        SET @MSJ2 = 'La sanción que intenta aplicarle al personal ya existe';
+    ELSE
+        UPDATE personal_incidencia SET descripcion = P_DESCRIPCION, estado = P_ESTADO WHERE personalid = P_PERSONAL_ID and incidenciaid = P_INCIDENCIA_ID;
+        SET @MSJ = 'Se modificó correctamente la sanción al personal';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_DARBAJA_INCIDENCIA
+DELIMITER $$
+CREATE PROCEDURE SP_DARBAJA_PERSONAL_INCIDENCIA(
+    IN P_INCIDENCIA_ID INT,
+    IN P_PERSONAL_ID INT
+)
+BEGIN
+    DECLARE cIncidencia INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN 
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cIncidencia FROM personal_incidencia WHERE incidenciaid = P_INCIDENCIA_ID and personalid = P_PERSONAL_ID;
+
+    IF cIncidencia <= 0 THEN
+        SET @MSJ2 = 'La sanción al personal que intenta dar de baja no existe';
+    ELSE
+        UPDATE personal_incidencia SET ESTADO = 0 WHERE personalid = P_PERSONAL_ID  AND incidenciaid = P_INCIDENCIA_ID;
+        SET @MSJ = 'Se dio de baja correctamente la sanción al personal';
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_PERSONAL_INCIDENCIA
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_PERSONAL_INCIDENCIA(
+    IN P_INCIDENCIA_ID INT,
+    IN P_PERSONAL_ID INT
+)
+BEGIN
+    DECLARE cIncidencia INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN 
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cIncidencia FROM personal_incidencia WHERE incidenciaid = P_INCIDENCIA_ID and personalid = P_PERSONAL_ID;
+
+    IF cIncidencia <= 0 THEN
+        SET @MSJ2 = 'La sanción al personal que intenta eliminar no existe';
+    ELSE
+        DELETE FROM personal_incidencia WHERE personalid = P_PERSONAL_ID  AND incidenciaid = P_INCIDENCIA_ID;
+        SET @MSJ = 'Se eliminó correctamente la sanción del personal';
+    END IF;
+END $$
+
+DELIMITER ;
 
 -- Crear procedimiento SP_REGISTRAR_INCIDENCIA
 DELIMITER $$
@@ -4500,6 +4633,8 @@ END $$
 DELIMITER $$
 CREATE PROCEDURE SP_REGISTRAR_RUTA(
     IN P_NOMBRE VARCHAR(255),
+    IN P_DISTANCIA DECIMAL(9,2),
+    IN P_TIEMPO DECIMAL(9,2),
     IN P_ESTADO BOOLEAN,
     IN P_TIPO VARCHAR(255),
     IN P_USUARIO VARCHAR(255)
@@ -4519,8 +4654,8 @@ BEGIN
     IF cNombre > 0 THEN
         SET @MSJ2 = 'El nombre de ruta que intenta registrar ya está registrado';
     ELSE
-        INSERT INTO ruta (NOMBRE, TIPO, ESTADO, USUARIO) 
-        VALUES (P_NOMBRE, P_TIPO, P_ESTADO, P_USUARIO);
+        INSERT INTO ruta (NOMBRE, DISTANCIA_ESTIMADA, TIEMPO_ESTIMADO, TIPO, ESTADO, USUARIO) 
+        VALUES (P_NOMBRE, P_DISTANCIA, P_TIEMPO, P_TIPO, P_ESTADO, P_USUARIO);
 
         SET @MSJ = 'Se registró correctamente la ruta';
     END IF;
@@ -4532,6 +4667,8 @@ DELIMITER $$
 CREATE PROCEDURE SP_EDITAR_RUTA(
     IN P_ID INT,
     IN P_NOMBRE VARCHAR(255),
+    IN P_DISTANCIA DECIMAL(9,2),
+    IN P_TIEMPO DECIMAL(9,2),
     IN P_TIPO VARCHAR(255),
     IN P_ESTADO BOOLEAN
 )
@@ -4556,6 +4693,8 @@ BEGIN
     ELSE
         UPDATE ruta 
         SET NOMBRE = P_NOMBRE,
+            DISTANCIA_ESTIMADA = P_DISTANCIA,
+            TIEMPO_ESTIMADO = P_TIEMPO,
             TIPO = P_TIPO,
             ESTADO = P_ESTADO, 
             estado_proceso = 'MODIFICADO' 

@@ -42,12 +42,12 @@ class Ruta:
 
     # REGISTRAR
     @classmethod
-    def registrar(cls, nombre, estado, tipo, escalas, usuario):
+    def registrar(cls, nombre, distancia, tiempo, estado, tipo, escalas, usuario):
         try:
             conexion = bd.Conexion()
 
             # Llamar al procedimiento almacenado
-            conexion.ejecutar("CALL SP_REGISTRAR_RUTA(%s, %s, %s, %s);", (nombre, estado, tipo, usuario), auto_commit=False)
+            conexion.ejecutar("CALL SP_REGISTRAR_RUTA(%s, %s, %s, %s, %s, %s);", (nombre, distancia, tiempo, estado, tipo, usuario), auto_commit=False)
 
             # Obtener el mensaje de error y el último idRuta generado
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2, LAST_INSERT_ID() AS idRuta;")
@@ -77,11 +77,11 @@ class Ruta:
 
     #EDITAR
     @classmethod
-    def editar(cls, id, nombre, tipo, estado, escalas, usuario):
+    def editar(cls, id, nombre, distancia, tiempo, tipo, estado, escalas, usuario):
         try:
             conexion = bd.Conexion()
             # Llamar al procedimiento almacenado
-            conexion.ejecutar("CALL SP_EDITAR_RUTA(%s, %s, %s, %s);", (id, nombre, tipo, estado), auto_commit=False)
+            conexion.ejecutar("CALL SP_EDITAR_RUTA(%s, %s, %s, %s, %s, %s);", (id, nombre, distancia, tiempo, tipo, estado), auto_commit=False)
 
             # Obtener el mensaje de error y el último idRuta generado
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
