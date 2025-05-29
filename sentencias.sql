@@ -1378,7 +1378,7 @@ BEGIN
     ELSEIF cIncidencia !=0 AND cPersonal !=0 THEN
         SET @MSJ2 = 'La sanción que intenta aplicarle al personal ya existe';
     ELSE
-        UPDATE personal_incidencia SET incidenciaid = P_INCIDENCIA_ID, descripcion = P_DESCRIPCION, estado = P_ESTADO WHERE personalid = P_PERSONAL_ID and incidenciaid = P_INCIDENCIA_ID;
+        UPDATE personal_incidencia SET descripcion = P_DESCRIPCION, estado = P_ESTADO WHERE personalid = P_PERSONAL_ID and incidenciaid = P_INCIDENCIA_ID;
         SET @MSJ = 'Se modificó correctamente la sanción al personal';
     END IF;
 END $$
