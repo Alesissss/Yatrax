@@ -36,11 +36,11 @@
             </button>
 
             <!-- Contenido del navbar -->
-            <div class="collapse navbar-collapse d-flex justify-content-center align-items-center" id="navbarNav">
+            <div class="collapse navbar-collapse" id="navbarNav">
             <!-- Menú central -->
-            <ul class="navbar-nav mx-auto gap-4">
+            <ul class="navbar-nav gap-4 justify-content-center w-100">
                 <li class="nav-item active">
-                <a class="navbar-brand text-white" href="#">Inicio</a>
+                <a class="navbar-brand text-white" href="{{url_for('homeClientes.index')}}">Inicio</a>
                 </li>
                 <li class="nav-item">
                 <a class="navbar-brand text-white" href="#">Servicios</a>
@@ -48,15 +48,17 @@
                 <li class="nav-item">
                 <a class="navbar-brand text-white" href="#">Sucursales</a>
                 </li>
-                <li class="nav-item dropdown">
-                <a class="navbar-brand text-white" href="#" id="navbarDropdown" role="button"
-                    data-bs-toggle="dropdown" aria-expanded="false">
-                    Pasajes
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="{{ url_for('homeClientes.transferencia_pasaje') }}">Transferencia de pasaje</a></li>
-                    <li><a class="dropdown-item" href="#">Cambio de pasaje</a></li>
-                </ul>
+                <li class="nav-item dropdown position-relative">
+                    <div style="position: relative; z-index: +2;">
+                        <a class="navbar-brand text-white" href="#" id="navbarDropdown" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        Pasajes
+                        </a>
+                        <ul class="dropdown-menu mt-2">
+                            <li><a class="dropdown-item" href="{{ url_for('homeClientes.transferencia_pasaje') }}">Transferencia de pasaje</a></li>
+                            <li><a class="dropdown-item" href="#">Cambio de pasaje</a></li>
+                        </ul>
+                    </div>
                 </li>
             </ul>
             <br>

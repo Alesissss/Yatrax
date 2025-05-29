@@ -836,29 +836,30 @@ def obtener_sucursales_mapa():
 @viajes_bp.route('/BuscarAbreviatura', methods=['POST'])
 def buscar_abreviatura():
     try:
-        data = request.json
-        provincia = data.get("provincia", '').strip()
+        data = request.get_json()
+        provincia = data.get('provincia', '').strip()
         if not provincia:
-            return jsonify({'error': 'Parámetro de provincia no proporcionado'}), 400
-        
+            return jsonify({'Status': 'error', 'message': 'El parámetro "provincia" es obligatorio.'}), 400
+
+        # 1. Si ya hay abreviatura registrada, la devolvemos
         resultado = Ciudad.obtener_abreviatura(provincia)
         if resultado:
-            return jsonify({
-                'Status': 'success',
-                'data': resultado
-            })
-        else:
-            resultado = provincia[:3] if len(provincia) >= 2 else provincia.ljust(3, 'X')
-            Ciudad.registrar_abreviatura(provincia, resultado)
-        return jsonify({
-            "Status": "success",
-            "data": {'abreviatura': resultado},
-        })
+            return jsonify({'Status': 'success', 
+                            'data': resultado}), 200
+
+        # 2. Generamos una nueva abreviatura única
+        nueva_abbr = Ciudad._generar_abreviatura_recursivo(provincia)
+
+        # 3. La registramos en la base de datos
+        Ciudad.registrar_abreviatura(provincia, nueva_abbr)
+        # 4. Devolvemos la nueva abreviatura
+        aux_resultado = Ciudad.obtener_abreviatura(provincia)
+        return jsonify({'Status': 'success', 
+                        'data': aux_resultado}), 200
+
     except Exception as e:
-        return jsonify({
-            'status': 'error',
-            'message': 'Error interno del servidor'
-        }), 100
+        return jsonify({'Status': 'error', 
+                        'message': 'Error interno del servidor.'}), 500
 
 @viajes_bp.route('/api/geocodificar', methods=['GET'])
 def geocodificar_coordenadas():
@@ -1368,9 +1369,12 @@ def get_vehiculo_viaje():
 def get_asientos_viaje():
     try:
         id = request.args.get('id', type=int)
-        asientos = Asiento.obtener_por_id_vehiculo(id)
+        idTipo = request.args.get('idTipo', type=int)
 
-        return jsonify({'data': asientos, 'Status': 'success', 'Msj': 'Listado de asientos retornado exitosamente'})
+        asientos = len(Asiento.obtener_por_id_vehiculo(id))
+        niveles = len([{'id': ni['id']} for ni in Nivel.obtener_por_tipo_vehiculo(idTipo) if ni['estado'] == 1])
+
+        return jsonify({'data': [{'asientos': asientos, 'niveles': niveles}], 'Status': 'success', 'Msj': 'Listado de asientos retornado exitosamente'})
     except Exception as e:
         return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar asientos: + {repr(e)}'})
 
