@@ -54,6 +54,10 @@ DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPOVEHICULO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_PERSONAL_INCIDENCIA;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_PERSONAL_INCIDENCIA;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_PERSONAL_INCIDENCIA;
+DROP PROCEDURE IF EXISTS SP_EDITAR_PERSONAL_INCIDENCIA;
 
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_ASIENTO;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_ASIENTO;
@@ -1236,6 +1240,132 @@ INSERT INTO cliente (
     1,                          -- estado
     'admin'                     -- usuario que registró
 );
+
+-- Crear procedimiento SP_REGISTRAR_PERSONAL_INCIDENCIA
+DELIMITER $$
+CREATE PROCEDURE SP_REGISTRAR_PERSONAL_INCIDENCIA(
+    IN P_PERSONAL_ID INT,
+    IN P_INCIDENCIA_ID INT,
+    IN P_DESCRIPCION VARCHAR(255),
+    IN P_ESTADO BOOLEAN, 
+    IN P_USUARIO VARCHAR(255)
+
+)
+BEGIN
+    DECLARE cIncidencia INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cIncidencia FROM personal_incidencia where personalid = P_PERSONAL_ID and incidenciaid = P_INCIDENCIA_ID;
+
+    IF cIncidencia > 0 THEN
+        SET @MSJ2 = 'Ya se encuentra registrada esa sanción para ese personal';
+    ELSE
+        INSERT INTO personal_incidencia (personalid, incidenciaid, descripcion, estado, usuario)
+        VALUES (P_PERSONAL_ID, P_INCIDENCIA_ID, P_DESCRIPCION, P_ESTADO, P_USUARIO);
+
+        SET @MSJ = 'Sanción registrada al personal correctamente';
+
+    END IF;
+
+END $$
+
+DELIMITER ;
+
+-- Crear procedimiento SP_EDITAR_PERSONAL_INCIDENCIA
+DELIMITER $$
+CREATE PROCEDURE SP_EDITAR_PERSONAL_INCIDENCIA(
+    IN P_PERSONAL_ID INT,
+    IN P_INCIDENCIA_ID INT,
+    IN P_DESCRIPCION VARCHAR(255),
+    IN P_ESTADO BOOLEAN, 
+    IN P_USUARIO VARCHAR(255)
+)
+BEGIN
+    DECLARE cPersonal INT;
+    DECLARE cIncidencia INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cPersonal FROM personal_incidencia where personalid = P_PERSONAL_ID;
+    SELECT COUNT(*) INTO cIncidencia FROM personal_incidencia where incidenciaid = P_INCIDENCIA_ID;
+
+    IF cPersonal <= 0 AND cIncidencia <= 0 THEN
+        SET @MSJ2 = 'El personal que intenta sancionar editar no existe';
+    ELSEIF cIncidencia !=0 AND cPersonal !=0 THEN
+        SET @MSJ2 = 'La sanción que intenta aplicarle al personal ya existe';
+    ELSE
+        UPDATE personal_incidencia SET incidenciaid = P_INCIDENCIA_ID, descripcion = P_DESCRIPCION, estado = P_ESTADO WHERE personalid = P_PERSONAL_ID and incidenciaid = P_INCIDENCIA_ID;
+        SET @MSJ = 'Se modificó correctamente la sanción al personal';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_DARBAJA_INCIDENCIA
+DELIMITER $$
+CREATE PROCEDURE SP_DARBAJA_PERSONAL_INCIDENCIA(
+    IN P_INCIDENCIA_ID INT,
+    IN P_PERSONAL_ID INT
+)
+BEGIN
+    DECLARE cIncidencia INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN 
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cIncidencia FROM personal_incidencia WHERE incidenciaid = P_INCIDENCIA_ID and personalid = P_PERSONAL_ID;
+
+    IF cIncidencia <= 0 THEN
+        SET @MSJ2 = 'La sanción al personal que intenta dar de baja no existe';
+    ELSE
+        UPDATE personal_incidencia SET ESTADO = 0 WHERE personalid = P_PERSONAL_ID  AND incidenciaid = P_INCIDENCIA_ID;
+        SET @MSJ = 'Se dio de baja correctamente la sanción al personal';
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_PERSONAL_INCIDENCIA
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_PERSONAL_INCIDENCIA(
+    IN P_INCIDENCIA_ID INT,
+    IN P_PERSONAL_ID INT
+)
+BEGIN
+    DECLARE cIncidencia INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN 
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cIncidencia FROM personal_incidencia WHERE incidenciaid = P_INCIDENCIA_ID and personalid = P_PERSONAL_ID;
+
+    IF cIncidencia <= 0 THEN
+        SET @MSJ2 = 'La sanción al personal que intenta eliminar no existe';
+    ELSE
+        DELETE FROM personal_incidencia WHERE personalid = P_PERSONAL_ID  AND incidenciaid = P_INCIDENCIA_ID;
+        SET @MSJ = 'Se eliminó correctamente la sanción del personal';
+    END IF;
+END $$
+
+DELIMITER ;
 
 -- Crear procedimiento SP_REGISTRAR_INCIDENCIA
 DELIMITER $$
