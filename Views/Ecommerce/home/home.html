@@ -3,22 +3,45 @@
 {% block contenido %}
 {% block styles %}
 <style>
+  /* Variables CSS para consistencia */
+  :root {
+    --primary-color: #003b8b;
+    --secondary-color: #315CAC;
+    --light-blue: #2196f3;
+    --success-color: #4caf50;
+    --danger-color: #c62828;
+    --border-radius: 10px;
+    --transition: all 0.3s ease;
+  }
+
+  /* Reset y base */
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+  }
+
+  /* Asientos - Mejorado para móviles */
   .seat {
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 5px;
     font-weight: bold;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: var(--transition);
     border: 2px solid transparent;
+    font-size: 12px;
   }
 
   .available {
     background-color: #e8f5e9;
-    border-color: #4caf50;
+    border-color: var(--success-color);
     color: #2e7d32;
   }
 
@@ -28,14 +51,14 @@
   }
 
   .selected {
-    background-color: #2196f3;
+    background-color: var(--light-blue);
     color: white;
     border-color: #0d47a1;
   }
 
   .occupied {
     background-color: #ffcdd2;
-    color: #c62828;
+    color: var(--danger-color);
     border-color: #b71c1c;
     cursor: not-allowed;
   }
@@ -45,9 +68,10 @@
   }
 
   .passenger-form {
-    border-left: 3px solid #2196f3;
+    border-left: 3px solid var(--light-blue);
   }
 
+  /* Contenedores principales responsivos */
   #asientos {
     border-right: 1px solid #dee2e6;
     height: calc(100vh - 200px);
@@ -59,41 +83,42 @@
     overflow-y: auto;
   }
 
-  /* SECCIÓN COMPRA PASAJE */
-  /* Contenedor principal */
+  /* SECCIÓN COMPRA PASAJE - Completamente responsiva */
   .pasaje-container {
     background: #f2f2f2;
     padding: 0;
-    border-radius: 10px;
-    border: 1px solid #315CAC;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--secondary-color);
     max-width: 100%;
-    width: 80%;
-    margin: 40px auto;
+    width: 95%;
+    margin: 20px auto;
     font-family: Arial, sans-serif;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   }
 
-
-  /* Barra de navegación de pasos */
+  /* Navegación de tabs responsiva */
   .tab-nav {
     display: flex;
     justify-content: space-between;
     border-bottom: 1px solid #ccc;
     background-color: white;
-    border-radius: 10px 10px 0 0;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
     overflow: hidden;
+    flex-wrap: wrap;
   }
 
   .tab-link {
     flex: 1;
-    padding: 12px 0;
+    padding: 12px 8px;
     border: none;
     cursor: pointer;
     font-weight: bold;
     background-color: white;
-    color: #003b8b;
+    color: var(--primary-color);
     border-right: 1px solid #ccc;
-    transition: 0.3s ease;
+    transition: var(--transition);
+    text-align: center;
+    min-width: 120px;
   }
 
   .tab-link:last-child {
@@ -101,19 +126,17 @@
   }
 
   .tab-link.active {
-    background-color: #003b8b;
+    background-color: var(--primary-color);
     color: white;
   }
 
-  /* Contenido de los tabs */
+  /* Contenido de tabs responsivo */
   .tab-content {
     background-color: #ffffff;
-    border-top: 1px solid #315CAC;
-    padding: 30px;
-    border-radius: 0 0 10px 10px;
+    border-top: 1px solid var(--secondary-color);
+    padding: 20px;
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
   }
-
-  .tab-content-pago {}
 
   .tab-content .step {
     display: none;
@@ -123,19 +146,18 @@
     display: block;
   }
 
-  /* Estilo del formulario */
+  /* Formulario de búsqueda responsivo */
   .form-search {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    /* 5 columnas iguales */
-    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
     padding: 20px;
     background: #b8b8b8;
-    border-radius: 0 0 10px 10px;
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
   }
 
   .checkbox-row {
-    grid-column: span 5;
+    grid-column: 1 / -1;
     padding-top: 10px;
     display: flex;
     align-items: center;
@@ -148,45 +170,46 @@
   .form-search input[type="date"],
   .form-search button {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     border: 1px solid #ccc;
     border-radius: 5px;
+    font-size: 14px;
   }
-
 
   .form-search button {
     background-color: #0050c8;
     color: white;
     border: none;
     cursor: pointer;
-    transition: 0.3s ease;
+    transition: var(--transition);
+    font-weight: bold;
   }
 
   .form-search button:hover {
-    background-color: #003b8b;
+    background-color: var(--primary-color);
   }
 
+  /* Layout responsivo para sección de pago */
   .rowcito {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
 
   .seccion_der {
-    margin-left: 1em;
-    margin-right: 1em;
-  }
-
-  .seccion_der>* {
-    margin-bottom: 1em;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
   }
 
   .detalles_viaje,
   .resumen_compra {
     border: 1px solid black;
-    height: 45%;
+    min-height: 200px;
+    padding: 15px;
   }
 
-  /* Seccion de pago */
+  /* Sección de pago responsiva */
   .pago-wrapper {
     margin-top: 20px;
     font-family: Arial;
@@ -197,6 +220,8 @@
     align-items: center;
     justify-content: space-between;
     margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
   }
 
   .etapa {
@@ -204,10 +229,14 @@
     text-align: center;
     font-weight: bold;
     color: #888;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
   }
 
   .etapa.active {
-    color: #003b8b;
+    color: var(--primary-color);
   }
 
   .barra {
@@ -217,32 +246,34 @@
     margin: 0 10px;
     border-radius: 4px;
     position: relative;
+    min-width: 100px;
   }
 
   .barra-interna {
     height: 8px;
-    background: #003b8b;
+    background: var(--primary-color);
     width: 50%;
-    /* Empieza a la mitad */
     transition: width 0.4s ease;
     border-radius: 4px;
   }
 
   .pago-seccion {
     border: 1px solid #ccc;
-    border-radius: 10px;
+    border-radius: var(--border-radius);
     margin-bottom: 15px;
     overflow: hidden;
   }
 
   .pago-seccion .encabezado {
-    padding: 10px 15px;
+    padding: 15px;
     font-weight: bold;
+    cursor: pointer;
+    transition: var(--transition);
   }
 
   .pago-seccion.abierta .contenido {
     display: block;
-    padding: 15px;
+    padding: 20px;
   }
 
   .pago-seccion .contenido {
@@ -250,45 +281,262 @@
   }
 
   .azul {
-    background: #003b8b;
+    background: var(--primary-color);
     color: white;
   }
 
   .blanco {
     background: #f4f4f4;
-    color: #003b8b;
+    color: var(--primary-color);
   }
 
+  /* Formulario responsivo */
   .grid-form {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    margin-bottom: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .grid-form .correo {
+    grid-column: 1 / -1;
   }
 
   .grid-form label {
     display: block;
-  }
-
-  .grid-form .correo {
-    grid-column: span 2;
+    margin-bottom: 5px;
+    font-weight: bold;
   }
 
   .grid-form input {
-    padding: 8px;
+    padding: 12px;
     border: 1px solid #ccc;
     border-radius: 5px;
     width: 100%;
+    font-size: 14px;
   }
 
   .btn-siguiente {
-    background: #003b8b;
+    background: var(--primary-color);
     color: white;
-    padding: 10px 20px;
+    padding: 12px 24px;
     border: none;
     border-radius: 5px;
     font-weight: bold;
     cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-siguiente:hover {
+    background: #002a6b;
+    transform: translateY(-1px);
+  }
+
+  /* Carrusel responsivo */
+  .carousel-inner .d-flex {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .card {
+    flex: 0 0 auto;
+    max-width: 300px;
+    width: 100%;
+  }
+
+  /* Acordeón responsivo */
+  .accordion-button {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+
+  /* MEDIA QUERIES */
+
+  /* Tablets */
+  @media (min-width: 768px) {
+    .pasaje-container {
+      width: 90%;
+      margin: 40px auto;
+    }
+
+    .tab-content {
+      padding: 30px;
+    }
+
+    .rowcito {
+      grid-template-columns: 2fr 1fr;
+    }
+
+    .seccion_der {
+      margin-left: 1em;
+      margin-right: 1em;
+    }
+
+    .detalles_viaje,
+    .resumen_compra {
+      height: 45%;
+    }
+
+    .seat {
+      width: 40px;
+      height: 40px;
+      font-size: 14px;
+    }
+  }
+
+  /* Desktop */
+  @media (min-width: 1024px) {
+    .pasaje-container {
+      width: 80%;
+    }
+
+    .form-search {
+      grid-template-columns: repeat(5, 1fr);
+    }
+
+    .checkbox-row {
+      grid-column: span 5;
+    }
+
+    .grid-form {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .pago-progress {
+      flex-wrap: nowrap;
+    }
+  }
+
+  /* Móviles pequeños */
+  @media (max-width: 576px) {
+    .pasaje-container {
+      width: 98%;
+      margin: 10px auto;
+    }
+
+    .tab-nav {
+      flex-direction: column;
+    }
+
+    .tab-link {
+      border-right: none;
+      border-bottom: 1px solid #ccc;
+      min-width: auto;
+    }
+
+    .tab-link:last-child {
+      border-bottom: none;
+    }
+
+    .tab-content {
+      padding: 15px;
+    }
+
+    .form-search {
+      grid-template-columns: 1fr;
+      padding: 15px;
+      gap: 10px;
+    }
+
+    .pago-progress {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .barra {
+      margin: 10px 0;
+      order: 3;
+    }
+
+    .etapa {
+      justify-content: center;
+    }
+
+    .grid-form {
+      grid-template-columns: 1fr;
+    }
+
+    .seat {
+      width: 30px;
+      height: 30px;
+      font-size: 10px;
+    }
+
+    .btn-siguiente {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .card {
+      margin-bottom: 20px;
+    }
+
+    .accordion-button span {
+      font-size: 14px;
+    }
+  }
+
+  /* Móviles muy pequeños */
+  @media (max-width: 375px) {
+
+    .form-search select,
+    .form-search input,
+    .form-search button {
+      padding: 10px;
+      font-size: 13px;
+    }
+
+    .grid-form input {
+      padding: 10px;
+      font-size: 13px;
+    }
+
+    .pago-seccion .encabezado {
+      padding: 12px;
+      font-size: 14px;
+    }
+
+    .etapa {
+      padding: 8px 12px;
+      font-size: 13px;
+    }
+  }
+
+  /* Utilidades responsivas */
+  .flotar_derecha {
+    float: right;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+  /* Mejoras de accesibilidad */
+  .tab-link:focus,
+  .btn-siguiente:focus,
+  .form-search button:focus {
+    outline: 2px solid var(--light-blue);
+    outline-offset: 2px;
+  }
+
+  .pago-seccion .encabezado:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: -2px;
+  }
+
+  /* Animaciones suaves */
+  .step {
+    transition: opacity 0.3s ease;
+  }
+
+  .pago-seccion .contenido {
+    transition: all 0.3s ease;
   }
 </style>
 {% endblock %}
@@ -309,19 +557,17 @@
       <!-- Paso 1 -->
       <div class="step active" id="step-0">
         <form id="form-destino" class="form-search">
-          <select name="origen">
+          <select name="origen" required>
             <option disabled selected>Origen</option>
-            <!-- Llama de la BD todas las ciudades -->
             <option value="CAJAMARCA">Cajamarca</option>
             <option value="LIMA">Lima</option>
           </select>
-          <select name="destino">
+          <select name="destino" required>
             <option disabled selected>Destino</option>
-            <!-- Llama de la BD todas las ciudades -->
             <option value="CHICLAYO">Chiclayo</option>
             <option value="TRUJILLO">Trujillo</option>
           </select>
-          <input type="date" name="fecha_ida" placeholder="Fecha ida">
+          <input type="date" name="fecha_ida" placeholder="Fecha ida" required>
           <input type="date" name="fecha_vuelta" placeholder="Fecha regreso">
           <button type="button" onclick="nextStep()">Buscar</button>
           <div class="checkbox-row">
@@ -330,16 +576,27 @@
           </div>
         </form>
       </div>
+
       <!-- Paso 2 -->
       <div class="step" id="step-1">
-        <p>Itinerario de ida...</p>
-        <button onclick="nextStep()">Siguiente</button>
+        <div class="text-center">
+          <h3>Itinerario de ida</h3>
+          <p>Seleccione su horario preferido para el viaje de ida.</p>
+          <div class="mt-4">
+            <button class="btn-siguiente" onclick="nextStep()">Siguiente <i class="fas fa-arrow-right"></i></button>
+          </div>
+        </div>
       </div>
 
       <!-- Paso 3 -->
       <div class="step" id="step-2">
-        <p>Itinerario de regreso...</p>
-        <button onclick="nextStep()">Siguiente</button>
+        <div class="text-center">
+          <h3>Itinerario de regreso</h3>
+          <p>Seleccione su horario preferido para el viaje de regreso.</p>
+          <div class="mt-4">
+            <button class="btn-siguiente" onclick="nextStep()">Siguiente <i class="fas fa-arrow-right"></i></button>
+          </div>
+        </div>
       </div>
 
       <!-- Paso 4 -->
@@ -359,6 +616,7 @@
               <span>Pago</span>
             </div>
           </div>
+
           <div class="rowcito">
             <div class="seccion_izq">
               <div class="pago-seccion abierta" id="seccionContacto">
@@ -370,63 +628,92 @@
                   <div class="grid-form">
                     <div class="correo">
                       <label for="email">Correo:</label>
-                      <input name="email" type="email" placeholder="Correo">
+                      <input name="email" type="email" placeholder="Correo electrónico" required>
                     </div>
                     <div class="nombre">
                       <label for="nombre">Nombres:</label>
-                      <input name="nombre" type="text" placeholder="Nombre">
+                      <input name="nombre" type="text" placeholder="Nombres" required>
                     </div>
                     <div class="apellidos">
                       <label for="apellidos">Apellidos:</label>
-                      <input type="text" placeholder="Apellidos">
+                      <input name="apellidos" type="text" placeholder="Apellidos" required>
                     </div>
                     <div class="doc">
                       <label for="doc">Documento de identidad:</label>
-                      <input type="text" placeholder="Documento de identidad" name="doc">
+                      <input type="text" placeholder="DNI o documento" name="doc" required>
                     </div>
                     <div class="telefono">
                       <label for="telefono">Teléfono:</label>
-                      <input name="telefono" type="tel" placeholder="Teléfono/móvil">
+                      <input name="telefono" type="tel" placeholder="Teléfono/móvil" required>
                     </div>
-
                   </div>
-                  <button class="btn-siguiente" onclick="pasarAPago()">Siguiente <i
-                      class="fas fa-arrow-right"></i></button>
+                  <button class="btn-siguiente" onclick="pasarAPago()">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                  </button>
                 </div>
               </div>
 
-              <!-- Sección PAGO (oculta al inicio) -->
+              <!-- Sección PAGO -->
               <div class="pago-seccion" id="seccionPago">
                 <div class="encabezado blanco">
                   <span><i class="fas fa-circle-2"></i> Pago</span>
                 </div>
                 <div class="contenido">
                   <div class="metodo_pago">
-                    <label for="metodo_pago" class=""></label>
+                    <h4>Método de pago</h4>
+                    <div class="mt-3">
+                      <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="metodoPago" id="tarjeta" value="tarjeta">
+                        <label class="form-check-label" for="tarjeta">
+                          <i class="fas fa-credit-card"></i> Tarjeta de crédito/débito
+                        </label>
+                      </div>
+                      <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="metodoPago" id="efectivo" value="efectivo">
+                        <label class="form-check-label" for="efectivo">
+                          <i class="fas fa-money-bill"></i> Efectivo en agencia
+                        </label>
+                      </div>
+                    </div>
                   </div>
-                  <button class="btn-siguiente" onclick="pasarAContacto()">Atras <i
-                      class="fas fa-arrow-left"></i></button>
+                  <div class="d-flex gap-2 flex-wrap">
+                    <button class="btn-siguiente" onclick="pasarAContacto()">
+                      <i class="fas fa-arrow-left"></i> Atrás
+                    </button>
+                    <button class="btn-siguiente" style="background: var(--success-color);">
+                      Confirmar compra <i class="fas fa-check"></i>
+                    </button>
+                  </div>
                 </div>
-
               </div>
             </div>
+
             <div class="seccion_der">
               <div class="detalles_viaje">
-
+                <h4>Detalles del viaje</h4>
+                <div class="mt-3">
+                  <p><strong>Origen:</strong> <span id="origenSeleccionado">-</span></p>
+                  <p><strong>Destino:</strong> <span id="destinoSeleccionado">-</span></p>
+                  <p><strong>Fecha ida:</strong> <span id="fechaIdaSeleccionada">-</span></p>
+                  <p><strong>Fecha regreso:</strong> <span id="fechaRegresoSeleccionada">-</span></p>
+                </div>
               </div>
               <div class="resumen_compra">
-
+                <h4>Resumen de compra</h4>
+                <div class="mt-3">
+                  <p><strong>Subtotal:</strong> S/ 0.00</p>
+                  <p><strong>IGV:</strong> S/ 0.00</p>
+                  <hr>
+                  <p><strong>Total:</strong> S/ 0.00</p>
+                </div>
               </div>
             </div>
           </div>
-          <!-- Sección CONTACTO -->
-
         </div>
-
       </div>
     </div>
   </section>
-  <h2 style="color: #315BAA; margin: 2%; font-weight: bold;" class="text-center">Servicios</h2>
+  <h2 style="color: #315BAA; margin: 2%; font-weight: bold;" class="text-center" id="seccionServicio">Servicios</h2>
   <section class="position-relative">
     <div class="container-fluid d-flex justify-content-center align-items-center">
       <div id="carouselExample" class="carousel slide w-100 position-relative">
@@ -434,16 +721,16 @@
           <div class="carousel-item active">
             <div class="d-flex justify-content-center gap-5">
               {% for servicio in datos["servicios"] %}
-                <a href="#" style="text-decoration: none;">
-                  <div class="card" style="width: 18rem; height: 420px;">
-                    <img src="/{{ servicio.imagen }}" class="card-img-top" alt="Imagen de servicio"
-                      style="border: 3px solid black; border-radius: 5%; display: block; margin: 5%; width: auto; height: auto;">
-                    <div class="card-body">
-                      <h5 class="card-title text-center" style="font-weight: bold;">{{ servicio.nombre }}</h5>
-                      <p class="card-text text-center">{{ servicio.descripcion }}</p>
-                    </div>
+              <a href="#" style="text-decoration: none;">
+                <div class="card" style="width: 18rem; height: 420px;">
+                  <img src="/{{ servicio.imagen }}" class="card-img-top" alt="Imagen de servicio"
+                    style="border: 3px solid black; border-radius: 5%; display: block; margin: 5%; width: auto; height: auto;">
+                  <div class="card-body">
+                    <h5 class="card-title text-center" style="font-weight: bold;">{{ servicio.nombre }}</h5>
+                    <p class="card-text text-center">{{ servicio.descripcion }}</p>
                   </div>
-                </a>
+                </div>
+              </a>
               {% endfor %}
             </div>
           </div>

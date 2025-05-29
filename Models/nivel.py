@@ -49,7 +49,7 @@ class Nivel:
         try:
             conexion = bd.Conexion()
             listado = conexion.obtener(
-                "SELECT * FROM nivel WHERE id_vehiculo = %s ORDER BY nroPiso",
+                "SELECT * FROM nivel WHERE id_tipo_vehiculo = %s ORDER BY nroPiso",
                 (vehiculo,)
             )
             return listado
@@ -93,8 +93,7 @@ class Nivel:
             WHERE id = %s
             """,
             (nroPiso, tipo_vehiculo, x_dimension, y_dimension, estado, idNivel),
-            auto_commit=False
-        )
+            auto_commit=False)
 
             conexion.ejecutar(
                 "DELETE FROM nivel_herramienta WHERE id_nivel = %s",

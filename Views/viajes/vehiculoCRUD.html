@@ -64,7 +64,7 @@
     function fct_GetTipos() {
         $.getJSON('/trabajadores/viajes/GetTiposVehiculo_Vehiculo', function (response) {
             if (response.Status === 'success') {
-                let items = '<option disabled>--SELECCIONAR--</option>';
+                let items = '<option disabled selected>--SELECCIONAR--</option>';
 
                 $.each(response.data, function (index, item) {
                     if (item.id === Number("{{ vehiculo.id_tipo_vehiculo }}")) {

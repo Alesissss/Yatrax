@@ -1,27 +1,25 @@
 {% extends "index.html" %}
 
-{% block title %}YATRAX - Gestión de rutas{% endblock %}
+{% block title %}YATRAX - Términos y condiciones{% endblock %}
 
 {% block content %}
 <div class="container-fluid p-4">
     <div class="panel-heading">
         <div class="row">
             <div class="col-md-12">
-                <h1>Gestionar rutas</h1>
+                <h1>Gestionar términos y condiciones</h1>
             </div>
         </div>
     </div>
     <div class="panel-body">
         <div class="row">
             <div class="col-12">
-                <table id="tbl_Rutas" class="table table-bordered table-short-rows">
+                <table id="tbl_TerminosYCondiciones" class="table table-bordered table-short-rows">
                     <thead class="bg-gray">
                         <tr>
                             <th class="text-center">ID</th>
                             <th class="text-center">NOMBRE</th>
-                            <th class="text-center">DISTANCIA ESTIMADA (KM)</th>
-                            <th class="text-center">TIEMPO ESTIMADO (MIN)</th>
-                            <th class="text-center">TIPO</th>
+                            <th class="text-center">ARCHIVO</th>
                             <th class="text-center">ESTADO</th>
                             <th class="text-center">ACCIÓN</th>
                         </tr>
@@ -36,7 +34,7 @@
 {% endblock %}
 {% block scripts %}
 <script>
-    var dtRutas;
+    var dtTerminosYCondiciones;
 
     $(document).ready(function () {
         // $('body').addClass('sidebar-collapse');
@@ -102,38 +100,97 @@
             lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
         });
 
-        fct_IniciarTablaRutas('#tbl_Rutas');
+        fct_IniciarTablaTerminosYCondiciones('#tbl_TerminosYCondiciones');
+
+        $('#tbl_TerminosYCondiciones').on('click', '.activar-terminos', function (e) {
+            const checkbox = $(this);
+            const id = checkbox.data('id');
+            const isChecked = checkbox.is(':checked');
+            const accion = isChecked ? 1 : 0;
+            let texto = accion === 1 ? 'asignar' : 'eliminar';
+
+            e.preventDefault();
+
+            if (accion === 0) {
+                toastr.warning('No se puede desactivar un término y condiciones; por favor, active el que desea activar para que los demás se desactiven', 'MENSAJE DE SISTEMA');
+                return;
+            }
+
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción activará los términos y condiciones y desactivará a los demás. ¿Deseas continuar?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, activar términos y condiciones",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Si el usuario confirma, hacemos la petición AJAX
+                    $.ajax({
+                        url: `/trabajadores/configuracion/ActivarTerminos/${id}`,  // Pasamos el ID en la URL
+                        type: "POST",
+                        contentType: "application/json",
+                        success: function (response) {
+                            if (response.Status === "success") {
+                                if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                    return;
+                                }
+
+                                fct_IniciarTablaTerminosYCondiciones('#tbl_TerminosYCondiciones');
+                                toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                            } else {
+                                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                                console.error('Error: ' + response.Msj);
+                            }
+                        },
+                        error: function (xhr, Status, error) {
+                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                            console.error('Error:' + error);
+                        }
+                    });
+
+                } else {
+                    checkbox.prop('checked', !isChecked);
+                }
+            });
+        });
     });
 
-    function fct_IniciarTablaRutas(IdTabla) {
+    function fct_IniciarTablaTerminosYCondiciones(IdTabla) {
         // Inicializar DataTables con botones
-        dtRutas = $(IdTabla).DataTable({
+        dtTerminosYCondiciones = $(IdTabla).DataTable({
             buttons: [
                 {
                     extend: 'copy',
                     text: '<i class="bi bi-back"></i>',
                     titleAttr: 'Copiar en portapapeles',
                     className: 'btn btn-primary',
+                    action: newexportaction
                 },
                 {
                     extend: 'excel',
                     text: '<i class="bi bi-file-earmark-excel"></i>',
                     titleAttr: 'Exportar a Excel',
                     className: 'btn btn-success',
-                    filename: 'Rutas' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'TerminosCondiciones' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     footer: true,
                     exportOptions:
                     {
                         stripHtml: true,
                         columns: ':not(:last-child)'
                     },
+                    action: newexportaction
                 },
                 {
                     extend: 'pdf',
                     text: '<i class="bi bi-file-earmark-pdf"></i>',
                     titleAttr: 'Exportar a PDF',
                     className: 'btn btn-danger',
-                    filename: 'Rutas' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'TerminosCondiciones' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     exportOptions:
                     {
                         stripHtml: true,
@@ -141,6 +198,7 @@
                     },
                     orientation: 'landscape',
                     pageSize: 'LEGAL',
+                    action: newexportaction
                 },
                 {
                     extend: 'print',
@@ -152,6 +210,7 @@
                         stripHtml: true,
                         columns: ':not(:last-child)'
                     },
+                    action: newexportaction
                 },
                 {
                     extend: 'colvis',
@@ -161,16 +220,16 @@
                     columns: ':not(.noVis)',
                 },
                 {
-                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nueva ruta',
+                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo términos y condiciones',
                     className: 'btn bg-success m-1',
                     titleAttr: 'Nuevo',
                     action: function (e, dt, node, config) {
-                        fct_RutaNuevo();
+                        fct_TerminosNuevo();
                     },
                 },
             ],
             ajax: {
-                url: "/trabajadores/viajes/GetData_Ruta",
+                url: "/trabajadores/configuracion/GetData_Terminos",
                 type: "GET",
                 datatype: "json",
                 data: function (d) {
@@ -191,35 +250,21 @@
             columns: [
                 { data: "id", name: "id" },
                 { data: "nombre", name: "nombre" },
-                { 
-                    data: "distancia_estimada", 
-                    name: "distancia_estimada",
-                    render: function (data, type, row) {
-                        return `${data} km`;
-                    },
-                },
-                { 
-                    data: "tiempo_estimado", 
-                    name: "tiempo_estimado",
-                    render: function (data, type, row) {
-                        return `${data} min`;
-                    },
-                },
-                { data: "tipo", name: "tipo" },
-
+                { data: "archivo", name: "archivo", visible: false },
                 {
                     data: "estado",
                     name: "estado",
                     render: function (data, type, row) {
-                        let estado = data === 1 ? 'Vigente' : 'No vigente';
-                        if (estado === "Vigente") {
-                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-success fs-5">${estado}</span></h5>`;
-                        } else if (estado === "No vigente") {
-                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-danger fs-5">${estado}</span></h5>`;
-                        } else {
-                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge fs-5" style="background-color: #800080; color: white;">${estado}</span></h5>`;
-                        }
+                        const checked = data === 1 ? 'checked' : '';
+                        const switchId = `customSwitch_${row.id}`;
+                        const disabled = data === 1 ? 'disabled' : '';
+                        return `
+                        <div class="custom-control custom-switch custom-switch-off-danger custom-switch-on-success">
+                            <input type="checkbox" class="activar-terminos" data-id="${row.id}" ${disabled} ${checked}>
+                        </div>
+                        `;
                     },
+                    className: 'text-center align-middle',
                 },
                 {
                     data: null,
@@ -227,10 +272,9 @@
                     render: function (data, type, row) {
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_RutaVer('${data.id}')" title="Ver ruta"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_RutaEditar('${data.id}')" title="Editar ruta"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_RutaDarBaja('${data.id}')" title="Dar de baja ruta"><i class="bi bi-arrow-down-circle"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_RutaEliminar('${data.id}')" title="Eliminar ruta"><i class="bi bi-trash"></i></button>
+                            <button class="btn btn-xs m-1 btn-info" onclick="fct_TerminosVer('${data.id}')" title="Ver términos y condiciones"><i class="bi bi-eye"></i></button>
+                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_TerminosEditar('${data.id}')" title="Editar términos y condiciones"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_TerminosEliminar('${data.id}')" title="Eliminar términos y condiciones"><i class="bi bi-trash"></i></button>
                         </div>
                         `;
                     },
@@ -243,11 +287,11 @@
                     className: "text-center align-middle",
                 },
                 {
-                    targets: [1, 2, 3, 4, 5, 6],
+                    targets: [1, 2, 3],
                     className: 'align-middle',
                 },
                 {
-                    targets: [6],
+                    targets: [4],
                     orderable: false,
                     width: '10%',
                 },
@@ -277,22 +321,22 @@
         });
     }
 
-    function fct_RutaNuevo() {
-        window.location.href = '/trabajadores/viajes/RutaNuevo';
+    function fct_TerminosNuevo() {
+        window.location.href = '/trabajadores/configuracion/TerminosCondicionesNuevo';
     }
 
-    function fct_RutaEditar(Id) {
-        window.location.href = `/trabajadores/viajes/EditarRuta/${Id}`;
+    function fct_TerminosEditar(Id) {
+        window.location.href = `/trabajadores/configuracion/EditarTerminos/${Id}`;
     }
 
-    function fct_RutaVer(Id) {
-        window.location.href = `/trabajadores/viajes/VerRuta/${Id}`;
+    function fct_TerminosVer(Id) {
+        window.location.href = `/trabajadores/configuracion/VerTerminos/${Id}`;
     }
 
-    function fct_RutaEliminar(Id) {
+    function fct_TerminosEliminar(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción eliminará la ruta. ¿Deseas continuar?",
+            text: "Esta acción eliminará los términos y condiciones. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -303,7 +347,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/viajes/EliminarRuta/${Id}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/configuracion/EliminarTerminos/${Id}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
@@ -312,46 +356,7 @@
                                 toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
                                 return;
                             }
-                            fct_IniciarTablaRutas('#tbl_Rutas');
-                            toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                        } else {
-                            toastr.error(response.Msj, "MENSAJE DE SISTEMA");
-                            console.error('Error: ' + response.Msj);
-                        }
-                    },
-                    error: function (xhr, Status, error) {
-                        toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
-                        console.error('Error:' + error);
-                    }
-                });
-            }
-        });
-    }
-
-    function fct_RutaDarBaja(Id) {
-        Swal.fire({
-            title: "¿Estás seguro?",
-            text: "Esta acción le dará de baja a la ruta. ¿Deseas continuar?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Sí, dar de baja",
-            cancelButtonText: "Cancelar",
-            reverseButtons: true // Invertir el orden de los botones
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `/trabajadores/viajes/DarBajaRuta/${Id}`,  // Pasamos el ID en la URL
-                    type: "POST",
-                    contentType: "application/json",
-                    success: function (response) {
-                        if (response.Status === "success") {
-                            if (response.Msj2 !== '' && response.Msj2 !== null) {
-                                toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                                return;
-                            }
-                            fct_IniciarTablaRutas('#tbl_Rutas');
+                            fct_IniciarTablaTerminosYCondiciones('#tbl_TerminosYCondiciones');
                             toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                         } else {
                             toastr.error(response.Msj, "MENSAJE DE SISTEMA");

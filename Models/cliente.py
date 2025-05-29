@@ -52,6 +52,38 @@ class Cliente:
             conexion.cerrar()
 
     @classmethod
+    def actualizar_cliente(cls, id_cliente, id_pais, id_tipo_cliente, id_tipo_doc, numero_documento,nombres, ape_paterno, ape_materno, sexo, f_nacimiento, razon_social,direccion, telefono, email, password_hash, usuario):
+        conexion = bd.Conexion()
+        try:
+            conexion.ejecutar(
+                '''
+                CALL SP_ACTUALIZAR_CLIENTE(
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                    @MSJ, @MSJ2
+                )
+                ''',
+                (
+                    id_cliente, id_pais, id_tipo_cliente, id_tipo_doc, numero_documento,
+                    nombres, ape_paterno, ape_materno, sexo, f_nacimiento, razon_social,
+                    direccion, telefono, email, password_hash or '', usuario
+                )
+            )
+
+            conexion.ejecutar('SELECT @MSJ, @MSJ2')
+            resultado = conexion.cursor.fetchone()
+
+            msj = resultado[0]
+            msj2 = resultado[1]
+
+            return msj, msj2
+
+        except Exception as e:
+            return None, f"Error en la ejecución: {str(e)}"
+        finally:
+            if conexion != None:
+                conexion.cerrar()
+
+    @classmethod
     def verificar_correo_cliente(cls,correo):
         conexion = bd.Conexion()
         status = -1
