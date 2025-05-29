@@ -1317,39 +1317,57 @@ INSERT INTO cliente (
 
 -- Crear procedimiento SP_REGISTRAR_PERSONAL_INCIDENCIA
 DELIMITER $$
+
 CREATE PROCEDURE SP_REGISTRAR_PERSONAL_INCIDENCIA(
     IN P_PERSONAL_ID INT,
     IN P_INCIDENCIA_ID INT,
     IN P_DESCRIPCION VARCHAR(255),
     IN P_ESTADO BOOLEAN, 
     IN P_USUARIO VARCHAR(255)
-
 )
 BEGIN
-    DECLARE cIncidencia INT;
+    DECLARE cIncidencia INT DEFAULT 0;
+    DECLARE duracion INT DEFAULT 0;
+    DECLARE fecha_fin DATETIME;
+    
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
-        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
     END;
 
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
-    SELECT COUNT(*) INTO cIncidencia FROM personal_incidencia where personalid = P_PERSONAL_ID and incidenciaid = P_INCIDENCIA_ID;
+    -- Verificar si ya existe la incidencia para ese personal
+    SELECT COUNT(*) INTO cIncidencia 
+    FROM personal_incidencia 
+    WHERE personalid = P_PERSONAL_ID AND incidenciaid = P_INCIDENCIA_ID;
 
     IF cIncidencia > 0 THEN
         SET @MSJ2 = 'Ya se encuentra registrada esa sanción para ese personal';
     ELSE
-        INSERT INTO personal_incidencia (personalid, incidenciaid, descripcion, estado, usuario)
-        VALUES (P_PERSONAL_ID, P_INCIDENCIA_ID, P_DESCRIPCION, P_ESTADO, P_USUARIO);
+        -- Recuperar la duración de la sanción en días
+        SELECT duracion_sancion INTO duracion
+        FROM incidencia 
+        WHERE id = P_INCIDENCIA_ID;
+
+        -- Calcular la fecha de fin sumando los días a la fecha actual
+        SET fecha_fin = DATE_ADD(NOW(), INTERVAL duracion DAY);
+
+        -- Insertar el registro en la tabla
+        INSERT INTO personal_incidencia (
+            personalid, incidenciaid, descripcion, fecha_fin, estado, usuario
+        ) VALUES (
+            P_PERSONAL_ID, P_INCIDENCIA_ID, P_DESCRIPCION, fecha_fin, P_ESTADO, P_USUARIO
+        );
 
         SET @MSJ = 'Sanción registrada al personal correctamente';
-
     END IF;
 
 END $$
 
 DELIMITER ;
+
 
 -- Crear procedimiento SP_EDITAR_PERSONAL_INCIDENCIA
 DELIMITER $$
