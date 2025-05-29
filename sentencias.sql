@@ -650,13 +650,16 @@ INSERT INTO tipo_cliente (nombre, estado, usuario)
 VALUES 
 ('Bebé', TRUE, 'admin'),
 ('Niño', TRUE, 'admin'),
-('Adulto', TRUE, 'admin');
+('Adulto', TRUE, 'admin'),
+('Empresa', TRUE, 'admin');
 
 -- INSERT TIPO DOCUMENTO
 INSERT INTO tipo_documento (nombre, abreviatura, estado, usuario)
 VALUES ('DOCUMENTO NACIONAL DE IDENTIFICACION', 'DNI', TRUE, 'admin');
 INSERT INTO tipo_documento (nombre, abreviatura, estado, usuario)
 VALUES ('REGISTRO UNICO DE CONTRIBUYENTE', 'RUC', TRUE, 'admin');
+INSERT INTO tipo_documento (nombre, abreviatura, estado, usuario)
+VALUES ('CARNET DE EXTRANJERIA', 'CE', TRUE, 'admin');
 
 -- INSERT SERVICIO
 insert into servicio values (1,'Premium','Los autobuses más modernos y lujosos del mercado. Asientos cama, entretenimiento a bordo, snacks incluidos, aire acondicionado y cargadores USB. Ideal para viajes de largo trayecto.',1,'2025-05-25 19:30:00','Alexis','Static/img/servicios/busPremium.png');
@@ -989,6 +992,7 @@ INSERT INTO tipo_usuario (id,nombre, estado, estado_proceso,estado_registro,fech
 INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (1,'Alexis','alexis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/alexis.jpeg', 1, 1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
 INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (2,'Edgar','edgar@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/edgar.png', 1, 1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
 INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (3,'Ander','ander@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/ander.jpg', 1, 1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
+INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (4,'Luis','luis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/luis.jpg', 1, 1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
 
 
 -- Tabla menus
@@ -1883,6 +1887,9 @@ BEGIN
     END IF;
 END $$
 DELIMITER ;
+
+
+
 
 -- Crear procedimiento SP_REGISTRAR_CLIENTE
 DELIMITER $$
