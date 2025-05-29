@@ -186,15 +186,13 @@
                         data: formData,
                         success: function (response) {
                             if (response.Status === "success") {
-                                if (response.Msj2 !== null || response.Msj2 !== '') {
-                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                                } else {
-                                    toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                                    setTimeout(() => {
-                                        window.location.href = "/trabajadores/ventas/GestionarServicio"
-                                    }, 500);
-                                }
-                            } else {
+                                toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                                setTimeout(() => {
+                                    window.location.href = "/trabajadores/ventas/GestionarServicio"
+                                }, 1000);
+                            }else if(response.Status === "warning"){
+                                toastr.warning(response.Msj,'MENSAJE DE SISTEMA')
+                            }else {
                                 toastr.error(response.Msj, "MENSAJE DE SISTEMA");
                             }
                         },
@@ -249,14 +247,10 @@
                         data: formData,
                         success: function (response) {
                             if (response.Status === "success") {
-                                if (response.Msj2 !== null || response.Msj2 !== '') {
-                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                                } else {
-                                    toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                                    setTimeout(() => {
-                                        window.location.href = "/trabajadores/ventas/GestionarServicio"
-                                    }, 500);
-                                }
+                                toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                                setTimeout(() => {
+                                    window.location.href = "/trabajadores/ventas/GestionarServicio"
+                                }, 500);
                             } else {
                                 toastr.error(response.Msj, "MENSAJE DE SISTEMA");
                             }
