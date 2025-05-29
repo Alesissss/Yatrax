@@ -21,7 +21,6 @@ class TipoVehiculo:
                     m.nombre AS marca,
                     s.id as id_servicio,
                     s.nombre AS servicio,
-                    tv.cantidad,
                     tv.estado
                 FROM tipo_vehiculo tv
                 LEFT JOIN marca m ON tv.id_marca = m.id
@@ -33,7 +32,6 @@ class TipoVehiculo:
                     m.nombre,
                     s.id,
                     s.nombre,
-                    tv.cantidad, 
                     tv.estado;
             """)
             return listado
@@ -50,7 +48,6 @@ class TipoVehiculo:
                     nombre,
                     id_marca,
                     id_servicio,
-                    cantidad,
                     estado
                 FROM tipo_vehiculo where id=%s
             """,(idTipoVehiculo,))
