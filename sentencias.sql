@@ -421,6 +421,7 @@ CREATE TABLE asiento (
 -- Crear tabla conf_general
 CREATE TABLE conf_general (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    tarifaBase DECIMAL(9,2) NOT NULL,
     igv DECIMAL(9,2) NOT NULL,
     max_pasajes_venta INT NOT NULL,
     viajesReprogramables BOOLEAN NOT NULL
@@ -994,6 +995,8 @@ INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuari
 INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (3,'Ander','ander@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/ander.jpg', 1, 1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
 INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (4,'Luis','luis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/luis.jpg', 1, 1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
 
+-- Tabla de configuración general
+INSERT INTO conf_general (id, igv, tarifaBase, max_pasajes_venta, viajesReprogramables) VALUES (1, 0.18, 10, 4, 0);
 
 -- Tabla menus
 INSERT INTO conf_menus (id, nombre, estado) VALUES (1, 'M_USUARIOS', 1);
