@@ -21,7 +21,9 @@ class Viaje:
     def obtener_todos(cls):
         conexion = bd.Conexion()
         try:
-            viajes = conexion.obtener(""" SELECT v.id, v.idRuta, r.nombre, tv.id_servicio, s.nombre, ve.placa, v.esReprogramado, v.esPostergado, v.fecha_salida_estimada, v.fecha_llegada_estimada
+            viajes = conexion.obtener(""" SELECT v.id, v.idRuta, v.estado, v.estadoViaje AS idEstadoViaje, ev.nombre AS estado_viaje, r.nombre AS ruta, 
+                r.tipo AS tipo_ruta, tv.id_servicio, s.nombre AS servicio, CONCAT(tv.nombre, ' - ', ve.placa) AS vehiculo, 
+                v.esReprogramado, v.esPostergado, v.fecha_salida_estimada, v.fecha_llegada_estimada
                 FROM viaje v
                 INNER JOIN ruta r on v.idRuta = r.id
                 INNER JOIN vehiculo ve on ve.id = v.idVehiculo
@@ -37,12 +39,16 @@ class Viaje:
     def obtener_por_id(cls, viaje_id):
         conexion = bd.Conexion()
         try:
-            viaje = conexion.obtener(""" SELECT v.id, v.idRuta, r.nombre, tv.id_servicio, s.nombre, ve.placa, v.esReprogramado, v.esPostergado, v.fecha_salida_estimada, v.fecha_llegada_estimada FROM viaje v
+            viaje = conexion.obtener(""" SELECT v.id, v.idRuta, v.estado, v.estadoViaje AS idEstadoViaje, ev.nombre AS estado_viaje, r.nombre AS ruta, 
+                r.tipo AS tipo_ruta, tv.id_servicio, s.nombre AS servicio, CONCAT(tv.nombre, ' - ', ve.placa) AS vehiculo, 
+                v.esReprogramado, v.esPostergado, v.fecha_salida_estimada, v.fecha_llegada_estimada
+                FROM viaje v
                 INNER JOIN ruta r on v.idRuta = r.id
                 INNER JOIN vehiculo ve on ve.id = v.idVehiculo
                 INNER JOIN estado_viaje ev on v.estadoViaje = ev.id
                 INNER JOIN tipo_vehiculo tv on tv.id = ve.id_tipo_vehiculo
-                INNER JOIN servicio s on s.id = tv.id_servicio WHERE r.id = %s""", (viaje_id,))
+                INNER JOIN servicio s on s.id = tv.id_servicio;
+                WHERE r.id = %s""", (viaje_id,))
             return viaje[0] if viaje else None
         finally:
             conexion.cerrar()
@@ -69,34 +75,33 @@ class Viaje:
             conexion.cerrar()
     # REGISTRAR
     @classmethod
-    def registrar(cls, nombre, estado, tipo, escalas, usuario):
+    def registrar(cls, idRuta, idVehiculo, estado, fecha_salida_estimada, fecha_llegada_estimada, choferes, tripulantes, usuario):
         try:
             conexion = bd.Conexion()
 
-            # Llamar al procedimiento almacenado
-            conexion.ejecutar("CALL SP_REGISTRAR_RUTA(%s, %s, %s, %s);", (nombre, estado, tipo, usuario), auto_commit=False)
+            conexion.ejecutar(""" INSERT INTO viaje (idRuta, idVehiculo, estado, estadoViaje, esReprogramado, esPostergado, fecha_salida_estimada, fecha_llegada_estimada, usuario) VALUES (%s, %s, %s, 1, 0, 0, %s, %s, %s) """, (idRuta, idVehiculo, estado, fecha_salida_estimada, fecha_llegada_estimada, usuario), auto_commit=False)
 
-            # Obtener el mensaje de error y el último idRuta generado
-            resultado = conexion.obtener("SELECT @MSJ, @MSJ2, LAST_INSERT_ID() AS idRuta;")
-            idRuta = resultado[0]['idRuta']  # Obtener el último ID generado por la ruta
-            msj2 = resultado[0]['@MSJ2']
+            resultado = conexion.obtener("SELECT @MSJ, @MSJ2, LAST_INSERT_ID() AS idViaje;")
+            idViaje = resultado[0]['idViaje'] 
 
-            if msj2:  # Si hay un mensaje de error en msj2
-                raise Exception('Error al registrar ruta: ' + msj2)
-
-            # Insertar las escalas
-            for escala in escalas:
-                conexion.ejecutar("INSERT INTO escala (nro_orden, idSucursal, idRuta, usuario) VALUES (%s, %s, %s, %s)",
-                                (escala['nroOrden'], escala['id'], idRuta, usuario), auto_commit=False)
+            # Insertar los choferes
+            for chofer in choferes:
+                conexion.ejecutar("INSERT INTO detalle_personal (idPersonal, idTipoPersonal, idViaje, usuario) VALUES (%s, %s, %s, %s)",
+                                (chofer['id'], chofer['id_tipopersonal'], idViaje, usuario), auto_commit=False)
+            
+            # Insertar los tripulantes
+            for tripulante in tripulantes:
+                conexion.ejecutar("INSERT INTO detalle_personal (idPersonal, idTipoPersonal, idViaje, usuario) VALUES (%s, %s, %s, %s)",
+                                (tripulante['id'], tripulante['id_tipopersonal'], idViaje, usuario), auto_commit=False)
 
             # Si todo es correcto, confirmamos la transacción
             conexion.conn.commit()
-            return resultado[0]  # Retorna un diccionario con los mensajes
+            return {'@MSJ': 'Se programó el viaje correctamente', '@MSJ2': ''}  # Retorna un diccionario con los mensajes
 
         except Exception as e:
             # Si algo falla, hacemos un rollback
             conexion.conn.rollback()
-            return {'@MSJ': '', '@MSJ2': f'Error al ejecutar la transacción de registro de ruta: {repr(e)}'}
+            return {'@MSJ': '', '@MSJ2': f'Error al ejecutar la transacción de registro de viaje: {repr(e)}'}
 
         finally:
             # Cerramos la conexión
@@ -169,3 +174,34 @@ class Viaje:
             return resultado[0]  # Retorna un diccionario con los mensajes
         finally:
             conexion.cerrar()
+    
+    @classmethod
+    def obtenerOrigenes():
+        conexion = bd.Conexion()
+        try:
+            lista_origenes = conexion.obtener("""
+                SELECT s.id, s.ciudad AS ciudad
+                FROM viaje v INNER JOIN ruta r on v.idRuta = r.id
+                INNER JOIN escala e on e.idRuta = r.id
+                INNER JOIN sucursal s on s.id = e.idSucursal
+                WHERE e.nro_orden = 1
+            """                 
+            )
+            return lista_origenes
+        finally:
+            conexion.cerrar()
+    def obtenerDestinosPorOrigen(id):
+        conexion = bd.Conexion()
+        try:
+            lista_origenes = conexion.obtener("""
+                SELECT s.id, s.ciudad AS ciudad
+                FROM viaje v INNER JOIN ruta r on v.idRuta = r.id
+                INNER JOIN escala e on e.idRuta = r.id
+                INNER JOIN sucursal s on s.id = e.idSucursal
+                WHERE e.nro_orden = 1
+            """                 
+            )
+            return lista_origenes
+        finally:
+            conexion.cerrar()
+

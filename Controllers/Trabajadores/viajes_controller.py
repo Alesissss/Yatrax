@@ -1,5 +1,7 @@
 import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort, json
+from werkzeug.utils import secure_filename
+
 from Models.nivel import Nivel
 from Models.tipoVehiculo import TipoVehiculo
 from Models.vehiculo import Vehiculo
@@ -9,7 +11,6 @@ from Models.horario import Horario
 from Models.ubigeo import Ubigeo
 from Models.marca import Marca
 from Models.ruta import Ruta
-from werkzeug.utils import secure_filename
 from Models.asiento import Asiento
 from Models.tipo_herramienta import TipoHerramienta
 from Models.herramienta import Herramienta
@@ -21,30 +22,29 @@ viajes_bp = Blueprint('viajes', __name__, url_prefix='/trabajadores/viajes')
 
 # ERRORES 
 # Manejar errores 401 (Página no autorizada)
+@viajes_bp.errorhandler(401)
+def error_401(error):
+    return render_template("error.html", error="Página no autorizada"), 401
 
-# @viajes_bp.errorhandler(401)
-# def error_401(error):
-#     return render_template("error.html", error="Página no autorizada"), 401
+# Manejar errores 403 (Página no autorizada para este usuario)
+@viajes_bp.errorhandler(403)
+def error_403(error):
+    return render_template("error.html", error="Página restringida"), 403
 
-# # Manejar errores 403 (Página no autorizada para este usuario)
-# @viajes_bp.errorhandler(403)
-# def error_403(error):
-#     return render_template("error.html", error="Página restringida"), 403
+# Manejar errores 404 (Página no encontrada)
+@viajes_bp.errorhandler(404)
+def error_404(error):
+    return render_template("error.html", error="Página no encontrada"), 404
 
-# # Manejar errores 404 (Página no encontrada)
-# @viajes_bp.errorhandler(404)
-# def error_404(error):
-#     return render_template("error.html", error="Página no encontrada"), 404
+# Manejar errores 500 (Error interno del servidor)
+@viajes_bp.errorhandler(500)
+def error_500(error):
+    return render_template("error.html", error="Error interno del servidor"), 500
 
-# # Manejar errores 500 (Error interno del servidor)
-# @viajes_bp.errorhandler(500)
-# def error_500(error):
-#     return render_template("error.html", error="Error interno del servidor"), 500
-
-# # Manejar cualquier otro error genérico
-# @viajes_bp.errorhandler(Exception)
-# def error_general(error):
-#     return render_template("error.html", error="Ocurrió un error inesperado"), 500
+# Manejar cualquier otro error genérico
+@viajes_bp.errorhandler(Exception)
+def error_general(error):
+    return render_template("error.html", error="Ocurrió un error inesperado"), 500
 
 # RESTRICCIONES
 @viajes_bp.before_request
@@ -109,7 +109,7 @@ def Menu_ProgramarViaje():
 
 @viajes_bp.route('/ProgramarViajeNuevo')
 def Menu_ProgramarViajeNuevo():
-    return render_template('viajes/programarViajeCRUD.html', active_page="programarViaje", active_menu='mViajes', tittle = 'Registrar viaje', btnId = 'btn_Registrar')
+    return render_template('viajes/programarViajeCRUD.html', active_page="programarViaje", active_menu='mViajes', viaje={}, personal=[], tittle = 'Registrar viaje', btnId = 'btn_Registrar')
 
 # @viajes_bp.route('/GestionarMarcas')
 # def Menu_Marcas():
@@ -314,30 +314,62 @@ def nuevoTipoVehiculo():
         try:
             nombre = request.form.get("nombre")
             marca = request.form.get("marca")
-            cantidad = request.form.get("cantidad")
             estado = request.form.get("estado")
             servicio = request.form.get("servicio")
+            cantidad_pisos = request.form.get("cantidadPisos")
+
+            niveles_json = request.form.get("niveles")
+            niveles = json.loads(niveles_json) if niveles_json else []
 
             usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO')
 
-            mensajes = TipoVehiculo.insertarTipoVehiculo(nombre,marca,cantidad,estado,servicio,usuario_actual)
-            msj1 = mensajes.get('@MSJ')
-            msj2 = mensajes.get('@MSJ2')
+            # Convertir tipos si es necesario
+            marca = int(marca) if marca else None
+            estado = int(estado) if estado else None
+            servicio = int(servicio) if servicio else None
+            cantidad_pisos = int(cantidad_pisos) if cantidad_pisos else 0
 
-            if msj1:
-                return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
-            elif msj2:
-                return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
-            else:
-                return jsonify({"Status": "error", 'Msj': 'Error desconocido al insertar tipo vehiculo'})
+            # Llamar al método de inserción
+            TipoVehiculo.insertarTipoVehiculo(
+                nombre=nombre,
+                idmarca=marca,
+                estado=estado,
+                servicio=servicio,
+                usuario=usuario_actual,
+                niveles=niveles
+            )
+
+            return jsonify({"Status": "success", 'Msj': 'Tipo de vehículo registrado con éxito', 'Msj2': ''})
+
         except Exception as e:
-            return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+            return jsonify({
+                "Status": "error",
+                "Msj": f"Ocurrió un error inesperado: {str(e)}"
+            })
 
 @viajes_bp.route("/verTipoVehiculo/<int:idVehiculo>")
 def verTipoVehiculo(idVehiculo):
+    niveles = TipoVehiculo.obtener_niveles_por_tipoVehiculo(idVehiculo)
+
+    botones = []
+    for nivel in niveles:
+        for herramienta in nivel["herramientas"]:
+            botones.append({
+                "x_dimension": herramienta["x_dimension"],
+                "y_dimension": herramienta["y_dimension"],
+                "id_herramienta": herramienta["id_herramienta"],
+                "piso": nivel["nroPiso"]
+            })
+
+    lista_tipo_herramienta = TipoHerramienta.obtener_todos()
+    lista_herramienta = Herramienta.obtener_todos()
     return render_template(
         "viajes/tipoVehiculoCRUD.html",
         title="Ver tipo de vehículo",
+        tipo_herramientas = lista_tipo_herramienta,
+        herramientas = lista_herramienta,
+        niveles=niveles,
+        botones = botones,
         tipoVehiculo = TipoVehiculo.obtenerUno(idVehiculo),
         btnId="btn_Regresar",
         active_page="tipoVehiculo", 
@@ -347,10 +379,26 @@ def verTipoVehiculo(idVehiculo):
 @viajes_bp.route("/editarTipoVehiculo/<int:idTipoVehiculo>",methods=["GET","POST"])
 def editarTipoVehiculo(idTipoVehiculo):
     if request.method == "GET":
+        niveles = TipoVehiculo.obtener_niveles_por_tipoVehiculo(idTipoVehiculo)
+        botones = []
+        for nivel in niveles:
+            for herramienta in nivel["herramientas"]:
+                botones.append({
+                    "x_dimension": herramienta["x_dimension"],
+                    "y_dimension": herramienta["y_dimension"],
+                    "id_herramienta": herramienta["id_herramienta"],
+                    "piso": nivel["nroPiso"]
+                })
+        lista_tipo_herramienta = TipoHerramienta.obtener_todos()
+        lista_herramienta = Herramienta.obtener_todos()
         return render_template(
             "viajes/tipoVehiculoCRUD.html",
             title="Editar tipo de vehículo",
+            tipo_herramientas = lista_tipo_herramienta,
+            herramientas = lista_herramienta,
+            niveles=niveles,
             tipoVehiculo = TipoVehiculo.obtenerUno(idTipoVehiculo),
+            botones = botones,
             btnId="btn_Actualizar",
             active_page="tipoVehiculo", 
             active_menu='mViajes'
@@ -359,16 +407,21 @@ def editarTipoVehiculo(idTipoVehiculo):
         try:
             nombre = request.form.get("nombre")
             marca = request.form.get("marca")
-            cantidad = request.form.get("cantidad")
+            cantidad = int(request.form.get("cantidadPisos"))
             estado = int(request.form.get("estado"))
             servicio = request.form.get("servicio")
 
             usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO')
 
+            # Parsear niveles desde el formData
+            niveles_json = request.form.get("niveles")
+            niveles = json.loads(niveles_json) if niveles_json else []
 
-            print(idTipoVehiculo)
-            mensajes = TipoVehiculo.actualizarTipoVehiculo(idTipoVehiculo,nombre,marca,estado,cantidad,servicio,usuario_actual)
-
+            # 1. Actualizar tipo vehículo
+            mensajes = TipoVehiculo.actualizarTipoVehiculo(
+                idTipoVehiculo, nombre, marca, estado, servicio,niveles
+            )
+            
             msj1 = mensajes.get('MSJ')
             msj2 = mensajes.get('MSJ2')
 
@@ -377,11 +430,11 @@ def editarTipoVehiculo(idTipoVehiculo):
             elif msj2:
                 return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
             else:
-                return jsonify({"Status": "error", 'Msj': 'Error desconocido al actualizar tipo vehiculo'})
+                return jsonify({"Status": "error", 'Msj': 'Error desconocido al actualizar tipo vehículo'})
 
         except Exception as e:
-            return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
-
+            print(f"Error en editarTipoVehiculo: {e}")
+            return jsonify({"Status": "error", 'Msj': 'Error interno en el servidor'})
 @viajes_bp.route("/DarBajaTipoVehiculo/<int:idTipVehiculo>",methods=["POST"])
 def darBajaTipoVehiculo(idTipVehiculo):
     try:
@@ -1054,6 +1107,8 @@ def obtener_sucursales_mapa_ruta():
 def registrar_ruta():
     try:
         nombre = request.form.get("nombre").strip()
+        distancia = float(request.form.get("distancia"))
+        tiempo = float(request.form.get("tiempo"))
         estado = request.form.get("estado")
         escalas_json = request.form.get("escalas")
 
@@ -1062,7 +1117,7 @@ def registrar_ruta():
 
         usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
 
-        mensajes = Ruta.registrar(nombre, estado, tipo, escalas, usuario_actual)
+        mensajes = Ruta.registrar(nombre, distancia, tiempo, estado, tipo, escalas, usuario_actual)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 
@@ -1100,6 +1155,8 @@ def editar_ruta(id):
 
         if request.method == 'POST':
             nombre = request.form.get("nombre").strip()
+            distancia = float(request.form.get("distancia"))
+            tiempo = float(request.form.get("tiempo"))
             estado = request.form.get("estado")
             escalas_json = request.form.get("escalas")
 
@@ -1108,7 +1165,7 @@ def editar_ruta(id):
             escalas = json.loads(escalas_json) if escalas_json else []
             tipo = "ESCALA" if len(escalas) > 2 else "DIRECTO"
             
-            mensajes = Ruta.editar(id, nombre, tipo, estado, escalas, usuario_actual)
+            mensajes = Ruta.editar(id, nombre, distancia, tiempo, tipo, estado, escalas, usuario_actual)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
@@ -1329,7 +1386,7 @@ def get_personal_viaje():
 @viajes_bp.route("/GetData_RutasViajes", methods=["GET"])
 def get_rutas_viaje():
     try:
-        result = [{'id': ru['id'], 'nombre': ru['nombre'], 'tipo': ru['tipo'], 'escalas': Ruta.obtener_escalas_por_ruta(ru['id'])} for ru in Ruta.obtener_todos() if ru['estado'] == 1]
+        result = [{'id': ru['id'], 'nombre': ru['nombre'], 'distancia_estimada': ru['distancia_estimada'], 'tiempo_estimado': ru['tiempo_estimado'], 'tipo': ru['tipo'], 'escalas': Ruta.obtener_escalas_por_ruta(ru['id'])} for ru in Ruta.obtener_todos() if ru['estado'] == 1]
 
         return jsonify({'data': result, 'Status': 'success', 'Msj': 'Listado de rutas retornado exitosamente'})
     except Exception as e:
@@ -1381,11 +1438,23 @@ def get_asientos_viaje():
 @viajes_bp.route("/RegistrarViaje", methods=["POST"])
 def registrar_viaje():
     try:
-        nombre = request.form.get("nombre").strip()
+        fechaHoraSalida = request.form.get("fechaHoraSalida")
+        fechaHoraLlegada = request.form.get("fechaHoraLlegada")
+        idRuta = request.form.get("idRuta")
+        idVehiculo = request.form.get("idVehiculo")
         estado = request.form.get("estado")
+
+        choferes_json = request.form.get("choferes")
+
+        choferes = json.loads(choferes_json) if choferes_json else []
+
+        tripulantes_json = request.form.get("tripulantes")
+
+        tripulantes = json.loads(tripulantes_json) if tripulantes_json else []
+
         usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
 
-        mensajes = Viaje.registrar(nombre, estado, usuario_actual)
+        mensajes = Viaje.registrar(idRuta, idVehiculo, estado, fechaHoraSalida, fechaHoraLlegada, choferes, tripulantes, usuario_actual)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 
@@ -1394,7 +1463,7 @@ def registrar_viaje():
         elif msj2:
             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
         else:
-            return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar tipo de usuario'})
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar viaje'})
 
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})

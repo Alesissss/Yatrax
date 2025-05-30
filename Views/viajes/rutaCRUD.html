@@ -62,6 +62,10 @@
                                         </tbody>
                                     </table>
                                 </div>
+                                <div id="infoRuta" class="col-md-12 text-left">
+                                    <h5>Distancia estimada: <span id="distanciaRuta">0</span> km</h5>
+                                    <h5>Tiempo estimado: <span id="tiempoRuta">0</span> minutos</h5>
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -118,6 +122,16 @@
 
     #map>div.leaflet-control-container>div.leaflet-top.leaflet-right>div {
         align-content: center;
+    }
+
+    .tooltip-ruta {
+        background-color: #1d3557;
+        color: white;
+        font-weight: bold;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        border: 1px solid #a8dadc;
     }
 </style>
 
@@ -202,46 +216,58 @@
             };
         });
 
+        let totalDistancia = 0;
+        let totalDuracion = 0;
+        let promesas = [];
+
         for (let i = 0; i < coordenadas.length - 1; i++) {
             const origen = coordenadas[i];
             const destino = coordenadas[i + 1];
 
             const orsAPIKey = '5b3ce3597851110001cf6248ee3267fd49824a40983b5ec79e79356f';
-            axios.get('https://api.openrouteservice.org/v2/directions/driving-car', {
-                headers: {
-                    'Authorization': orsAPIKey
-                },
+            let promesa = axios.get('https://api.openrouteservice.org/v2/directions/driving-car', {
+                headers: { 'Authorization': orsAPIKey },
                 params: {
                     start: `${origen.lng},${origen.lat}`,
                     end: `${destino.lng},${destino.lat}`
                 }
-            })
-                .then(function (response) {
-                    console.log("Respuesta de la API:", response.data);
+            }).then(response => {
+                const datos = response.data;
+                const ruta = datos.features[0].geometry.coordinates;
+                const resumen = datos.features[0].properties.summary;
 
-                    if (response.data.features && response.data.features.length > 0) {
-                        const ruta = response.data.features[0].geometry.coordinates;
+                totalDistancia += resumen.distance;
+                totalDuracion += resumen.duration;
 
+                if (ruta && ruta.length > 0) {
+                    const latlngs = ruta.map(coord => [coord[1], coord[0]]);
+                    const lineaRuta = L.polyline(latlngs, { color: 'blue' }).addTo(capaRutas);
 
-                        if (coordenadas.length - 2 === i) {
-                            HideSpinner();
-                        }
+                    const distanciaKm = (resumen.distance / 1000).toFixed(2);
+                    const duracionMin = (resumen.duration / 60).toFixed(2);
 
-                        if (ruta && ruta.length > 0) {
-                            L.polyline(ruta.map(coord => [coord[1], coord[0]]), { color: 'blue' }).addTo(capaRutas);
-                        } else {
-                            console.error("No se encontraron coordenadas en la ruta.");
-                            HideSpinner();
-                        }
-                    } else {
-                        console.error("No se encontró ninguna ruta.");
-                        HideSpinner();
-                    }
-                })
-                .catch(function (error) {
-                    console.error('Error al obtener la ruta:', error);
-                });
+                    lineaRuta.bindTooltip(`🚗 ${distanciaKm} km - ⏱ ${duracionMin} min`, {
+                        permanent: false,
+                        direction: 'center',
+                        offset: [0, -10],
+                        opacity: 0.8,
+                        className: 'tooltip-ruta'
+                    }).openTooltip();
+                }
+            }).catch(error => {
+                console.error('Error al obtener la ruta:', error);
+            });
+
+            promesas.push(promesa);
         }
+
+        Promise.all(promesas).then(() => {
+            const km = (totalDistancia / 1000).toFixed(2);
+            const min = (totalDuracion / 60).toFixed(2);
+            document.getElementById('distanciaRuta').innerText = km;
+            document.getElementById('tiempoRuta').innerText = min;
+            HideSpinner();
+        });
     }
 
     function cargarSucursales() {
@@ -373,6 +399,8 @@
         if (escalas.length >= 2) {
             dibujarRutaDesdeEscalas();
         } else {
+            document.getElementById('distanciaRuta').innerText = 0;
+            document.getElementById('tiempoRuta').innerText = 0;
             borrarRutasPrevias();
         }
     }
@@ -437,9 +465,11 @@
     $(document).ready(function () {
         $("#btn_Registrar").click(function () {
             let nombre = $("#txt_Ruta").val().trim();
+            let distancia = $('#distanciaRuta').text();
+            let tiempo = $('#tiempoRuta').text();
             let estado = $('#cbx_Estado').val();
 
-            if (!nombre || !estado || !escalas) {
+            if (!nombre || !estado || !escalas || !distancia || !tiempo) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
@@ -463,6 +493,8 @@
 
                     let formData = new FormData();
                     formData.append("nombre", nombre);
+                    formData.append("distancia", distancia);
+                    formData.append("tiempo", tiempo);
                     formData.append("escalas", JSON.stringify(escalas));
                     formData.append("estado", estado);
 
@@ -501,9 +533,11 @@
             const id = Number("{{ ruta.id }}");
 
             let nombre = $("#txt_Ruta").val().trim();
+            let distancia = $('#distanciaRuta').text();
+            let tiempo = $('#tiempoRuta').text();
             let estado = $('#cbx_Estado').val();
 
-            if (!nombre || !estado || !escalas) {
+            if (!nombre || !estado || !escalas || !distancia || !tiempo) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
@@ -527,6 +561,8 @@
 
                     let formData = new FormData();
                     formData.append("nombre", nombre);
+                    formData.append("distancia", distancia);
+                    formData.append("tiempo", tiempo);
                     formData.append("escalas", JSON.stringify(escalas));
                     formData.append("estado", estado);
 

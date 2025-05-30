@@ -54,6 +54,11 @@ DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPOVEHICULO;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPOVEHICULO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_PERSONAL_INCIDENCIA;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_PERSONAL_INCIDENCIA;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_PERSONAL_INCIDENCIA;
+DROP PROCEDURE IF EXISTS SP_EDITAR_PERSONAL_INCIDENCIA;
+DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_CLIENTE;
 
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_ASIENTO;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_ASIENTO;
@@ -351,6 +356,8 @@ CREATE TABLE sucursal (
 CREATE TABLE ruta (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
+    distancia_estimada DECIMAL(9,2),
+    tiempo_estimado DECIMAL(9,2),
     tipo VARCHAR(100) NOT NULL,
     estado BOOLEAN NOT NULL DEFAULT 1,
     estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
@@ -484,7 +491,6 @@ CREATE TABLE tipo_vehiculo (
     id_marca INT NULL,
     id_servicio INT NOT NULL,
     estado BOOLEAN NOT NULL,
-    cantidad INT NOT NULL,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NOT NULL,
     CONSTRAINT fk_tipo_vehiculo_marca FOREIGN KEY (id_marca) REFERENCES marca(id),
@@ -644,18 +650,21 @@ INSERT INTO tipo_cliente (nombre, estado, usuario)
 VALUES 
 ('Bebé', TRUE, 'admin'),
 ('Niño', TRUE, 'admin'),
-('Adulto', TRUE, 'admin');
+('Adulto', TRUE, 'admin'),
+('Empresa', TRUE, 'admin');
 
 -- INSERT TIPO DOCUMENTO
 INSERT INTO tipo_documento (nombre, abreviatura, estado, usuario)
 VALUES ('DOCUMENTO NACIONAL DE IDENTIFICACION', 'DNI', TRUE, 'admin');
 INSERT INTO tipo_documento (nombre, abreviatura, estado, usuario)
 VALUES ('REGISTRO UNICO DE CONTRIBUYENTE', 'RUC', TRUE, 'admin');
+INSERT INTO tipo_documento (nombre, abreviatura, estado, usuario)
+VALUES ('CARNET DE EXTRANJERIA', 'CE', TRUE, 'admin');
 
 -- INSERT SERVICIO
-insert into servicio values (1,'Premium','Los autobuses más modernos y lujosos del mercado. Asientos cama, entretenimiento a bordo, snacks incluidos, aire acondicionado y cargadores USB. Ideal para viajes de largo trayecto.',1,'2025-05-25 19:30:00','Alexis','Static/img/servicios/busPremium.png');
-insert into servicio values (2,'Económico','Autobuses cómodos y seguros a precios accesibles. Pensado para usuarios que priorizan economía sin perder calidad.',1,'2025-05-25 19:32:00','Alexis','Static/img/servicios/busEconomico.png');
-insert into servicio values (3,'Exprés','Servicios rápidos con pocas paradas. Unidades modernas y seguras para viajeros que buscan llegar en el menor tiempo posible.',1,'2025-05-25 19:40:00','Alexis','Static/img/servicios/busExpress.png');
+insert into servicio values (1,'Premium','Los autobuses más modernos y lujosos del mercado. Asientos cama, entretenimiento a bordo, snacks incluidos, aire acondicionado y cargadores USB. Ideal para viajes de largo trayecto.',1,'2025-05-25 19:30:00','Alexis','/Static/img/servicios/busPremium.png');
+insert into servicio values (2,'Económico','Autobuses cómodos y seguros a precios accesibles. Pensado para usuarios que priorizan economía sin perder calidad.',1,'2025-05-25 19:32:00','Alexis','/Static/img/servicios/busEconomico.png');
+insert into servicio values (3,'Exprés','Servicios rápidos con pocas paradas. Unidades modernas y seguras para viajeros que buscan llegar en el menor tiempo posible.',1,'2025-05-25 19:40:00','Alexis','/Static/img/servicios/busExpress.png');
 
 -- INSERT MARCA
 
@@ -666,16 +675,16 @@ VALUES (1,'Mercedes-Benz', '/Static/img/marca/MercedesBenz.png', '1', 'REGISTRAD
 (4,'Hyundai','/Static/img/marca/Hyundai.png', '1', 'REGISTRADO', '1', '2025-05-26 11:41:28', 'edgar@gmail.com');
 
 -- INSERT TIPO_VEHICULO
-INSERT INTO `tipo_vehiculo` (`id`, `nombre`, `id_marca`, `id_servicio`, `estado`, `cantidad`, `fecha_registro`, `usuario`) 
-VALUES (1, 'Solati H350', '4', '1', '1', '0', '2025-05-26 11:57:29', 'edgar@gmail.com'),
-(2, 'County bus', '4', '1', '1', '0', '2025-05-26 11:58:51', 'edgar@gmail.com'),
-(3, 'Volksbus', '3', '2', '1', '0', '2025-05-26 12:01:43', 'edgar@gmail.com'),
-(4, 'eCitaro fuel cell', '1', '1', '1', '0', '2025-05-26 12:04:08', 'edgar@gmail.com'),
-(5, 'eCitaro', '1', '2', '1', '0', '2025-05-26 12:04:42', 'edgar@gmail.com'),
-(6, 'Citaro', '1', '2', '1', '0', '2025-05-26 12:05:05', 'edgar@gmail.com'),
-(7, 'Citaro U', '1', '3', '1', '0', '2025-05-26 12:05:38', 'edgar@gmail.com'),
-(8, 'Intouro', '1', '3', '1', '0', '2025-05-26 12:05:50', 'edgar@gmail.com'),
-(9, 'Tourismo', '1', '3', '1', '0', '2025-05-26 12:08:52', 'edgar@gmail.com');
+INSERT INTO `tipo_vehiculo` (`id`, `nombre`, `id_marca`, `id_servicio`, `estado`, `fecha_registro`, `usuario`) 
+VALUES (1, 'Solati H350', '4', '1', '1', '2025-05-26 11:57:29', 'edgar@gmail.com'),
+(2, 'County bus', '4', '1', '1', '2025-05-26 11:58:51', 'edgar@gmail.com'),
+(3, 'Volksbus', '3', '2', '1', '2025-05-26 12:01:43', 'edgar@gmail.com'),
+(4, 'eCitaro fuel cell', '1', '1', '1', '2025-05-26 12:04:08', 'edgar@gmail.com'),
+(5, 'eCitaro', '1', '2', '1', '2025-05-26 12:04:42', 'edgar@gmail.com'),
+(6, 'Citaro', '1', '2', '1', '2025-05-26 12:05:05', 'edgar@gmail.com'),
+(7, 'Citaro U', '1', '3', '1', '2025-05-26 12:05:38', 'edgar@gmail.com'),
+(8, 'Intouro', '1', '3', '1', '2025-05-26 12:05:50', 'edgar@gmail.com'),
+(9, 'Tourismo', '1', '3', '1', '2025-05-26 12:08:52', 'edgar@gmail.com');
 
 -- INSERT TIPO_HERRAMIENTA  
 
@@ -983,6 +992,7 @@ INSERT INTO tipo_usuario (id,nombre, estado, estado_proceso,estado_registro,fech
 INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (1,'Alexis','alexis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/alexis.jpeg', 1, 1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
 INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (2,'Edgar','edgar@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/edgar.png', 1, 1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
 INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (3,'Ander','ander@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/ander.jpg', 1, 1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
+INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (4,'Luis','luis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/luis.jpg', 1, 1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
 
 
 -- Tabla menus
@@ -1310,6 +1320,150 @@ INSERT INTO cliente (
     1,                          -- estado
     'admin'                     -- usuario que registró
 );
+
+-- Crear procedimiento SP_REGISTRAR_PERSONAL_INCIDENCIA
+DELIMITER $$
+
+CREATE PROCEDURE SP_REGISTRAR_PERSONAL_INCIDENCIA(
+    IN P_PERSONAL_ID INT,
+    IN P_INCIDENCIA_ID INT,
+    IN P_DESCRIPCION VARCHAR(255),
+    IN P_ESTADO BOOLEAN, 
+    IN P_USUARIO VARCHAR(255)
+)
+BEGIN
+    DECLARE cIncidencia INT DEFAULT 0;
+    DECLARE duracion INT DEFAULT 0;
+    DECLARE fecha_fin DATETIME;
+    
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    -- Verificar si ya existe la incidencia para ese personal
+    SELECT COUNT(*) INTO cIncidencia 
+    FROM personal_incidencia 
+    WHERE personalid = P_PERSONAL_ID AND incidenciaid = P_INCIDENCIA_ID;
+
+    IF cIncidencia > 0 THEN
+        SET @MSJ2 = 'Ya se encuentra registrada esa sanción para ese personal';
+    ELSE
+        -- Recuperar la duración de la sanción en días
+        SELECT duracion_sancion INTO duracion
+        FROM incidencia 
+        WHERE id = P_INCIDENCIA_ID;
+
+        -- Calcular la fecha de fin sumando los días a la fecha actual
+        SET fecha_fin = DATE_ADD(NOW(), INTERVAL duracion DAY);
+
+        -- Insertar el registro en la tabla
+        INSERT INTO personal_incidencia (
+            personalid, incidenciaid, descripcion, fecha_fin, estado, usuario
+        ) VALUES (
+            P_PERSONAL_ID, P_INCIDENCIA_ID, P_DESCRIPCION, fecha_fin, P_ESTADO, P_USUARIO
+        );
+
+        SET @MSJ = 'Sanción registrada al personal correctamente';
+    END IF;
+
+END $$
+
+DELIMITER ;
+
+
+-- Crear procedimiento SP_EDITAR_PERSONAL_INCIDENCIA
+DELIMITER $$
+CREATE PROCEDURE SP_EDITAR_PERSONAL_INCIDENCIA(
+    IN P_PERSONAL_ID INT,
+    IN P_INCIDENCIA_ID INT,
+    IN P_DESCRIPCION VARCHAR(255),
+    IN P_ESTADO BOOLEAN, 
+    IN P_USUARIO VARCHAR(255)
+)
+BEGIN
+    DECLARE cPersonal INT;
+    DECLARE cIncidencia INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cPersonal FROM personal_incidencia where personalid = P_PERSONAL_ID;
+    SELECT COUNT(*) INTO cIncidencia FROM personal_incidencia where incidenciaid = P_INCIDENCIA_ID;
+
+    IF cPersonal <= 0 AND cIncidencia <= 0 THEN
+        SET @MSJ2 = 'El personal que intenta sancionar editar no existe';
+    ELSEIF cIncidencia !=0 AND cPersonal !=0 THEN
+        SET @MSJ2 = 'La sanción que intenta aplicarle al personal ya existe';
+    ELSE
+        UPDATE personal_incidencia SET descripcion = P_DESCRIPCION, estado = P_ESTADO WHERE personalid = P_PERSONAL_ID and incidenciaid = P_INCIDENCIA_ID;
+        SET @MSJ = 'Se modificó correctamente la sanción al personal';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_DARBAJA_INCIDENCIA
+DELIMITER $$
+CREATE PROCEDURE SP_DARBAJA_PERSONAL_INCIDENCIA(
+    IN P_INCIDENCIA_ID INT,
+    IN P_PERSONAL_ID INT
+)
+BEGIN
+    DECLARE cIncidencia INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN 
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cIncidencia FROM personal_incidencia WHERE incidenciaid = P_INCIDENCIA_ID and personalid = P_PERSONAL_ID;
+
+    IF cIncidencia <= 0 THEN
+        SET @MSJ2 = 'La sanción al personal que intenta dar de baja no existe';
+    ELSE
+        UPDATE personal_incidencia SET ESTADO = 0 WHERE personalid = P_PERSONAL_ID  AND incidenciaid = P_INCIDENCIA_ID;
+        SET @MSJ = 'Se dio de baja correctamente la sanción al personal';
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_PERSONAL_INCIDENCIA
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_PERSONAL_INCIDENCIA(
+    IN P_INCIDENCIA_ID INT,
+    IN P_PERSONAL_ID INT
+)
+BEGIN
+    DECLARE cIncidencia INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN 
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cIncidencia FROM personal_incidencia WHERE incidenciaid = P_INCIDENCIA_ID and personalid = P_PERSONAL_ID;
+
+    IF cIncidencia <= 0 THEN
+        SET @MSJ2 = 'La sanción al personal que intenta eliminar no existe';
+    ELSE
+        DELETE FROM personal_incidencia WHERE personalid = P_PERSONAL_ID  AND incidenciaid = P_INCIDENCIA_ID;
+        SET @MSJ = 'Se eliminó correctamente la sanción del personal';
+    END IF;
+END $$
+
+DELIMITER ;
 
 -- Crear procedimiento SP_REGISTRAR_INCIDENCIA
 DELIMITER $$
@@ -1733,6 +1887,9 @@ BEGIN
     END IF;
 END $$
 DELIMITER ;
+
+
+
 
 -- Crear procedimiento SP_REGISTRAR_CLIENTE
 DELIMITER $$
@@ -4501,6 +4658,8 @@ END $$
 DELIMITER $$
 CREATE PROCEDURE SP_REGISTRAR_RUTA(
     IN P_NOMBRE VARCHAR(255),
+    IN P_DISTANCIA DECIMAL(9,2),
+    IN P_TIEMPO DECIMAL(9,2),
     IN P_ESTADO BOOLEAN,
     IN P_TIPO VARCHAR(255),
     IN P_USUARIO VARCHAR(255)
@@ -4520,8 +4679,8 @@ BEGIN
     IF cNombre > 0 THEN
         SET @MSJ2 = 'El nombre de ruta que intenta registrar ya está registrado';
     ELSE
-        INSERT INTO ruta (NOMBRE, TIPO, ESTADO, USUARIO) 
-        VALUES (P_NOMBRE, P_TIPO, P_ESTADO, P_USUARIO);
+        INSERT INTO ruta (NOMBRE, DISTANCIA_ESTIMADA, TIEMPO_ESTIMADO, TIPO, ESTADO, USUARIO) 
+        VALUES (P_NOMBRE, P_DISTANCIA, P_TIEMPO, P_TIPO, P_ESTADO, P_USUARIO);
 
         SET @MSJ = 'Se registró correctamente la ruta';
     END IF;
@@ -4533,6 +4692,8 @@ DELIMITER $$
 CREATE PROCEDURE SP_EDITAR_RUTA(
     IN P_ID INT,
     IN P_NOMBRE VARCHAR(255),
+    IN P_DISTANCIA DECIMAL(9,2),
+    IN P_TIEMPO DECIMAL(9,2),
     IN P_TIPO VARCHAR(255),
     IN P_ESTADO BOOLEAN
 )
@@ -4557,6 +4718,8 @@ BEGIN
     ELSE
         UPDATE ruta 
         SET NOMBRE = P_NOMBRE,
+            DISTANCIA_ESTIMADA = P_DISTANCIA,
+            TIEMPO_ESTIMADO = P_TIEMPO,
             TIPO = P_TIPO,
             ESTADO = P_ESTADO, 
             estado_proceso = 'MODIFICADO' 

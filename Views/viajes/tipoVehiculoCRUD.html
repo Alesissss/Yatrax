@@ -45,13 +45,6 @@
                                         </div>
                                     </div>
                                     <div class="col-md-12 mb-3">
-                                        <label for="txt_Cantidad">Cantidad</label>
-                                        <input type="number" name="txt_Cantidad" id="txt_Cantidad" class="form-control"
-                                            placeholder="Ingrese la cantidad de vehiuclos de ese tipo"
-                                            value="{{ tipoVehiculo.cantidad }}" {% if btnId=="btn_Regresar" %} disabled
-                                            {% endif %}>
-                                    </div>
-                                    <div class="col-md-12 mb-3">
                                         <label for="cbx_Estado">Estado</label>
                                         <select id="cbx_Estado" name="cbx_Estado" class="form-control" {% if
                                             btnId=="btn_Regresar" %} disabled {% endif %}>
@@ -66,7 +59,8 @@
                                         <label for="cantidadPisos">Cantidad de pisos</label>
                                         <input type="number" min="1" id="cantidadPisos"
                                             placeholder="Cantidad de pisos del tipo de vehículo" name="cantidadPisos"
-                                            class="form-control" required>
+                                            class="form-control" required value="{{ niveles|length }}" {% if
+                                            btnId=="btn_Regresar" %} disabled {% endif %}>
                                     </div>
                                     <div class="col-md-12 text-center">
                                         <button id="btn_Listado" type="button" class="btn btn-danger">Volver al listado
@@ -88,27 +82,80 @@
 
 
 {% block scripts %}
+<!-- Script para usar botones -->
 <script>
 
-    $(document).on('click', '#btn_Siguiente', function () {
-        const siguienteId = irAlSiguienteTab();
-        if (siguienteId) {
-            generarMatriz(siguienteId);
-            activarEventosDrag();
-        }
-    });
+</script>
 
-    $("#btn_Siguiente_tab_01").click(function () {
-        generarTabsNivel();
+<!-- Script para cargar datos -->
+<script>
+    function fct_GetMarcas() {
+        $.getJSON('/trabajadores/viajes/GetMarcasTipoVehiculo', function (response) {
+            if (response.Status === 'success') {
+                let items = '<option disabled>--SELECCIONAR--</option>';
 
-        setTimeout(() => {
-            const matrizId = irAlSiguienteTab();
-            if (matrizId) {
-                generarMatriz(matrizId);
-                activarEventosDrag();
+                $.each(response.data, function (index, item) {
+                    if (item.id === Number("{{ tipoVehiculo.id_marca }}")) {
+                        items += `<option selected value="${item.id}">${item.nombre}</option>`;
+                    } else {
+                        items += `<option value="${item.id}">${item.nombre}</option>`;
+                    }
+                });
+
+                $('#cbx_Marca').html(items);
+            } else {
+                console.error('Error al obtener las marcas:', response.Msj);
             }
-        }, 100);
-    });
+        });
+    }
+
+    function fct_GetServicios() {
+        $.getJSON('/trabajadores/viajes/GetServiciosTipoVehiculo', function (response) {
+            if (response.Status === 'success') {
+                let items = '<option disabled>--SELECCIONAR--</option>';
+
+                $.each(response.data, function (index, item) {
+                    if (item.id === Number("{{ tipoVehiculo.id_servicio }}")) {
+                        items += `<option selected value="${item.id}">${item.nombre}</option>`;
+                    } else {
+                        items += `<option value="${item.id}">${item.nombre}</option>`;
+                    }
+                });
+
+                $('#cbx_Servicio').html(items);
+            } else {
+                console.error('Error al obtener los servicios:', response.Msj);
+            }
+        });
+    }
+
+</script>
+
+<!-- Funciones auxiliares -->
+
+<script>
+    window.btnId = "{{ btnId }}";
+    function irAlSiguienteTab() {
+        const tabs = Array.from(document.querySelectorAll('#tipoVehiculoTabs .nav-link'));
+        const activeTab = tabs.find(tab => tab.classList.contains('active'));
+
+        if (!activeTab) return;
+
+        const currentIndex = tabs.indexOf(activeTab);
+        const nextTab = tabs[currentIndex + 1];
+
+        if (nextTab) {
+            $(nextTab).tab('show');
+        } else {
+            toastr.info("Ya estás en el último tab.");
+        }
+        return currentIndex + 1;
+    }
+
+
+    let herramientaSeleccionada = null;
+    const list_herramientas = JSON.parse('{{ herramientas | tojson }}');
+    const botones_guardados = JSON.parse('{{ botones | tojson }}');
 
     function generarTabsNivel() {
         const cantidad = parseInt(document.getElementById("cantidadPisos").value);
@@ -120,46 +167,88 @@
         const tabs = document.getElementById("tipoVehiculoTabs");
         const content = document.getElementById("tipoVehiculoTabsContent");
 
-        // Limpiar tabs antiguos excepto el primero (tipo vehículo)
-        tabs.querySelectorAll("li:not(:first-child)").forEach(e => e.remove());
-        content.querySelectorAll(".tab-pane:not(:first-child)").forEach(e => e.remove());
+        // Obtener tabs ya existentes (excluyendo el primero, que es el de datos)
+        const existingTabs = Array.from(tabs.querySelectorAll('li'))
+            .filter(tab => tab.querySelector('a')?.id?.startsWith('nivel-'));
 
-        for (let i = 1; i <= cantidad; i++) {
-            const tabId = `nivel-${i}`;
-            const matrizId = i;
+        const existingCount = existingTabs.length;
 
-            // Crear nuevo tab
-            const newTab = document.createElement('li');
-            newTab.className = 'nav-item';
-            newTab.innerHTML = `
-            <a class="nav-link" id="${tabId}-tab" data-toggle="pill" href="#${tabId}" role="tab"
-               aria-controls="${tabId}" aria-selected="false">Piso ${i}</a>
-        `;
-            tabs.appendChild(newTab);
+        if (existingCount < cantidad) {
+            // Faltan tabs → agregar los que faltan
+            for (let i = existingCount + 1; i <= cantidad; i++) {
+                const tabId = `nivel-${i}`;
+                const matrizId = i;
 
-            // Crear contenido del tab
-            const newContent = cargarContenido(tabId, matrizId, cantidad);
-            content.appendChild(newContent);
+                const newTab = document.createElement('li');
+                newTab.className = 'nav-item';
+                newTab.innerHTML = `
+                <a class="nav-link" id="${tabId}-tab" data-toggle="pill" href="#${tabId}" role="tab"
+                   aria-controls="${tabId}" aria-selected="false">Piso ${i}</a>
+            `;
+                tabs.appendChild(newTab);
+
+                const newContent = cargarContenido(tabId, matrizId, cantidad);
+                content.appendChild(newContent);
+            }
+
+        } else if (existingCount > cantidad) {
+            // Sobran tabs → eliminar los que sobran
+            for (let i = existingCount; i > cantidad; i--) {
+                const tabId = `nivel-${i}`;
+                const tabElement = document.getElementById(`${tabId}-tab`);
+                const paneElement = document.getElementById(tabId);
+
+                if (tabElement) {
+                    tabElement.closest('li').remove();
+                }
+                if (paneElement) {
+                    paneElement.remove();
+                }
+            }
         }
+
+        // Si cantidad == existingCount → no hacer nada
+        // Actualizar botones de todos los niveles: solo el último debe tener "Aceptar"
+        document.querySelectorAll('.tab-pane').forEach((pane, index) => {
+            const footer = pane.querySelector('.card-footer');
+            if (!footer) return;
+
+            // Eliminar botones anteriores
+            const oldBtn = footer.querySelector(`#${window.btnId}`);
+            if (oldBtn) oldBtn.remove();
+
+            const oldNext = footer.querySelector('#btn_Siguiente');
+            if (oldNext) oldNext.remove();
+
+            const isLast = (index === cantidad); // índice 0 es el tab de "Datos", por eso `=== cantidad`
+            const newBtn = document.createElement('button');
+            newBtn.className = 'btn btn-primary mb-2';
+
+            if (isLast && window.btnId !== "btn_Regresar") {
+                newBtn.textContent = "Aceptar";
+                newBtn.id = window.btnId;
+            } else {
+                newBtn.textContent = "Siguiente";
+                newBtn.id = "btn_Siguiente";
+            }
+
+            footer.appendChild(newBtn);
+        });
     }
+
     function cargarContenido(tabId, matrizId, cantidad) {
+
         const newContent = document.createElement('div');
         newContent.className = 'tab-pane fade';
         newContent.id = tabId;
         newContent.setAttribute('role', 'tabpanel');
         newContent.setAttribute('aria-labelledby', `${tabId}-tab`);
 
-        let botoncito = `
-            <button id="btn_Siguiente" type="button"
-            class="btn btn-primary mb-2">Siguiente</button>
-        `;
-        if (matrizId == cantidad) {
-            botoncito = `
-                {% if btnId != "btn_Regresar" %}
-                <button id="{{ btnId }}" class="btn btn-primary mb-2">Aceptar</button>
-                {% endif %}
-            `;;
+        let botoncito = `<button id="btn_Siguiente" type="button" class="btn btn-primary mb-2">Siguiente</button>`;
+        if (matrizId == cantidad && window.btnId !== "btn_Regresar") {
+            botoncito = `<button type="button" class="btn btn-primary mb-2" id="${window.btnId}">Aceptar</button>`;
         }
+
 
         newContent.innerHTML = `
         <div class="row justify-content-center">
@@ -217,326 +306,6 @@
         return newContent;
     }
 
-</script>
-<script>
-    function fct_GetMarcas() {
-        $.getJSON('/trabajadores/viajes/GetMarcasTipoVehiculo', function (response) {
-            if (response.Status === 'success') {
-                let items = '<option disabled>--SELECCIONAR--</option>';
-
-                $.each(response.data, function (index, item) {
-                    if (item.id === Number("{{ tipoVehiculo.id_marca }}")) {
-                        items += `<option selected value="${item.id}">${item.nombre}</option>`;
-                    } else {
-                        items += `<option value="${item.id}">${item.nombre}</option>`;
-                    }
-                });
-
-                $('#cbx_Marca').html(items);
-            } else {
-                console.error('Error al obtener las marcas:', response.Msj);
-            }
-        });
-    }
-
-    function fct_GetServicios() {
-        $.getJSON('/trabajadores/viajes/GetServiciosTipoVehiculo', function (response) {
-            if (response.Status === 'success') {
-                let items = '<option disabled>--SELECCIONAR--</option>';
-
-                $.each(response.data, function (index, item) {
-                    if (item.id === Number("{{ tipoVehiculo.id_servicio }}")) {
-                        items += `<option selected value="${item.id}">${item.nombre}</option>`;
-                    } else {
-                        items += `<option value="${item.id}">${item.nombre}</option>`;
-                    }
-                });
-
-                $('#cbx_Servicio').html(items);
-            } else {
-                console.error('Error al obtener los servicios:', response.Msj);
-            }
-        });
-    }
-    // Aquí puedes agregar cualquier script que necesites
-    $(document).ready(function () {
-
-        fct_GetMarcas();
-        fct_GetServicios();
-
-        $("#btn_Listado").click(() => {
-            window.location.href = "/trabajadores/viajes/GestionarTipoVehiculo"
-        })
-
-        $("#btn_Regresar").click(() => {
-            window.location.href = "/trabajadores/viajes/GestionarTipoVehiculo"
-        })
-
-        $("#btn_Registrar").click(function () {
-            let nombre = $("#txt_Nombre").val().trim();
-            let marca = $("#cbx_Marca").val().trim();
-            let cantidad = $("#txt_Cantidad").val().trim();
-            let estado = $('#cbx_Estado').val();
-            let servicio = $('#cbx_Servicio').val();
-
-            if (!nombre || !estado || !marca || !cantidad) {
-                toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
-                return;
-            }
-
-            Swal.fire({
-                title: "¿Estás seguro?",
-                text: "Esta acción registrará al tipo de vehículo. ¿Deseas continuar?",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Sí, registrar tipo vehículo",
-                cancelButtonText: "Cancelar",
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-
-                    let formData = new FormData();
-                    formData.append("nombre", nombre);
-                    formData.append("estado", estado);
-                    formData.append("marca", marca);
-                    formData.append("cantidad", cantidad);
-                    formData.append("servicio", servicio);
-
-                    $.ajax({
-                        url: '/trabajadores/viajes/registrarTipoVehiculo',
-                        type: "POST",
-                        processData: false,
-                        contentType: false,
-                        data: formData,
-                        success: function (response) {
-                            if (response.Status === "success") {
-                                if (response.Msj2 !== '' && response.Msj2 !== null) {
-                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                                    return;
-                                } else {
-                                    toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                                    setTimeout(() => {
-                                        window.location.href = '/trabajadores/viajes/GestionarTipoVehiculo';
-                                    }, 500);
-                                }
-                            } else {
-                                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
-                                console.error('Error: ' + response.Msj);
-                            }
-                        },
-                        error: function (xhr, Status, error) {
-                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
-                            console.error('Error:' + error);
-                        }
-                    });
-                }
-            });
-        });
-
-        $("#btn_Actualizar").click(function () {
-            const id = Number("{{ tipoVehiculo.id }}");
-
-            let nombre = $("#txt_Nombre").val().trim();
-            let marca = $("#cbx_Marca").val().trim();
-            let cantidad = $("#txt_Cantidad").val().trim();
-            let estado = $('#cbx_Estado').val();
-            let servicio = $('#cbx_Servicio').val();
-
-            if (!nombre || !estado || !marca || !cantidad) {
-                toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
-                return;
-            }
-
-            Swal.fire({
-                title: "¿Estás seguro?",
-                text: "Esta acción modificará al tipo vehículo. ¿Deseas continuar?",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Sí, editar tipo vehículo",
-                cancelButtonText: "Cancelar",
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-
-                    let formData = new FormData();
-                    formData.append("nombre", nombre);
-                    formData.append("estado", estado);
-                    formData.append("marca", marca);
-                    formData.append("cantidad", cantidad);
-                    formData.append("servicio", servicio);
-
-                    $.ajax({
-                        url: `/trabajadores/viajes/editarTipoVehiculo/${id}`,
-                        type: "POST",
-                        processData: false,
-                        contentType: false,
-                        data: formData,
-                        success: function (response) {
-                            if (response.Status === "success") {
-                                if (response.Msj2 !== '' && response.Msj2 !== null) {
-                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                                    return;
-                                } else {
-                                    toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                                    setTimeout(() => {
-                                        window.location.href = '/trabajadores/viajes/GestionarTipoVehiculo';
-                                    }, 500);
-                                }
-                            } else {
-                                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
-                            }
-                        },
-                        error: function (xhr, Status, error) {
-                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
-                        }
-                    });
-                }
-            });
-        });
-
-        fct_Vehiculos()
-
-        if ("{{ btnId }}" === "btn_Regresar") {
-            document.querySelectorAll('.control').forEach(icono => {
-                icono.setAttribute('draggable', 'false');
-            });
-        }
-        if (herramientaSeleccionada && "{{ btnId }}" !== "btn_Regresar") {
-            this.setAttribute('data-tipo', herramientaSeleccionada);
-            this.innerHTML = obtenerIcono(herramientaSeleccionada);
-        }
-
-        $('#btn_Registrar').click(function (e) {
-            e.preventDefault();
-            try {
-                const herramientas = dict_botones();
-                if (herramientas.length == 0) {
-                    toastr.error("Debe diseñar el nivel para continuar", 'Error');
-                    return;
-                }
-
-                let maxX = 15;
-                let maxY = 6;
-
-
-                const datos = {
-                    nroPiso: $('#txt_nroPiso').val(),
-                    id_tipo_vehiculo: $('#cbx_TipoVehiculo').val(),
-                    x_dimension: maxX,
-                    y_dimension: maxY,
-                    estado: $('#txt_estado').val(),
-                    herramientas: herramientas
-                };
-
-                $.ajax({
-                    url: "/trabajadores/viajes/registrarNivel",
-                    type: "POST",
-                    contentType: "application/json",
-                    data: JSON.stringify(datos),
-                    success: function (response) {
-                        if (response.Status === "success") {
-                            toastr.success("Se ha registrado el nivel correctamente", "Éxito");
-                            setTimeout(() => {
-                                window.location.href = "/trabajadores/viajes/GestionarNivel";
-                            }, 500);
-
-                        } else {
-                            toastr.error("Ocurrió un error al registrar el nivel: " + response.Msj, "Error")
-                        }
-                    },
-                    error: function () {
-                        toastr.error("Error en el servidor", "Error")
-                    }
-                });
-            } catch (error) {
-                console.error("Error capturado en try-catch:", error);
-                toastr.error("Se produjo un error inesperado: " + error.message, "Error");
-            }
-        });
-        $('#btn_Actualizar').click(function (e) {
-
-            e.preventDefault();
-
-            try {
-                const id = Number("{{ nivel.id }}");
-                const herramientas = dict_botones();
-                if (herramientas.length == 0) {
-                    toastr.error("Debe diseñar el nivel para continuar", 'Error');
-                    return;
-                }
-
-                let maxX = 15;
-                let maxY = 6;
-
-                const datos = {
-                    nroPiso: $('#txt_nroPiso').val(),
-                    id_tipo_vehiculo: $('#cbx_TipoVehiculo').val(),
-                    x_dimension: maxX,
-                    y_dimension: maxY,
-                    estado: $('#txt_estado').val(),
-                    herramientas: herramientas
-                };
-
-                $.ajax({
-                    url: `/trabajadores/viajes/editarNivel/${id}`,  // Envia a /editarNivel/<idNivel>
-                    type: "POST",
-                    contentType: "application/json",
-                    data: JSON.stringify(datos),
-                    success: function (response) {
-                        if (response.Status === "success") {
-                            toastr.success("Se ha actualizado el nivel correctamente", "Éxito");
-                            setTimeout(() => {
-                                window.location.href = "/trabajadores/viajes/GestionarNivel";
-                            }, 500);
-                        } else {
-                            toastr.error("Error al actualizar el nivel: " + response.Msj, "Error");
-                        }
-                    },
-                    error: function () {
-                        toastr.error("Error en el servidor", "Error");
-                    }
-                });
-            } catch (error) {
-                console.error("Error capturado en try-catch:", error);
-                toastr.error("Se produjo un error inesperado: " + error.message, "Error");
-            }
-        });
-
-    });
-</script>
-
-<script>
-    function irAlSiguienteTab() {
-        const tabs = Array.from(document.querySelectorAll('#tipoVehiculoTabs .nav-link'));
-        const activeTab = tabs.find(tab => tab.classList.contains('active'));
-
-        if (!activeTab) return;
-
-        const currentIndex = tabs.indexOf(activeTab);
-        const nextTab = tabs[currentIndex + 1];
-
-        if (nextTab) {
-            $(nextTab).tab('show');
-        } else {
-            toastr.info("Ya estás en el último tab.");
-        }
-        return currentIndex + 1;
-    }
-
-
-    let herramientaSeleccionada = null;
-    const list_herramientas = JSON.parse('{{ herramientas | tojson }}');
-    const botones_guardados = JSON.parse('{{ botones | tojson }}');
-    $(document).ready(() => {
-
-
-
-
-    });
     function activarEventosDrag() {
         document.querySelectorAll('.control').forEach(icono => {
             icono.addEventListener('dragstart', function (e) {
@@ -545,11 +314,13 @@
         });
     }
 
-
     function generarMatriz(piso) {
         const filas = 15;
         const columnas = 6;
         const contenedor = document.getElementById(`matrizContainer_${piso}`);
+
+        if (contenedor.children.length > 0) return;
+
         contenedor.innerHTML = '';
 
         contenedor.style.display = 'grid';
@@ -569,7 +340,9 @@
 
                 // Verificar si hay un botón en esta posición
                 const boton_existente = botones_guardados.find(b =>
-                    parseInt(b.x_dimension) === j && parseInt(b.y_dimension) === i
+                    parseInt(b.x_dimension) === j &&
+                    parseInt(b.y_dimension) === i &&
+                    parseInt(b.piso) === piso
                 );
 
                 if (boton_existente) {
@@ -608,8 +381,6 @@
             }
         }
     }
-
-
     function obtenerIcono(idHerramienta) {
         const herramienta_dict = list_herramientas.find(h => h.id === parseInt(idHerramienta));
         if (herramienta_dict) {
@@ -617,37 +388,284 @@
         }
         return '';
     }
-    function dict_botones() {
-        const botones = document.querySelectorAll("#matrizContainer button");
-        const lista_botones = Array.from(botones)
-            .filter(boton => boton.dataset.tipo != "")
-            .map(boton => ({
-                x: boton.dataset.x,
-                y: boton.dataset.y,
-                tipo: boton.dataset.tipo
-            }));
-        return lista_botones
-    }
-    function fct_Vehiculos() {
-        $.getJSON('/trabajadores/viajes/GetData_TipoVehiculo', function (response) {
-            if (response.Status === 'success') {
-                let items = '<option disabled>--SELECCIONAR--</option>';
 
-                $.each(response.data, function (index, item) {
-                    if (item.id === Number('{{ nivel.id_tipo_vehiculo }}')) {
-                        items += `<option selected value="${item.id}">${item.nombre}</option>`;
-                    } else {
-                        items += `<option value="${item.id}">${item.nombre}</option>`;
-                    }
-                });
 
-                $('#cbx_TipoVehiculo').html(items);
-            } else {
-                console.error('Error al obtener los tipos de usuario:', response.Msj);
-            }
+    function dict_botones_por_piso() {
+        const resultados = {};
+
+        const matrices = document.querySelectorAll('[id^="matrizContainer_"]');
+
+        matrices.forEach(matriz => {
+            const piso = parseInt(matriz.id.split('_')[1]);
+            const botones = Array.from(matriz.querySelectorAll('button'))
+                .filter(btn => btn.dataset.tipo !== "")
+                .map(btn => ({
+                    x: parseInt(btn.dataset.x),
+                    y: parseInt(btn.dataset.y),
+                    tipo: btn.dataset.tipo
+                }));
+
+            resultados[piso] = botones;
         });
+
+        return resultados;
     }
+
 
 </script>
+
+<script>
+
+    $(document).on('click', '#btn_Siguiente', function () {
+        irAlSiguienteTab();
+    });
+
+    $(document).on('click', '#btn_Registrar', function (e) {
+        e.preventDefault();
+        const nombre = $("#txt_Nombre").val().trim();
+        const marca = $("#cbx_Marca").val().trim();
+        const estado = $('#cbx_Estado').val();
+        const servicio = $('#cbx_Servicio').val();
+        const cantidadPisos = parseInt($('#cantidadPisos').val());
+
+        if (!nombre || !estado || !marca || !cantidadPisos || cantidadPisos < 1) {
+            toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+            return;
+        }
+
+        const herramientasPorPiso = dict_botones_por_piso();
+
+        const hayDatos = Object.values(herramientasPorPiso).some(arr => arr.length > 0);
+        if (!hayDatos) {
+            toastr.error("Debe diseñar al menos un nivel para continuar", 'Error');
+            return;
+        }
+
+        const niveles = [];
+        for (let i = 1; i <= cantidadPisos; i++) {
+            const herramientas = herramientasPorPiso[i] || [];
+
+            let maxX = -Infinity;
+            let maxY = -Infinity;
+
+            herramientas.forEach(el => {
+                if (el.x > maxX) maxX = el.x;
+                if (el.y > maxY) maxY = el.y;
+            });
+
+            niveles.push({
+                nroPiso: i,
+                x_dimension: maxX === -Infinity ? 0 : maxX,
+                y_dimension: maxY === -Infinity ? 0 : maxY,
+                herramientas: herramientas
+            });
+        }
+
+        Swal.fire({
+            title: "¿Estás seguro?",
+            text: "Esta acción registrará al tipo de vehículo y sus niveles. ¿Deseas continuar?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sí, registrar tipo vehículo",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+
+                let formData = new FormData();
+                formData.append("nombre", nombre);
+                formData.append("estado", estado);
+                formData.append("marca", marca);
+                formData.append("servicio", servicio);
+                formData.append("cantidadPisos", cantidadPisos);
+                formData.append("niveles", JSON.stringify(niveles));
+
+                $.ajax({
+                    url: '/trabajadores/viajes/registrarTipoVehiculo',
+                    type: "POST",
+                    processData: false,
+                    contentType: false,
+                    data: formData,
+                    success: function (response) {
+                        if (response.Status === "success") {
+                            if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                return;
+                            } else {
+                                toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                                setTimeout(() => {
+                                    window.location.href = '/trabajadores/viajes/GestionarTipoVehiculo';
+                                }, 500);
+                            }
+                        } else {
+                            toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                            console.error('Error: ' + response.Msj);
+                        }
+                    },
+                    error: function (xhr, Status, error) {
+                        toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                        console.error('Error:' + error);
+                    }
+                });
+            }
+        });
+
+        // ... tu lógica de validación, Swal, formData y AJAX aquí ...
+    });
+
+    $(document).on('click', '#btn_Actualizar', function (e) {
+        e.preventDefault();
+
+        const id = Number("{{ tipoVehiculo.id }}");
+
+        // Capturar datos del tipo vehículo
+        const nombre = $("#txt_Nombre").val().trim();
+        const marca = $("#cbx_Marca").val().trim();
+        const estado = $('#cbx_Estado').val();
+        const servicio = $('#cbx_Servicio').val();
+        const cantidadPisos = parseInt($('#cantidadPisos').val());
+
+        if (!nombre || !estado || !marca || !cantidadPisos || cantidadPisos < 1) {
+            toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+            return;
+        }
+
+        // Capturar herramientas por piso
+        const herramientasPorPiso = dict_botones_por_piso();
+
+        // Validar que al menos un nivel tenga algo diseñado
+        const hayDatos = Object.values(herramientasPorPiso).some(arr => arr.length > 0);
+        if (!hayDatos) {
+            toastr.error("Debe diseñar al menos un nivel para continuar", 'Error');
+            return;
+        }
+
+        // Construir array de niveles
+        const niveles = [];
+        for (let i = 1; i <= cantidadPisos; i++) {
+            const herramientas = herramientasPorPiso[i] || [];
+
+            let maxX = -Infinity;
+            let maxY = -Infinity;
+
+            herramientas.forEach(el => {
+                if (el.x > maxX) maxX = el.x;
+                if (el.y > maxY) maxY = el.y;
+            });
+
+            niveles.push({
+                nroPiso: i,
+                x_dimension: maxX === -Infinity ? 0 : maxX,
+                y_dimension: maxY === -Infinity ? 0 : maxY,
+                herramientas: herramientas
+            });
+        }
+
+        // Confirmación
+        Swal.fire({
+            title: "¿Estás seguro?",
+            text: "Esta acción modificará el tipo vehículo y sus niveles. ¿Deseas continuar?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sí, editar tipo vehículo",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                let formData = new FormData();
+                formData.append("nombre", nombre);
+                formData.append("estado", estado);
+                formData.append("marca", marca);
+                formData.append("servicio", servicio);
+                formData.append("cantidadPisos", cantidadPisos);
+                formData.append("niveles", JSON.stringify(niveles)); // Serializamos los niveles
+
+                $.ajax({
+                    url: `/trabajadores/viajes/editarTipoVehiculo/${id}`,
+                    type: "POST",
+                    processData: false,
+                    contentType: false,
+                    data: formData,
+                    success: function (response) {
+                        if (response.Status === "success") {
+                            toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                            setTimeout(() => {
+                                window.location.href = '/trabajadores/viajes/GestionarTipoVehiculo';
+                            }, 500);
+                        } else {
+                            toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                    }
+                });
+            }
+        });
+    })
+
+    $(document).on('click', '#btn_Listado', function (e) {
+        window.location.href = "/trabajadores/viajes/GestionarTipoVehiculo"
+    })
+    $("#btn_Siguiente_tab_01").click(function () {
+        generarTabsNivel(); // crea los tabs
+
+        setTimeout(() => {
+
+            const cantidad = parseInt(document.getElementById("cantidadPisos").value);
+            for (let i = 1; i <= cantidad; i++) {
+                generarMatriz(i); // matrizContainer_1, matrizContainer_2, etc.
+            }
+
+            activarEventosDrag();
+
+            irAlSiguienteTab();
+        }, 100);
+    });
+
+</script>
+<script>
+
+    $(document).ready(function () {
+
+        fct_GetMarcas();
+        fct_GetServicios();
+
+        $("#btn_Regresar").click(() => {
+            window.location.href = "/trabajadores/viajes/GestionarTipoVehiculo"
+        })
+
+
+        if ("{{ btnId }}" === "btn_Regresar") {
+            document.querySelectorAll('.control').forEach(icono => {
+                icono.setAttribute('draggable', 'false');
+            });
+        }
+        if (herramientaSeleccionada && "{{ btnId }}" !== "btn_Regresar") {
+            this.setAttribute('data-tipo', herramientaSeleccionada);
+            this.innerHTML = obtenerIcono(herramientaSeleccionada);
+        }
+        if ("{{ btnId }}" !== "btn_Registrar") {
+            setTimeout(() => {
+                $('#cantidadPisos').val("{{ niveles|length }}");
+                generarTabsNivel();
+
+                setTimeout(() => {
+                    const cantidad = parseInt(document.getElementById("cantidadPisos").value);
+                    for (let i = 1; i <= cantidad; i++) {
+                        generarMatriz(i); // esta matriz ya usa `botones_guardados`
+                    }
+                    activarEventosDrag(); // solo habilita si no es modo ver
+                }, 100);
+            }, 100);
+        }
+
+    });
+</script>
+
 
 {% endblock %}

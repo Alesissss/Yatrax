@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
@@ -26,7 +26,7 @@
         <div class="container-fluid">
             <!-- Logo -->
             <a class="navbar-brand" href="/ecommerce/home/inicio">
-            <img src="..." alt="logo_yatrax" id="maestra_logo" style="width: 70px; height: 70px;">
+            <img src="" alt="logo_yatrax" id="maestra_logo" style="width: 70px; height: 70px;">
             </a>
 
             <!-- Botón para menú responsive -->
@@ -43,7 +43,7 @@
                 <a class="navbar-brand text-white" href="{{url_for('homeClientes.index')}}">Inicio</a>
                 </li>
                 <li class="nav-item">
-                <a class="navbar-brand text-white" href="#">Servicios</a>
+                <a class="navbar-brand text-white" href="{{url_for('homeClientes.index')}}#seccionServicio">Servicios</a>
                 </li>
                 <li class="nav-item">
                 <a class="navbar-brand text-white" href="#">Sucursales</a>
@@ -82,7 +82,7 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a id="abrirModalLogin" class="dropdown-item">Iniciar sesión</a></li>
-                        <li><a class="dropdown-item" href="#">Registrar</a></li>
+                        <li><a class="dropdown-item" href="{{url_for('homeClientes.register_cliente')}}">Registrar</a></li>
                     </ul>
                 {% endif %}
             </div>
@@ -369,23 +369,24 @@
 
     </script>
     <script>
-        const botonMenu = document.getElementById('botonMenu');
-        const menuDesplegable = document.getElementById('menuDesplegable');
-        // Aplicar posición relativa al botón de menú para el posicionamiento correcto del desplegable
-        botonMenu.style.position = 'relative';
+        // ESTOS IDS NO EXISTEN, SOLO ESTÁN GENERANDO ERRORES EN CONSOLA
+        // const botonMenu = document.getElementById('botonMenu');
+        // const menuDesplegable = document.getElementById('menuDesplegable');
+        // // Aplicar posición relativa al botón de menú para el posicionamiento correcto del desplegable
+        // botonMenu.style.position = 'relative';
 
-        // Alternar el menú desplegable al hacer clic en el botón
-        botonMenu.addEventListener('click', function (e) {
-            e.preventDefault();
-            menuDesplegable.classList.toggle('mostrar');
-        });
+        // // Alternar el menú desplegable al hacer clic en el botón
+        // botonMenu.addEventListener('click', function (e) {
+        //     e.preventDefault();
+        //     menuDesplegable.classList.toggle('mostrar');
+        // });
 
-        // Cerrar el menú desplegable al hacer clic en cualquier parte fuera de él
-        document.addEventListener('click', function (e) {
-            if (!botonMenu.contains(e.target) && !menuDesplegable.contains(e.target)) {
-                menuDesplegable.classList.remove('mostrar');
-            }
-        });
+        // // Cerrar el menú desplegable al hacer clic en cualquier parte fuera de él
+        // document.addEventListener('click', function (e) {
+        //     if (!botonMenu.contains(e.target) && !menuDesplegable.contains(e.target)) {
+        //         menuDesplegable.classList.remove('mostrar');
+        //     }
+        // });
     </script>
     <script>
         function fct_SignUp(event) {
