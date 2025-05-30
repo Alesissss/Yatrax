@@ -88,9 +88,9 @@
         <div class="col-md-8">
             <div class="card h-100">
                 <div class="card-header d-flex align-items-center bg-info text-white">
-                    <h2 class="mx-auto text-center mb-0" id="previewName">
+                    <h4 class="mx-auto text-center mb-0" id="previewName">
                         {{ termino.nombre if termino and termino.nombre else 'Previsualización' }}
-                    </h2>
+                    </h4>
                 </div>
                 <div
                     class="card-body"
@@ -270,10 +270,13 @@ $(document).ready(function () {
         Swal.fire({
             title: "¿Confirmar registro?",
             text:  "Se registrará el término y condición. ¿Continuar?",
-            icon:  "question",
+            icon:  "warning",
             showCancelButton: true,
-            confirmButtonText: "Sí, registrar",
-            cancelButtonText: "Cancelar"
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sí, registrar términos y condiciones",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true
         }).then(res => {
             if (!res.isConfirmed) return;
             showLoader(true);
@@ -313,10 +316,13 @@ $(document).ready(function () {
         Swal.fire({
             title: "¿Confirmar actualización?",
             text:  "Se modificarán los términos y condiciones. ¿Continuar?",
-            icon:  "question",
+            icon: "warning",
             showCancelButton: true,
-            confirmButtonText: "Sí, actualizar",
-            cancelButtonText: "Cancelar"
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sí, editar términos y condiciones",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true
         }).then(res => {
             if (!res.isConfirmed) return;
             showLoader(true);

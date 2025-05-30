@@ -1,5 +1,6 @@
-{% extends "maestra.html" %} {% block titulo %}YATRAX - Tranferencia de
-pasaje{%endblock %} {% block contenido %}
+{% extends "maestra.html" %} 
+{% block titulo %}YATRAX - Tranferencia de pasaje{%endblock %} 
+{% block contenido %}
 
 <style>
   /* Un poco de espacio extra para el edit-icon */
@@ -479,7 +480,9 @@ pasaje{%endblock %} {% block contenido %}
 
     // funcion para validar la edad del nuevo pasajero
     function validarEdadNuevoPasajero() {
-      const fechaNacimiento = document.getElementById("fechaNacimientoNuevo").value;
+      const fechaNacimiento = document.getElementById(
+        "fechaNacimientoNuevo"
+      ).value;
       if (!fechaNacimiento) return;
 
       let fechaActual = new Date();
@@ -501,7 +504,7 @@ pasaje{%endblock %} {% block contenido %}
         );
         //marcar el checkbox de menor
         document.getElementById("esMenor").checked = true;
-      }else{
+      } else {
         // Si es mayor de edad, desmarcar el checkbox de menor
         document.getElementById("esMenor").checked = false;
       }
@@ -534,7 +537,7 @@ pasaje{%endblock %} {% block contenido %}
     document
       .getElementById("tipoDocMenor")
       .addEventListener("change", buscarPersonaMenor);
-    
+
     // Función de búsqueda para el menor
     function buscarPersonaMenor() {
       const tipoDoc = document.getElementById("tipoDocMenor").value;

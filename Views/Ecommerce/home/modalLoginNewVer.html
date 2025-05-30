@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YATRAX - Iniciar Sesión</title>
+    <!-- Favicon -->
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{{ url_for('static', filename='/img/icono_yatrax.ico') }}"
+    />
+
+    <!-- AdminLTE -->
+    <link rel="stylesheet" href="/Static/css/adminlte.min.css" />
+    <link rel="stylesheet" href="/Static/css/all.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+    />
+
+    <!-- SweetAlert2 -->
+    <link
+      rel="stylesheet"
+      href="/Static/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css"
+    />
+    <!-- Toastr -->
+    <link rel="stylesheet" href="/Static/plugins/toastr/toastr.min.css" />
+    <!-- Select2 -->
+    <link rel="stylesheet" href="/Static/plugins/select2/css/select2.min.css" />
+    <link
+      rel="stylesheet"
+      href="/Static/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css"
+    />
+    <!-- Tempusdominus Bootstrap 4 -->
+    <link
+      rel="stylesheet"
+      href="/Static/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css"
+    />
+    <!-- Google Font: Source Sans Pro -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700"
+    />
+    <!-- Inter Font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", "Source Sans Pro", sans-serif;
+        background-image: url("/Static/img/WallpaperLogin.jpeg");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        min-height: 100vh;
+      }
+
+      .modal-body {
+        padding: 0;
+      }
+
+      .login-container {
+        display: flex;
+        width: 100%;
+        max-width: 1000px;
+        min-height: 600px;
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+        overflow: hidden;
+        animation: slideIn 0.8s ease-out;
+        margin: auto;
+        position: relative;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(50px) scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      /* Left Side - Illustration */
+      .left-side {
+        flex: 1;
+        background: linear-gradient(
+          135deg,
+          #1e40af 0%,
+          #3b82f6 50%,
+          #06b6d4 100%
+        );
+        /* background-image: url("{{url_for('static',filename='img/login_pc.jpg')}}") !important;
+        background-size: cover !important;
+        background-position: center !important;
+        background-repeat: no-repeat !important; */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px;
+        position: relative;
+        color: white;
+        text-align: center;
+      }
+
+      .left-side::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          135deg,
+          rgba(30, 64, 175, 0.9) 0%,
+          rgba(59, 130, 246, 0.8) 50%,
+          rgba(6, 182, 212, 0.7) 100%
+        );
+        z-index: 1;
+      }
+
+      .illustration {
+        position: relative;
+        z-index: 2;
+        margin-bottom: 30px;
+      }
+
+      .user-icon {
+        width: 120px;
+        height: 120px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        position: relative;
+      }
+
+      .user-icon i {
+        font-size: 48px;
+        color: white;
+      }
+
+      .shield-icon {
+        position: absolute;
+        bottom: -10px;
+        right: -10px;
+        width: 40px;
+        height: 40px;
+        background: #10b981;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 3px solid white;
+      }
+
+      .shield-icon i {
+        font-size: 18px;
+        color: white;
+      }
+
+      .bus-illustration {
+        width: 100%;
+        max-width: 300px;
+        margin: 20px 0;
+        opacity: 0.3;
+      }
+
+      .welcome-title {
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        position: relative;
+        z-index: 2;
+      }
+
+      .welcome-subtitle {
+        font-size: 16px;
+        opacity: 0.9;
+        line-height: 1.5;
+        position: relative;
+        z-index: 2;
+      }
+
+      /* Right Side - Form */
+      .right-side {
+        flex: 1;
+        padding: 60px 50px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .form-header {
+        margin-bottom: 40px;
+        text-align: center;
+      }
+
+      .form-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 8px;
+      }
+
+      .form-subtitle {
+        color: #64748b;
+        font-size: 15px;
+        margin-bottom: 20px;
+      }
+
+      .form-group {
+        margin-bottom: 24px;
+        position: relative;
+      }
+
+      .input-wrapper {
+        position: relative;
+      }
+
+      .form-input {
+        width: 100%;
+        padding: 16px 20px 16px 50px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background: #f8fafc;
+        color: #1e293b;
+        box-sizing: border-box;
+      }
+
+      .form-input:focus {
+        outline: none;
+        border-color: #3b82f6;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        transform: translateY(-1px);
+      }
+
+      .form-input::placeholder {
+        color: #94a3b8;
+      }
+
+      .input-icon {
+        position: absolute;
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        transition: color 0.3s ease;
+        font-size: 16px;
+        z-index: 2;
+      }
+
+      .form-input:focus ~ .input-icon {
+        color: #3b82f6;
+      }
+
+      .login-btn {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, #1e40af, #3b82f6);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        margin-bottom: 24px;
+      }
+
+      .login-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+      }
+
+      .login-btn:active {
+        transform: translateY(0);
+      }
+
+      .login-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .btn-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top: 2px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        display: none;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .forgot-password {
+        text-align: center;
+      }
+
+      .forgot-password a {
+        color: #3b82f6;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+      }
+
+      .forgot-password a:hover {
+        color: #1e40af;
+        text-decoration: underline;
+      }
+
+      .close {
+        position: absolute !important;
+        top: 20px !important;
+        right: 20px !important;
+        background: none !important;
+        border: none !important;
+        color: #718096 !important;
+        font-size: 24px !important;
+        cursor: pointer !important;
+        outline: none !important;
+        width: 40px !important;
+        height: 40px !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        transition: all 0.3s ease !important;
+        z-index: 10 !important;
+        transform-origin: center center !important;
+      }
+
+      .close:hover {
+        background: #f7fafc !important;
+        color: #0C336E !important;
+        transform: scale(1.1) !important;
+      }
+
+      .close:active {
+        transform: scale(0.95) !important;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        body {
+          padding: 10px;
+        }
+
+        .close {
+          top: 15px !important;
+          right: 15px !important;
+          font-size: 20px !important;
+        }
+
+        .login-container {
+          flex-direction: column;
+          width: 100%;
+          max-width: 500px;
+          height: auto;
+          min-height: auto;
+        }
+
+        .left-side {
+          padding: 30px 20px;
+          min-height: 250px;
+        }
+
+        .welcome-title {
+          font-size: 24px;
+        }
+
+        .welcome-subtitle {
+          font-size: 14px;
+        }
+
+        .user-icon {
+          width: 80px;
+          height: 80px;
+        }
+
+        .user-icon i {
+          font-size: 32px;
+        }
+
+        .right-side {
+          padding: 30px 25px;
+        }
+
+        .form-title {
+          font-size: 24px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .right-side {
+          padding: 25px 20px;
+        }
+
+        .form-title {
+          font-size: 22px;
+        }
+
+        .form-input,
+        .login-btn {
+          padding: 15px 15px 15px 50px;
+        }
+      }
+
+      /* Toast customization */
+      .toast-success {
+        background-color: #10b981 !important;
+      }
+
+      .toast-error {
+        background-color: #ef4444 !important;
+      }
+
+      .toast-warning {
+        background-color: #f59e0b !important;
+      }
+    </style>
+  </head>
+
+  <body>
+
+    
+
+    <div class="login-container">
+      <!-- Left Side - Illustration -->
+      <div class="left-side">
+
+        <div class="illustration">
+          <div class="user-icon">
+            <i class="fas fa-user"></i>
+            <div class="shield-icon">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+          </div>
+
+          <!-- Bus illustration using font awesome -->
+          <div class="bus-illustration">
+            <i
+              class="fas fa-bus"
+              style="font-size: 120px; opacity: 0.2; color: white"
+            ></i>
+          </div>
+        </div>
+
+        <h1 class="welcome-title">Bienvenido de vuelta</h1>
+        <p class="welcome-subtitle">
+          Inicia sesión en tu cuenta para acceder a todas las funcionalidades de
+          YATRAX.
+        </p>
+      </div>
+
+      <!-- Right Side - Form -->
+      <div class="right-side">
+        <div class="form-header">
+          <h2 class="form-title">Inicio de sesión</h2>
+          <p class="form-subtitle">
+            Ingresa tus credenciales para acceder a tu cuenta de forma segura.
+          </p>
+        </div>
+
+        <button type="button" id="closeModal" class="close" data-dismiss="modal" aria-label="Close">
+          <span>×</span>
+        </button>
+
+        <form id="unifiedLoginForm">
+          <div class="form-group">
+            <div class="input-wrapper">
+              <input
+                type="email"
+                id="txt_Email"
+                name="email"
+                class="form-input"
+                placeholder="ejemplo@gmail.com"
+                required
+              />
+              <i class="fas fa-envelope input-icon"></i>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="input-wrapper">
+              <input
+                type="password"
+                id="txt_Password"
+                name="password"
+                class="form-input"
+                placeholder="••••••••••"
+                required
+              />
+              <i class="fas fa-lock input-icon"></i>
+            </div>
+          </div>
+
+          <button type="button" id="btn_Login" class="login-btn">
+            <div class="btn-content">
+              <div class="spinner" id="loginSpinner"></div>
+              <i class="fas fa-sign-in-alt" id="loginIcon"></i>
+              <span id="loginText">Iniciar sesión</span>
+            </div>
+          </button>
+        </form>
+
+        <div class="forgot-password">
+          <a href="#" id="forgotPasswordLink">¿Olvidaste tu contraseña?</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <!-- AdminLTE JS -->
+    <script src="/Static/js/adminlte.min.js"></script>
+
+    <!-- Moment.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+
+    <!-- SweetAlert2 -->
+    <script src="/Static/plugins/sweetalert2/sweetalert2.min.js"></script>
+    <!-- Toastr -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <!-- Select2 -->
+    <script src="/Static/plugins/select2/js/select2.full.min.js"></script>
+    <!-- InputMask -->
+    <script src="/Static/plugins/inputmask/jquery.inputmask.min.js"></script>
+    <!-- Tempusdominus Bootstrap 4 -->
+    <script src="/Static/plugins/moment/moment.min.js"></script>
+    <script src="/Static/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+
+    <script>
+      // Configuración de Toastr
+      toastr.options = {
+        closeButton: true,
+        debug: false,
+        newestOnTop: true,
+        progressBar: true,
+        positionClass: "toast-top-right",
+        preventDuplicates: false,
+        onclick: null,
+        showDuration: "300",
+        hideDuration: "1000",
+        timeOut: "5000",
+        extendedTimeOut: "1000",
+        showEasing: "swing",
+        hideEasing: "linear",
+        showMethod: "fadeIn",
+        hideMethod: "fadeOut",
+      };
+
+      $(document).ready(function () {
+        // Soporte para tecla Enter
+        $(".form-input").on("keypress", function (e) {
+          if (e.which === 13) {
+            $("#btn_Login").click();
+          }
+        });
+
+        // Efectos de focus en los inputs
+        $(".form-input")
+          .on("focus", function () {
+            $(this).closest(".input-wrapper").addClass("focused");
+          })
+          .on("blur", function () {
+            $(this).closest(".input-wrapper").removeClass("focused");
+          });
+
+        // Función para resetear el botón
+        function resetButton() {
+          const btn = $("#btn_Login");
+          const spinner = $("#loginSpinner");
+          const text = $("#loginText");
+          const icon = $("#loginIcon");
+
+          btn.prop("disabled", false);
+          spinner.hide();
+          text.text("Iniciar sesión");
+          icon.removeClass("fa-check").addClass("fa-sign-in-alt").show();
+        }
+
+        // Función para mostrar estado de carga
+        function showLoadingState() {
+          const btn = $("#btn_Login");
+          const spinner = $("#loginSpinner");
+          const text = $("#loginText");
+          const icon = $("#loginIcon");
+
+          btn.prop("disabled", true);
+          spinner.show();
+          text.text("Verificando...");
+          icon.hide();
+        }
+
+        // Función para mostrar estado de éxito
+        function showSuccessState(message) {
+          const spinner = $("#loginSpinner");
+          const text = $("#loginText");
+          const icon = $("#loginIcon");
+
+          text.text(message || "¡Acceso concedido!");
+          spinner.hide();
+          icon.removeClass("fa-sign-in-alt").addClass("fa-check").show();
+        }
+
+        // Función para intentar login de empleados
+        function tryEmployeeLogin(email, password) {
+          return $.ajax({
+            url: "/trabajadores/home/login",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+              email: email,
+              password: password,
+            }),
+          });
+        }
+
+        // Función para intentar login de clientes
+        function tryClientLogin(email, password) {
+          const formData = new FormData();
+          formData.append("correo", email);
+          formData.append("contrasena", password);
+
+          return $.ajax({
+            url: "/ecommerce/home/login",
+            method: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            dataType: "text",
+          });
+        }
+
+        // Evento del botón de login
+        $("#btn_Login").on("click", function () {
+          const email = $("#txt_Email").val().trim();
+          const password = $("#txt_Password").val().trim();
+
+          // Validaciones básicas
+          if (email === "" || password === "") {
+            toastr.warning(
+              "Debe ingresar sus credenciales de acceso",
+              "MENSAJE DE SISTEMA"
+            );
+            return;
+          }
+
+          // Validación de email
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(email)) {
+            toastr.warning(
+              "Por favor, ingresa un correo electrónico válido",
+              "Email inválido"
+            );
+            return;
+          }
+
+          showLoadingState();
+
+          // Primero intentar login de empleados
+          tryEmployeeLogin(email, password)
+            .done(function (employeeResponse) {
+              if (employeeResponse.Status === "success") {
+                // Login de empleado exitoso
+                toastr.success(employeeResponse.Msj, "MENSAJE DE SISTEMA");
+                showSuccessState("¡Acceso concedido!");
+
+                setTimeout(() => {
+                  window.location.href = "/trabajadores/home/inicio";
+                }, 500);
+              } else {
+                // Login de empleado falló, intentar con cliente
+                tryClientLogin(email, password)
+                  .done(function (clientResponse) {
+                    let json = null;
+                    try {
+                      json = JSON.parse(clientResponse);
+                    } catch (e) {
+                      // Si no es JSON, asumimos que fue redirección exitosa
+                      showSuccessState("¡Acceso concedido!");
+
+                      setTimeout(() => {
+                        window.location.href = "/ecommerce/home/inicio";
+                      }, 500);
+                      return;
+                    }
+
+                    // Si es JSON con mensaje de error
+                    if (json && json.msj) {
+                      toastr.warning(
+                        "Credenciales incorrectas. Verifique su email y contraseña.",
+                        "Login fallido"
+                      );
+                      resetButton();
+                    }
+                  })
+                  .fail(function (xhr, status, errorThrown) {
+                    // Ambos logins fallaron
+                    toastr.error(
+                      "Credenciales incorrectas. Verifique su email y contraseña.",
+                      "Login fallido"
+                    );
+                    console.error(
+                      "Error en login de cliente:",
+                      xhr.responseText
+                    );
+                    resetButton();
+                  });
+              }
+            })
+            .fail(function (xhr, status, errorThrown) {
+              // Login de empleado falló, intentar con cliente
+              tryClientLogin(email, password)
+                .done(function (clientResponse) {
+                  let json = null;
+                  try {
+                    json = JSON.parse(clientResponse);
+                  } catch (e) {
+                    // Si no es JSON, asumimos que fue redirección exitosa
+                    showSuccessState("¡Acceso concedido!");
+
+                    setTimeout(() => {
+                      window.location.href = "/ecommerce/home/inicio";
+                    }, 500);
+                    return;
+                  }
+
+                  // Si es JSON con mensaje de error
+                  if (json && json.msj) {
+                    toastr.warning(
+                      "Credenciales incorrectas. Verifique su email y contraseña.",
+                      "Login fallido"
+                    );
+                    resetButton();
+                  }
+                })
+                .fail(function (xhr, status, errorThrown) {
+                  // Ambos logins fallaron
+                  toastr.error(
+                    "Credenciales incorrectas. Verifique su email y contraseña.",
+                    "Login fallido"
+                  );
+                  console.error("Error en ambos logins");
+                  resetButton();
+                });
+            });
+        });
+
+        // Manejo del enlace "¿Olvidaste tu contraseña?"
+        $("#forgotPasswordLink").on("click", function (e) {
+          e.preventDefault();
+
+          // Mostrar opciones para recuperar contraseña
+          toastr.info(
+            "Por favor, contacte al administrador del sistema para recuperar su contraseña.",
+            "Recuperar contraseña"
+          );
+
+          // Alternativamente, puedes redirigir a una página específica
+          // window.location.href = '/recovery-options';
+        });
+      });
+    </script>
+  </body>
+</html>
