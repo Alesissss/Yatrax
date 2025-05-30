@@ -121,7 +121,7 @@
         // Mostrar imagen actual si se está editando y existe imagen
         const imagenGuardada = "{{ servicio.imagen or '' }}";
         if (imagenGuardada && "{{ btnId }}" !== "btn_Registrar") {
-            $('#logoPreviewImage').attr('src', `/${imagenGuardada}`);
+            $('#logoPreviewImage').attr('src', `${imagenGuardada}`);
             $('#logoPreview').show();
         }
 

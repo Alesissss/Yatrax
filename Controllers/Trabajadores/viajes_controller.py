@@ -1463,7 +1463,7 @@ def registrar_viaje():
         elif msj2:
             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
         else:
-            return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar tipo de usuario'})
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar viaje'})
 
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})

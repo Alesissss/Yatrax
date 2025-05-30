@@ -21,7 +21,9 @@ class Viaje:
     def obtener_todos(cls):
         conexion = bd.Conexion()
         try:
-            viajes = conexion.obtener(""" SELECT v.id, v.idRuta, r.nombre, tv.id_servicio, s.nombre, ve.placa, v.esReprogramado, v.esPostergado, v.fecha_salida_estimada, v.fecha_llegada_estimada
+            viajes = conexion.obtener(""" SELECT v.id, v.idRuta, v.estado, v.estadoViaje AS idEstadoViaje, ev.nombre AS estado_viaje, r.nombre AS ruta, 
+                r.tipo AS tipo_ruta, tv.id_servicio, s.nombre AS servicio, CONCAT(tv.nombre, ' - ', ve.placa) AS vehiculo, 
+                v.esReprogramado, v.esPostergado, v.fecha_salida_estimada, v.fecha_llegada_estimada
                 FROM viaje v
                 INNER JOIN ruta r on v.idRuta = r.id
                 INNER JOIN vehiculo ve on ve.id = v.idVehiculo
@@ -37,12 +39,16 @@ class Viaje:
     def obtener_por_id(cls, viaje_id):
         conexion = bd.Conexion()
         try:
-            viaje = conexion.obtener(""" SELECT v.id, v.idRuta, r.nombre, tv.id_servicio, s.nombre, ve.placa, v.esReprogramado, v.esPostergado, v.fecha_salida_estimada, v.fecha_llegada_estimada FROM viaje v
+            viaje = conexion.obtener(""" SELECT v.id, v.idRuta, v.estado, v.estadoViaje AS idEstadoViaje, ev.nombre AS estado_viaje, r.nombre AS ruta, 
+                r.tipo AS tipo_ruta, tv.id_servicio, s.nombre AS servicio, CONCAT(tv.nombre, ' - ', ve.placa) AS vehiculo, 
+                v.esReprogramado, v.esPostergado, v.fecha_salida_estimada, v.fecha_llegada_estimada
+                FROM viaje v
                 INNER JOIN ruta r on v.idRuta = r.id
                 INNER JOIN vehiculo ve on ve.id = v.idVehiculo
                 INNER JOIN estado_viaje ev on v.estadoViaje = ev.id
                 INNER JOIN tipo_vehiculo tv on tv.id = ve.id_tipo_vehiculo
-                INNER JOIN servicio s on s.id = tv.id_servicio WHERE r.id = %s""", (viaje_id,))
+                INNER JOIN servicio s on s.id = tv.id_servicio;
+                WHERE r.id = %s""", (viaje_id,))
             return viaje[0] if viaje else None
         finally:
             conexion.cerrar()

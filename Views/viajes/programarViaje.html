@@ -18,12 +18,12 @@
                     <thead class="bg-gray">
                         <tr>
                             <th class="text-center">ID</th>
-                            <th class="text-center">ORIGEN</th>
-                            <th class="text-center">DESTINO</th>
-                            <th class="text-center">BUS</th>
-                            <th class="text-center">CHOFER</th>
-                            <th class="text-center">TIPO SERVICIO</th>
+                            <th class="text-center">TIPO RUTA</th>
+                            <th class="text-center">RUTA</th>
+                            <th class="text-center">VEHÍCULO</th>
                             <th class="text-center">SERVICIO</th>
+                            <th class="text-center">FECHA SALIDA ESTIMADA</th>
+                            <th class="text-center">FECHA LLEGADA ESTIMADA</th>
                             <th class="text-center">PRECIO POR ASIENTO</th>
                             <th class="text-center">ESTADO</th>
                             <th class="text-center">ACCIÓN</th>
@@ -172,35 +172,53 @@
                     },
                 },
             ],
-            // ajax: {
-            //     url: "/trabajadores/viajes/GetData_Ruta",
-            //     type: "GET",
-            //     datatype: "json",
-            //     data: function (d) {
-            //     },
-            //     dataSrc: function (json) {
-            //         if (json.Status === "error") {
-            //             toastr.error('Ocurrió un error inesperado al intentar listar la tabla');
-            //             console.error(json.Msj);
-            //             return [];
-            //         }
-            //         return json.data;
-            //     },
-            //     error: function (xhr, error, thrown) {
-            //         toastr.error('Ocurrió un error inesperado al intentar listar la tabla');
-            //         console.error('Error en la solicitud Ajax: ' + error + xhr.Msj + thrown);
-            //     },
-            // },
+            ajax: {
+                url: "/trabajadores/viajes/GetData_ViajesProgramados",
+                type: "GET",
+                datatype: "json",
+                data: function (d) {
+                },
+                dataSrc: function (json) {
+                    if (json.Status === "error") {
+                        toastr.error('Ocurrió un error inesperado al intentar listar la tabla');
+                        console.error(json.Msj);
+                        return [];
+                    }
+                    return json.data;
+                },
+                error: function (xhr, error, thrown) {
+                    toastr.error('Ocurrió un error inesperado al intentar listar la tabla');
+                    console.error('Error en la solicitud Ajax: ' + error + xhr.Msj + thrown);
+                },
+            },
             data: [],
             columns: [
                 { data: "id", name: "id" },
-                { data: "nombre", name: "nombre" },
-                { data: "nombre", name: "nombre" },
-                { data: "nombre", name: "nombre" },
-                { data: "nombre", name: "nombre" },
-                { data: "nombre", name: "nombre" },
-                { data: "nombreOrigen", name: "nombreOrigen" },
-                { data: "nombreDestino", name: "nombreDestino" },
+                { data: "tipo_ruta", name: "tipo_ruta" },
+                { data: "ruta", name: "ruta" },
+                { data: "vehiculo", name: "vehiculo" },
+                { data: "servicio", name: "servicio" },
+                { 
+                    data: "fecha_salida_estimada", 
+                    name: "fecha_salida_estimada",
+                    render: function (data, type, row) {
+                        return moment(data).format('YYYY-MM-DD HH:mm:ss');
+                    },
+                },
+                { 
+                    data: "fecha_llegada_estimada", 
+                    name: "fecha_llegada_estimada",
+                    render: function (data, type, row) {
+                        return moment(data).format('YYYY-MM-DD HH:mm:ss');
+                    },
+                },
+                { 
+                    data: "id", 
+                    name: "id",
+                    render: function (data, type, row) {
+                        return data;
+                    },
+                },
                 {
                     data: "estado",
                     name: "estado",
@@ -237,11 +255,11 @@
                     className: "text-center align-middle",
                 },
                 {
-                    targets: [1, 2, 3, 4, 5],
+                    targets: [1, 2, 3, 4, 5, 6, 7, 8, 9],
                     className: 'align-middle',
                 },
                 {
-                    targets: [5],
+                    targets: [9],
                     orderable: false,
                     width: '10%',
                 },
