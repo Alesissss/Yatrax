@@ -84,7 +84,7 @@ def login():
 def logout():
     if session.get('usuario'):
         session.clear()
-        return redirect(url_for('home.login'))
+        return redirect(url_for('homeClientes.index'))
     else:
         return redirect(url_for('home.index'))
 #End Login

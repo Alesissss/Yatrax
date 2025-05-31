@@ -3,7 +3,12 @@ body{
   padding: 0;
   box-sizing: border-box;
   overflow-x: hidden;
+  display: grid;
+  min-height: 100dvh;
+  grid-template-rows: auto 1fr auto;
 }
+
+
 
 header {
   background-image: url("../img/fondo_banner.webp");
@@ -13,7 +18,7 @@ header {
   background-blend-mode: soft-light;
   background-color: rgb(88, 88, 88);
   width: 100vw;
-  height: 85vh;
+  height: 56vh;
   color: var(--blanco);
   position: relative;
   display: flex;

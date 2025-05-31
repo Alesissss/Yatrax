@@ -58,7 +58,9 @@ app.register_blueprint(homeClientes_bp)
 
 @app.route('/')
 def home():
-    return redirect(url_for('home.login'))
+    ##return redirect(url_for('home.login'))
+    return redirect(url_for('homeClientes.index'))
+
 
 # @app.before_request
 # def verificar_sesion():

@@ -307,7 +307,7 @@
                             }),
                             success: function (response) {
                                 if (response.Status === "success") {
-                                    if (response.data.abreviatura === null || response.data.abreviatura === '') {
+                                    if (!response.data.abreviatura) {
                                         toastr.warning('No se encontró la abreviatura', 'MENSAJE DE SISTEMA');
                                         $('#txt_abreviatura').val('');
                                         HideSpinner();

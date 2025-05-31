@@ -196,7 +196,7 @@
                     name: "imagen",
                     render: function (data, type, row) {
                         if (data && data !== "") {
-                            return `<img src="/${data}" alt="Imagen" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">`;
+                            return `<img src="${data}" alt="Imagen" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">`;
                         } else {
                             return `<span class="badge bg-secondary">Sin imagen</span>`;
                         }

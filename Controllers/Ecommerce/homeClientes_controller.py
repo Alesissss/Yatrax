@@ -59,7 +59,8 @@ def error():
 @homeClientes_bp.route('/login',methods=["GET","POST"])
 def login_cliente():
     if request.method == "GET":
-        return render_template('Ecommerce/home/modalLogin.html')
+        # return render_template('Ecommerce/home/modalLogin.html')
+        return render_template('Ecommerce/home/modalLoginNewVer.html')
     else:
         correo = request.form["correo"]
         contrasena = request.form["contrasena"]
@@ -178,12 +179,9 @@ def get_persona_data():
         num_doc = request.args.get('numDoc')
         if not tipo_doc:
             return jsonify({'data': {}, 'Status': 'error', 'Msj': 'Debe proporcionar un DNI'})
-
         api = ApiNetPe()
-
         if tipo_doc == 'DNI':
             datos = api.get_person(num_doc)
-
             if datos:
                 return jsonify({'data': datos, 'Status': 'success', 'Msj': 'Datos obtenidos correctamente'})
             else:
@@ -205,7 +203,6 @@ def get_persona_data():
 @homeClientes_bp.route("/RegistrarClienteForm", methods=["POST"])
 def registrar_cliente_form():
     try:
-        # Obtener datos del formulario (coinciden con los IDs en tu HTML)
         id_tipo_doc = request.form.get("tipo-doc")
         numero_documento = request.form.get("ytrx-doc-number", "").strip()
         razon_social = request.form.get("ytrx-razon-social", "").strip()
@@ -219,17 +216,17 @@ def registrar_cliente_form():
         id_pais = request.form.get("ytrx-country")
         email = request.form.get("ytrx-email", "").strip()
         password_raw = request.form.get("ytrx-password", "").strip()
-
-        # Validaciones básicas
-
-        # Hash de la contraseña (SHA-256)
-        import hashlib
         password = hashlib.sha256(password_raw.encode()).hexdigest()
-
+        abreviatura = TipoDocumento.obtener_por_id(id_tipo_doc)
+        if  abreviatura['abreviatura']== "RUC":
+            id_tipoCliente = TipoCliente.obtener_por_nombre("Empresa")
+        else:
+            id_tipoCliente = TipoCliente.obtener_por_nombre("Adulto")
+        
         # Registrar cliente
         mensajes = Cliente.registrarForm(
             id_pais=id_pais,
-            id_tipo_cliente=1,
+            id_tipo_cliente=id_tipoCliente['ID'],
             id_tipo_doc=id_tipo_doc,
             numero_documento=numero_documento,
             nombres=nombres,
@@ -249,10 +246,9 @@ def registrar_cliente_form():
         if msj1:
             return jsonify({"Status": "success", "Msj": msj1, "Msj2": ""})
         elif msj2:
-            return jsonify({"Status": "success", "Msj": "", "Msj2": msj2})
+            return jsonify({"Status": "error", "Msj": "", "Msj2": msj2})
         else:
             return jsonify({"Status": "error", "Msj": "Error desconocido al registrar cliente"})
-
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
     

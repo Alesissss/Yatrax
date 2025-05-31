@@ -1,5 +1,7 @@
 import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort, json
+from werkzeug.utils import secure_filename
+
 from Models.nivel import Nivel
 from Models.tipoVehiculo import TipoVehiculo
 from Models.vehiculo import Vehiculo
@@ -9,7 +11,6 @@ from Models.horario import Horario
 from Models.ubigeo import Ubigeo
 from Models.marca import Marca
 from Models.ruta import Ruta
-from werkzeug.utils import secure_filename
 from Models.asiento import Asiento
 from Models.tipo_herramienta import TipoHerramienta
 from Models.herramienta import Herramienta
@@ -21,30 +22,29 @@ viajes_bp = Blueprint('viajes', __name__, url_prefix='/trabajadores/viajes')
 
 # ERRORES 
 # Manejar errores 401 (Página no autorizada)
+@viajes_bp.errorhandler(401)
+def error_401(error):
+    return render_template("error.html", error="Página no autorizada"), 401
 
-# @viajes_bp.errorhandler(401)
-# def error_401(error):
-#     return render_template("error.html", error="Página no autorizada"), 401
+# Manejar errores 403 (Página no autorizada para este usuario)
+@viajes_bp.errorhandler(403)
+def error_403(error):
+    return render_template("error.html", error="Página restringida"), 403
 
-# # Manejar errores 403 (Página no autorizada para este usuario)
-# @viajes_bp.errorhandler(403)
-# def error_403(error):
-#     return render_template("error.html", error="Página restringida"), 403
+# Manejar errores 404 (Página no encontrada)
+@viajes_bp.errorhandler(404)
+def error_404(error):
+    return render_template("error.html", error="Página no encontrada"), 404
 
-# # Manejar errores 404 (Página no encontrada)
-# @viajes_bp.errorhandler(404)
-# def error_404(error):
-#     return render_template("error.html", error="Página no encontrada"), 404
+# Manejar errores 500 (Error interno del servidor)
+@viajes_bp.errorhandler(500)
+def error_500(error):
+    return render_template("error.html", error="Error interno del servidor"), 500
 
-# # Manejar errores 500 (Error interno del servidor)
-# @viajes_bp.errorhandler(500)
-# def error_500(error):
-#     return render_template("error.html", error="Error interno del servidor"), 500
-
-# # Manejar cualquier otro error genérico
-# @viajes_bp.errorhandler(Exception)
-# def error_general(error):
-#     return render_template("error.html", error="Ocurrió un error inesperado"), 500
+# Manejar cualquier otro error genérico
+@viajes_bp.errorhandler(Exception)
+def error_general(error):
+    return render_template("error.html", error="Ocurrió un error inesperado"), 500
 
 # RESTRICCIONES
 @viajes_bp.before_request
@@ -109,7 +109,7 @@ def Menu_ProgramarViaje():
 
 @viajes_bp.route('/ProgramarViajeNuevo')
 def Menu_ProgramarViajeNuevo():
-    return render_template('viajes/programarViajeCRUD.html', active_page="programarViaje", active_menu='mViajes', tittle = 'Registrar viaje', btnId = 'btn_Registrar')
+    return render_template('viajes/programarViajeCRUD.html', active_page="programarViaje", active_menu='mViajes', viaje={}, personal=[], tittle = 'Registrar viaje', btnId = 'btn_Registrar')
 
 # @viajes_bp.route('/GestionarMarcas')
 # def Menu_Marcas():
@@ -1386,7 +1386,7 @@ def get_personal_viaje():
 @viajes_bp.route("/GetData_RutasViajes", methods=["GET"])
 def get_rutas_viaje():
     try:
-        result = [{'id': ru['id'], 'nombre': ru['nombre'], 'tipo': ru['tipo'], 'escalas': Ruta.obtener_escalas_por_ruta(ru['id'])} for ru in Ruta.obtener_todos() if ru['estado'] == 1]
+        result = [{'id': ru['id'], 'nombre': ru['nombre'], 'distancia_estimada': ru['distancia_estimada'], 'tiempo_estimado': ru['tiempo_estimado'], 'tipo': ru['tipo'], 'escalas': Ruta.obtener_escalas_por_ruta(ru['id'])} for ru in Ruta.obtener_todos() if ru['estado'] == 1]
 
         return jsonify({'data': result, 'Status': 'success', 'Msj': 'Listado de rutas retornado exitosamente'})
     except Exception as e:
@@ -1438,11 +1438,23 @@ def get_asientos_viaje():
 @viajes_bp.route("/RegistrarViaje", methods=["POST"])
 def registrar_viaje():
     try:
-        nombre = request.form.get("nombre").strip()
+        fechaHoraSalida = request.form.get("fechaHoraSalida")
+        fechaHoraLlegada = request.form.get("fechaHoraLlegada")
+        idRuta = request.form.get("idRuta")
+        idVehiculo = request.form.get("idVehiculo")
         estado = request.form.get("estado")
+
+        choferes_json = request.form.get("choferes")
+
+        choferes = json.loads(choferes_json) if choferes_json else []
+
+        tripulantes_json = request.form.get("tripulantes")
+
+        tripulantes = json.loads(tripulantes_json) if tripulantes_json else []
+
         usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
 
-        mensajes = Viaje.registrar(nombre, estado, usuario_actual)
+        mensajes = Viaje.registrar(idRuta, idVehiculo, estado, fechaHoraSalida, fechaHoraLlegada, choferes, tripulantes, usuario_actual)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 
@@ -1451,7 +1463,7 @@ def registrar_viaje():
         elif msj2:
             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
         else:
-            return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar tipo de usuario'})
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar viaje'})
 
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})

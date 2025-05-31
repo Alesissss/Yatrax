@@ -44,7 +44,7 @@
                                             <label for="txt_hora_salida">Fecha y hora de salida:</label>
                                             <div class="input-group">
                                                 <input class="form-control" type="datetime-local" id="txt_hora_salida"
-                                                    name="fechaHoraSalida">
+                                                    name="fechaHoraSalida" disabled>
                                             </div>
                                         </div>
                                         <div class="col-md-12 mb-3">
@@ -52,6 +52,20 @@
                                             <div class="input-group">
                                                 <input class="form-control" type="datetime-local" id="txt_hora_llegada"
                                                     name="fechaHoraLlegada" disabled>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <label for="cbx_Estado">Estado</label>
+                                            <div class="input-group">
+                                                <select id="cbx_Estado" class="form-control" {% if btnId=='btn_Aceptar'
+                                                    %}disabled{% endif %}>
+                                                    <option disabled>--SELECCIONAR--</option>
+                                                    <option {% if viaje.estado==1 %}selected{% endif %} value="1">
+                                                        Vigente</option>
+                                                    <option {% if viaje.estado==0 %}selected{% endif %} value="0">
+                                                        No vigente
+                                                    </option>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
@@ -174,6 +188,8 @@
                         return ruta.id == rutaSeleccionadaId;
                     });
 
+                    $('#txt_hora_salida').prop('disabled', false);
+
                     if (rutaSeleccionada) {
                         let trs = '';
                         $.each(rutaSeleccionada.escalas, function (index, item) {
@@ -190,6 +206,38 @@
                         console.log('No se encontró la ruta seleccionada');
                     }
                 });
+
+                $('#txt_hora_salida').on('input', function () {
+                    let rutaSeleccionadaId = $('#cbx_Ruta').val();
+                    let rutaSeleccionada = rutas.find(function (ruta) {
+                        return ruta.id == rutaSeleccionadaId;
+                    });
+
+                    if (rutaSeleccionada) {
+                        let tiempoEstimado = parseInt(rutaSeleccionada.tiempo_estimado);
+
+                        let horaSalida = $('#txt_hora_salida').val();
+
+                        if (!horaSalida) return;
+
+                        let partes = horaSalida.split(/[-T:]/);
+                        let fechaSalida = new Date(
+                            parseInt(partes[0]),
+                            parseInt(partes[1]) - 1,
+                            parseInt(partes[2]),
+                            parseInt(partes[3]),
+                            parseInt(partes[4])
+                        );
+
+                        fechaSalida.setMinutes(fechaSalida.getMinutes() + tiempoEstimado);
+
+                        let fechaLlegadaLocal = new Date(fechaSalida.getTime() - (fechaSalida.getTimezoneOffset() * 60000))
+                            .toISOString().slice(0, 16);
+
+                        $('#txt_hora_llegada').val(fechaLlegadaLocal);
+                    }
+                });
+
             } else {
                 console.error('Error al obtener las rutas:', response.Msj);
             }
@@ -204,37 +252,48 @@
                 const choferes = personal.filter(p => p.id_tipopersonal == 1);
                 const tripulantes = personal.filter(p => p.id_tipopersonal == 2);
 
-                let itemsChofer = '';
-                choferes.forEach(c => {
-                    itemsChofer += `<option value="${c.id}">${c.nombre}</option>`;
-                });
+                // Formatear para Select2
+                const dataChoferes = choferes.map(c => ({
+                    id: c.id,
+                    text: c.nombre,
+                    data: c  // guardamos toda la info del objeto
+                }));
 
-                let itemsTripulante = '';
-                tripulantes.forEach(t => {
-                    itemsTripulante += `<option value="${t.id}">${t.nombre}</option>`;
-                });
+                const dataTripulantes = tripulantes.map(t => ({
+                    id: t.id,
+                    text: t.nombre,
+                    data: t
+                }));
 
-                $('#cbx_Chofer').html(itemsChofer).select2({
+                $('#cbx_Chofer').empty().select2({
                     theme: 'bootstrap4',
+                    data: dataChoferes,
                     placeholder: "Buscar chofer(es)...",
+                    allowClear: true,
                     language: {
                         noResults: function () {
                             return "No se encontraron resultados";
                         }
-                    },
-                    allowClear: true
+                    }
                 });
 
-                $('#cbx_Tripulante').html(itemsTripulante).select2({
+                $('#cbx_Tripulante').empty().select2({
                     theme: 'bootstrap4',
+                    data: dataTripulantes,
                     placeholder: "Buscar tripulante(s)...",
+                    allowClear: true,
                     language: {
                         noResults: function () {
                             return "No se encontraron resultados";
                         }
-                    },
-                    allowClear: true
+                    }
                 });
+
+                // idsChoferes = [1];
+                // idsTripulantes = [4];
+
+                // $('#cbx_Chofer').val(idsChoferes.map(String)).trigger('change');
+                // $('#cbx_Tripulante').val(idsTripulantes.map(String)).trigger('change');
 
             } else {
                 console.error('Error al obtener al personal:', response.Msj);
@@ -342,33 +401,45 @@
         $("#btn_Registrar").click(function () {
             let fechaHoraSalida = moment($('#txt_hora_salida').val()).format('YYYY-MM-DD HH:mm:ss');
             let fechaHoraLlegada = moment($('#txt_hora_llegada').val()).format('YYYY-MM-DD HH:mm:ss');
-            let nombre = $("#txt_TipoUsuario").val().trim();
+            let idRuta = $('#cbx_Ruta').val();
+            let idVehiculo = $('#cbx_Vehiculo').val();
+            let choferesSeleccionados = $('#cbx_Chofer').select2('data').map(item => item.data);
+            let tripulantesSeleccionados = $('#cbx_Tripulante').select2('data').map(item => item.data);
+            
+            console.log(choferesSeleccionados);
+            console.log(tripulantesSeleccionados);
+
             let estado = $('#cbx_Estado').val();
 
-            if (!nombre || !estado) {
+            if (!fechaHoraSalida || !fechaHoraLlegada || !idRuta || !idVehiculo || !choferesSeleccionados || !tripulantesSeleccionados) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
 
             Swal.fire({
                 title: "¿Estás seguro?",
-                text: "Esta acción registrará al tipo usuario. ¿Deseas continuar?",
+                text: "Esta acción registrará al viaje. ¿Deseas continuar?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
                 cancelButtonColor: "#d33",
-                confirmButtonText: "Sí, registrar tipo usuario",
+                confirmButtonText: "Sí, registrar viaje",
                 cancelButtonText: "Cancelar",
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
 
                     let formData = new FormData();
-                    formData.append("nombre", nombre);
+                    formData.append("fechaHoraSalida", fechaHoraSalida);
+                    formData.append("fechaHoraLlegada", fechaHoraLlegada);
+                    formData.append("idRuta", idRuta);
+                    formData.append("idVehiculo", idVehiculo);
+                    formData.append("choferes", JSON.stringify(choferesSeleccionados));
+                    formData.append("tripulantes", JSON.stringify(tripulantesSeleccionados));
                     formData.append("estado", estado);
 
                     $.ajax({
-                        url: "/trabajadores/usuarios/RegistrarTipoUsuario",
+                        url: "/trabajadores/viajes/RegistrarViaje",
                         type: "POST",
                         processData: false,
                         contentType: false,
@@ -381,7 +452,7 @@
                                 } else {
                                     toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                                     setTimeout(() => {
-                                        window.location.href = "/trabajadores/usuarios/GestionarTipoUsuario";
+                                        window.location.href = "/trabajadores/viajes/ProgramarViaje";
                                     }, 500);
                                 }
                             } else {

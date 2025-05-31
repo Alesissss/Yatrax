@@ -31,6 +31,15 @@ class TipoCliente:
                 conexion.cerrar()
 
     @classmethod
+    def obtener_por_nombre(cls, nombre):
+        try:
+            conexion = bd.Conexion()
+            tipo_cliente = conexion.obtener("Select idTipoCliente as ID, nombre, estado from tipo_cliente where estado_registro = 1 and UPPER(nombre) = UPPER(%s)", (nombre,))
+            return tipo_cliente[0] if tipo_cliente else None
+        finally:
+                conexion.cerrar()
+    
+    @classmethod
     def eliminar_tipo_cliente(cls, idTipoCliente):
         conexion = bd.Conexion()
         try:
