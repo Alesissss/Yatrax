@@ -64,7 +64,7 @@ class TipoVehiculo:
         conexion = bd.Conexion()
         try:
             conexion.conn.begin()
-            cursor = conexion.ejecutar("INSERT INTO TIPO_VEHICULO(nombre,id_marca,id_servicio,estado,usuario) VALUES (%s,%s,%s,%s,%s)",(nombre,idmarca,servicio,estado,usuario),auto_commit=False)
+            cursor = conexion.ejecutar("INSERT INTO tipo_vehiculo(nombre,id_marca,id_servicio,estado,usuario) VALUES (%s,%s,%s,%s,%s)",(nombre,idmarca,servicio,estado,usuario),auto_commit=False)
             id_tipo_vehiculo = cursor.lastrowid
             for nivel in niveles:
                 cursor = conexion.ejecutar("INSERT INTO nivel (nroPiso,id_tipo_vehiculo, x_dimension, y_dimension, estado) VALUES (%s,%s,%s,%s,%s)",(nivel['nroPiso'], id_tipo_vehiculo,nivel['x_dimension'],nivel['y_dimension'],1),auto_commit=False)

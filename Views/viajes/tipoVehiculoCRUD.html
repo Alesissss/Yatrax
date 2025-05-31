@@ -437,7 +437,7 @@
 
         const hayDatos = Object.values(herramientasPorPiso).some(arr => arr.length > 0);
         if (!hayDatos) {
-            toastr.error("Debe diseñar al menos un nivel para continuar", 'Error');
+            toastr.error("Debe diseñar al menos un nivel para continuar", 'MENSAJE DE SISTEMA');
             return;
         }
 
@@ -538,7 +538,7 @@
         // Validar que al menos un nivel tenga algo diseñado
         const hayDatos = Object.values(herramientasPorPiso).some(arr => arr.length > 0);
         if (!hayDatos) {
-            toastr.error("Debe diseñar al menos un nivel para continuar", 'Error');
+            toastr.error("Debe diseñar al menos un nivel para continuar", 'MENSAJE DE SISTEMA');
             return;
         }
 
