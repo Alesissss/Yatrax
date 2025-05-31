@@ -16,12 +16,15 @@
 
   /* Reset y base */
   * {
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
   }
 
   body {
     font-family: Arial, sans-serif;
     line-height: 1.6;
+    width: 100vw;
   }
 
   /* Asientos - Mejorado para móviles */
@@ -714,7 +717,7 @@
     </div>
   </section>
   <h2 style="color: #315BAA; margin: 2%; font-weight: bold;" class="text-center" id="seccionServicio">Servicios</h2>
-  <section class="position-relative">
+  <!--<section class="position-relative">
     <div class="container-fluid d-flex justify-content-center align-items-center">
       <div id="carouselExample" class="carousel slide w-100 position-relative">
         <div class="carousel-inner">
@@ -735,15 +738,17 @@
                 {% endif %}
               {% endfor %}
             </div>
-          </div>
+          </div>-->
           <!-- Botón anterior -->
+           <!--
           <button class="carousel-control-prev justify-content-md-end" type="button" data-bs-target="#carouselExample"
             data-bs-slide="prev" style="color: black;">
             <span class="carousel-control-prev-icon" aria-hidden="true"
               style="filter: invert(0%) brightness(0%)"></span>
             <span class="visually-hidden">Anterior</span>
-          </button>
+          </button>-->
           <!-- Botón siguiente -->
+          <!--
           <button class="carousel-control-next justify-content-md-start" type="button" data-bs-target="#carouselExample"
             data-bs-slide="next" style="color: black;">
             <span class="carousel-control-next-icon" aria-hidden="true"
@@ -752,8 +757,59 @@
           </button>
         </div>
       </div>
-  </section>
+  </section>-->
 
+  <section class="position-relative">
+    <div class="container-fluid d-flex justify-content-center align-items-center">
+
+      <!-- Carrusel con avance automático -->
+      <div id="carouselExample" class="carousel slide w-100 position-relative" data-bs-ride="carousel" data-bs-interval="2000">
+        
+        <!-- Slides del carrusel -->
+        <div class="carousel-inner">
+          {% set activos = [] %}
+          {% for servicio in datos["servicios"] %}
+            {% if servicio.estado == 1 %}
+              {% set _ = activos.append(servicio) %}
+            {% endif %}
+          {% endfor %}
+
+          {% for i in range(0, activos|length, 3) %}
+            <div class="carousel-item {% if i == 0 %}active{% endif %}">
+              <div class="d-flex justify-content-center gap-4 flex-wrap">
+                {% for servicio in activos[i:i+3] %}
+                  <a href="#" style="text-decoration: none;">
+                    <div class="card" style="width: 18rem; height: 420px;">
+                      <img src="{{ servicio.imagen }}" class="card-img-top" alt="Imagen de servicio"
+                        style="border: 3px solid black; border-radius: 5%; display: block; margin: 5%; width: auto; height: auto;">
+                      <div class="card-body">
+                        <h5 class="card-title text-center" style="font-weight: bold;">{{ servicio.nombre }}</h5>
+                        <p class="card-text text-center">{{ servicio.descripcion }}</p>
+                      </div>
+                    </div>
+                  </a>
+                {% endfor %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Botón anterior -->
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true" style="filter: invert(0%) brightness(0%)"></span>
+          <span class="visually-hidden">Anterior</span>
+        </button>
+
+        <!-- Botón siguiente -->
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true" style="filter: invert(0%) brightness(0%)"></span>
+          <span class="visually-hidden">Siguiente</span>
+        </button>
+
+      </div> <!-- FIN del carrusel -->
+    </div>
+  </section>
+  
   <section id="principal" class="h-75 container-sm mx-auto d-flex justify-content-md-start align-items-start">
     <div class="row">
       <h2 style="color: #315BAA; margin: 2%; font-weight: bold;" class="text-center">Preguntas frecuentes</h2>
