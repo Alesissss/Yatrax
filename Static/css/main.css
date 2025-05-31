@@ -3,7 +3,12 @@ body{
   padding: 0;
   box-sizing: border-box;
   overflow-x: hidden;
+  display: grid;
+  min-height: 100dvh;
+  grid-template-rows: auto 1fr auto;
 }
+
+
 
 header {
   background-image: url("../img/fondo_banner.webp");
