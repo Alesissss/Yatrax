@@ -477,6 +477,7 @@ def nuevo_servicio():
         )
     else:
         try:
+            UPLOAD_FOLDER = "Static/img/servicios/"
             nombre = request.form.get('nombre').strip()
             descripcion = request.form.get('descripcion').strip()
             estado = request.form.get('estado')
@@ -492,11 +493,12 @@ def nuevo_servicio():
                     return jsonify({"Status": "error", "Msj": "Formato de imagen no permitido. Solo JPG y PNG."})
 
                 nombre_archivo = secure_filename(imagen_file.filename)
-                ruta_guardado = os.path.join("/Static/img/servicios/", nombre_archivo)
+                ruta_imagen = f"/{UPLOAD_FOLDER}{nombre_archivo}"
+                ruta_guardado = os.path.join(UPLOAD_FOLDER, nombre_archivo)
                 imagen_file.save(ruta_guardado)
                 imagen_path = ruta_guardado
 
-            mensajes = Servicio.registrar(nombre, descripcion, estado, usuario_actual, imagen_path, microservicios)
+            mensajes = Servicio.registrar(nombre, descripcion, estado, usuario_actual, ruta_imagen, microservicios)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
