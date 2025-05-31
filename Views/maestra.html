@@ -70,10 +70,16 @@
                         style="background:#0d6efd; border:#000 1px solid; border-radius: 5px;">
                         {{ cliente['nombres'] }}
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a href="{{ url_for('homeClientes.perfilCliente') }}" class="dropdown-item">Mi Perfil</a></li>
-                        <li><a class="dropdown-item" href="#">Mis viajes</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('homeClientes.logoutCliente') }}">Cerrar Sesión</a></li>
+                    <ul class="dropdown-menu dropdown-menu-end" style="width: 200px;">
+                        <li>
+                            <section class="d-flex flex-column justify-content-center align-items-center">
+                                <div style="width: 50px;height: 50px;background: #0d6efd;border-radius: 100%;border: #000 1px solid;" class="d-flex flex-column justify-content-center align-items-center mb-2 mt-3 text-white">{{ cliente['nombres'][0] }}</div>
+                                <p>Hola {{ cliente['nombres'] }}</p>
+                                <li><a class="dropdown-item rounded mb-3" href="{{ url_for('homeClientes.logoutCliente') }}" style="background: #42474938;border: #000 1px solid;">Cerrar Sesión</a></li>
+                            </section>
+                        </li>
+                        <li><a href="{{ url_for('homeClientes.perfilCliente') }}" class="dropdown-item" style="border: #42474938 1px solid;">Mi Perfil</a></li>
+                        <li><a class="dropdown-item mb-0" href="#"">Mis viajes</a></li>
                     </ul>
                 {% else %}
                     <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
@@ -171,7 +177,7 @@
                         <a class="text-decoration-none text-black text-white" href="{{ url_for('homeClientes.terminos_y_condiciones') }}">
                             <li>Término y Condiciones</li>
                         </a>
-                        <a class="text-decoration-none text-black text-white" href="">
+                        <a class="text-decoration-none text-black text-white" href="/ecommerce/home/sobreNosotros">
                             <li>Contáctanos</li>
                         </a>
                     </ul>

@@ -13,7 +13,7 @@ header {
   background-blend-mode: soft-light;
   background-color: rgb(88, 88, 88);
   width: 100vw;
-  height: 85vh;
+  height: 56vh;
   color: var(--blanco);
   position: relative;
   display: flex;
