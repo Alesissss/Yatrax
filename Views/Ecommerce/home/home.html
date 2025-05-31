@@ -166,6 +166,7 @@
     gap: 10px;
   }
 
+
   .form-search select,
   .form-search input[type="date"],
   .form-search button {
@@ -397,7 +398,7 @@
     }
 
     .form-search {
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(4, 1fr);
     }
 
     .checkbox-row {
@@ -557,15 +558,7 @@
       <!-- Paso 1 -->
       <div class="step active" id="step-0">
         <form id="form-destino" class="form-search">
-          <select name="origen" required>
-            <option disabled selected>Origen</option>
-            <option value="CAJAMARCA">Cajamarca</option>
-            <option value="LIMA">Lima</option>
-          </select>
-          <select name="destino" required>
-            <option disabled selected>Destino</option>
-            <option value="CHICLAYO">Chiclayo</option>
-            <option value="TRUJILLO">Trujillo</option>
+          <select id="cbx_Ciudades" class="form-control">
           </select>
           <input type="date" name="fecha_ida" placeholder="Fecha ida" required>
           <input type="date" name="fecha_vuelta" placeholder="Fecha regreso">
@@ -935,6 +928,7 @@
     // Marca etapa activa
     document.getElementById("etapaPago").classList.remove("active");
   }
+
 
 
 

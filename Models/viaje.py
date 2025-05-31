@@ -188,12 +188,12 @@ class Viaje:
     def obtenerDestinosPorOrigen(id):
         conexion = bd.Conexion()
         try:
-            lista_origenes = conexion.obtener("""
-                SELECT s.id, s.ciudad AS ciudad
+            lista_origenes = conexion.obtener(f"""
+                SELECT r.id, MAX(e.nro_orden) AS ciudad
                 FROM viaje v INNER JOIN ruta r on v.idRuta = r.id
                 INNER JOIN escala e on e.idRuta = r.id
                 INNER JOIN sucursal s on s.id = e.idSucursal
-                WHERE e.nro_orden = 1
+                GROUP BY r.id;
             """                 
             )
             return lista_origenes
