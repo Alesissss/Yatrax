@@ -39,7 +39,7 @@ document
       trigger: card,
       start: "top 12vh", // justo debajo del nav
       end: () => "+=" + window.innerHeight,
-      pin: true,
+      pin: false,
       pinSpacing: false,
       scrub: false,
       markers: false,
