@@ -2,8 +2,12 @@
 {% block titulo %}YATRAX - Inicio{% endblock %}
 {% block contenido %}
 {% block styles %}
+
 <style>
-  /* Variables CSS para consistencia */
+  .row{
+    margin-left: 0px;
+    margin-right: 0px;
+  }
   :root {
     --primary-color: #003b8b;
     --secondary-color: #315CAC;
@@ -14,20 +18,6 @@
     --transition: all 0.3s ease;
   }
 
-  /* Reset y base */
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  body {
-    font-family: Arial, sans-serif;
-    line-height: 1.6;
-    width: 100vw;
-  }
-
-  /* Asientos - Mejorado para móviles */
   .seat {
     width: 35px;
     height: 35px;
@@ -66,222 +56,27 @@
     cursor: not-allowed;
   }
 
-  .seat-map-container {
-    padding: 15px;
+  .hidden {
+    display: none !important;
   }
 
-  .passenger-form {
-    border-left: 3px solid var(--light-blue);
+  .primero {
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
   }
 
-  /* Contenedores principales responsivos */
-  #asientos {
-    border-right: 1px solid #dee2e6;
-    height: calc(100vh - 200px);
-    overflow-y: auto;
+  .step {
+    display: none;
+    padding: 2rem;
+    transition: opacity 0.3s ease;
   }
 
-  #formulariosPasajeros {
-    height: calc(100vh - 200px);
-    overflow-y: auto;
-  }
-
-  /* SECCIÓN COMPRA PASAJE - Completamente responsiva */
-  .pasaje-container {
-    background: #f2f2f2;
-    padding: 0;
-    border-radius: var(--border-radius);
-    border: 1px solid var(--secondary-color);
-    max-width: 100%;
-    width: 95%;
-    margin: 20px auto;
-    font-family: Arial, sans-serif;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  }
-
-  /* Navegación de tabs responsiva */
-  .tab-nav {
-    display: flex;
-    justify-content: space-between;
-    border-bottom: 1px solid #ccc;
-    background-color: white;
-    border-radius: var(--border-radius) var(--border-radius) 0 0;
-    overflow: hidden;
-    flex-wrap: wrap;
-  }
-
-  .tab-link {
-    flex: 1;
-    padding: 12px 8px;
-    border: none;
-    cursor: pointer;
-    font-weight: bold;
-    background-color: white;
-    color: var(--primary-color);
-    border-right: 1px solid #ccc;
-    transition: var(--transition);
-    text-align: center;
-    min-width: 120px;
-  }
-
-  .tab-link:last-child {
-    border-right: none;
+  .step.active {
+    display: block;
   }
 
   .tab-link.active {
     background-color: var(--primary-color);
     color: white;
-  }
-
-  /* Contenido de tabs responsivo */
-  .tab-content {
-    background-color: #ffffff;
-    border-top: 1px solid var(--secondary-color);
-    padding: 20px;
-    border-radius: 0 0 var(--border-radius) var(--border-radius);
-  }
-
-  .tab-content .step {
-    display: none;
-  }
-
-  .tab-content .step.active {
-    display: block;
-  }
-
-  /* Formulario de búsqueda responsivo */
-  .form-search {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-    padding: 20px;
-    background: #b8b8b8;
-    border-radius: 0 0 var(--border-radius) var(--border-radius);
-  }
-
-  .checkbox-row {
-    grid-column: 1 / -1;
-    padding-top: 10px;
-    display: flex;
-    align-items: center;
-    font-size: 16px;
-    font-weight: normal;
-    gap: 10px;
-  }
-
-
-  .form-search select,
-  .form-search input[type="date"],
-  .form-search button {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 14px;
-  }
-
-  .form-search button {
-    background-color: #0050c8;
-    color: white;
-    border: none;
-    cursor: pointer;
-    transition: var(--transition);
-    font-weight: bold;
-  }
-
-  .form-search button:hover {
-    background-color: var(--primary-color);
-  }
-
-  /* Layout responsivo para sección de pago */
-  .rowcito {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .seccion_der {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 15px;
-  }
-
-  .detalles_viaje,
-  .resumen_compra {
-    border: 1px solid black;
-    min-height: 200px;
-    padding: 15px;
-  }
-
-  /* Sección de pago responsiva */
-  .pago-wrapper {
-    margin-top: 20px;
-    font-family: Arial;
-  }
-
-  .pago-progress {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .etapa {
-    padding: 10px 15px;
-    text-align: center;
-    font-weight: bold;
-    color: #888;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
-  }
-
-  .etapa.active {
-    color: var(--primary-color);
-  }
-
-  .barra {
-    flex-grow: 1;
-    height: 8px;
-    background: #ddd;
-    margin: 0 10px;
-    border-radius: 4px;
-    position: relative;
-    min-width: 100px;
-  }
-
-  .barra-interna {
-    height: 8px;
-    background: var(--primary-color);
-    width: 50%;
-    transition: width 0.4s ease;
-    border-radius: 4px;
-  }
-
-  .pago-seccion {
-    border: 1px solid #ccc;
-    border-radius: var(--border-radius);
-    margin-bottom: 15px;
-    overflow: hidden;
-  }
-
-  .pago-seccion .encabezado {
-    padding: 15px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: var(--transition);
-  }
-
-  .pago-seccion.abierta .contenido {
-    display: block;
-    padding: 20px;
-  }
-
-  .pago-seccion .contenido {
-    display: none;
   }
 
   .azul {
@@ -294,253 +89,96 @@
     color: var(--primary-color);
   }
 
-  /* Formulario responsivo */
-  .grid-form {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 15px;
-    margin-bottom: 20px;
+  .hidden {
+    display: none !important;
   }
 
-  .grid-form .correo {
-    grid-column: 1 / -1;
-  }
-
-  .grid-form label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-  }
-
-  .grid-form input {
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    width: 100%;
-    font-size: 14px;
-  }
-
-  .btn-siguiente {
-    background: var(--primary-color);
-    color: white;
-    padding: 12px 24px;
-    border: none;
-    border-radius: 5px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: var(--transition);
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .btn-siguiente:hover {
-    background: #002a6b;
-    transform: translateY(-1px);
-  }
-
-  /* Carrusel responsivo */
-  .carousel-inner .d-flex {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-  }
-
-  .card {
-    flex: 0 0 auto;
-    max-width: 300px;
-    width: 100%;
-  }
-
-  /* Acordeón responsivo */
-  .accordion-button {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    flex-wrap: wrap;
-  }
-
-  /* MEDIA QUERIES */
-
-  /* Tablets */
-  @media (min-width: 768px) {
-    .pasaje-container {
-      width: 90%;
-      margin: 40px auto;
-    }
-
-    .tab-content {
-      padding: 30px;
-    }
-
-    .rowcito {
-      grid-template-columns: 2fr 1fr;
-    }
-
-    .seccion_der {
-      margin-left: 1em;
-      margin-right: 1em;
-    }
-
-    .detalles_viaje,
-    .resumen_compra {
-      height: 45%;
-    }
-
-    .seat {
-      width: 40px;
-      height: 40px;
-      font-size: 14px;
-    }
-  }
-
-  /* Desktop */
-  @media (min-width: 1024px) {
-    .pasaje-container {
-      width: 80%;
-    }
-
-    .form-search {
-      grid-template-columns: repeat(4, 1fr);
-    }
-
-    .checkbox-row {
-      grid-column: span 5;
-    }
-
-    .grid-form {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    .pago-progress {
-      flex-wrap: nowrap;
-    }
-  }
-
-  /* Móviles pequeños */
-  @media (max-width: 576px) {
-    .pasaje-container {
-      width: 98%;
-      margin: 10px auto;
-    }
-
-    .tab-nav {
-      flex-direction: column;
-    }
-
-    .tab-link {
-      border-right: none;
-      border-bottom: 1px solid #ccc;
-      min-width: auto;
-    }
-
-    .tab-link:last-child {
-      border-bottom: none;
-    }
-
-    .tab-content {
-      padding: 15px;
-    }
-
-    .form-search {
-      grid-template-columns: 1fr;
-      padding: 15px;
-      gap: 10px;
-    }
-
-    .pago-progress {
-      flex-direction: column;
-      align-items: stretch;
-    }
-
-    .barra {
-      margin: 10px 0;
-      order: 3;
-    }
-
-    .etapa {
-      justify-content: center;
-    }
-
-    .grid-form {
-      grid-template-columns: 1fr;
-    }
-
-    .seat {
-      width: 30px;
-      height: 30px;
-      font-size: 10px;
-    }
-
-    .btn-siguiente {
-      width: 100%;
-      justify-content: center;
-    }
-
-    .card {
-      margin-bottom: 20px;
-    }
-
-    .accordion-button span {
-      font-size: 14px;
-    }
-  }
-
-  /* Móviles muy pequeños */
-  @media (max-width: 375px) {
-
-    .form-search select,
-    .form-search input,
-    .form-search button {
-      padding: 10px;
-      font-size: 13px;
-    }
-
-    .grid-form input {
-      padding: 10px;
-      font-size: 13px;
-    }
-
-    .pago-seccion .encabezado {
-      padding: 12px;
-      font-size: 14px;
-    }
-
-    .etapa {
-      padding: 8px 12px;
-      font-size: 13px;
-    }
-  }
-
-  /* Utilidades responsivas */
-  .flotar_derecha {
-    float: right;
-  }
-
-  .text-center {
-    text-align: center;
-  }
-
-  /* Mejoras de accesibilidad */
-  .tab-link:focus,
-  .btn-siguiente:focus,
-  .form-search button:focus {
-    outline: 2px solid var(--light-blue);
-    outline-offset: 2px;
-  }
-
-  .pago-seccion .encabezado:focus {
-    outline: 2px solid var(--primary-color);
-    outline-offset: -2px;
-  }
-
-  /* Animaciones suaves */
   .step {
+    display: none;
+    padding: 2rem;
     transition: opacity 0.3s ease;
   }
 
-  .pago-seccion .contenido {
-    transition: all 0.3s ease;
+  .step.active {
+    display: block;
+  }
+
+  .tab-link.active {
+    background-color: var(--primary-color);
+    color: white;
+  }
+
+  .accordion-header button {
+    font-weight: bold;
+    color: var(--primary-color);
+  }
+
+  .accordion-item.active .accordion-header button {
+    background-color: var(--primary-color);
+    color: white;
+  }
+
+  .accordion-button:focus {
+    box-shadow: none;
+  }
+
+  .progreso-contacto-pago {
+    position: relative;
+  }
+
+  .select2-container--bootstrap-5 .select2-selection--single {
+    height: auto;
+    line-height: normal;
+    display: flex;
+    align-items: center;
+  }
+
+  .accordion-button.collapsed {
+    background-color: #f8f9fa;
+    color: var(--primary-color);
+  }
+
+  .accordion-button:not(.collapsed) {
+    background-color: var(--primary-color);
+    color: white;
+  }
+
+  .accordion-collapse {
+    transition: height 0.3s ease;
+  }
+
+  .itinerario-header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.75rem;
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+    font-weight: bold;
+  }
+
+  .itinerario-item {
+    border: 1px solid #ccc;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    overflow: hidden;
+  }
+
+  .itinerario-body {
+    padding: 1rem;
+  }
+
+  .badge-directo {
+    background-color: #aaa;
+    color: white;
+  }
+
+  .badge-escala {
+    background-color: #fbc02d;
+    color: black;
+  }
+
+  .nivel-label {
+    font-weight: bold;
   }
 </style>
 {% endblock %}
@@ -549,164 +187,233 @@
 </header>
 <main>
   <!-- INICIO SECCIÓN: COMPRA PASAJE -->
-  <section class="pasaje-container">
-    <div class="tab-nav">
-      <button class="tab-link active" data-step="0">Elegir destino</button>
-      <button class="tab-link" data-step="1">Itinerario ida</button>
-      <button class="tab-link" data-step="2">Itinerario regreso</button>
-      <button class="tab-link" data-step="3">Pago</button>
+  <section class="container my-4 p-0 border border-secondary rounded shadow-sm bg-light">
+    <div class="d-flex flex-wrap justify-content-between border-bottom bg-white rounded-top">
+      <button class="btn tab-link active flex-fill" data-step="0">Elegir destino</button>
+      <button class="btn tab-link flex-fill" data-step="1">Itinerario ida</button>
+      <button class="btn tab-link flex-fill" data-step="2">Itinerario regreso</button>
+      <button class="btn tab-link flex-fill" data-step="3">Pago</button>
+    </div>
+    <div class="row mx-0 p-0">
+      <form id="form-destino" class="p-4 bg-secondary-subtle">
+        <div class="row">
+          <div class="col-md-3">
+            <select id="cbx_Ciudades" class="form-select"></select>
+          </div>
+          <div class="col-md-3">
+            <input type="date" name="fecha_ida" class="form-control" required>
+          </div>
+          <div class="col-md-3">
+            <input type="date" name="fecha_vuelta" class="form-control">
+          </div>
+          <div class="col-md-3 d-grid">
+            <button style="background-color: var(--primary-color); border: 0px;" type="button"
+              class="btn btn-primary fw-bold" onclick="nextStep()">Buscar</button>
+          </div>
+        </div>
+      </form>
     </div>
 
-    <div class="tab-content" style="padding: 0;">
-      <!-- Paso 1 -->
+
+
+    <div class="tab-content">
       <div class="step active" id="step-0">
-        <form id="form-destino" class="form-search">
-          <select id="cbx_Ciudades" class="form-control">
-          </select>
-          <input type="date" name="fecha_ida" placeholder="Fecha ida" required>
-          <input type="date" name="fecha_vuelta" placeholder="Fecha regreso">
-          <button type="button" onclick="nextStep()">Buscar</button>
-          <div class="checkbox-row" style="padding: 0;">
-            <input type="checkbox" id="pasaje_libre" name="pasaje_libre">
-            <label for="pasaje_libre">Pasaje libre</label>
-          </div>
-        </form>
+        <div class="col-12 d-flex align-items-center mt-3">
+          <input type="checkbox" id="pasaje_libre" name="pasaje_libre">
+          <label for="pasaje_libre" class="form-label">&nbsp;&nbsp;Pasaje libre</label>
+        </div>
       </div>
-
-      <!-- Paso 2 -->
       <div class="step" id="step-1">
-        <div class="text-center">
-          <h3>Itinerario de ida</h3>
-          <p>Seleccione su horario preferido para el viaje de ida.</p>
-          <div class="mt-4">
-            <button class="btn-siguiente" onclick="nextStep()">Siguiente <i class="fas fa-arrow-right"></i></button>
-          </div>
-        </div>
-      </div>
+        <div class="container my-4">
+          <h6>Elige el itinerario para el viaje de ida <span class="text-muted">(Chiclayo - Trujillo)</span></h5>
 
-      <!-- Paso 3 -->
-      <div class="step" id="step-2">
-        <div class="text-center">
-          <h3>Itinerario de regreso</h3>
-          <p>Seleccione su horario preferido para el viaje de regreso.</p>
-          <div class="mt-4">
-            <button class="btn-siguiente" onclick="nextStep()">Siguiente <i class="fas fa-arrow-right"></i></button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Paso 4 -->
-      <div class="step" id="step-3">
-        <div class="pago-wrapper">
-          <!-- Barra de progreso -->
-          <div class="pago-progress">
-            <div class="etapa active">
-              <i class="fas fa-id-card"></i>
-              <span>Contacto</span>
-            </div>
-            <div class="barra">
-              <div class="barra-interna" id="barraProgreso"></div>
-            </div>
-            <div class="etapa" id="etapaPago">
-              <i class="fas fa-credit-card"></i>
-              <span>Pago</span>
-            </div>
+          <div class="row itinerario-header d-none d-md-flex">
+            <div class="col-md-3">Horario</div>
+            <div class="col-md-3">Servicio</div>
+            <div class="col-md-3">Asientos</div>
+            <div class="col-md-3">Elegir</div>
           </div>
 
-          <div class="rowcito">
-            <div class="seccion_izq">
-              <div class="pago-seccion abierta" id="seccionContacto">
-                <div class="encabezado azul">
-                  <span><i class="fas fa-circle-1"></i> Contacto</span>
-                  <i class="fa-solid fa-pen-to-square flotar_derecha"></i>
-                </div>
-                <div class="contenido">
-                  <div class="grid-form">
-                    <div class="correo">
-                      <label for="email">Correo:</label>
-                      <input name="email" type="email" placeholder="Correo electrónico" required>
-                    </div>
-                    <div class="nombre">
-                      <label for="nombre">Nombres:</label>
-                      <input name="nombre" type="text" placeholder="Nombres" required>
-                    </div>
-                    <div class="apellidos">
-                      <label for="apellidos">Apellidos:</label>
-                      <input name="apellidos" type="text" placeholder="Apellidos" required>
-                    </div>
-                    <div class="doc">
-                      <label for="doc">Documento de identidad:</label>
-                      <input type="text" placeholder="DNI o documento" name="doc" required>
-                    </div>
-                    <div class="telefono">
-                      <label for="telefono">Teléfono:</label>
-                      <input name="telefono" type="tel" placeholder="Teléfono/móvil" required>
-                    </div>
+          <div class="accordion" id="itinerarioAccordion">
+            <!-- Ejemplo de viaje -->
+            <div class="itinerario-item accordion-item">
+              <h2 class="accordion-header" id="heading1">
+                <button class="accordion-button collapsed d-md-none" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#collapse1" aria-expanded="false" aria-controls="collapse1">
+                  Bolognesi → El ejercito (4:30 PM - 10:30 PM)
+                </button>
+                <div class="row d-none d-md-flex align-items-center p-3">
+                  <div class="col-md-3">
+                    <div><strong>4:30 PM</strong> Bolognesi</div>
+                    <div><strong>10:30 PM</strong> Trujillo</div>
                   </div>
-                  <button class="btn-siguiente" onclick="pasarAPago()">
-                    Siguiente <i class="fas fa-arrow-right"></i>
+                  <div class="col-md-3">
+                    <div>Premium</div>
+                    <span class="badge badge-directo px-3 py-1 rounded-pill">Directo</span>
+                  </div>
+                  <div class="col-md-3">
+                    <div><span class="nivel-label">1° Nivel</span>: 10 libres - S/50</div>
+                    <div><span class="nivel-label">2° Nivel</span>: 28 libres - S/40</div>
+                  </div>
+                  <div class="col-md-3 text-end">
+                    <button class="btn btn-elegir" style="background-color: #42cd6d; color:var(--primary-color);" data-bs-toggle="collapse"
+                      data-bs-target="#collapse1">Elegir</button>
+                  </div>
+                </div>
+              </h2>
+              <div id="collapse1" class="accordion-collapse collapse" aria-labelledby="heading1"
+                data-bs-parent="#itinerarioAccordion">
+                <div class="accordion-body itinerario-body">
+                  <!-- Aquí va el contenido extendido que se muestra al elegir -->
+                  <p>Detalles adicionales del viaje, selección de asientos, etc.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Puedes copiar más bloques como este para más itinerarios -->
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <button class="btn btn-primary btn-siguiente" onclick="nextStep()">Siguiente <i
+              class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+    </div>
+    <div class="step" id="step-2">
+      <div class="text-center">
+        <h3>Itinerario de regreso</h3>
+        <p>Seleccione su horario preferido para el viaje de regreso.</p>
+        <div class="mt-4">
+          <button class="btn btn-primary btn-siguiente" onclick="nextStep()">Siguiente <i
+              class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="step" id="step-3">
+      <div class="row">
+        <div class="row">
+          <div class="progress" role="progressbar" aria-label="Example 1px high" aria-valuenow="25" aria-valuemin="0"
+            aria-valuemax="100" style="height: 1em">
+            <div class="progress-bar" style="width: 0%"></div>
+          </div>
+          <div class="progress" role="progressbar" aria-label="Example 20px high" aria-valuenow="25" aria-valuemin="0"
+            aria-valuemax="100" style="height: 20px">
+            <div class="progress-bar" style="width: 25%"></div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-8">
+            <div class="accordion" id="accordionPago">
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingContacto">
+                  <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapseContacto" aria-expanded="true" aria-controls="collapseContacto">
+                    <i class="fas fa-id-card me-2"></i> Contacto
                   </button>
-                </div>
-              </div>
-
-              <!-- Sección PAGO -->
-              <div class="pago-seccion" id="seccionPago">
-                <div class="encabezado blanco">
-                  <span><i class="fas fa-circle-2"></i> Pago</span>
-                </div>
-                <div class="contenido">
-                  <div class="metodo_pago">
-                    <h4>Método de pago</h4>
-                    <div class="mt-3">
-                      <div class="form-check mb-2">
-                        <input class="form-check-input" type="radio" name="metodoPago" id="tarjeta" value="tarjeta">
-                        <label class="form-check-label" for="tarjeta">
-                          <i class="fas fa-credit-card"></i> Tarjeta de crédito/débito
-                        </label>
+                </h2>
+                <div id="collapseContacto" class="accordion-collapse collapse show" data-bs-parent="#accordionPago">
+                  <div class="accordion-body">
+                    <div class="row g-3">
+                      <div class="col-md-6">
+                        <label for="email" class="form-label">Correo</label>
+                        <input type="email" id="email" class="form-control" required>
                       </div>
-                      <div class="form-check mb-2">
-                        <input class="form-check-input" type="radio" name="metodoPago" id="efectivo" value="efectivo">
-                        <label class="form-check-label" for="efectivo">
-                          <i class="fas fa-money-bill"></i> Efectivo en agencia
-                        </label>
+                      <div class="col-md-6">
+                        <label for="telefono" class="form-label">Teléfono/móvil</label>
+                        <input type="tel" id="telefono" class="form-control" required>
+                      </div>
+                      <div class="col-md-6">
+                        <label for="nombre" class="form-label">Nombre</label>
+                        <input type="text" id="nombre" class="form-control" required>
+                      </div>
+                      <div class="col-md-6">
+                        <label for="apellido" class="form-label">Apellidos</label>
+                        <input type="text" id="apellido" class="form-control" required>
+                      </div>
+                      <div class="col-md-6">
+                        <label for="tipo_documento" class="form-label">Tipo de documento</label>
+                        <select id="tipo_documento" class="form-select">
+                          <option>DNI</option>
+                          <option>CE</option>
+                        </select>
+                      </div>
+                      <div class="col-md-6">
+                        <label for="numero_documento" class="form-label">Número de documento</label>
+                        <input type="text" id="numero_documento" class="form-control" required>
                       </div>
                     </div>
-                  </div>
-                  <div class="d-flex gap-2 flex-wrap">
-                    <button class="btn-siguiente" onclick="pasarAContacto()">
-                      <i class="fas fa-arrow-left"></i> Atrás
-                    </button>
-                    <button class="btn-siguiente" style="background: var(--success-color);">
-                      Confirmar compra <i class="fas fa-check"></i>
-                    </button>
+                    <div class="mt-4 d-flex justify-content-end">
+                      <a class="btn btn-primary" data-bs-toggle="collapse" href="#collapsePago" role="button"
+                        aria-expanded="false" aria-controls="collapsePago">
+                        Siguiente <i class="fas fa-arrow-right"></i>
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div class="seccion_der">
-              <div class="detalles_viaje">
-                <h4>Detalles del viaje</h4>
-                <div class="mt-3">
-                  <p><strong>Origen:</strong> <span id="origenSeleccionado">-</span></p>
-                  <p><strong>Destino:</strong> <span id="destinoSeleccionado">-</span></p>
-                  <p><strong>Fecha ida:</strong> <span id="fechaIdaSeleccionada">-</span></p>
-                  <p><strong>Fecha regreso:</strong> <span id="fechaRegresoSeleccionada">-</span></p>
-                </div>
-              </div>
-              <div class="resumen_compra">
-                <h4>Resumen de compra</h4>
-                <div class="mt-3">
-                  <p><strong>Subtotal:</strong> S/ 0.00</p>
-                  <p><strong>IGV:</strong> S/ 0.00</p>
-                  <hr>
-                  <p><strong>Total:</strong> S/ 0.00</p>
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingPago">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapsePago" aria-expanded="false" aria-controls="collapsePago">
+                    <i class="fas fa-credit-card me-2"></i> Pago
+                  </button>
+                </h2>
+                <div id="collapsePago" class="accordion-collapse collapse" data-bs-parent="#accordionPago">
+                  <div class="accordion-body">
+                    <h5>Método de pago</h5>
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="metodoPago" id="tarjeta">
+                      <label class="form-check-label" for="tarjeta">Tarjeta</label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="metodoPago" id="efectivo">
+                      <label class="form-check-label" for="efectivo">Efectivo</label>
+                    </div>
+                    <div class="mt-4 d-flex gap-2">
+                      <a class="btn btn-secondary" data-bs-toggle="collapse" href="#collapseContacto" role="button"
+                        aria-expanded="true" aria-controls="collapseContacto">
+                        <i class="fas fa-arrow-left"></i> Atrás
+                      </a>
+                      <button class="btn btn-success">
+                        Confirmar compra <i class="fas fa-check"></i>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+
+          <div class="col-md-4">
+            <div class="card mb-3">
+              <div class="card-header bg-dark text-white">Detalle del viaje</div>
+              <div class="card-body">
+                <p><strong>16:00</strong> CHICLAYO (Bolognesi)</p>
+                <p><strong>21:00</strong> TRUJILLO (El Ejercito)</p>
+                <p><i class="fas fa-clock"></i> 5h 00m</p>
+                <p><i class="fas fa-user"></i> 2 pasajeros</p>
+                <p><i class="fas fa-calendar-alt"></i> Viernes 16, mayo</p>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header bg-dark text-white">Resumen de compra</div>
+              <div class="card-body">
+                <p>Chiclayo → Trujillo</p>
+                <p>Pasajero 1 (Asiento 44) - S/ 40.00</p>
+                <p>Pasajero 2 (Asiento 45) - S/ 40.00</p>
+                <hr>
+                <p><strong>Total:</strong> S/ 80.00</p>
+              </div>
+            </div>
+          </div>
         </div>
+
       </div>
+    </div>
     </div>
   </section>
   <h2 style="color: #315BAA; margin: 2%; font-weight: bold;" class="text-center" id="seccionServicio">Servicios</h2>
@@ -732,16 +439,16 @@
               {% endfor %}
             </div>
           </div>-->
-          <!-- Botón anterior -->
-           <!--
+  <!-- Botón anterior -->
+  <!--
           <button class="carousel-control-prev justify-content-md-end" type="button" data-bs-target="#carouselExample"
             data-bs-slide="prev" style="color: black;">
             <span class="carousel-control-prev-icon" aria-hidden="true"
               style="filter: invert(0%) brightness(0%)"></span>
             <span class="visually-hidden">Anterior</span>
           </button>-->
-          <!-- Botón siguiente -->
-          <!--
+  <!-- Botón siguiente -->
+  <!--
           <button class="carousel-control-next justify-content-md-start" type="button" data-bs-target="#carouselExample"
             data-bs-slide="next" style="color: black;">
             <span class="carousel-control-next-icon" aria-hidden="true"
@@ -756,34 +463,35 @@
     <div class="container-fluid d-flex justify-content-center align-items-center">
 
       <!-- Carrusel con avance automático -->
-      <div id="carouselExample" class="carousel slide w-100 position-relative" data-bs-ride="carousel" data-bs-interval="2000">
-        
+      <div id="carouselExample" class="carousel slide w-100 position-relative" data-bs-ride="carousel"
+        data-bs-interval="2000">
+
         <!-- Slides del carrusel -->
         <div class="carousel-inner">
           {% set activos = [] %}
           {% for servicio in datos["servicios"] %}
-            {% if servicio.estado == 1 %}
-              {% set _ = activos.append(servicio) %}
-            {% endif %}
+          {% if servicio.estado == 1 %}
+          {% set _ = activos.append(servicio) %}
+          {% endif %}
           {% endfor %}
 
           {% for i in range(0, activos|length, 3) %}
-            <div class="carousel-item {% if i == 0 %}active{% endif %}">
-              <div class="d-flex justify-content-center gap-4 flex-wrap">
-                {% for servicio in activos[i:i+3] %}
-                  <a href="#" style="text-decoration: none;">
-                    <div class="card" style="width: 18rem; height: 420px;">
-                      <img src="{{ servicio.imagen }}" class="card-img-top" alt="Imagen de servicio"
-                        style="border: 3px solid black; border-radius: 5%; display: block; margin: 5%; width: auto; height: auto;">
-                      <div class="card-body">
-                        <h5 class="card-title text-center" style="font-weight: bold;">{{ servicio.nombre }}</h5>
-                        <p class="card-text text-center">{{ servicio.descripcion }}</p>
-                      </div>
-                    </div>
-                  </a>
-                {% endfor %}
-              </div>
+          <div class="carousel-item {% if i == 0 %}active{% endif %}">
+            <div class="d-flex justify-content-center gap-4 flex-wrap">
+              {% for servicio in activos[i:i+3] %}
+              <a href="#" style="text-decoration: none;">
+                <div class="card" style="width: 18rem; height: 420px;">
+                  <img src="{{ servicio.imagen }}" class="card-img-top" alt="Imagen de servicio"
+                    style="border: 3px solid black; border-radius: 5%; display: block; margin: 5%; width: auto; height: auto;">
+                  <div class="card-body">
+                    <h5 class="card-title text-center" style="font-weight: bold;">{{ servicio.nombre }}</h5>
+                    <p class="card-text text-center">{{ servicio.descripcion }}</p>
+                  </div>
+                </div>
+              </a>
+              {% endfor %}
             </div>
+          </div>
           {% endfor %}
         </div>
 
@@ -802,7 +510,7 @@
       </div> <!-- FIN del carrusel -->
     </div>
   </section>
-  
+
   <section id="principal" class="h-75 container-sm mx-auto d-flex justify-content-md-start align-items-start">
     <div class="row">
       <h2 style="color: #315BAA; margin: 2%; font-weight: bold;" class="text-center">Preguntas frecuentes</h2>
@@ -924,71 +632,72 @@
 </main>
 {% endblock %}
 {% block scripts %}
-
 <script>
   let currentStep = 0;
-  const steps = document.querySelectorAll('.step');
-  const tabs = document.querySelectorAll('.tab-link');
+  function updateFormVisibility() {
+    const form = document.getElementById('form-destino');
+    const steps = document.querySelectorAll('.step');
+    const tabs = document.querySelectorAll('.tab-link');
+
+    form.classList.toggle('hidden', currentStep === 3);
+    form.classList.toggle('primero', currentStep === 0);
+
+    steps.forEach(step => step.classList.remove('active'));
+    tabs.forEach(tab => tab.classList.remove('active'));
+
+    document.getElementById(`step-${currentStep}`).classList.add('active');
+    document.querySelector(`.tab-link[data-step="${currentStep}"]`).classList.add('active');
+  }
 
   function nextStep() {
+    const steps = document.querySelectorAll('.step');
     if (currentStep < steps.length - 1) {
-      steps[currentStep].classList.remove('active');
-      tabs[currentStep].classList.remove('active');
       currentStep++;
-      steps[currentStep].classList.add('active');
-      tabs[currentStep].classList.add('active');
+      updateFormVisibility();
     }
   }
-
-  tabs.forEach(tab => {
+  document.querySelectorAll('.tab-link').forEach(tab => {
     tab.addEventListener('click', () => {
       const stepIndex = parseInt(tab.getAttribute('data-step'));
-      steps[currentStep].classList.remove('active');
-      tabs[currentStep].classList.remove('active');
       currentStep = stepIndex;
-      steps[currentStep].classList.add('active');
-      tabs[currentStep].classList.add('active');
+      updateFormVisibility();
     });
   });
+  $(document).ready(function () {
+    fct_CargarRutas(); // todo lo hace esta función
+    updateFormVisibility();
+    const hoy = new Date().toISOString().split('T')[0];
+    $('input[name="fecha_ida"]').val(hoy);
+  });
 
-  function pasarAPago() {
-    // Oculta CONTACTO
-    document.getElementById("seccionContacto").classList.remove("abierta");
-    document.querySelector("#seccionContacto .encabezado").classList.remove("azul");
-    document.querySelector("#seccionContacto .encabezado").classList.add("blanco");
+  function fct_CargarRutas() {
+    $.getJSON('/ecommerce/home/GetRutasConcatenadas', function (response) {
+      if (response.Status === 'success') {
+        let items = [];
+        $.each(response.data, function (index, item) {
+          items.push({ id: index, text: item.ciudad });
+        });
 
-    // Muestra PAGO
-    document.getElementById("seccionPago").classList.add("abierta");
-    document.querySelector("#seccionPago .encabezado").classList.remove("blanco");
-    document.querySelector("#seccionPago .encabezado").classList.add("azul");
+        // Agrega opción "--SELECCIONAR--"
 
-    // Mueve barra
-    document.getElementById("barraProgreso").style.width = "100%";
-
-    // Marca etapa activa
-    document.getElementById("etapaPago").classList.add("active");
+        // Inicializa select2 UNA sola vez, con todo bien configurado
+        $('#cbx_Ciudades').empty().select2({
+          width: '100%',
+          theme: 'bootstrap4',
+          placeholder: "Buscar...",
+          data: items,
+          language: {
+            noResults: function () {
+              return "No se encontraron resultados";
+            }
+          },
+          allowClear: true
+        });
+      } else {
+        console.error('Error al obtener las marcas:', response.Msj);
+      }
+    });
   }
-
-  function pasarAContacto() {
-    // Oculta CONTACTO
-    document.getElementById("seccionContacto").classList.add("abierta");
-    document.querySelector("#seccionContacto .encabezado").classList.add("azul");
-    document.querySelector("#seccionContacto .encabezado").classList.remove("blanco");
-
-    // Muestra PAGO
-    document.getElementById("seccionPago").classList.remove("abierta");
-    document.querySelector("#seccionPago .encabezado").classList.add("blanco");
-    document.querySelector("#seccionPago .encabezado").classList.remove("azul");
-
-    // Mueve barra
-    document.getElementById("barraProgreso").style.width = "50%";
-
-    // Marca etapa activa
-    document.getElementById("etapaPago").classList.remove("active");
-  }
-
-
-
 
 </script>
 {% endblock %}
