@@ -327,7 +327,7 @@
                             }
                         });
                     } else {
-                        toastr.warning('No se encontró la abreviatura PROVINCIA', 'MENSAJE DE SISTEMA');
+                        toastr.warning('Debe seleccionar una zona del mapa de Perú', 'MENSAJE DE SISTEMA');
                         $('#txt_abreviatura').val('');
                         HideSpinner();
                     }
@@ -380,7 +380,7 @@
             let provincia = $("#txt_provincia").val().trim();
             let distrito = $("#txt_distrito").val().trim();
             let estado = $('#cbx_Estado').val();
-            let country = $("#txt_country").val().trim();
+            let country_code = $("#txt_country").val().trim();
             let abreviatura = $("#txt_abreviatura").val().trim();
 
             if (country !== 'Perú') {
@@ -465,10 +465,10 @@
             let provincia = $("#txt_provincia").val().trim();
             let distrito = $("#txt_distrito").val().trim();
             let estado = $('#cbx_Estado').val();
-            let country = $("#txt_country").val().trim();
+            let country_code = $("#txt_country").val().trim();
             let abreviatura = $("#txt_abreviatura").val().trim();
 
-            if (country !== 'Perú') {
+            if (country_code !== 'pe') {
                 toastr.warning("La ubicación debe ser en Perú", "MENSAJE DE SISTEMA");
                 return;
             }

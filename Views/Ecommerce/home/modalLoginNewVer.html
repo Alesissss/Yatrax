@@ -57,12 +57,23 @@
 
       body {
         font-family: "Inter", "Source Sans Pro", sans-serif;
-        background-image: url("/Static/img/WallpaperLogin.jpeg");
+        /* background-image: url("/Static/img/WallpaperLogin.jpeg"); */
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
         background-attachment: fixed;
         min-height: 100vh;
+      }
+
+      @keyframes modalFadeIn {
+        from {
+          opacity: 0;
+          backdrop-filter: blur(0px);
+        }
+        to {
+          opacity: 1;
+          backdrop-filter: blur(5px);
+        }
       }
 
       .modal-body {
