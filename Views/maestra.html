@@ -70,7 +70,9 @@
                 {% if 'cliente' in session %}
                     {% set cliente = session["cliente"] %}
                     <button class="btn text-white d-flex" type="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-person fs-3" style="color:white;"></i>
+                        <!-- <i class="bi bi-person fs-3" style="color:white;"></i> -->
+                        <div style="width: 60px;height: 60px;background: #0d6efd;border-radius: 100%;border: #000 1px solid;" class="d-flex flex-column justify-content-center align-items-center mb-2 mt-3 text-white">{{ cliente['nombres'][0].upper() }}</div>
+
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end px-3" style="width: auto;">
                         <li>
