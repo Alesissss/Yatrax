@@ -185,7 +185,7 @@
 <header>
   <h1>{% block tematica %}{% endblock %}</h1>
 </header>
-<main>
+<main style="padding-bottom: 40px;">
   <!-- INICIO SECCIÓN: COMPRA PASAJE -->
   <section class="container my-4 p-0 border border-secondary rounded shadow-sm bg-light">
     <div class="d-flex flex-wrap justify-content-between border-bottom bg-white rounded-top">
@@ -218,9 +218,22 @@
 
     <div class="tab-content">
       <div class="step active" id="step-0">
-        <div class="col-12 d-flex align-items-center mt-3">
-          <input type="checkbox" id="pasaje_libre" name="pasaje_libre">
-          <label for="pasaje_libre" class="form-label">&nbsp;&nbsp;Pasaje libre</label>
+        <div class="col-12 d-flex align-items-center mt-3 gap-3">
+          {% if 'cliente' in session %}
+            <label for="pasaje_libre" class="form-label">
+              <input type="radio" id="pasaje_libre" name="tipo_pasaje">
+              &nbsp;Pasaje libre
+            </label>
+            <label for="reserva_pasaje" class="form-label">
+              <input type="radio" id="reserva_pasaje" name="tipo_pasaje">
+              &nbsp;Reserva de pasaje
+            </label>
+          {% else %}
+            <label for="pasaje_libre" class="form-label">
+              <input type="checkbox" id="pasaje_libre" name="tipo_pasaje">
+              &nbsp;Pasaje libre
+            </label>
+          {% endif %}
         </div>
       </div>
       <div class="step" id="step-1">
@@ -417,49 +430,8 @@
     </div>
   </section>
   <h2 style="color: #315BAA; margin: 2%; font-weight: bold;" class="text-center" id="seccionServicio">Servicios</h2>
-  <!--<section class="position-relative">
-    <div class="container-fluid d-flex justify-content-center align-items-center">
-      <div id="carouselExample" class="carousel slide w-100 position-relative">
-        <div class="carousel-inner">
-          <div class="carousel-item active">
-            <div class="d-flex justify-content-center gap-5">
-              {% for servicio in datos["servicios"] %}
-                {% if servicio.estado == 1 %}
-                  <a href="#" style="text-decoration: none;">
-                    <div class="card" style="width: 18rem; height: 420px;">
-                      <img src="{{ servicio.imagen }}" class="card-img-top" alt="Imagen de servicio"
-                        style="border: 3px solid black; border-radius: 5%; display: block; margin: 5%; width: auto; height: auto;">
-                      <div class="card-body">
-                        <h5 class="card-title text-center" style="font-weight: bold;">{{ servicio.nombre }}</h5>
-                        <p class="card-text text-center">{{ servicio.descripcion }}</p>
-                      </div>
-                    </div>
-                  </a>
-                {% endif %}
-              {% endfor %}
-            </div>
-          </div>-->
-  <!-- Botón anterior -->
-  <!--
-          <button class="carousel-control-prev justify-content-md-end" type="button" data-bs-target="#carouselExample"
-            data-bs-slide="prev" style="color: black;">
-            <span class="carousel-control-prev-icon" aria-hidden="true"
-              style="filter: invert(0%) brightness(0%)"></span>
-            <span class="visually-hidden">Anterior</span>
-          </button>-->
-  <!-- Botón siguiente -->
-  <!--
-          <button class="carousel-control-next justify-content-md-start" type="button" data-bs-target="#carouselExample"
-            data-bs-slide="next" style="color: black;">
-            <span class="carousel-control-next-icon" aria-hidden="true"
-              style="filter: invert(0%) brightness(0%)"></span>
-            <span class="visually-hidden">Siguiente</span>
-          </button>
-        </div>
-      </div>
-  </section>-->
 
-  <section class="position-relative">
+  <section class="position-relative" style="padding-bottom: 40px;">
     <div class="container-fluid d-flex justify-content-center align-items-center">
 
       <!-- Carrusel con avance automático -->
