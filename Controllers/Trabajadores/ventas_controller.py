@@ -477,6 +477,7 @@ def nuevo_servicio():
         )
     else:
         try:
+            UPLOAD_FOLDER = "Static/img/servicios/"
             nombre = request.form.get('nombre').strip()
             descripcion = request.form.get('descripcion').strip()
             estado = request.form.get('estado')
@@ -492,11 +493,12 @@ def nuevo_servicio():
                     return jsonify({"Status": "error", "Msj": "Formato de imagen no permitido. Solo JPG y PNG."})
 
                 nombre_archivo = secure_filename(imagen_file.filename)
-                ruta_guardado = os.path.join("/Static/img/servicios/", nombre_archivo)
+                ruta_imagen = f"/{UPLOAD_FOLDER}{nombre_archivo}"
+                ruta_guardado = os.path.join(UPLOAD_FOLDER, nombre_archivo)
                 imagen_file.save(ruta_guardado)
                 imagen_path = ruta_guardado
 
-            mensajes = Servicio.registrar(nombre, descripcion, estado, usuario_actual, imagen_path, microservicios)
+            mensajes = Servicio.registrar(nombre, descripcion, estado, usuario_actual, ruta_imagen, microservicios)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
@@ -539,6 +541,7 @@ def editar_servicio(idServicio):
         )
     else:
         try:
+            UPLOAD_FOLDER = "Static/img/servicios/"
             nombre = request.form.get('nombre').strip()
             descripcion = request.form.get('descripcion').strip()
             estado = request.form.get('estado')
@@ -548,16 +551,21 @@ def editar_servicio(idServicio):
 
             imagen_file = request.files.get('imagen')
             imagen_path = ''
+
             if imagen_file and imagen_file.filename:
+                if not extension_valida(imagen_file.filename):
+                    return jsonify({"Status": "error", "Msj": "Formato de imagen no permitido. Solo JPG y PNG."})
+
                 nombre_archivo = secure_filename(imagen_file.filename)
-                ruta_guardado = os.path.join("Static/img/servicios/", nombre_archivo)
+                ruta_imagen = f"/{UPLOAD_FOLDER}{nombre_archivo}"
+                ruta_guardado = os.path.join(UPLOAD_FOLDER, nombre_archivo)
                 imagen_file.save(ruta_guardado)
                 imagen_path = ruta_guardado
             else:
                 servicio = Servicio.obtener_uno(idServicio)
-                imagen_path = servicio.get("imagen", "")
+                ruta_imagen = servicio.get("imagen", "")
 
-            mensajes = Servicio.editar(idServicio, nombre, descripcion, estado, imagen_path, usuario_actual, microservicios)
+            mensajes = Servicio.editar(idServicio, nombre, descripcion, estado, ruta_imagen, usuario_actual, microservicios)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
