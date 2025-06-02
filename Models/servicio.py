@@ -20,7 +20,6 @@ class Servicio:
                        s.estado AS estado, s.imagen AS imagen
                 FROM servicio s
             """)
-            print(servicios)
             return servicios
         finally:
             conexion.cerrar()
