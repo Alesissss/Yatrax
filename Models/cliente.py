@@ -125,7 +125,6 @@ class Cliente:
             conexion.cerrar()
     
     
-    
     @classmethod
     def registrarForm(cls, id_pais, id_tipo_cliente, id_tipo_doc, numero_documento, nombres,
                 ape_paterno, ape_materno, sexo, f_nacimiento, razon_social,
@@ -133,7 +132,15 @@ class Cliente:
         conexion = bd.Conexion()
         try:
             password_hash = hashlib.sha256(password.encode()).hexdigest()
-            conexion.ejecutar("CALL SP_REGISTRAR_CLIENTE_REGISTRAR(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 1, %s);",(
+            query = """
+            INSERT INTO cliente (
+                id_pais, id_tipo_cliente, id_tipo_doc, numero_documento, 
+                nombres, ape_paterno, ape_materno, sexo, f_nacimiento, 
+                razon_social, direccion, telefono, email, password, usuario
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+            """
+
+            conexion.ejecutar(query, (
                 id_pais, id_tipo_cliente, id_tipo_doc, numero_documento,
                 nombres, ape_paterno, ape_materno, sexo, f_nacimiento,
                 razon_social, direccion, telefono, email, password_hash, usuario

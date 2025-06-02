@@ -73,7 +73,6 @@ def login_cliente():
     else:
         correo = request.form["correo"]
         contrasena = request.form["contrasena"]
-
         cliente = Cliente.logear_cliente(correo,contrasena)
 
         if cliente != None:
@@ -233,10 +232,9 @@ def registrar_cliente_form():
         f_nacimiento = request.form.get("ytrx-birthdate")
         telefono = request.form.get("ytrx-phone", "").strip()
         direccion = request.form.get("ytrx-address", "").strip()
-        id_pais = request.form.get("ytrx-country")
+        id_pais = request.form.get("ytrx-country").strip()
         email = request.form.get("ytrx-email", "").strip()
-        password_raw = request.form.get("ytrx-password", "").strip()
-        password = hashlib.sha256(password_raw.encode()).hexdigest()
+        password = request.form.get("ytrx-password", "").strip()
         abreviatura = TipoDocumento.obtener_por_id(id_tipo_doc)
         if  abreviatura['abreviatura']== "RUC":
             id_tipoCliente = TipoCliente.obtener_por_nombre("Empresa")
@@ -271,7 +269,6 @@ def registrar_cliente_form():
             return jsonify({"Status": "error", "Msj": "Error desconocido al registrar cliente"})
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
-    
 # REGION TERMINOS Y CONDICIONES
 @homeClientes_bp.route('/ApiTerminosCondicionesActivo', methods=['GET'])
 def api_terminos_condiciones_activo():
