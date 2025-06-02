@@ -164,6 +164,10 @@ def pago_pasajes():
 @homeClientes_bp.route('/terminosYcondiciones')
 def terminos_y_condiciones():
     return render_template('Ecommerce/home/terminosCondiciones.html')
+
+@homeClientes_bp.route('/cambioRuta')
+def cambio_ruta():
+    return render_template('Ecommerce/home/cambioRutamod.html')
 # END VIEWS
 
 # FUNCIONES
