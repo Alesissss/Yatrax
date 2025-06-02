@@ -12,6 +12,7 @@ from Models.tipoCliente import TipoCliente
 from Models.pais import Pais
 from Models.terminos_condiciones import TerminosCondiciones
 from Models.viaje import Viaje
+from Models.pasaje import Pasaje
 
 homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/home')
 
@@ -330,3 +331,24 @@ def obtenerOrigenesDestinos():
         return {"data":[],"Msj":f"Error al obtener los origenes:{repr(e)}","Status":"error"}
 
 # END FUNCIONES
+
+#REGION RESERVA
+@homeClientes_bp.route('/reservarPasaje', methods=["POST"])
+def reservarPasaje():
+    try:
+        id_metodo_pago = 1 # reemplazar por request.form["metodo_pago"]
+        id_tipo_comprobante = 1  # valor por defecto para probar
+        id_cliente = 'Christian' # reemplazar por request.form["cliente"]
+        id_promocion = 0  # o podrías usar: request.form.get("promocion", 0)
+        id_viaje = 1
+
+        resultado = Pasaje.registrarReserva(id_metodo_pago,id_tipo_comprobante,id_cliente,id_promocion,id_viaje)
+
+        if resultado.get("msj"):
+            return jsonify({"status": 1,"mensaje": resultado["msj"]})
+        else:
+            return jsonify({"status": 0,"mensaje": resultado.get("msj2", "Ocurrió un error inesperado.")})
+    except Exception as e:
+        return jsonify({"status": -1,"mensaje": "Error al realizar reserva","error": repr(e)})
+
+#END REGION

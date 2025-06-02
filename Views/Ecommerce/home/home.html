@@ -214,23 +214,21 @@
       </form>
     </div>
 
-
-
     <div class="tab-content">
       <div class="step active" id="step-0">
         <div class="col-12 d-flex align-items-center mt-3 gap-3">
           {% if 'cliente' in session %}
             <label for="pasaje_libre" class="form-label">
-              <input type="radio" id="pasaje_libre" name="tipo_pasaje">
+              <input type="radio" id="pasaje_libre" name="tipo_pasaje" value="pasaje_libre">
               &nbsp;Pasaje libre
             </label>
             <label for="reserva_pasaje" class="form-label">
-              <input type="radio" id="reserva_pasaje" name="tipo_pasaje">
+              <input type="radio" id="reserva_pasaje" name="tipo_pasaje" value="reserva">
               &nbsp;Reserva de pasaje
             </label>
           {% else %}
             <label for="pasaje_libre" class="form-label">
-              <input type="checkbox" id="pasaje_libre" name="tipo_pasaje">
+              <input type="checkbox" id="pasaje_libre" name="tipo_pasaje" value="pasaje_libre">
               &nbsp;Pasaje libre
             </label>
           {% endif %}
@@ -320,6 +318,7 @@
         <div class="row">
           <div class="col-md-8">
             <div class="accordion" id="accordionPago">
+              <!--Contenedor de contacto-->
               <div class="accordion-item">
                 <h2 class="accordion-header" id="headingContacto">
                   <button class="accordion-button" type="button" data-bs-toggle="collapse"
@@ -367,7 +366,7 @@
                   </div>
                 </div>
               </div>
-
+              <!--Contenedor pago-->
               <div class="accordion-item">
                 <h2 class="accordion-header" id="headingPago">
                   <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
@@ -378,11 +377,11 @@
                 <div id="collapsePago" class="accordion-collapse collapse" data-bs-parent="#accordionPago">
                   <div class="accordion-body">
                     <h5>Método de pago</h5>
-                    <div class="form-check">
-                      <input class="form-check-input" type="radio" name="metodoPago" id="tarjeta">
-                      <label class="form-check-label" for="tarjeta">Tarjeta</label>
-                    </div>
-                    <div class="form-check">
+                    <section class="form-check" id="tipo_transaccion">
+                      <!-- <input class="form-check-input" type="radio" name="metodoPago" id="tarjeta">
+                      <label class="form-check-label" for="tarjeta">Tarjeta</label> -->
+                    </section>
+                    <!-- <div class="form-check">
                       <input class="form-check-input" type="radio" name="metodoPago" id="efectivo">
                       <label class="form-check-label" for="efectivo">Efectivo</label>
                     </div>
@@ -394,7 +393,7 @@
                       <button class="btn btn-success">
                         Confirmar compra <i class="fas fa-check"></i>
                       </button>
-                    </div>
+                    </div> -->
                   </div>
                 </div>
               </div>
@@ -604,6 +603,7 @@
 </main>
 {% endblock %}
 {% block scripts %}
+<script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-3fp5w1wV5Qb7vNq7+9q0q7b8rj2x9Q5uXv5e5h5Q5VY=" crossorigin="anonymous"></script>
 <script>
   let currentStep = 0;
   function updateFormVisibility() {
@@ -670,6 +670,222 @@
       }
     });
   }
+
+function fct_Modalidad(){
+  const opciones = document.querySelectorAll('input[name="tipo_pasaje"]');
+  let contenedor_modificar = document.getElementById("tipo_transaccion");
+
+  opciones.forEach((opcion) => {
+    /* Verificamos si hay algún radio seleccionado */
+    const algunSeleccionado = Array.from(opciones).some(radio => radio.checked);
+
+    if(!algunSeleccionado){
+      /*Si no hay ningun radio seleccionado es porque quiere realizar la compra normal de toda la vida. Así que cargamos el contenido de forma dinamica*/
+
+      contenedor_modificar.innerHTML = "";
+
+      // Creamos el primer div con radio "Tarjeta"
+      let divTarjeta = document.createElement("div");
+      divTarjeta.className = "form-check";
+
+      let inputTarjeta = document.createElement("input");
+      inputTarjeta.className = "form-check-input";
+      inputTarjeta.type = "radio";
+      inputTarjeta.name = "metodoPago";
+      inputTarjeta.id = "tarjeta";
+
+      let labelTarjeta = document.createElement("label");
+      labelTarjeta.className = "form-check-label";
+      labelTarjeta.htmlFor = "tarjeta";
+      labelTarjeta.textContent = "Tarjeta";
+
+      // Agregamos input y label al div
+      divTarjeta.appendChild(inputTarjeta);
+      divTarjeta.appendChild(labelTarjeta);
+
+      // Creamos el segundo div con radio "Efectivo"
+      let divEfectivo = document.createElement("div");
+      divEfectivo.className = "form-check";
+
+      let inputEfectivo = document.createElement("input");
+      inputEfectivo.className = "form-check-input";
+      inputEfectivo.type = "radio";
+      inputEfectivo.name = "metodoPago";
+      inputEfectivo.id = "efectivo";
+
+      let labelEfectivo = document.createElement("label");
+      labelEfectivo.className = "form-check-label";
+      labelEfectivo.htmlFor = "efectivo";
+      labelEfectivo.textContent = "Efectivo";
+
+      // Agregamos input y label al div
+      divEfectivo.appendChild(inputEfectivo);
+      divEfectivo.appendChild(labelEfectivo);
+
+      // Creamos el div con los botones
+      let divBotones = document.createElement("div");
+      divBotones.className = "mt-4 d-flex gap-2";
+
+      // Botón "Atrás" (enlace con icono)
+      let botonAtras = document.createElement("a");
+      botonAtras.className = "btn btn-secondary";
+      botonAtras.setAttribute("data-bs-toggle", "collapse");
+      botonAtras.href = "#collapseContacto";
+      botonAtras.role = "button";
+      botonAtras.setAttribute("aria-expanded", "true");
+      botonAtras.setAttribute("aria-controls", "collapseContacto");
+      botonAtras.innerHTML = `<i class="fas fa-arrow-left"></i> Atrás`;
+
+      // Botón "Confirmar compra"
+      let botonConfirmar = document.createElement("button");
+      botonConfirmar.className = "btn btn-success";
+      botonConfirmar.type = "button"; // o "submit" según contexto
+      botonConfirmar.innerHTML = `Confirmar compra <i class="fas fa-check"></i>`;
+
+      // Agregamos los botones al contenedor
+      divBotones.appendChild(botonAtras);
+      divBotones.appendChild(botonConfirmar);
+
+      // Finalmente agregamos todo al contenedor principal
+      contenedor_modificar.appendChild(divTarjeta);
+      contenedor_modificar.appendChild(divEfectivo);
+      contenedor_modificar.appendChild(divBotones);
+    }
+
+    opcion.addEventListener('change', (e) => {
+      if(e.target.checked){
+        let seleccionado = e.target.value;
+        
+        /*Reserva*/
+        if (seleccionado == "reserva"){
+          // Limpiamos el contenedor
+          contenedor_modificar.innerHTML = "";
+
+          // Label para "Tipo de método de pago"
+          const labelTipoMetodo = document.createElement("label");
+          labelTipoMetodo.className = "mt-3 mb-2 col-12";
+          labelTipoMetodo.textContent = "Tipo de método de pago";
+
+          // Salto de línea
+          const br1 = document.createElement("br");
+
+          // Select "tipo_metodo_pago"
+          const selectTipoMetodo = document.createElement("select");
+          selectTipoMetodo.name = "tipo_metodo_pago";
+          selectTipoMetodo.className = "mt-2 mb-3 py-1 col-6";
+          selectTipoMetodo.disabled = true;
+
+          // Opción "Efectivo"
+          const optionEfectivo1 = document.createElement("option");
+          optionEfectivo1.textContent = "Efectivo";
+          selectTipoMetodo.appendChild(optionEfectivo1);
+
+          // Insertamos salto de línea dentro del label (para mantener estructura)
+          labelTipoMetodo.appendChild(br1);
+          labelTipoMetodo.appendChild(selectTipoMetodo);
+
+          // Label para "Método de pago"
+          const labelMetodoPago = document.createElement("label");
+          labelMetodoPago.className = "mb-3 col-12";
+          labelMetodoPago.textContent = "Método de pago";
+
+          // Salto de línea
+          const br2 = document.createElement("br");
+
+          // Select "metodo_pago"
+          const selectMetodoPago = document.createElement("select");
+          selectMetodoPago.name = "metodo_pago";
+          selectMetodoPago.className = "mt-2 mb-3 py-1 col-6";
+          selectMetodoPago.disabled = true;
+
+          // Opción "Efectivo"
+          const optionEfectivo2 = document.createElement("option");
+          optionEfectivo2.textContent = "Efectivo";
+          selectMetodoPago.appendChild(optionEfectivo2);
+
+          // Insertamos salto de línea dentro del label
+          labelMetodoPago.appendChild(br2);
+          labelMetodoPago.appendChild(selectMetodoPago);
+
+          // Salto de línea adicional
+          const br3 = document.createElement("br");
+
+          // Small con texto informativo
+          const smallInfo = document.createElement("small");
+          smallInfo.textContent = "*El pago en efectivo solo se puede hacer en la empresa. Tiene 2 horas para pagar su reserva";
+
+          // Salto de línea
+          const br4 = document.createElement("br");
+
+          // Botón "Finalizar Reserva"
+          const btnFinalizar = document.createElement("button");
+          btnFinalizar.id = "realizar_reserva";
+          btnFinalizar.className = "mt-4 text-white py-2 px-3";
+          btnFinalizar.style.background = "var(--primary-color)";
+          btnFinalizar.style.border = "hidden";
+          btnFinalizar.textContent = "Finalizar Reserva";
+
+          // Agregamos todo al contenedor
+          contenedor_modificar.appendChild(labelTipoMetodo);
+          contenedor_modificar.appendChild(labelMetodoPago);
+          contenedor_modificar.appendChild(br3);
+          contenedor_modificar.appendChild(smallInfo);
+          contenedor_modificar.appendChild(br4);
+          contenedor_modificar.appendChild(btnFinalizar);
+          
+        } /*Pasaje libre*/
+        else {
+          // Limpiamos el contenido previo por si hay algo
+          contenedor_modificar.innerHTML = "";
+        }
+      }
+    });
+  });
+}
+
+fct_Modalidad()
+
+$(document).on('click', '#realizar_reserva', function() {
+  $.ajax({
+    url: "/ecommerce/home/reservarPasaje",
+    type: "POST",
+    data: {
+      metodo_pago: $("#metodo_pago").val(),
+      cliente: $("#cliente_id").val() // Asegúrate que esté este campo en tu HTML
+    },
+    success: function(response) {
+      if (response.status === 1) {
+        // Simula que el código de reserva fue generado (puedes retornarlo en el backend si deseas)
+        const codigoReserva = response.codigo_reserva || "PR01 - 12345678";
+
+        Swal.fire({
+          icon: 'success',
+          title: '<strong>Tu reserva se ha registrado con éxito</strong>',
+          html: `
+            <p><strong>Tienes 2 horas para acercarte a la empresa y realizar el pago.</strong></p>
+            <p>Si no paga en las 2 horas el asiento pasa a ser liberado</p>
+            <br>
+            <p>Se ha enviado a su correo el código de reserva</p>
+            <p><strong>Su código de reserva es:</strong></p>
+            <p style="font-weight: bold; font-size: 18px;">${codigoReserva}</p>
+          `,
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#1c3c78',
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          width: '40rem',
+          padding: '1.5rem'
+        });
+      } else {
+        toastr.error(response.mensaje || "Error al realizar la reserva.");
+      }
+    },
+    error: function(xhr) {
+      const errorMsg = xhr.responseJSON?.mensaje || "Error inesperado en la reserva.";
+      toastr.error(errorMsg);
+    }
+  });
+});
 
 </script>
 {% endblock %}

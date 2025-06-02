@@ -129,6 +129,10 @@ DROP PROCEDURE IF EXISTS SP_EDITAR_TERMINOS_CONDICIONES;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_TERMINOS_CONDICIONES;
 DROP PROCEDURE IF EXISTS SP_ACTIVAR_TERMINOS_CONDICIONES;
 
+DROP PROCEDURE IF EXISTS SP_INSERTAR_PASAJE;
+DROP PROCEDURE IF EXISTS SP_MODIFICAR_PASAJE;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_PASAJE;
+
 DROP PROCEDURE IF EXISTS SP_CAMBIAR_CLAVE;
 -- Luego eliminamos las tablas, primero la que depende de la otra
 DROP TABLE IF EXISTS conf_general;
@@ -171,6 +175,7 @@ DROP TABLE IF EXISTS herramienta;
 DROP TABLE IF EXISTS tipo_herramienta;
 DROP TABLE IF EXISTS tipo_metodoPago;
 DROP TABLE IF EXISTS terminos_condiciones;
+DROP TABLE IF EXISTS pasaje;
 
 -- Crear tabla terminos_condiciones
 CREATE TABLE terminos_condiciones (
@@ -626,6 +631,16 @@ CREATE TABLE detalle_personal (
     usuario VARCHAR(100) NOT NULL,
     FOREIGN KEY (idPersonal) REFERENCES personal(id),
     FOREIGN KEY (idViaje) REFERENCES viaje(id)
+);
+
+CREATE TABLE pasaje(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_metodo_pago INT NOT NULL,
+    id_tipo_comprobante INT NOT NULL,
+    id_cliente INT NOT NULL,
+    id_promocion INT NOT NULL,
+    id_viaje INT NOT NULL,
+    estado CHAR(1) NOT NULL
 );
 
 -- INSERTS terminos y condicones
@@ -5058,3 +5073,103 @@ BEGIN
     END IF;
 END $$
 
+DELIMITER $$
+
+CREATE PROCEDURE SP_INSERTAR_PASAJE(
+    IN p_id_metodo_pago INT,
+    IN p_id_tipo_comprobante INT,
+    IN p_id_cliente INT,
+    IN p_id_promocion INT,
+    IN p_id_viaje INT,
+    IN p_estado CHAR(1),
+    OUT MSJ VARCHAR(255),
+    OUT MSJ2 VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET MSJ = NULL;
+        SET MSJ2 = 'Error al registrar el pasaje.';
+    END;
+
+    INSERT INTO pasaje(id_metodo_pago, id_tipo_comprobante, id_cliente, id_promocion, id_viaje, estado)
+    VALUES (p_id_metodo_pago, p_id_tipo_comprobante, p_id_cliente, p_id_promocion, p_id_viaje, p_estado);
+
+    SET MSJ = 'Pasaje registrado correctamente.';
+    SET MSJ2 = NULL;
+END$$
+
+-- Crear procedimiento para modificar pasaje
+CREATE PROCEDURE SP_MODIFICAR_PASAJE(
+    IN p_id INT,
+    IN p_id_metodo_pago INT,
+    IN p_id_tipo_comprobante INT,
+    IN p_id_cliente INT,
+    IN p_id_promocion INT,
+    IN p_id_viaje INT,
+    IN p_estado CHAR(1),
+    OUT MSJ VARCHAR(255),
+    OUT MSJ2 VARCHAR(255)
+)
+BEGIN
+    DECLARE v_existe INT;
+
+    SELECT COUNT(*) INTO v_existe FROM pasaje WHERE id = p_id;
+
+    IF v_existe = 0 THEN
+        SET MSJ = NULL;
+        SET MSJ2 = 'No se encontró el pasaje para modificar.';
+    ELSE
+        BEGIN
+            DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+            BEGIN
+                SET MSJ = NULL;
+                SET MSJ2 = 'Error al modificar el pasaje.';
+            END;
+
+            UPDATE pasaje
+            SET id_metodo_pago = p_id_metodo_pago,
+                id_tipo_comprobante = p_id_tipo_comprobante,
+                id_cliente = p_id_cliente,
+                id_promocion = p_id_promocion,
+                id_viaje = p_id_viaje,
+                estado = p_estado
+            WHERE id = p_id;
+
+            SET MSJ = 'Pasaje modificado correctamente.';
+            SET MSJ2 = NULL;
+        END;
+    END IF;
+END$$
+
+-- Crear procedimiento para eliminar pasaje
+CREATE PROCEDURE SP_ELIMINAR_PASAJE(
+    IN p_id INT,
+    OUT MSJ VARCHAR(255),
+    OUT MSJ2 VARCHAR(255)
+)
+BEGIN
+    DECLARE v_existe INT;
+
+    SELECT COUNT(*) INTO v_existe FROM pasaje WHERE id = p_id;
+
+    IF v_existe = 0 THEN
+        SET MSJ = NULL;
+        SET MSJ2 = 'No se encontró el pasaje para eliminar.';
+    ELSE
+        BEGIN
+            DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+            BEGIN
+                SET MSJ = NULL;
+                SET MSJ2 = 'Error al eliminar el pasaje.';
+            END;
+
+            DELETE FROM pasaje WHERE id = p_id;
+
+            SET MSJ = 'Pasaje eliminado correctamente.';
+            SET MSJ2 = NULL;
+        END;
+    END IF;
+END$$
+
+DELIMITER ;
