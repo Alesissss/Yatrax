@@ -68,5 +68,36 @@ def listarReservas():
     except Exception as e:
         return jsonify({"Status": "error","Msg": str(e)}), 500
 
+@atencion_bp.route('/RegistrarReserva',methods=["GET","POST"])
+def registrarReserva():
+    if request.method == "GET":
+        return render_template("atencion/reservaCRUD.html",btnId="btn_Registrar")
+    else:
+        pass
+
+@atencion_bp.route('/EditarReserva/<int:id>',methods=["GET","POST"])
+def editarReserva(id):
+    if request.method == "GET":
+        reserva = Pasaje.obtener_una_reserva(id)
+        return render_template("atencion/reservaCRUD.html",reserva=reserva,btnId="btn_Editar")
+    else:
+        pass
+
+@atencion_bp.route('/EliminarReserva/<int:id>', methods=["POST"])
+def eliminarReserva(id):
+    try:
+        resultado = Pasaje.eliminarReserva(id)
+        if resultado["msj"] is not None:
+            return jsonify({"Status": "success", "Msj": resultado["msj"],"Msj2":resultado["msj2"]})
+        else:
+            return jsonify({"Status": "error",   "Msj": resultado["msj"],"Msj2":resultado["msj2"]})
+    except Exception as e:
+        return jsonify({"Status": "error", "Msg": str(e)})
+
+
+@atencion_bp.route('/VerReserva/<int:id>')
+def verReserva(id):
+    reserva = Pasaje.obtener_una_reserva(id)
+    return render_template("atencion/reservaCRUD.html",reserva=reserva)
 #END REGION RESERVAS
 # END FUNCIONES

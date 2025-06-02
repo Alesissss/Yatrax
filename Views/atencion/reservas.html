@@ -169,11 +169,11 @@
                     columns: ':not(.noVis)',
                 },
                 {
-                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo usuario',
+                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nueva reserva',
                     className: 'btn bg-success m-1',
                     titleAttr: 'Nuevo',
                     action: function (e, dt, node, config) {
-                        fct_UsuarioNuevo();
+                        fct_reservaNueva();
                     },
                 },
             ],
@@ -227,7 +227,7 @@
                             <button class="btn btn-xs m-1 btn-info" onclick="fct_UsuarioVer('${data.id}')" title="Ver usuario"><i class="bi bi-eye"></i></button>
                             <button class="btn btn-xs m-1 btn-primary" onclick="fct_UsuarioEditar('${data.id}')" title="Editar usuario"><i class="bi bi-pencil-square"></i></button>
                             <button class="btn btn-xs m-1 btn-warning" onclick="fct_UsuarioDarBaja('${data.id}')" title="Dar de baja usuario"><i class="bi bi-arrow-down-circle"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_UsuarioEliminar('${data.id}')" title="Eliminar usuario"><i class="bi bi-trash"></i></button>
+                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_eliminarReserva('${data.id}')" title="Eliminar usuario"><i class="bi bi-trash"></i></button>
                         </div>
                         `;
                     },
@@ -274,22 +274,22 @@
         });
     }
 
-    function fct_UsuarioNuevo() {
-        window.location.href = '/trabajadores/usuarios/UsuarioNuevo';
+    function fct_reservaNueva() {
+        window.location.href = '/trabajadores/atencion/RegistrarReserva';
     }
 
     function fct_UsuarioEditar(Id) {
-        window.location.href = `/trabajadores/usuarios/EditarUsuario/${Id}`;
+        window.location.href = `/trabajadores/atencion/EditarReserva/${Id}`;
     }
 
     function fct_UsuarioVer(Id) {
-        window.location.href = `/trabajadores/usuarios/VerUsuario/${Id}`;
+        window.location.href = `/trabajadores/atencion/VerReserva/${Id}`;
     }
 
-    function fct_UsuarioEliminar(Id) {
+    function fct_eliminarReserva(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción eliminará al usuario. ¿Deseas continuar?",
+            text: "Esta acción eliminará la reserva. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -300,46 +300,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/usuarios/EliminarUsuario/${Id}`,  // Pasamos el ID en la URL
-                    type: "POST",
-                    contentType: "application/json",
-                    success: function (response) {
-                        if (response.Status === "success") {
-                            if (response.Msj2 !== '' && response.Msj2 !== null) {
-                                toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                                return;
-                            }
-                            fct_IniciarTablaUsuarios('#tbl_Usuarios');
-                            toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                        } else {
-                            toastr.error(response.Msj, "MENSAJE DE SISTEMA");
-                            console.error('Error: ' + response.Msj);
-                        }
-                    },
-                    error: function (xhr, Status, error) {
-                        toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
-                        console.error('Error:' + error);
-                    }
-                });
-            }
-        });
-    }
-
-    function fct_UsuarioDarBaja(Id) {
-        Swal.fire({
-            title: "¿Estás seguro?",
-            text: "Esta acción le dará de baja al usuario. ¿Deseas continuar?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Sí, dar de baja",
-            cancelButtonText: "Cancelar",
-            reverseButtons: true // Invertir el orden de los botones
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `/trabajadores/usuarios/DarBajaUsuario/${Id}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/atencion/EliminarReserva/${Id}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
