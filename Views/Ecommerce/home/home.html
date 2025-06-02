@@ -937,6 +937,8 @@ fct_Modalidad();
 
 $(document).on('click', '#realizar_reserva', function() {
   if (($("#metodo_pago").val() != null) && ($("#tipo_comprobante").val() != null)){
+    btnReserva = document.getElementById("realizar_reserva")
+    btnReserva.disabled=true
     $.ajax({
       url: "/ecommerce/home/reservarPasaje",
       type: "POST",
@@ -979,6 +981,9 @@ $(document).on('click', '#realizar_reserva', function() {
         toastr.error(errorMsg);
       }
     });
+    setTimeout(() => {
+      btnReserva.disabled=false
+    }, 4000);
   }else{
     toastr.error("El método para reservas en efectivo aun no esta disponible. Contáctese con la empresa para mayor información");
   }
