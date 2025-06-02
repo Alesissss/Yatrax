@@ -2,11 +2,10 @@ import bd
 import hashlib
 
 class Personal_Sancion:
-    def __init__(self, personalid = None, incidenciaid = None, descripcion = None, fecha_fin = None, estado = None, fecha_registro = None, usuario = None):
+    def __init__(self, personalid = None, incidenciaid = None, descripcion= None, estado = None, fecha_registro = None, usuario = None):
         self.personalid = personalid
         self.incidenciaid = incidenciaid
         self.descripcion = descripcion
-        self.fecha_fin = fecha_fin
         self.estado = estado
         self.fechaRegistro = fecha_registro
         self.usuario = usuario
@@ -44,10 +43,10 @@ class Personal_Sancion:
             conexion.cerrar()
     
     @classmethod
-    def registrar(cls, nombre, descripcion, duracion_sancion, estado, usuario):
+    def registrar(cls, personalid, sancionid, descripcion, estado, usuario):
         conexion = bd.Conexion()
         try:
-            conexion.ejecutar("CALL SP_REGISTRAR_INCIDENCIA(%s, %s, %s, %s, %s);", (nombre, descripcion, duracion_sancion, estado, usuario))
+            conexion.ejecutar("CALL SP_REGISTRAR_PERSONAL_INCIDENCIA(%s, %s, %s, %s, %s);", (personalid, sancionid, descripcion, estado, usuario))
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
             return resultado[0]
         finally:

@@ -114,7 +114,7 @@
                     <input type="hidden" id="txt_departamento" name="departamento">
                     <input type="hidden" id="txt_provincia" name="provincia">
                     <input type="hidden" id="txt_distrito" name="distrito">
-                    <input type="hidden" id="txt_country" name="country">
+                    <input type="hidden" id="txt_country_code" name="country_code">
                 </div>
             </div>
 
@@ -215,12 +215,12 @@
                                         const provincia = address.region || '';
                                         const distrito = address.village || address.town || address.suburb || address.city || address.hamlet || '';
                                         const direccionCompleta = data.display_name || 'Dirección no disponible';
-                                        const country = address.country || '';
+                                        const country_code = address.country_code || '';
 
                                         // Asignar a campos visibles
                                         document.getElementById("txt_direccion").value = direccionCompleta;
                                         document.getElementById("txt_ubicacion").value = `${departamento} - ${provincia} - ${distrito}`;
-                                        document.getElementById("txt_country").value = country;
+                                        document.getElementById("txt_country_code").value = country_code;
 
                                         // Asignar a los inputs ocultos
                                         document.getElementById("txt_departamento").value = departamento;
@@ -283,12 +283,12 @@
                     const provincia = address.region || address.state || '';
                     const distrito = address.village || address.town || address.suburb || address.city || address.hamlet || '';
                     const direccionCompleta = data.display_name || 'Dirección no disponible';
-                    const country = address.country || '';
+                    const country_code = address.country_code || '';
 
                     // Asignar a campos visibles
                     document.getElementById("txt_direccion").value = direccionCompleta;
                     document.getElementById("txt_ubicacion").value = `${departamento} - ${provincia} - ${distrito}`;
-                    document.getElementById("txt_country").value = country;
+                    document.getElementById("txt_country_code").value = country_code;
 
                     // Asignar a los inputs ocultos
                     document.getElementById("txt_departamento").value = departamento;
@@ -296,7 +296,7 @@
                     document.getElementById("txt_distrito").value = distrito;
 
                     // Buscar abreviatura solo si hay provincia
-                    if (provincia) {
+                    if (country_code === 'pe' && provincia) {
                         ShowSpinner();
                         $.ajax({
                             url: "/trabajadores/viajes/BuscarAbreviatura",
@@ -327,7 +327,7 @@
                             }
                         });
                     } else {
-                        toastr.warning('No se encontró la abreviatura PROVINCIA', 'MENSAJE DE SISTEMA');
+                        toastr.warning('Debe seleccionar una zona del mapa de Perú', 'MENSAJE DE SISTEMA');
                         $('#txt_abreviatura').val('');
                         HideSpinner();
                     }
@@ -380,10 +380,10 @@
             let provincia = $("#txt_provincia").val().trim();
             let distrito = $("#txt_distrito").val().trim();
             let estado = $('#cbx_Estado').val();
-            let country = $("#txt_country").val().trim();
+            let country_code = $("#txt_country_code").val().trim();
             let abreviatura = $("#txt_abreviatura").val().trim();
 
-            if (country !== 'Perú') {
+            if (country_code !== 'pe') {
                 toastr.warning("La ubicación debe ser en Perú", "MENSAJE DE SISTEMA");
                 return;
             }
@@ -465,10 +465,10 @@
             let provincia = $("#txt_provincia").val().trim();
             let distrito = $("#txt_distrito").val().trim();
             let estado = $('#cbx_Estado').val();
-            let country = $("#txt_country").val().trim();
+            let country_code = $("#txt_country_code").val().trim();
             let abreviatura = $("#txt_abreviatura").val().trim();
 
-            if (country !== 'Perú') {
+            if (country_code !== 'pe') {
                 toastr.warning("La ubicación debe ser en Perú", "MENSAJE DE SISTEMA");
                 return;
             }

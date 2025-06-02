@@ -11,6 +11,7 @@ from Models.tipoDocumento import TipoDocumento
 from Models.tipoCliente import TipoCliente
 from Models.pais import Pais
 from Models.terminos_condiciones import TerminosCondiciones
+from Models.viaje import Viaje
 
 homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/home')
 
@@ -169,6 +170,17 @@ def get_ConfApariencia():
             return jsonify({'data': {}, 'Status': 'error', 'Msj': 'No se encontró configuración activa.'})
     except Exception as e:
         return jsonify({'data': {}, 'Status': 'error', 'Msj': f'Ocurrió un error al obtener la configuración: {repr(e)}'})
+    
+@homeClientes_bp.route('/GetRutasConcatenadas')
+def get_rutasConcatenadas():
+    try:
+        lista_rutas = Viaje.obtenerDestinos()
+        if lista_rutas:
+            return jsonify({'data': lista_rutas, 'Status': 'success', 'Msj': 'Rutas obtenidas correctamente.'})
+        else:
+            return jsonify({'data': {}, 'Status': 'error', 'Msj': 'No se encontraron rutas activas.'})
+    except Exception as e:
+        return jsonify({'data': {}, 'Status': 'error', 'Msj': f'Ocurrió un error al obtener la ruta: {repr(e)}'})
     
 # API NET RENIEC
 # controller_clientes.py

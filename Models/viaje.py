@@ -175,30 +175,29 @@ class Viaje:
         finally:
             conexion.cerrar()
     
+
     @classmethod
-    def obtenerOrigenes():
-        conexion = bd.Conexion()
-        try:
-            lista_origenes = conexion.obtener("""
-                SELECT s.id, s.ciudad AS ciudad
-                FROM viaje v INNER JOIN ruta r on v.idRuta = r.id
-                INNER JOIN escala e on e.idRuta = r.id
-                INNER JOIN sucursal s on s.id = e.idSucursal
-                WHERE e.nro_orden = 1
-            """                 
-            )
-            return lista_origenes
-        finally:
-            conexion.cerrar()
-    def obtenerDestinosPorOrigen(id):
+    def obtenerDestinos(cls):
         conexion = bd.Conexion()
         try:
             lista_origenes = conexion.obtener(f"""
-                SELECT r.id, MAX(e.nro_orden) AS ciudad
-                FROM viaje v INNER JOIN ruta r on v.idRuta = r.id
-                INNER JOIN escala e on e.idRuta = r.id
-                INNER JOIN sucursal s on s.id = e.idSucursal
-                GROUP BY r.id;
+                SELECT DISTINCT
+                        CONCAT_WS(' - ',
+                        (SELECT s1.ciudad
+                        FROM escala e1
+                        JOIN sucursal s1 ON s1.id = e1.idSucursal
+                        WHERE e1.idRuta = r.id AND e1.nro_orden = 1
+                        LIMIT 1),
+                        
+                        (SELECT s2.ciudad
+                        FROM escala e2
+                        JOIN sucursal s2 ON s2.id = e2.idSucursal
+                        WHERE e2.idRuta = r.id
+                        ORDER BY e2.nro_orden DESC
+                        LIMIT 1)
+                ) AS ciudad
+                FROM viaje v
+                JOIN ruta r ON v.idRuta = r.id;
             """                 
             )
             return lista_origenes

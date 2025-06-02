@@ -3,6 +3,7 @@ from flask import Blueprint, request, jsonify, render_template, session, flash, 
 from Models.tipoPersonal import TipoPersonal
 from Models.personal import Personal
 from Models.sancion import Sancion
+from Models.personal_sancion import Personal_Sancion
 
 personal_bp = Blueprint('personal', __name__, url_prefix='/trabajadores/personal')
 
@@ -76,6 +77,14 @@ def Menu_Incidencia():
 @personal_bp.route('/SancionNuevo')
 def SancionNuevo():
     return render_template('personal/sancionCRUD.html', active_page="sancion", active_menu="mPersonal", sancion = {}, tittle='Registrar sanción', btnId='btn_Registrar')
+
+@personal_bp.route('/GestionarSancionPersonal')
+def Menu_SancionPersonal():
+    return render_template('personal/sancionPersonal.html', active_page="sancionPersonal", active_menu="mPersonal")
+
+@personal_bp.route('/SancionPersonalNuevo')
+def SancionPersonalNuevo():
+    return render_template('personal/sancionPersonalCRUD.html', active_page='sancionPersonal', active_menu='mPersonal', sancionPersonal = {}, tittle = 'Registrar sanción a personal', btnId = 'btn_Registrar')
 
 # END VIEWS
 
@@ -289,6 +298,125 @@ def darBajaSancion(id):
 
 
 # END REGION SANCION #
+
+# REGION SANCION_PERSONAL #
+
+@personal_bp.route("/GetData_SancionPersonal", methods = ["GET"])
+def get_SancionPersonal():
+    try:
+        sp = Personal_Sancion.obtener_todos()
+        return jsonify({'data': sp, 'Status': 'success', 'Msj': 'Listado de sanciones a personal retornado exitosamente'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+
+@personal_bp.route("/RegistrarSancionPersonal", methods=["POST"])
+def registrar_sancionPersonal():
+    try:
+        personalid = request.form.get("personalid")
+        sancionid = request.form.get("sancionid")
+        descripcion = request.form.get("descripcion").strip()
+        estado = request.form.get("estado")
+        usuario = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
+
+        mensajes = Personal_Sancion.registrar(personalid, sancionid, descripcion, estado, usuario)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar personal'})
+
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+    
+@personal_bp.route("/EditarSancionPersonal/<int:personalid>/<int:sancionid>", methods=["GET", "POST"])
+def editar_personalSancion(personalid, sancionid):
+    try:
+        sancion_personal = Personal_Sancion.obtener_por_id(personalid, sancionid)
+        if request.method == "POST":
+            descripcion = request.form.get("descripcion").strip()
+            estado = request.form.get("estado")
+
+            mensajes = Personal_Sancion.editar(personalid, sancionid, descripcion, estado)
+            msj1 = mensajes.get('@MSJ')
+            msj2 = mensajes.get('@MSJ2')
+
+            if msj1:
+                return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+            elif msj2:
+                return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+            else:
+                return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar sanción a personal'})
+
+        if sancion_personal:
+            return render_template('personal/sancionPersonalCRUD.html', active_page='sancionPersonal', active_menu='mPersonal', sancion_personal = sancion_personal, tittle='Editar sanción a personal', btnId='btn_Editar')
+        return render_template('personal/sancionPersonalCRUD.html', active_page='sancionPersonal', active_menu='mPersonal', sancion_personal = {}, tittle='Editar sanción a personal', btnId='btn_Editar')
+
+    except Exception as e:
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al editar sanción a personal: {repr(e)}'})
+    
+@personal_bp.route("/DarBajaPersonalSancion/<int:personalid>/<int:sancionid>", methods=['POST'])
+def darBaja_personalSancion(personalid,sancionid):
+    try:
+        mensajes = Personal_Sancion(personalid, sancionid)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja la sanción del personal'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+    
+@personal_bp.route("/EliminarPersonalSancion/<int:personalid>/<int:sancionid>", methods=['POST'])
+def eliminar_personalSancion(personalid, sancionid):
+    try:
+        mensajes = Personal_Sancion.eliminar_sancion(personalid, sancionid)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al eliminar sanción de personal'})
+
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+    
+@personal_bp.route("/VerPersonalSancion/<int:personalid>/<int:sancionid>", methods=['GET'])
+def ver_personalSancion(personalid, sancionid):
+    try:
+        # Obtener el personal por ID
+        sancion_personal = Personal_Sancion.obtener_por_id(personalid, sancionid)
+        
+        # Si el personal existe, se pasa al template
+        if sancion_personal:
+            return render_template('personal/sancionPersonalCRUD.html', 
+                                   active_page="sancionPersonal", 
+                                   active_menu='mPersonal', 
+                                   sancion_personal=sancion_personal, 
+                                   tittle='Ver sanción a personal', 
+                                   btnId='btn_Aceptar')
+        # Si no se encuentra el personal, mostrar un formulario vacío
+        return render_template('personal/sancionPersonalCRUD.html', 
+                                   active_page="sancionPersonal", 
+                                   active_menu='mPersonal', 
+                                   sancion_personal={}, 
+                                   tittle='Ver sanción a personal', 
+                                   btnId='btn_Aceptar')
+    except Exception as e:
+        # En caso de error, devolver un mensaje en formato JSON
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+# END REGION SANCION_PERSONAL #
 
 # REGION PERSONAL
 
