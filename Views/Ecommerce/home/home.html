@@ -4,10 +4,11 @@
 {% block styles %}
 
 <style>
-  .row{
+  .row {
     margin-left: 0px;
     margin-right: 0px;
   }
+
   :root {
     --primary-color: #003b8b;
     --secondary-color: #315CAC;
@@ -60,9 +61,9 @@
     display: none !important;
   }
 
-  .primero {
+  /* .primero {
     border-radius: 0 0 var(--border-radius) var(--border-radius);
-  }
+  } */
 
   .step {
     display: none;
@@ -133,7 +134,7 @@
     align-items: center;
   }
 
-  .accordion-button.collapsed {
+  /* .accordion-button.collapsed {
     background-color: #f8f9fa;
     color: var(--primary-color);
   }
@@ -141,7 +142,7 @@
   .accordion-button:not(.collapsed) {
     background-color: var(--primary-color);
     color: white;
-  }
+  } */
 
   .accordion-collapse {
     transition: height 0.3s ease;
@@ -187,8 +188,8 @@
 </header>
 <main style="padding-bottom: 40px;">
   <!-- INICIO SECCIÓN: COMPRA PASAJE -->
-  <section class="container my-4 p-0 border border-secondary rounded shadow-sm bg-light">
-    <div class="d-flex flex-wrap justify-content-between border-bottom bg-white rounded-top">
+  <section class="container my-4 p-0 border border-secondary shadow-sm bg-light">
+    <div class="d-flex flex-wrap justify-content-between border-bottom bg-white">
       <button class="btn tab-link active flex-fill" data-step="0">Elegir destino</button>
       <button class="btn tab-link flex-fill" data-step="1">Itinerario ida</button>
       <button class="btn tab-link flex-fill" data-step="2">Itinerario regreso</button>
@@ -235,53 +236,96 @@
         </div>
       </div>
       <div class="step" id="step-1">
-        <div class="container my-4">
-          <h6>Elige el itinerario para el viaje de ida <span class="text-muted">(Chiclayo - Trujillo)</span></h5>
-
-          <div class="row itinerario-header d-none d-md-flex">
-            <div class="col-md-3">Horario</div>
-            <div class="col-md-3">Servicio</div>
-            <div class="col-md-3">Asientos</div>
-            <div class="col-md-3">Elegir</div>
+        <div class="row rounded">
+          <div class="col-md-3 d-flex justify-content-center p-2 rounded-start"
+            style="background-color: var(--primary-color); color: #e8f5e9;">
+            <h6>Horario</h6>
           </div>
-
-          <div class="accordion" id="itinerarioAccordion">
-            <!-- Ejemplo de viaje -->
-            <div class="itinerario-item accordion-item">
-              <h2 class="accordion-header" id="heading1">
-                <button class="accordion-button collapsed d-md-none" type="button" data-bs-toggle="collapse"
-                  data-bs-target="#collapse1" aria-expanded="false" aria-controls="collapse1">
-                  Bolognesi → El ejercito (4:30 PM - 10:30 PM)
-                </button>
-                <div class="row d-none d-md-flex align-items-center p-3">
-                  <div class="col-md-3">
-                    <div><strong>4:30 PM</strong> Bolognesi</div>
-                    <div><strong>10:30 PM</strong> Trujillo</div>
+          <div class="col-md-3 d-flex justify-content-center p-2"
+            style="background-color: var(--primary-color); color: #e8f5e9;">
+            <h6>Servicio</h6>
+          </div>
+          <div class="col-md-3 d-flex justify-content-center p-2"
+            style="background-color: var(--primary-color); color: #e8f5e9;">
+            <h6>Asiento</h6>
+          </div>
+          <div class="col-md-3 d-flex justify-content-center p-2 rounded-end"
+            style="background-color: var(--primary-color); color: #e8f5e9;">
+            <h6>Elegir</h6>
+          </div>
+        </div>
+        <div class="accordion accordion-flush" id="accordionFlushExample">
+          <div class="accordion-item">
+            <div class="row" id="contenedor_viajes">
+              <div class="col-md-3 d-flex justify-content-center p-2">
+                <div class="row">
+                  <div class="col-md-3 d-flex justify-content-center">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <p><b>4:30 PM</b></p>
+                      </div>
+                      <div class="col-md-12">
+                        <p>Bolognesi</p>
+                      </div>
+                      <div class="col-md-12">
+                        <p>Chiclayo</p>
+                      </div>
+                    </div>
                   </div>
-                  <div class="col-md-3">
-                    <div>Premium</div>
-                    <span class="badge badge-directo px-3 py-1 rounded-pill">Directo</span>
+                  <div class="col-md-3 d-flex justify-content-center">
+                    <div class="row d-flex align-items-center justify-content-center">
+                      <div class="col-md-12">
+                        <p> -> </p>
+                      </div>
+                    </div>
                   </div>
-                  <div class="col-md-3">
-                    <div><span class="nivel-label">1° Nivel</span>: 10 libres - S/50</div>
-                    <div><span class="nivel-label">2° Nivel</span>: 28 libres - S/40</div>
-                  </div>
-                  <div class="col-md-3 text-end">
-                    <button class="btn btn-elegir" style="background-color: #42cd6d; color:var(--primary-color);" data-bs-toggle="collapse"
-                      data-bs-target="#collapse1">Elegir</button>
+                  <div class="col-md-3 d-flex justify-content-center">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <p><b>6:30 PM</b></p>
+                      </div>
+                      <div class="col-md-12">
+                        <p>El ejercito</p>
+                      </div>
+                      <div class="col-md-12">
+                        <p>Trujillo</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </h2>
-              <div id="collapse1" class="accordion-collapse collapse" aria-labelledby="heading1"
-                data-bs-parent="#itinerarioAccordion">
-                <div class="accordion-body itinerario-body">
-                  <!-- Aquí va el contenido extendido que se muestra al elegir -->
-                  <p>Detalles adicionales del viaje, selección de asientos, etc.</p>
+              </div>
+              <div class="col-md-3 d-flex justify-content-center p-2">
+                <div class="row">
+                  <div class="col-md-6 d-flex justify-content-center align-items-center"><p>Premium</p></div>
+                  <div class="col-md-6 d-flex justify-content-center align-items-center"><p>Directo</p></div>
+                </div>
+              </div>
+              <div class="col-md-3 d-flex justify-content-center p-2">
+                <div class="row">
+                  <div class="col-md-12">
+                    <p><b>1° Nivel:</b> 10 libres S/50</p>
+                  </div>
+                  <div class="col-md-12">
+                    <p><b>2° Nivel:</b> 28 libres S/40</p>
+                  </div>
+                </div>
+                
+              </div>
+              <div class="col-md-3 d-flex justify-content-center p-2 rounded-end">
+                <button class="button btn" style="background-color: var(--success-color); color: white;" type="button"
+                  data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false"
+                  aria-controls="flush-collapseOne">
+                  Elegir
+                </button>
+              </div>
+              <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne"
+                data-bs-parent="#accordionFlushExample">
+                <div class="accordion-body">Placeholder content for this accordion, which is intended to demonstrate the
+                  <code>.accordion-flush</code> class. This is the first item's accordion body.
                 </div>
               </div>
             </div>
 
-            <!-- Puedes copiar más bloques como este para más itinerarios -->
           </div>
         </div>
 
@@ -304,19 +348,16 @@
 
     <div class="step" id="step-3">
       <div class="row">
-        <div class="row">
-          <div class="progress" role="progressbar" aria-label="Example 1px high" aria-valuenow="25" aria-valuemin="0"
-            aria-valuemax="100" style="height: 1em">
-            <div class="progress-bar" style="width: 0%"></div>
-          </div>
-          <div class="progress" role="progressbar" aria-label="Example 20px high" aria-valuenow="25" aria-valuemin="0"
-            aria-valuemax="100" style="height: 20px">
+        <div class="row d-flex justify-content-center">
+          <div class="progress m-6" role="progressbar" aria-label="Example 20px high" aria-valuenow="25"
+            aria-valuemin="0" aria-valuemax="100" style="height: 3em">
             <div class="progress-bar" style="width: 25%"></div>
           </div>
         </div>
 
         <div class="row">
           <div class="col-md-8">
+
             <div class="accordion" id="accordionPago">
               <!--Contenedor de contacto-->
               <div class="accordion-item">
@@ -329,13 +370,9 @@
                 <div id="collapseContacto" class="accordion-collapse collapse show" data-bs-parent="#accordionPago">
                   <div class="accordion-body">
                     <div class="row g-3">
-                      <div class="col-md-6">
+                      <div class="col-md-12">
                         <label for="email" class="form-label">Correo</label>
                         <input type="email" id="email" class="form-control" required>
-                      </div>
-                      <div class="col-md-6">
-                        <label for="telefono" class="form-label">Teléfono/móvil</label>
-                        <input type="tel" id="telefono" class="form-control" required>
                       </div>
                       <div class="col-md-6">
                         <label for="nombre" class="form-label">Nombre</label>
@@ -356,6 +393,12 @@
                         <label for="numero_documento" class="form-label">Número de documento</label>
                         <input type="text" id="numero_documento" class="form-control" required>
                       </div>
+                      <div class="col-md-6">
+                        <label for="telefono" class="form-label">Teléfono/móvil</label>
+                        <input type="tel" id="telefono" class="form-control" required>
+                      </div>
+
+
                     </div>
                     <div class="mt-4 d-flex justify-content-end">
                       <a class="btn btn-primary" data-bs-toggle="collapse" href="#collapsePago" role="button"
@@ -718,6 +761,45 @@
 
 
 /*Bloque donde se indica que se va a mostrar para cada operacion (venta de pasaje normal, pasaje libre o reserva de pasaje)*/
+  function capturarDatos() {
+    let texto = $('#cbx_Ciudades').select2('data')[0].text;
+    let origen_destino = texto.split(' - ');
+
+    let fecha_ida = $("input[name='fecha_ida']").val();
+
+    let fecha_vuelta = $("input[name='fecha_vuelta']").val();
+
+    return {
+      'origen': origen_destino[0],
+      'destino': origen_destino[1],
+      'fecha_ida': fecha_ida,
+      'fecha_vuelta': fecha_vuelta
+    }
+
+  }
+
+  $.ajax({
+    url: '/ecommerce/home/buscarViajes',
+    data: capturarDatos(),
+    method: 'POST',
+    success: function (resp) {
+      if (resp.Status == 'success') {
+        toastr.success('VIAJES RETORNADOS CORRECTAMENTE', 'MENSAJE DEL SISTEMA');
+        itinerario_ida = resp.data_ida;
+        itinerario_vuelta = resp.data_vuelta;
+      } else {
+        toastr.warning('ERROR AL BUSCAR EL VIAJE', 'MENSAJE DEL SISTEMA');
+      }
+    },
+    error: function (err) {
+      console.log('Error; ', err)
+    }
+  });
+
+  // function cargarItinerario(itinerario) {
+  //   $('#contenedor_viajes').
+  // }
+
 function fct_Modalidad(){
   const opciones = document.querySelectorAll('input[name="tipo_pasaje"]');
   let contenedor_modificar = document.getElementById("tipo_transaccion");

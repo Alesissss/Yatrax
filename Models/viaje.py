@@ -203,4 +203,77 @@ class Viaje:
             return lista_origenes
         finally:
             conexion.cerrar()
+    
+    @classmethod
+    def buscarViajePorRutaYFecha(cls, origen,destino,fecha):
+        conexion = bd.Conexion()
+        try:
+            datos_viaje = conexion.obtener("""
+            SELECT 
+                datos_viaje.hora_salida,
+                datos_viaje.hora_llegada,
+                datos_viaje.sucursal_salida,
+                datos_viaje.sucursal_llegada,
+                datos_viaje.ciudad_salida,
+                datos_viaje.ciudad_llegada,
+                datos_viaje.tipo_viaje,
+                datos_viaje.servicio,
+                GROUP_CONCAT(
+                    CONCAT('Piso ', info_asientos.nroPiso, ': ', info_asientos.cantidad, ' asientos disponibles')
+                    ORDER BY info_asientos.nroPiso SEPARATOR ' | '
+                ) AS niveles_con_asientos
+
+            FROM (
+                SELECT 
+                    v.id AS id_viaje,
+                    DATE_FORMAT(v.fecha_salida_estimada, "%H:%i") AS hora_salida,
+                    DATE_FORMAT(v.fecha_llegada_estimada, "%H:%i") AS hora_llegada,
+                    s_origen.nombre AS sucursal_salida,
+                    s_destino.nombre AS sucursal_llegada,
+                    s_origen.ciudad AS ciudad_salida,
+                    s_destino.ciudad AS ciudad_llegada,
+                    IF(e_intermedias.total_escalas > 0, 'Escala', 'Directo') AS tipo_viaje,
+                    se.nombre AS servicio
+                FROM viaje v
+                INNER JOIN ruta r ON v.idRuta = r.id
+                INNER JOIN escala e_salida ON e_salida.idRuta = r.id AND e_salida.nro_orden = 1
+                INNER JOIN sucursal s_origen ON s_origen.id = e_salida.idSucursal
+                INNER JOIN (
+                    SELECT idRuta, MAX(nro_orden) AS max_orden
+                    FROM escala GROUP BY idRuta
+                ) e_max ON e_max.idRuta = r.id
+                INNER JOIN escala e_llegada ON e_llegada.idRuta = r.id AND e_llegada.nro_orden = e_max.max_orden
+                INNER JOIN sucursal s_destino ON s_destino.id = e_llegada.idSucursal
+                INNER JOIN vehiculo ve ON ve.id = v.idVehiculo
+                INNER JOIN tipo_vehiculo tv ON tv.id = ve.id_tipo_vehiculo
+                INNER JOIN servicio se ON se.id = tv.id_servicio
+                LEFT JOIN (
+                    SELECT idRuta, COUNT(*) AS total_escalas
+                    FROM escala WHERE nro_orden > 1
+                    GROUP BY idRuta
+                ) e_intermedias ON e_intermedias.idRuta = r.id
+                WHERE s_origen.ciudad = %s
+                AND s_destino.ciudad = %s
+                AND DATE(v.fecha_salida_estimada) = %s
+            ) AS datos_viaje
+
+            LEFT JOIN (
+                SELECT 
+                    v.id AS id_viaje,
+                    n.nroPiso,
+                    COUNT(a.id) AS cantidad
+                FROM viaje v
+                INNER JOIN vehiculo ve ON ve.id = v.idVehiculo
+                INNER JOIN tipo_vehiculo tv ON tv.id = ve.id_tipo_vehiculo
+                INNER JOIN nivel n ON n.id_tipo_vehiculo = tv.id
+                INNER JOIN asiento a ON a.id_vehiculo = v.id AND a.estado = 1
+                GROUP BY v.id, n.nroPiso
+            ) AS info_asientos ON info_asientos.id_viaje = datos_viaje.id_viaje
+
+            GROUP BY datos_viaje.id_viaje;
+
+                             """, (origen,destino,fecha))
+            return datos_viaje
+        finally:
+            conexion.cerrar()
 
