@@ -330,3 +330,37 @@ def obtenerOrigenesDestinos():
         return {"data":[],"Msj":f"Error al obtener los origenes:{repr(e)}","Status":"error"}
 
 # END FUNCIONES
+
+# REGIÓN COMPRA PASAJE
+@homeClientes_bp.route('/buscarViajes',methods=['POST'])
+def buscarViajes():
+    try:
+        datos_viaje_ida = []
+        data_viaje_vuelta = []
+
+        origen = request.form.get('origen')
+        destino = request.form.get('destino')
+        fecha_ida = request.form.get('fecha_ida')
+        fecha_vuelta = request.form.get('fecha_vuelta')
+        datos_viaje_ida = Viaje.buscarViajePorRutaYFecha(origen=origen, destino=destino, fecha= fecha_ida)
+        
+        if fecha_vuelta:
+            datos_viaje_vuelta = Viaje.buscarViajePorRutaYFecha(origen=origen, destino=destino, fecha= fecha_ida)
+        return jsonify({
+            "data_ida":datos_viaje_ida,
+            "data_vuelta":datos_viaje_vuelta,
+            "Msg":"Listado retornado correctamente",
+            "Status": "success"
+        })
+    except Exception as e:
+        return jsonify({
+            "data_ida":datos_viaje_ida,
+            "data_vuelta":datos_viaje_vuelta,
+            "Msg":"Hubo un error al buscar los viajes; " + repr(e),
+            "Status": "error"
+        })
+
+
+    
+
+# END REGION COMPRA PASAJE
