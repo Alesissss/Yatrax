@@ -1,6 +1,7 @@
 import hashlib
 import os
 import re
+import random
 from flask import Blueprint, request, jsonify, render_template, session, redirect, url_for, abort
 from Models.conf_plantillas import Conf_Plantillas
 from Models.api_net import ApiNetPe
@@ -13,6 +14,8 @@ from Models.pais import Pais
 from Models.terminos_condiciones import TerminosCondiciones
 from Models.viaje import Viaje
 from Models.pasaje import Pasaje
+from Models.tipoComprobante import TipoComprobante
+from Models.metodo_pago import MetodoPago
 
 homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/home')
 
@@ -333,22 +336,39 @@ def obtenerOrigenesDestinos():
 # END FUNCIONES
 
 #REGION RESERVA
+@homeClientes_bp.route("/listarTiposComprobante")
+def listadoTiposComprobantes():
+    try:
+        listado = TipoComprobante.obtener_todos()
+        return listado
+    except Exception as e:
+        return [e]
+
+@homeClientes_bp.route("/listadoMetodosPago")
+def listadoMetodosPago():
+    try:
+        listado = MetodoPago.obtener_todos()
+        return listado
+    except Exception as e:
+        return [e]
+
 @homeClientes_bp.route('/reservarPasaje', methods=["POST"])
 def reservarPasaje():
     try:
-        id_metodo_pago = 1 # reemplazar por request.form["metodo_pago"]
-        id_tipo_comprobante = 1  # valor por defecto para probar
-        id_cliente = 'Christian' # reemplazar por request.form["cliente"]
-        id_promocion = 0  # o podrías usar: request.form.get("promocion", 0)
-        id_viaje = 1
+        id_metodo_pago = request.form["metodo_pago"]
+        id_tipo_comprobante = request.form["tipo_comprobante"]
+        id_cliente = request.form["cliente"]
+        id_promocion = request.form.get("promocion", 0)
+        id_viaje = request.form["viaje"]
+        codigo_aleatorio = random.randint(10**11, 10**12 - 1)
 
-        resultado = Pasaje.registrarReserva(id_metodo_pago,id_tipo_comprobante,id_cliente,id_promocion,id_viaje)
+        resultado = Pasaje.registrarReserva(id_metodo_pago,id_tipo_comprobante,id_cliente,id_promocion,id_viaje,codigo_aleatorio)
 
         if resultado.get("msj"):
-            return jsonify({"status": 1,"mensaje": resultado["msj"]})
+            return jsonify({"status": 1,"mensaje": resultado["msj"],"codigo_reserva":codigo_aleatorio})
         else:
             return jsonify({"status": 0,"mensaje": resultado.get("msj2", "Ocurrió un error inesperado.")})
     except Exception as e:
-        return jsonify({"status": -1,"mensaje": "Error al realizar reserva","error": repr(e)})
+        return jsonify({"status": -1,"mensaje": "Error al realizar reserva"+repr(e),"error": repr(e)})
 
 #END REGION

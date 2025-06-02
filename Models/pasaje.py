@@ -12,12 +12,12 @@ class Pasaje:
         self.estado = estado
 
     @classmethod
-    def registrarReserva(cls, id_metodo_pago, id_tipo_comprobante, id_cliente, id_promocion,id_viaje):
+    def registrarReserva(cls, id_metodo_pago, id_tipo_comprobante, id_cliente, id_promocion,id_viaje,codigo):
         conexion = None
         try:
             conexion = bd.Conexion()
 
-            conexion.ejecutar("CALL SP_INSERTAR_PASAJE(%s, %s, %s, %s, %s,%s, @MSJ, @MSJ2);", (id_metodo_pago,id_tipo_comprobante,id_cliente,id_promocion,id_viaje,'R'))
+            conexion.ejecutar("CALL SP_INSERTAR_PASAJE(%s, %s, %s, %s, %s,%s,%s, @MSJ, @MSJ2);", (id_metodo_pago,id_tipo_comprobante,id_cliente,id_promocion,id_viaje,'R',codigo))
 
             resultado = conexion.obtener("SELECT @MSJ AS msj, @MSJ2 AS msj2;")
             return resultado[0] if resultado else {"msj": None, "msj2": "Error al recuperar mensaje"}

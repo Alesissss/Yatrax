@@ -640,7 +640,9 @@ CREATE TABLE pasaje(
     id_cliente INT NOT NULL,
     id_promocion INT NOT NULL,
     id_viaje INT NOT NULL,
-    estado CHAR(1) NOT NULL
+    estado CHAR(1) NOT NULL,
+    fechaHora TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    codigo CHAR(12)
 );
 
 -- INSERTS terminos y condicones
@@ -5072,33 +5074,75 @@ BEGIN
         SET @MSJ = 'Se eliminó correctamente el tipo de método de pago';
     END IF;
 END $$
+DELIMITER ;
 
 DELIMITER $$
 
 CREATE PROCEDURE SP_INSERTAR_PASAJE(
-    IN p_id_metodo_pago INT,
-    IN p_id_tipo_comprobante INT,
-    IN p_id_cliente INT,
-    IN p_id_promocion INT,
-    IN p_id_viaje INT,
-    IN p_estado CHAR(1),
-    OUT MSJ VARCHAR(255),
-    OUT MSJ2 VARCHAR(255)
+    IN p_id_metodo_pago       INT,
+    IN p_id_tipo_comprobante  INT,
+    IN p_id_cliente           INT,
+    IN p_id_promocion         INT,
+    IN p_id_viaje             INT,
+    IN p_estado               CHAR(1),
+    IN p_codigo               CHAR(12),      -- Puede recibir NULL si no se proporciona
+    OUT MSJ                   VARCHAR(255),
+    OUT MSJ2                  VARCHAR(255)
 )
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION 
     BEGIN
-        SET MSJ = NULL;
+        SET MSJ  = NULL;
         SET MSJ2 = 'Error al registrar el pasaje.';
     END;
 
-    INSERT INTO pasaje(id_metodo_pago, id_tipo_comprobante, id_cliente, id_promocion, id_viaje, estado)
-    VALUES (p_id_metodo_pago, p_id_tipo_comprobante, p_id_cliente, p_id_promocion, p_id_viaje, p_estado);
+    IF p_codigo IS NOT NULL THEN
+        INSERT INTO pasaje (
+            id_metodo_pago,
+            id_tipo_comprobante,
+            id_cliente,
+            id_promocion,
+            id_viaje,
+            estado,
+            codigo
+        )
+        VALUES (
+            p_id_metodo_pago,
+            p_id_tipo_comprobante,
+            p_id_cliente,
+            p_id_promocion,
+            p_id_viaje,
+            p_estado,
+            p_codigo
+        );
+    ELSE
+        INSERT INTO pasaje (
+            id_metodo_pago,
+            id_tipo_comprobante,
+            id_cliente,
+            id_promocion,
+            id_viaje,
+            estado,
+            codigo
+        )
+        VALUES (
+            p_id_metodo_pago,
+            p_id_tipo_comprobante,
+            p_id_cliente,
+            p_id_promocion,
+            p_id_viaje,
+            p_estado,
+            NULL
+        );
+    END IF;
 
-    SET MSJ = 'Pasaje registrado correctamente.';
+    SET MSJ  = 'Pasaje registrado correctamente.';
     SET MSJ2 = NULL;
 END$$
 
+DELIMITER ;
+
+DELIMITER $$
 -- Crear procedimiento para modificar pasaje
 CREATE PROCEDURE SP_MODIFICAR_PASAJE(
     IN p_id INT,
