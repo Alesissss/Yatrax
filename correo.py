@@ -1,14 +1,14 @@
 from flask_mail import Message
 
-def enviar_correo(datos):
-    # Aquí importamos la instancia de Mail dentro de la función,
-    # en lugar de hacerlo al nivel de módulo, para evitar importaciones circulares.
-    from app import mail
+def enviar_correo(mail_instancia,datos):
+    try:
+        msg = Message(
+            subject=datos['asunto'],
+            sender = datos['remitente'],
+            recipients = [datos['destinatario']],
+            body = datos['mensaje']
+        )
 
-    msg = Message(
-        subject=datos.get('asunto', 'Sin asunto'),
-        sender=datos['remitente'],
-        recipients=[datos['destinatario']],
-        body=datos['mensaje']
-    )
-    mail.send(msg)
+        mail_instancia.send(msg)
+    except Exception as e:
+        print(f"[ERROR enviar_correo] {e}")

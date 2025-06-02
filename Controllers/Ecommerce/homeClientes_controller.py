@@ -2,7 +2,11 @@ import hashlib
 import os
 import re
 import random
-from flask import Blueprint, request, jsonify, render_template, session, redirect, url_for, abort
+from correo import enviar_correo
+from flask import Blueprint, request, jsonify, render_template, session, redirect, url_for, abort,current_app
+
+from flask_mail import Mail
+
 from Models.conf_plantillas import Conf_Plantillas
 from Models.api_net import ApiNetPe
 from Models.servicio import Servicio
@@ -399,10 +403,20 @@ def reservarPasaje():
         resultado = Pasaje.registrarReserva(id_metodo_pago,id_tipo_comprobante,id_cliente,id_promocion,id_viaje,codigo_aleatorio)
 
         if resultado.get("msj"):
+            #correoCliente = request.form["correo_cliente"]
+            datosEnvio = {
+                'asunto':'Reserva de pasaje Yatrax',
+                'remitente': 'yatraxyatusa@gmail.com',
+                'destinatario': "christiancubasjaramillo@gmail.com",
+                'mensaje': 'El codigo de su reserva es : '+str(codigo_aleatorio)
+            }
+
+            enviar_correo(current_app.extensions['mail'],datosEnvio)
+
             return jsonify({"status": 1,"mensaje": resultado["msj"],"codigo_reserva":codigo_aleatorio})
         else:
             return jsonify({"status": 0,"mensaje": resultado.get("msj2", "Ocurrió un error inesperado.")})
     except Exception as e:
-        return jsonify({"status": -1,"mensaje": "Error al realizar reserva"+repr(e),"error": repr(e)})
+        return jsonify({"status": -1,"mensaje": "Ha ocurrido un error","error": repr(e)})
 
 #END REGION
