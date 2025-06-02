@@ -40,7 +40,7 @@
                             <div class="input-group">
                                 <input type="number" min="0" id="txt_Duracion" class="form-control"
                                     placeholder="Duración de sanción en días..." {% if btnId=='btn_Aceptar' %}disabled{%
-                                    endif %} value="{{ sancion.duracion }}">
+                                    endif %} value="{{ sancionPersonal.duracion }}">
                                 <div class="input-group-append">
                                     <div class="input-group-text"><i class="fas fa-user"></i></div>
                                 </div>
@@ -53,8 +53,8 @@
                                 <select id="cbx_Estado" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{%
                                     endif %}>
                                     <option disabled>--SELECCIONAR--</option>
-                                    <option {% if sancion.estado==1 %}selected{% endif %} value="1">Vigente</option>
-                                    <option {% if sancion.estado==0 %}selected{% endif %} value="0">No vigente</option>
+                                    <option {% if sancionPersonal.estado==1 %}selected{% endif %} value="1">Vigente</option>
+                                    <option {% if sancionPersonal.estado==0 %}selected{% endif %} value="0">No vigente</option>
                                 </select>
                             </div>
                         </div>
