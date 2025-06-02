@@ -1,0 +1,210 @@
+{% extends "index.html" %}
+
+{% block title %}YATRAX - {{ tittle }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="text-center mb-0">{{ tittle }}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="txt_Nombre">Nombre</label>
+                            <div class="input-group">
+                                <input type="text" id="txt_Nombre" class="form-control" placeholder="Nombre completo" {%
+                                    if btnId=='btn_Aceptar' %}disabled{% endif %} value="{{ sancion.nombre }}">
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><i class="fas fa-user"></i></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label for="txt_Nombre">Descripción</label>
+                            <div class="input-group">
+                                <input type="text" id="txt_Descripcion" class="form-control"
+                                    placeholder="Descripción de sanción..." {% if btnId=='btn_Aceptar' %}disabled{%
+                                    endif %} value="{{ sancion.descripcion }}">
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><i class="fas fa-user"></i></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label for="txt_Nombre">Duración de sanción</label>
+                            <div class="input-group">
+                                <input type="number" min="0" id="txt_Duracion" class="form-control"
+                                    placeholder="Duración de sanción en días..." {% if btnId=='btn_Aceptar' %}disabled{%
+                                    endif %} value="{{ sancionPersonal.duracion }}">
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><i class="fas fa-user"></i></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label for="cbx_Estado">Estado</label>
+                            <div class="input-group">
+                                <select id="cbx_Estado" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{%
+                                    endif %}>
+                                    <option disabled>--SELECCIONAR--</option>
+                                    <option {% if sancionPersonal.estado==1 %}selected{% endif %} value="1">Vigente</option>
+                                    <option {% if sancionPersonal.estado==0 %}selected{% endif %} value="0">No vigente</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 text-center">
+                            <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de
+                                sanciones</button>
+                            <button id="{{ btnId }}" type="button" class="btn btn-primary">Aceptar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+
+        $("#btn_Registrar").click(function () {
+            let nombre = $("#txt_Nombre").val().trim();
+            let descripcion = $("#txt_Descripcion").val().trim();
+            let duracion = $("#txt_Duracion").val();
+            let estado = $('#cbx_Estado').val();
+
+            if (!nombre || !estado || !descripcion || !duracion) {
+                toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                return;
+            }
+
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción registrará la sanción. ¿Deseas continuar?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, registrar sanción",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let formData = new FormData();
+                    formData.append("nombre", nombre);
+                    formData.append("descripcion", descripcion);
+                    formData.append("duracion", duracion);
+                    formData.append("estado", estado);
+                    $.ajax({
+                        url: "/trabajadores/personal/RegistrarSancion",
+                        type: "POST",
+                        processData: false,
+                        contentType: false,
+                        data: formData,
+                        success: function (response) {
+                            if (response.Status === "success") {
+                                if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                    return;
+                                } else {
+                                    toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                                    setTimeout(() => {
+                                        window.location.href = "/trabajadores/personal/GestionarSancion";
+                                    }, 500);
+                                }
+                            } else {
+                                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                                console.error('Error: ' + response.Msj);
+                            }
+                        },
+                        error: function (xhr, Status, error) {
+                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                            console.error('Error:' + error);
+                        }
+                    });
+                }
+            });
+        });
+
+        $("#btn_Editar").click(function () {
+            const id = Number("{{ sancion.id }}");
+
+            let nombre = $("#txt_Nombre").val().trim();
+            let descripcion = $("#txt_Descripcion").val().trim();
+            let duracion = $("#txt_Duracion").val();
+            let estado = $('#cbx_Estado').val();
+
+
+
+            if (!nombre || !estado || !descripcion || !duracion) {
+                toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                return;
+            }
+
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción modificará la sanción. ¿Deseas continuar?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, editar sanción",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let formData = new FormData();
+                    formData.append("nombre", nombre);
+                    formData.append("descripcion", descripcion);
+                    formData.append("duracion", duracion);
+                    formData.append("estado", estado);
+
+                    $.ajax({
+                        url: `/trabajadores/personal/EditarSancion/${id}`,
+                        type: "POST",
+                        processData: false,
+                        contentType: false,
+                        data: formData,
+                        success: function (response) {
+                            if (response.Status === "success") {
+                                if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                    return;
+                                } else {
+                                    toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                                    setTimeout(() => {
+                                        window.location.href = "/trabajadores/personal/GestionarSancion";
+                                    }, 500);
+                                }
+                            } else {
+                                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                            }
+                        },
+                        error: function (xhr, Status, error) {
+                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                        }
+                    });
+                }
+            });
+        });
+
+        $("#btn_Aceptar").click(function () {
+            window.location.href = "/trabajadores/personal/GestionarSancion";
+        });
+
+        $("#btn_Volver").click(function () {
+            window.location.href = "/trabajadores/personal/GestionarSancion";
+        });
+    });
+</script>
+{% endblock %}

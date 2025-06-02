@@ -362,7 +362,7 @@ def editar_personalSancion(personalid, sancionid):
 @personal_bp.route("/DarBajaPersonalSancion/<int:personalid>/<int:sancionid>", methods=['POST'])
 def darBaja_personalSancion(personalid,sancionid):
     try:
-        mensajes = Personal_Sancion(personalid, sancionid)
+        mensajes = Personal_Sancion.darBaja(personalid, sancionid)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 
