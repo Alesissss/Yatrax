@@ -12,6 +12,17 @@ class Pasaje:
         self.estado = estado
 
     @classmethod
+    def listarReservas(cls):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            listado = conexion.obtener("select * from pasaje where estado='R'")
+            return listado
+        finally:
+            if conexion != None:
+                conexion.cerrar()
+
+    @classmethod
     def registrarReserva(cls, id_metodo_pago, id_tipo_comprobante, id_cliente, id_promocion,id_viaje,codigo):
         conexion = None
         try:

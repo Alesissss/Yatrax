@@ -1,5 +1,6 @@
 import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort
+from Models.pasaje import Pasaje
 
 atencion_bp = Blueprint('atencion', __name__, url_prefix='/trabajadores/atencion')
 
@@ -50,12 +51,22 @@ def verificar_sesion():
     #     abort(403)  # Autenticado, pero no tiene permiso para ese módulo
 
 # VIEWS
-@atencion_bp.route('/GestionarEjemplo')
+@atencion_bp.route('/GestionarReservas')
 def Menu_Atencion():
-    return render_template('atencion/ejemplo.html', active_page="ejemplo", active_menu='mAtencion')
+    return render_template('atencion/reservas.html', active_page="ejemplo", active_menu='mAtencion')
 
 # END VIEWS
 
 # FUNCIONES
+# REGION RESERVAS
+@atencion_bp.route('/GetData_Reservas')
+def listarReservas():
+    try:
+        reservas = Pasaje.listarReservas()
 
+        return jsonify({"Status": "success","data": reservas})
+    except Exception as e:
+        return jsonify({"Status": "error","Msg": str(e)}), 500
+
+#END REGION RESERVAS
 # END FUNCIONES
