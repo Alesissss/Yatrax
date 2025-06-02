@@ -761,44 +761,6 @@
 
 
 /*Bloque donde se indica que se va a mostrar para cada operacion (venta de pasaje normal, pasaje libre o reserva de pasaje)*/
-  function capturarDatos() {
-    let texto = $('#cbx_Ciudades').select2('data')[0].text;
-    let origen_destino = texto.split(' - ');
-
-    let fecha_ida = $("input[name='fecha_ida']").val();
-
-    let fecha_vuelta = $("input[name='fecha_vuelta']").val();
-
-    return {
-      'origen': origen_destino[0],
-      'destino': origen_destino[1],
-      'fecha_ida': fecha_ida,
-      'fecha_vuelta': fecha_vuelta
-    }
-
-  }
-
-  $.ajax({
-    url: '/ecommerce/home/buscarViajes',
-    data: capturarDatos(),
-    method: 'POST',
-    success: function (resp) {
-      if (resp.Status == 'success') {
-        toastr.success('VIAJES RETORNADOS CORRECTAMENTE', 'MENSAJE DEL SISTEMA');
-        itinerario_ida = resp.data_ida;
-        itinerario_vuelta = resp.data_vuelta;
-      } else {
-        toastr.warning('ERROR AL BUSCAR EL VIAJE', 'MENSAJE DEL SISTEMA');
-      }
-    },
-    error: function (err) {
-      console.log('Error; ', err)
-    }
-  });
-
-  // function cargarItinerario(itinerario) {
-  //   $('#contenedor_viajes').
-  // }
 
 function fct_Modalidad(){
   const opciones = document.querySelectorAll('input[name="tipo_pasaje"]');
@@ -971,7 +933,7 @@ function fct_Modalidad(){
   });
 }
 
-fct_Modalidad()
+fct_Modalidad();
 
 $(document).on('click', '#realizar_reserva', function() {
   if (($("#metodo_pago").val() != null) && ($("#tipo_comprobante").val() != null)){
@@ -1021,6 +983,44 @@ $(document).on('click', '#realizar_reserva', function() {
     toastr.error("El método para reservas en efectivo aun no esta disponible. Contáctese con la empresa para mayor información");
   }
 });
+
+function capturarDatos() {
+  let texto = $('#cbx_Ciudades').select2('data')[0].text;
+  let origen_destino = texto.split(' - ');
+
+  let fecha_ida = $("input[name='fecha_ida']").val();
+
+  let fecha_vuelta = $("input[name='fecha_vuelta']").val();
+
+  return {
+    'origen': origen_destino[0],
+    'destino': origen_destino[1],
+    'fecha_ida': fecha_ida,
+    'fecha_vuelta': fecha_vuelta
+  }
+}
+
+$.ajax({
+  url: '/ecommerce/home/buscarViajes',
+  data: capturarDatos(),
+  method: 'POST',
+  success: function (resp) {
+    if (resp.Status == 'success') {
+      toastr.success('VIAJES RETORNADOS CORRECTAMENTE', 'MENSAJE DEL SISTEMA');
+      itinerario_ida = resp.data_ida;
+      itinerario_vuelta = resp.data_vuelta;
+    } else {
+      toastr.warning('ERROR AL BUSCAR EL VIAJE', 'MENSAJE DEL SISTEMA');
+    }
+  },
+  error: function (err) {
+    console.log('Error; ', err)
+  }
+});
+
+  // function cargarItinerario(itinerario) {
+  //   $('#contenedor_viajes').
+  // }
 
 </script>
 <script>
