@@ -132,6 +132,7 @@ DROP PROCEDURE IF EXISTS SP_ACTIVAR_TERMINOS_CONDICIONES;
 DROP PROCEDURE IF EXISTS SP_INSERTAR_PASAJE;
 DROP PROCEDURE IF EXISTS SP_MODIFICAR_PASAJE;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_PASAJE;
+DROP PROCEDURE IF EXISTS SP_CAMBIAR_ESTADO_PASAJE;
 
 DROP PROCEDURE IF EXISTS SP_CAMBIAR_CLAVE;
 -- Luego eliminamos las tablas, primero la que depende de la otra
@@ -5185,7 +5186,41 @@ BEGIN
         END;
     END IF;
 END$$
+DELIMITER ;
 
+DELIMITER $$
+
+CREATE PROCEDURE SP_CAMBIAR_ESTADO_PASAJE(
+    IN p_id_pasaje INT,       -- 1) ID del pasaje a modificar
+    IN p_estado    CHAR(1),   -- 2) Nuevo valor de estado ('R', 'P', etc.)
+    OUT MSJ        VARCHAR(255),
+    OUT MSJ2       VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET MSJ  = NULL;
+        SET MSJ2 = 'Error al modificar el estado del pasaje.';
+    END;
+
+    -- Verificar si existe el pasaje; si no existe, se asignan mensajes de error
+    IF NOT EXISTS (SELECT 1 FROM pasaje WHERE id = p_id_pasaje) THEN
+        SET MSJ  = NULL;
+        SET MSJ2 = CONCAT('No existe pasaje con id ', p_id_pasaje);
+    ELSE
+        -- Si existe, actualizamos solo el campo "estado"
+        UPDATE pasaje
+           SET estado = p_estado
+         WHERE id = p_id_pasaje;
+
+        SET MSJ  = 'Estado del pasaje actualizado correctamente.';
+        SET MSJ2 = NULL;
+    END IF;
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
 -- Crear procedimiento para eliminar pasaje
 CREATE PROCEDURE SP_ELIMINAR_PASAJE(
     IN p_id INT,

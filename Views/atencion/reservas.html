@@ -224,9 +224,9 @@
                     render: function (data, type, row) {
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_UsuarioVer('${data.id}')" title="Ver usuario"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_UsuarioEditar('${data.id}')" title="Editar usuario"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_UsuarioDarBaja('${data.id}')" title="Dar de baja usuario"><i class="bi bi-arrow-down-circle"></i></button>
+                            <button class="btn btn-xs m-1 btn-info" onclick="fct_VerReserva('${data.id}')" title="Ver usuario"><i class="bi bi-eye"></i></button>
+                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_editarReserva('${data.id}')" title="Editar usuario"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_PagarReserva('${data.id}')" title="Pagar reserva">Pagar reserva</button>
                             <button class="btn btn-xs m-1 btn-danger" onclick = "fct_eliminarReserva('${data.id}')" title="Eliminar usuario"><i class="bi bi-trash"></i></button>
                         </div>
                         `;
@@ -278,11 +278,11 @@
         window.location.href = '/trabajadores/atencion/RegistrarReserva';
     }
 
-    function fct_UsuarioEditar(Id) {
+    function fct_editarReserva(Id) {
         window.location.href = `/trabajadores/atencion/EditarReserva/${Id}`;
     }
 
-    function fct_UsuarioVer(Id) {
+    function fct_VerReserva(Id) {
         window.location.href = `/trabajadores/atencion/VerReserva/${Id}`;
     }
 
@@ -323,6 +323,27 @@
                 });
             }
         });
+    }
+
+    function fct_PagarReserva(Id) {
+        $.ajax({
+            url: `/trabajadores/atencion/CambiarEstado/${Id}`,  // Ruta creada en Flask
+            method: "POST",
+            success: function(response) {
+                if (response.Status === "success") {
+                    toastr.success(response.Msj);
+                } else {
+                    toastr.error("Error al pagar reserva: " + response.Msj2);
+                }
+            },
+            error: function(xhr, status, error) {
+                // Capturamos el 500 ó cualquier otro error HTTP
+                console.error("Error AJAX:", xhr.status, xhr.responseText);
+                alert("Ocurrió un error interno al intentar pagar la reserva.");
+            }
+        });
+
+        fct_IniciarTablaUsuarios('#tbl_Usuarios');
     }
 
     function ShowSpinner() {

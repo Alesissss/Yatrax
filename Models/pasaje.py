@@ -58,7 +58,7 @@ class Pasaje:
 
             # Llamamos al procedimiento SP_MODIFICAR_PASAJE con sus parámetros y recuperamos los parámetros de salida @MSJ y @MSJ2
             conexion.ejecutar(
-                "CALL SP_MODIFICAR_PASAJE(%s, %s, %s, %s, %s, %s, %s, @MSJ, @MSJ2);",
+                "CALL SP_MODIFICAR_PASAJE(%s, %s, %s, %s, %s, %s,%s, @MSJ, @MSJ2);",
                 (p_id, id_metodo_pago, id_tipo_comprobante, id_cliente, id_promocion, id_viaje, estado)
             )
 
@@ -92,5 +92,24 @@ class Pasaje:
         finally:
             if conexion is not None:
                 conexion.cerrar()
+
+    @classmethod
+    def cambiarEstado(cls, id_pasaje, nuevo_estado):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            # Llamamos con 2 parámetros de entrada + 2 parámetros OUT implicados
+            conexion.ejecutar(
+                "CALL SP_CAMBIAR_ESTADO_PASAJE(%s, %s, @MSJ, @MSJ2);",
+                (id_pasaje, nuevo_estado)
+            )
+            resultado = conexion.obtener("SELECT @MSJ AS msj, @MSJ2 AS msj2;")
+            return resultado[0] if resultado else {"msj": None, "msj2": "Error al recuperar mensaje"}
+        except Exception as e:
+            return {"msj": None, "msj2": f"Error en el modelo: {str(e)}"}
+        finally:
+            if conexion is not None:
+                conexion.cerrar()
+
 
 
