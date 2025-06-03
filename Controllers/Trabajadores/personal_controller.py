@@ -336,7 +336,7 @@ def registrar_sancionPersonal():
 @personal_bp.route("/EditarSancionPersonal/<int:personalid>/<int:sancionid>", methods=["GET", "POST"])
 def editar_personalSancion(personalid, sancionid):
     try:
-        sancion_personal = Personal_Sancion.obtener_por_id(personalid, sancionid)
+        sancionPersonal = Personal_Sancion.obtener_por_id(personalid, sancionid)
         if request.method == "POST":
             descripcion = request.form.get("descripcion").strip()
             estado = request.form.get("estado")
@@ -352,9 +352,9 @@ def editar_personalSancion(personalid, sancionid):
             else:
                 return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar sanción a personal'})
 
-        if sancion_personal:
-            return render_template('personal/sancionPersonalCRUD.html', active_page='sancionPersonal', active_menu='mPersonal', sancion_personal = sancion_personal, tittle='Editar sanción a personal', btnId='btn_Editar')
-        return render_template('personal/sancionPersonalCRUD.html', active_page='sancionPersonal', active_menu='mPersonal', sancion_personal = {}, tittle='Editar sanción a personal', btnId='btn_Editar')
+        if sancionPersonal:
+            return render_template('personal/sancionPersonalCRUD.html', active_page='sancionPersonal', active_menu='mPersonal', sancionPersonal = sancionPersonal, tittle='Editar sanción a personal', btnId='btn_Editar')
+        return render_template('personal/sancionPersonalCRUD.html', active_page='sancionPersonal', active_menu='mPersonal', sancionPersonal = {}, tittle='Editar sanción a personal', btnId='btn_Editar')
 
     except Exception as e:
         return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al editar sanción a personal: {repr(e)}'})
@@ -362,7 +362,7 @@ def editar_personalSancion(personalid, sancionid):
 @personal_bp.route("/DarBajaPersonalSancion/<int:personalid>/<int:sancionid>", methods=['POST'])
 def darBaja_personalSancion(personalid,sancionid):
     try:
-        mensajes = Personal_Sancion(personalid, sancionid)
+        mensajes = Personal_Sancion.darBaja(personalid, sancionid)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 
@@ -421,6 +421,7 @@ def ver_personalSancion(personalid, sancionid):
 # REGION PERSONAL
 
 # Obtener todos los registros de personal
+
 @personal_bp.route("/GetData_Personal", methods=["GET"])
 def get_Personal():
     try:

@@ -129,6 +129,16 @@ DROP PROCEDURE IF EXISTS SP_EDITAR_TERMINOS_CONDICIONES;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_TERMINOS_CONDICIONES;
 DROP PROCEDURE IF EXISTS SP_ACTIVAR_TERMINOS_CONDICIONES;
 
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_PREGUNTA_FRECUENTE;
+DROP PROCEDURE IF EXISTS SP_EDITAR_PREGUNTA_FRECUENTE;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_PREGUNTA_FRECUENTE;
+DROP PROCEDURE IF EXISTS SP_DAR_BAJA_PREGUNTA_FRECUENTE;
+
+DROP PROCEDURE IF EXISTS SP_INSERTAR_PASAJE;
+DROP PROCEDURE IF EXISTS SP_MODIFICAR_PASAJE;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_PASAJE;
+DROP PROCEDURE IF EXISTS SP_CAMBIAR_ESTADO_PASAJE;
+
 DROP PROCEDURE IF EXISTS SP_CAMBIAR_CLAVE;
 -- Luego eliminamos las tablas, primero la que depende de la otra
 DROP TABLE IF EXISTS conf_general;
@@ -171,6 +181,18 @@ DROP TABLE IF EXISTS herramienta;
 DROP TABLE IF EXISTS tipo_herramienta;
 DROP TABLE IF EXISTS tipo_metodoPago;
 DROP TABLE IF EXISTS terminos_condiciones;
+DROP TABLE IF EXISTS pasaje;
+DROP TABLE IF EXISTS preguntas_frecuentes;
+
+-- Crear tabla preguntas_frecuentes
+CREATE TABLE preguntas_frecuentes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    pregunta VARCHAR(255) NOT NULL,
+    respuesta TEXT NOT NULL,
+    estado BOOLEAN NOT NULL,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL
+);
 
 -- Crear tabla terminos_condiciones
 CREATE TABLE terminos_condiciones (
@@ -627,6 +649,42 @@ CREATE TABLE detalle_personal (
     FOREIGN KEY (idPersonal) REFERENCES personal(id),
     FOREIGN KEY (idViaje) REFERENCES viaje(id)
 );
+
+CREATE TABLE pasaje(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_metodo_pago INT NOT NULL,
+    id_tipo_comprobante INT NOT NULL,
+    id_cliente INT NOT NULL,
+    id_promocion INT NOT NULL,
+    id_viaje INT NOT NULL,
+    estado CHAR(1) NOT NULL,
+    fechaHora TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    codigo CHAR(12)
+);
+
+INSERT INTO sucursal (`cod_sucursal`, `ciudad`, `nombre`, `direccion`, `latitud`, `longitud`, `estado`, `abreviatura`, `estado_proceso`, `estado_registro`, `fecha_registro`, `usuario`) 
+VALUES ('CIX-01', 'Chiclayo', 'BALTA', 'Emtrafesa, 110, Avenida José Balta, Urbanizacion Santa Victoria, Chiclayo, Lambayeque, 14001, Perú', '-6.776610', '-79.838656', '1', 'CIX', 'REGISTRADO', '1', '2025-06-02 11:34:18', 'edgar@gmail.com'),
+('CIX-02', 'Chiclayo', 'CHAVEZ', 'Calle Francisco de Orellana, Chiclayo, Lambayeque, 14001, Perú', '-6.764886', '-79.830315', '1', 'CIX', 'REGISTRADO', '1', '2025-06-02 11:37:36', 'edgar@gmail.com'),
+('CIX-03', 'Chiclayo', 'CATOLICA', 'Universidad Católica Santo Toribio de Mogrovejo, Panamericana Norte, Ciudad El Chofer, Chiclayo, Lambayeque, 14013, Perú', '-6.759932', '-79.862134', '1', 'CIX', 'REGISTRADO', '1', '2025-06-02 11:39:17', 'edgar@gmail.com'),
+('IMA-01', 'Lima', 'PLAZA NORTE', 'Plaza Norte, 1400, Avenida Tomás Valle, Urbanización Mesa Redonda, Independencia, Lima, Lima Metropolitana, Lima, 15028, Perú', '-12.006144', '-77.058837', '1', 'IMA', 'REGISTRADO', '1', '2025-06-02 11:39:59', 'edgar@gmail.com'),
+('IMA-02', 'Lima', 'PLAZA SAN MIGUEL', 'Plaza San Miguel, 2000, Avenida La Marina, Virgen de Fatima, San Miguel, Lima, Lima Metropolitana, Lima, 15088, Perú', '-12.076740', '-77.082720', '1', 'IMA', 'REGISTRADO', '1', '2025-06-02 11:40:35', 'edgar@gmail.com'),
+('CJA-01', 'Cajamarca', 'CUMBE', 'El Cumbe, Avenida San Martín de Porres, Urbanización Ramon Castilla, Mollepampa, Cajamarca, 06002, Perú', '-7.164035', '-78.510006', '1', 'CJA', 'REGISTRADO', '1', '2025-06-02 11:42:04', 'edgar@gmail.com'),
+('HUA-01', 'Huamanga', 'SAN JUAN BAUTISTA', 'Terminal San Juan Bautista, Avenida Venezuela, Asociación La Victoria, San Juan Bautista, Huamanga, Ayacucho, 05002, Perú', '-13.170961', '-74.214658', '1', 'HUA', 'REGISTRADO', '1', '2025-06-02 11:43:48', 'edgar@gmail.com'),
+('AQP-01', 'Arequipa', 'FLORES HERMANOS', 'Avenida Pedro P. Diaz, Urbanización Campiña, Arequipa, 04002, Perú', '-16.422245', '-71.543607', '1', 'AQP', 'REGISTRADO', '1', '2025-06-02 11:45:18', 'edgar@gmail.com'),
+('PUN-01', 'Puno', 'EL SOL', 'Avenida El Sol, Laykakota, Puno, 05151, Perú', '-15.849338', '-70.018838', '1', 'PUN', 'REGISTRADO', '1', '2025-06-02 11:46:46', 'edgar@gmail.com'),
+('COR-01', 'Coronel Portillo', 'GUSBET', 'Gran Hotel Gusbet, Tupac Amaru, Area Metropolitana de Pucallpa, Las Palmeras, Yarinacocha, Coronel Portillo, Ucayali, 25004, Perú', '-8.360615', '-74.579561', '1', 'COR', 'REGISTRADO', '1', '2025-06-02 11:50:16', 'edgar@gmail.com'),
+('HUU-01', 'Huánuco', 'PLAZA REY', 'Rey Tours, 1215, Jirón 28 de Julio, Huánuco, 10003, Perú', '-9.927278', '-76.237774', '1', 'HUU', 'REGISTRADO', '1', '2025-06-02 11:51:14', 'edgar@gmail.com');
+
+INSERT INTO ruta (`nombre`, `distancia_estimada`, `tiempo_estimado`, `tipo`, `estado`, `estado_proceso`, `estado_registro`, `fecha_registro`, `usuario`) 
+VALUES ('COSTA COMPLETA IDA', '1766.48', '1477.55', 'ESCALA', '1', 'MODIFICADO', '1', '2025-06-02 12:02:38', 'edgar@gmail.com'),
+('COSTA COMPLETA VUELTA', '1767.03', '1506.97', 'ESCALA', '1', 'MODIFICADO', '1', '2025-06-02 12:04:19', 'edgar@gmail.com'),
+('SIERRA COMPLETA IDA', '2595.83', '2366.86', 'ESCALA', '1', 'MODIFICADO', '1', '2025-06-02 12:05:35', 'edgar@gmail.com'),
+('SIERRA COMPLETA VUELTA', '2595.10', '2371.92', 'ESCALA', '1', 'MODIFICADO', '1', '2025-06-02 12:06:08', 'edgar@gmail.com'),
+('COSTA NORTE IDA', '763.92', '685.04', 'DIRECTO', '1', 'REGISTRADO', '1', '2025-06-02 12:08:42', 'edgar@gmail.com'),
+('COSTA NORTE VUELTA', '765.10', '713.35', 'DIRECTO', '1', 'REGISTRADO', '1', '2025-06-02 12:08:56', 'edgar@gmail.com'),
+('COSTA SUR IDA', '1002.56', '792.50', 'DIRECTO', '1', 'REGISTRADO', '1', '2025-06-02 12:09:18', 'edgar@gmail.com'),
+('COSTA SUR VUELTA', '1001.93', '793.63', 'DIRECTO', '1', 'REGISTRADO', '1', '2025-06-02 12:09:40', 'edgar@gmail.com');
+
 
 -- INSERTS terminos y condicones
 INSERT INTO terminos_condiciones(id, nombre, archivo, estado, fecha_registro, usuario) VALUES (1,'TyC-v2025-001','TyC_v2025-001.txt',1,'2025-05-29 01:51:30','ander@gmail.com');
@@ -3692,6 +3750,134 @@ BEGIN
 END $$
 DELIMITER ;
 
+-- Crear procedimiento SP_REGISTRAR_PREGUNTA_FRECUENTE;
+DELIMITER $$
+CREATE PROCEDURE SP_REGISTRAR_PREGUNTA_FRECUENTE(
+    IN P_PREGUNTA VARCHAR(255),
+    IN P_RESPUESTA TEXT,
+    IN P_ESTADO BOOLEAN,
+    IN P_USUARIO VARCHAR(100)
+)
+BEGIN
+    DECLARE cPregunta INT;
+    DECLARE cRespuesta INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cPregunta FROM preguntas_frecuentes WHERE pregunta = P_PREGUNTA;
+    SELECT COUNT(*) INTO cRespuesta FROM preguntas_frecuentes WHERE respuesta = P_RESPUESTA;
+
+    IF cPregunta > 0 THEN
+        SET @MSJ2 = 'La pregunta frecuente que intenta registrar ya existe';
+    ELSEIF cRespuesta > 0 THEN
+        SET @MSJ2 = 'La respuesta que intenta registrar ya existe';
+    ELSE
+        INSERT INTO preguntas_frecuentes (pregunta, respuesta, estado, usuario)
+        VALUES (P_PREGUNTA, P_RESPUESTA, P_ESTADO, P_USUARIO);
+        SET @MSJ = 'Se registró correctamente la pregunta frecuente';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_EDITAR_PREGUNTA_FRECUENTE;
+DELIMITER $$
+CREATE PROCEDURE SP_EDITAR_PREGUNTA_FRECUENTE(
+    IN P_ID INT,
+    IN P_PREGUNTA VARCHAR(255),
+    IN P_RESPUESTA TEXT,
+    IN P_ESTADO BOOLEAN,
+    IN P_USUARIO VARCHAR(100)
+)
+BEGIN
+    DECLARE cPregunta INT;
+    DECLARE cRespuesta INT;
+    DECLARE cExiste INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cExiste FROM preguntas_frecuentes WHERE id = P_ID;
+    SELECT COUNT(*) INTO cPregunta FROM preguntas_frecuentes WHERE pregunta = P_PREGUNTA AND id != P_ID;
+    SELECT COUNT(*) INTO cRespuesta FROM preguntas_frecuentes WHERE respuesta = P_RESPUESTA AND id != P_ID;
+
+    IF cExiste <= 0 THEN
+        SET @MSJ2 = 'La pregunta frecuente que intenta editar no existe';
+    ELSEIF cPregunta > 0 THEN
+        SET @MSJ2 = 'La pregunta ingresada ya existe';
+    ELSEIF cRespuesta > 0 THEN
+        SET @MSJ2 = 'La respuesta ingresada ya existe';
+    ELSE
+        UPDATE preguntas_frecuentes 
+        SET pregunta = P_PREGUNTA, 
+            respuesta = P_RESPUESTA, 
+            estado = P_ESTADO,
+            usuario = P_USUARIO 
+        WHERE id = P_ID;
+
+        SET @MSJ = 'Se modificó correctamente la pregunta frecuente';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_PREGUNTA_FRECUENTE;
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_PREGUNTA_FRECUENTE(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cPregunta INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cPregunta FROM preguntas_frecuentes WHERE id = P_ID;
+
+    IF cPregunta <= 0 THEN
+        SET @MSJ2 = 'La pregunta frecuente que intenta eliminar no existe';
+    ELSE
+        DELETE FROM preguntas_frecuentes WHERE id = P_ID;
+        SET @MSJ = 'Se eliminó correctamente la pregunta frecuente';
+    END IF;
+END $$
+
+-- Crear procedimiento SP_DAR_BAJA_PREGUNTA_FRECUENTE;
+DELIMITER $$
+CREATE PROCEDURE SP_DAR_BAJA_PREGUNTA_FRECUENTE(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cPregunta INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cPregunta FROM preguntas_frecuentes WHERE id = P_ID AND estado = 1;
+
+    IF cPregunta <= 0 THEN
+        SET @MSJ2 = 'La pregunta frecuente que intenta dar de baja no existe';
+    ELSE
+        UPDATE preguntas_frecuentes SET estado = 0 WHERE id = P_ID AND estado = 1;
+        SET @MSJ = 'Se dio de baja correctamente la pregunta frecuente';
+    END IF;
+END $$
+
 -- Crear procedimiento SP_REGISTRAR_TIPO_DOCUMENTO
 DELIMITER $$
 CREATE PROCEDURE SP_REGISTRAR_TIPO_DOCUMENTO(
@@ -5057,4 +5243,180 @@ BEGIN
         SET @MSJ = 'Se eliminó correctamente el tipo de método de pago';
     END IF;
 END $$
+DELIMITER ;
 
+DELIMITER $$
+
+CREATE PROCEDURE SP_INSERTAR_PASAJE(
+    IN p_id_metodo_pago       INT,
+    IN p_id_tipo_comprobante  INT,
+    IN p_id_cliente           INT,
+    IN p_id_promocion         INT,
+    IN p_id_viaje             INT,
+    IN p_estado               CHAR(1),
+    IN p_codigo               CHAR(12),      -- Puede recibir NULL si no se proporciona
+    OUT MSJ                   VARCHAR(255),
+    OUT MSJ2                  VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET MSJ  = NULL;
+        SET MSJ2 = 'Error al registrar el pasaje.';
+    END;
+
+    IF p_codigo IS NOT NULL THEN
+        INSERT INTO pasaje (
+            id_metodo_pago,
+            id_tipo_comprobante,
+            id_cliente,
+            id_promocion,
+            id_viaje,
+            estado,
+            codigo
+        )
+        VALUES (
+            p_id_metodo_pago,
+            p_id_tipo_comprobante,
+            p_id_cliente,
+            p_id_promocion,
+            p_id_viaje,
+            p_estado,
+            p_codigo
+        );
+    ELSE
+        INSERT INTO pasaje (
+            id_metodo_pago,
+            id_tipo_comprobante,
+            id_cliente,
+            id_promocion,
+            id_viaje,
+            estado,
+            codigo
+        )
+        VALUES (
+            p_id_metodo_pago,
+            p_id_tipo_comprobante,
+            p_id_cliente,
+            p_id_promocion,
+            p_id_viaje,
+            p_estado,
+            NULL
+        );
+    END IF;
+
+    SET MSJ  = 'Pasaje registrado correctamente.';
+    SET MSJ2 = NULL;
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+-- Crear procedimiento para modificar pasaje
+CREATE PROCEDURE SP_MODIFICAR_PASAJE(
+    IN p_id INT,
+    IN p_id_metodo_pago INT,
+    IN p_id_tipo_comprobante INT,
+    IN p_id_cliente INT,
+    IN p_id_promocion INT,
+    IN p_id_viaje INT,
+    IN p_estado CHAR(1),
+    OUT MSJ VARCHAR(255),
+    OUT MSJ2 VARCHAR(255)
+)
+BEGIN
+    DECLARE v_existe INT;
+
+    SELECT COUNT(*) INTO v_existe FROM pasaje WHERE id = p_id;
+
+    IF v_existe = 0 THEN
+        SET MSJ = NULL;
+        SET MSJ2 = 'No se encontró el pasaje para modificar.';
+    ELSE
+        BEGIN
+            DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+            BEGIN
+                SET MSJ = NULL;
+                SET MSJ2 = 'Error al modificar el pasaje.';
+            END;
+
+            UPDATE pasaje
+            SET id_metodo_pago = p_id_metodo_pago,
+                id_tipo_comprobante = p_id_tipo_comprobante,
+                id_cliente = p_id_cliente,
+                id_promocion = p_id_promocion,
+                id_viaje = p_id_viaje,
+                estado = p_estado
+            WHERE id = p_id;
+
+            SET MSJ = 'Pasaje modificado correctamente.';
+            SET MSJ2 = NULL;
+        END;
+    END IF;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE SP_CAMBIAR_ESTADO_PASAJE(
+    IN p_id_pasaje INT,       -- 1) ID del pasaje a modificar
+    IN p_estado    CHAR(1),   -- 2) Nuevo valor de estado ('R', 'P', etc.)
+    OUT MSJ        VARCHAR(255),
+    OUT MSJ2       VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET MSJ  = NULL;
+        SET MSJ2 = 'Error al modificar el estado del pasaje.';
+    END;
+
+    -- Verificar si existe el pasaje; si no existe, se asignan mensajes de error
+    IF NOT EXISTS (SELECT 1 FROM pasaje WHERE id = p_id_pasaje) THEN
+        SET MSJ  = NULL;
+        SET MSJ2 = CONCAT('No existe pasaje con id ', p_id_pasaje);
+    ELSE
+        -- Si existe, actualizamos solo el campo "estado"
+        UPDATE pasaje
+           SET estado = p_estado
+         WHERE id = p_id_pasaje;
+
+        SET MSJ  = 'Estado del pasaje actualizado correctamente.';
+        SET MSJ2 = NULL;
+    END IF;
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+-- Crear procedimiento para eliminar pasaje
+CREATE PROCEDURE SP_ELIMINAR_PASAJE(
+    IN p_id INT,
+    OUT MSJ VARCHAR(255),
+    OUT MSJ2 VARCHAR(255)
+)
+BEGIN
+    DECLARE v_existe INT;
+
+    SELECT COUNT(*) INTO v_existe FROM pasaje WHERE id = p_id;
+
+    IF v_existe = 0 THEN
+        SET MSJ = NULL;
+        SET MSJ2 = 'No se encontró el pasaje para eliminar.';
+    ELSE
+        BEGIN
+            DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+            BEGIN
+                SET MSJ = NULL;
+                SET MSJ2 = 'Error al eliminar el pasaje.';
+            END;
+
+            DELETE FROM pasaje WHERE id = p_id;
+
+            SET MSJ = 'Pasaje eliminado correctamente.';
+            SET MSJ2 = NULL;
+        END;
+    END IF;
+END$$
+
+DELIMITER ;

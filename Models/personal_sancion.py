@@ -15,7 +15,7 @@ class Personal_Sancion:
         try:
             conexion = bd.Conexion()
             personal_sancion = conexion.obtener("""
-                        SELECT pr.nombre as PERSONAL, ic.nombre as SANCIÓN, pr_ic.descripcion, pr_ic.fecha_fin, pr_ic.estado
+                        SELECT pr.nombre as PERSONAL, ic.nombre as SANCIÓN, pr_ic.descripcion, pr_ic.fecha_fin, pr_ic.estado, pr.id as personalid, ic.id as incidenciaid
                         from personal_incidencia pr_ic INNER JOIN personal pr ON pr_ic.personalid = pr.id
                         INNER JOIN incidencia ic ON pr_ic.incidenciaid = ic.id
                                        """)

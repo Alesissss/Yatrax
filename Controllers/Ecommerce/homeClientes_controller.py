@@ -1,7 +1,12 @@
 import hashlib
 import os
 import re
-from flask import Blueprint, request, jsonify, render_template, session, redirect, url_for, abort
+import random
+from correo import enviar_correo
+from flask import Blueprint, request, jsonify, render_template, session, redirect, url_for, abort,current_app
+
+from flask_mail import Mail
+
 from Models.conf_plantillas import Conf_Plantillas
 from Models.api_net import ApiNetPe
 from Models.servicio import Servicio
@@ -12,6 +17,9 @@ from Models.tipoCliente import TipoCliente
 from Models.pais import Pais
 from Models.terminos_condiciones import TerminosCondiciones
 from Models.viaje import Viaje
+from Models.pasaje import Pasaje
+from Models.tipoComprobante import TipoComprobante
+from Models.metodo_pago import MetodoPago
 
 homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/home')
 
@@ -65,7 +73,6 @@ def login_cliente():
     else:
         correo = request.form["correo"]
         contrasena = request.form["contrasena"]
-
         cliente = Cliente.logear_cliente(correo,contrasena)
 
         if cliente != None:
@@ -150,6 +157,10 @@ def register_cliente():
 def transferencia_pasaje():
     return render_template('Ecommerce/home/transferenciaPasaje.html')
 
+@homeClientes_bp.route('/miPasajeOperaciones')
+def mi_pasaje_operaciones():
+    return render_template('Ecommerce/home/miPasajeOp.html')
+
 @homeClientes_bp.route('/pago')
 def pago_pasajes():
     return render_template('Ecommerce/home/pago.html')
@@ -157,6 +168,10 @@ def pago_pasajes():
 @homeClientes_bp.route('/terminosYcondiciones')
 def terminos_y_condiciones():
     return render_template('Ecommerce/home/terminosCondiciones.html')
+
+@homeClientes_bp.route('/cambioRuta')
+def cambio_ruta():
+    return render_template('Ecommerce/home/cambioRutamod.html')
 # END VIEWS
 
 # FUNCIONES
@@ -225,10 +240,9 @@ def registrar_cliente_form():
         f_nacimiento = request.form.get("ytrx-birthdate")
         telefono = request.form.get("ytrx-phone", "").strip()
         direccion = request.form.get("ytrx-address", "").strip()
-        id_pais = request.form.get("ytrx-country")
+        id_pais = request.form.get("ytrx-country").strip()
         email = request.form.get("ytrx-email", "").strip()
-        password_raw = request.form.get("ytrx-password", "").strip()
-        password = hashlib.sha256(password_raw.encode()).hexdigest()
+        password = request.form.get("ytrx-password", "").strip()
         abreviatura = TipoDocumento.obtener_por_id(id_tipo_doc)
         if  abreviatura['abreviatura']== "RUC":
             id_tipoCliente = TipoCliente.obtener_por_nombre("Empresa")
@@ -263,7 +277,6 @@ def registrar_cliente_form():
             return jsonify({"Status": "error", "Msj": "Error desconocido al registrar cliente"})
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
-    
 # REGION TERMINOS Y CONDICIONES
 @homeClientes_bp.route('/ApiTerminosCondicionesActivo', methods=['GET'])
 def api_terminos_condiciones_activo():
@@ -330,3 +343,85 @@ def obtenerOrigenesDestinos():
         return {"data":[],"Msj":f"Error al obtener los origenes:{repr(e)}","Status":"error"}
 
 # END FUNCIONES
+
+# REGIÓN COMPRA PASAJE
+@homeClientes_bp.route('/buscarViajes',methods=['POST'])
+def buscarViajes():
+    try:
+        datos_viaje_ida = []
+        data_viaje_vuelta = []
+
+        origen = request.form.get('origen')
+        destino = request.form.get('destino')
+        fecha_ida = request.form.get('fecha_ida')
+        fecha_vuelta = request.form.get('fecha_vuelta')
+        datos_viaje_ida = Viaje.buscarViajePorRutaYFecha(origen=origen, destino=destino, fecha= fecha_ida)
+        
+        if fecha_vuelta:
+            datos_viaje_vuelta = Viaje.buscarViajePorRutaYFecha(origen=origen, destino=destino, fecha= fecha_ida)
+        return jsonify({
+            "data_ida":datos_viaje_ida,
+            "data_vuelta":datos_viaje_vuelta,
+            "Msg":"Listado retornado correctamente",
+            "Status": "success"
+        })
+    except Exception as e:
+        return jsonify({
+            "data_ida":datos_viaje_ida,
+            "data_vuelta":datos_viaje_vuelta,
+            "Msg":"Hubo un error al buscar los viajes; " + repr(e),
+            "Status": "error"
+        })
+
+
+    
+
+# END REGION COMPRA PASAJE
+
+#REGION RESERVA
+@homeClientes_bp.route("/listarTiposComprobante")
+def listadoTiposComprobantes():
+    try:
+        listado = TipoComprobante.obtener_todos()
+        return listado
+    except Exception as e:
+        return [e]
+
+@homeClientes_bp.route("/listadoMetodosPago")
+def listadoMetodosPago():
+    try:
+        listado = MetodoPago.obtener_todos()
+        return listado
+    except Exception as e:
+        return [e]
+
+@homeClientes_bp.route('/reservarPasaje', methods=["POST"])
+def reservarPasaje():
+    try:
+        id_metodo_pago = request.form["metodo_pago"]
+        id_tipo_comprobante = request.form["tipo_comprobante"]
+        id_cliente = request.form["cliente"]
+        id_promocion = request.form.get("promocion", 0)
+        id_viaje = request.form["viaje"]
+        codigo_aleatorio = random.randint(10**11, 10**12 - 1)
+
+        resultado = Pasaje.registrarReserva(id_metodo_pago,id_tipo_comprobante,id_cliente,id_promocion,id_viaje,codigo_aleatorio)
+
+        if resultado.get("msj"):
+            #correoCliente = request.form["correo_cliente"]
+            datosEnvio = {
+                'asunto':'Reserva de pasaje Yatrax',
+                'remitente': 'yatraxyatusa@gmail.com',
+                'destinatario': "christiancubasjaramillo@gmail.com",
+                'mensaje': 'El codigo de su reserva es : '+str(codigo_aleatorio)
+            }
+
+            enviar_correo(current_app.extensions['mail'],datosEnvio)
+
+            return jsonify({"status": 1,"mensaje": resultado["msj"],"codigo_reserva":codigo_aleatorio})
+        else:
+            return jsonify({"status": 0,"mensaje": resultado.get("msj2", "Ocurrió un error inesperado.")})
+    except Exception as e:
+        return jsonify({"status": -1,"mensaje": "Ha ocurrido un error","error": repr(e)})
+
+#END REGION
