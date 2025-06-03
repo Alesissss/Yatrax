@@ -329,10 +329,13 @@
         }
 
 
-        document.getElementById("abrirModalLogin").addEventListener("click", function (event) {
-            event.preventDefault();
-            loadInicioSesion();
-        });
+        const btnAbrirLogin = document.getElementById("abrirModalLogin");
+        if (btnAbrirLogin) {
+            btnAbrirLogin.addEventListener("click", function (event) {
+                event.preventDefault();
+                loadInicioSesion();
+            });
+        }
 
         function loadBigModal(url, title) {
             $.ajax({
