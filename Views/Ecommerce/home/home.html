@@ -937,23 +937,24 @@
 
   fct_Modalidad();
 
-  $(document).on('click', '#realizar_reserva', function () {
-    if (($("#metodo_pago").val() != null) && ($("#tipo_comprobante").val() != null)) {
-      $("#realizar_reserva").prop("disabled", true);
-      $.ajax({
-        url: "/ecommerce/home/reservarPasaje",
-        type: "POST",
-        data: {
-          metodo_pago: $("#metodo_pago").val(),
-          tipo_comprobante: $("#tipo_comprobante").val(),
-          cliente: $("#cliente_id").val(),
-          promocion: 0,
-          viaje: 1
-        },
-        success: function (response) {
-          if (response.status === 1) {
-            // Simula que el código de reserva fue generado (puedes retornarlo en el backend si deseas)
-            const codigoReserva = response.codigo_reserva;
+$(document).on('click', '#realizar_reserva', function() {
+  if (($("#metodo_pago").val() != null) && ($("#tipo_comprobante").val() != null)){
+    btnReserva = document.getElementById("realizar_reserva")
+    btnReserva.disabled=true
+    $.ajax({
+      url: "/ecommerce/home/reservarPasaje",
+      type: "POST",
+      data: {
+        metodo_pago: $("#metodo_pago").val(),
+        tipo_comprobante: $("#tipo_comprobante").val(),
+        cliente: $("#cliente_id").val(),
+        promocion: 0,
+        viaje: 1
+      },
+      success: function(response) {
+        if (response.status === 1) {
+          // Simula que el código de reserva fue generado (puedes retornarlo en el backend si deseas)
+          const codigoReserva = response.codigo_reserva;
 
             Swal.fire({
               icon: 'success',
@@ -966,27 +967,29 @@
               <p><strong>Su código de reserva es:</strong></p>
               <p style="font-weight: bold; font-size: 18px;">${codigoReserva}</p>
             `,
-              confirmButtonText: 'OK',
-              confirmButtonColor: '#1c3c78',
-              allowOutsideClick: false,
-              allowEscapeKey: false,
-              width: '40rem',
-              padding: '1.5rem'
-            });
-          } else {
-            toastr.error(response.mensaje || "Error al realizar la reserva.");
-          }
-        },
-        error: function (xhr) {
-          const errorMsg = xhr.responseJSON?.mensaje || "Error inesperado en la reserva.";
-          toastr.error(errorMsg);
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#1c3c78',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            width: '40rem',
+            padding: '1.5rem'
+          });
+        } else {
+          toastr.error(response.mensaje || "Error al realizar la reserva.");
         }
-      });
-      $("#realizar_reserva").prop("disabled", false);
-    } else {
-      toastr.error("El método para reservas en efectivo aun no esta disponible. Contáctese con la empresa para mayor información");
-    }
-  });
+      },
+      error: function(xhr) {
+        const errorMsg = xhr.responseJSON?.mensaje || "Error inesperado en la reserva.";
+        toastr.error(errorMsg);
+      }
+    });
+    setTimeout(() => {
+      btnReserva.disabled=false
+    }, 4000);
+  }else{
+    toastr.error("El método para reservas en efectivo aun no esta disponible. Contáctese con la empresa para mayor información");
+  }
+});
 
   function capturarDatos() {
     let texto = $('#cbx_Ciudades').select2('data')[0].text;

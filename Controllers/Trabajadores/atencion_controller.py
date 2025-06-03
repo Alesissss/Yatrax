@@ -1,5 +1,6 @@
 import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort
+from Models.pasaje import Pasaje
 
 atencion_bp = Blueprint('atencion', __name__, url_prefix='/trabajadores/atencion')
 
@@ -50,12 +51,140 @@ def verificar_sesion():
     #     abort(403)  # Autenticado, pero no tiene permiso para ese módulo
 
 # VIEWS
-@atencion_bp.route('/GestionarEjemplo')
+@atencion_bp.route('/GestionarReservas')
 def Menu_Atencion():
-    return render_template('atencion/ejemplo.html', active_page="ejemplo", active_menu='mAtencion')
+    return render_template('atencion/reservas.html', active_page="ejemplo", active_menu='mAtencion')
 
 # END VIEWS
 
 # FUNCIONES
+# REGION RESERVAS
+@atencion_bp.route('/GetData_Reservas')
+def listarReservas():
+    try:
+        reservas = Pasaje.listarReservas()
 
+        return jsonify({"Status": "success","data": reservas})
+    except Exception as e:
+        return jsonify({"Status": "error","Msg": str(e)}), 500
+
+@atencion_bp.route('/RegistrarReserva',methods=["GET","POST"])
+def registrarReserva():
+    if request.method == "GET":
+        return render_template("atencion/reservaCRUD.html",tittle="Registrar reserva",btnId="btn_Registrar")
+    else:
+        try:
+            id_metodo_pago = int(request.form["id_metodo_pago"])
+            id_tipo_comprobante = int(request.form["id_tipo_comprobante"])
+            id_cliente = int(request.form["id_cliente"])
+            id_promocion = int(request.form.get("id_promocion", 0))
+            id_viaje = int(request.form["id_viaje"])
+            codigo = request.form["codigo"]
+
+            resultado = Pasaje.registrarReserva(
+                id_metodo_pago,
+                id_tipo_comprobante,
+                id_cliente,
+                id_promocion,
+                id_viaje,
+                codigo
+            )
+            
+            # Resultado es diccionario con claves "msj" y "msj2"
+            if resultado.get("msj") is not None:
+                return jsonify({
+                    "Status": "success",
+                    "Msj": resultado["msj"],
+                    "Msj2": resultado.get("msj2")
+                })
+            else:
+                return jsonify({
+                    "Status": "error",
+                    "Msj": "",
+                    "Msj2": resultado.get("msj2")
+                })
+        except Exception as e:
+             return jsonify({
+                    "Status": "error",
+                    "Msj": repr(e),
+                    "Msj2": resultado.get("msj2")
+                })
+
+@atencion_bp.route('/EditarReserva/<int:id>',methods=["GET","POST"])
+def editarReserva(id):
+    if request.method == "GET":
+        reserva = Pasaje.obtener_una_reserva(id)
+        return render_template("atencion/reservaCRUD.html",reserva=reserva,tittle="Editar reserva",btnId="btn_Editar")
+    else:
+        try:
+            id_metodo_pago = int(request.form["id_metodo_pago"])
+            id_tipo_comprobante = int(request.form["id_tipo_comprobante"])
+            id_cliente = int(request.form["id_cliente"])
+            id_promocion = int(request.form.get("id_promocion", 0))
+            id_viaje = int(request.form["id_viaje"])
+            codigo = request.form["codigo"]
+            estado = request.form["estado"]
+
+            # Llamar al método del modelo para insertar la reserva
+            resultado = Pasaje.modificarReserva(
+                id,
+                id_metodo_pago,
+                id_tipo_comprobante,
+                id_cliente,
+                id_promocion,
+                id_viaje,
+                estado
+            )
+            
+            # Resultado es diccionario con claves "msj" y "msj2"
+            if resultado.get("msj") is not None:
+                return jsonify({
+                    "Status": "success",
+                    "Msj": resultado["msj"],
+                    "Msj2": resultado.get("msj2")
+                })
+            else:
+                return jsonify({
+                    "Status": "error",
+                    "Msj": "",
+                    "Msj2": resultado.get("msj2")
+                })
+        except Exception as e:
+             return jsonify({
+                    "Status": "error",
+                    "Msj": repr(e),
+                    "Msj2": resultado.get("msj2")
+                })
+        
+
+@atencion_bp.route('/EliminarReserva/<int:id>', methods=["POST"])
+def eliminarReserva(id):
+    try:
+        resultado = Pasaje.eliminarReserva(id)
+        if resultado["msj"] is not None:
+            return jsonify({"Status": "success", "Msj": resultado["msj"],"Msj2":resultado["msj2"]})
+        else:
+            return jsonify({"Status": "error",   "Msj": resultado["msj"],"Msj2":resultado["msj2"]})
+    except Exception as e:
+        return jsonify({"Status": "error", "Msg": str(e)})
+
+
+@atencion_bp.route('/VerReserva/<int:id>')
+def verReserva(id):
+    reserva = Pasaje.obtener_una_reserva(id)
+    return render_template("atencion/reservaCRUD.html",tittle="Ver reserva",reserva=reserva)
+
+@atencion_bp.route('/CambiarEstado/<int:id_pasaje>', methods=["POST"])
+def cambiarEstadoPasaje(id_pasaje):
+    try:
+        nuevo_estado = "P"
+        resultado = Pasaje.cambiarEstado(id_pasaje, nuevo_estado)
+        if resultado["msj"] is not None:
+            return jsonify({"Status": "success", "Msj": resultado["msj"],"Msj2":resultado["msj2"]})
+        else:
+            return jsonify({"Status": "error",   "Msj": resultado["msj"],"Msj2":resultado["msj2"]})
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": repr(e), "Msj2": None}), 500
+
+#END REGION RESERVAS
 # END FUNCIONES

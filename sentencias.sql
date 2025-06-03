@@ -129,9 +129,15 @@ DROP PROCEDURE IF EXISTS SP_EDITAR_TERMINOS_CONDICIONES;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_TERMINOS_CONDICIONES;
 DROP PROCEDURE IF EXISTS SP_ACTIVAR_TERMINOS_CONDICIONES;
 
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_PREGUNTA_FRECUENTE;
+DROP PROCEDURE IF EXISTS SP_EDITAR_PREGUNTA_FRECUENTE;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_PREGUNTA_FRECUENTE;
+DROP PROCEDURE IF EXISTS SP_DAR_BAJA_PREGUNTA_FRECUENTE;
+
 DROP PROCEDURE IF EXISTS SP_INSERTAR_PASAJE;
 DROP PROCEDURE IF EXISTS SP_MODIFICAR_PASAJE;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_PASAJE;
+DROP PROCEDURE IF EXISTS SP_CAMBIAR_ESTADO_PASAJE;
 
 DROP PROCEDURE IF EXISTS SP_CAMBIAR_CLAVE;
 -- Luego eliminamos las tablas, primero la que depende de la otra
@@ -176,6 +182,17 @@ DROP TABLE IF EXISTS tipo_herramienta;
 DROP TABLE IF EXISTS tipo_metodoPago;
 DROP TABLE IF EXISTS terminos_condiciones;
 DROP TABLE IF EXISTS pasaje;
+DROP TABLE IF EXISTS preguntas_frecuentes;
+
+-- Crear tabla preguntas_frecuentes
+CREATE TABLE preguntas_frecuentes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    pregunta VARCHAR(255) NOT NULL,
+    respuesta TEXT NOT NULL,
+    estado BOOLEAN NOT NULL,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL
+);
 
 -- Crear tabla terminos_condiciones
 CREATE TABLE terminos_condiciones (
@@ -3733,6 +3750,134 @@ BEGIN
 END $$
 DELIMITER ;
 
+-- Crear procedimiento SP_REGISTRAR_PREGUNTA_FRECUENTE;
+DELIMITER $$
+CREATE PROCEDURE SP_REGISTRAR_PREGUNTA_FRECUENTE(
+    IN P_PREGUNTA VARCHAR(255),
+    IN P_RESPUESTA TEXT,
+    IN P_ESTADO BOOLEAN,
+    IN P_USUARIO VARCHAR(100)
+)
+BEGIN
+    DECLARE cPregunta INT;
+    DECLARE cRespuesta INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cPregunta FROM preguntas_frecuentes WHERE pregunta = P_PREGUNTA;
+    SELECT COUNT(*) INTO cRespuesta FROM preguntas_frecuentes WHERE respuesta = P_RESPUESTA;
+
+    IF cPregunta > 0 THEN
+        SET @MSJ2 = 'La pregunta frecuente que intenta registrar ya existe';
+    ELSEIF cRespuesta > 0 THEN
+        SET @MSJ2 = 'La respuesta que intenta registrar ya existe';
+    ELSE
+        INSERT INTO preguntas_frecuentes (pregunta, respuesta, estado, usuario)
+        VALUES (P_PREGUNTA, P_RESPUESTA, P_ESTADO, P_USUARIO);
+        SET @MSJ = 'Se registró correctamente la pregunta frecuente';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_EDITAR_PREGUNTA_FRECUENTE;
+DELIMITER $$
+CREATE PROCEDURE SP_EDITAR_PREGUNTA_FRECUENTE(
+    IN P_ID INT,
+    IN P_PREGUNTA VARCHAR(255),
+    IN P_RESPUESTA TEXT,
+    IN P_ESTADO BOOLEAN,
+    IN P_USUARIO VARCHAR(100)
+)
+BEGIN
+    DECLARE cPregunta INT;
+    DECLARE cRespuesta INT;
+    DECLARE cExiste INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cExiste FROM preguntas_frecuentes WHERE id = P_ID;
+    SELECT COUNT(*) INTO cPregunta FROM preguntas_frecuentes WHERE pregunta = P_PREGUNTA AND id != P_ID;
+    SELECT COUNT(*) INTO cRespuesta FROM preguntas_frecuentes WHERE respuesta = P_RESPUESTA AND id != P_ID;
+
+    IF cExiste <= 0 THEN
+        SET @MSJ2 = 'La pregunta frecuente que intenta editar no existe';
+    ELSEIF cPregunta > 0 THEN
+        SET @MSJ2 = 'La pregunta ingresada ya existe';
+    ELSEIF cRespuesta > 0 THEN
+        SET @MSJ2 = 'La respuesta ingresada ya existe';
+    ELSE
+        UPDATE preguntas_frecuentes 
+        SET pregunta = P_PREGUNTA, 
+            respuesta = P_RESPUESTA, 
+            estado = P_ESTADO,
+            usuario = P_USUARIO 
+        WHERE id = P_ID;
+
+        SET @MSJ = 'Se modificó correctamente la pregunta frecuente';
+    END IF;
+END $$
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_PREGUNTA_FRECUENTE;
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_PREGUNTA_FRECUENTE(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cPregunta INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cPregunta FROM preguntas_frecuentes WHERE id = P_ID;
+
+    IF cPregunta <= 0 THEN
+        SET @MSJ2 = 'La pregunta frecuente que intenta eliminar no existe';
+    ELSE
+        DELETE FROM preguntas_frecuentes WHERE id = P_ID;
+        SET @MSJ = 'Se eliminó correctamente la pregunta frecuente';
+    END IF;
+END $$
+
+-- Crear procedimiento SP_DAR_BAJA_PREGUNTA_FRECUENTE;
+DELIMITER $$
+CREATE PROCEDURE SP_DAR_BAJA_PREGUNTA_FRECUENTE(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cPregunta INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cPregunta FROM preguntas_frecuentes WHERE id = P_ID AND estado = 1;
+
+    IF cPregunta <= 0 THEN
+        SET @MSJ2 = 'La pregunta frecuente que intenta dar de baja no existe';
+    ELSE
+        UPDATE preguntas_frecuentes SET estado = 0 WHERE id = P_ID AND estado = 1;
+        SET @MSJ = 'Se dio de baja correctamente la pregunta frecuente';
+    END IF;
+END $$
+
 -- Crear procedimiento SP_REGISTRAR_TIPO_DOCUMENTO
 DELIMITER $$
 CREATE PROCEDURE SP_REGISTRAR_TIPO_DOCUMENTO(
@@ -5209,7 +5354,41 @@ BEGIN
         END;
     END IF;
 END$$
+DELIMITER ;
 
+DELIMITER $$
+
+CREATE PROCEDURE SP_CAMBIAR_ESTADO_PASAJE(
+    IN p_id_pasaje INT,       -- 1) ID del pasaje a modificar
+    IN p_estado    CHAR(1),   -- 2) Nuevo valor de estado ('R', 'P', etc.)
+    OUT MSJ        VARCHAR(255),
+    OUT MSJ2       VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET MSJ  = NULL;
+        SET MSJ2 = 'Error al modificar el estado del pasaje.';
+    END;
+
+    -- Verificar si existe el pasaje; si no existe, se asignan mensajes de error
+    IF NOT EXISTS (SELECT 1 FROM pasaje WHERE id = p_id_pasaje) THEN
+        SET MSJ  = NULL;
+        SET MSJ2 = CONCAT('No existe pasaje con id ', p_id_pasaje);
+    ELSE
+        -- Si existe, actualizamos solo el campo "estado"
+        UPDATE pasaje
+           SET estado = p_estado
+         WHERE id = p_id_pasaje;
+
+        SET MSJ  = 'Estado del pasaje actualizado correctamente.';
+        SET MSJ2 = NULL;
+    END IF;
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
 -- Crear procedimiento para eliminar pasaje
 CREATE PROCEDURE SP_ELIMINAR_PASAJE(
     IN p_id INT,
