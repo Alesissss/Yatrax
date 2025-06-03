@@ -1382,6 +1382,29 @@ INSERT INTO cliente (
     'admin'                     -- usuario que registró
 );
 
+INSERT INTO `tipo_comprobante` (`nombre`, `estado`, `usuario`)
+VALUES ('boleta', 1, 'alexis@gmail.com');
+
+INSERT INTO `tipo_comprobante` (`nombre`, `estado`, `usuario`)
+VALUES ('factura', 1, 'alexis@gmail.com');
+
+INSERT INTO `tipo_metodopago` (`nombre`, `estado`, `usuario`)
+VALUES ('Efectivo', 1, 'alexis@gmail.com');
+
+INSERT INTO `metodo_pago` 
+    (`nombre`, `logo`, `estado`, `id_tipo_metodoPago`, `qr`, `estado_proceso`, `estado_registro`, `usuario`)
+VALUES
+    (
+      'Efectivo',
+      '/static/img/efectivo.png',
+      1,
+      1,
+      '/static/img/efectivo.png',
+      'REGISTRADO',
+      1,
+      'alexis@gmail.com'
+    );
+
 -- Crear procedimiento SP_REGISTRAR_PERSONAL_INCIDENCIA
 DELIMITER $$
 
