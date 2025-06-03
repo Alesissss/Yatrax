@@ -86,7 +86,7 @@ def logout():
         session.clear()
         return redirect(url_for('homeClientes.index'))
     else:
-        return redirect(url_for('home.index'))
+        return redirect(url_for('homeClientes.index'))
 #End Login
 # REGION Recuperar contraseña
 

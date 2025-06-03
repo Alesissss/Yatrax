@@ -394,6 +394,8 @@ CREATE TABLE escala (
     nro_orden INT NOT NULL,
     idSucursal INT NOT NULL,
     idRuta INT NOT NULL,
+    distancia_estimada DECIMAL(9,2),
+    tiempo_estimado DECIMAL(9,2),
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NOT NULL,
     FOREIGN KEY (idSucursal) REFERENCES sucursal (id),
@@ -4969,7 +4971,7 @@ BEGIN
         -- UPDATE ruta SET ESTADO_REGISTRO = 2, ESTADO_PROCESO = 'ELIMINADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
 
         DELETE FROM escala WHERE idRuta = P_ID;
-        DELETE FROM ruta WHERE id = ID;
+        DELETE FROM ruta WHERE id = P_ID;
 
         SET @MSJ = 'Se eliminó correctamente a la ruta';
     END IF;

@@ -59,8 +59,8 @@ class Ruta:
 
             # Insertar las escalas
             for escala in escalas:
-                conexion.ejecutar("INSERT INTO escala (nro_orden, idSucursal, idRuta, usuario) VALUES (%s, %s, %s, %s)",
-                                (escala['nroOrden'], escala['id'], idRuta, usuario), auto_commit=False)
+                conexion.ejecutar("INSERT INTO escala (nro_orden, idSucursal, idRuta, distancia_estimada, tiempo_estimado, usuario) VALUES (%s, %s, %s, %s, %s, %s)",
+                                (escala['nroOrden'], escala['id'], idRuta, escala['distancia'], escala['tiempo'], usuario), auto_commit=False)
 
             # Si todo es correcto, confirmamos la transacción
             conexion.conn.commit()
@@ -97,8 +97,8 @@ class Ruta:
 
             # Insertar las escalas
             for escala in escalas:
-                conexion.ejecutar("INSERT INTO escala (nro_orden, idSucursal, idRuta, usuario) VALUES (%s, %s, %s, %s)",
-                                (escala['nroOrden'], escala['id'], id, usuario), auto_commit=False)
+                conexion.ejecutar("INSERT INTO escala (nro_orden, idSucursal, idRuta, distancia_estimada, tiempo_estimado, usuario) VALUES (%s, %s, %s, %s, %s, %s)",
+                                (escala['nroOrden'], escala['id'], id, escala['distancia'], escala['tiempo'], usuario), auto_commit=False)
 
             # Si todo es correcto, confirmamos la transacción
             conexion.conn.commit()

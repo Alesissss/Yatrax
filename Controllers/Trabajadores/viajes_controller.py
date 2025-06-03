@@ -1176,9 +1176,7 @@ def editar_ruta(id):
             else:
                 return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar ruta'})
 
-        if ruta and escalas:
-            return render_template('viajes/rutaCRUD.html', active_page="ruta", active_menu='mViajes', ruta=ruta, escalas=escalas, tittle = 'Editar ruta', btnId = 'btn_Editar')
-        return render_template('viajes/rutaCRUD.html', active_page="ruta", active_menu='mViajes', ruta={}, escalas=[], tittle = 'Editar ruta', btnId = 'btn_Editar')
+        return render_template('viajes/rutaCRUD.html', active_page="ruta", active_menu='mViajes', ruta = ruta if ruta else {}, escalas = escalas if escalas else [], tittle = 'Editar ruta', btnId = 'btn_Editar')
 
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
@@ -1188,9 +1186,7 @@ def ver_ruta(id):
     try:
         ruta = Ruta.obtener_por_id(id)
         escalas = Ruta.obtener_escalas_por_ruta(id)
-        if ruta and escalas:
-            return render_template('viajes/rutaCRUD.html', active_page="ruta", active_menu='mViajes', ruta=ruta, escalas=escalas, tittle = 'Ver ruta', btnId = 'btn_Aceptar')
-        return render_template('viajes/rutaCRUD.html', active_page="ruta", active_menu='mViajes', ruta={}, escalas=[], tittle = 'Ver ruta', btnId = 'btn_Aceptar')
+        return render_template('viajes/rutaCRUD.html', active_page="ruta", active_menu='mViajes', ruta = ruta if ruta else {}, escalas = escalas if escalas else [], tittle = 'Ver ruta', btnId = 'btn_Aceptar')
         
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})

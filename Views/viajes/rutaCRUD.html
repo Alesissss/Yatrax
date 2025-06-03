@@ -49,18 +49,22 @@
                                     </div>
                                 </div>
                                 <div class="col-md-12 mb-3">
-                                    <table id="tbl_Escalas" class="table table-short-rows">
-                                        <thead>
-                                            <tr>
-                                                <th class="text-center d-none">Id Sucursal</th>
-                                                <th class="text-center" style="width: 100px;">N° Orden</th>
-                                                <th class="text-center">Sucursal</th>
-                                                <th class="text-center">Acción</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="table-short-rows">
-                                        </tbody>
-                                    </table>
+                                    <div class="table-responsive">
+                                        <table id="tbl_Escalas" class="table table-hover w-100">
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-center d-none">Id Sucursal</th>
+                                                    <th class="text-center" style="width: 100px;">N° Orden</th>
+                                                    <th class="text-center" style="width: 100px;">Distancia (km)</th>
+                                                    <th class="text-center" style="width: 100px;">Tiempo (min)</th>
+                                                    <th class="text-center">Sucursal</th>
+                                                    <th class="text-center">Acción</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="table-short-rows">
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                                 <div id="infoRuta" class="col-md-12 text-left">
                                     <h5>Distancia estimada: <span id="distanciaRuta">0</span> km</h5>
@@ -74,9 +78,16 @@
                                     <h2>Ubicación de la ruta en el mapa</h2>
                                 </div>
                                 <div class="col-md-5 d-flex align-items-center gap-3">
-                                    <h5>Leyenda:&nbsp;</h5>
-                                    <h5 class="text-end"><span class="badge badge-primary fs-5">SÍ PASA</span></h5>
-                                    <h5 class="text-end"><span class="badge badge-dark fs-5">NO PASA</span></h5>
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-info-circle text-info" data-toggle="tooltip"
+                                            title="Referencia de colores en el mapa"></i>
+                                    </h5>
+                                    <h5 class="mb-0">
+                                        <span class="badge bg-primary fs-6">Ruta confirmada</span>
+                                    </h5>
+                                    <h5 class="mb-0">
+                                        <span class="badge bg-dark fs-6">Ruta no confirmada</span>
+                                    </h5>
                                 </div>
                             </div>
                             <div id="map"></div>
@@ -154,6 +165,7 @@
     // Lista de escalas
     let escalas = [];
     let markers = [];
+    let distancias = [];
     let escalasRecibidas = JSON.parse('{{ escalas | tojson }}');
 
     const iconoAzul = L.icon({
@@ -246,6 +258,9 @@
                     const distanciaKm = (resumen.distance / 1000).toFixed(2);
                     const duracionMin = (resumen.duration / 60).toFixed(2);
 
+                    escalas[i + 1]['distancia'] = (resumen.distance / 1000);
+                    escalas[i + 1]['tiempo'] = (resumen.duration / 60);
+
                     lineaRuta.bindTooltip(`🚗 ${distanciaKm} km - ⏱ ${duracionMin} min`, {
                         permanent: false,
                         direction: 'center',
@@ -262,12 +277,16 @@
         }
 
         Promise.all(promesas).then(() => {
-            const km = (totalDistancia / 1000).toFixed(2);
-            const min = (totalDuracion / 60).toFixed(2);
+            const km = formatearNumero((totalDistancia / 1000));
+            const min = formatearNumero((totalDuracion / 60));
             document.getElementById('distanciaRuta').innerText = km;
             document.getElementById('tiempoRuta').innerText = min;
+
+            reordenarTabla();
+        }).finally(() => {
             HideSpinner();
         });
+
     }
 
     function cargarSucursales() {
@@ -345,19 +364,21 @@
         }
 
         let nroOrden = escalas.length + 1;
-        escalas.push({ 'id': id, 'nombre': nombre, 'nroOrden': nroOrden, 'latitud': latitud, 'longitud': longitud });
+        escalas.push({ 'id': id, 'nombre': nombre, 'nroOrden': nroOrden, 'latitud': latitud, 'longitud': longitud, 'distancia': 0, 'tiempo': 0 });
 
         markers[id] = marker;
         marker.setIcon(iconoAzul);
         const item = `
         <tr>
             <td class="d-none">${id}</td>
-            <td class="text-center style="width: 100px;"">${nroOrden}</td>
+            <td class="text-center" style="width: 100px;">${nroOrden}</td>
+            <td class="text-center" style="width: 100px;">${formatearNumero(0)}</td>
+            <td class="text-center" style="width: 100px;">${formatearNumero(0)}</td>
             <td class="text-left">${nombre}</td>
             <td class="text-center">
                 <button class="btn btn-primary btn-sm {% if btnId == 'btn_Aceptar' %}disabled{% endif %}" onclick="moverEscala(${id}, 'subir') {% if btnId == 'btn_Aceptar' %}disabled{% endif %}">↑</button>
                 <button class="btn btn-primary btn-sm {% if btnId == 'btn_Aceptar' %}disabled{% endif %}" onclick="moverEscala(${id}, 'bajar') {% if btnId == 'btn_Aceptar' %}disabled{% endif %}">↓</button>
-                <button class="btn btn-danger btn-sm {% if btnId == 'btn_Aceptar' %}disabled{% endif %}" onclick="eliminarEscala(${id}) {% if btnId == 'btn_Aceptar' %}disabled{% endif %}">Eliminar</button>
+                <button class="btn btn-danger btn-sm {% if btnId == 'btn_Aceptar' %}disabled{% endif %}" onclick="eliminarEscala(${id}) {% if btnId == 'btn_Aceptar' %}disabled{% endif %}"><i class="bi bi-trash"></i></button>
             </td>
         </tr>
     `;
@@ -405,7 +426,7 @@
         }
     }
 
-    function moverEscala(id, direccion, marker) {
+    function moverEscala(id, direccion) {
         const index = escalas.findIndex(escala => escala.id === id);
 
         if (index === -1) return;
@@ -417,14 +438,14 @@
             [escalas[index], escalas[index + 1]] = [escalas[index + 1], escalas[index]];
         }
 
-        reordenarTabla(marker);
+        reordenarTabla();
 
         if (escalas.length >= 2) {
             dibujarRutaDesdeEscalas();
         }
     }
 
-    function reordenarTabla(marker) {
+    function reordenarTabla() {
         escalas.forEach((escala, index) => {
             escala.nroOrden = index + 1;
         });
@@ -436,12 +457,14 @@
             const item = `
             <tr data-id="${escala.id}">
                 <td class="d-none">${escala.id}</td>
-                <td class="text-center style="width: 100px;"">${escala.nroOrden}</td>
+                <td class="text-center" style="width: 100px;">${escala.nroOrden}</td>
+                <td class="text-center" style="width: 100px;">${formatearNumero(escala.nroOrden === 1 ? 0 : escala.distancia || 0)}</td>
+                <td class="text-center" style="width: 100px;">${formatearNumero(escala.nroOrden === 1 ? 0 : escala.tiempo || 0)}</td>
                 <td class="text-left">${escala.nombre}</td>
                 <td class="text-center">
-                    <button class="btn btn-primary btn-sm" onclick="moverEscala(${escala.id}, 'subir', ${marker})">↑</button>
-                    <button class="btn btn-primary btn-sm" onclick="moverEscala(${escala.id}, 'bajar', ${marker})">↓</button>
-                    <button class="btn btn-danger btn-sm" onclick="eliminarEscala(${escala.id}, ${marker})">Eliminar</button>
+                    <button class="btn btn-primary btn-sm" onclick="moverEscala(${escala.id}, 'subir')">↑</button>
+                    <button class="btn btn-primary btn-sm" onclick="moverEscala(${escala.id}, 'bajar')">↓</button>
+                    <button class="btn btn-danger btn-sm" onclick="eliminarEscala(${escala.id})"><i class="bi bi-trash"></i></button>
                 </td>
             </tr>
         `;
@@ -460,13 +483,13 @@
         }
     }
 
-    map.whenReady(cargarSucursales);
-
     $(document).ready(function () {
+        map.whenReady(cargarSucursales);
+
         $("#btn_Registrar").click(function () {
             let nombre = $("#txt_Ruta").val().trim();
-            let distancia = $('#distanciaRuta').text();
-            let tiempo = $('#tiempoRuta').text();
+            let distancia = escalas.reduce((total, escala) => total + escala.distancia, 0);
+            let tiempo = escalas.reduce((total, escala) => total + escala.tiempo, 0);
             let estado = $('#cbx_Estado').val();
 
             if (!nombre || !estado || !escalas || !distancia || !tiempo) {
@@ -533,8 +556,8 @@
             const id = Number("{{ ruta.id }}");
 
             let nombre = $("#txt_Ruta").val().trim();
-            let distancia = $('#distanciaRuta').text();
-            let tiempo = $('#tiempoRuta').text();
+            let distancia = escalas.reduce((total, escala) => total + escala.distancia, 0);
+            let tiempo = escalas.reduce((total, escala) => total + escala.tiempo, 0);
             let estado = $('#cbx_Estado').val();
 
             if (!nombre || !estado || !escalas || !distancia || !tiempo) {
@@ -611,6 +634,11 @@
 
     function HideSpinner() {
         $('#efec-cargando').addClass('d-none');
+    }
+
+    function formatearNumero(numero) {
+        let numeroRedondeado = Math.round(numero * 100) / 100;
+        return new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(numeroRedondeado);
     }
 </script>
 {% endblock %}
