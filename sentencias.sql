@@ -645,6 +645,30 @@ CREATE TABLE pasaje(
     codigo CHAR(12)
 );
 
+INSERT INTO sucursal (`cod_sucursal`, `ciudad`, `nombre`, `direccion`, `latitud`, `longitud`, `estado`, `abreviatura`, `estado_proceso`, `estado_registro`, `fecha_registro`, `usuario`) 
+VALUES ('CIX-01', 'Chiclayo', 'BALTA', 'Emtrafesa, 110, Avenida José Balta, Urbanizacion Santa Victoria, Chiclayo, Lambayeque, 14001, Perú', '-6.776610', '-79.838656', '1', 'CIX', 'REGISTRADO', '1', '2025-06-02 11:34:18', 'edgar@gmail.com'),
+('CIX-02', 'Chiclayo', 'CHAVEZ', 'Calle Francisco de Orellana, Chiclayo, Lambayeque, 14001, Perú', '-6.764886', '-79.830315', '1', 'CIX', 'REGISTRADO', '1', '2025-06-02 11:37:36', 'edgar@gmail.com'),
+('CIX-03', 'Chiclayo', 'CATOLICA', 'Universidad Católica Santo Toribio de Mogrovejo, Panamericana Norte, Ciudad El Chofer, Chiclayo, Lambayeque, 14013, Perú', '-6.759932', '-79.862134', '1', 'CIX', 'REGISTRADO', '1', '2025-06-02 11:39:17', 'edgar@gmail.com'),
+('IMA-01', 'Lima', 'PLAZA NORTE', 'Plaza Norte, 1400, Avenida Tomás Valle, Urbanización Mesa Redonda, Independencia, Lima, Lima Metropolitana, Lima, 15028, Perú', '-12.006144', '-77.058837', '1', 'IMA', 'REGISTRADO', '1', '2025-06-02 11:39:59', 'edgar@gmail.com'),
+('IMA-02', 'Lima', 'PLAZA SAN MIGUEL', 'Plaza San Miguel, 2000, Avenida La Marina, Virgen de Fatima, San Miguel, Lima, Lima Metropolitana, Lima, 15088, Perú', '-12.076740', '-77.082720', '1', 'IMA', 'REGISTRADO', '1', '2025-06-02 11:40:35', 'edgar@gmail.com'),
+('CJA-01', 'Cajamarca', 'CUMBE', 'El Cumbe, Avenida San Martín de Porres, Urbanización Ramon Castilla, Mollepampa, Cajamarca, 06002, Perú', '-7.164035', '-78.510006', '1', 'CJA', 'REGISTRADO', '1', '2025-06-02 11:42:04', 'edgar@gmail.com'),
+('HUA-01', 'Huamanga', 'SAN JUAN BAUTISTA', 'Terminal San Juan Bautista, Avenida Venezuela, Asociación La Victoria, San Juan Bautista, Huamanga, Ayacucho, 05002, Perú', '-13.170961', '-74.214658', '1', 'HUA', 'REGISTRADO', '1', '2025-06-02 11:43:48', 'edgar@gmail.com'),
+('AQP-01', 'Arequipa', 'FLORES HERMANOS', 'Avenida Pedro P. Diaz, Urbanización Campiña, Arequipa, 04002, Perú', '-16.422245', '-71.543607', '1', 'AQP', 'REGISTRADO', '1', '2025-06-02 11:45:18', 'edgar@gmail.com'),
+('PUN-01', 'Puno', 'EL SOL', 'Avenida El Sol, Laykakota, Puno, 05151, Perú', '-15.849338', '-70.018838', '1', 'PUN', 'REGISTRADO', '1', '2025-06-02 11:46:46', 'edgar@gmail.com'),
+('COR-01', 'Coronel Portillo', 'GUSBET', 'Gran Hotel Gusbet, Tupac Amaru, Area Metropolitana de Pucallpa, Las Palmeras, Yarinacocha, Coronel Portillo, Ucayali, 25004, Perú', '-8.360615', '-74.579561', '1', 'COR', 'REGISTRADO', '1', '2025-06-02 11:50:16', 'edgar@gmail.com'),
+('HUU-01', 'Huánuco', 'PLAZA REY', 'Rey Tours, 1215, Jirón 28 de Julio, Huánuco, 10003, Perú', '-9.927278', '-76.237774', '1', 'HUU', 'REGISTRADO', '1', '2025-06-02 11:51:14', 'edgar@gmail.com');
+
+INSERT INTO ruta (`nombre`, `distancia_estimada`, `tiempo_estimado`, `tipo`, `estado`, `estado_proceso`, `estado_registro`, `fecha_registro`, `usuario`) 
+VALUES ('COSTA COMPLETA IDA', '1766.48', '1477.55', 'ESCALA', '1', 'MODIFICADO', '1', '2025-06-02 12:02:38', 'edgar@gmail.com'),
+('COSTA COMPLETA VUELTA', '1767.03', '1506.97', 'ESCALA', '1', 'MODIFICADO', '1', '2025-06-02 12:04:19', 'edgar@gmail.com'),
+('SIERRA COMPLETA IDA', '2595.83', '2366.86', 'ESCALA', '1', 'MODIFICADO', '1', '2025-06-02 12:05:35', 'edgar@gmail.com'),
+('SIERRA COMPLETA VUELTA', '2595.10', '2371.92', 'ESCALA', '1', 'MODIFICADO', '1', '2025-06-02 12:06:08', 'edgar@gmail.com'),
+('COSTA NORTE IDA', '763.92', '685.04', 'DIRECTO', '1', 'REGISTRADO', '1', '2025-06-02 12:08:42', 'edgar@gmail.com'),
+('COSTA NORTE VUELTA', '765.10', '713.35', 'DIRECTO', '1', 'REGISTRADO', '1', '2025-06-02 12:08:56', 'edgar@gmail.com'),
+('COSTA SUR IDA', '1002.56', '792.50', 'DIRECTO', '1', 'REGISTRADO', '1', '2025-06-02 12:09:18', 'edgar@gmail.com'),
+('COSTA SUR VUELTA', '1001.93', '793.63', 'DIRECTO', '1', 'REGISTRADO', '1', '2025-06-02 12:09:40', 'edgar@gmail.com');
+
+
 -- INSERTS terminos y condicones
 INSERT INTO terminos_condiciones(id, nombre, archivo, estado, fecha_registro, usuario) VALUES (1,'TyC-v2025-001','TyC_v2025-001.txt',1,'2025-05-29 01:51:30','ander@gmail.com');
 
