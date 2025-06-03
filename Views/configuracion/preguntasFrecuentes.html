@@ -1,0 +1,191 @@
+{% extends "index.html" %}
+
+{% block title %}YATRAX - Gestión de preguntas frecuentes{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4">
+    <div class="panel-heading">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Gestionar preguntas frecuentes</h1>
+            </div>
+        </div>
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-12">
+                <table id="tbl_PreguntasFrecuentes" class="table table-bordered table-short-rows">
+                    <thead class="bg-gray">
+                        <tr>
+                            <th class="text-center">ID</th>
+                            <th class="text-center">PREGUNTA</th>
+                            <th class="text-center">RESPUESTA</th>
+                            <th class="text-center">ESTADO</th>
+                            <th class="text-center">ACCIÓN</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white table-short-rows">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% end block %}
+
+{% block scripts %}
+<script>
+    var dtPreguntasFrecuentes;
+
+    $(document).ready(function () {
+        // $('body').addClass('sidebar-collapse');
+        var windowHeight = $('body > div.os-padding.menu-open > div > div > div > div.content-wrapper').height() / 2;
+        //CONFIGURACION POR DEFECTO DATATABLES
+        $.extend($.fn.dataTable.defaults, {
+            dom: "<'row align-items-center'<'col-sm-8 justify-content-start'f><'col-sm-4 c1 d-flex justify-content-end'>>" + "<'row align-items-center'<'col-sm-4'l><'col-sm-4 my-3 justify-content-start d-flex'B><'col-sm-4 d-flex justify-content-end'p>>" + "rt" + "<'row'<'col-sm-6'i><'col-sm-6 mt-1 d-flex justify-content-end'p>>",
+            // dom: "<'row pb-1'<'col-sm-9 d-flex'B><'col-sm-3 c1 d-flex justify-content-end'>>" + "<'row'<'col-sm-4'l><'col-sm-8 justify-content-start'f>>" + "<'row'<'col-sm-6'i><'col-sm-6 d-flex justify-content-end'p>>" + "rt" + "<'row'<'col-sm-6'i><'col-sm-6 mt-1 d-flex justify-content-end'p>>",
+            // dom: "<'row pb-1'<'col-sm-9'B><'col-sm-3 c1 d-flex justify-content-end'>>" + "<'row'<'col-sm-10'l><'col-sm-2'f>>" + "<'row'<'col-sm-6'i><'col-sm-6'p>>" + "rt" + "<'row'<'col-sm-6'i><'col-sm-6'p>>",
+            // dom: "<'row pb-1'<'col-sm-10'B><'col-sm-2 c1 d-flex justify-content-end'>>" + "<'row'<'col-sm-11'l><'col-sm-1'f>>" + "<'row'<'col-sm-10'i><'col-sm-2'p>>" + "rt" + "<'row'<'col-sm-10'i><'col-sm-2'p>>",
+            paging: true,
+            select: true,
+            scroller: false,
+            deferRender: true,
+            scrollY: windowHeight,
+            scrollX: false,
+            fixedHeader: true,
+            ordering: true,
+            destroy: true,
+            responsive: true,
+            autoWidth: false,
+            processing: true,
+            filter: true,
+            orderMulti: true,
+            stateSave: false,
+            serverSide: false,
+            language: {
+                processing: "Procesando...",
+                sSearch: "Buscar:",
+                lengthMenu: "Mostrar _MENU_ registros",
+                info: "Mostrando del _START_ al _END_ de un total de _TOTAL_ registros",
+                infoEmpty: "Sin registros encontrados.",
+                infoFiltered: "(Total de _MAX_ registros filtrados)",
+                loadingRecords: "Cargando...",
+                zeroRecords: "No se encontraron registros",
+                emptyTable: "No hay datos disponibles en la tabla",
+                paginate: {
+                    previous: "Anterior",
+                    next: "Siguiente",
+                    first: "Primero",
+                    last: "Último",
+                },
+            aria: {
+                    sortAscending: ": Activar para ordenar la columna de manera ascendente",
+                    sortDescending: ": Activar para ordenar la columna de manera descendente"
+                },
+            select: {
+                rows: {
+                    _: "%d filas seleccionadas",
+                    0: "Haz clic en una fila para seleccionarla",
+                    1: "1 fila seleccionada"
+                }
+            },
+            buttons: {
+                    copyTitle: 'Copiado en el portapapeles',
+                    copyKeys: 'Presiona <i>ctrl</i> o <i>\u2318</i> + <i>C</i> para copiar los datos de la tabla a tu portapapeles. <br><br>Para cancelar, haga clic en este mensaje o presione Esc.',
+                    copySuccess: {
+                        _: '%d registros copiados correctamente',
+                        1: '1 registro copiado correctamente'
+                    }
+                }
+            },
+            lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
+        });
+
+        fct_IniciarTablaPreguntasFrecuentes('#tbl_PreguntasFrecuentes');
+    });
+
+    function fct_IniciarTablaPreguntasFrecuentes(IdTabla) {
+        // Inicializar DataTables con botones
+        dtPreguntasFrecuentes = $(IdTabla).DataTable({
+            buttons: [
+                {
+                    extend: 'copy',
+                    text: '<i class="bi bi-back"></i>',
+                    titleAttr: 'Copiar en portapapeles',
+                    className: 'btn btn-primary',
+                },
+                {
+                    extend: 'excel',
+                    text: '<i class="bi bi-file-earmark-excel"></i>',
+                    titleAttr: 'Exportar a Excel',
+                    className: 'btn btn-success',
+                    filename: 'Preguntas Frecuentes' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    footer: true,
+                    exportOptions:
+                    {
+                        stripHtml: true,
+                        columns: ':not(:last-child)'
+                    },
+                },
+                {
+                    extend: 'pdf',
+                    text: '<i class="bi bi-file-earmark-pdf"></i>',
+                    titleAttr: 'Exportar a PDF',
+                    className: 'btn btn-danger',
+                    filename: 'Preguntas Frecuentes' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    exportOptions:
+                    {
+                        stripHtml: true,
+                        columns: ':not(:last-child)'
+                    },
+                    orientation: 'landscape',
+                    pageSize: 'LEGAL',
+                },
+                {
+                    extend: 'print',
+                    text: '<i class="bi bi-printer-fill"></i>',
+                    titleAttr: 'Imprimir',
+                    className: 'btn btn-info',
+                    exportOptions:
+                    {
+                        stripHtml: true,
+                        columns: ':not(:last-child)'
+                    },
+                },
+                {
+                    extend: 'colvis',
+                    text: '<i class="bi bi-ui-checks"></i>',
+                    titleAttr: 'Seleccionar',
+                    className: 'btn btn-warning',
+                    columns: ':not(.noVis)',
+                },
+                {
+                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo tipo metodo de pago',
+                    className: 'btn bg-success m-1',
+                    titleAttr: 'Nuevo',
+                    action: function (e, dt, node, config) {
+                        fct_PreguntasFrecuentesNuevo();
+                    },
+                },
+            ],
+            ajax: {
+                url: "/trabajadores/configuracion/GetData_PreguntasFrecuentes",
+                type: "GET",
+                datatype: "json",
+                data: function (d) {
+                },
+                dataSrc: function (json) {
+                    if (json.Status === "error") {
+                        toastr.error('Ocurrió un error inesperado al intentar listar la tabla');
+                        console.error(json.Msj);
+                        return [];
+                    }
+                    return json.data;
+                },
+                error: function (xhr, error, thrown) {
+                    toastr.error('Ocurrió un error inesperado al intentar listar la tabla');
+                    console.error('Error en la solicitud Ajax: ' + error + xhr.Msj + thrown);
+                },
+            },
+
+{% endblock %}

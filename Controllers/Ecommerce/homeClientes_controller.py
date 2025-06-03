@@ -157,6 +157,10 @@ def register_cliente():
 def transferencia_pasaje():
     return render_template('Ecommerce/home/transferenciaPasaje.html')
 
+@homeClientes_bp.route('/miPasajeOperaciones')
+def mi_pasaje_operaciones():
+    return render_template('Ecommerce/home/miPasajeOp.html')
+
 @homeClientes_bp.route('/pago')
 def pago_pasajes():
     return render_template('Ecommerce/home/pago.html')
