@@ -236,17 +236,15 @@
             const origen = coordenadas[i];
             const destino = coordenadas[i + 1];
 
-            const orsAPIKey = '5b3ce3597851110001cf6248ee3267fd49824a40983b5ec79e79356f';
-            let promesa = axios.get('https://api.openrouteservice.org/v2/directions/driving-car', {
-                headers: { 'Authorization': orsAPIKey },
+            let promesa = axios.get('/trabajadores/viajes/API_ENRUTAR', {
                 params: {
-                    start: `${origen.lng},${origen.lat}`,
-                    end: `${destino.lng},${destino.lat}`
+                    start: `${origen.lat},${origen.lng}`,
+                    end: `${destino.lat},${destino.lng}`
                 }
             }).then(response => {
                 const datos = response.data;
-                const ruta = datos.features[0].geometry.coordinates;
-                const resumen = datos.features[0].properties.summary;
+                const ruta = datos.route;
+                const resumen = datos;
 
                 totalDistancia += resumen.distance;
                 totalDuracion += resumen.duration;
@@ -270,7 +268,9 @@
                     }).openTooltip();
                 }
             }).catch(error => {
+                toastr.error("Ocurrió un error inesperado al obtener la ruta");
                 console.error('Error al obtener la ruta:', error);
+                HideSpinner();
             });
 
             promesas.push(promesa);
