@@ -427,7 +427,7 @@ CREATE TABLE cliente (
     estado TINYINT DEFAULT 1,
     
     fechaRegistro DATETIME DEFAULT CURRENT_TIMESTAMP,
-    usuario VARCHAR(100) NOT NULL
+    usuario VARCHAR(100) NULL
 );
 
 CREATE TABLE asiento (
