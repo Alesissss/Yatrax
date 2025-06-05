@@ -35,7 +35,7 @@ class Ruta:
     def obtener_escalas_por_ruta(cls, ruta_id):
         conexion = bd.Conexion()
         try:
-            escalas = conexion.obtener(""" SELECT es.id, es.nro_orden, es.idSucursal, suc.nombre, es.idRuta from escala es INNER JOIN sucursal suc on es.idSucursal = suc.id WHERE idRuta = %s ORDER BY nro_orden""", (ruta_id,))
+            escalas = conexion.obtener(""" SELECT es.id, es.nro_orden, es.idSucursal, es.distancia_estimada, es.tiempo_estimado, suc.nombre, es.idRuta from escala es INNER JOIN sucursal suc on es.idSucursal = suc.id WHERE idRuta = %s ORDER BY nro_orden""", (ruta_id,))
             return escalas
         finally:
             conexion.cerrar()
