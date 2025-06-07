@@ -94,7 +94,7 @@
                         <i class="bi bi-person fs-3" style="color:white;"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a id="abrirModalLogin" class="dropdown-item">Iniciar sesión</a></li>
+                        <li><a id="abrirModalLogin" class="dropdown-item" style="cursor: pointer;">Iniciar sesión</a></li>
                         <li><a class="dropdown-item" href="{{url_for('homeClientes.register_cliente')}}">Registrar</a></li>
                     </ul>
                 {% endif %}
@@ -329,10 +329,13 @@
         }
 
 
-        document.getElementById("abrirModalLogin").addEventListener("click", function (event) {
-            event.preventDefault();
-            loadInicioSesion();
-        });
+        const btnAbrirLogin = document.getElementById("abrirModalLogin");
+        if (btnAbrirLogin) {
+            btnAbrirLogin.addEventListener("click", function (event) {
+                event.preventDefault();
+                loadInicioSesion();
+            });
+        }
 
         function loadBigModal(url, title) {
             $.ajax({

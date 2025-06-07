@@ -191,22 +191,21 @@
             columns: [
                 { data: "id", name: "id" },
                 { data: "nombre", name: "nombre" },
-                { 
-                    data: "distancia_estimada", 
+                {
+                    data: "distancia_estimada",
                     name: "distancia_estimada",
                     render: function (data, type, row) {
-                        return `${data} km`;
+                        return `${formatearNumero(data)} km`;
                     },
                 },
-                { 
-                    data: "tiempo_estimado", 
+                {
+                    data: "tiempo_estimado",
                     name: "tiempo_estimado",
                     render: function (data, type, row) {
-                        return `${data} min`;
+                        return `${formatearNumero(data)} min`;
                     },
                 },
                 { data: "tipo", name: "tipo" },
-
                 {
                     data: "estado",
                     name: "estado",
@@ -365,6 +364,11 @@
                 });
             }
         });
+    }
+
+    function formatearNumero(numero) {
+        let numeroRedondeado = Math.round(numero * 100) / 100;
+        return new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(numeroRedondeado);
     }
 
     function newexportaction(e, dt, button, config) {

@@ -12,7 +12,7 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-12 pb-3">
                             <div class="card card-outline card-primary h-100">
                                 <div class="card-header">
                                     <h3 class="card-title">Datos Generales</h3>
@@ -27,20 +27,40 @@
                                                 </select>
                                             </div>
                                         </div>
+                                        <!-- <div class="col-md-12 mb-3">
+                                            <div class="table-responsive">
+                                                <table id="tbl_Escalas" class="table table-hover w-100">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="text-center d-none">Id Sucursal</th>
+                                                            <th class="text-center" style="width: 100px;">N° Orden</th>
+                                                            <th class="text-center">Sucursal</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody class="table-short-rows">
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div> -->
                                         <div class="col-md-12 mb-3">
-                                            <table id="tbl_Escalas" class="table table-short-rows">
-                                                <thead>
-                                                    <tr>
-                                                        <th class="text-center d-none">Id Sucursal</th>
-                                                        <th class="text-center" style="width: 100px;">N° Orden</th>
-                                                        <th class="text-center">Sucursal</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody class="table-short-rows">
-                                                </tbody>
-                                            </table>
+                                            <div class="table-responsive">
+                                                <table id="tbl_Escalas" class="table table-hover w-100">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="text-center">Subruta</th>
+                                                            <th class="text-center">Origen</th>
+                                                            <th class="text-center">Destino</th>
+                                                            <th class="text-center">Fecha salida</th>
+                                                            <th class="text-center">Fecha llegada</th>
+                                                            <th class="text-center">Precio (S/.)</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody class="table-short-rows">
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         </div>
-                                        <div class="col-md-12 mb-3">
+                                        <!-- <div class="col-md-12 mb-3">
                                             <label for="txt_hora_salida">Fecha y hora de salida:</label>
                                             <div class="input-group">
                                                 <input class="form-control" type="datetime-local" id="txt_hora_salida"
@@ -53,7 +73,7 @@
                                                 <input class="form-control" type="datetime-local" id="txt_hora_llegada"
                                                     name="fechaHoraLlegada" disabled>
                                             </div>
-                                        </div>
+                                        </div> -->
                                         <div class="col-md-12 mb-3">
                                             <label for="cbx_Estado">Estado</label>
                                             <div class="input-group">
@@ -72,7 +92,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6 pb-3">
                             <div class="card card-outline card-primary h-100">
                                 <div class="card-header">
                                     <h3 class="card-title">Asignar vehículo</h3>
@@ -124,7 +144,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6 pb-3">
                             <div class="card card-outline card-primary h-100">
                                 <div class="card-header">
                                     <h3 class="card-title">Asignar personal</h3>
@@ -165,82 +185,189 @@
 {% endblock %}
 {% block scripts %}
 <script>
+    // function fct_GetRutas() {
+    //     $.getJSON('/trabajadores/viajes/GetData_RutasViajes', function (response) {
+    //         if (response && response.Status === "success") {
+    //             let items = '<option disabled selected>--SELECCIONAR--</option>';
+
+    //             let rutas = response.data;
+
+    //             $.each(response.data, function (index, item) {
+    //                 if (false) {
+    //                     items += `<option selected value="${item.id}">${item.nombre} - ${item.tipo}</option>`;
+    //                 } else {
+    //                     items += `<option value="${item.id}">${item.nombre} - ${item.tipo}</option>`;
+    //                 }
+    //             });
+
+    //             $('#cbx_Ruta').html(items);
+
+    //             $('#cbx_Ruta').change(function () {
+    //                 let rutaSeleccionadaId = $(this).val();
+    //                 let rutaSeleccionada = rutas.find(function (ruta) {
+    //                     return ruta.id == rutaSeleccionadaId;
+    //                 });
+
+    //                 $('#txt_hora_salida').prop('disabled', false);
+
+    //                 if (rutaSeleccionada) {
+    //                     let trs = '';
+    //                     $.each(rutaSeleccionada.escalas, function (index, item) {
+    //                         trs += `
+    //                             <tr>
+    //                                 <td class="d-none">${item.id}</td>
+    //                                 <td class="text-center style="width: 100px;"">${item.nro_orden}</td>
+    //                                 <td class="text-left">${item.nombre}</td>
+    //                             </tr>
+    //                         `;
+    //                     });
+    //                     $('#tbl_Escalas tbody').html(trs);
+    //                 } else {
+    //                     console.log('No se encontró la ruta seleccionada');
+    //                 }
+    //             });
+
+    //             $('#txt_hora_salida').on('input', function () {
+    //                 let rutaSeleccionadaId = $('#cbx_Ruta').val();
+    //                 let rutaSeleccionada = rutas.find(function (ruta) {
+    //                     return ruta.id == rutaSeleccionadaId;
+    //                 });
+
+    //                 if (rutaSeleccionada) {
+    //                     let tiempoEstimado = parseInt(rutaSeleccionada.tiempo_estimado);
+
+    //                     let horaSalida = $('#txt_hora_salida').val();
+
+    //                     if (!horaSalida) return;
+
+    //                     let partes = horaSalida.split(/[-T:]/);
+    //                     let fechaSalida = new Date(
+    //                         parseInt(partes[0]),
+    //                         parseInt(partes[1]) - 1,
+    //                         parseInt(partes[2]),
+    //                         parseInt(partes[3]),
+    //                         parseInt(partes[4])
+    //                     );
+
+    //                     fechaSalida.setMinutes(fechaSalida.getMinutes() + tiempoEstimado);
+
+    //                     let fechaLlegadaLocal = new Date(fechaSalida.getTime() - (fechaSalida.getTimezoneOffset() * 60000))
+    //                         .toISOString().slice(0, 16);
+
+    //                     $('#txt_hora_llegada').val(fechaLlegadaLocal);
+    //                 }
+    //             });
+
+    //         } else {
+    //             console.error('Error al obtener las rutas:', response.Msj);
+    //         }
+    //     });
+    // }
+
     function fct_GetRutas() {
         $.getJSON('/trabajadores/viajes/GetData_RutasViajes', function (response) {
             if (response && response.Status === "success") {
                 let items = '<option disabled selected>--SELECCIONAR--</option>';
-
                 let rutas = response.data;
 
-                $.each(response.data, function (index, item) {
-                    if (false) {
-                        items += `<option selected value="${item.id}">${item.nombre} - ${item.tipo}</option>`;
-                    } else {
-                        items += `<option value="${item.id}">${item.nombre} - ${item.tipo}</option>`;
-                    }
+                $.each(rutas, function (_, item) {
+                    items += `<option value="${item.id}">${item.nombre} - ${item.tipo}</option>`;
                 });
 
                 $('#cbx_Ruta').html(items);
 
-                $('#cbx_Ruta').change(function () {
-                    let rutaSeleccionadaId = $(this).val();
-                    let rutaSeleccionada = rutas.find(function (ruta) {
-                        return ruta.id == rutaSeleccionadaId;
-                    });
+                $('#cbx_Ruta').off('change').on('change', function () {
+                    let rutaId = $(this).val();
+                    let ruta = rutas.find(r => r.id == rutaId);
+                    if (!ruta || ruta.escalas.length < 2) return;
 
-                    $('#txt_hora_salida').prop('disabled', false);
+                    const escalas = ruta.escalas.sort((a, b) => a.nro_orden - b.nro_orden);
+                    let filas = '';
 
-                    if (rutaSeleccionada) {
-                        let trs = '';
-                        $.each(rutaSeleccionada.escalas, function (index, item) {
-                            trs += `
-                                <tr>
-                                    <td class="d-none">${item.id}</td>
-                                    <td class="text-center style="width: 100px;"">${item.nro_orden}</td>
-                                    <td class="text-left">${item.nombre}</td>
-                                </tr>
-                            `;
-                        });
-                        $('#tbl_Escalas tbody').html(trs);
-                    } else {
-                        console.log('No se encontró la ruta seleccionada');
+                    for (let i = 0; i < escalas.length; i++) {
+                        for (let j = i + 1; j < escalas.length; j++) {
+                            const origen = escalas[i];
+                            const destino = escalas[j];
+
+                            // Calcular tiempo total entre i y j
+                            let tiempoTotal = 0;
+                            for (let k = i + 1; k <= j; k++) {
+                                tiempoTotal += parseFloat(escalas[k].tiempo_estimado || '0');
+                            }
+
+                            const isPrimeraSubruta = (i === 0 && j === 1);
+                            const inputSalida = isPrimeraSubruta
+                                ? `<input type="datetime-local" class="form-control input-salida" data-tiempo="${tiempoTotal}" onchange="calcularLlegadas()">`
+                                : `<span class="fecha-salida"></span>`;
+
+                            filas += `
+                            <tr data-i="${i}" data-j="${j}" data-tiempo="${tiempoTotal}">
+                                <td class="text-center">Subruta ${origen.nro_orden} - ${destino.nro_orden}</td>
+                                <td class="text-center">${origen.nombre}</td>
+                                <td class="text-center">${destino.nombre}</td>
+                                <td class="text-center">${inputSalida}</td>
+                                <td class="text-center"><span class="fecha-llegada"></span></td>
+                                <td class="text-center">
+                                    <input type="number" step="0.01" min="0" class="form-control precio-input">
+                                </td>
+                            </tr>
+                        `;
+                        }
                     }
+
+                    $('#tbl_Escalas tbody').html(filas);
                 });
-
-                $('#txt_hora_salida').on('input', function () {
-                    let rutaSeleccionadaId = $('#cbx_Ruta').val();
-                    let rutaSeleccionada = rutas.find(function (ruta) {
-                        return ruta.id == rutaSeleccionadaId;
-                    });
-
-                    if (rutaSeleccionada) {
-                        let tiempoEstimado = parseInt(rutaSeleccionada.tiempo_estimado);
-
-                        let horaSalida = $('#txt_hora_salida').val();
-
-                        if (!horaSalida) return;
-
-                        let partes = horaSalida.split(/[-T:]/);
-                        let fechaSalida = new Date(
-                            parseInt(partes[0]),
-                            parseInt(partes[1]) - 1,
-                            parseInt(partes[2]),
-                            parseInt(partes[3]),
-                            parseInt(partes[4])
-                        );
-
-                        fechaSalida.setMinutes(fechaSalida.getMinutes() + tiempoEstimado);
-
-                        let fechaLlegadaLocal = new Date(fechaSalida.getTime() - (fechaSalida.getTimezoneOffset() * 60000))
-                            .toISOString().slice(0, 16);
-
-                        $('#txt_hora_llegada').val(fechaLlegadaLocal);
-                    }
-                });
-
             } else {
-                console.error('Error al obtener las rutas:', response.Msj);
+                console.error('Error al obtener rutas:', response.Msj);
             }
+        });
+    }
+
+    function calcularLlegadas() {
+        const salidaInput = document.querySelector('.input-salida');
+        if (!salidaInput || !salidaInput.value) return;
+
+        const filas = Array.from(document.querySelectorAll('#tbl_Escalas tbody tr'));
+        const salidaInicial = moment(salidaInput.value);
+        if (!salidaInicial.isValid()) return;
+
+        // Mapa para guardar hora llegada por índice de destino
+        const horaLlegadaPorEscala = new Map();
+
+        filas.forEach((fila) => {
+            const i = parseInt(fila.dataset.i);
+            const j = parseInt(fila.dataset.j);
+            const tiempoMin = parseFloat(fila.dataset.tiempo || '0');
+
+            let horaSalida;
+
+            // Si es la primera subruta (1-2), usar input
+            if (i === 0 && j === 1) {
+                horaSalida = salidaInicial.clone();
+            }
+            // Si la subruta empieza desde E1 (1–3, 1–4…), usar también la hora inicial
+            else if (i === 0) {
+                horaSalida = salidaInicial.clone();
+            }
+            // Si no, usamos la llegada de la subruta anterior como hora de salida
+            else {
+                horaSalida = horaLlegadaPorEscala.get(i);
+            }
+
+            const horaLlegada = moment(horaSalida).add(tiempoMin, 'minutes');
+
+            const salidaCell = fila.querySelector('.fecha-salida');
+            if (salidaCell && salidaCell.tagName === 'SPAN') {
+                salidaCell.textContent = horaSalida.format('YYYY-MM-DD HH:mm:ss');
+            }
+
+            const llegadaCell = fila.querySelector('.fecha-llegada');
+            if (llegadaCell) {
+                llegadaCell.textContent = horaLlegada.format('YYYY-MM-DD HH:mm:ss');
+            }
+
+            // Guardamos hora de llegada para posibles usos futuros
+            horaLlegadaPorEscala.set(j, horaLlegada);
         });
     }
 
@@ -405,9 +532,6 @@
             let idVehiculo = $('#cbx_Vehiculo').val();
             let choferesSeleccionados = $('#cbx_Chofer').select2('data').map(item => item.data);
             let tripulantesSeleccionados = $('#cbx_Tripulante').select2('data').map(item => item.data);
-            
-            console.log(choferesSeleccionados);
-            console.log(tripulantesSeleccionados);
 
             let estado = $('#cbx_Estado').val();
 
@@ -467,6 +591,10 @@
                     });
                 }
             });
+        });
+
+        $("#btn_Volver").click(function () {
+            window.location.href = "/trabajadores/viajes/ProgramarViaje";
         });
     });
 </script>

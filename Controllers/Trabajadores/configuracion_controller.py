@@ -404,14 +404,14 @@ def registrar_metodo_pago():
             logo_path = f"/Static/img/metodos_pago/logo/{logo_filename}"
             logo.save(os.path.join("Static/img/metodos_pago/logo/", logo_filename))
         else:
-            logo_path = "/Static/img/trabajadores/default-logo.png"  # Logo por defecto
+            logo_path = "/Static/img/metodos_pago/logo/default_metodopago.png"  # Logo por defecto
         qr = request.files.get("qr")
         if qr:
             qr_filename = secure_filename(qr.filename)
             qr_path = f"/Static/img/metodos_pago/qr/{qr_filename}"
             qr.save(os.path.join("Static/img/metodos_pago/qr", qr_filename))
         else:
-            qr_path = "/Static/img/trabajadores/default-logo.png"
+            qr_path = None
             
         mensajes = MetodoPago.registrar(nombre, logo_path, estado, session.get('usuario', {}).get('email', 'SIN USUARIO').strip(), tipo_pago, qr_path)
         msj1 = mensajes.get('@MSJ')

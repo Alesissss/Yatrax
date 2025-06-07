@@ -1,4 +1,5 @@
 import os
+import requests
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort, json
 from werkzeug.utils import secure_filename
 
@@ -1073,6 +1074,41 @@ def get_marcas():
 
 # REGION RUTA
 
+@viajes_bp.route("/API_ENRUTAR", methods=["GET"])
+def api_enrutar():
+    try:
+        start = request.args.get('start')
+        end = request.args.get('end')
+
+        start_lat, start_lng = map(float, start.split(','))
+        end_lat, end_lng = map(float, end.split(','))
+
+        url = 'https://api.openrouteservice.org/v2/directions/driving-car'
+        headers = {
+            'Authorization': '5b3ce3597851110001cf6248ee3267fd49824a40983b5ec79e79356f'
+        }
+        params = {
+            'start': f"{start_lng},{start_lat}",
+            'end': f"{end_lng},{end_lat}"
+        }
+
+        response = requests.get(url, headers=headers, params=params)
+
+        if response.status_code == 200:
+            data = response.json()
+            route = data['features'][0]['geometry']['coordinates']
+            summary = data['features'][0]['properties']['summary']
+
+            return jsonify({
+                'route': route,
+                'distance': summary['distance'],
+                'duration': summary['duration']
+            })
+        else:
+            return jsonify({'error': 'Error al obtener la ruta'}), 500
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @viajes_bp.route("/GetData_Ruta", methods=["GET"])
 def get_rutas():
     try:
@@ -1176,9 +1212,7 @@ def editar_ruta(id):
             else:
                 return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar ruta'})
 
-        if ruta and escalas:
-            return render_template('viajes/rutaCRUD.html', active_page="ruta", active_menu='mViajes', ruta=ruta, escalas=escalas, tittle = 'Editar ruta', btnId = 'btn_Editar')
-        return render_template('viajes/rutaCRUD.html', active_page="ruta", active_menu='mViajes', ruta={}, escalas=[], tittle = 'Editar ruta', btnId = 'btn_Editar')
+        return render_template('viajes/rutaCRUD.html', active_page="ruta", active_menu='mViajes', ruta = ruta if ruta else {}, escalas = escalas if escalas else [], tittle = 'Editar ruta', btnId = 'btn_Editar')
 
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
@@ -1188,9 +1222,7 @@ def ver_ruta(id):
     try:
         ruta = Ruta.obtener_por_id(id)
         escalas = Ruta.obtener_escalas_por_ruta(id)
-        if ruta and escalas:
-            return render_template('viajes/rutaCRUD.html', active_page="ruta", active_menu='mViajes', ruta=ruta, escalas=escalas, tittle = 'Ver ruta', btnId = 'btn_Aceptar')
-        return render_template('viajes/rutaCRUD.html', active_page="ruta", active_menu='mViajes', ruta={}, escalas=[], tittle = 'Ver ruta', btnId = 'btn_Aceptar')
+        return render_template('viajes/rutaCRUD.html', active_page="ruta", active_menu='mViajes', ruta = ruta if ruta else {}, escalas = escalas if escalas else [], tittle = 'Ver ruta', btnId = 'btn_Aceptar')
         
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
