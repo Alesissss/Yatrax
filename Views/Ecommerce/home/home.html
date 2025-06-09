@@ -209,7 +209,10 @@
           </div>
           <div class="col-md-3 d-grid">
             <button style="background-color: var(--primary-color); border: 0px;" type="button"
-              class="btn btn-primary fw-bold" onclick="nextStep()">Buscar</button>
+              class="btn btn-primary fw-bold" onclick="buscarYMostrarItinerario()">
+              Buscar
+            </button>
+
           </div>
         </div>
       </form>
@@ -254,84 +257,9 @@
             <h6>Elegir</h6>
           </div>
         </div>
-        <div id="contenedor_viajes" class="row">
+        <div id="contenedor_viajes_ida" class="row">
 
         </div>
-        <div class="accordion accordion-flush" id="accordionFlushExample">
-          <div class="accordion-item">
-              <div class="col-md-5 d-flex justify-content-center p-2">
-                <div class="row d-flex justify-content-center">
-                  <div class="col-md-5 d-flex justify-content-center">
-                    <div class="row">
-                      <div class="col-md-12">
-                        <p><b>4:30 PM</b></p>
-                      </div>
-                      <div class="col-md-12">
-                        <p>Bolognesi</p>
-                      </div>
-                      <div class="col-md-12">
-                        <p>Chiclayo</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-md-2 d-flex justify-content-center">
-                    <div class="row d-flex align-items-center justify-content-center">
-                        <p> -> </p>
-                    </div>
-                  </div>
-                  <div class="col-md-5 d-flex justify-content-center">
-                    <div class="row">
-                      <div class="col-md-12">
-                        <p><b>6:30 PM</b></p>
-                      </div>
-                      <div class="col-md-12">
-                        <p>El ejercito</p>
-                      </div>
-                      <div class="col-md-12">
-                        <p>Trujillo</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-2 d-flex justify-content-center p-2">
-                <div class="row">
-                  <div class="col-md-6 d-flex justify-content-center align-items-center">
-                    <p class="p-0 m-0">Premium</p>
-                  </div>      
-                  <div class="col-md-6 d-flex justify-content-center align-items-center">
-                    <p class="p-0 m-0">Directo</p>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-3 d-flex justify-content-center p-2">
-                <div class="row">
-                  <div class="col-md-12">
-                    <p><b>1° Nivel:</b> 10 libres S/50</p>
-                  </div>
-                  <div class="col-md-12">
-                    <p><b>2° Nivel:</b> 28 libres S/40</p>
-                  </div>
-                </div>
-
-              </div>
-              <div class="col-md-2 d-flex justify-content-center p-2 rounded-end">
-                <button class="button btn" style="background-color: var(--success-color); color: white;" type="button"
-                  data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false"
-                  aria-controls="flush-collapseOne">
-                  Elegir
-                </button>
-              </div>
-              <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne"
-                data-bs-parent="#accordionFlushExample">
-                <div class="accordion-body">Placeholder content for this accordion, which is intended to demonstrate the
-                  <code>.accordion-flush</code> class. This is the first item's accordion body.
-                </div>
-              </div>
-
-          </div>
-        </div>
-
         <button class="btn btn-primary btn-siguiente" onclick="nextStep()">Siguiente <i
             class="fas fa-arrow-right"></i></button>
       </div>
@@ -664,15 +592,49 @@
 
     document.getElementById(`step-${currentStep}`).classList.add('active');
     document.querySelector(`.tab-link[data-step="${currentStep}"]`).classList.add('active');
-  }
-
-  function nextStep() {
-    const steps = document.querySelectorAll('.step');
-    if (currentStep < steps.length - 1) {
-      currentStep++;
-      updateFormVisibility();
+    if (currentStep === 2) {
+      cargarItinerario(resp.data_vuelta, "contenedor_viajes_vuelta");
     }
   }
+
+  function buscarYMostrarItinerario() {
+    const datos = capturarDatos();
+
+    if (!datos.origen || !datos.destino || !datos.fecha_ida) {
+      toastr.warning("Debes completar origen, destino y fecha de ida.");
+      return;
+    }
+
+    $.ajax({
+      url: '/ecommerce/home/buscarViajes',
+      data: datos,
+      method: 'POST',
+      success: function (resp) {
+        if (resp.Status == 'success') {
+          toastr.success('VIAJES RETORNADOS CORRECTAMENTE', 'MENSAJE DEL SISTEMA');
+          cargarItinerario(resp.data_ida, 'contenedor_viajes_ida');
+
+          // Si tiene fecha de vuelta, almacenamos para el paso 2
+          if (resp.data_vuelta && resp.data_vuelta.length > 0) {
+            window.itinerario_vuelta = resp.data_vuelta;
+          } else {
+            window.itinerario_vuelta = [];
+          }
+
+          // Cambiar al paso 1 (itinerario ida)
+          currentStep = 1;
+          updateFormVisibility();
+        } else {
+          toastr.warning('ERROR AL BUSCAR EL VIAJE: ' + resp.Msj, 'MENSAJE DEL SISTEMA');
+        }
+      },
+      error: function (err) {
+        console.log('Error; ', err)
+        toastr.error("Error en la conexión al servidor.");
+      }
+    });
+  }
+
   document.querySelectorAll('.tab-link').forEach(tab => {
     tab.addEventListener('click', () => {
       const stepIndex = parseInt(tab.getAttribute('data-step'));
@@ -937,24 +899,24 @@
 
   fct_Modalidad();
 
-$(document).on('click', '#realizar_reserva', function() {
-  if (($("#metodo_pago").val() != null) && ($("#tipo_comprobante").val() != null)){
-    btnReserva = document.getElementById("realizar_reserva")
-    btnReserva.disabled=true
-    $.ajax({
-      url: "/ecommerce/home/reservarPasaje",
-      type: "POST",
-      data: {
-        metodo_pago: $("#metodo_pago").val(),
-        tipo_comprobante: $("#tipo_comprobante").val(),
-        cliente: $("#cliente_id").val(),
-        promocion: 0,
-        viaje: 1
-      },
-      success: function(response) {
-        if (response.status === 1) {
-          // Simula que el código de reserva fue generado (puedes retornarlo en el backend si deseas)
-          const codigoReserva = response.codigo_reserva;
+  $(document).on('click', '#realizar_reserva', function () {
+    if (($("#metodo_pago").val() != null) && ($("#tipo_comprobante").val() != null)) {
+      btnReserva = document.getElementById("realizar_reserva")
+      btnReserva.disabled = true
+      $.ajax({
+        url: "/ecommerce/home/reservarPasaje",
+        type: "POST",
+        data: {
+          metodo_pago: $("#metodo_pago").val(),
+          tipo_comprobante: $("#tipo_comprobante").val(),
+          cliente: $("#cliente_id").val(),
+          promocion: 0,
+          viaje: 1
+        },
+        success: function (response) {
+          if (response.status === 1) {
+            // Simula que el código de reserva fue generado (puedes retornarlo en el backend si deseas)
+            const codigoReserva = response.codigo_reserva;
 
             Swal.fire({
               icon: 'success',
@@ -967,29 +929,29 @@ $(document).on('click', '#realizar_reserva', function() {
               <p><strong>Su código de reserva es:</strong></p>
               <p style="font-weight: bold; font-size: 18px;">${codigoReserva}</p>
             `,
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#1c3c78',
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            width: '40rem',
-            padding: '1.5rem'
-          });
-        } else {
-          toastr.error(response.mensaje || "Error al realizar la reserva.");
+              confirmButtonText: 'OK',
+              confirmButtonColor: '#1c3c78',
+              allowOutsideClick: false,
+              allowEscapeKey: false,
+              width: '40rem',
+              padding: '1.5rem'
+            });
+          } else {
+            toastr.error(response.mensaje || "Error al realizar la reserva.");
+          }
+        },
+        error: function (xhr) {
+          const errorMsg = xhr.responseJSON?.mensaje || "Error inesperado en la reserva.";
+          toastr.error(errorMsg);
         }
-      },
-      error: function(xhr) {
-        const errorMsg = xhr.responseJSON?.mensaje || "Error inesperado en la reserva.";
-        toastr.error(errorMsg);
-      }
-    });
-    setTimeout(() => {
-      btnReserva.disabled=false
-    }, 4000);
-  }else{
-    toastr.error("El método para reservas en efectivo aun no esta disponible. Contáctese con la empresa para mayor información");
-  }
-});
+      });
+      setTimeout(() => {
+        btnReserva.disabled = false
+      }, 4000);
+    } else {
+      toastr.error("El método para reservas en efectivo aun no esta disponible. Contáctese con la empresa para mayor información");
+    }
+  });
 
   function capturarDatos() {
     let texto = $('#cbx_Ciudades').select2('data')[0].text;
@@ -1006,32 +968,68 @@ $(document).on('click', '#realizar_reserva', function() {
       'fecha_vuelta': fecha_vuelta
     }
   }
-
-  $.ajax({
-    url: '/ecommerce/home/buscarViajes',
-    data: capturarDatos(),
-    method: 'POST',
-    success: function (resp) {
-      if (resp.Status == 'success') {
-        toastr.success('VIAJES RETORNADOS CORRECTAMENTE', 'MENSAJE DEL SISTEMA');
-        itinerario_ida = resp.data_ida;
-        itinerario_vuelta = resp.data_vuelta;
-      } else {
-        toastr.warning('ERROR AL BUSCAR EL VIAJE', 'MENSAJE DEL SISTEMA');
-      }
-    },
-    error: function (err) {
-      console.log('Error; ', err)
-    }
-  });
-  
-  function cargarItinerario(itinerario) {
-    const contenedor = document.getElementById("contenedor_viajes");
-    const newContent = ;
-    if (contenedor.children.length > 0) return;
+  function cargarItinerario(itinerarios, contenedorId) {
+    const contenedor = document.getElementById(contenedorId);
     contenedor.innerHTML = '';
-    
+
+    if (!itinerarios || itinerarios.length === 0) {
+      contenedor.innerHTML = '<p class="text-center">No hay itinerarios disponibles.</p>';
+      return;
+    }
+
+    let contenido = '<div class="accordion accordion-flush" id="accordionFlushExample">';
+
+    itinerarios.forEach((it, index) => {
+      const collapseId = `${contenedorId}-collapse-${index}`;
+
+      contenido += `
+      <div class="accordion-item">
+        <div class="row">
+          <div class="col-md-5 d-flex justify-content-center p-2">
+            <div class="row d-flex justify-content-center">
+              <div class="col-md-5 text-center">
+                <p><b>${it.hora_salida}</b></p>
+                <p>${it.sucursal_salida}</p>
+                <p>${it.ciudad_salida}</p>
+              </div>
+              <div class="col-md-2 d-flex justify-content-center align-items-center">
+                <p>→</p>
+              </div>
+              <div class="col-md-5 text-center">
+                <p><b>${it.hora_llegada}</b></p>
+                <p>${it.sucursal_llegada}</p>
+                <p>${it.ciudad_llegada}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-2 d-flex justify-content-center p-2">
+            <div class="row text-center">
+              <div class="col-md-6"><p class="m-0">${it.servicio}</p></div>
+              <div class="col-md-6"><p class="m-0">${it.tipo_viaje}</p></div>
+            </div>
+          </div>
+          <div class="col-md-3 d-flex justify-content-center p-2">
+            <p class="text-center">${it.niveles_con_asientos}</p>
+          </div>
+          <div class="col-md-2 d-flex justify-content-center p-2 rounded-end">
+            <button class="button btn" style="background-color: var(--success-color); color: white;" type="button"
+              data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false"
+              aria-controls="${collapseId}">
+              Elegir
+            </button>
+          </div>
+          <div id="${collapseId}" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+            <div class="accordion-body">Aquí puedes mostrar detalles adicionales.</div>
+          </div>
+        </div>
+      </div>`;
+    });
+
+    contenido += '</div>';
+    contenedor.innerHTML = contenido;
   }
+
+
 
 </script>
 <script>

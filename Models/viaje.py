@@ -226,8 +226,8 @@ class Viaje:
             FROM (
                 SELECT 
                     v.id AS id_viaje,
-                    DATE_FORMAT(v.fecha_salida_estimada, "%H:%i") AS hora_salida,
-                    DATE_FORMAT(v.fecha_llegada_estimada, "%H:%i") AS hora_llegada,
+                    DATE_FORMAT(v.fecha_salida_estimada, "%%H:%%i") AS hora_salida,
+                    DATE_FORMAT(v.fecha_llegada_estimada, "%%H:%%i") AS hora_llegada,
                     s_origen.nombre AS sucursal_salida,
                     s_destino.nombre AS sucursal_llegada,
                     s_origen.ciudad AS ciudad_salida,

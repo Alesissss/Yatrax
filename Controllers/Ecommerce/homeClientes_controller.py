@@ -349,7 +349,7 @@ def obtenerOrigenesDestinos():
 def buscarViajes():
     try:
         datos_viaje_ida = []
-        data_viaje_vuelta = []
+        datos_viaje_vuelta = []
 
         origen = request.form.get('origen')
         destino = request.form.get('destino')

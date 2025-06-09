@@ -1,0 +1,44 @@
+<div class="accordion-item">
+    <div class="row">
+        <div class="col-md-5 d-flex justify-content-center p-2">
+            <div class="row d-flex justify-content-center">
+                <div class="col-md-5 text-center">
+                    <p><b>${it.hora_salida}</b></p>
+                    <p>${it.sucursal_salida}</p>
+                    <p>${it.ciudad_salida}</p>
+                </div>
+                <div class="col-md-2 d-flex justify-content-center align-items-center">
+                    <p>→</p>
+                </div>
+                <div class="col-md-5 text-center">
+                    <p><b>${it.hora_llegada}</b></p>
+                    <p>${it.sucursal_llegada}</p>
+                    <p>${it.ciudad_llegada}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 d-flex justify-content-center p-2">
+            <div class="row text-center">
+                <div class="col-md-6">
+                    <p class="m-0">${it.servicio}</p>
+                </div>
+                <div class="col-md-6">
+                    <p class="m-0">${it.tipo_viaje}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 d-flex justify-content-center p-2">
+            <p class="text-center">${it.niveles_con_asientos}</p>
+        </div>
+        <div class="col-md-2 d-flex justify-content-center p-2 rounded-end">
+            <button class="button btn" style="background-color: var(--success-color); color: white;" type="button"
+                data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false"
+                aria-controls="${collapseId}">
+                Elegir
+            </button>
+        </div>
+        <div id="${collapseId}" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+            <div class="accordion-body">Aquí puedes mostrar detalles adicionales.</div>
+        </div>
+    </div>
+</div>
