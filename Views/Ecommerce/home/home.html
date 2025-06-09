@@ -123,6 +123,37 @@
     box-shadow: none;
   }
 
+  .accordion-collapse {
+    min-width: 100%;
+    /* o ancho fijo en px */
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .accordion-collapse,
+  .accordion-body {
+    width: 100%;
+  }
+
+
+  #accordionExample {
+    width: 100%;
+  }
+
+  #accordionExample .accordion-item {
+    width: 100%;
+  }
+
+  #accordionExample .accordion-button {
+    width: 100%;
+    text-align: left;
+    /* para que el texto quede alineado a la izquierda */
+  }
+
+  #accordionExample .accordion-button>.px-3 {
+    flex-grow: 1;
+  }
+
   .progreso-contacto-pago {
     position: relative;
   }
@@ -145,7 +176,7 @@
   } */
 
   .accordion-collapse {
-    transition: height 0.3s ease;
+    transition: none !important;
   }
 
   .itinerario-header {
@@ -260,6 +291,81 @@
         <div id="contenedor_viajes_ida" class="row">
 
         </div>
+        <div class="accordion accordion-flush" id="accordionFlushExample">
+          <div class="accordion-item">
+            <div class="col-md-5 d-flex justify-content-center p-2">
+              <div class="row d-flex justify-content-center">
+                <div class="col-md-5 d-flex justify-content-center">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <p><b>4:30 PM</b></p>
+                    </div>
+                    <div class="col-md-12">
+                      <p>Bolognesi</p>
+                    </div>
+                    <div class="col-md-12">
+                      <p>Chiclayo</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-2 d-flex justify-content-center">
+                  <div class="row d-flex align-items-center justify-content-center">
+                    <p> -> </p>
+                  </div>
+                </div>
+                <div class="col-md-5 d-flex justify-content-center">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <p><b>6:30 PM</b></p>
+                    </div>
+                    <div class="col-md-12">
+                      <p>El ejercito</p>
+                    </div>
+                    <div class="col-md-12">
+                      <p>Trujillo</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-2 d-flex justify-content-center p-2">
+              <div class="row">
+                <div class="col-md-6 d-flex justify-content-center align-items-center">
+                  <p class="p-0 m-0">Premium</p>
+                </div>
+                <div class="col-md-6 d-flex justify-content-center align-items-center">
+                  <p class="p-0 m-0">Directo</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3 d-flex justify-content-center p-2">
+              <div class="row">
+                <div class="col-md-12">
+                  <p><b>1° Nivel:</b> 10 libres S/50</p>
+                </div>
+                <div class="col-md-12">
+                  <p><b>2° Nivel:</b> 28 libres S/40</p>
+                </div>
+              </div>
+
+            </div>
+            <div class="col-md-2 d-flex justify-content-center p-2 rounded-end">
+              <button class="button btn" style="background-color: var(--success-color); color: white;" type="button"
+                data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false"
+                aria-controls="flush-collapseOne">
+                Elegir
+              </button>
+            </div>
+            <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne"
+              data-bs-parent="#accordionFlushExample">
+              <div class="accordion-body">Placeholder content for this accordion, which is intended to demonstrate the
+                <code>.accordion-flush</code> class. This is the first item's accordion body.
+              </div>
+            </div>
+
+          </div>
+        </div>
+
         <button class="btn btn-primary btn-siguiente" onclick="nextStep()">Siguiente <i
             class="fas fa-arrow-right"></i></button>
       </div>
@@ -454,121 +560,20 @@
     </div>
   </section>
 
-  <section id="principal" class="h-75 container-sm mx-auto d-flex justify-content-md-start align-items-start">
-    <div class="row">
-      <h2 style="color: #315BAA; margin: 2%; font-weight: bold;" class="text-center">Preguntas frecuentes</h2>
-      <div class="col-md-8">
-        <div class="accordion" id="accordionExample">
-          <div class="accordion-item my-4">
-            <h2 class="accordion-header" id="headingOne">
-              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
-                aria-expanded="false" aria-controls="collapseOne">
-                <i class="bi bi-truck-flatbed"></i>
-                <span class="px-3 text-black">¿Postergar y activar boleto?</span>
-              </button>
-            </h2>
-            <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne"
-              data-bs-parent="#accordionExample">
-              <div class="accordion-body">
-                <h2 class="fs-6 fw-semibold"></h2>
-                <div class="my-2">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa, odit.</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Segundo acordion de pregunta -->
-
-          <div class="accordion-item my-4">
-            <h2 class="accordion-header" id="headingTwo">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                <i class="bi bi-credit-card"></i>
-                <span class="px-3 text-black">¿Qué pasa si deseo cambiar mi boleto a nombre de otra persona?</span>
-              </button>
-            </h2>
-            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
-              data-bs-parent="#accordionExample">
-              <div class="accordion-body">
-                <h2 class="fs-6 fw-semibold"></h2>
-                <div class="my-2">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa, odit.</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Siguiente bloque de preguntas -->
-
-          <div class="accordion-item my-4">
-            <h2 class="accordion-header" id="heading3">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                data-bs-target="#collapse3" aria-expanded="false" aria-controls="collapse3">
-                <i class="bi bi-credit-card"></i>
-                <span class="px-3 text-black">¿Cómo realizo un cambio de ruta?</span>
-              </button>
-            </h2>
-            <div id="collapse3" class="accordion-collapse collapse" aria-labelledby="heading3"
-              data-bs-parent="#accordionExample">
-              <div class="accordion-body">
-                <h2 class="fs-6 fw-semibold"></h2>
-                <div class="my-2">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa, odit.</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="accordion-item my-4">
-            <h2 class="accordion-header" id="heading4">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                data-bs-target="#collapse4" aria-expanded="false" aria-controls="collapse4">
-                <i class="bi bi-credit-card"></i>
-                <span class="px-3 text-black">¿Debo imprimir mi boleto para viajar?</span>
-              </button>
-            </h2>
-            <div id="collapse4" class="accordion-collapse collapse" aria-labelledby="heading4"
-              data-bs-parent="#accordionExample">
-              <div class="accordion-body">
-                <h2 class="fs-6 fw-semibold"></h2>
-                <div class="my-2">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa, odit.</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="accordion-item my-4">
-            <h2 class="accordion-header" id="heading5">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                data-bs-target="#collapse5" aria-expanded="false" aria-controls="collapse5">
-                <i class="bi bi-credit-card"></i>
-                <span class="px-3 text-black">¿Puedo llevar mascotas?</span>
-              </button>
-            </h2>
-            <div id="collapse5" class="accordion-collapse collapse" aria-labelledby="heading5"
-              data-bs-parent="#accordionExample">
-              <div class="accordion-body">
-                <h2 class="fs-6 fw-semibold"></h2>
-                <div class="my-2">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa, odit.</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="accordion-item my-4">
-            <h2 class="accordion-header" id="headingTwo">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                data-bs-target="#collapse6" aria-expanded="false" aria-controls="collapse6">
-                <i class="bi bi-credit-card"></i>
-                <span class="px-3 text-black">¿Cuánto de peso de equipaje está permitido llevar?</span>
-              </button>
-            </h2>
-            <div id="collapse6" class="accordion-collapse collapse" aria-labelledby="heading6"
-              data-bs-parent="#accordionExample">
-              <div class="accordion-body">
-                <h2 class="fs-6 fw-semibold"></h2>
-                <div class="my-2">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa, odit.</div>
-              </div>
-            </div>
+  <section id="principal" class="container-fluid">
+    <div class="container">
+      <h2 style="color: #315BAA; margin: 2rem 0; font-weight: bold;" class="text-center">Preguntas frecuentes</h2>
+      <div class="row">
+        <div class="col-md-8">
+          <div class="accordion" id="accordionExample">
+            <!-- Aquí se cargan dinámicamente las preguntas -->
           </div>
         </div>
-      </div>
-      <div class="col-md-4 d-flex align-items-center justify-content-center">
-        <img src="../../../Static/img/seleccionIMGTYR.png" alt="Imagen ilustrativa" class="img-fluid"
-          style="max-height: 300px;">
+        <div class="col-md-4">
+          <div class="text-center">
+            <img src="../../../Static/img/seleccionIMGTYR.png" alt="Imagen ilustrativa" class="img-fluid">
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -578,6 +583,61 @@
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"
   integrity="sha256-3fp5w1wV5Qb7vNq7+9q0q7b8rj2x9Q5uXv5e5h5Q5VY=" crossorigin="anonymous"></script>
 <script>
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const accordion = document.getElementById('accordionExample');
+
+    fetch('/trabajadores/configuracion/GetData_PreguntasFrecuentes')
+      .then(res => res.json())
+      .then(data => {
+        if (data.Status === "success") {
+          // Filtra solo las preguntas con estado=1
+          const preguntasActivas = data.data.filter(p => p.estado === 1);
+          // Limita a las primeras 7 preguntas
+          const primeras7 = preguntasActivas.slice(0, 7);
+
+          if (primeras7.length === 0) {
+            accordion.innerHTML = "<p>No hay preguntas frecuentes activas.</p>";
+            return;
+          }
+
+          primeras7.forEach((pregunta, index) => {
+            const headingId = `heading${index + 1}`;
+            const collapseId = `collapse${index + 1}`;
+            const abierto = index === 0 ? 'show' : '';
+            const botonCollapsed = index === 0 ? '' : 'collapsed';
+            const ariaExpanded = index === 0 ? 'true' : 'false';
+
+            const item = document.createElement('div');
+            item.classList.add('accordion-item', 'my-4');
+
+            item.innerHTML = `
+            <h2 class="accordion-header" id="${headingId}">
+              <button class="accordion-button ${botonCollapsed}" type="button" data-bs-toggle="collapse"
+                data-bs-target="#${collapseId}" aria-expanded="${ariaExpanded}" aria-controls="${collapseId}">
+                <i class="bi bi-question-circle"></i>
+                <span class="px-3 text-black">${pregunta.pregunta}</span>
+              </button>
+            </h2>
+            <div id="${collapseId}" class="accordion-collapse collapse ${abierto}" aria-labelledby="${headingId}"
+              data-bs-parent="#accordionExample">
+              <div class="accordion-body">
+                <p>${pregunta.respuesta}</p>
+              </div>
+            </div>
+          `;
+
+            accordion.appendChild(item);
+          });
+        } else {
+          accordion.innerHTML = "<p>No hay preguntas frecuentes disponibles.</p>";
+        }
+      })
+      .catch(() => {
+        accordion.innerHTML = "<p>Error cargando preguntas frecuentes.</p>";
+      });
+  });
+
   let currentStep = 0;
   function updateFormVisibility() {
     const form = document.getElementById('form-destino');
@@ -1028,6 +1088,8 @@
     contenido += '</div>';
     contenedor.innerHTML = contenido;
   }
+
+
 
 
 

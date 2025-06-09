@@ -8,6 +8,7 @@ from Models.conf_claims import Conf_Claims
 from Models.conf_plantillas import Conf_Plantillas
 from Models.tipoMetodoPago import TipoMetodoPago
 from Models.terminos_condiciones import TerminosCondiciones
+from Models.preguntas_frecuentes import PreguntasFrecuentes
 from werkzeug.utils import secure_filename
 
 configuracion_bp = Blueprint('configuracion', __name__, url_prefix='/trabajadores/configuracion')
@@ -86,6 +87,14 @@ def Menu_TerminosCondiciones():
 @configuracion_bp.route('/TerminosCondicionesNuevo')
 def TerminosCondiciones_Nuevo():
     return render_template('configuracion/terminosYCondicionesCRUD.html', active_page="terminosCondiciones", active_menu='mConfiguracion', terminosCondiciones={}, tittle = 'Registrar términos y condiciones', btnId = 'btn_Registrar')
+
+@configuracion_bp.route('/GestionarPreguntasFrecuentes')
+def Menu_PreguntasFrecuentes():
+    return render_template('configuracion/preguntasFrecuentes.html', active_page="preguntasFrecuentes", active_menu='mConfiguracion')
+
+@configuracion_bp.route('/PreguntasFrecuentesNuevo')
+def PreguntasFrecuentes_Nuevo():
+    return render_template('configuracion/preguntasFrecuentesCRUD.html', active_page="preguntasFrecuentes", active_menu='mConfiguracion', preguntaFrecuente={}, tittle = 'Registrar pregunta frecuente', btnId = 'btn_Registrar')
 
 # END VIEWS
 
@@ -395,14 +404,14 @@ def registrar_metodo_pago():
             logo_path = f"/Static/img/metodos_pago/logo/{logo_filename}"
             logo.save(os.path.join("Static/img/metodos_pago/logo/", logo_filename))
         else:
-            logo_path = "/Static/img/trabajadores/default-logo.png"  # Logo por defecto
+            logo_path = "/Static/img/metodos_pago/logo/default_metodopago.png"  # Logo por defecto
         qr = request.files.get("qr")
         if qr:
             qr_filename = secure_filename(qr.filename)
             qr_path = f"/Static/img/metodos_pago/qr/{qr_filename}"
             qr.save(os.path.join("Static/img/metodos_pago/qr", qr_filename))
         else:
-            qr_path = "/Static/img/trabajadores/default-logo.png"
+            qr_path = None
             
         mensajes = MetodoPago.registrar(nombre, logo_path, estado, session.get('usuario', {}).get('email', 'SIN USUARIO').strip(), tipo_pago, qr_path)
         msj1 = mensajes.get('@MSJ')
@@ -622,6 +631,142 @@ def get_tipo_metodos_pago():
         return jsonify({"Status": "error", "Msj": f"Error al obtener los tipos de métodos de pago: {repr(e)}", "data": []})
 
 # END REGION TIPO METODO PAGO
+
+# REGION PREGUNTAS FRECUENTES
+
+@configuracion_bp.route("/RegistrarPreguntaFrecuente", methods=["POST"])
+def registrar_pregunta_frecuente():
+    try:
+        pregunta = request.form.get("pregunta").strip()
+        respuesta = request.form.get("respuesta").strip()
+        estado = request.form.get("estado")
+        usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO')
+        
+        if not pregunta or not respuesta or not estado:
+            return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
+
+        mensajes = PreguntasFrecuentes.registrar(pregunta, respuesta, estado, usuario_actual)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1})
+        elif msj2:
+            return jsonify({"Status": "error", 'Msj': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar pregunta frecuente'})
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Error: {repr(e)}"})
+
+@configuracion_bp.route("/EditarPreguntaFrecuente/<int:id>", methods=['GET', 'POST'])
+def editar_pregunta_frecuente(id):
+    try:
+        pregunta_frecuente = PreguntasFrecuentes.obtener_por_id(id)
+        if request.method == 'POST':
+            pregunta = request.form.get("pregunta").strip()
+            respuesta = request.form.get("respuesta").strip()
+            estado = request.form.get("estado").strip()
+            usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO')
+
+            if not pregunta or not respuesta or estado not in ["0", "1"]:
+                return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios y válidos"})
+
+            estado = estado == "1"  # Convertimos a booleano para SP
+
+            mensajes = PreguntasFrecuentes.editar(id, pregunta, respuesta, estado, usuario_actual)
+            msj1 = mensajes.get('@MSJ')
+            msj2 = mensajes.get('@MSJ2')
+
+            if msj1:
+                return jsonify({"Status": "success", "Msj": msj1, "Msj2": ""})
+            elif msj2:
+                return jsonify({"Status": "success", "Msj": "", "Msj2": msj2})
+            else:
+                return jsonify({"Status": "error", "Msj": "Error desconocido al actualizar la pregunta frecuente"})
+
+        if pregunta_frecuente:
+            return render_template('configuracion/preguntasFrecuentesCRUD.html',
+                                   active_page='preguntasFrecuentes',
+                                   active_menu='mConfiguracion',
+                                   preguntaFrecuente=pregunta_frecuente,
+                                   tittle='Editar pregunta frecuente',
+                                   btnId='btn_Editar')
+        return render_template('configuracion/preguntasFrecuentesCRUD.html',
+                               active_page='preguntasFrecuentes',
+                               active_menu='mConfiguracion',
+                               preguntaFrecuente={},
+                               tittle='Editar pregunta frecuente',
+                               btnId='btn_Editar')
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
+
+@configuracion_bp.route("/VerPreguntaFrecuente/<int:id>", methods=['GET'])
+def ver_pregunta_frecuente(id):
+    try:
+        pregunta_frecuente = PreguntasFrecuentes.obtener_por_id(id)
+        if pregunta_frecuente:
+            return render_template('configuracion/preguntasFrecuentesCRUD.html', 
+                                 active_page="preguntasFrecuentes", 
+                                 active_menu='mConfiguracion', 
+                                 preguntaFrecuente=pregunta_frecuente, 
+                                 tittle='Ver pregunta frecuente', 
+                                 btnId='btn_Aceptar')
+        return render_template('configuracion/preguntasFrecuentesCRUD.html', 
+                             active_page="preguntasFrecuentes", 
+                             active_menu='mConfiguracion', 
+                             preguntaFrecuente={}, 
+                             tittle='Ver pregunta frecuente', 
+                             btnId='btn_Aceptar')
+        
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@configuracion_bp.route("/DarBajaPreguntaFrecuente/<int:id>", methods=['POST'])
+def dar_baja_pregunta_frecuente(id):
+    try:
+        estado = PreguntasFrecuentes.obtener_por_id(id)
+        
+        if estado['estado'] == 0:
+            return jsonify({"Status": "error", 'Msj': 'La pregunta frecuente ya está NO VIGENTE'})
+        
+        mensajes = PreguntasFrecuentes.dar_baja(id)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja la pregunta frecuente'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@configuracion_bp.route("/EliminarPreguntaFrecuente/<int:id>", methods=['POST'])
+def eliminar_pregunta_frecuente(id):
+    try:
+        mensajes = PreguntasFrecuentes.eliminar(id)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al eliminar la pregunta frecuente'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@configuracion_bp.route("/GetData_PreguntasFrecuentes", methods=["GET"])
+def get_preguntas_frecuentes():
+    try:
+        preguntas = PreguntasFrecuentes.obtener_todos()
+        if preguntas:
+            return jsonify({"Status": "success", "data": preguntas})
+        return jsonify({"Status": "info", "Msj": "Aún no hay preguntas frecuentes registradas", "data": []})
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Error al obtener las preguntas frecuentes: {repr(e)}", "data": []})
+
+# END REGION PREGUNTAS FRECUENTES
 
 # REGION TERMINOS Y CONDICIONES
 def allowed_file_txt(filename):

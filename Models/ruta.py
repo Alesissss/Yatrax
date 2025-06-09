@@ -35,7 +35,7 @@ class Ruta:
     def obtener_escalas_por_ruta(cls, ruta_id):
         conexion = bd.Conexion()
         try:
-            escalas = conexion.obtener(""" SELECT es.id, es.nro_orden, es.idSucursal, suc.nombre, es.idRuta from escala es INNER JOIN sucursal suc on es.idSucursal = suc.id WHERE idRuta = %s ORDER BY nro_orden""", (ruta_id,))
+            escalas = conexion.obtener(""" SELECT es.id, es.nro_orden, es.idSucursal, es.distancia_estimada, es.tiempo_estimado, suc.nombre, es.idRuta from escala es INNER JOIN sucursal suc on es.idSucursal = suc.id WHERE idRuta = %s ORDER BY nro_orden""", (ruta_id,))
             return escalas
         finally:
             conexion.cerrar()
@@ -59,8 +59,8 @@ class Ruta:
 
             # Insertar las escalas
             for escala in escalas:
-                conexion.ejecutar("INSERT INTO escala (nro_orden, idSucursal, idRuta, usuario) VALUES (%s, %s, %s, %s)",
-                                (escala['nroOrden'], escala['id'], idRuta, usuario), auto_commit=False)
+                conexion.ejecutar("INSERT INTO escala (nro_orden, idSucursal, idRuta, distancia_estimada, tiempo_estimado, usuario) VALUES (%s, %s, %s, %s, %s, %s)",
+                                (escala['nroOrden'], escala['id'], idRuta, escala['distancia'], escala['tiempo'], usuario), auto_commit=False)
 
             # Si todo es correcto, confirmamos la transacción
             conexion.conn.commit()
@@ -97,8 +97,8 @@ class Ruta:
 
             # Insertar las escalas
             for escala in escalas:
-                conexion.ejecutar("INSERT INTO escala (nro_orden, idSucursal, idRuta, usuario) VALUES (%s, %s, %s, %s)",
-                                (escala['nroOrden'], escala['id'], id, usuario), auto_commit=False)
+                conexion.ejecutar("INSERT INTO escala (nro_orden, idSucursal, idRuta, distancia_estimada, tiempo_estimado, usuario) VALUES (%s, %s, %s, %s, %s, %s)",
+                                (escala['nroOrden'], escala['id'], id, escala['distancia'], escala['tiempo'], usuario), auto_commit=False)
 
             # Si todo es correcto, confirmamos la transacción
             conexion.conn.commit()

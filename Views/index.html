@@ -415,6 +415,15 @@
                                         <p>Gestionar términos y condiciones</p>
                                     </a>
                                 </li>
+
+                                <li class="nav-item">
+                                    <a href="{{ url_for('configuracion.Menu_PreguntasFrecuentes') }}"
+                                        class="nav-link {% if active_page == 'preguntasFrecuentes' %}active{% endif %}">
+                                        <i class="bi bi-info-circle nav-icon"></i>
+                                        <p>Gestionar preguntas frecuentes</p>
+                                    </a>
+                                </li>
+
                                 {% endif %}
                             </ul>
                         </li>
@@ -692,9 +701,6 @@
         }
 
         $(document).ready(function () {
-            // $('body').addClass('sidebar-collapse');
-            var windowHeight = $('body > div.os-padding.menu-open > div > div > div > div.content-wrapper').height() / 2;
-
             $(document).on('column-visibility.dt', function (e, settings) {
                 var table = new $.fn.dataTable.Api(settings);
                 setTimeout(function () {

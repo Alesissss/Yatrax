@@ -21,9 +21,11 @@ class PreguntasFrecuentes:
     def obtener_por_id(cls, id):
         conexion = bd.Conexion()
         try:
-            return conexion.obtener("SELECT id, pregunta, respuesta, estado, fecha_registro, usuario FROM preguntas_frecuentes WHERE  id = %s", (id,))
+            resultado = conexion.obtener("SELECT id, pregunta, respuesta, estado FROM preguntas_frecuentes WHERE id = %s", (id,))
+            return resultado[0] if resultado else None
         finally:
             conexion.cerrar()
+
             
     @classmethod
     def registrar(cls, pregunta, respuesta, estado, usuario):

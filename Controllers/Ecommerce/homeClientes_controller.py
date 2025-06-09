@@ -86,7 +86,9 @@ def logoutCliente():
     if 'cliente' in session:
         session.pop('cliente',None)
         return redirect("/ecommerce/home/inicio")
-    
+    else:
+        return redirect("/ecommerce/home/inicio")
+
 #REGION POR TERMINAR    
 @homeClientes_bp.route("/miPerfil",methods=["GET","POST"])
 def perfilCliente():
@@ -102,21 +104,17 @@ def perfilCliente():
             id_pais = request.form["id_pais"]
             id_tipo_cliente = request.form["id_tipo_cliente"]
             razon_social = request.form["razon_social"]
-
             id_tipo_doc = request.form["id_tipo_doc"]
             numero_documento = request.form["numero_documento"]
             f_nacimiento = request.form["f_nacimiento"]
-
             nombres = request.form["nombres"]
             ape_paterno = request.form["ape_paterno"]
             ape_materno = request.form["ape_materno"]
             sexo = request.form["sexo"]
             direccion = request.form["direccion"]
             telefono = request.form["telefono"]
-
             email = request.form["email"]
             password = request.form["password"]
-
             if password.strip():
                 password_hash = hashlib.sha256(password.encode()).hexdigest()
             else:
@@ -149,10 +147,13 @@ def forgot_password():
 
 @homeClientes_bp.route('/register')
 def register_cliente():
-    TipoDocumentos=TipoDocumento.obtener_todos()
-    Paises = Pais.obtener_todos()
-    return render_template('Ecommerce/home/formRegistro.html', TipoDocumento=TipoDocumentos, Paises=Paises)
-
+    if 'cliente' in session:
+        return redirect(url_for('homeClientes.index'))
+    else:
+        TipoDocumentos=TipoDocumento.obtener_todos()
+        Paises = Pais.obtener_todos()
+        return render_template('Ecommerce/home/formRegistro.html', TipoDocumento=TipoDocumentos, Paises=Paises)
+        
 @homeClientes_bp.route('transferenciaPasaje')
 def transferencia_pasaje():
     return render_template('Ecommerce/home/transferenciaPasaje.html')
@@ -265,7 +266,7 @@ def registrar_cliente_form():
             telefono=telefono,
             email=email,
             password=password,
-            usuario=email
+            usuario=None
         )
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
