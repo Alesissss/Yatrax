@@ -188,9 +188,7 @@ def cambiarEstadoPasaje(id_pasaje):
 
 #END REGION RESERVAS
 #REGION TIPO RECLAMO
-@atencion_bp.route('/GetData_TipoReclamo')
-def listarTiposReclamo():
-    
+
 #END REGION
 #REGION RECLAMO
 
