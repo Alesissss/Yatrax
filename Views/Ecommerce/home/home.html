@@ -230,12 +230,15 @@
       <form id="form-destino" class="p-4 bg-secondary-subtle">
         <div class="row">
           <div class="col-md-3">
+            <label for="ciudad">Ruta</label>
             <select id="cbx_Ciudades" class="form-select"></select>
           </div>
           <div class="col-md-3">
+            <label for="ida">Ida</label>
             <input type="date" name="fecha_ida" class="form-control" required>
           </div>
           <div class="col-md-3">
+            <label for="vuelta">Vuelta</label>
             <input type="date" name="fecha_vuelta" class="form-control">
           </div>
           <div class="col-md-3 d-grid">
@@ -291,81 +294,6 @@
         <div id="contenedor_viajes_ida" class="row">
 
         </div>
-        <div class="accordion accordion-flush" id="accordionFlushExample">
-          <div class="accordion-item">
-            <div class="col-md-5 d-flex justify-content-center p-2">
-              <div class="row d-flex justify-content-center">
-                <div class="col-md-5 d-flex justify-content-center">
-                  <div class="row">
-                    <div class="col-md-12">
-                      <p><b>4:30 PM</b></p>
-                    </div>
-                    <div class="col-md-12">
-                      <p>Bolognesi</p>
-                    </div>
-                    <div class="col-md-12">
-                      <p>Chiclayo</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-md-2 d-flex justify-content-center">
-                  <div class="row d-flex align-items-center justify-content-center">
-                    <p> -> </p>
-                  </div>
-                </div>
-                <div class="col-md-5 d-flex justify-content-center">
-                  <div class="row">
-                    <div class="col-md-12">
-                      <p><b>6:30 PM</b></p>
-                    </div>
-                    <div class="col-md-12">
-                      <p>El ejercito</p>
-                    </div>
-                    <div class="col-md-12">
-                      <p>Trujillo</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-2 d-flex justify-content-center p-2">
-              <div class="row">
-                <div class="col-md-6 d-flex justify-content-center align-items-center">
-                  <p class="p-0 m-0">Premium</p>
-                </div>
-                <div class="col-md-6 d-flex justify-content-center align-items-center">
-                  <p class="p-0 m-0">Directo</p>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-3 d-flex justify-content-center p-2">
-              <div class="row">
-                <div class="col-md-12">
-                  <p><b>1° Nivel:</b> 10 libres S/50</p>
-                </div>
-                <div class="col-md-12">
-                  <p><b>2° Nivel:</b> 28 libres S/40</p>
-                </div>
-              </div>
-
-            </div>
-            <div class="col-md-2 d-flex justify-content-center p-2 rounded-end">
-              <button class="button btn" style="background-color: var(--success-color); color: white;" type="button"
-                data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false"
-                aria-controls="flush-collapseOne">
-                Elegir
-              </button>
-            </div>
-            <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne"
-              data-bs-parent="#accordionFlushExample">
-              <div class="accordion-body">Placeholder content for this accordion, which is intended to demonstrate the
-                <code>.accordion-flush</code> class. This is the first item's accordion body.
-              </div>
-            </div>
-
-          </div>
-        </div>
-
         <button class="btn btn-primary btn-siguiente" onclick="nextStep()">Siguiente <i
             class="fas fa-arrow-right"></i></button>
       </div>
@@ -1062,13 +990,13 @@
               </div>
             </div>
           </div>
-          <div class="col-md-2 d-flex justify-content-center p-2">
+          <div class="col-md-2 d-flex justify-content-center align-items-center p-2">
             <div class="row text-center">
               <div class="col-md-6"><p class="m-0">${it.servicio}</p></div>
               <div class="col-md-6"><p class="m-0">${it.tipo_viaje}</p></div>
             </div>
           </div>
-          <div class="col-md-3 d-flex justify-content-center p-2">
+          <div class="col-md-3 d-flex justify-content-center align-items-center p-2">
             <p class="text-center">${it.niveles_con_asientos}</p>
           </div>
           <div class="col-md-2 d-flex justify-content-center p-2 rounded-end">

@@ -85,7 +85,6 @@ class TipoVehiculo:
         conexion = bd.Conexion()
         try:
             conexion.conn.begin()
-
             # Actualizar datos del tipo de vehículo
             conexion.ejecutar("""
                 UPDATE tipo_vehiculo
@@ -95,7 +94,6 @@ class TipoVehiculo:
                     estado = %s
                 WHERE id = %s
             """, (nombre, marca, servicio, estado, id), auto_commit=False)
-
             # Obtener niveles existentes
             niveles_actuales = conexion.obtener("""
                 SELECT id, nroPiso FROM nivel
@@ -104,20 +102,17 @@ class TipoVehiculo:
             mapa_niveles_actuales = {n['nroPiso']: n['id'] for n in niveles_actuales}
             pisos_actuales = set(mapa_niveles_actuales.keys())
             pisos_nuevos = set(n['nroPiso'] for n in niveles)
-
             # Eliminar niveles que ya no están
             pisos_eliminar = pisos_actuales - pisos_nuevos
             if pisos_eliminar:
                 placeholders = ','.join(['%s'] * len(pisos_eliminar))
                 sql = f"DELETE FROM nivel WHERE id_tipo_vehiculo = %s AND nroPiso IN ({placeholders})"
                 conexion.ejecutar(sql, (id, *pisos_eliminar), auto_commit=False)
-
             for nivel in niveles:
                 nro = nivel['nroPiso']
                 x = nivel['x_dimension']
                 y = nivel['y_dimension']
                 herramientas = nivel['herramientas']
-
                 if nro in mapa_niveles_actuales:
                     id_nivel = mapa_niveles_actuales[nro]
                     conexion.ejecutar("""
@@ -131,29 +126,24 @@ class TipoVehiculo:
                         VALUES (%s, %s, %s, %s, 1)
                     """, (id, nro, x, y), auto_commit=False)
                     id_nivel = cursor.lastrowid
-
                 # Sincronizar herramientas
                 herramientas_actuales = conexion.obtener("""
                     SELECT id_herramienta, x_dimension, y_dimension
                     FROM nivel_herramienta
                     WHERE id_nivel = %s
                 """, (id_nivel,))
-
                 set_actuales = {(h['id_herramienta'], h['x_dimension'], h['y_dimension']) for h in herramientas_actuales}
                 set_nuevos = {(int(h['tipo']), int(h['x']), int(h['y'])) for h in herramientas}
-
                 for h in set_nuevos - set_actuales:
                     conexion.ejecutar("""
                         INSERT INTO nivel_herramienta (id_nivel, id_herramienta, x_dimension, y_dimension)
                         VALUES (%s, %s, %s, %s)
                     """, (id_nivel, h[0], h[1], h[2]), auto_commit=False)
-
                 for h in set_actuales - set_nuevos:
                     conexion.ejecutar("""
                         DELETE FROM nivel_herramienta
                         WHERE id_nivel = %s AND id_herramienta = %s AND x_dimension = %s AND y_dimension = %s
                     """, (id_nivel, h[0], h[1], h[2]), auto_commit=False)
-
             conexion.conn.commit()
             return {"MSJ": "Actualización exitosa", "MSJ2": ""}
 

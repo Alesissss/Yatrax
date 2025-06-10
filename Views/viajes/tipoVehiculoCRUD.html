@@ -580,8 +580,6 @@
         }
         return '';
     }
-
-
     function dict_botones_por_piso() {
         const resultados = {};
 
@@ -590,11 +588,14 @@
         matrices.forEach(matriz => {
             const piso = parseInt(matriz.id.split('_')[1]);
             const botones = Array.from(matriz.querySelectorAll('button'))
-                .filter(btn => btn.dataset.tipo !== "")
+                .filter(btn => {
+                    const tipo = btn.dataset.tipo;
+                    return tipo !== undefined && tipo !== null && tipo !== "";
+                })
                 .map(btn => ({
                     x: parseInt(btn.dataset.x),
                     y: parseInt(btn.dataset.y),
-                    tipo: btn.dataset.tipo
+                    tipo: parseInt(btn.dataset.tipo)
                 }));
 
             resultados[piso] = botones;
@@ -615,9 +616,9 @@
     const cantidadPisosInput = document.getElementById('cantidadPisos');
 
     cantidadPisosInput.addEventListener('input', () => {
-    let val = parseInt(cantidadPisosInput.value);
-    if (isNaN(val) || val < 1) cantidadPisosInput.value = 1;
-    else if (val > 2) cantidadPisosInput.value = 2;
+        let val = parseInt(cantidadPisosInput.value);
+        if (isNaN(val) || val < 1) cantidadPisosInput.value = 1;
+        else if (val > 2) cantidadPisosInput.value = 2;
     });
 
 
@@ -793,10 +794,15 @@
                     data: formData,
                     success: function (response) {
                         if (response.Status === "success") {
-                            toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                            setTimeout(() => {
-                                window.location.href = '/trabajadores/viajes/GestionarTipoVehiculo';
-                            }, 500);
+                            if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                return;
+                            } else {
+                                toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                                setTimeout(() => {
+                                    window.location.href = '/trabajadores/viajes/GestionarTipoVehiculo';
+                                }, 500);
+                            }
                         } else {
                             toastr.error(response.Msj, "MENSAJE DE SISTEMA");
                         }
