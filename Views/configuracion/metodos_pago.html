@@ -190,11 +190,15 @@
               <img src="${data}" class="img-thumbnail" style="width: 50px;">
           </div>
           `; }},
-          { data: "qr", name: "qr", render: function(data) { return `
+          { data: "qr", name: "qr", render: function(data) {
+            if (!data) {
+                return `<div class="d-flex justify-content-center align-items-center"><span class="badge badge-secondary">No disponible</span></div>`;
+            }else {
+            return `
           <div class="d-flex justify-content-center align-items-center">
               <img src="${data}" class="img-thumbnail" style="width: 50px;">
           </div>
-          `; }},
+          `; }}},
       {
           data: "estado",
           name: "estado",

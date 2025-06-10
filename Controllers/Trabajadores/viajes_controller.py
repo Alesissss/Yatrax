@@ -18,6 +18,7 @@ from Models.herramienta import Herramienta
 from Models.servicio import Servicio
 from Models.viaje import Viaje
 from Models.personal import Personal
+from Models.api_enrutar import ApiEnrutar
 
 viajes_bp = Blueprint('viajes', __name__, url_prefix='/trabajadores/viajes')
 
@@ -1077,35 +1078,19 @@ def get_marcas():
 @viajes_bp.route("/API_ENRUTAR", methods=["GET"])
 def api_enrutar():
     try:
-        start = request.args.get('start')
-        end = request.args.get('end')
+        start = request.args.get('start')  # "lat,lng"
+        end = request.args.get('end')      # "lat,lng"
 
         start_lat, start_lng = map(float, start.split(','))
         end_lat, end_lng = map(float, end.split(','))
 
-        url = 'https://api.openrouteservice.org/v2/directions/driving-car'
-        headers = {
-            'Authorization': '5b3ce3597851110001cf6248ee3267fd49824a40983b5ec79e79356f'
-        }
-        params = {
-            'start': f"{start_lng},{start_lat}",
-            'end': f"{end_lng},{end_lat}"
-        }
+        enrutar = ApiEnrutar()
+        resultado = enrutar.obtener_ruta(start_lat, start_lng, end_lat, end_lng)
 
-        response = requests.get(url, headers=headers, params=params)
-
-        if response.status_code == 200:
-            data = response.json()
-            route = data['features'][0]['geometry']['coordinates']
-            summary = data['features'][0]['properties']['summary']
-
-            return jsonify({
-                'route': route,
-                'distance': summary['distance'],
-                'duration': summary['duration']
-            })
+        if resultado:
+            return jsonify(resultado)
         else:
-            return jsonify({'error': 'Error al obtener la ruta'}), 500
+            return jsonify({'error': 'No se pudo obtener la ruta'}), 500
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
