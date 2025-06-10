@@ -181,23 +181,13 @@ class Viaje:
         conexion = bd.Conexion()
         try:
             lista_origenes = conexion.obtener(f"""
-                SELECT DISTINCT
-                        CONCAT_WS(' - ',
-                        (SELECT s1.ciudad
-                        FROM escala e1
-                        JOIN sucursal s1 ON s1.id = e1.idSucursal
-                        WHERE e1.idRuta = r.id AND e1.nro_orden = 1
-                        LIMIT 1),
-                        
-                        (SELECT s2.ciudad
-                        FROM escala e2
-                        JOIN sucursal s2 ON s2.id = e2.idSucursal
-                        WHERE e2.idRuta = r.id
-                        ORDER BY e2.nro_orden DESC
-                        LIMIT 1)
-                ) AS ciudad
-                FROM viaje v
-                JOIN ruta r ON v.idRuta = r.id;
+                SELECT DISTINCT CONCAT(s_origen.ciudad,'-',s_destino.ciudad) as ruta
+                FROM detalle_viaje dv INNER JOIN escala e_origen ON dv.idSucursalOrigen = e_origen.id
+                INNER JOIN sucursal s_origen ON s_origen.id = e_origen.id
+                INNER JOIN escala e_destino ON dv.idSucursalDestino = e_destino.id
+                INNER JOIN sucursal s_destino ON s_destino.id = e_destino.id
+                INNER JOIN viaje v ON v.id = dv.idViaje
+                WHERE v.id = 1;
             """                 
             )
             return lista_origenes
