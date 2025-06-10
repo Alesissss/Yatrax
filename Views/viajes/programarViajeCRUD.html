@@ -27,28 +27,15 @@
                                                 </select>
                                             </div>
                                         </div>
-                                        <!-- <div class="col-md-12 mb-3">
-                                            <div class="table-responsive">
-                                                <table id="tbl_Escalas" class="table table-hover w-100">
-                                                    <thead>
-                                                        <tr>
-                                                            <th class="text-center d-none">Id Sucursal</th>
-                                                            <th class="text-center" style="width: 100px;">N° Orden</th>
-                                                            <th class="text-center">Sucursal</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody class="table-short-rows">
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div> -->
                                         <div class="col-md-12 mb-3">
                                             <div class="table-responsive">
                                                 <table id="tbl_Escalas" class="table table-hover w-100">
                                                     <thead>
                                                         <tr>
                                                             <th class="text-center">Subruta</th>
+                                                            <th class="d-none">Id Origen</th>
                                                             <th class="text-center">Origen</th>
+                                                            <th class="d-none">Id Destino</th>
                                                             <th class="text-center">Destino</th>
                                                             <th class="text-center">Fecha salida</th>
                                                             <th class="text-center">Fecha llegada</th>
@@ -60,20 +47,6 @@
                                                 </table>
                                             </div>
                                         </div>
-                                        <!-- <div class="col-md-12 mb-3">
-                                            <label for="txt_hora_salida">Fecha y hora de salida:</label>
-                                            <div class="input-group">
-                                                <input class="form-control" type="datetime-local" id="txt_hora_salida"
-                                                    name="fechaHoraSalida" disabled>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12 mb-3">
-                                            <label for="txt_hora_llegada">Fecha y hora de llegada:</label>
-                                            <div class="input-group">
-                                                <input class="form-control" type="datetime-local" id="txt_hora_llegada"
-                                                    name="fechaHoraLlegada" disabled>
-                                            </div>
-                                        </div> -->
                                         <div class="col-md-12 mb-3">
                                             <label for="cbx_Estado">Estado</label>
                                             <div class="input-group">
@@ -185,85 +158,6 @@
 {% endblock %}
 {% block scripts %}
 <script>
-    // function fct_GetRutas() {
-    //     $.getJSON('/trabajadores/viajes/GetData_RutasViajes', function (response) {
-    //         if (response && response.Status === "success") {
-    //             let items = '<option disabled selected>--SELECCIONAR--</option>';
-
-    //             let rutas = response.data;
-
-    //             $.each(response.data, function (index, item) {
-    //                 if (false) {
-    //                     items += `<option selected value="${item.id}">${item.nombre} - ${item.tipo}</option>`;
-    //                 } else {
-    //                     items += `<option value="${item.id}">${item.nombre} - ${item.tipo}</option>`;
-    //                 }
-    //             });
-
-    //             $('#cbx_Ruta').html(items);
-
-    //             $('#cbx_Ruta').change(function () {
-    //                 let rutaSeleccionadaId = $(this).val();
-    //                 let rutaSeleccionada = rutas.find(function (ruta) {
-    //                     return ruta.id == rutaSeleccionadaId;
-    //                 });
-
-    //                 $('#txt_hora_salida').prop('disabled', false);
-
-    //                 if (rutaSeleccionada) {
-    //                     let trs = '';
-    //                     $.each(rutaSeleccionada.escalas, function (index, item) {
-    //                         trs += `
-    //                             <tr>
-    //                                 <td class="d-none">${item.id}</td>
-    //                                 <td class="text-center style="width: 100px;"">${item.nro_orden}</td>
-    //                                 <td class="text-left">${item.nombre}</td>
-    //                             </tr>
-    //                         `;
-    //                     });
-    //                     $('#tbl_Escalas tbody').html(trs);
-    //                 } else {
-    //                     console.log('No se encontró la ruta seleccionada');
-    //                 }
-    //             });
-
-    //             $('#txt_hora_salida').on('input', function () {
-    //                 let rutaSeleccionadaId = $('#cbx_Ruta').val();
-    //                 let rutaSeleccionada = rutas.find(function (ruta) {
-    //                     return ruta.id == rutaSeleccionadaId;
-    //                 });
-
-    //                 if (rutaSeleccionada) {
-    //                     let tiempoEstimado = parseInt(rutaSeleccionada.tiempo_estimado);
-
-    //                     let horaSalida = $('#txt_hora_salida').val();
-
-    //                     if (!horaSalida) return;
-
-    //                     let partes = horaSalida.split(/[-T:]/);
-    //                     let fechaSalida = new Date(
-    //                         parseInt(partes[0]),
-    //                         parseInt(partes[1]) - 1,
-    //                         parseInt(partes[2]),
-    //                         parseInt(partes[3]),
-    //                         parseInt(partes[4])
-    //                     );
-
-    //                     fechaSalida.setMinutes(fechaSalida.getMinutes() + tiempoEstimado);
-
-    //                     let fechaLlegadaLocal = new Date(fechaSalida.getTime() - (fechaSalida.getTimezoneOffset() * 60000))
-    //                         .toISOString().slice(0, 16);
-
-    //                     $('#txt_hora_llegada').val(fechaLlegadaLocal);
-    //                 }
-    //             });
-
-    //         } else {
-    //             console.error('Error al obtener las rutas:', response.Msj);
-    //         }
-    //     });
-    // }
-
     function fct_GetRutas() {
         $.getJSON('/trabajadores/viajes/GetData_RutasViajes', function (response) {
             if (response && response.Status === "success") {
@@ -301,17 +195,19 @@
                                 : `<span class="fecha-salida"></span>`;
 
                             filas += `
-                            <tr data-i="${i}" data-j="${j}" data-tiempo="${tiempoTotal}">
-                                <td class="text-center">Subruta ${origen.nro_orden} - ${destino.nro_orden}</td>
-                                <td class="text-center">${origen.nombre}</td>
-                                <td class="text-center">${destino.nombre}</td>
-                                <td class="text-center">${inputSalida}</td>
-                                <td class="text-center"><span class="fecha-llegada"></span></td>
-                                <td class="text-center">
-                                    <input type="number" step="0.01" min="0" class="form-control precio-input">
-                                </td>
-                            </tr>
-                        `;
+                                <tr data-i="${i}" data-j="${j}" data-tiempo="${tiempoTotal}">
+                                    <td class="text-center">Subruta ${origen.nro_orden} - ${destino.nro_orden}</td>
+                                    <td class="d-none">${origen.idSucursal}</td>
+                                    <td class="text-center">${origen.nombre}</td>
+                                    <td class="d-none">${destino.idSucursal}</td>
+                                    <td class="text-center">${destino.nombre}</td>
+                                    <td class="text-center">${inputSalida}</td>
+                                    <td class="text-center"><span class="fecha-llegada"></span></td>
+                                    <td class="text-center">
+                                        <input type="number" step="0.01" min="0" class="form-control precio-input">
+                                    </td>
+                                </tr>
+                                `;
                         }
                     }
 
@@ -520,6 +416,31 @@
         });
     }
 
+    function obtenerDatosSubrutas() {
+        const data = [];
+
+        const filas = document.querySelectorAll('#tbl_Escalas tbody tr');
+        filas.forEach(fila => {
+            const celdas = fila.querySelectorAll('td');
+
+            const subruta = {
+                nro_subruta: celdas[0].innerText.trim(),
+                id_sucursal_origen: parseInt(celdas[1].innerText.trim()),
+                origen: celdas[2].innerText.trim(),
+                id_sucursal_destino: parseInt(celdas[3].innerText.trim()),
+                destino: celdas[4].innerText.trim(),
+                fecha_salida: fila.querySelector('.fecha-salida')?.textContent.trim() ||
+                    fila.querySelector('.input-salida')?.value || null,
+                fecha_llegada: fila.querySelector('.fecha-llegada')?.textContent.trim() || null,
+                precio: parseFloat(fila.querySelector('.precio-input')?.value || '0')
+            };
+
+            data.push(subruta);
+        });
+
+        return data;
+    }
+
     $(document).ready(function () {
         fct_GetRutas();
         fct_GetPersonal();
@@ -532,10 +453,11 @@
             let idVehiculo = $('#cbx_Vehiculo').val();
             let choferesSeleccionados = $('#cbx_Chofer').select2('data').map(item => item.data);
             let tripulantesSeleccionados = $('#cbx_Tripulante').select2('data').map(item => item.data);
+            let subrutas = obtenerDatosSubrutas();
 
             let estado = $('#cbx_Estado').val();
 
-            if (!fechaHoraSalida || !fechaHoraLlegada || !idRuta || !idVehiculo || !choferesSeleccionados || !tripulantesSeleccionados) {
+            if (!fechaHoraSalida || !fechaHoraLlegada || !idRuta || !idVehiculo || !choferesSeleccionados || !tripulantesSeleccionados || !subrutas) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
@@ -560,6 +482,7 @@
                     formData.append("idVehiculo", idVehiculo);
                     formData.append("choferes", JSON.stringify(choferesSeleccionados));
                     formData.append("tripulantes", JSON.stringify(tripulantesSeleccionados));
+                    formData.append("detalles_viajes", JSON.stringify(subrutas));
                     formData.append("estado", estado);
 
                     $.ajax({
