@@ -33,10 +33,10 @@ class Personal_Sancion:
                 conexion.cerrar()
 
     @classmethod
-    def eliminar_sancion(cls, incidenciaid, personalid):
+    def eliminar_sancion(cls, personalid, incidenciaid):
         conexion = bd.Conexion()
         try:
-            conexion.ejecutar("CALL SP_ELIMINAR_PERSONAL_INCIDENCIA(%s, %s);", (incidenciaid, personalid,))
+            conexion.ejecutar("CALL SP_ELIMINAR_PERSONAL_INCIDENCIA(%s, %s);", (personalid, incidenciaid))
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
             return resultado[0]
         finally:

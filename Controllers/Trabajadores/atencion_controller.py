@@ -187,4 +187,13 @@ def cambiarEstadoPasaje(id_pasaje):
         return jsonify({"Status": "error", "Msj": repr(e), "Msj2": None}), 500
 
 #END REGION RESERVAS
+#REGION TIPO RECLAMO
+
+#END REGION
+#REGION RECLAMO
+
+#END REGION
 # END FUNCIONES
+#REGION TIPO RECLAMO #
+
+#END REGION TIPO RECLAMO #
