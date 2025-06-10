@@ -74,11 +74,11 @@ def Plantilla_Nuevo():
 
 @configuracion_bp.route('/Menu_TipoMetodoPago')
 def Menu_TipoMetodoPago():
-    return render_template('configuracion/tipoMetodoPago.html', active_page="tipoMetodoPago", active_menu='mConfiguracion')
+    return render_template('configuracion/tipoMetodoPago.html', active_page="TipometodosPago", active_menu='mConfiguracion')
 
 @configuracion_bp.route('/TipoMetodoPagoNuevo')
 def Menu_TipoServicioNuevo():
-    return render_template('configuracion/tipoMetodoPagoCRUD.html', active_page="tipoMetodoPago", active_menu = 'mConfiguracion', tipoMetodoPago = {}, tittle = 'Registrar tipo de metodo de Pago', btnId = 'btn_Registrar')
+    return render_template('configuracion/tipoMetodoPagoCRUD.html', active_page="TipometodosPago", active_menu='mConfiguracion', tipoMetodoPago = {}, tittle = 'Registrar tipo de metodo de Pago', btnId = 'btn_Registrar')
 
 @configuracion_bp.route('/GestionarTerminosCondiciones')
 def Menu_TerminosCondiciones():
@@ -358,7 +358,7 @@ def Menu_MetodosPago():
     # Captura el mensaje de la URL, si existe
     msg = request.args.get('msg', '')
     tipotoast = request.args.get('tipotoast', '')
-    return render_template('configuracion/metodos_pago.html', active_page="metodos_pago", active_menu='mConfiguracion', msg=msg, tipotoast=tipotoast)
+    return render_template('configuracion/metodos_pago.html', active_page="metodosPago", active_menu='mConfiguracion', msg=msg, tipotoast=tipotoast)
 
 # Ruta para registrar un nuevo método de pago
 @configuracion_bp.route('/MetodoPagoNuevo', methods=['GET', 'POST'])
@@ -366,9 +366,11 @@ def MetodoPago_Nuevo():
     if request.method == 'POST':
         return registrar_metodo_pago()
     
-    return render_template('configuracion/metodo_pago_crud.html', 
+    return render_template('configuracion/metodo_pago_crud.html',
                            tittle="Registrar método de pago", 
-                           btnId="btn_Registrar", 
+                           btnId="btn_Registrar",
+                           active_menu='mConfiguracion',
+                           active_page='metodosPago',
                            metodo_pago=None)
 
 # Ruta para editar y ver un método de pago (con id)
