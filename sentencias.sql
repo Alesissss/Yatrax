@@ -416,11 +416,16 @@ CREATE TABLE cliente (
     email VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
     estado BOOLEAN NOT NULL,
-    id_pais INT NOT NULL REFERENCES PAIS(id),
-    id_tipo_cliente INT NOT NULL REFERENCES TIPO_CLIENTE(idTipoCliente),
-    id_tipo_doc INT NOT NULL REFERENCES TIPO_DOCUMENTO(id)
+    id_pais INT NOT NULL REFERENCES PAIS(id_pais)
     fechaRegistro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NOT NULL
+
+
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    
+    id_pais INT NOT NULL,
+    id_tipo_cliente INT NOT NULL,
+    id_tipo_doc INT NOT NULL,
 );
 
 CREATE TABLE asiento (
