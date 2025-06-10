@@ -5,114 +5,110 @@
 {% block content %}
 <div class="container-fluid">
     <div class="row justify-content-center">
-        <div class="col-md-6">
+        <div class="col-md-8">
             <div class="card">
                 <div class="card-header bg-primary text-white">
                     <h4 class="text-center mb-0">{{ tittle }}</h4>
                 </div>
                 <div class="card-body">
-                    <div class="col-md-12 mb-3">
-                        <label for="cbx_Pais">País</label>
-                        <div class="input-group">
-                            <select id="cbx_Pais" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{% endif
-                                %}>
-                            </select>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="cbx_TipoDocumento">Tipo de documento</label>
+                            <div class="input-group">
+                                <select id="cbx_TipoDocumento" class="form-control">
+                                    <option disabled selected>--SELECCIONAR--</option>
+                                    <option value="dni">DNI</option>
+                                    <option value="ruc">RUC</option>
+                                    <option value="ce">Carnet de extranjería</option>
+                                </select>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-12 mb-3">
-                        <label for="cbx_TipoDocumento">Tipo de documento</label>
-                        <div class="input-group">
-                            <select id="cbx_TipoDocumento" class="form-control">
-                                <option disabled selected>--SELECCIONAR--</option>
-                                <option value="dni">DNI</option>
-                                <option value="ruc">RUC</option>
-                                <option value="ce">Carnet de extranjería</option>
-                            </select>
-                        </div>
-                    </div>
 
-                    <div class="col-md-12 mb-3">
-                        <label for="txt_NumeroDocumento">Número de documento</label>
-                        <div class="input-group">
-                            <input type="text" id="txt_NumeroDocumento" class="form-control"
-                                placeholder="Número de documento">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-id-card"></i></div>
+                        <div class="col-md-6 mb-3">
+                            <label for="txt_NumeroDocumento">Número de documento</label>
+                            <div class="input-group">
+                                <input type="text" id="txt_NumeroDocumento" class="form-control"
+                                    placeholder="Número de documento">
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><i class="fas fa-id-card"></i></div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-12 mb-3">
-                        <label for="txt_Nombres">Nombres</label>
-                        <div class="input-group">
-                            <input type="text" id="txt_Nombres" class="form-control"
-                                placeholder="Nombres">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-user-tag"></i></div>
+                        <div class="col-md-6 mb-3">
+                            <label for="cbx_Pais">País</label>
+                            <div class="input-group">
+                                <select id="cbx_Pais" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{% endif
+                                    %}>
+                                </select>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-12 mb-3">
-                        <label for="txt_ApellidoPaterno">Apellido paterno</label>
-                        <div class="input-group">
-                            <input type="text" id="txt_ApellidoPaterno" class="form-control"
-                                placeholder="Apellido paterno">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-user-tag"></i></div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="cbx_Sexo">Sexo</label>
+                            <div class="input-group">
+                                <select id="cbx_Sexo" class="form-control">
+                                    <option disabled selected>--SELECCIONAR--</option>
+                                    <option value="Masculino">Masculino</option>
+                                    <option value="Femenino">Femenino</option>
+                                </select>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-12 mb-3">
-                        <label for="txt_ApellidoMaterno">Apellido materno</label>
-                        <div class="input-group">
-                            <input type="text" id="txt_ApellidoMaterno" class="form-control"
-                                placeholder="Apellido materno">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-user-tag"></i></div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="txt_ApellidoPaterno">Apellido paterno</label>
+                            <div class="input-group">
+                                <input type="text" id="txt_ApellidoPaterno" class="form-control"
+                                    placeholder="Apellido paterno">
+
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-12 mb-3">
-                        <label for="cbx_Sexo">Sexo</label>
-                        <div class="input-group">
-                            <select id="cbx_Sexo" class="form-control">
-                                <option disabled selected>--SELECCIONAR--</option>
-                                <option value="Masculino">Masculino</option>
-                                <option value="Femenino">Femenino</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-12 mb-3">
-                        <label for="txt_FechaNacimiento">Fecha de nacimiento</label>
-                        <div class="input-group">
-                            <input type="date" id="txt_FechaNacimiento" class="form-control">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-calendar-alt"></i></div>
+                        <div class="col-md-4 mb-3">
+                            <label for="txt_ApellidoMaterno">Apellido materno</label>
+                            <div class="input-group">
+                                <input type="text" id="txt_ApellidoMaterno" class="form-control"
+                                    placeholder="Apellido materno">
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-12 mb-3">
-                        <label for="txt_Direccion">Dirección</label>
-                        <div class="input-group">
-                            <input type="text" id="txt_Direccion" class="form-control" placeholder="Dirección">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-map-marker-alt"></i></div>
+                                                <div class="col-md-4 mb-3">
+                            <label for="txt_Nombres">Nombres</label>
+                            <div class="input-group">
+                                <input type="text" id="txt_Nombres" class="form-control" placeholder="Nombres">
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-12 mb-3">
-                        <label for="txt_Telefono">Teléfono</label>
-                        <div class="input-group">
-                            <input type="text" id="txt_Telefono" class="form-control" placeholder="Teléfono">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-phone"></i></div>
+                        <div class="col-md-6 mb-3">
+                            <label for="txt_FechaNacimiento">Fecha de nacimiento</label>
+                            <div class="input-group">
+                                <input type="date" id="txt_FechaNacimiento" class="form-control">
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><i class="fas fa-calendar-alt"></i></div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <!-- Botón de acción -->
-                    <div class="col-md-12 text-center">
-                        <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de
-                            clientes</button>
-                        <button id="{{ btnId }}" type="button" class="btn btn-primary">Aceptar</button>
+                        <div class="col-md-6 mb-3">
+                            <label for="txt_Telefono">Teléfono</label>
+                            <div class="input-group">
+                                <input type="text" id="txt_Telefono" class="form-control" placeholder="Teléfono">
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><i class="fas fa-phone"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label for="txt_Direccion">Dirección</label>
+                            <div class="input-group">
+                                <input type="text" id="txt_Direccion" class="form-control" placeholder="Dirección">
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><i class="fas fa-map-marker-alt"></i></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botón de acción -->
+                        <div class="col-md-12 text-center">
+                            <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de
+                                clientes</button>
+                            <button id="{{ btnId }}" type="button" class="btn btn-primary">Aceptar</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -159,6 +155,143 @@
 
     $(document).ready(function () {
         fct_GetPaises();
+
+            $("#btn_Registrar").click(function () {
+            let tipo_documento = $('#cbx_tipoDocumento').val();
+            let numero_documento = $('#num_documento').val().trim();
+            let pais = $('#cbx_Pais').val();
+            let sexo = $('#cbx_sexo').val();
+            let ape_pat = $('#ape_pat').val().trim();
+            let ape_mat = $('#ape_mat').val().trim();
+            let nombre = $('#nombre').val().trim();
+            let fecha_nac = $('#txt_FechaNacimiento').val();
+            let telefono = $('#telefono').val().trim();
+            let direccion = $('#direccion').val().trim();
+
+            if (tipo_documento === 'DNI') {
+                if (!tipo_documento || !numero_documento || !pais) {
+                    toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                    return;
+                }
+            } else if (tipo_documento === 'RUC') {
+                if (!tipo_documento || !numero_documento || !pais || !sexo || !ape_pat || !ape_mat || !nombre || !fecha_nac || !telefono || !direccion) {
+                    toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                    return;
+                }
+            }
+
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción registrará al tipo cliente. ¿Deseas continuar?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, registrar tipo cliente",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    let formData = new FormData();
+                    formData.append("nombre", nombre);
+                    formData.append("estado", estado);
+
+                    $.ajax({
+                        url: "/trabajadores/ventas/RegistrarTipoCliente",
+                        type: "POST",
+                        processData: false,
+                        contentType: false,
+                        data: formData,
+                        success: function (response) {
+                            if (response.Status === "success") {
+                                if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                    return;
+                                } else {
+                                    toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                                    setTimeout(() => {
+                                        window.location.href = "/trabajadores/ventas/GestionarTipoCliente";
+                                    }, 500);
+                                }
+                            } else {
+                                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                                console.error('Error: ' + response.Msj);
+                            }
+                        },
+                        error: function (xhr, Status, error) {
+                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                            console.error('Error:' + error);
+                        }
+                    });
+                }
+            });
+        });
+
+        $("#btn_Editar").click(function () {
+            const id = Number("{{ tipocliente.ID }}");
+
+            let nombre = $("#txt_TipoCliente").val().trim();
+            let estado = $('#cbx_Estado').val();
+
+            if (!nombre || !estado) {
+                toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                return;
+            }
+
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción modificará al cliente. ¿Deseas continuar?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, editar tipo cliente",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    let formData = new FormData();
+                    formData.append("nombre", nombre);
+                    formData.append("estado", estado);
+
+                    $.ajax({
+                        url: `/trabajadores/ventas/EditarTipoCliente/${id}`,
+                        type: "POST",
+                        processData: false,
+                        contentType: false,
+                        data: formData,
+                        success: function (response) {
+                            if (response.Status === "success") {
+                                if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                    return;
+                                } else {
+                                    toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                                    setTimeout(() => {
+                                        window.location.href = "/trabajadores/ventas/GestionarTipoCliente";
+                                    }, 500);
+                                }
+                            } else {
+                                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                            }
+                        },
+                        error: function (xhr, Status, error) {
+                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                        }
+                    });
+                }
+            });
+        });
+
+        $("#btn_Aceptar").click(function () {
+            window.location.href = "/trabajadores/ventas/GestionarTipoCliente";
+        });
+
+        $("#btn_Volver").click(function () {
+            window.location.href = "/trabajadores/ventas/GestionarTipoCliente";
+        });
     });
 </script>
 {% endblock %}

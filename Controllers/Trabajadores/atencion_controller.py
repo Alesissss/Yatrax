@@ -1,6 +1,8 @@
 import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort
 from Models.pasaje import Pasaje
+from Models.tipoReclamo import Tipo_Reclamo
+from Models.reclamo import Reclamo
 
 atencion_bp = Blueprint('atencion', __name__, url_prefix='/trabajadores/atencion')
 
@@ -187,4 +189,92 @@ def cambiarEstadoPasaje(id_pasaje):
         return jsonify({"Status": "error", "Msj": repr(e), "Msj2": None}), 500
 
 #END REGION RESERVAS
-# END FUNCIONES
+#REGION TIPO RECLAMO
+@atencion_bp.route('/GetData_TipoReclamo')
+def listarTiposReclamos():
+    try:
+        resultados = Tipo_Reclamo.obtener_todos()
+        return jsonify({"Status":"success","data":resultados})
+    except Exception as e:
+        return jsonify({"Status": "error","Msg": str(e)}), 500
+    
+@atencion_bp.route('/RegistrarTipoReclamo')
+def registrarTipoReclamo():
+    try:
+        nombre = request.form["nombre"]
+        resultado = Tipo_Reclamo.registrar(nombre)
+        if resultado.get("msj") is not None:
+            return jsonify({
+                "Status": "success",
+                "Msj": resultado["msj"],
+                "Msj2": resultado.get("msj2")
+            })
+        else:
+            return jsonify({
+                "Status": "error",
+                "Msj": "",
+                "Msj2": resultado.get("msj2")
+            })
+    except Exception as e:
+            return jsonify({
+                "Status": "error",
+                "Msj": repr(e),
+                "Msj2": resultado.get("msj2")
+            })
+
+@atencion_bp.route('/EditarTipoReclamo')
+def editarTipoReclamo():
+    try:
+        idTipoReclamo = int(request.form["id"])
+        nombre_tipo = request.form["nombre"]
+        resultado = Tipo_Reclamo.editar(idTipoReclamo,nombre)
+
+        if resultado.get("msj") is not None:
+            return jsonify({
+                "Status": "success",
+                "Msj": resultado["msj"],
+                "Msj2": resultado.get("msj2")
+            })
+        else:
+            return jsonify({
+                "Status": "error",
+                "Msj": "",
+                "Msj2": resultado.get("msj2")
+            })
+    except Exception as e:
+            return jsonify({
+                "Status": "error",
+                "Msj": repr(e),
+                "Msj2": resultado.get("msj2")
+            })
+
+@atencion_bp.route('/EliminarTipoReclamo')
+def eliminarTipoReclamo():
+    try:
+        idTipoReclamo = int(request.form["id"])
+        resultado = Tipo_Reclamo.eliminar(idTipoReclamo)
+
+        if resultado.get("msj") is not None:
+            return jsonify({
+                "Status": "success",
+                "Msj": resultado["msj"],
+                "Msj2": resultado.get("msj2")
+            })
+        else:
+            return jsonify({
+                "Status": "error",
+                "Msj": "",
+                "Msj2": resultado.get("msj2")
+            })
+    except Exception as e:
+            return jsonify({
+                "Status": "error",
+                "Msj": repr(e),
+                "Msj2": resultado.get("msj2")
+            })
+    
+
+#END REGION
+#REGION RECLAMO
+
+#END REGION

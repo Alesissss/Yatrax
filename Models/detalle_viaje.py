@@ -1,14 +1,12 @@
 import bd
 
-class Viaje:
-    def __init__(self, id=None, idRuta=None, idVehiculo=None, estado=None, estadoViaje=None, esReprogramado=None, esPostergado=None, fechaSalidaEstimada=None, fechaSalidaReal=None, fechaLlegadaEstimada=None, fechaLlegadaReal=None, fechaRegistro=None, usuario=None):
+class DetalleViaje:
+    def __init__(self, id=None, idViaje=None, idSucursalOrigen=None, idSucursalDestino=None, precio=None, fechaSalidaEstimada=None, fechaSalidaReal=None, fechaLlegadaEstimada=None, fechaLlegadaReal=None, fechaRegistro=None, usuario=None):
         self.id = id
-        self.idRuta = idRuta
-        self.idVehiculo = idVehiculo
-        self.estado = estado
-        self.estadoViaje = estadoViaje
-        self.esReprogramado = esReprogramado
-        self.esPostergado = esPostergado
+        self.idViaje = idViaje
+        self.idSucursalOrigen = idSucursalDestino
+        self.idSucursalDestino = idSucursalDestino
+        self.precio = precio
         self.fechaSalidaEstimada = fechaSalidaEstimada
         self.fechaSalidaReal = fechaSalidaReal
         self.fechaLlegadaEstimada = fechaLlegadaEstimada
@@ -75,19 +73,14 @@ class Viaje:
             conexion.cerrar()
     # REGISTRAR
     @classmethod
-    def registrar(cls, idRuta, idVehiculo, estado, fecha_salida_estimada, fecha_llegada_estimada, detalles_viajes, choferes, tripulantes, usuario):
+    def registrar(cls, idRuta, idVehiculo, estado, fecha_salida_estimada, fecha_llegada_estimada, choferes, tripulantes, usuario):
         try:
             conexion = bd.Conexion()
 
-            conexion.ejecutar(""" INSERT INTO viaje (idRuta, idVehiculo, estado, estadoViaje, esReprogramado, fechaHoraSalida, fechaHoraLlegada, usuario) VALUES (%s, %s, %s, 1, 0, %s, %s, %s) """, (idRuta, idVehiculo, estado, fecha_salida_estimada, fecha_llegada_estimada, usuario), auto_commit=False)
+            conexion.ejecutar(""" INSERT INTO viaje (idRuta, idVehiculo, estado, estadoViaje, esReprogramado, esPostergado, fecha_salida_estimada, fecha_llegada_estimada, usuario) VALUES (%s, %s, %s, 1, 0, 0, %s, %s, %s) """, (idRuta, idVehiculo, estado, fecha_salida_estimada, fecha_llegada_estimada, usuario), auto_commit=False)
 
-            resultado = conexion.obtener("SELECT LAST_INSERT_ID() AS idViaje;")
+            resultado = conexion.obtener("SELECT @MSJ, @MSJ2, LAST_INSERT_ID() AS idViaje;")
             idViaje = resultado[0]['idViaje'] 
-
-            # Insertar los itinerarios
-            for detalle in detalles_viajes:
-                conexion.ejecutar("INSERT INTO detalle_viaje (idViaje, idSucursalOrigen, idSucursalDestino, precio, fechaSalida, fechaLlegadaEstimada, usuario) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-                                  (idViaje, detalle['id_sucursal_origen'], detalle['id_sucursal_destino'], detalle['precio'], detalle['fecha_salida'], detalle['fecha_llegada'], usuario), auto_commit=False)
 
             # Insertar los choferes
             for chofer in choferes:
@@ -186,13 +179,23 @@ class Viaje:
         conexion = bd.Conexion()
         try:
             lista_origenes = conexion.obtener(f"""
-                SELECT DISTINCT CONCAT(s_origen.ciudad,'-',s_destino.ciudad) as ruta
-                FROM detalle_viaje dv INNER JOIN escala e_origen ON dv.idSucursalOrigen = e_origen.id
-                INNER JOIN sucursal s_origen ON s_origen.id = e_origen.id
-                INNER JOIN escala e_destino ON dv.idSucursalDestino = e_destino.id
-                INNER JOIN sucursal s_destino ON s_destino.id = e_destino.id
-                INNER JOIN viaje v ON v.id = dv.idViaje
-                WHERE v.id = 1;
+                SELECT DISTINCT
+                        CONCAT_WS(' - ',
+                        (SELECT s1.ciudad
+                        FROM escala e1
+                        JOIN sucursal s1 ON s1.id = e1.idSucursal
+                        WHERE e1.idRuta = r.id AND e1.nro_orden = 1
+                        LIMIT 1),
+                        
+                        (SELECT s2.ciudad
+                        FROM escala e2
+                        JOIN sucursal s2 ON s2.id = e2.idSucursal
+                        WHERE e2.idRuta = r.id
+                        ORDER BY e2.nro_orden DESC
+                        LIMIT 1)
+                ) AS ciudad
+                FROM viaje v
+                JOIN ruta r ON v.idRuta = r.id;
             """                 
             )
             return lista_origenes
