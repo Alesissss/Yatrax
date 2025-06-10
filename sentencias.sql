@@ -403,31 +403,29 @@ CREATE TABLE escala (
 );
 
 CREATE TABLE cliente (
+    id int AUTO_INCREMENT PRIMARY KEY,
+    numero_documento VARCHAR() NOT NULL,
+    nombre VARCHAR(50) NOT NULL,
+    ape_paterno VARCHAR(50) NOT NULL,
+    ape_materno VARCHAR(50) NOT NULL,
+    sexo BOOLEAN NOT NULL,
+    f_nacimiento DATE NOT NULL,
+    razon_social VARCHAR(150) NOT NULL,
+    direccion VARCHAR(255) NOT NULL,
+    telefono VARCHAR(15) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    estado BOOLEAN NOT NULL,
+    id_pais INT NOT NULL REFERENCES PAIS(id_pais)
+    fechaRegistro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL
+
+
     id INT AUTO_INCREMENT PRIMARY KEY,
     
     id_pais INT NOT NULL,
     id_tipo_cliente INT NOT NULL,
     id_tipo_doc INT NOT NULL,
-    
-    numero_documento VARCHAR(20) NOT NULL, -- UNIQUE,
-    
-    nombres VARCHAR(90),
-    ape_paterno VARCHAR(50),
-    ape_materno VARCHAR(50),
-        
-    sexo TINYINT DEFAULT 0, -- 'O' para otros/no especificado
-    f_nacimiento DATE,
-    
-    razon_social VARCHAR(90),
-    direccion VARCHAR(70),
-    
-    telefono VARCHAR(13), -- Ej: +51912345678
-    email VARCHAR(100) NOT NULL,
-    password VARCHAR(256) NOT NULL, -- SHA-256 hash
-    estado TINYINT DEFAULT 1,
-    
-    fechaRegistro DATETIME DEFAULT CURRENT_TIMESTAMP,
-    usuario VARCHAR(100) NULL
 );
 
 CREATE TABLE asiento (
