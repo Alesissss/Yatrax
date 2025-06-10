@@ -112,6 +112,14 @@ def get_tipo_cliente():
     except Exception as e:
         return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar tipos de cliente: {repr(e)}'})
     
+@ventas_bp.route("/GetData_Paises", methods=["GET"])
+def get_paises():
+    try:
+        paises = Pais.obtener_todos()
+        return jsonify({'data': paises, 'Status': 'success', 'Msj': 'Listado de países retornado exitosamente'})
+    except Exception as e:
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar tipos de cliente: {repr(e)}'})
+    
 @ventas_bp.route("/RegistrarTipoCliente", methods=["POST"])
 def registrar_tipo_cliente():
     try:
@@ -719,13 +727,13 @@ def eliminar_tipo_documento(id):
 # END REGION TIPO DOCUMENTO #
 
 # REGION CLIENTE
-@ventas_bp.route('/GetData_Paises')
-def get_paises():
+@ventas_bp.route('/GetData_Cliente', methods=['GET'])
+def get_cliente():
     try:
-        paises = Pais.obtener_todos()
-        return jsonify({'data': paises, 'Status': 'success', 'Msj': 'Listado de paises retornado exitosamente'})
+        clientes = Cliente.obtener_todos()
+        return jsonify({'data': clientes, 'Status': 'success', 'Msj': 'Listado de clientes retornado exitosamente'})
     except Exception as e:
-        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar paises: {repr(e)}'})
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar clientes: {repr(e)}'})
 
 @ventas_bp.route('/ClienteNuevo')
 def cliente_nuevo():
