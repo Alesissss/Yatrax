@@ -26,7 +26,7 @@ class Cliente:
     def obtener_todos(cls):
         conexion = bd.Conexion()
         try:
-            clientes = conexion.obtener("")
+            clientes = conexion.obtener("SELECT ")
             return clientes
         finally:
             conexion.cerrar()
