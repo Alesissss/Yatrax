@@ -183,6 +183,10 @@ DROP TABLE IF EXISTS tipo_metodoPago;
 DROP TABLE IF EXISTS terminos_condiciones;
 DROP TABLE IF EXISTS pasaje;
 DROP TABLE IF EXISTS preguntas_frecuentes;
+DROP TABLE IF EXISTS promocion;
+DROP TABLE IF EXISTS detalle_viaje_asiento;
+DROP TABLE IF EXISTS detalle_viaje;
+DROP TABLE IF EXISTS venta;
 
 -- Crear tabla preguntas_frecuentes
 CREATE TABLE preguntas_frecuentes (
@@ -543,6 +547,7 @@ CREATE TABLE nivel(
     id_tipo_vehiculo int not null,
     x_dimension int not null,
     y_dimension int not null,
+    precio DECIMAL(10,2) not null,
     estado BOOLEAN not null,
     foreign key (id_tipo_vehiculo) references tipo_vehiculo(id)
 );
@@ -624,21 +629,40 @@ CREATE TABLE viaje (
     id INT AUTO_INCREMENT PRIMARY KEY,
     idRuta INT NOT NULL,
     idVehiculo INT NOT NULL,
-    estado BOOLEAN NOT NULL,
+    estado BOOLEAN NOT NULL, -- 1: vigente, 0: no vigente
     estadoViaje INT NOT NULL,
     esReprogramado BOOLEAN DEFAULT 0,
-    esPostergado BOOLEAN DEFAULT 0,
-    fecha_salida_estimada DATETIME NOT NULL,
-    fecha_salida_real DATETIME NULL,
-    fecha_llegada_estimada DATETIME NOT NULL,
-    fecha_llegada_real DATETIME NULL,
-
+    fechaHoraSalida DATETIME NOT NULL,
     -- Auditoría
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NOT NULL,
     FOREIGN KEY (idVehiculo) REFERENCES vehiculo(id),
     FOREIGN KEY (idRuta) REFERENCES ruta(id),
     FOREIGN KEY (estadoViaje) REFERENCES estado_viaje(id)
+);
+
+CREATE TABLE detalle_viaje (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idViaje INT NOT NULL REFERENCES viaje(id),
+    idSucursalOrigen INT NOT NULL,
+    idSucursalDestino INT NOT NULL,
+    fechaSalida DATETIME NOT NULL,
+    fechaSalidaReal DATETIME NULL,
+    fechaLlegadaEstimada DATETIME NOT NULL,
+    fechaLlegadaReal DATETIME NULL,
+    -- Auditoría
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE detalle_viaje_asiento(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idDetalle_Viaje INT NOT NULL REFERENCES detalle_viaje(id),
+    idAsiento INT NULL REFERENCES asiento(id),
+    esDisponible TINYINT NOT NULL, -- 1: disponible, 0: no disponible
+    -- Auditoría
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE detalle_personal (
@@ -652,16 +676,42 @@ CREATE TABLE detalle_personal (
     FOREIGN KEY (idViaje) REFERENCES viaje(id)
 );
 
+CREATE TABLE promocion (
+    id INT AUTO_INCREMENT PRIMARY KEY, 
+    nombre varchar(100) NOT NULL, 
+    estado TINYINT NOT NULL, 
+    fecha_inicio date NOT NULL, 
+    fecha_fin date NOT NULL, 
+    codigo char(8) NOT NULL, 
+    monto_promo DECIMAL(9, 2) NOT NULL
+);
+
+CREATE TABLE venta (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idCliente INT NOT NULL REFERENCES cliente(id),
+    fecha DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    subTotal DECIMAL(10,2) NOT NULL,
+    igv DECIMAL(10,2) NOT NULL,
+    idPromocion INT NOT NULL REFERENCES promocion(id),
+    idMetodoPago INT NOT NULL REFERENCES metodo_pago(id),
+    idTipoComprobante INT NOT NULL REFERENCES tipo_comprobante(id)
+);
+
+
 CREATE TABLE pasaje(
     id INT AUTO_INCREMENT PRIMARY KEY,
-    id_metodo_pago INT NOT NULL,
-    id_tipo_comprobante INT NOT NULL,
-    id_cliente INT NOT NULL,
-    id_promocion INT NOT NULL,
-    id_viaje INT NOT NULL,
-    estado CHAR(1) NOT NULL,
-    fechaHora TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    codigo CHAR(12)
+    idCliente INT NOT NULL REFERENCES cliente(id),
+    idDetalleViajeAsiento INT NOT NULL REFERENCES detalle_viaje_asiento(id),
+    numeroComprobante char(13) NOT NULL, -- Ej: A001-00000001
+    -- operaciones con pasaje
+    esPasajeNormal TINYINT NULL DEFAULT 1, -- 1: es pasaje normal, 0: no es pasaje normal
+    esPasajeLibre TINYINT NULL DEFAULT 0, -- 1: es pasaje libre, 0: no es pasaje libre
+    esTransferencia TINYINT NULL DEFAULT 0, -- 1: es transferencia, 0: no es transferencia
+    esReserva TINYINT NULL DEFAULT 0, -- 1: es pasaje reserva, 0: no es pasaje reserva
+    esCambioRuta TINYINT NULL DEFAULT 0, -- 1: es cambio de ruta, 0: no es cambio de ruta
+    idVenta INT NOT NULL REFERENCES venta(id),
+    codigo CHAR(8),
+    idPasaje INT NULL REFERENCES pasaje(id) -- Para operaciones con pasajes
 );
 
 INSERT INTO preguntas_frecuentes (pregunta, respuesta, estado, fecha_registro, usuario) VALUES ('¿Qué medios de pago aceptan para comprar pasajes en línea?','Aceptamos tarjetas de crédito y débito Visa, así como billeteras digitales como Yape y Plin.','1','2025-06-07 11:34:18','ander@gmail.com');
