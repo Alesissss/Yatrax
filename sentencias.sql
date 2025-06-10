@@ -142,6 +142,7 @@ DROP PROCEDURE IF EXISTS SP_CAMBIAR_ESTADO_PASAJE;
 DROP PROCEDURE IF EXISTS SP_CAMBIAR_CLAVE;
 -- Luego eliminamos las tablas, primero la que depende de la otra
 DROP TABLE IF EXISTS conf_general;
+DROP TABLE IF EXISTS cliente;
 DROP TABLE IF EXISTS detalle_personal;
 DROP TABLE IF EXISTS viaje;
 DROP TABLE IF EXISTS estado_viaje;
@@ -175,7 +176,6 @@ DROP TABLE IF EXISTS servicio;
 DROP TABLE IF EXISTS marca;
 DROP TABLE IF EXISTS ruta;
 DROP TABLE IF EXISTS ciudad;
-DROP TABLE IF EXISTS cliente;
 DROP TABLE IF EXISTS pais;
 DROP TABLE IF EXISTS herramienta;
 DROP TABLE IF EXISTS tipo_herramienta;
@@ -403,8 +403,8 @@ CREATE TABLE escala (
 );
 
 CREATE TABLE cliente (
-    id int AUTO_INCREMENT PRIMARY KEY,
-    numero_documento VARCHAR() NOT NULL,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    numero_documento VARCHAR(11) NOT NULL, -- Se recomienda especificar una longitud
     nombre VARCHAR(50) NOT NULL,
     ape_paterno VARCHAR(50) NOT NULL,
     ape_materno VARCHAR(50) NOT NULL,
@@ -416,16 +416,16 @@ CREATE TABLE cliente (
     email VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
     estado BOOLEAN NOT NULL,
-    id_pais INT NOT NULL REFERENCES PAIS(id_pais)
-    fechaRegistro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    usuario VARCHAR(100) NOT NULL
-
-
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    
     id_pais INT NOT NULL,
     id_tipo_cliente INT NOT NULL,
     id_tipo_doc INT NOT NULL,
+    fechaRegistro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL,
+    
+    -- Claves foráneas
+    CONSTRAINT fk_pais FOREIGN KEY (id_pais) REFERENCES PAIS(id),
+    CONSTRAINT fk_tipo_cliente FOREIGN KEY (id_tipo_cliente) REFERENCES TIPO_CLIENTE(idTipoCliente),
+    CONSTRAINT fk_tipo_doc FOREIGN KEY (id_tipo_doc) REFERENCES TIPO_DOCUMENTO(id)
 );
 
 CREATE TABLE asiento (
@@ -1360,7 +1360,7 @@ INSERT INTO cliente (
     id_tipo_cliente,
     id_tipo_doc,
     numero_documento,
-    nombres,
+    nombre,
     ape_paterno,
     ape_materno,
     sexo,
