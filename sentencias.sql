@@ -631,6 +631,7 @@ CREATE TABLE viaje (
     estadoViaje INT NOT NULL,
     esReprogramado BOOLEAN DEFAULT 0,
     fechaHoraSalida DATETIME NOT NULL,
+    fechaHoraLlegada DATETIME NOT NULL,
     -- Auditoría
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NOT NULL,
@@ -644,6 +645,7 @@ CREATE TABLE detalle_viaje (
     idViaje INT NOT NULL REFERENCES viaje(id),
     idSucursalOrigen INT NOT NULL,
     idSucursalDestino INT NOT NULL,
+    precio DECIMAL(10,2) NOT NULL,
     fechaSalida DATETIME NOT NULL,
     fechaSalidaReal DATETIME NULL,
     fechaLlegadaEstimada DATETIME NOT NULL,
