@@ -57,6 +57,14 @@ def verificar_sesion():
 def Menu_Atencion():
     return render_template('atencion/reservas.html', active_page="ejemplo", active_menu='mAtencion')
 
+@atencion_bp.route('/GestionarTipoReclamo')
+def Menu_TipoReclamo():
+    return render_template('atencion/tipoReclamo.html', active_page="ejemplo", active_menu='mAtencion')
+
+@atencion_bp.route('/GestionarReclamo')
+def Menu_Reclamo():
+    return render_template('atencion/reclamo.html', active_page="ejemplo", active_menu='mAtencion')
+
 # END VIEWS
 
 # FUNCIONES
@@ -201,7 +209,7 @@ def listarTiposReclamos():
 @atencion_bp.route('/RegistrarTipoReclamo',methods=["GET","POST"])
 def registrarTipoReclamo():
     if request.method == "GET":
-        return render_template("")
+        return render_template("atencion/tipoReclamoCRUD.html")
     else:
         try:
             nombre = request.form["nombre"]
@@ -228,12 +236,13 @@ def registrarTipoReclamo():
 @atencion_bp.route('/EditarTipoReclamo',methods=["GET","POST"])
 def editarTipoReclamo():
     if request.method == "GET":
-        return render_template()
+        return render_template("atencion/tipoReclamoCRUD.html")
     else:
         try:
             idTipoReclamo = int(request.form["id"])
             nombre_tipo = request.form["nombre"]
-            resultado = Tipo_Reclamo.editar(idTipoReclamo,nombre)
+            estado = request.form["estado"]
+            resultado = Tipo_Reclamo.editar(idTipoReclamo,nombre_tipo,estado)
 
             if resultado.get("msj") is not None:
                 return jsonify({

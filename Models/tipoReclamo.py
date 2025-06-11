@@ -2,9 +2,10 @@ import hashlib
 import bd
 
 class Tipo_Reclamo:
-    def __init__(self,id,nombre):
+    def __init__(self,id,nombre,estado):
         self.id = id
         self.nombre = nombre
+        self.estado = estado
 
     @classmethod
     def obtener_todos(cls):
@@ -39,11 +40,11 @@ class Tipo_Reclamo:
                 conexion.cerrar()
     
     @classmethod
-    def editar(cls,id,nombre):
+    def editar(cls,id,nombre,estado):
         conexion = None
         try:
             conexion = bd.Conexion()
-            conexion.ejecutar("CALL SP_MODIFICAR_TIPO_RECLAMO(%s,%s,MSJ,MSJ2)",(id,nombre,))
+            conexion.ejecutar("CALL SP_MODIFICAR_TIPO_RECLAMO(%s,%s,%s,MSJ,MSJ2)",(id,nombre,estado,))
             resultado = conexion.obtener("SELECT MSJ,MSJ2;")
             return resultado[0] if resultado else ""
         except Exception as e:

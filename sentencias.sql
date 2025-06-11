@@ -149,6 +149,7 @@ DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_RECLAMO;
 DROP PROCEDURE IF EXISTS SP_INSERTAR_RECLAMO;
 DROP PROCEDURE IF EXISTS SP_MODIFICAR_RECLAMO;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_RECLAMO;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_CLIENTE;
 
 -- Luego eliminamos las tablas, primero la que depende de la otra
 DROP TABLE IF EXISTS conf_general;
@@ -731,7 +732,8 @@ CREATE TABLE pasaje(
 
 CREATE TABLE tipo_reclamo(
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL
+    nombre VARCHAR(100) NOT NULL,
+    estado TINYINT NOT NULL
 );
 
 CREATE TABLE reclamo(
@@ -5564,8 +5566,8 @@ BEGIN
     IF v_count > 0 THEN
         SET MSJ2 = 'Ya existe un tipo_reclamo con ese nombre';
     ELSE
-        INSERT INTO tipo_reclamo (nombre)
-        VALUES (p_nombre);
+        INSERT INTO tipo_reclamo (nombre,estado)
+        VALUES (p_nombre,1);
         SET MSJ = 'Tipo_reclamo insertado correctamente';
     END IF;
 END$$
@@ -5573,6 +5575,7 @@ END$$
 CREATE PROCEDURE SP_MODIFICAR_TIPO_RECLAMO(
     IN p_id INT,
     IN p_nombre VARCHAR(100),
+    IN p_estado TINYINT,
     OUT MSJ VARCHAR(255),
     OUT MSJ2 VARCHAR(255)
 )
@@ -5597,7 +5600,7 @@ BEGIN
         SET MSJ2 = 'Ya existe un tipo_reclamo con ese nombre';
     ELSE
         UPDATE tipo_reclamo
-           SET nombre = p_nombre
+           SET nombre = p_nombre, estado = p_estado
          WHERE id = p_id;
         SET MSJ = 'Tipo_reclamo modificado correctamente';
     END IF;
