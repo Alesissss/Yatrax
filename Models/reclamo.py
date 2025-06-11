@@ -85,3 +85,16 @@ class Reclamo:
         finally:
             if conexion:
                 conexion.cerrar()
+
+    @classmethod
+    def darBajaReclamo(cls,id):
+        try:
+            conexion = bd.Conexion()
+            conexion.ejecutar("CALL SP_DARBAJA_RECLAMO(%s,@MSJ,@MSJ2);",(id,))
+            resultado = conexion.obtener("SELECT @MSJ AS msj, @MSJ2 AS msj2;")
+            return resultado[0] if resultado else None
+        except Exception as e:
+            return {"Status": 0, "Mensaje": f"Error: {e}"}
+        finally:
+            if conexion:
+                conexion.cerrar()

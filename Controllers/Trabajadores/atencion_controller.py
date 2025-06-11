@@ -420,4 +420,28 @@ def verReclamo(idReclamo):
     reclamo = Reclamo.obtener_por_id(idReclamo)
     return render_template("atencion/reclamoCRUD.html",reclamo=reclamo,tittle="Editar reclamo",btnId="btn_Ver")
 
+@atencion_bp.route("/darBajaReclamo/<int:idReclamo>",methods=["POST"])
+def darBajaReclamo(idReclamo):
+    try:
+        resultado = Reclamo.darBajaReclamo(idReclamo)
+
+        if resultado.get("msj") is not None:
+            return jsonify({
+                "Status": "success",
+                "Msj": resultado["msj"],
+                "Msj2": resultado.get("msj2")
+            })
+        else:
+            return jsonify({
+                "Status": "error",
+                "Msj": "",
+                "Msj2": resultado.get("msj2")
+            })
+    except Exception as e:
+        return jsonify({
+            "Status": "error",
+            "Msj": repr(e),
+            "Msj2": ""
+        })
+
 #END REGION

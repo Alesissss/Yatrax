@@ -5701,6 +5701,47 @@ END$$
 
 DELIMITER ;
 
+DELIMITER $$
+
+CREATE PROCEDURE SP_DARBAJA_RECLAMO(
+    IN  p_id   INT,
+    OUT MSJ    VARCHAR(255),
+    OUT MSJ2   VARCHAR(255)
+)
+BEGIN
+    DECLARE v_existe INT;
+
+    -- Captura cualquier error inesperado
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            MSJ2 = MESSAGE_TEXT;
+        SET MSJ = NULL;
+    END;
+
+    -- Inicializar mensajes
+    SET MSJ  = NULL;
+    SET MSJ2 = NULL;
+
+    -- Verificar si el reclamo existe
+    SELECT COUNT(*) INTO v_existe
+    FROM reclamo
+    WHERE id = p_id;
+
+    IF v_existe <= 0 THEN
+        SET MSJ2 = 'El reclamo que intenta dar de baja no existe';
+    ELSE
+        -- Dar de baja (baja lógica)
+        UPDATE reclamo
+        SET estado = 0
+        WHERE id = p_id;
+
+        SET MSJ = 'Se dio de baja correctamente el reclamo';
+    END IF;
+END$$
+
+DELIMITER ;
+
 
 
 -- SP para registrar una promoción

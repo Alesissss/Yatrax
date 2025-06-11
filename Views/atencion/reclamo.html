@@ -223,7 +223,7 @@
                         <div class="flex-wrap btn-group">
                             <button class="btn btn-xs m-1 btn-info" onclick="fct_VerReclamo('${data.id}')" title="Ver usuario"><i class="bi bi-eye"></i></button>
                             <button class="btn btn-xs m-1 btn-primary" onclick="fct_editarReclamo('${data.id}')" title="Editar usuario"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_PagarReserva('${data.id}')" title="Pagar reserva">Pagar reserva</button>
+                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_darBajaReclamo('${data.id}')" title="Dar de baja reclamo"><i class="bi bi-arrow-down-circle"></i></button>
                             <button class="btn btn-xs m-1 btn-danger" onclick = "fct_eliminarReclamo('${data.id}')" title="Eliminar usuario"><i class="bi bi-trash"></i></button>
                         </div>
                         `;
@@ -322,15 +322,15 @@
         });
     }
 
-    function fct_PagarReserva(Id) {
+    function fct_darBajaReclamo(Id) {
         $.ajax({
-            url: `/trabajadores/atencion/CambiarEstado/${Id}`,  // Ruta creada en Flask
+            url: `/trabajadores/atencion/darBajaReclamo/${Id}`,  // Ruta creada en Flask
             method: "POST",
             success: function(response) {
                 if (response.Status === "success") {
                     toastr.success(response.Msj);
                 } else {
-                    toastr.error("Error al pagar reserva: " + response.Msj2);
+                    toastr.error("Error al dar baja: " + response.Msj2);
                 }
             },
             error: function(xhr, status, error) {
