@@ -20,6 +20,7 @@ from Models.viaje import Viaje
 from Models.pasaje import Pasaje
 from Models.tipoComprobante import TipoComprobante
 from Models.metodo_pago import MetodoPago
+from Models.preguntas_frecuentes import PreguntasFrecuentes
 
 homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/home')
 
@@ -291,6 +292,7 @@ def registrar_cliente_form():
             return jsonify({"Status": "error", "Msj": "Error desconocido al registrar cliente"})
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
+
 # REGION TERMINOS Y CONDICIONES
 @homeClientes_bp.route('/ApiTerminosCondicionesActivo', methods=['GET'])
 def api_terminos_condiciones_activo():
@@ -348,6 +350,21 @@ def api_terminos_condiciones_activo():
 
 
 # END REGION TERMINOS Y CONDICIONES
+
+# REGION PREGUNTAS FRECUENTES
+
+@homeClientes_bp.route('/obtenerPreguntasFrecuentes', methods=['GET'])
+def obtener_preguntas_frecuentes():
+    try:
+        preguntas = PreguntasFrecuentes.obtener_todos()
+        if preguntas:
+            return jsonify({"Status": "success", "data": preguntas})
+        return jsonify({"Status": "info", "Msj": "Aún no hay preguntas frecuentes registradas", "data": []})
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Error al obtener las preguntas frecuentes: {repr(e)}", "data": []})
+
+# END REGION PREGUNTAS FRECUENTES
+
 @homeClientes_bp.route('/obtenerOrigenesDestinos',methods=['GET'])
 def obtenerOrigenesDestinos():
     try:

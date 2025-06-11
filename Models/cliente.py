@@ -49,7 +49,7 @@ class Cliente:
         conexion = bd.Conexion()
         try:
             query = """
-                select cli.nombres, cli.ape_paterno, cli.ape_materno, cli.razon_social, cli.email, cli.numero_documento, cli.telefono, 
+                select cli.nombre, cli.ape_paterno, cli.ape_materno, cli.razon_social, cli.email, cli.numero_documento, cli.telefono, 
                 cli.f_nacimiento, cli.sexo from cliente cli inner join tipo_cliente tc on cli.id_tipo_cliente = tc.idTipoCliente 
                 where cli.numero_documento = %s
             """
