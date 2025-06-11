@@ -149,7 +149,13 @@ DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_RECLAMO;
 DROP PROCEDURE IF EXISTS SP_INSERTAR_RECLAMO;
 DROP PROCEDURE IF EXISTS SP_MODIFICAR_RECLAMO;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_RECLAMO;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_CLIENTE;
 
+
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_PROMOCION;
+DROP PROCEDURE IF EXISTS SP_EDITAR_PROMOCION;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_PROMOCION;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_PROMOCION;
 -- Luego eliminamos las tablas, primero la que depende de la otra
 DROP TABLE IF EXISTS conf_general;
 DROP TABLE IF EXISTS cliente;
@@ -731,7 +737,8 @@ CREATE TABLE pasaje(
 
 CREATE TABLE tipo_reclamo(
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL
+    nombre VARCHAR(100) NOT NULL,
+    estado TINYINT NOT NULL
 );
 
 CREATE TABLE reclamo(
@@ -5564,8 +5571,8 @@ BEGIN
     IF v_count > 0 THEN
         SET MSJ2 = 'Ya existe un tipo_reclamo con ese nombre';
     ELSE
-        INSERT INTO tipo_reclamo (nombre)
-        VALUES (p_nombre);
+        INSERT INTO tipo_reclamo (nombre,estado)
+        VALUES (p_nombre,1);
         SET MSJ = 'Tipo_reclamo insertado correctamente';
     END IF;
 END$$
@@ -5573,6 +5580,7 @@ END$$
 CREATE PROCEDURE SP_MODIFICAR_TIPO_RECLAMO(
     IN p_id INT,
     IN p_nombre VARCHAR(100),
+    IN p_estado TINYINT,
     OUT MSJ VARCHAR(255),
     OUT MSJ2 VARCHAR(255)
 )
@@ -5597,7 +5605,7 @@ BEGIN
         SET MSJ2 = 'Ya existe un tipo_reclamo con ese nombre';
     ELSE
         UPDATE tipo_reclamo
-           SET nombre = p_nombre
+           SET nombre = p_nombre, estado = p_estado
          WHERE id = p_id;
         SET MSJ = 'Tipo_reclamo modificado correctamente';
     END IF;
@@ -5699,6 +5707,98 @@ BEGIN
     DELETE FROM reclamo
     WHERE id = p_id;
     SET MSJ = 'Reclamo eliminado correctamente';
+END$$
+
+DELIMITER ;
+
+
+
+-- SP para registrar una promoción
+DELIMITER $$
+
+CREATE PROCEDURE SP_REGISTRAR_PROMOCION (
+    IN p_nombre VARCHAR(100),
+    IN p_estado TINYINT,
+    IN p_fecha_inicio DATE,
+    IN p_fecha_fin DATE,
+    IN p_codigo CHAR(8),
+    IN p_monto_promo DECIMAL(9,2)
+)
+BEGIN
+    IF EXISTS (SELECT 1 FROM promocion WHERE codigo = p_codigo) THEN
+        SET @MSJ2 = 'Ya existe una promoción con ese código';
+        
+    ELSEIF p_fecha_fin < p_fecha_inicio THEN
+        SET @MSJ2 = 'La fecha de fin no puede ser anterior a la fecha de inicio';
+        
+    ELSE
+        INSERT INTO promocion (nombre, estado, fecha_inicio, fecha_fin, codigo, monto_promo)
+        VALUES (p_nombre, p_estado, p_fecha_inicio, p_fecha_fin, p_codigo, p_monto_promo);
+
+        SET @MSJ = 'Promoción registrada correctamente';
+    END IF;
+END$$
+
+DELIMITER ;
+
+-- SP para editar una promoción
+DELIMITER $$
+
+CREATE PROCEDURE SP_EDITAR_PROMOCION (
+    IN p_id INT,
+    IN p_nombre VARCHAR(100),
+    IN p_estado TINYINT,
+    IN p_fecha_inicio DATE,
+    IN p_fecha_fin DATE,
+    IN p_codigo CHAR(8),
+    IN p_monto_promo DECIMAL(9,2)
+)
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM promocion WHERE codigo = p_codigo AND id != p_id
+    ) THEN
+        SET @MSJ2 = 'El código ya está registrado en otra promoción';
+    ELSEIF p_fecha_fin < p_fecha_inicio THEN
+        SET @MSJ2 = 'La fecha de fin no puede ser anterior a la fecha de inicio';
+    ELSE
+        UPDATE promocion
+        SET nombre = p_nombre,
+            estado = p_estado,
+            fecha_inicio = p_fecha_inicio,
+            fecha_fin = p_fecha_fin,
+            codigo = p_codigo,
+            monto_promo = p_monto_promo
+        WHERE id = p_id;
+
+        SET @MSJ = 'Promoción actualizada correctamente';
+    END IF;
+END$$
+
+DELIMITER ;
+
+-- SP para dar de baja una promoción
+DELIMITER $$
+
+CREATE PROCEDURE SP_DAR_BAJA_PROMOCION (
+    IN p_id INT
+)
+BEGIN
+    UPDATE promocion SET estado = 0 WHERE id = p_id;
+
+    SET @MSJ = 'Promoción dada de baja correctamente';
+END$$
+
+DELIMITER ;
+
+-- SP para eliminar una promoción
+DELIMITER $$
+
+CREATE PROCEDURE SP_ELIMINAR_PROMOCION (
+    IN p_id INT
+)
+BEGIN
+    DELETE FROM promocion WHERE id = p_id;
+    SET @MSJ = 'Promoción eliminada correctamente';
 END$$
 
 DELIMITER ;

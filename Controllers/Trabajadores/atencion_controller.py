@@ -1,6 +1,8 @@
 import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort
 from Models.pasaje import Pasaje
+from Models.tipoReclamo import Tipo_Reclamo
+from Models.reclamo import Reclamo
 
 atencion_bp = Blueprint('atencion', __name__, url_prefix='/trabajadores/atencion')
 
@@ -54,6 +56,14 @@ def verificar_sesion():
 @atencion_bp.route('/GestionarReservas')
 def Menu_Atencion():
     return render_template('atencion/reservas.html', active_page="ejemplo", active_menu='mAtencion')
+
+@atencion_bp.route('/GestionarTipoReclamo')
+def Menu_TipoReclamo():
+    return render_template('atencion/tipoReclamo.html', active_page="ejemplo", active_menu='mAtencion')
+
+@atencion_bp.route('/GestionarReclamo')
+def Menu_Reclamo():
+    return render_template('atencion/reclamo.html', active_page="ejemplo", active_menu='mAtencion')
 
 # END VIEWS
 
@@ -188,12 +198,194 @@ def cambiarEstadoPasaje(id_pasaje):
 
 #END REGION RESERVAS
 #REGION TIPO RECLAMO
+@atencion_bp.route('/GetData_TipoReclamo')
+def listarTiposReclamos():
+    try:
+        resultados = Tipo_Reclamo.obtener_todos()
+        return jsonify({"Status":"success","data":resultados})
+    except Exception as e:
+        return jsonify({"Status": "error","Msg": str(e)}), 500
+    
+@atencion_bp.route('/RegistrarTipoReclamo',methods=["GET","POST"])
+def registrarTipoReclamo():
+    if request.method == "GET":
+        return render_template("atencion/tipoReclamoCRUD.html")
+    else:
+        try:
+            nombre = request.form["nombre"]
+            resultado = Tipo_Reclamo.registrar(nombre)
+            if resultado.get("msj") is not None:
+                return jsonify({
+                    "Status": "success",
+                    "Msj": resultado["msj"],
+                    "Msj2": resultado.get("msj2")
+                })
+            else:
+                return jsonify({
+                    "Status": "error",
+                    "Msj": "",
+                    "Msj2": resultado.get("msj2")
+                })
+        except Exception as e:
+                return jsonify({
+                    "Status": "error",
+                    "Msj": repr(e),
+                    "Msj2": resultado.get("msj2")
+                })
 
+@atencion_bp.route('/EditarTipoReclamo',methods=["GET","POST"])
+def editarTipoReclamo():
+    if request.method == "GET":
+        return render_template("atencion/tipoReclamoCRUD.html")
+    else:
+        try:
+            idTipoReclamo = int(request.form["id"])
+            nombre_tipo = request.form["nombre"]
+            estado = request.form["estado"]
+            resultado = Tipo_Reclamo.editar(idTipoReclamo,nombre_tipo,estado)
+
+            if resultado.get("msj") is not None:
+                return jsonify({
+                    "Status": "success",
+                    "Msj": resultado["msj"],
+                    "Msj2": resultado.get("msj2")
+                })
+            else:
+                return jsonify({
+                    "Status": "error",
+                    "Msj": "",
+                    "Msj2": resultado.get("msj2")
+                })
+        except Exception as e:
+                return jsonify({
+                    "Status": "error",
+                    "Msj": repr(e),
+                    "Msj2": resultado.get("msj2")
+                })
+
+@atencion_bp.route('/EliminarTipoReclamo',methods=["POST"])
+def eliminarTipoReclamo():
+    try:
+        idTipoReclamo = int(request.form["id"])
+        resultado = Tipo_Reclamo.eliminar(idTipoReclamo)
+
+        if resultado.get("msj") is not None:
+            return jsonify({
+                "Status": "success",
+                "Msj": resultado["msj"],
+                "Msj2": resultado.get("msj2")
+            })
+        else:
+            return jsonify({
+                "Status": "error",
+                "Msj": "",
+                "Msj2": resultado.get("msj2")
+            })
+    except Exception as e:
+            return jsonify({
+                "Status": "error",
+                "Msj": repr(e),
+                "Msj2": resultado.get("msj2")
+            })
+    
 #END REGION
 #REGION RECLAMO
+@atencion_bp.route('/GetData_Reclamo')
+def listarReclamos():
+    try:
+        resultados = Reclamo.obtener_todos()
+        return jsonify({"Status":"success","data":resultados})
+    except Exception as e:
+        return jsonify({"Status": "error","Msg": str(e)}), 500
+    
+@atencion_bp.route('/RegistrarReclamo',methods=["GET","POST"])
+def registrarReclamo():
+    if request.method == "GET":
+        return render_template("")
+    else:
+        try:
+            idTipoReclamo = int(request.form["idTipoReclamo"])
+            detalle = request.form["detalle"]
+            monto = request.form["monto"]
+            idPasaje = request.form["id_pasaje"]
+            motivo = request.form["motivo"]
+
+            resultado = Reclamo.registrar(idTipoReclamo,detalle,monto,idPasaje,motivo)
+            
+            if resultado.get("msj") is not None:
+                return jsonify({
+                    "Status": "success",
+                    "Msj": resultado["msj"],
+                    "Msj2": resultado.get("msj2")
+                })
+            else:
+                return jsonify({
+                    "Status": "error",
+                    "Msj": "",
+                    "Msj2": resultado.get("msj2")
+                })
+        except Exception as e:
+                return jsonify({
+                    "Status": "error",
+                    "Msj": repr(e),
+                    "Msj2": resultado.get("msj2")
+                })
+    
+@atencion_bp.route('/EditarReclamo', methods=["GET","POST"])
+def editarReclamo():
+    if request.method == "GET":
+        return render_template("")
+    else:
+        try:
+            idReclamo = int(request.form["idReclamo"])
+            idTipoReclamo = int(request.form["idTipoReclamo"])
+            detalle = request.form["detalle"]
+            monto = request.form["monto"]
+            idPasaje = request.form["id_pasaje"]
+            motivo = request.form["motivo"]
+
+            resultado = Reclamo.editar(idReclamo,idTipoReclamo,detalle,monto,idPasaje,motivo)
+            if resultado.get("msj") is not None:
+                return jsonify({
+                    "Status": "success",
+                    "Msj": resultado["msj"],
+                    "Msj2": resultado.get("msj2")
+                })
+            else:
+                return jsonify({
+                    "Status": "error",
+                    "Msj": "",
+                    "Msj2": resultado.get("msj2")
+                })
+        except Exception as e:
+                return jsonify({
+                    "Status": "error",
+                    "Msj": repr(e),
+                    "Msj2": resultado.get("msj2")
+                })
+
+@atencion_bp.route('/EliminarReclamo',methods=["POST"])
+def eliminarReclamo():
+    try:
+        idReclamo = int(request.form["idReclamo"])
+        resultado = Reclamo.eliminar(idReclamo)
+        if resultado.get("msj") is not None:
+            return jsonify({
+                    "Status": "success",
+                    "Msj": resultado["msj"],
+                    "Msj2": resultado.get("msj2")
+                })
+        else:
+            return jsonify({
+                    "Status": "error",
+                    "Msj": "",
+                    "Msj2": resultado.get("msj2")
+                })
+    except Exception as e:
+        return jsonify({
+            "Status": "error",
+            "Msj": repr(e),
+            "Msj2": resultado.get("msj2")
+        })
 
 #END REGION
-# END FUNCIONES
-#REGION TIPO RECLAMO #
-
-#END REGION TIPO RECLAMO #
