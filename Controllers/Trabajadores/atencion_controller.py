@@ -328,7 +328,7 @@ def listarReclamos():
 @atencion_bp.route('/RegistrarReclamo',methods=["GET","POST"])
 def registrarReclamo():
     if request.method == "GET":
-        return render_template("")
+        return render_template("atencion/reclamoCRUD.html",tittle="Nuevo reclamo",btnId="btn_Registrar")
     else:
         try:
             idTipoReclamo = int(request.form["idTipoReclamo"])
@@ -391,10 +391,9 @@ def editarReclamo():
                     "Msj2": resultado.get("msj2")
                 })
 
-@atencion_bp.route('/EliminarReclamo',methods=["POST"])
-def eliminarReclamo():
+@atencion_bp.route('/EliminarReclamo/<int:idReclamo>',methods=["POST"])
+def eliminarReclamo(idReclamo):
     try:
-        idReclamo = int(request.form["idReclamo"])
         resultado = Reclamo.eliminar(idReclamo)
         if resultado.get("msj") is not None:
             return jsonify({
