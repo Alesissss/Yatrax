@@ -1,34 +1,30 @@
 {% extends "index.html" %}
 
-{% block title %}YATRAX - Gestión de clientes{% endblock %}
+{% block title %}YATRAX - Gestión de tipos de reclamo{% endblock %}
 
 {% block content %}
+<div class="card d-none" id="efec-cargando">
+    <div
+        class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center overlay dark">
+        <i class="fas fa-3x fa-sync-alt fa-spin text-white"></i>
+    </div>
+</div>
 <div class="container-fluid p-4">
     <div class="panel-heading">
         <div class="row">
             <div class="col-md-12">
-                <h1>Gestionar clientes</h1>
+                <h1>Gestionar tipos de reclamo</h1>
             </div>
         </div>
     </div>
     <div class="panel-body">
         <div class="row">
-            <div class="col-md-12">
-
-                <table id="tbl_Clientes" class="table table-bordered table-short-rows">
+            <div class="col-12">
+                <table id="tbl_tiposReclamo" class="table table-bordered table-short-rows">
                     <thead class="bg-gray">
                         <tr>
                             <th class="text-center">ID</th>
-                            <th class="text-center">PAÍS</th>
-                            <th class="text-center">TIPO DOCUMENTO</th>
-                            <th class="text-center">N° DOCUMENTO</th>
-                            <th class="text-center">NOMBRES</th>
-                            <th class="text-center">APELLIDOS</th>
-                            <th class="text-center">SEXO</th>
-                            <th class="text-center">FECHA NACIMIENTO</th>
-                            <th class="text-center">DIRECCIÓN</th>
-                            <th class="text-center">TELÉFONO</th>
-                            <th class="text-center">EMAIL</th>
+                            <th class="text-center">NOMBRE</th>
                             <th class="text-center">ESTADO</th>
                             <th class="text-center">ACCIÓN</th>
                         </tr>
@@ -36,7 +32,6 @@
                     <tbody class="bg-white table-short-rows">
                     </tbody>
                 </table>
-
             </div>
         </div>
     </div>
@@ -44,7 +39,7 @@
 {% endblock %}
 {% block scripts %}
 <script>
-    var dtClientes;
+    var dtUsuarios;
 
     $(document).ready(function () {
         // $('body').addClass('sidebar-collapse');
@@ -110,12 +105,12 @@
             lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
         });
 
-        fct_IniciarTablaClientes('#tbl_Clientes');
+        fct_IniciarTablaUsuarios('#tbl_tiposReclamo');
     });
 
-    function fct_IniciarTablaClientes(IdTabla) {
+    function fct_IniciarTablaUsuarios(IdTabla) {
         // Inicializar DataTables con botones
-        dtClientes = $(IdTabla).DataTable({
+        dtUsuarios = $(IdTabla).DataTable({
             buttons: [
                 {
                     extend: 'copy',
@@ -128,7 +123,7 @@
                     text: '<i class="bi bi-file-earmark-excel"></i>',
                     titleAttr: 'Exportar a Excel',
                     className: 'btn btn-success',
-                    filename: 'Clientes' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Usuarios' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     footer: true,
                     exportOptions:
                     {
@@ -141,7 +136,7 @@
                     text: '<i class="bi bi-file-earmark-pdf"></i>',
                     titleAttr: 'Exportar a PDF',
                     className: 'btn btn-danger',
-                    filename: 'Clientes' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Usuarios' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     exportOptions:
                     {
                         stripHtml: true,
@@ -169,64 +164,39 @@
                     columns: ':not(.noVis)',
                 },
                 {
-                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo cliente',
+                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo tipo reclamo',
                     className: 'btn bg-success m-1',
                     titleAttr: 'Nuevo',
                     action: function (e, dt, node, config) {
-                        fct_ClienteNuevo();
+                        fct_nuevo_tipoReclamo();
                     },
                 },
             ],
             ajax: {
-                url: "/trabajadores/ventas/GetData_Cliente",
+                url: "/trabajadores/atencion/GetData_TiposReclamo",
                 type: "GET",
-                datatype: "json",
-                data: function (d) {
-                },
                 dataSrc: function (json) {
-                    if (json.Status === "error") {
-                        toastr.error('Ocurrió un error inesperado al intentar listar la tabla');
-                        console.error(json.Msj);
+                    if (json.Status === "info") {
+                        toastr.info('Aun no hay tipos de reclamo registrados', 'MENSAJE DE SISTEMA');
                         return [];
                     }
                     return json.data;
                 },
-                error: function (xhr, error, thrown) {
-                    toastr.error('Ocurrió un error inesperado al intentar listar la tabla');
-                    console.error('Error en la solicitud Ajax: ' + error + xhr.Msj + thrown);
+                error: function () {
+                    toastr.error("Error en la solicitud AJAX", "MENSAJE DE SISTEMA");
                 },
             },
             columns: [
-                { data: "ID", name: "ID" },
-                { data: "nombre_pais", name: "nombre_pais" },
-                { data: "abreviatura", name: "abreviatura" },
-                { data: "numero_documento", name: "numero_documento" },
-                { data: "nombre", name: "nombre" },
-                { data: "apellidos", name: "apellidos" },
-                {
-                    data: "sexo", name: "sexo",
-                    render: function (data, type, row) {
-                        return data === 1 ? 'Masculino' : 'Femenino';
-                    }
-                },
-                {
-                    data: "f_nacimiento",
-                    name: "f_nacimiento",
-                    render: function (data, type, row) {
-                        return data ? moment(data).format('DD/MM/YYYY') : '';
-                    }
-                },
-                { data: "direccion", name: "direccion" },
-                { data: "telefono", name: "telefono" },
-                { data: "email", name: "email" },
+                { data: "id", name: "Id" },
+                { data: "nombre", name: "Nombre" },
                 {
                     data: "estado",
                     name: "estado",
                     render: function (data, type, row) {
-                        let estado = data === 1 ? 'Vigente' : 'No vigente';
-                        if (estado === "Vigente") {
+                        let estado = data === 1 ? 'Activo' : 'No activo';
+                        if (estado === "Activo") {
                             return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-success fs-5">${estado}</span></h5>`;
-                        } else if (estado === "No vigente") {
+                        } else if (estado === "No activo") {
                             return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-danger fs-5">${estado}</span></h5>`;
                         } else {
                             return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge fs-5" style="background-color: #800080; color: white;">${estado}</span></h5>`;
@@ -238,16 +208,15 @@
                     name: null,
                     render: function (data, type, row) {
                         return `
-                <div class="flex-wrap btn-group">
-                    <button class="btn btn-xs m-1 btn-info" onclick="fct_ClienteVer('${data.ID}')" title="Ver cliente"><i class="bi bi-eye"></i></button>
-                    <button class="btn btn-xs m-1 btn-primary" onclick="fct_ClienteEditar('${data.ID}')" title="Editar cliente"><i class="bi bi-pencil-square"></i></button>
-                    <button class="btn btn-xs m-1 btn-warning" onclick="fct_ClienteDarBaja('${data.ID}')" title="Dar de baja cliente"><i class="bi bi-arrow-down-circle"></i></button>
-                    <button class="btn btn-xs m-1 btn-danger" onclick="fct_ClienteEliminar('${data.ID}')" title="Eliminar cliente"><i class="bi bi-trash"></i></button>
-                </div>
-            `;
+                        <div class="flex-wrap btn-group">
+                            <button class="btn btn-xs m-1 btn-info" onclick="fct_verTipoReclamo('${data.id}')" title="Ver usuario"><i class="bi bi-eye"></i></button>
+                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_editar_tipoReclamo('${data.id}')" title="Editar usuario"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_darBaja_TipoReclamo('${data.id}')"><i class="bi bi-arrow-down-circle"></i></button>
+                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_eliminar_tipoReclamo('${data.id}')" title="Eliminar usuario"><i class="bi bi-trash"></i></button>
+                        </div>
+                        `;
                     },
                     className: 'text-center align-middle',
-                    orderable: false
                 }
             ],
             columnDefs: [
@@ -256,14 +225,13 @@
                     className: "text-center align-middle",
                 },
                 {
-                    targets: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-                    className: 'text-center align-middle',
+                    targets: [1, 2],
+                    className: 'align-middle',
                 },
                 {
-                    targets: [12],
+                    targets: [3],
                     orderable: false,
-                    className: 'text-center align-middle',
-                    width: '10%',
+                    width: '15%',
                 },
             ],
             lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
@@ -291,22 +259,22 @@
         });
     }
 
-    function fct_ClienteNuevo() {
-        window.location.href = '/trabajadores/ventas/ClienteNuevo';
+    function fct_nuevo_tipoReclamo() {
+        window.location.href = '/trabajadores/atencion/RegistrarTipoReclamo';
     }
 
-    function fct_ClienteEditar(ID) {
-        window.location.href = `/trabajadores/ventas/EditarCliente/${ID}`;
+    function fct_editar_tipoReclamo(Id) {
+        window.location.href = `/trabajadores/atencion/EditarTipoReclamo/${Id}`;
     }
 
-    function fct_ClienteVer(ID) {
-        window.location.href = `/trabajadores/ventas/VerCliente/${ID}`;
+    function fct_verTipoReclamo(Id) {
+        window.location.href = `/trabajadores/atencion/verTipoReclamo/${Id}`;
     }
 
-    function fct_ClienteEliminar(ID) {
+    function fct_eliminar_tipoReclamo(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción eliminará al cliente. ¿Deseas continuar?",
+            text: "Esta acción eliminará la reserva. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -317,7 +285,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/ventas/EliminarCliente/${ID}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/atencion/EliminarTipoReclamo/${Id}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
@@ -326,7 +294,7 @@
                                 toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
                                 return;
                             }
-                            fct_IniciarTablaClientes('#tbl_Clientes');
+                            fct_IniciarTablaUsuarios('#tbl_tiposReclamo');
                             toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                         } else {
                             toastr.error(response.Msj, "MENSAJE DE SISTEMA");
@@ -342,44 +310,33 @@
         });
     }
 
-    function fct_ClienteDarBaja(ID) {
-        console.log(ID);
-        Swal.fire({
-            title: "¿Estás seguro?",
-            text: "Esta acción le dará de baja al cliente. ¿Deseas continuar?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Sí, dar de baja",
-            cancelButtonText: "Cancelar",
-            reverseButtons: true // Invertir el orden de los botones
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `/trabajadores/ventas/DarBajaCliente/${ID}`,  // Pasamos el ID en la URL
-                    type: "POST",
-                    contentType: "application/json",
-                    success: function (response) {
-                        if (response.Status === "success") {
-                            if (response.Msj2 !== '' && response.Msj2 !== null) {
-                                toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                                return;
-                            }
-                            fct_IniciarTablaClientes('#tbl_Clientes');
-                            toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                        } else {
-                            toastr.error(response.Msj, "MENSAJE DE SISTEMA");
-                            console.error('Error: ' + response.Msj);
-                        }
-                    },
-                    error: function (xhr, Status, error) {
-                        toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
-                        console.error('Error:' + error);
-                    }
-                });
+    function fct_darBaja_TipoReclamo(Id) {
+        $.ajax({
+            url: `/trabajadores/atencion/darBajaTipoReclamo/${Id}`,  // Ruta creada en Flask
+            method: "POST",
+            success: function(response) {
+                if (response.Status === "success") {
+                    toastr.success(response.Msj);
+                } else {
+                    toastr.error("Error al dar baja tipo de reclamo: " + response.Msj2);
+                }
+            },
+            error: function(xhr, status, error) {
+                // Capturamos el 500 ó cualquier otro error HTTP
+                console.error("Error AJAX:", xhr.status, xhr.responseText);
+                alert("Ocurrió un error interno al intentar dar de baja el tipo de reclamo.");
             }
         });
+
+        fct_IniciarTablaUsuarios('#tbl_tiposReclamo');
+    }
+
+    function ShowSpinner() {
+        $('#efec-cargando').removeClass('d-none');
+    }
+
+    function HideSpinner() {
+        $('#efec-cargando').addClass('d-none');
     }
 
     function newexportaction(e, dt, button, config) {

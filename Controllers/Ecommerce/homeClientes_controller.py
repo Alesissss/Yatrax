@@ -207,14 +207,27 @@ def get_persona_data():
         num_doc = request.args.get('numDoc')
         if not tipo_doc:
             return jsonify({'data': {}, 'Status': 'error', 'Msj': 'Debe proporcionar un DNI'})
+        
+        api_clientes = Cliente()
         api = ApiNetPe()
+        
         if tipo_doc == 'DNI':
+            datos_cliente = api_clientes.obtener_por_numero_documento(num_doc)
+            if datos_cliente:
+                return jsonify({'data': datos_cliente, 'Status': 'success', 'Msj': 'Datos obtenidos correctamente'})
+            else:
+                datos = api.get_person(num_doc)
+                if datos:
+                    return jsonify({'data': datos, 'Status': 'success', 'Msj': 'Datos obtenidos correctamente'})
+                else:
+                    return jsonify({'data': {}, 'Status': 'error', 'Msj': 'No se encontraron datos para el DNI proporcionado'})
+        elif tipo_doc == 'CE':
             datos = api.get_person(num_doc)
             if datos:
                 return jsonify({'data': datos, 'Status': 'success', 'Msj': 'Datos obtenidos correctamente'})
             else:
-                return jsonify({'data': {}, 'Status': 'error', 'Msj': 'No se encontraron datos para el DNI proporcionado'})
-        elif tipo_doc =='RUC':
+                return jsonify({'data': {}, 'Status': 'error', 'Msj': 'No se encontraron datos para el CE proporcionado'})
+        elif tipo_doc == 'RUC':
             datos = api.get_company(num_doc)
             
             if datos:

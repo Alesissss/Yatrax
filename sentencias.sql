@@ -1,64 +1,68 @@
-    -- Primero eliminamos los procedimientos por si existen
-    DROP PROCEDURE IF EXISTS SP_ASIGNAR_DMENU;
-    DROP PROCEDURE IF EXISTS SP_REGISTRAR_INCIDENCIA;
-    DROP PROCEDURE IF EXISTS SP_EDITAR_INCIDENCIA;
-    DROP PROCEDURE IF EXISTS SP_DARBAJA_INCIDENCIA;
-    DROP PROCEDURE IF EXISTS SP_ELIMINAR_INCIDENCIA;
-    DROP PROCEDURE IF EXISTS SP_ELIMINAR_DMENU;
-    DROP PROCEDURE IF EXISTS SP_ASIGNAR_DCLAIM;
-    DROP PROCEDURE IF EXISTS SP_ELIMINAR_DCLAIM;
-    DROP PROCEDURE IF EXISTS SP_ELIMINAR_USUARIO;
-    DROP PROCEDURE IF EXISTS SP_DARBAJA_USUARIO;
-    DROP PROCEDURE IF EXISTS SP_EDITAR_USUARIO;
-    DROP PROCEDURE IF EXISTS SP_REGISTRAR_USUARIO;
-    DROP PROCEDURE IF EXISTS SP_CAMBIAR_CLAVE;
-    DROP PROCEDURE IF EXISTS SP_REGISTRAR_TIPO_USUARIO;
-    DROP PROCEDURE IF EXISTS SP_EDITAR_TIPO_USUARIO;
-    DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPO_USUARIO;
-    DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_USUARIO;
-    DROP PROCEDURE IF EXISTS SP_REGISTRAR_PLANTILLA;
-    DROP PROCEDURE IF EXISTS SP_EDITAR_PLANTILLA;
-    DROP PROCEDURE IF EXISTS SP_ELIMINAR_PLANTILLA;
-    DROP PROCEDURE IF EXISTS SP_ACTIVAR_PLANTILLA;
-    DROP PROCEDURE IF EXISTS SP_REGISTRAR_ABREVIATURA_CIUDAD;
-    DROP PROCEDURE IF EXISTS SP_REGISTRAR_SUCURSAL;
-    DROP PROCEDURE IF EXISTS SP_EDITAR_SUCURSAL;
-    DROP PROCEDURE IF EXISTS SP_DARBAJA_SUCURSAL;
-    DROP PROCEDURE IF EXISTS SP_ELIMINAR_SUCURSAL;
-    DROP PROCEDURE IF EXISTS SP_REGISTRAR_HORARIO;
-    DROP PROCEDURE IF EXISTS SP_EDITAR_HORARIO;
-    DROP PROCEDURE IF EXISTS SP_ELIMINAR_HORARIO;
-    DROP PROCEDURE IF EXISTS SP_ACTIVAR_HORARIO;
-    DROP PROCEDURE IF EXISTS SP_DARBAJA_HORARIO;
-    DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPO_CLIENTE;
-    DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPO_CLIENTE;
-    DROP PROCEDURE IF EXISTS SP_DAR_BAJA_TIPO_CLIENTE;
-    DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_CLIENTE;
-    DROP PROCEDURE IF EXISTS SP_REGISTRAR_METODO_PAGO;
-    DROP PROCEDURE IF EXISTS SP_EDITAR_METODO_PAGO;
-    DROP PROCEDURE IF EXISTS SP_ELIMINAR_METODO_PAGO;
-    DROP PROCEDURE IF EXISTS SP_DARBAJA_METODO_PAGO;
-    DROP PROCEDURE IF EXISTS SP_REGISTRAR_TIPO_PERSONAL;
-    DROP PROCEDURE IF EXISTS SP_EDITAR_TIPO_PERSONAL;
-    DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPO_PERSONAL;
-    DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_PERSONAL;
-    DROP PROCEDURE IF EXISTS SP_REGISTRAR_TIPO_DOCUMENTO;
-    DROP PROCEDURE IF EXISTS SP_EDITAR_TIPO_DOCUMENTO;
-    DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPO_DOCUMENTO;
-    DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_DOCUMENTO;
-    DROP PROCEDURE IF EXISTS SP_REGISTRAR_PERSONAL;
-    DROP PROCEDURE IF EXISTS SP_EDITAR_PERSONAL;
-    DROP PROCEDURE IF EXISTS SP_DARBAJA_PERSONAL;
-    DROP PROCEDURE IF EXISTS SP_ELIMINAR_PERSONAL;
-    DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPOVEHICULO;
-    DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPOVEHICULO;
-    DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPOVEHICULO;
-    DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPOVEHICULO;
-    DROP PROCEDURE IF EXISTS SP_ELIMINAR_PERSONAL_INCIDENCIA;
-    DROP PROCEDURE IF EXISTS SP_DARBAJA_PERSONAL_INCIDENCIA;
-    DROP PROCEDURE IF EXISTS SP_REGISTRAR_PERSONAL_INCIDENCIA;
-    DROP PROCEDURE IF EXISTS SP_EDITAR_PERSONAL_INCIDENCIA;
-    DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_CLIENTE;
+-- Primero eliminamos los procedimientos por si existen
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_CLIENTE;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_CLIENTE;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_CLIENTE;
+DROP PROCEDURE IF EXISTS SP_EDITAR_CLIENTE;
+DROP PROCEDURE IF EXISTS SP_ASIGNAR_DMENU;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_INCIDENCIA;
+DROP PROCEDURE IF EXISTS SP_EDITAR_INCIDENCIA;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_INCIDENCIA;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_INCIDENCIA;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_DMENU;
+DROP PROCEDURE IF EXISTS SP_ASIGNAR_DCLAIM;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_DCLAIM;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_USUARIO;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_USUARIO;
+DROP PROCEDURE IF EXISTS SP_EDITAR_USUARIO;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_USUARIO;
+DROP PROCEDURE IF EXISTS SP_CAMBIAR_CLAVE;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_TIPO_USUARIO;
+DROP PROCEDURE IF EXISTS SP_EDITAR_TIPO_USUARIO;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPO_USUARIO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_USUARIO;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_PLANTILLA;
+DROP PROCEDURE IF EXISTS SP_EDITAR_PLANTILLA;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_PLANTILLA;
+DROP PROCEDURE IF EXISTS SP_ACTIVAR_PLANTILLA;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_ABREVIATURA_CIUDAD;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_SUCURSAL;
+DROP PROCEDURE IF EXISTS SP_EDITAR_SUCURSAL;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_SUCURSAL;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_SUCURSAL;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_HORARIO;
+DROP PROCEDURE IF EXISTS SP_EDITAR_HORARIO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_HORARIO;
+DROP PROCEDURE IF EXISTS SP_ACTIVAR_HORARIO;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_HORARIO;
+DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPO_CLIENTE;
+DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPO_CLIENTE;
+DROP PROCEDURE IF EXISTS SP_DAR_BAJA_TIPO_CLIENTE;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_CLIENTE;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_METODO_PAGO;
+DROP PROCEDURE IF EXISTS SP_EDITAR_METODO_PAGO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_METODO_PAGO;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_METODO_PAGO;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_TIPO_PERSONAL;
+DROP PROCEDURE IF EXISTS SP_EDITAR_TIPO_PERSONAL;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPO_PERSONAL;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_PERSONAL;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_TIPO_DOCUMENTO;
+DROP PROCEDURE IF EXISTS SP_EDITAR_TIPO_DOCUMENTO;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPO_DOCUMENTO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_DOCUMENTO;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_PERSONAL;
+DROP PROCEDURE IF EXISTS SP_EDITAR_PERSONAL;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_PERSONAL;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_PERSONAL;
+DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPOVEHICULO;
+DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_TIPOVEHICULO;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPOVEHICULO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPOVEHICULO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_PERSONAL_INCIDENCIA;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_PERSONAL_INCIDENCIA;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_PERSONAL_INCIDENCIA;
+DROP PROCEDURE IF EXISTS SP_EDITAR_PERSONAL_INCIDENCIA;
+DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_CLIENTE;
 
     DROP PROCEDURE IF EXISTS SP_ELIMINAR_ASIENTO;
     DROP PROCEDURE IF EXISTS SP_DARBAJA_ASIENTO;
@@ -146,6 +150,17 @@
     DROP PROCEDURE IF EXISTS SP_MODIFICAR_TIPO_RECLAMO;
     DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_RECLAMO;
 
+DROP PROCEDURE IF EXISTS SP_INSERTAR_RECLAMO;
+DROP PROCEDURE IF EXISTS SP_MODIFICAR_RECLAMO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_RECLAMO;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_CLIENTE;
+
+
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_PROMOCION;
+DROP PROCEDURE IF EXISTS SP_EDITAR_PROMOCION;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_PROMOCION;
+DROP PROCEDURE IF EXISTS SP_DAR_BAJA_PROMOCION;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPO_RECLAMO;
     DROP PROCEDURE IF EXISTS SP_INSERTAR_RECLAMO;
     DROP PROCEDURE IF EXISTS SP_MODIFICAR_RECLAMO;
     DROP PROCEDURE IF EXISTS SP_ELIMINAR_RECLAMO;
@@ -419,31 +434,30 @@
         FOREIGN KEY (idRuta) REFERENCES ruta (id)
     );
 
-    CREATE TABLE cliente (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        numero_documento VARCHAR(11) NOT NULL, -- Se recomienda especificar una longitud
-        nombre VARCHAR(50) NOT NULL,
-        ape_paterno VARCHAR(50) NOT NULL,
-        ape_materno VARCHAR(50) NOT NULL,
-        sexo BOOLEAN NOT NULL,
-        f_nacimiento DATE NOT NULL,
-        razon_social VARCHAR(150) NOT NULL,
-        direccion VARCHAR(255) NOT NULL,
-        telefono VARCHAR(15) NOT NULL,
-        email VARCHAR(255) NOT NULL,
-        password VARCHAR(255) NOT NULL,
-        estado BOOLEAN NOT NULL,
-        id_pais INT NOT NULL,
-        id_tipo_cliente INT NOT NULL,
-        id_tipo_doc INT NOT NULL,
-        fechaRegistro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        usuario VARCHAR(100) NOT NULL,
-        
-        -- Claves foráneas
-        CONSTRAINT fk_pais FOREIGN KEY (id_pais) REFERENCES PAIS(id),
-        CONSTRAINT fk_tipo_cliente FOREIGN KEY (id_tipo_cliente) REFERENCES TIPO_CLIENTE(idTipoCliente),
-        CONSTRAINT fk_tipo_doc FOREIGN KEY (id_tipo_doc) REFERENCES TIPO_DOCUMENTO(id)
-    );
+CREATE TABLE cliente (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    numero_documento VARCHAR(11) NOT NULL, -- Se recomienda especificar una longitud
+    nombre VARCHAR(255) NOT NULL,
+    ape_paterno VARCHAR(50),
+    ape_materno VARCHAR(50),
+    sexo BOOLEAN,
+    f_nacimiento DATE,
+    direccion VARCHAR(255) NOT NULL,
+    telefono VARCHAR(15) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    estado BOOLEAN NOT NULL,
+    id_pais INT NOT NULL,
+    id_tipo_cliente INT NOT NULL,
+    id_tipo_doc INT NOT NULL,
+    fechaRegistro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL,
+    
+    -- Claves foráneas
+    CONSTRAINT fk_pais FOREIGN KEY (id_pais) REFERENCES PAIS(id),
+    CONSTRAINT fk_tipo_cliente FOREIGN KEY (id_tipo_cliente) REFERENCES TIPO_CLIENTE(idTipoCliente),
+    CONSTRAINT fk_tipo_doc FOREIGN KEY (id_tipo_doc) REFERENCES TIPO_DOCUMENTO(id)
+);
 
     CREATE TABLE asiento (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -636,22 +650,22 @@
         nombre VARCHAR (100) NOT NULL  
     );
 
-    CREATE TABLE viaje (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        idRuta INT NOT NULL,
-        idVehiculo INT NOT NULL,
-        estado BOOLEAN NOT NULL, -- 1: vigente, 0: no vigente
-        estadoViaje INT NOT NULL,
-        esReprogramado BOOLEAN DEFAULT 0,
-        fechaHoraSalida DATETIME NOT NULL,
-        fechaHoraLlegada DATETIME NOT NULL,
-        -- Auditoría
-        fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
-        usuario VARCHAR(100) NOT NULL,
-        FOREIGN KEY (idVehiculo) REFERENCES vehiculo(id),
-        FOREIGN KEY (idRuta) REFERENCES ruta(id),
-        FOREIGN KEY (estadoViaje) REFERENCES estado_viaje(id)
-    );
+CREATE TABLE viaje (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idRuta INT NOT NULL,
+    idVehiculo INT NOT NULL,
+    estado BOOLEAN NOT NULL, -- 1: vigente, 0: no vigente
+    idEstadoViaje INT NOT NULL REFERENCES estado_viaje(id),
+    esReprogramado BOOLEAN DEFAULT 0,
+    fechaHoraSalida DATETIME NOT NULL,
+    fechaHoraLlegada DATETIME NOT NULL,
+    -- Auditoría
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL,
+    FOREIGN KEY (idVehiculo) REFERENCES vehiculo(id),
+    FOREIGN KEY (idRuta) REFERENCES ruta(id),
+    FOREIGN KEY (estadoViaje) REFERENCES estado_viaje(id)
+);
 
     CREATE TABLE detalle_viaje (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -729,10 +743,11 @@
 
     -- Crear tablas tipo_reclamo y reclamo
 
-    CREATE TABLE tipo_reclamo(
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        nombre VARCHAR(100) NOT NULL
-    );
+CREATE TABLE tipo_reclamo(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    estado TINYINT NOT NULL
+);
 
     CREATE TABLE reclamo(
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -1461,41 +1476,23 @@
     -- Tabla apariencia
     INSERT INTO conf_plantillas (id, nombre, color_header, color_footer, logo, estado, fecha_registro, usuario) VALUES (1, 'YATRAX', '#0c336e', '#000000', '/Static/img/plantillas/logo_yatusa.png', 1, '2025-03-06 20:06:14', 'SYSTEM');
 
-    INSERT INTO cliente (
-        id_pais,
-        id_tipo_cliente,
-        id_tipo_doc,
-        numero_documento,
-        nombre,
-        ape_paterno,
-        ape_materno,
-        sexo,
-        f_nacimiento,
-        razon_social,
-        direccion,
-        telefono,
-        email,
-        password,
-        estado,
-        usuario
-    ) VALUES (
-        1,                          -- id_pais
-        2,                          -- id_tipo_cliente
-        1,                          -- id_tipo_doc
-        '12345678',                 -- numero_documento
-        'Christian Cubas',             -- nombres
-        'García',                   -- ape_paterno
-        'Torres',                   -- ape_materno
-        1,                          -- sexo
-        '1990-05-20',               -- f_nacimiento
-        'Luis García S.A.C',        -- razon_social
-        'Av. Perú 123',             -- direccion
-        '987654321',                -- telefono
-        'christiancubasjaramillo@gmail.com',         -- email
-        SHA2('123', 256), -- password encriptada con SHA-256
-        1,                          -- estado
-        'admin'                     -- usuario que registró
-    );
+INSERT INTO cliente (
+    numero_documento, nombre, ape_paterno, ape_materno, sexo, f_nacimiento, direccion, telefono, email, password, estado,
+    id_pais, id_tipo_cliente, id_tipo_doc, usuario
+) VALUES
+-- Clientes con RUC
+('20481234567', 'Empresa Alpha SAC', NULL, NULL, NULL, NULL,'Av. Perú 101', '987654321', 'contacto@alpha.com', SHA2('123', 256), 1, 1, 1, 2, 'admin'),
+('20553334441', 'Servicios Beta SRL', NULL, NULL, NULL, NULL,'Calle Lima 202', '912345678', 'contacto@beta.com', SHA2('123', 256), 1, 1, 1, 2, 'admin'),
+('20661234589', 'Consultora Gamma EIRL', NULL, NULL, NULL, NULL,'Jr. Cusco 303', '923456789', 'info@gamma.com', SHA2('123', 256), 1, 1, 1, 2, 'admin'),
+('20771234987', 'Constructora Delta S.A.', NULL, NULL, NULL, NULL,'Av. Arequipa 404', '934567890', 'delta@construct.com', SHA2('123', 256), 1, 1, 1, 2, 'admin'),
+('20881234500', 'Comercial Epsilon S.A.C.', NULL, NULL, NULL, NULL,'Av. Brasil 505', '945678901', 'epsilon@comercial.com', SHA2('123', 256), 1, 1, 1, 2, 'admin'),
+
+-- Clientes con DNI
+('12345678', 'Juan', 'Pérez', 'Lopez', 1, '1990-05-10', 'Mz A Lt 5', '956789012', 'juanp@example.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
+('87654321', 'Ana', 'García', 'Torres', 0, '1992-08-22', 'Jr. Ayacucho 123', '967890123', 'ana@example.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
+('11223344', 'Carlos', 'Ramirez', 'Paredes', 1, '1988-03-15', 'Av. Grau 456', '978901234', 'carlosr@example.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
+('44332211', 'María', 'López', 'Rojas', 0, '1995-12-01', 'Jr. Junín 789', '989012345', 'maria@example.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
+('55667788', 'Luis', 'Torres', 'Gómez', 1, '1991-09-30', 'Av. Salaverry 101', '990123456', 'luist@example.com', SHA2('123', 256), 1, 1, 1, 1, 'admin');
 
     INSERT INTO `tipo_comprobante` (`nombre`, `estado`, `usuario`)
     VALUES ('boleta', 1, 'alexis@gmail.com');
@@ -2083,214 +2080,168 @@
         ELSE
             UPDATE usuarios SET ESTADO_REGISTRO = 2, ESTADO_PROCESO = 'ELIMINADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
 
-            SET @MSJ = 'Se eliminó correctamente al usuario';
-        END IF;
-    END $$
-    DELIMITER ;
+        SET @MSJ = 'Se eliminó correctamente al usuario';
+    END IF;
+END $$
+DELIMITER ;
 
-
-
-
-    -- Crear procedimiento SP_REGISTRAR_CLIENTE
-    DELIMITER $$
-    CREATE PROCEDURE SP_REGISTRAR_CLIENTE(
-        IN P_ID_PAIS INT,
-        IN P_ID_TIPO_DOC INT,
-        IN P_ID_TIPO_CLIENTE INT,
-        IN P_NUMERO_DOCUMENTO VARCHAR(20),
-        IN P_NOMBRES VARCHAR(90),
-        IN P_APE_PATERNO VARCHAR(50),
-        IN P_APE_MATERNO VARCHAR(50),
-        IN P_SEXO TINYINT,
-        IN P_F_NACIMIENTO DATE,
-        IN P_DIRECCION VARCHAR(70),
-        IN P_TELEFONO VARCHAR(13),
-        IN P_EMAIL VARCHAR(100),
-        IN P_PASSWORD VARCHAR(256),
-        IN P_ESTADO TINYINT,
-        IN P_USUARIO VARCHAR(100)
-    )
+-- Crear procedimiento SP_REGISTRAR_CLIENTE
+DELIMITER $$
+CREATE PROCEDURE SP_REGISTRAR_CLIENTE(
+    IN P_ID_PAIS INT,
+    IN P_ID_TIPO_DOC INT,
+    IN P_ID_TIPO_CLIENTE INT,
+    IN P_NUMERO_DOCUMENTO VARCHAR(11),
+    IN P_NOMBRE VARCHAR(255),
+    IN P_APE_PATERNO VARCHAR(50),
+    IN P_APE_MATERNO VARCHAR(50),
+    IN P_SEXO BOOLEAN,
+    IN P_F_NACIMIENTO DATE,
+    IN P_DIRECCION VARCHAR(255),
+    IN P_TELEFONO VARCHAR(13),
+    IN P_EMAIL VARCHAR(100),
+    IN P_PASSWORD VARCHAR(256),
+    IN P_ESTADO TINYINT,
+    IN P_USUARIO VARCHAR(100)
+)
+BEGIN
+    DECLARE cEmail INT;
+    DECLARE cNumeroDoc INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
     BEGIN
-        DECLARE cEmail INT;
-        DECLARE cNumeroDoc INT;
-        DECLARE EXIT HANDLER FOR SQLEXCEPTION 
-        BEGIN
-            SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
-        END;
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
 
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cEmail FROM CLIENTE WHERE EMAIL = P_EMAIL;
-        SELECT COUNT(*) INTO cNumeroDoc FROM CLIENTE WHERE numero_documento = P_NUMERO_DOCUMENTO;
-        IF cEmail > 0 THEN
-            SET @MSJ2 = 'El correo que intenta registrar ya está registrado';
-        ELSEIF cNumeroDoc > 0 THEN
-            SET @MSJ2 = 'El numero de documento que intenta registrar ya está registrado';
-        ELSE
-            INSERT INTO CLIENTE (id_pais,id_tipo_doc,id_tipo_cliente,numero_documento,nombres, ape_paterno, ape_materno, sexo, f_nacimiento, direccion, telefono, email, password,estado,usuario) 
-            VALUES (P_ID_PAIS, P_ID_TIPO_DOC, P_ID_TIPO_CLIENTE, P_NUMERO_DOCUMENTO, P_NOMBRES, P_APE_PATERNO, P_APE_MATERNO, P_SEXO, P_F_NACIMIENTO, P_DIRECCION, P_TELEFONO, P_EMAIL, P_PASSWORD,P_ESTADO,P_USUARIO);
-            SET @MSJ = 'Se registró correctamente al cliente';
-        END IF;
-    END $$
-    DELIMITER ;
+    SELECT COUNT(*) INTO cEmail FROM CLIENTE WHERE EMAIL = P_EMAIL;
+    SELECT COUNT(*) INTO cNumeroDoc FROM CLIENTE WHERE numero_documento = P_NUMERO_DOCUMENTO;
+    IF cEmail > 0 THEN
+        SET @MSJ2 = 'El correo que intenta registrar ya está registrado';
+    ELSEIF cNumeroDoc > 0 THEN
+        SET @MSJ2 = 'El numero de documento que intenta registrar ya está registrado';
+    ELSE
+        INSERT INTO CLIENTE (id_pais,id_tipo_doc,id_tipo_cliente,numero_documento,nombre, ape_paterno, ape_materno, sexo, f_nacimiento, direccion, telefono, email, password,estado,usuario) 
+        VALUES (P_ID_PAIS, P_ID_TIPO_DOC, 3, P_NUMERO_DOCUMENTO, P_NOMBRE, P_APE_PATERNO, P_APE_MATERNO, P_SEXO, P_F_NACIMIENTO, P_DIRECCION, P_TELEFONO, P_EMAIL, P_PASSWORD,P_ESTADO,P_USUARIO);
+        SET @MSJ = 'Se registró correctamente al cliente';
+    END IF;
+END $$
+DELIMITER ;
 
-    DELIMITER $$
-    CREATE PROCEDURE SP_REGISTRAR_CLIENTE_JURIDICO(
-        IN P_ID_PAIS INT,
-        IN P_ID_TIPO_DOC INT,
-        IN P_NUMERO_DOCUMENTO VARCHAR(20),
-        IN P_RAZON_SOCIAL VARCHAR(90),
-        IN P_DIRECCION VARCHAR(70),
-        IN P_TELEFONO VARCHAR(13),
-        IN P_EMAIL VARCHAR(100),
-        IN P_PASSWORD VARCHAR(256),
-        IN P_ESTADO TINYINT,
-        IN P_USUARIO VARCHAR(100)
-    )
+-- Procedimiento unificado para editar cliente (natural o jurídico) según tipo de documento
+DELIMITER $$
+CREATE PROCEDURE SP_EDITAR_CLIENTE(
+    IN P_ID INT,
+    IN P_ID_PAIS INT,
+    IN P_ID_TIPO_DOC INT,
+    IN P_ID_TIPO_CLIENTE INT,
+    IN P_NUMERO_DOCUMENTO VARCHAR(20),
+    IN P_NOMBRES VARCHAR(90),
+    IN P_APE_PATERNO VARCHAR(50),
+    IN P_APE_MATERNO VARCHAR(50),
+    IN P_SEXO TINYINT,
+    IN P_F_NACIMIENTO DATE,
+    IN P_DIRECCION VARCHAR(255),
+    IN P_TELEFONO VARCHAR(13),
+    IN P_EMAIL VARCHAR(100),
+    IN P_PASSWORD VARCHAR(256),
+    IN P_ESTADO TINYINT,
+    IN P_USUARIO VARCHAR(100)
+)
+BEGIN
+    DECLARE cCliente INT;
+    DECLARE cEmail INT;
+    DECLARE cNumeroDoc INT;
+    DECLARE v_tipo_doc VARCHAR(10);
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
-        DECLARE cEmail INT;
-        DECLARE cRazonSocial INT;
-        DECLARE EXIT HANDLER FOR SQLEXCEPTION 
-        BEGIN
-            SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
-        END;
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
 
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cEmail FROM cliente WHERE EMAIL = P_EMAIL;
-        SELECT COUNT(*) INTO cRazonSocial FROM cliente WHERE RAZON_SOCIAL = P_RAZON_SOCIAL;
+    -- Obtener la abreviatura del tipo de documento
+    SELECT abreviatura INTO v_tipo_doc FROM tipo_documento WHERE id = P_ID_TIPO_DOC;
 
-        IF cEmail > 0 THEN
-            SET @MSJ2 = 'El correo que intenta registrar ya está registrado';
-        ELSEIF cRazonSocial > 0 THEN
-            SET @MSJ2 = 'La razón social que intenta registrar ya está registrado';
-        ELSE  
-            INSERT INTO CLIENTE (id_pais,id_tipo_doc,numero_documento, razon_social, direccion, telefono, email, password,estado,usuario) 
-            VALUES (P_ID_PAIS, P_ID_TIPO_DOC, P_NUMERO_DOCUMENTO, P_RAZON_SOCIAL, P_DIRECCION, P_TELEFONO, P_EMAIL, P_PASSWORD, P_ESTADO,P_USUARIO);
-            SET @MSJ = 'Se registró correctamente al cliente';
-        END IF;
-    END $$
-    DELIMITER ;
+    SELECT COUNT(*) INTO cCliente FROM cliente WHERE id = P_ID;
+    SELECT COUNT(*) INTO cEmail FROM cliente WHERE email = P_EMAIL AND id != P_ID;
+    SELECT COUNT(*) INTO cNumeroDoc FROM cliente WHERE numero_documento = P_NUMERO_DOCUMENTO AND id != P_ID;
 
-
-    -- Crear procedimiento SP_EDITAR_CLIENTE_NATURAL
-    DELIMITER $$
-    CREATE PROCEDURE SP_EDITAR_CLIENTE_NATURAL(
-        IN P_ID INT,
-        IN P_ID_PAIS INT,
-        IN P_ID_TIPO_DOC INT,
-        IN P_ID_TIPO_CLIENTE INT,
-        IN P_NUMERO_DOCUMENTO VARCHAR(20),
-        IN P_NOMBRES VARCHAR(90),
-        IN P_APE_PATERNO VARCHAR(50),
-        IN P_APE_MATERNO VARCHAR(50),
-        IN P_SEXO TINYINT,
-        IN P_F_NACIMIENTO DATE,
-        IN P_DIRECCION VARCHAR(70),
-        IN P_TELEFONO VARCHAR(13),
-        IN P_EMAIL VARCHAR(100),
-        IN P_PASSWORD VARCHAR(256),
-        IN P_ESTADO TINYINT
-    )
-    BEGIN
-        DECLARE cCliente INT;
-        DECLARE cEmail INT;
-        DECLARE cNumeroDoc INT;
-        DECLARE EXIT HANDLER FOR SQLEXCEPTION
-        BEGIN
-            SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
-        END;
-
-        SET @MSJ = NULL;
-        SET @MSJ2 = NULL;
-
-        SELECT COUNT(*) INTO cCliente FROM CLIENTE WHERE id = P_ID;
-        SELECT COUNT(*) INTO cEmail FROM CLIENTE WHERE EMAIL = P_EMAIL AND id != P_ID;
-        SELECT COUNT(*) INTO cNumeroDoc FROM CLIENTE WHERE numero_documento = P_NUMERO_DOCUMENTO AND id != P_ID;
-
-        IF cCliente <= 0 THEN
-            SET @MSJ2 = 'El cliente que intenta editar no existe';
-        ELSEIF cEmail != 0 THEN
-            SET @MSJ2 = 'El correo ingresado ya existe';
-        ELSEIF cNumeroDoc != 0 THEN
-            SET @MSJ2 = 'El numero de documento ingresado ya existe';
-        ELSE
-            UPDATE CLIENTE
-            SET id_pais = P_ID_PAIS,
-            id_tipo_doc = P_ID_TIPO_DOC,
-            id_tipo_cliente = P_ID_TIPO_CLIENTE,
-            numero_documento = P_NUMERO_DOCUMENTO,
-            nombres = P_NOMBRES,
-            ape_paterno = P_APE_PATERNO,
-            ape_materno = P_APE_MATERNO,
-            sexo = P_SEXO,
-            f_nacimiento = P_F_NACIMIENTO,
-            direccion = P_DIRECCION,
-            telefono = P_TELEFONO,
-            email = P_EMAIL,
-            password = P_PASSWORD,
-            estado = P_ESTADO
-            WHERE id = P_ID;
-            
-            SET @MSJ = 'Se modificó correctamente al usuario';
-        END IF;
-    END $$
-    DELIMITER ;
-    -- Crear procedimiento SP_EDITAR_CLIENTE_JURIDICO
-    DELIMITER $$
-    CREATE PROCEDURE SP_EDITAR_CLIENTE_JURIDICO(
-        IN P_ID INT,
-        IN P_ID_PAIS INT,
-        IN P_ID_TIPO_DOC INT,
-        IN P_NUMERO_DOCUMENTO VARCHAR(20),
-        IN P_RAZON_SOCIAL VARCHAR(90),
-        IN P_DIRECCION VARCHAR(70),
-        IN P_TELEFONO VARCHAR(13),
-        IN P_EMAIL VARCHAR(100),
-        IN P_PASSWORD VARCHAR(256),
-        IN P_ESTADO TINYINT
-    )
-    BEGIN
-        DECLARE cCliente INT;
-        DECLARE cEmail INT;
-        DECLARE cNumeroDoc INT;
-        DECLARE EXIT HANDLER FOR SQLEXCEPTION
-        BEGIN
-            SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
-        END;
-
-        SET @MSJ = NULL;
-        SET @MSJ2 = NULL;
-
-        SELECT COUNT(*) INTO cCliente FROM CLIENTE WHERE id = P_ID;
-        SELECT COUNT(*) INTO cEmail FROM CLIENTE WHERE EMAIL = P_EMAIL AND id != P_ID;
-        SELECT COUNT(*) INTO cNumeroDoc FROM CLIENTE WHERE numero_documento = P_NUMERO_DOCUMENTO AND id != P_ID;
-
-        IF cCliente <= 0 THEN
-            SET @MSJ2 = 'El cliente que intenta editar no existe';
-        ELSEIF cEmail != 0 THEN
-            SET @MSJ2 = 'El correo ingresado ya existe';
-        ELSEIF cNumeroDoc != 0 THEN
-            SET @MSJ2 = 'El número de documento ingresado ya existe';
-        ELSE
-            UPDATE CLIENTE
+    IF cCliente <= 0 THEN
+        SET @MSJ2 = 'El cliente que intenta editar no existe';
+    ELSEIF cEmail != 0 THEN
+        SET @MSJ2 = 'El correo ingresado ya existe';
+    ELSEIF cNumeroDoc != 0 THEN
+        SET @MSJ2 = 'El número de documento ingresado ya existe';
+    ELSE
+        IF v_tipo_doc = 'DNI' THEN
+            UPDATE cliente
             SET id_pais = P_ID_PAIS,
                 id_tipo_doc = P_ID_TIPO_DOC,
+                id_tipo_cliente = 3,
                 numero_documento = P_NUMERO_DOCUMENTO,
-                razon_social = P_RAZON_SOCIAL,
+                nombre = P_NOMBRES,
+                ape_paterno = P_APE_PATERNO,
+                ape_materno = P_APE_MATERNO,
+                sexo = P_SEXO,
+                f_nacimiento = P_F_NACIMIENTO,
                 direccion = P_DIRECCION,
                 telefono = P_TELEFONO,
                 email = P_EMAIL,
                 password = P_PASSWORD,
-                estado = P_ESTADO
+                estado = P_ESTADO,
+                usuario = P_USUARIO
+            -- Actualizar el cliente natural
             WHERE id = P_ID;
-
+            SET @MSJ = 'Se modificó correctamente al cliente natural';
+        ELSEIF v_tipo_doc = 'RUC' THEN
+            UPDATE cliente
+            SET id_pais = P_ID_PAIS,
+                id_tipo_doc = P_ID_TIPO_DOC,
+                id_tipo_cliente = 4,
+                numero_documento = P_NUMERO_DOCUMENTO,
+                nombre = P_NOMBRES,
+                ape_paterno = NULL,
+                ape_materno = NULL,
+                sexo = NULL,
+                f_nacimiento = NULL,
+                direccion = P_DIRECCION,
+                telefono = P_TELEFONO,
+                email = P_EMAIL,
+                password = P_PASSWORD,
+                estado = P_ESTADO,
+                usuario = P_USUARIO
+            -- Actualizar el cliente jurídico
+            WHERE id = P_ID;
+            SET @MSJ = 'Se modificó correctamente al cliente jurídico';
+        ELSE
+            -- Para otros tipos de documento, se puede ajustar la lógica según necesidad
+            UPDATE cliente
+            SET id_pais = P_ID_PAIS,
+                id_tipo_doc = P_ID_TIPO_DOC,
+                id_tipo_cliente = 3,
+                numero_documento = P_NUMERO_DOCUMENTO,
+                nombre = P_NOMBRES,
+                ape_paterno = P_APE_PATERNO,
+                ape_materno = P_APE_MATERNO,
+                sexo = P_SEXO,
+                f_nacimiento = P_F_NACIMIENTO,
+                direccion = P_DIRECCION,
+                telefono = P_TELEFONO,
+                email = P_EMAIL,
+                password = P_PASSWORD,
+                estado = P_ESTADO,
+                usuario = P_USUARIO
+            -- Actualizar el cliente con otro tipo de documento
+            WHERE id = P_ID;
             SET @MSJ = 'Se modificó correctamente al cliente';
         END IF;
-    END $$
-    DELIMITER ;
+    END IF;
+END $$
+DELIMITER ;
 
     -- Crear procedimiento SP_DARBAJA_CLIENTE
     DELIMITER $$
@@ -2340,14 +2291,14 @@
 
         SELECT COUNT(*) INTO cCliente FROM cliente WHERE ID = P_ID;
 
-        IF cCliente <= 0 THEN
-            SET @MSJ2 = 'El cliente que intenta eliminar no existe';
-        ELSE
-            DELETE FROM CLIENTE WHERE ID = P_ID;
-            SET @MSJ = 'Se eliminó correctamente al usuario';
-        END IF;
-    END $$
-    DELIMITER ;
+    IF cCliente <= 0 THEN
+        SET @MSJ2 = 'El cliente que intenta eliminar no existe';
+    ELSE
+        DELETE FROM CLIENTE WHERE ID = P_ID;
+        SET @MSJ = 'Se eliminó correctamente al cliente';
+    END IF;
+END $$
+DELIMITER ;
 
     DELIMITER $$
 
@@ -5584,29 +5535,30 @@
         FROM tipo_reclamo
         WHERE nombre = p_nombre;
 
-        IF v_count > 0 THEN
-            SET MSJ2 = 'Ya existe un tipo_reclamo con ese nombre';
-        ELSE
-            INSERT INTO tipo_reclamo (nombre)
-            VALUES (p_nombre);
-            SET MSJ = 'Tipo_reclamo insertado correctamente';
-        END IF;
-    END$$
+    IF v_count > 0 THEN
+        SET MSJ2 = 'Ya existe un tipo_reclamo con ese nombre';
+    ELSE
+        INSERT INTO tipo_reclamo (nombre,estado)
+        VALUES (p_nombre,1);
+        SET MSJ = 'Tipo_reclamo insertado correctamente';
+    END IF;
+END$$
 
-    CREATE PROCEDURE SP_MODIFICAR_TIPO_RECLAMO(
-        IN p_id INT,
-        IN p_nombre VARCHAR(100),
-        OUT MSJ VARCHAR(255),
-        OUT MSJ2 VARCHAR(255)
-    )
+CREATE PROCEDURE SP_MODIFICAR_TIPO_RECLAMO(
+    IN p_id INT,
+    IN p_nombre VARCHAR(100),
+    IN p_estado TINYINT,
+    OUT MSJ VARCHAR(255),
+    OUT MSJ2 VARCHAR(255)
+)
+BEGIN
+    DECLARE v_count INT DEFAULT 0;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
-        DECLARE v_count INT DEFAULT 0;
-        DECLARE EXIT HANDLER FOR SQLEXCEPTION
-        BEGIN
-            GET DIAGNOSTICS CONDITION 1
-                MSJ2 = MESSAGE_TEXT;
-            SET MSJ = NULL;
-        END;
+        GET DIAGNOSTICS CONDITION 1
+            MSJ2 = MESSAGE_TEXT;
+        SET MSJ = NULL;
+    END;
 
         SET MSJ  = NULL;
         SET MSJ2 = NULL;
@@ -5616,15 +5568,15 @@
         WHERE nombre = p_nombre
         AND id <> p_id;
 
-        IF v_count > 0 THEN
-            SET MSJ2 = 'Ya existe un tipo_reclamo con ese nombre';
-        ELSE
-            UPDATE tipo_reclamo
-            SET nombre = p_nombre
-            WHERE id = p_id;
-            SET MSJ = 'Tipo_reclamo modificado correctamente';
-        END IF;
-    END$$
+    IF v_count > 0 THEN
+        SET MSJ2 = 'Ya existe un tipo_reclamo con ese nombre';
+    ELSE
+        UPDATE tipo_reclamo
+           SET nombre = p_nombre, estado = p_estado
+         WHERE id = p_id;
+        SET MSJ = 'Tipo_reclamo modificado correctamente';
+    END IF;
+END$$
 
     CREATE PROCEDURE SP_ELIMINAR_TIPO_RECLAMO(
         IN p_id INT,
@@ -5642,10 +5594,30 @@
         SET MSJ  = NULL;
         SET MSJ2 = NULL;
 
-        DELETE FROM tipo_reclamo
-        WHERE id = p_id;
-        SET MSJ = 'Tipo_reclamo eliminado correctamente';
-    END$$
+    DELETE FROM tipo_reclamo
+    WHERE id = p_id;
+    SET MSJ = 'Tipo_reclamo eliminado correctamente';
+END$$
+
+CREATE PROCEDURE SP_DARBAJA_TIPO_RECLAMO (
+    IN p_id INT,
+    OUT MSJ VARCHAR(255),
+    OUT MSJ2 VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            MSJ2 = MESSAGE_TEXT;
+        SET MSJ = NULL;
+    END;
+
+    SET MSJ  = NULL;
+    SET MSJ2 = NULL;
+
+    UPDATE tipo_reclamo SET estado=0 WHERE id = p_id;
+    SET MSJ = 'Tipo de reclamo dado de baja correctamente';
+END$$
 
     CREATE PROCEDURE SP_INSERTAR_RECLAMO(
         IN p_tipo_reclamo INT,
@@ -5719,9 +5691,101 @@
         SET MSJ  = NULL;
         SET MSJ2 = NULL;
 
-        DELETE FROM reclamo
+    DELETE FROM reclamo
+    WHERE id = p_id;
+    SET MSJ = 'Reclamo eliminado correctamente';
+END$$
+
+DELIMITER ;
+
+
+
+-- SP para registrar una promoción
+DELIMITER $$
+
+CREATE PROCEDURE SP_REGISTRAR_PROMOCION (
+    IN p_nombre VARCHAR(100),
+    IN p_estado TINYINT,
+    IN p_fecha_inicio DATE,
+    IN p_fecha_fin DATE,
+    IN p_codigo CHAR(8),
+    IN p_monto_promo DECIMAL(9,2)
+)
+BEGIN
+    IF EXISTS (SELECT 1 FROM promocion WHERE codigo = p_codigo) THEN
+        SET @MSJ2 = 'Ya existe una promoción con ese código';
+        
+    ELSEIF p_fecha_fin < p_fecha_inicio THEN
+        SET @MSJ2 = 'La fecha de fin no puede ser anterior a la fecha de inicio';
+        
+    ELSE
+        INSERT INTO promocion (nombre, estado, fecha_inicio, fecha_fin, codigo, monto_promo)
+        VALUES (p_nombre, p_estado, p_fecha_inicio, p_fecha_fin, p_codigo, p_monto_promo);
+
+        SET @MSJ = 'Promoción registrada correctamente';
+    END IF;
+END$$
+
+DELIMITER ;
+
+-- SP para editar una promoción
+DELIMITER $$
+
+CREATE PROCEDURE SP_EDITAR_PROMOCION (
+    IN p_id INT,
+    IN p_nombre VARCHAR(100),
+    IN p_estado TINYINT,
+    IN p_fecha_inicio DATE,
+    IN p_fecha_fin DATE,
+    IN p_codigo CHAR(8),
+    IN p_monto_promo DECIMAL(9,2)
+)
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM promocion WHERE codigo = p_codigo AND id != p_id
+    ) THEN
+        SET @MSJ2 = 'El código ya está registrado en otra promoción';
+    ELSEIF p_fecha_fin < p_fecha_inicio THEN
+        SET @MSJ2 = 'La fecha de fin no puede ser anterior a la fecha de inicio';
+    ELSE
+        UPDATE promocion
+        SET nombre = p_nombre,
+            estado = p_estado,
+            fecha_inicio = p_fecha_inicio,
+            fecha_fin = p_fecha_fin,
+            codigo = p_codigo,
+            monto_promo = p_monto_promo
         WHERE id = p_id;
-        SET MSJ = 'Reclamo eliminado correctamente';
-    END$$
+
+        SET @MSJ = 'Promoción actualizada correctamente';
+    END IF;
+END$$
+
+DELIMITER ;
+
+-- SP para dar de baja una promoción
+DELIMITER $$
+
+CREATE PROCEDURE SP_DAR_BAJA_PROMOCION (
+    IN p_id INT
+)
+BEGIN
+    UPDATE promocion SET estado = 0 WHERE id = p_id;
+
+    SET @MSJ = 'Promoción dada de baja correctamente';
+END$$
+
+DELIMITER ;
+
+-- SP para eliminar una promoción
+DELIMITER $$
+
+CREATE PROCEDURE SP_ELIMINAR_PROMOCION (
+    IN p_id INT
+)
+BEGIN
+    DELETE FROM promocion WHERE id = p_id;
+    SET @MSJ = 'Promoción eliminada correctamente';
+END$$
 
     DELIMITER ;

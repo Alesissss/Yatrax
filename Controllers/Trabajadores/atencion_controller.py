@@ -57,6 +57,14 @@ def verificar_sesion():
 def Menu_Atencion():
     return render_template('atencion/reservas.html', active_page="ejemplo", active_menu='mAtencion')
 
+@atencion_bp.route('/GestionarTipoReclamo')
+def Menu_TipoReclamo():
+    return render_template('atencion/tipoReclamo.html', active_page="ejemplo", active_menu='mAtencion')
+
+@atencion_bp.route('/GestionarReclamo')
+def Menu_Reclamo():
+    return render_template('atencion/reclamo.html', active_page="ejemplo", active_menu='mAtencion')
+
 # END VIEWS
 
 # FUNCIONES
@@ -190,7 +198,7 @@ def cambiarEstadoPasaje(id_pasaje):
 
 #END REGION RESERVAS
 #REGION TIPO RECLAMO
-@atencion_bp.route('/GetData_TipoReclamo')
+@atencion_bp.route('/GetData_TiposReclamo')
 def listarTiposReclamos():
     try:
         resultados = Tipo_Reclamo.obtener_todos()
@@ -201,7 +209,7 @@ def listarTiposReclamos():
 @atencion_bp.route('/RegistrarTipoReclamo',methods=["GET","POST"])
 def registrarTipoReclamo():
     if request.method == "GET":
-        return render_template("")
+        return render_template("atencion/tipoReclamoCRUD.html",tittle="Nuevo tipo reclamo",btnId="btn_Registrar")
     else:
         try:
             nombre = request.form["nombre"]
@@ -225,15 +233,16 @@ def registrarTipoReclamo():
                     "Msj2": resultado.get("msj2")
                 })
 
-@atencion_bp.route('/EditarTipoReclamo',methods=["GET","POST"])
-def editarTipoReclamo():
+@atencion_bp.route('/EditarTipoReclamo/<int:idTipoReclamo>',methods=["GET","POST"])
+def editarTipoReclamo(idTipoReclamo):
     if request.method == "GET":
-        return render_template()
+        tipo = Tipo_Reclamo.obtener_por_id(idTipoReclamo)
+        return render_template("atencion/tipoReclamoCRUD.html",tipoReclamo=tipo,tittle="Editar tipo reclamo",btnId="btn_Actualizar")
     else:
         try:
-            idTipoReclamo = int(request.form["id"])
             nombre_tipo = request.form["nombre"]
-            resultado = Tipo_Reclamo.editar(idTipoReclamo,nombre)
+            estado = request.form["estado"]
+            resultado = Tipo_Reclamo.editar(idTipoReclamo,nombre_tipo,estado)
 
             if resultado.get("msj") is not None:
                 return jsonify({
@@ -254,10 +263,9 @@ def editarTipoReclamo():
                     "Msj2": resultado.get("msj2")
                 })
 
-@atencion_bp.route('/EliminarTipoReclamo',methods=["POST"])
-def eliminarTipoReclamo():
+@atencion_bp.route('/EliminarTipoReclamo/<int:idTipoReclamo>',methods=["POST"])
+def eliminarTipoReclamo(idTipoReclamo):
     try:
-        idTipoReclamo = int(request.form["id"])
         resultado = Tipo_Reclamo.eliminar(idTipoReclamo)
 
         if resultado.get("msj") is not None:
@@ -278,7 +286,35 @@ def eliminarTipoReclamo():
                 "Msj": repr(e),
                 "Msj2": resultado.get("msj2")
             })
-    
+
+@atencion_bp.route('/verTipoReclamo/<int:idTipoReclamo>')
+def verTipoReclamo(idTipoReclamo):
+    tipo = Tipo_Reclamo.obtener_por_id(idTipoReclamo)
+    return render_template("atencion/tipoReclamoCRUD.html",tipoReclamo=tipo,tittle="Ver tipo reclamo",btnId="btn_Ver")  
+
+@atencion_bp.route("/darBajaTipoReclamo/<int:idTipoReclamo>",methods=["POST"])
+def darBajaTipoReclamo(idTipoReclamo):
+    try:
+        resultado = Tipo_Reclamo.darBaja(idTipoReclamo)
+        if resultado.get("msj") is not None:
+            return jsonify({
+                "Status": "success",
+                "Msj": resultado["msj"],
+                "Msj2": resultado.get("msj2")
+            })
+        else:
+            return jsonify({
+                "Status": "error",
+                "Msj": "",
+                "Msj2": resultado.get("msj2")
+            })
+    except Exception as e:
+        return jsonify({
+            "Status": "error",
+            "Msj": repr(e),
+            "Msj2": resultado.get("msj2")
+        })
+
 #END REGION
 #REGION RECLAMO
 @atencion_bp.route('/GetData_Reclamo')
