@@ -250,7 +250,7 @@
                 horaSalida = horaLlegadaPorEscala.get(i);
             }
 
-            const horaLlegada = moment(horaSalida).add(tiempoMin, 'minutes');
+            const horaLlegada = moment(horaSalida).add(tiempoMin + 30, 'minutes');
 
             const salidaCell = fila.querySelector('.fecha-salida');
             if (salidaCell && salidaCell.tagName === 'SPAN') {
