@@ -164,19 +164,6 @@
           required
         />
       </div>
-      <div
-        class="ytrx-input-group"
-        id="grupo-razon-social"
-        style="display: none"
-      >
-        <input
-          type="text"
-          id="ytrx-razon-social"
-          name="ytrx-razon-social"
-          class="ytrx-form-input"
-          placeholder="Razón social"
-        />
-      </div>
 
       <!-- Apellidos -->
       <div class="row" id="grupo-apellidos">
@@ -341,7 +328,6 @@
     const form = document.getElementById("ytrx-register-form");
 
     const grupoNombres = document.getElementById("grupo-nombres");
-    const razonSocial = document.getElementById("grupo-razon-social");
     const grupoApellidos = document.getElementById("grupo-apellidos");
     const grupoSexo = document.getElementById("grupo-sexo");
     const grupoNacimiento = document.getElementById("grupo-fecha-nacimiento");
@@ -356,29 +342,20 @@
       const seleccionado = tipoDoc.options[tipoDoc.selectedIndex].text;
 
       if (seleccionado === "RUC") {
-        razonSocial.style.display = "block";
-        grupoNombres.style.display = "none";
         grupoApellidos.style.display = "none";
         grupoSexo.style.display = "none";
         grupoNacimiento.style.display = "none";
-
         document.getElementById("ytrx-fullname").value = "";
         document.getElementById("ytrx-lastname-father").value = "";
         document.getElementById("ytrx-lastname-mother").value = "";
         document.getElementById("ytrx-gender").selectedIndex = 0;
         document.getElementById("ytrx-birthdate").value = "";
-        document.getElementById("ytrx-razon-social").required = true;
         document.getElementById("ytrx-fullname").required = false;
       } else if (seleccionado === "DNI") {
-        razonSocial.style.display = "none";
         grupoNombres.style.display = "block";
         grupoApellidos.style.display = "flex";
         grupoSexo.style.display = "flex";
         grupoNacimiento.style.display = "block";
-
-        document.getElementById("ytrx-razon-social").value = "";
-
-        document.getElementById("ytrx-razon-social").required = false;
         document.getElementById("ytrx-fullname").required = true;
       } else {
         razonSocial.style.display = "none";
@@ -386,8 +363,6 @@
         grupoApellidos.style.display = "flex";
         grupoSexo.style.display = "flex";
         grupoNacimiento.style.display = "block";
-        document.getElementById("ytrx-razon-social").value = "";
-        document.getElementById("ytrx-razon-social").required = false;
         document.getElementById("ytrx-fullname").required = true;
         document.getElementById("ytrx-lastname-father").value = "";
         document.getElementById("ytrx-lastname-mother").style.display = "block";
@@ -408,13 +383,6 @@
         errorMsg.style.display = "none";
       }
 
-      if (
-        tipoDoc.options[tipoDoc.selectedIndex].text === "RUC" &&
-        document.getElementById("ytrx-razon-social").value.trim() === ""
-      ) {
-        alert("Debe ingresar la Razón Social para RUC.");
-        return;
-      }
 
       const formData = new FormData(form);
 
@@ -429,11 +397,11 @@
             toastr.success("Registro exitoso"+ (data.Msj || data.Msj2));
             form.reset();
           } else {
-            alert("❌ Error: " + (data.Msj || data.Msj2));
+            toastr.error("❌ Error: " + (data.Msj || data.Msj2));
           }
         },
         error: function (xhr, status, error) {
-          alert("❌ Error al enviar el formulario. " + error);
+          toastr.error("❌ Error al enviar el formulario. " + error);
           console.error("Error AJAX:", error);
         },
       });
@@ -526,13 +494,13 @@
             if (json.Status === "success") {
               const d = json.data;
               if (d.razonSocial)
-                document.getElementById("ytrx-razon-social").value =
+                document.getElementById("ytrx-fullname").value =
                   d.razonSocial;
               else
-                document.getElementById("ytrx-razon-social").value =
+                document.getElementById("ytrx-fullname").value =
                   "RazonSocial";
             } else {
-              document.getElementById("ytrx-razon-social").value =
+              document.getElementById("ytrx-fullname").value =
                 "RazonSocial";
               toastr.error(json.Msj, "ERROR");
             }
@@ -547,7 +515,6 @@
       document.getElementById("ytrx-fullname").value = "";
       document.getElementById("ytrx-lastname-father").value = "";
       document.getElementById("ytrx-lastname-mother").value = "";
-      document.getElementById("ytrx-razon-social").value = "";
       document.getElementById("ytrx-birthdate").value = "";
       document.getElementById("ytrx-phone").value = "";
       document.getElementById("ytrx-country").value = "";

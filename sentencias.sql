@@ -453,8 +453,7 @@ CREATE TABLE cliente (
     id_tipo_cliente INT NOT NULL,
     id_tipo_doc INT NOT NULL,
     fechaRegistro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    usuario VARCHAR(100) NOT NULL,
-    
+    usuario VARCHAR(100) NULL,
     -- Claves foráneas
     CONSTRAINT fk_pais FOREIGN KEY (id_pais) REFERENCES PAIS(id),
     CONSTRAINT fk_tipo_cliente FOREIGN KEY (id_tipo_cliente) REFERENCES TIPO_CLIENTE(idTipoCliente),

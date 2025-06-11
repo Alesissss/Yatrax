@@ -138,34 +138,32 @@ class Cliente:
             conexion.cerrar()
     
     
-   # @classmethod
-    #def registrarForm(cls, id_pais, id_tipo_cliente, id_tipo_doc, numero_documento, nombres,
-     #           ape_paterno, ape_materno, sexo, f_nacimiento, razon_social,
-      #          direccion, telefono, email, password, usuario):
-       # conexion = bd.Conexion()
-        #try:
-         #   password_hash = hashlib.sha256(password.encode()).hexdigest()
-          #  query = """
-           # INSERT INTO cliente (
-            #    id_pais, id_tipo_cliente, id_tipo_doc, numero_documento, 
-             #   nombres, ape_paterno, ape_materno, sexo, f_nacimiento, 
-              #  razon_social, direccion, telefono, email, password, usuario
-            #) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
-            #"""
+    @classmethod
+    def registrarForm(cls, id_pais, id_tipo_cliente, id_tipo_doc, numero_documento, nombres,
+                ape_paterno, ape_materno, sexo, f_nacimiento, razon_social,
+                direccion, telefono, email, password, usuario):
+        conexion = bd.Conexion()
+        try:
+            password_hash = hashlib.sha256(password.encode()).hexdigest()
+            query = """
+            INSERT INTO cliente (
+                id_pais, id_tipo_cliente, id_tipo_doc, numero_documento, 
+                nombre, ape_paterno, ape_materno, sexo, f_nacimiento, 
+                razon_social, direccion, telefono, email, password, usuario
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+                """
 
-            #conexion.ejecutar(query, (
-             #   id_pais, id_tipo_cliente, id_tipo_doc, numero_documento,
-              #  nombres, ape_paterno, ape_materno, sexo, f_nacimiento,
-               # razon_social, direccion, telefono, email, password_hash, usuario
-            #))
-
-            # Simular respuesta exitosa como los otros métodos
-            #return {'@MSJ': 'Cliente registrado con éxito', '@MSJ2': ''}
-        #except Exception as e:
-         #   print("ERROR en Cliente.registrar:", e)
-          #  return {'@MSJ': '', '@MSJ2': f'Error: {str(e)}'}
-        #finally:
-         #   conexion.cerrar()
+            conexion.ejecutar(query, (
+                id_pais, id_tipo_cliente, id_tipo_doc, numero_documento,
+                nombres, ape_paterno, ape_materno, sexo, f_nacimiento,
+                razon_social, direccion, telefono, email, password_hash, usuario
+                ))
+            return {'@MSJ': 'Cliente registrado con éxito', '@MSJ2': ''}
+        except Exception as e:
+            print("ERROR en Cliente.registrar:", e)
+            return {'@MSJ': '', '@MSJ2': f'Error: {str(e)}'}
+        finally:
+            conexion.cerrar()
 
     
     #ELIMINAR
