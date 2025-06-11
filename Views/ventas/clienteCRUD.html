@@ -25,7 +25,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="txt_NumeroDocumento">Número de documento</label>
                             <div class="input-group">
-                                <input type="text" id="txt_NumeroDocumento" class="form-control"
+                                <input type="number" id="txt_NumeroDocumento" class="form-control"
                                     value="{{ cliente.numero_documento }}" {% if btnId=='btn_Aceptar' %}disabled{% endif
                                     %} placeholder="Número de documento">
                                 <div class="input-group-append">
@@ -73,7 +73,7 @@
                             </div>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label for="nombre">Nombres</label>
+                            <label for="nombre">Nombre</label>
                             <div class="input-group">
                                 <input type="text" id="nombre" class="form-control" placeholder="Nombres"
                                     value="{{ cliente.nombre }}" {% if btnId=='btn_Aceptar' %}disabled{% endif %}
@@ -93,7 +93,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="telefono">Teléfono</label>
                             <div class="input-group">
-                                <input type="text" id="telefono" class="form-control" placeholder="Teléfono"
+                                <input type="number" id="telefono" class="form-control" placeholder="Teléfono"
                                     value="{{ cliente.telefono }}" {% if btnId=='btn_Aceptar' %}disabled{% endif %}
                                     oninput="this.value = this.value.toUpperCase();">
                                 <div class="input-group-append">
@@ -261,20 +261,90 @@ function fct_cambiarInputs() {
 
     function fct_ValidarNumeroDocumento() {
         let tipoDocumento = $('#cbx_tipoDocumento').val();
-        let numeroDocumento = $('#txt_NumeroDocumento').val().trim();
+        let $numeroDocumento = $('#txt_NumeroDocumento');
+        let numeroDocumento = $numeroDocumento.val().trim();
 
-        if (tipoDocumento === "1" && numeroDocumento.length !== 8) {
-            toastr.warning("El número de documento debe tener 8 dígitos para DNI", "MENSAJE DE SISTEMA");
+        // Definir longitudes máximas y mínimas según el tipo de documento
+        let maxLength = null;
+        let minLength = null;
+
+        if (tipoDocumento === "1") { // DNI
+            maxLength = 8;
+            minLength = 8;
+        } else if (tipoDocumento === "2") { // RUC
+            maxLength = 11;
+            minLength = 11;
+        } else if (tipoDocumento === "3") { // Carnet de Extranjería
+            maxLength = 20;
+            minLength = 9;
+        }
+
+        // Limitar la longitud máxima en el input
+        if (maxLength !== null) {
+            $numeroDocumento.attr('maxlength', maxLength);
+        } else {
+            $numeroDocumento.removeAttr('maxlength');
+        }
+
+        // Validación de longitud
+        if (minLength !== null && numeroDocumento.length < minLength) {
+            toastr.warning(`El número de documento debe tener al menos ${minLength} dígitos`, "MENSAJE DE SISTEMA");
             return false;
-        } else if (tipoDocumento === "2" && numeroDocumento.length !== 11) {
-            toastr.warning("El número de documento debe tener 11 dígitos para RUC", "MENSAJE DE SISTEMA");
-            return false;
-        } else if (tipoDocumento === "4" && (numeroDocumento.length < 9 || numeroDocumento.length > 20)) {
-            toastr.warning("El número de documento debe tener entre 9 y 20 dígitos para Carnet de Extranjería", "MENSAJE DE SISTEMA");
+        }
+        if (maxLength !== null && numeroDocumento.length > maxLength) {
+            toastr.warning(`El número de documento no puede tener más de ${maxLength} dígitos`, "MENSAJE DE SISTEMA");
             return false;
         }
         return true;
     }
+
+    // Limitar en tiempo real la cantidad de caracteres permitidos según el tipo de documento
+    $(document).on('input', '#txt_NumeroDocumento', function () {
+        let tipoDocumento = $('#cbx_tipoDocumento').val();
+        let $this = $(this);
+        let maxLength = null;
+
+        if (tipoDocumento === "1") {
+            maxLength = 8;
+        } else if (tipoDocumento === "2") {
+            maxLength = 11;
+        } else if (tipoDocumento === "3") {
+            maxLength = 20;
+        }
+
+        if (maxLength !== null) {
+            let value = $this.val();
+            if (value.length > maxLength) {
+                $this.val(value.slice(0, maxLength));
+            }
+        }
+    });
+
+    // Cambiar maxlength cuando cambia el tipo de documento
+    $(document).on('change', '#cbx_tipoDocumento', function () {
+        let tipoDocumento = $(this).val();
+        let $numeroDocumento = $('#txt_NumeroDocumento');
+        let maxLength = null;
+
+        if (tipoDocumento === "1") {
+            maxLength = 8;
+        } else if (tipoDocumento === "2") {
+            maxLength = 11;
+        } else if (tipoDocumento === "3") {
+            maxLength = 20;
+        }
+
+        if (maxLength !== null) {
+            $numeroDocumento.attr('maxlength', maxLength);
+            // Truncar si ya hay más caracteres
+            let value = $numeroDocumento.val();
+            if (value.length > maxLength) {
+                $numeroDocumento.val(value.slice(0, maxLength));
+            }
+        } else {
+            $numeroDocumento.removeAttr('maxlength');
+        }
+    });
 
     $(document).ready(function () {
         fct_GetPaises();
@@ -283,7 +353,6 @@ function fct_cambiarInputs() {
         fct_cambiarInputs();
         $('#cbx_tipoDocumento').change(function () {
             fct_cambiarInputs();
-            fct_ValidarNumeroDocumento();
         });
 
         $("#btn_Registrar").click(function () {
