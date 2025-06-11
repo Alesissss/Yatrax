@@ -43,6 +43,20 @@ class Cliente:
             return cliente[0] if cliente else None
         finally:
             conexion.cerrar()
+            
+    @classmethod
+    def obtener_por_numero_documento(cls, numero_documento):
+        conexion = bd.Conexion()
+        try:
+            query = """
+                select cli.nombres, cli.ape_paterno, cli.ape_materno, cli.razon_social, cli.email, cli.numero_documento, cli.telefono, 
+                cli.f_nacimiento, cli.sexo from cliente cli inner join tipo_cliente tc on cli.id_tipo_cliente = tc.idTipoCliente 
+                where cli.numero_documento = %s
+            """
+            usuario = conexion.obtener(query, (numero_documento,))
+            return usuario[0] if usuario else None
+        finally:
+            conexion.cerrar()
 
     @classmethod
     def logear_cliente(cls, email,contrasena):
