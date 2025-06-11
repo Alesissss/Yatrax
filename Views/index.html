@@ -408,6 +408,14 @@
                                     </a>
                                 </li>
 
+                                 <li class="nav-item">
+                                    <a href="{{ url_for('configuracion.Menu_Promociones')}}"
+                                        class="nav-link {% if active_page == 'promociones' %}active{% endif %}">
+                                        <i class="bi bi-file-earmark-text nav-icon"></i>
+                                        <p>Gestionar promociones</p>
+                                    </a>
+                                </li>
+
                                 <li class="nav-item">
                                     <a href="{{ url_for('configuracion.Menu_TerminosCondiciones')}}"
                                         class="nav-link {% if active_page == 'terminosCondiciones' %}active{% endif %}">
