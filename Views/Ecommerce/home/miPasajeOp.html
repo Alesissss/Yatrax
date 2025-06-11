@@ -738,19 +738,45 @@
                 document.getElementById("nombres").value = d.nombres;
               else document.getElementById("nombres").value = "Nombres";
 
-              if (d.apellidoPaterno)
+              if (d.apellidoPaterno || d.ape_paterno)
                 document.getElementById("apellidoPaterno").value =
-                  d.apellidoPaterno;
+                  d.apellidoPaterno || d.ape_paterno;
               else
                 document.getElementById("apellidoPaterno").value =
                   "Apellido paterno";
 
-              if (d.apellidoMaterno)
+              if (d.apellidoMaterno || d.ape_materno)
                 document.getElementById("apellidoMaterno").value =
-                  d.apellidoMaterno;
+                  d.apellidoMaterno || d.ape_materno;
               else
                 document.getElementById("apellidoMaterno").value =
                   "Apellido materno";
+              
+              if (d.email) {
+                document.getElementById("correo").value = d.email;
+              } else {
+                document.getElementById("correo").value = "Correo";
+              }
+
+              if (d.telefono) {
+                document.getElementById("telefono").value = d.telefono;
+              } else {
+                document.getElementById("telefono").value = "Teléfono";
+              }
+
+              if (d.sexo) {
+                if (d.sexo === '1') {
+                  document.getElementById("sexoMasculino").checked = true;
+                  document.getElementById("sexoFemenino").checked = false;
+                } else if (d.sexo === '0') {
+                  document.getElementById("sexoFemenino").checked = true;
+                  document.getElementById("sexoMasculino").checked = false;
+                }
+              } else {
+                  document.getElementById("sexoMasculino").checked = false;
+                  document.getElementById("sexoFemenino").checked = false;
+              }
+
               toastr.success(json.Msj, "OK");
             } else {
               document.getElementById("nombres").value = "Nombres";

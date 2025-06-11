@@ -653,7 +653,7 @@ CREATE TABLE viaje (
     idRuta INT NOT NULL,
     idVehiculo INT NOT NULL,
     estado BOOLEAN NOT NULL, -- 1: vigente, 0: no vigente
-    estadoViaje INT NOT NULL,
+    idEstadoViaje INT NOT NULL REFERENCES estado_viaje(id),
     esReprogramado BOOLEAN DEFAULT 0,
     fechaHoraSalida DATETIME NOT NULL,
     fechaHoraLlegada DATETIME NOT NULL,
