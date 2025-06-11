@@ -162,7 +162,7 @@
                     columns: ':not(.noVis)',
                 },
                 {
-                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo tipo metodo de pago',
+                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nueva promoción',
                     className: 'btn bg-success m-1',
                     titleAttr: 'Nuevo',
                     action: function (e, dt, node, config) {
@@ -197,7 +197,7 @@
                 { data: "fecha_inicio", name: "fecha_inicio", render: function(data, type, row) {
         if (!data) return '';
         const fecha = new Date(data);
-        const dia = String(fecha.getDate()).padStart(2, '0');
+        const dia = String(fecha.getDate()+1).padStart(2, '0');
         const mes = String(fecha.getMonth() + 1).padStart(2, '0');
         const anio = fecha.getFullYear();
         return `${dia}/${mes}/${anio}`;
@@ -205,7 +205,7 @@
                 { data: "fecha_fin", name: "fecha_fin",render: function(data, type, row) {
         if (!data) return '';
         const fecha = new Date(data);
-        const dia = String(fecha.getDate()).padStart(2, '0');
+        const dia = String(fecha.getDate()+1).padStart(2, '0');
         const mes = String(fecha.getMonth() + 1).padStart(2, '0');
         const anio = fecha.getFullYear();
         return `${dia}/${mes}/${anio}`;
@@ -285,11 +285,11 @@
     }
 
     function fct_TipoMetodoPagoEditar(Id) {
-        window.location.href = `/trabajadores/configuracion/EditarTipoMetodoPago/${Id}`;
+        window.location.href = `/trabajadores/configuracion/EditarPromocion/${Id}`;
     }
 
     function fct_TipoMetodoPagoVer(Id) {
-        window.location.href = `/trabajadores/configuracion/VerTipoMetodoPago/${Id}`;
+        window.location.href = `/trabajadores/configuracion/VerPromocion/${Id}`;
     }
 
     function fct_TipoMetodoPagoEliminar(Id) {

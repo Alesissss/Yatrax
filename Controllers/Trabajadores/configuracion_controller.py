@@ -1027,6 +1027,72 @@ def registrar_promocion():
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
 
+@configuracion_bp.route("/EditarPromocion/<int:id>", methods=["GET", "POST"])
+def editar_promocion(id):
+    try:
+        promocion = Promocion.obtener_por_id(id)
+        if not promocion:
+            return jsonify({"Status": "error", "Msj": "Promoción no encontrada"})
+
+        if request.method == 'POST':
+            nombre = request.form.get("nombre", "").strip()
+            codigo = request.form.get("codigo", "").strip()
+            monto_promo = request.form.get("monto_promo", "").strip()
+            fecha_inicio = request.form.get("fecha_inicio", "").strip()
+            fecha_fin = request.form.get("fecha_fin", "").strip()
+            estado = request.form.get("estado", "").strip()
+            usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO')
+
+            # Validación
+            if not all([nombre, codigo, monto_promo, fecha_inicio, fecha_fin, estado]):
+                return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
+
+            try:
+                monto_promo = float(monto_promo)
+            except ValueError:
+                return jsonify({"Status": "error", "Msj": "Monto de promoción inválido"})
+            mensajes = Promocion.editar(id, nombre, estado, fecha_inicio, fecha_fin, codigo, monto_promo)
+            msj1 = mensajes.get('@MSJ')
+            msj2 = mensajes.get('@MSJ2')
+
+            if msj1:
+                return jsonify({"Status": "success", "Msj": msj1})
+            elif msj2:
+                return jsonify({"Status": "error", "Msj": msj2})
+            else:
+                return jsonify({"Status": "error", "Msj": "Error desconocido al actualizar promoción"})
+
+        # GET: Renderizar plantilla con datos existentes
+        return render_template("configuracion/promocionCRUD.html",
+                               promocion=promocion,
+                               tittle="Editar promoción",
+                               btnId="btn_Editar",
+                               active_page="promociones",
+                               active_menu="mConfiguracion")
+
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
+
+
+
+@configuracion_bp.route("/VerPromocion/<int:id>", methods=["GET"])
+def ver_promocion(id):
+    try:
+        promocion = Promocion.obtener_por_id(id)
+        if not promocion:
+            return render_template("error.html", error="Promoción no encontrada")
+
+        return render_template("configuracion/promocionCRUD.html",
+                               promocion=promocion,
+                               tittle="Ver promoción",
+                               btnId="btn_Aceptar",
+                               active_page="promociones",
+                               active_menu="mConfiguracion")
+
+    except Exception as e:
+        return render_template("error.html", error=f"Ocurrió un error inesperado: {repr(e)}")
+
+
 
 @configuracion_bp.route("/EliminarPromocion/<int:id>", methods=["POST"])
 def eliminar_promocion(id):
