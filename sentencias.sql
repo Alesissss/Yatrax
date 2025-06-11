@@ -210,6 +210,8 @@ DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPO_RECLAMO;
     -- eliminando tablas de reclamo y tipo_reclamo
     DROP TABLE IF EXISTS reclamo;
     DROP TABLE IF EXISTS tipo_reclamo;
+    DROP TABLE IF EXISTS detalle_pasaje;
+    DROP TABLE IF EXISTS pasajero;
     DROP TABLE IF EXISTS pasaje;
     DROP TABLE IF EXISTS preguntas_frecuentes;
     DROP TABLE IF EXISTS promocion;
