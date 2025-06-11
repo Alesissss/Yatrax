@@ -1,0 +1,272 @@
+{% extends "index.html" %}
+
+{% block title %}YATRAX - {{ tittle }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="text-center mb-0">{{ tittle }}</h4>
+                </div>
+                <div class="card-body">
+                    <div id="formReclamo">
+                        <!-- ID (oculto en registro, visible y deshabilitado en ver/editar) -->
+                        <div class="mb-3">
+                            {% if btnId == "btn_Registrar" %}
+                                <input type="hidden" id="txt_Id" name="id" value="">
+                            {% else %}
+                                <label for="txt_Id">ID</label>
+                                <input
+                                    type="text"
+                                    id="txt_Id"
+                                    name="id"
+                                    class="form-control"
+                                    value="{{ reclamo.id }}"
+                                    {% if btnId == "btn_Ver" or btnId == "btn_Actualizar" %}disabled{% endif %}>
+                            {% endif %}
+                        </div>
+
+                        <!-- Tipo de Reclamo -->
+                        <div class="mb-3">
+                            <label for="sel_TipoReclamo">Tipo de reclamo</label>
+                            <select
+                                id="sel_TipoReclamo"
+                                name="idTipoReclamo"
+                                class="form-control"
+                                {% if btnId == "btn_Ver" %}disabled{% endif %}>
+                                <option disabled value="" {% if not reclamo %}selected{% endif %}>--SELECCIONAR--</option>
+                                {% for tipo in tipoReclamos %}
+                                    <option
+                                        value="{{ tipo.id }}"
+                                        {% if reclamo and reclamo.id_tipo_reclamo == tipo.id %}selected{% endif %}>
+                                        {{ tipo.nombre }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Detalle -->
+                        <div class="mb-3">
+                            <label for="txt_Detalle">Detalle</label>
+                            <textarea
+                                id="txt_Detalle"
+                                name="detalle"
+                                class="form-control"
+                                rows="3"
+                                placeholder="Detalle del reclamo"
+                                {% if btnId == "btn_Ver" %}disabled{% endif %}>{{ reclamo.detalle if reclamo else '' }}</textarea>
+                        </div>
+
+                        <!-- Monto -->
+                        <div class="mb-3">
+                            <label for="txt_Monto">Monto</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                id="txt_Monto"
+                                name="monto"
+                                class="form-control"
+                                placeholder="Monto"
+                                value="{{ reclamo.monto if reclamo else '' }}"
+                                {% if btnId == "btn_Ver" %}disabled{% endif %}>
+                        </div>
+
+                        <!-- ID Pasaje -->
+                        <div class="mb-3">
+                            <label for="txt_IdPasaje">ID Pasaje</label>
+                            <input
+                                type="text"
+                                id="txt_IdPasaje"
+                                name="id_pasaje"
+                                class="form-control"
+                                placeholder="ID del pasaje"
+                                value="{{ reclamo.idPasaje if reclamo else '' }}"
+                                {% if btnId == "btn_Ver" %}disabled{% endif %}>
+                        </div>
+
+                        <!-- Motivo -->
+                        <div class="mb-3">
+                            <label for="txt_Motivo">Motivo</label>
+                            <textarea
+                                id="txt_Motivo"
+                                name="motivo"
+                                class="form-control"
+                                rows="3"
+                                placeholder="Motivo del reclamo"
+                                {% if btnId == "btn_Ver" %}disabled{% endif %}>{{ reclamo.motivo if reclamo else '' }}</textarea>
+                        </div>
+
+                        <!-- Estado (solo en edición/ver) -->
+                        <div class="mb-3">
+                            <label for="txt_Estado">Estado</label>
+                            <select
+                                id="txt_Estado"
+                                name="estado"
+                                class="form-control"
+                                {% if btnId == "btn_Registrar" or btnId == "btn_Ver" %}disabled{% endif %}>
+                                {% set opciones = { '1': 'Activo', '0': 'Inactivo' } %}
+                                <option disabled value="" {% if not reclamo %}selected{% endif %}>--SELECCIONAR--</option>
+                                {% for val, label in opciones.items() %}
+                                    <option
+                                        value="{{ val }}"
+                                        {% if reclamo and reclamo.estado|string == val %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="text-center">
+                            <button id="btn_Volver" type="button" class="btn btn-danger">
+                                Volver al listado de reclamos
+                            </button>
+                            <button id="{{ btnId }}" type="button" class="btn btn-primary">
+                                Aceptar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+    // Volver al listado
+    $("#btn_Volver").click(function(){
+        window.location.href = "/trabajadores/atencion/GestionarReclamo";
+    });
+
+    // Registrar nuevo reclamo
+    $("#btn_Registrar").click(function(){
+        var idTipo    = $("#sel_TipoReclamo").val();
+        var detalle   = $("#txt_Detalle").val().trim();
+        var monto     = $("#txt_Monto").val().trim();
+        var idPasaje  = $("#txt_IdPasaje").val().trim();
+        var motivo    = $("#txt_Motivo").val().trim();
+
+        if(!idTipo || !detalle || !idPasaje || !motivo){
+            toastr.warning("Todos los campos marcados son obligatorios","MENSAJE DE SISTEMA");
+            return;
+        }
+
+        Swal.fire({
+            title: "¿Estás seguro?",
+            text: "Se registrará el reclamo. ¿Deseas continuar?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sí, registrar",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true
+        }).then(function(result){
+            if(result.isConfirmed){
+                var formData = new FormData();
+                formData.append("idTipoReclamo", idTipo);
+                formData.append("detalle", detalle);
+                formData.append("monto", monto);
+                formData.append("id_pasaje", idPasaje);
+                formData.append("motivo", motivo);
+
+                $.ajax({
+                    url: "/trabajadores/atencion/RegistrarReclamo",
+                    type: "POST",
+                    processData: false,
+                    contentType: false,
+                    data: formData,
+                    success: function(response){
+                        if(response.Status === "success"){
+                            if(response.Msj2){
+                                toastr.warning(response.Msj2, "MENSAJE DE SISTEMA");
+                                return;
+                            }
+                            toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                            setTimeout(function(){
+                                window.location.href = "/trabajadores/atencion/GestionarReclamo";
+                            }, 500);
+                        } else {
+                            toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                        }
+                    },
+                    error: function(xhr){
+                        toastr.error("Error en el servidor","MENSAJE DE SISTEMA");
+                        console.error(xhr.responseText);
+                    }
+                });
+            }
+        });
+    });
+
+    // Actualizar reclamo existente
+    $("#btn_Actualizar").click(function(){
+        var id        = $("#txt_Id").val().trim();
+        var idTipo    = $("#sel_TipoReclamo").val();
+        var detalle   = $("#txt_Detalle").val().trim();
+        var monto     = $("#txt_Monto").val().trim();
+        var idPasaje  = $("#txt_IdPasaje").val().trim();
+        var motivo    = $("#txt_Motivo").val().trim();
+        var estado    = $("#txt_Estado").val();
+
+        if(!idTipo || !detalle || !idPasaje || !motivo){
+            toastr.warning("Todos los campos marcados son obligatorios","MENSAJE DE SISTEMA");
+            return;
+        }
+
+        Swal.fire({
+            title: "¿Estás seguro?",
+            text: "Se actualizarán los datos del reclamo. ¿Deseas continuar?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sí, actualizar",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true
+        }).then(function(result){
+            if(result.isConfirmed){
+                var formData = new FormData();
+                formData.append("id", id);
+                formData.append("idTipoReclamo", idTipo);
+                formData.append("detalle", detalle);
+                formData.append("monto", monto);
+                formData.append("id_pasaje", idPasaje);
+                formData.append("motivo", motivo);
+                formData.append("estado", estado);
+
+                $.ajax({
+                    url: `/trabajadores/atencion/EditarReclamo/${id}`,
+                    type: "POST",
+                    processData: false,
+                    contentType: false,
+                    data: formData,
+                    success: function(response){
+                        if(response.Status === "success"){
+                            if(response.Msj2){
+                                toastr.warning(response.Msj2, "MENSAJE DE SISTEMA");
+                                return;
+                            }
+                            toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                            setTimeout(function(){
+                                window.location.href = "/trabajadores/atencion/GestionarReclamo";
+                            }, 500);
+                        } else {
+                            toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                        }
+                    },
+                    error: function(xhr){
+                        toastr.error("Error en el servidor","MENSAJE DE SISTEMA");
+                        console.error(xhr.responseText);
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

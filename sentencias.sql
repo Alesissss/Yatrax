@@ -756,6 +756,7 @@ CREATE TABLE tipo_reclamo(
         monto NUMERIC(9,2),
         idPasaje INT NOT NULL,
         motivo TEXT NOT NULL,
+        estado TINYINT NOT NULL,    
         FOREIGN KEY (idPasaje) REFERENCES pasaje (id),
         FOREIGN KEY (id_tipo_reclamo) REFERENCES reclamo (id)
     );
@@ -5639,8 +5640,8 @@ END$$
         SET MSJ  = NULL;
         SET MSJ2 = NULL;
 
-        INSERT INTO reclamo (tipo_reclamo, detalle, monto, idPasaje, motivo)
-        VALUES (p_tipo_reclamo, p_detalle, p_monto, p_idPasaje, p_motivo);
+        INSERT INTO reclamo (tipo_reclamo, detalle, monto, idPasaje, motivo,estado)
+        VALUES (p_tipo_reclamo, p_detalle, p_monto, p_idPasaje, p_motivo,1);
         SET MSJ = 'Reclamo insertado correctamente';
     END$$
 
@@ -5651,6 +5652,7 @@ END$$
         IN p_monto DECIMAL(9,2),
         IN p_idPasaje INT,
         IN p_motivo TEXT,
+        IN p_estado TINYINT,
         OUT MSJ VARCHAR(255),
         OUT MSJ2 VARCHAR(255)
     )
@@ -5670,7 +5672,8 @@ END$$
             detalle       = p_detalle,
             monto         = p_monto,
             idPasaje      = p_idPasaje,
-            motivo        = p_motivo
+            motivo        = p_motivo,
+            estado        = p_estado
         WHERE id = p_id;
         SET MSJ = 'Reclamo modificado correctamente';
     END$$
