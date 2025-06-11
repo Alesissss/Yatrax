@@ -87,6 +87,10 @@ def Menu_Servicio():
 def Menu_Clientes():
     return render_template('ventas/cliente.html', active_page="cliente", active_menu='mVentas')
 
+@ventas_bp.route('/ClienteNuevo')
+def Cliente_Nuevo():
+    return render_template('ventas/clienteCRUD.html', active_page="cliente", active_menu='mVentas', cliente = {}, tittle = 'Registrar cliente', btnId = 'btn_Registrar')
+
 @ventas_bp.route('/MicroservicioNuevo')
 def Microservicio_Nuevo():
     return render_template('ventas/microservicioCRUD.html', active_page="microservicio", active_menu = 'mVentas', microservicio = {}, tittle = 'Registrar microservicio', btnId = 'btn_Registrar')
@@ -735,25 +739,25 @@ def get_cliente():
     except Exception as e:
         return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar clientes: {repr(e)}'})
 
-@ventas_bp.route('/ClienteNuevo')
-def cliente_nuevo():
-    return render_template(
-        'ventas/clienteCRUD.html',
-        tittle='Registrar cliente',
-        cliente= {},
-        btnId= 'btn_Registrar',
-        active_page="cliente", 
-        active_menu='mVentas'
-    )
-
 @ventas_bp.route("/RegistrarCliente", methods=["POST"])
 def registrar_cliente():
     try:
-        nombre = request.form.get("nombre").strip()
-        estado = request.form.get("estado")
+        tipo_documento = request.form.get("tipo_documento", "").strip()
+        numero_documento = request.form.get("numero_documento", "").strip()
+        pais = request.form.get("pais", "").strip()
+        sexo = request.form.get("sexo", "").strip()
+        ape_pat = request.form.get("ape_pat", "").strip()
+        ape_mat = request.form.get("ape_mat", "").strip()
+        nombre = request.form.get("nombre", "").strip()
+        fecha_nac = request.form.get("fecha_nac", "").strip()
+        telefono = request.form.get("telefono", "").strip()
+        correo = request.form.get("correo", "").strip()
+        contrasena = request.form.get("contraseña", "").strip()
+        direccion = request.form.get("direccion", "").strip()
+        estado = 1
         usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
 
-        mensajes = Cliente.registrar(nombre, estado, usuario_actual)
+        mensajes = Cliente.registrar(pais, tipo_documento, 3, numero_documento, nombre, ape_pat, ape_mat, sexo, fecha_nac, direccion, telefono, correo, contrasena, estado, usuario_actual)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 
@@ -762,7 +766,7 @@ def registrar_cliente():
         elif msj2:
             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
         else:
-            return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar tipo de usuario'})
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar cliente'})
 
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
@@ -786,13 +790,26 @@ def eliminar_cliente(id):  # Recibe el ID de la URL
 @ventas_bp.route("/EditarCliente/<int:id>", methods=['GET', 'POST'])
 def editar_cliente(id):
     try:
-        tipoUsuario = Cliente.obtener_por_id(id)
+        cliente = Cliente.obtener_por_id(id)
 
         if request.method == 'POST':
-            nombre = request.form.get("nombre").strip()
-            estado = request.form.get("estado")
-            
-            mensajes = Cliente.editar(id, nombre, estado)
+            tipo_documento = request.form.get("tipo_documento", "").strip()
+            numero_documento = request.form.get("numero_documento", "").strip()
+            pais = request.form.get("pais", "").strip()
+            sexo = request.form.get("sexo", "").strip()
+            ape_pat = request.form.get("ape_pat", "").strip()
+            ape_mat = request.form.get("ape_mat", "").strip()
+            nombre = request.form.get("nombre", "").strip()
+            fecha_nac = request.form.get("fecha_nac", "").strip()
+            telefono = request.form.get("telefono", "").strip()
+            direccion = request.form.get("direccion", "").strip()
+            estado = 1
+            email = request.form.get("correo", "").strip()
+            password = request.form.get("contraseña", "").strip()
+            tipo_cliente = 3  # si lo estás fijando manualmente
+            usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
+
+            mensajes = Cliente.actualizar_cliente(id, pais, tipo_cliente, tipo_documento, numero_documento, nombre, ape_pat, ape_mat, sexo, fecha_nac, direccion, telefono, email, password, estado, usuario_actual)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
@@ -801,11 +818,11 @@ def editar_cliente(id):
             elif msj2:
                 return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
             else:
-                return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar tipo de usuario'})
+                return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar cliente'})
 
-        if tipoUsuario:
-            return render_template('usuario/tipoUsuarioCRUD.html', active_page="tipoUsuario", active_menu='mUsuarios', tipoUsuario=tipoUsuario, tittle = 'Editar tipo usuario', btnId = 'btn_Editar')
-        return render_template('usuario/tipoUsuarioCRUD.html', active_page="tipoUsuario", active_menu='mUsuarios', tipoUsuario={}, tittle = 'Editar tipo usuario', btnId = 'btn_Editar')
+        if cliente:
+            return render_template('ventas/clienteCRUD.html', active_page="cliente", active_menu='mVentas', cliente=cliente, tittle='Editar cliente', btnId='btn_Editar')
+        return render_template('ventas/clienteCRUD.html', active_page="cliente", active_menu='mVentas', cliente={}, tittle='Editar cliente', btnId='btn_Editar')
 
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
@@ -813,16 +830,17 @@ def editar_cliente(id):
 @ventas_bp.route("/VerCliente/<int:id>", methods=['GET'])
 def ver_cliente(id):
     try:
-        tipoUsuario = Cliente.obtener_por_id(id)
-        if tipoUsuario:
-            return render_template('usuario/tipoUsuarioCRUD.html', active_page="tipoUsuario", active_menu='mUsuarios', tipoUsuario=tipoUsuario, tittle = 'Ver tipo usuario', btnId = 'btn_Aceptar')
-        return render_template('usuario/tipoUsuarioCRUD.html', active_page="tipoUsuario", active_menu='mUsuarios', tipoUsuario={}, tittle = 'Ver tipo usuario', btnId = 'btn_Aceptar')
-        
+        cliente = Cliente.obtener_por_id(id)
+        if cliente:
+            print(cliente)
+            return render_template('ventas/clienteCRUD.html', active_page="cliente", active_menu='mVentas', cliente=cliente, tittle = 'Ver cliente', btnId = 'btn_Aceptar')
+        return render_template('ventas/clienteCRUD.html', active_page="cliente", active_menu='mVentas', cliente={}, tittle = 'Ver cliente', btnId = 'btn_Aceptar')        
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
     
-@ventas_bp.route("/DarBajaTipoUsuario/<int:id>", methods=['POST'])
-def darBaja_cliente(id):  # Recibe el ID de la URL
+@ventas_bp.route("/DarBajaCliente/<int:id>", methods=['POST'])
+def dar_baja_cliente(id):  # Recibe el ID de la URL
     try:
         mensajes = Cliente.darBaja(id)  # Se usa el ID directamente
         msj1 = mensajes.get('@MSJ')
@@ -833,7 +851,7 @@ def darBaja_cliente(id):  # Recibe el ID de la URL
         elif msj2:
             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
         else:
-            return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja al tipo de usuario'})
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja al cliente'})
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 

@@ -317,7 +317,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/clientes/EliminarCliente/${ID}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/ventas/EliminarCliente/${ID}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
@@ -343,6 +343,7 @@
     }
 
     function fct_ClienteDarBaja(ID) {
+        console.log(ID);
         Swal.fire({
             title: "¿Estás seguro?",
             text: "Esta acción le dará de baja al cliente. ¿Deseas continuar?",
@@ -356,7 +357,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/clientes/DarBajaCliente/${ID}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/ventas/DarBajaCliente/${ID}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
