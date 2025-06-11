@@ -5,114 +5,140 @@
 {% block content %}
 <div class="container-fluid">
     <div class="row justify-content-center">
-        <div class="col-md-6">
+        <div class="col-md-8">
             <div class="card">
                 <div class="card-header bg-primary text-white">
                     <h4 class="text-center mb-0">{{ tittle }}</h4>
                 </div>
                 <div class="card-body">
-                    <div class="col-md-12 mb-3">
-                        <label for="cbx_Pais">País</label>
-                        <div class="input-group">
-                            <select id="cbx_Pais" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{% endif
-                                %}>
-                            </select>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="cbx_TipoDocumento">Tipo de documento</label>
+                            <div class="input-group">
+                                <select id="cbx_tipoDocumento" class="form-control" {% if btnId=='btn_Aceptar'
+                                    %}disabled{% endif %}>
+                                    <option value=" {{ cliente.abreviatura }}" disabled selected>--SELECCIONAR--
+                                    </option>
+                                </select>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-12 mb-3">
-                        <label for="cbx_TipoDocumento">Tipo de documento</label>
-                        <div class="input-group">
-                            <select id="cbx_TipoDocumento" class="form-control">
-                                <option disabled selected>--SELECCIONAR--</option>
-                                <option value="dni">DNI</option>
-                                <option value="ruc">RUC</option>
-                                <option value="ce">Carnet de extranjería</option>
-                            </select>
+                        <div class="col-md-6 mb-3">
+                            <label for="txt_NumeroDocumento">Número de documento</label>
+                            <div class="input-group">
+                                <input type="text" id="txt_NumeroDocumento" class="form-control"
+                                    value="{{ cliente.numero_documento }}" {% if btnId=='btn_Aceptar' %}disabled{% endif
+                                    %} placeholder="Número de documento">
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><i class="fas fa-id-card"></i></div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="cbx_Pais">País</label>
+                            <div class="input-group">
+                                <select id="cbx_Pais" class="form-control" value="{{ cliente.nombre_pais }}" {% if
+                                    btnId=='btn_Aceptar' %}disabled{% endif %}>
+                                    <option disabled selected>--SELECCIONAR--</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="cbx_Sexo">Sexo</label>
+                            <div class="input-group">
+                                <select id="cbx_Sexo" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
+                                    <option value="" {% if cliente.sexo is none %}selected{% endif %}>--SELECCIONAR--</option>
+                                    <option value="1" {% if cliente.sexo == 1 %}selected{% endif %}>Masculino</option>
+                                    <option value="0" {% if cliente.sexo == 0 %}selected{% endif %}>Femenino</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="ape_pat">Apellido paterno</label>
+                            <div class="input-group">
+                                <input type="text" id="ape_pat" class="form-control" placeholder="Apellido paterno"
+                                    value="{{ cliente.apellidos.split(' ')[0] if cliente.apellidos else '' }}" {% if
+                                    btnId=='btn_Aceptar' %}disabled{% endif %}
+                                    oninput="this.value = this.value.toUpperCase();">
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="ape_mat">Apellido materno</label>
+                            <div class="input-group">
+                                <input type="text" id="ape_mat" class="form-control" placeholder="Apellido materno"
+                                    value="{{ cliente.apellidos.split(' ')[1] if cliente.apellidos else '' }}" {% if
+                                    btnId=='btn_Aceptar' %}disabled{% endif %}
+                                    oninput="this.value = this.value.toUpperCase();">
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="nombre">Nombres</label>
+                            <div class="input-group">
+                                <input type="text" id="nombre" class="form-control" placeholder="Nombres"
+                                    value="{{ cliente.nombre }}" {% if btnId=='btn_Aceptar' %}disabled{% endif %}
+                                    oninput="this.value = this.value.toUpperCase();">
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="txt_FechaNacimiento">Fecha de nacimiento</label>
+                            <div class="input-group">
+                                <input type="date" id="txt_FechaNacimiento" class="form-control"
+                                    value="{{ cliente.f_nacimiento }}" {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><i class="fas fa-calendar-alt"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="telefono">Teléfono</label>
+                            <div class="input-group">
+                                <input type="text" id="telefono" class="form-control" placeholder="Teléfono"
+                                    value="{{ cliente.telefono }}" {% if btnId=='btn_Aceptar' %}disabled{% endif %}
+                                    oninput="this.value = this.value.toUpperCase();">
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><i class="fas fa-phone"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="correo">Correo electrónico</label>
+                            <div class="input-group">
+                                <input type="email" id="correo" class="form-control" placeholder="Correo electrónico"
+                                    value="{{ cliente.email }}" {% if btnId=='btn_Aceptar' %}disabled{% endif %}
+                                    oninput="this.value = this.value.toUpperCase();">
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><i class="fas fa-envelope"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="contraseña">Contraseña</label>
+                            <div class="input-group">
+                                <input type="password" id="contraseña" class="form-control" placeholder="Contraseña"
+                                    value="{{ cliente.password }}" {% if btnId=='btn_Aceptar' %}disabled{% endif %}
+                                    oninput="this.value = this.value.toUpperCase();">
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><i class="fas fa-lock"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label for="direccion">Dirección</label>
+                            <div class="input-group">
+                                <input type="text" id="direccion" class="form-control" placeholder="Dirección"
+                                    value="{{ cliente.direccion }}" {% if btnId=='btn_Aceptar' %}disabled{% endif %}
+                                    oninput="this.value = this.value.toUpperCase();">
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><i class="fas fa-map-marker-alt"></i></div>
+                                </div>
+                            </div>
+                        </div>
 
-                    <div class="col-md-12 mb-3">
-                        <label for="txt_NumeroDocumento">Número de documento</label>
-                        <div class="input-group">
-                            <input type="text" id="txt_NumeroDocumento" class="form-control"
-                                placeholder="Número de documento">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-id-card"></i></div>
-                            </div>
+                        <!-- Botón de acción -->
+                        <div class="col-md-12 text-center">
+                            <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de
+                                clientes</button>
+                            <button id="{{ btnId }}" type="button" class="btn btn-primary">Aceptar</button>
                         </div>
-                    </div>
-                    <div class="col-md-12 mb-3">
-                        <label for="txt_Nombres">Nombres</label>
-                        <div class="input-group">
-                            <input type="text" id="txt_Nombres" class="form-control"
-                                placeholder="Nombres">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-user-tag"></i></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-12 mb-3">
-                        <label for="txt_ApellidoPaterno">Apellido paterno</label>
-                        <div class="input-group">
-                            <input type="text" id="txt_ApellidoPaterno" class="form-control"
-                                placeholder="Apellido paterno">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-user-tag"></i></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-12 mb-3">
-                        <label for="txt_ApellidoMaterno">Apellido materno</label>
-                        <div class="input-group">
-                            <input type="text" id="txt_ApellidoMaterno" class="form-control"
-                                placeholder="Apellido materno">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-user-tag"></i></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-12 mb-3">
-                        <label for="cbx_Sexo">Sexo</label>
-                        <div class="input-group">
-                            <select id="cbx_Sexo" class="form-control">
-                                <option disabled selected>--SELECCIONAR--</option>
-                                <option value="Masculino">Masculino</option>
-                                <option value="Femenino">Femenino</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-12 mb-3">
-                        <label for="txt_FechaNacimiento">Fecha de nacimiento</label>
-                        <div class="input-group">
-                            <input type="date" id="txt_FechaNacimiento" class="form-control">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-calendar-alt"></i></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-12 mb-3">
-                        <label for="txt_Direccion">Dirección</label>
-                        <div class="input-group">
-                            <input type="text" id="txt_Direccion" class="form-control" placeholder="Dirección">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-map-marker-alt"></i></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-12 mb-3">
-                        <label for="txt_Telefono">Teléfono</label>
-                        <div class="input-group">
-                            <input type="text" id="txt_Telefono" class="form-control" placeholder="Teléfono">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><i class="fas fa-phone"></i></div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Botón de acción -->
-                    <div class="col-md-12 text-center">
-                        <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de
-                            clientes</button>
-                        <button id="{{ btnId }}" type="button" class="btn btn-primary">Aceptar</button>
                     </div>
                 </div>
             </div>
@@ -149,16 +175,254 @@
                     },
                     allowClear: true
                 });
-
-                $('#cbx_Pais').val("{{ cliente.id_pais }}").trigger('change');
-            } else {
-                console.error('Error al obtener las sucursales:', response.Msj);
+                // Buscar el país por nombre y seleccionarlo si existe
+                let paisCliente = "{{ cliente.nombre_pais }}";
+                if (paisCliente) {
+                    let paisOption = $('#cbx_Pais option').filter(function () {
+                        // El texto de la opción es "ISO3 - Nombre"
+                        return $(this).text().toLowerCase().includes(paisCliente.toLowerCase());
+                    }).first();
+                    if (paisOption.length) {
+                        $('#cbx_Pais').val(paisOption.val()).trigger('change');
+                    }
+                }
             }
         });
     }
 
+    function fct_GetTipoDocumento() {        
+        $.getJSON('/trabajadores/ventas/GetData_TipoDocumento', function (response) {
+            if (response.Status === 'success') {
+                let $combo = $('#cbx_tipoDocumento');
+                $combo.empty();
+                $combo.append('<option value="" disabled selected>--SELECCIONAR--</option>');
+                $.each(response.data, function (index, item) {
+                    $combo.append(
+                        $('<option>', {
+                            value: item.id, // El value es el ID
+                            text: item.abreviatura // Lo que se muestra es la abreviatura
+                        })
+                    );
+                });
+
+                // Buscar la opción cuyo texto coincida con la abreviatura del cliente y seleccionarla
+                let abreviaturaCliente = "{{ cliente.abreviatura }}";
+                if (abreviaturaCliente) {
+                    let optionToSelect = $combo.find('option').filter(function () {
+                        return $(this).text().trim().toLowerCase() === abreviaturaCliente.trim().toLowerCase();
+                    }).first();
+                    if (optionToSelect.length) {
+                        $combo.val(optionToSelect.val()).trigger('change');
+                    }
+                }
+            }
+        });
+    }
+
+    function fct_ValidarNumeroDocumento() {
+        let tipoDocumento = $('#cbx_tipoDocumento').val();
+        let numeroDocumento = $('#txt_NumeroDocumento').val().trim();
+
+        if (tipoDocumento === "1" && numeroDocumento.length !== 8) {
+            toastr.warning("El número de documento debe tener 8 dígitos para DNI", "MENSAJE DE SISTEMA");
+            return false;
+        } else if (tipoDocumento === "2" && numeroDocumento.length !== 11) {
+            toastr.warning("El número de documento debe tener 11 dígitos para RUC", "MENSAJE DE SISTEMA");
+            return false;
+        } else if (tipoDocumento === "4" && (numeroDocumento.length < 9 || numeroDocumento.length > 20)) {
+            toastr.warning("El número de documento debe tener entre 9 y 20 dígitos para Carnet de Extranjería", "MENSAJE DE SISTEMA");
+            return false;
+        }
+        return true;
+    }
+
     $(document).ready(function () {
         fct_GetPaises();
+        fct_GetTipoDocumento();
+        fct_ValidarNumeroDocumento();
+
+        $("#btn_Registrar").click(function () {
+            let tipo_documento = $('#cbx_tipoDocumento').val();
+            let numero_documento = $('#txt_NumeroDocumento').val().trim();
+            let pais = $('#cbx_Pais').val();
+            let sexo = $('#cbx_Sexo').val();
+            sexo = (sexo === "" || sexo === null || sexo === undefined) ? null : Number(sexo);
+            let ape_pat = $('#ape_pat').val().trim();
+            let ape_mat = $('#ape_mat').val().trim();
+            let nombre = $('#nombre').val().trim();
+            let fecha_nac = $('#txt_FechaNacimiento').val();
+            let telefono = $('#telefono').val().trim();
+            let correo = $('#correo').val().trim();
+            let contraseña = $('#contraseña').val().trim();
+            let direccion = $('#direccion').val().trim();
+
+            if (tipo_documento === null || tipo_documento === undefined) {
+                toastr.warning("El tipo de documento es obligatorio", "MENSAJE DE SISTEMA");
+                return;
+            }
+
+            if (tipo_documento === "1") {
+                if (!tipo_documento || !numero_documento || !pais || !sexo || !ape_pat || !ape_mat || !nombre || !fecha_nac || !telefono || !direccion || !correo || !contraseña) {
+                    toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                    return;
+                }
+            } else if (tipo_documento === "2") {
+                if (!tipo_documento || !numero_documento || !pais || !nombre || !telefono || !direccion || !correo || !contraseña) {
+                    toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                    return;
+                }
+            }
+
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción registrará al cliente. ¿Deseas continuar?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, registrar cliente",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    let formData = new FormData();
+                    formData.append("tipo_documento", tipo_documento);
+                    formData.append("numero_documento", numero_documento);
+                    formData.append("pais", pais);
+                    formData.append("Sexo", sexo);
+                    formData.append("ape_pat", ape_pat);
+                    formData.append("ape_mat", ape_mat);
+                    formData.append("nombre", nombre);
+                    formData.append("fecha_nac", fecha_nac);
+                    formData.append("telefono", telefono);
+                    formData.append("correo", correo);
+                    formData.append("contraseña", contraseña);
+                    formData.append("direccion", direccion);
+
+                    $.ajax({
+                        url: "/trabajadores/ventas/RegistrarCliente",
+                        type: "POST",
+                        processData: false,
+                        contentType: false,
+                        data: formData,
+                        success: function (response) {
+                            if (response.Status === "success") {
+                                if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                    return;
+                                } else {
+                                    toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                                    setTimeout(() => {
+                                        window.location.href = "/trabajadores/ventas/GestionarClientes";
+                                    }, 500);
+                                }
+                            } else {
+                                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                                console.error('Error: ' + response.Msj);
+                            }
+                        },
+                        error: function (xhr, Status, error) {
+                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                            console.error('Error:' + error);
+                        }
+                    });
+                }
+            });
+        });
+
+        $("#btn_Editar").click(function () {
+            const id = Number("{{ cliente.ID }}");
+
+            let tipo_documento = $('#cbx_tipoDocumento').val();
+            let numero_documento = $('#txt_NumeroDocumento').val().trim();
+            let pais = $('#cbx_Pais').val();
+            let sexo = $('#cbx_Sexo').val();
+            sexo = (sexo === "" || sexo === null || sexo === undefined) ? null : Number(sexo);
+            let ape_pat = $('#ape_pat').val().trim();
+            let ape_mat = $('#ape_mat').val().trim();
+            let nombre = $('#nombre').val().trim();
+            let fecha_nac = $('#txt_FechaNacimiento').val();
+            let telefono = $('#telefono').val().trim();
+            let correo = $('#correo').val().trim();
+            let contraseña = $('#contraseña').val().trim();
+            let direccion = $('#direccion').val().trim();
+
+            if (tipo_documento === 'DNI') {
+                if (!tipo_documento || !numero_documento || !pais || !sexo || !ape_pat || !ape_mat || !nombre || !fecha_nac || !telefono || !direccion || !correo || !contraseña) {
+                    toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                    return;
+                }
+            } else if (tipo_documento === 'RUC') {
+                if (!tipo_documento || !numero_documento || !pais || !nombre || !telefono || !direccion || !correo || !contraseña) {
+                    toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                    return;
+                }
+            }
+
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción modificará al cliente. ¿Deseas continuar?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, editar cliente",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    let formData = new FormData();
+                    formData.append("tipo_documento", tipo_documento);
+                    formData.append("numero_documento", numero_documento);
+                    formData.append("pais", pais);
+                    formData.append("Sexo", sexo);
+                    formData.append("ape_pat", ape_pat);
+                    formData.append("ape_mat", ape_mat);
+                    formData.append("nombre", nombre);
+                    formData.append("fecha_nac", fecha_nac);
+                    formData.append("telefono", telefono);
+                    formData.append("correo", correo);
+                    formData.append("contraseña", contraseña);
+                    formData.append("direccion", direccion);
+
+                    $.ajax({
+                        url: `/trabajadores/ventas/EditarCliente/${id}`,
+                        type: "POST",
+                        processData: false,
+                        contentType: false,
+                        data: formData,
+                        success: function (response) {
+                            if (response.Status === "success") {
+                                if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                    return;
+                                } else {
+                                    toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                                    setTimeout(() => {
+                                        window.location.href = "/trabajadores/ventas/GestionarClientes";
+                                    }, 500);
+                                }
+                            } else {
+                                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                            }
+                        },
+                        error: function (xhr, Status, error) {
+                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                        }
+                    });
+                }
+            });
+        });
+
+        $("#btn_Aceptar").click(function () {
+            window.location.href = "/trabajadores/ventas/GestionarClientes";
+        });
+
+        $("#btn_Volver").click(function () {
+            window.location.href = "/trabajadores/ventas/GestionarClientes";
+        });
     });
 </script>
 {% endblock %}

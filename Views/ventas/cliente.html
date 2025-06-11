@@ -13,7 +13,8 @@
     </div>
     <div class="panel-body">
         <div class="row">
-            <div class="col-12">
+            <div class="col-md-12">
+
                 <table id="tbl_Clientes" class="table table-bordered table-short-rows">
                     <thead class="bg-gray">
                         <tr>
@@ -22,8 +23,7 @@
                             <th class="text-center">TIPO DOCUMENTO</th>
                             <th class="text-center">N° DOCUMENTO</th>
                             <th class="text-center">NOMBRES</th>
-                            <th class="text-center">APELLIDO PATERNO</th>
-                            <th class="text-center">APELLIDO MATERNO</th>
+                            <th class="text-center">APELLIDOS</th>
                             <th class="text-center">SEXO</th>
                             <th class="text-center">FECHA NACIMIENTO</th>
                             <th class="text-center">DIRECCIÓN</th>
@@ -36,6 +36,7 @@
                     <tbody class="bg-white table-short-rows">
                     </tbody>
                 </table>
+
             </div>
         </div>
     </div>
@@ -47,7 +48,7 @@
 
     $(document).ready(function () {
         // $('body').addClass('sidebar-collapse');
-        var windowHeight = $('body > div.os-padding.menu-open > div > div > div > div.content-wrapper').height() / 2;
+        var windowHeight = $('body > div.wrapper > div.content-wrapper').height() / 2;
         //CONFIGURACION POR DEFECTO DATATABLES
         $.extend($.fn.dataTable.defaults, {
             dom: "<'row align-items-center'<'col-sm-8 justify-content-start'f><'col-sm-4 c1 d-flex justify-content-end'>>" + "<'row align-items-center'<'col-sm-4'l><'col-sm-4 my-3 justify-content-start d-flex'B><'col-sm-4 d-flex justify-content-end'p>>" + "rt" + "<'row'<'col-sm-6'i><'col-sm-6 mt-1 d-flex justify-content-end'p>>",
@@ -177,7 +178,7 @@
                 },
             ],
             ajax: {
-                url: "/trabajadores/viajes/GetData_Clientes",
+                url: "/trabajadores/ventas/GetData_Cliente",
                 type: "GET",
                 datatype: "json",
                 data: function (d) {
@@ -196,26 +197,30 @@
                 },
             },
             columns: [
-                { data: "id", name: "id" },
-                { data: "pais", name: "pais" },
-                { data: "tipo documento", name: "tipo documento" },
-                { data: "numero documento", name: "numero documento" },
-                { data: "nombres", name: "nombres" },
-                { data: "apellido paterno", name: "apellido paterno" },
-                { data: "apellido materno", name: "apellido materno" },
-                { data: "sexo", name: "sexo" },
-                { 
-                    data: "fecha nacimiento", 
-                    name: "fecha nacimiento",
+                { data: "ID", name: "ID" },
+                { data: "nombre_pais", name: "nombre_pais" },
+                { data: "abreviatura", name: "abreviatura" },
+                { data: "numero_documento", name: "numero_documento" },
+                { data: "nombre", name: "nombre" },
+                { data: "apellidos", name: "apellidos" },
+                {
+                    data: "sexo", name: "sexo",
                     render: function (data, type, row) {
-                        return data;
+                        return data === 1 ? 'Masculino' : 'Femenino';
+                    }
+                },
+                {
+                    data: "f_nacimiento",
+                    name: "f_nacimiento",
+                    render: function (data, type, row) {
+                        return data ? moment(data).format('DD/MM/YYYY') : '';
                     }
                 },
                 { data: "direccion", name: "direccion" },
                 { data: "telefono", name: "telefono" },
                 { data: "email", name: "email" },
-                { 
-                    data: "estado", 
+                {
+                    data: "estado",
                     name: "estado",
                     render: function (data, type, row) {
                         let estado = data === 1 ? 'Vigente' : 'No vigente';
@@ -229,15 +234,15 @@
                     },
                 },
                 {
-                    data: "",
-                    name: "",
+                    data: null,
+                    name: null,
                     render: function (data, type, row) {
                         return `
                 <div class="flex-wrap btn-group">
-                    <button class="btn btn-xs m-1 btn-info" onclick="fct_ClienteVer('${row.id}')" title="Ver cliente"><i class="bi bi-eye"></i></button>
-                    <button class="btn btn-xs m-1 btn-primary" onclick="fct_ClienteEditar('${row.id}')" title="Editar cliente"><i class="bi bi-pencil-square"></i></button>
-                    <button class="btn btn-xs m-1 btn-warning" onclick="fct_ClienteDarBaja('${row.id}')" title="Dar de baja cliente"><i class="bi bi-arrow-down-circle"></i></button>
-                    <button class="btn btn-xs m-1 btn-danger" onclick="fct_ClienteEliminar('${row.id}')" title="Eliminar cliente"><i class="bi bi-trash"></i></button>
+                    <button class="btn btn-xs m-1 btn-info" onclick="fct_ClienteVer('${data.ID}')" title="Ver cliente"><i class="bi bi-eye"></i></button>
+                    <button class="btn btn-xs m-1 btn-primary" onclick="fct_ClienteEditar('${data.ID}')" title="Editar cliente"><i class="bi bi-pencil-square"></i></button>
+                    <button class="btn btn-xs m-1 btn-warning" onclick="fct_ClienteDarBaja('${data.ID}')" title="Dar de baja cliente"><i class="bi bi-arrow-down-circle"></i></button>
+                    <button class="btn btn-xs m-1 btn-danger" onclick="fct_ClienteEliminar('${data.ID}')" title="Eliminar cliente"><i class="bi bi-trash"></i></button>
                 </div>
             `;
                     },
@@ -290,15 +295,15 @@
         window.location.href = '/trabajadores/ventas/ClienteNuevo';
     }
 
-    function fct_ClienteEditar(Id) {
-        window.location.href = `/trabajadores/ventas/EditarCliente/${Id}`;
+    function fct_ClienteEditar(ID) {
+        window.location.href = `/trabajadores/ventas/EditarCliente/${ID}`;
     }
 
-    function fct_ClienteVer(Id) {
-        window.location.href = `/trabajadores/ventas/VerCliente/${Id}`;
+    function fct_ClienteVer(ID) {
+        window.location.href = `/trabajadores/ventas/VerCliente/${ID}`;
     }
 
-    function fct_ClienteEliminar(Id) {
+    function fct_ClienteEliminar(ID) {
         Swal.fire({
             title: "¿Estás seguro?",
             text: "Esta acción eliminará al cliente. ¿Deseas continuar?",
@@ -312,7 +317,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/clientes/EliminarCliente/${Id}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/ventas/EliminarCliente/${ID}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
@@ -337,7 +342,8 @@
         });
     }
 
-    function fct_ClienteDarBaja(Id) {
+    function fct_ClienteDarBaja(ID) {
+        console.log(ID);
         Swal.fire({
             title: "¿Estás seguro?",
             text: "Esta acción le dará de baja al cliente. ¿Deseas continuar?",
@@ -351,7 +357,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/clientes/DarBajaCliente/${Id}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/ventas/DarBajaCliente/${ID}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {

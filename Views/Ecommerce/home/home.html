@@ -242,6 +242,8 @@
             <input type="date" name="fecha_vuelta" class="form-control">
           </div>
           <div class="col-md-3 d-grid">
+            
+            <label style="color:#E2E3E5">...</label>
             <button style="background-color: var(--primary-color); border: 0px;" type="button"
               class="btn btn-primary fw-bold" onclick="buscarYMostrarItinerario()">
               Buscar
@@ -508,8 +510,6 @@
 </main>
 {% endblock %}
 {% block scripts %}
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"
-  integrity="sha256-3fp5w1wV5Qb7vNq7+9q0q7b8rj2x9Q5uXv5e5h5Q5VY=" crossorigin="anonymous"></script>
 <script>
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -640,14 +640,13 @@
   function fct_CargarRutas() {
     $.getJSON('/ecommerce/home/GetRutasConcatenadas', function (response) {
       if (response.Status === 'success') {
-        let items = [];
-        $.each(response.data, function (index, item) {
-          items.push({ id: index, text: item.ciudad });
-        });
+        const data = response.data || [];
 
-        // Agrega opción "--SELECCIONAR--"
+        const items = data.map((item, index) => ({
+          id: index,
+          text: item.ciudad
+        }));
 
-        // Inicializa select2 UNA sola vez, con todo bien configurado
         $('#cbx_Ciudades').empty().select2({
           width: '100%',
           theme: 'bootstrap4',
@@ -661,7 +660,15 @@
           allowClear: true
         });
       } else {
-        console.error('Error al obtener las marcas:', response.Msj);
+        $('#cbx_Ciudades')
+          .html('<option value="" disabled>-- No hay rutas disponibles --</option>')
+          .select2({
+            width: '100%',
+            theme: 'bootstrap4',
+            minimumResultsForSearch: Infinity, // Oculta el cuadro de búsqueda
+            allowClear: false
+          });
+        return;
       }
     });
   }
@@ -990,13 +997,13 @@
               </div>
             </div>
           </div>
-          <div class="col-md-2 d-flex justify-content-center p-2">
+          <div class="col-md-2 d-flex justify-content-center align-items-center p-2">
             <div class="row text-center">
               <div class="col-md-6"><p class="m-0">${it.servicio}</p></div>
               <div class="col-md-6"><p class="m-0">${it.tipo_viaje}</p></div>
             </div>
           </div>
-          <div class="col-md-3 d-flex justify-content-center p-2">
+          <div class="col-md-3 d-flex justify-content-center align-items-center p-2">
             <p class="text-center">${it.niveles_con_asientos}</p>
           </div>
           <div class="col-md-2 d-flex justify-content-center p-2 rounded-end">

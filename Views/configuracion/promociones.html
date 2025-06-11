@@ -1,25 +1,28 @@
 {% extends "index.html" %}
 
-{% block title %}YATRAX - Gestión de microservicios{% endblock %}
+{% block title %}YATRAX - Gestión de promociones{% endblock %}
 
 {% block content %}
 <div class="container-fluid p-4">
     <div class="panel-heading">
         <div class="row">
             <div class="col-md-12">
-                <h1>Gestionar microservicios</h1>
+                <h1>Gestionar promociones</h1>
             </div>
         </div>
     </div>
     <div class="panel-body">
         <div class="row">
             <div class="col-12">
-                <table id="tbl_Microservicio" class="table table-bordered table-short-rows">
+                <table id="tbl_TipoMetodoPago" class="table table-bordered table-short-rows">
                     <thead class="bg-gray">
                         <tr>
                             <th class="text-center">ID</th>
                             <th class="text-center">NOMBRE</th>
-                            <th class="text-center">DESCRIPCION</th>
+                            <th class="text-center">CODIGO</th>
+                            <th class="text-center">MONTO</th>
+                            <th class="text-center">Fecha inicio</th>
+                            <th class="text-center">Fecha Fin</th>
                             <th class="text-center">ESTADO</th>
                             <th class="text-center">ACCIÓN</th>
                         </tr>
@@ -34,11 +37,11 @@
 {% endblock %}
 {% block scripts %}
 <script>
-    var dtMicroservicios;
+    var dtMetodoPago;
 
     $(document).ready(function () {
         // $('body').addClass('sidebar-collapse');
-        var windowHeight = $('body > div.wrapper > div.content-wrapper').height() / 2;
+        var windowHeight = $('body > div.os-padding.menu-open > div > div > div > div.content-wrapper').height() / 2;
         //CONFIGURACION POR DEFECTO DATATABLES
         $.extend($.fn.dataTable.defaults, {
             dom: "<'row align-items-center'<'col-sm-8 justify-content-start'f><'col-sm-4 c1 d-flex justify-content-end'>>" + "<'row align-items-center'<'col-sm-4'l><'col-sm-4 my-3 justify-content-start d-flex'B><'col-sm-4 d-flex justify-content-end'p>>" + "rt" + "<'row'<'col-sm-6'i><'col-sm-6 mt-1 d-flex justify-content-end'p>>",
@@ -100,12 +103,12 @@
             lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
         });
 
-        fct_IniciarTablaMicroservicios('#tbl_Microservicio');
+        fct_IniciarTablaTipoMetodoPago('#tbl_TipoMetodoPago');
     });
 
-    function fct_IniciarTablaMicroservicios(IdTabla) {
+    function fct_IniciarTablaTipoMetodoPago(IdTabla) {
         // Inicializar DataTables con botones
-        dtMicroservicios = $(IdTabla).DataTable({
+        dtMetodoPago = $(IdTabla).DataTable({
             buttons: [
                 {
                     extend: 'copy',
@@ -118,7 +121,7 @@
                     text: '<i class="bi bi-file-earmark-excel"></i>',
                     titleAttr: 'Exportar a Excel',
                     className: 'btn btn-success',
-                    filename: 'Microservicios' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Tipo Metodo Pago' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     footer: true,
                     exportOptions:
                     {
@@ -131,7 +134,7 @@
                     text: '<i class="bi bi-file-earmark-pdf"></i>',
                     titleAttr: 'Exportar a PDF',
                     className: 'btn btn-danger',
-                    filename: 'Microservicios' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Tipo Metodo Pago' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     exportOptions:
                     {
                         stripHtml: true,
@@ -159,16 +162,16 @@
                     columns: ':not(.noVis)',
                 },
                 {
-                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo microservicio',
+                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nueva promoción',
                     className: 'btn bg-success m-1',
                     titleAttr: 'Nuevo',
                     action: function (e, dt, node, config) {
-                        fct_NuevoMicroservicio();
+                        fct_TipoMetodoPagoNuevo();
                     },
                 },
             ],
             ajax: {
-                url: "/trabajadores/ventas/GetData_Microservicios",
+                url: "/trabajadores/configuracion/GetData_Promociones",
                 type: "GET",
                 datatype: "json",
                 data: function (d) {
@@ -189,7 +192,24 @@
             columns: [
                 { data: "id", name: "id" },
                 { data: "nombre", name: "nombre" },
-                { data: "descripcion", name: "descripcion" },
+                { data: "codigo", name: "codigo" },
+                { data: "monto_promo", name: "monto_promo" },
+                { data: "fecha_inicio", name: "fecha_inicio", render: function(data, type, row) {
+        if (!data) return '';
+        const fecha = new Date(data);
+        const dia = String(fecha.getDate()+1).padStart(2, '0');
+        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+        const anio = fecha.getFullYear();
+        return `${dia}/${mes}/${anio}`;
+    }},
+                { data: "fecha_fin", name: "fecha_fin",render: function(data, type, row) {
+        if (!data) return '';
+        const fecha = new Date(data);
+        const dia = String(fecha.getDate()+1).padStart(2, '0');
+        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+        const anio = fecha.getFullYear();
+        return `${dia}/${mes}/${anio}`;
+    } },
                 { 
                     data: "estado", 
                     name: "estado",
@@ -210,10 +230,10 @@
                     render: function (data, type, row) {
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_VerMicroservicio('${data.id}')" title="Ver microservicio"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_MicroservicioEditar('${data.id}')" title="Editar microservicio"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_MicroservicioDarBaja('${data.id}')" title="Dar de baja microservicio"><i class="bi bi-arrow-down-circle"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_MicroservicioEliminar('${data.id}')" title="Eliminar microservicio"><i class="bi bi-trash"></i></button>
+                            <button class="btn btn-xs m-1 btn-info" onclick="fct_TipoMetodoPagoVer('${data.id}')" title="Ver tipo metodo de pago"><i class="bi bi-eye"></i></button>
+                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_TipoMetodoPagoEditar('${data.id}')" title="Editar tipo metodo de pago"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_TipoMetodoPagoDarBaja('${data.id}')" title="Dar de baja tipo metodo de pago"><i class="bi bi-arrow-down-circle"></i></button>
+                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_TipoMetodoPagoEliminar('${data.id}')" title="Eliminar tipo metodo de pago"><i class="bi bi-trash"></i></button>
                         </div>
                         `;
                     },
@@ -230,7 +250,7 @@
                     className: 'align-middle',
                 },
                 {
-                    targets: [4],
+                    targets: [3],
                     orderable: false,
                     width: '10%',
                 },
@@ -260,42 +280,39 @@
         });
     }
 
-    function fct_NuevoMicroservicio() {
-        window.location.href = '/trabajadores/ventas/MicroservicioNuevo';
+    function fct_TipoMetodoPagoNuevo() {
+        window.location.href = '/trabajadores/configuracion/PromocionNuevo';
     }
 
-    function fct_MicroservicioEditar(Id) {
-        window.location.href = `/trabajadores/ventas/EditarMicroservicio/${Id}`;
+    function fct_TipoMetodoPagoEditar(Id) {
+        window.location.href = `/trabajadores/configuracion/EditarPromocion/${Id}`;
     }
 
-    function fct_VerMicroservicio(Id) {
-        window.location.href = `/trabajadores/ventas/VerMicroservicio/${Id}`;
+    function fct_TipoMetodoPagoVer(Id) {
+        window.location.href = `/trabajadores/configuracion/VerPromocion/${Id}`;
     }
 
-    function fct_MicroservicioEliminar(Id) {
+    function fct_TipoMetodoPagoEliminar(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción eliminará el microservicio. ¿Deseas continuar?",
+            text: "Esta acción eliminará al tipo de metodo de pago. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             cancelButtonColor: "#d33",
-            confirmButtonText: "Sí, eliminar microservicio",
+            confirmButtonText: "Sí, eliminar",
             cancelButtonText: "Cancelar",
             reverseButtons: true // Invertir el orden de los botones
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/ventas/EliminarMicroservicio/${Id}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/configuracion/EliminarPromocion/${Id}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
                         if (response.Status === "success") {
-                            if (response.Msj2 !== '' && response.Msj2 !== null) {
-                                toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                                return;
-                            }
-                            fct_IniciarTablaMicroservicios('#tbl_Microservicio');
+                            
+                            fct_IniciarTablaTipoMetodoPago('#tbl_TipoMetodoPago');
                             toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                         } else {
                             toastr.error(response.Msj, "MENSAJE DE SISTEMA");
@@ -303,7 +320,7 @@
                         }
                     },
                     error: function (xhr, Status, error) {
-                        toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                        toastr.error("Error en el servidor"+ error, "MENSAJE DE SISTEMA");
                         console.error('Error:' + error);
                     }
                 });
@@ -311,37 +328,32 @@
         });
     }
 
-    function fct_MicroservicioDarBaja(Id) {
+    function fct_TipoMetodoPagoDarBaja(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción le dará de baja al microservicio. ¿Deseas continuar?",
+            text: "Esta acción le dará de baja al tipo metodo de pago. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             cancelButtonColor: "#d33",
-            confirmButtonText: "Sí, dar de baja microservicio",
+            confirmButtonText: "Sí, dar de baja",
             cancelButtonText: "Cancelar",
             reverseButtons: true // Invertir el orden de los botones
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/ventas/DarBajaMicroservicio/${Id}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/configuracion/DarBajaPromocion/${Id}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
                         if (response.Status === "success") {
-                            if (response.Msj2 !== '' && response.Msj2 !== null) {
-                                toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                                return;
-                            }
-                            fct_IniciarTablaMicroservicios('#tbl_Microservicio');
+                            fct_IniciarTablaTipoMetodoPago('#tbl_TipoMetodoPago');
                             toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                         } else {
                             toastr.error(response.Msj, "MENSAJE DE SISTEMA");
                             console.error('Error: ' + response.Msj);
                         }
                     },
-
                     error: function (xhr, Status, error) {
                         toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
                         console.error('Error:' + error);
