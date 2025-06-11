@@ -233,13 +233,13 @@ def registrarTipoReclamo():
                     "Msj2": resultado.get("msj2")
                 })
 
-@atencion_bp.route('/EditarTipoReclamo',methods=["GET","POST"])
-def editarTipoReclamo():
+@atencion_bp.route('/EditarTipoReclamo/<int:idTipoReclamo>',methods=["GET","POST"])
+def editarTipoReclamo(idTipoReclamo):
     if request.method == "GET":
-        return render_template("atencion/tipoReclamoCRUD.html")
+        tipo = Tipo_Reclamo.obtener_por_id(idTipoReclamo)
+        return render_template("atencion/tipoReclamoCRUD.html",tipoReclamo=tipo,tittle="Editar tipo reclamo",btnId="btn_Actualizar")
     else:
         try:
-            idTipoReclamo = int(request.form["id"])
             nombre_tipo = request.form["nombre"]
             estado = request.form["estado"]
             resultado = Tipo_Reclamo.editar(idTipoReclamo,nombre_tipo,estado)
@@ -286,7 +286,35 @@ def eliminarTipoReclamo(idTipoReclamo):
                 "Msj": repr(e),
                 "Msj2": resultado.get("msj2")
             })
-    
+
+@atencion_bp.route('/verTipoReclamo/<int:idTipoReclamo>')
+def verTipoReclamo(idTipoReclamo):
+    tipo = Tipo_Reclamo.obtener_por_id(idTipoReclamo)
+    return render_template("atencion/tipoReclamoCRUD.html",tipoReclamo=tipo,tittle="Ver tipo reclamo",btnId="btn_Ver")  
+
+@atencion_bp.route("/darBajaTipoReclamo/<int:idTipoReclamo>",methods=["POST"])
+def darBajaTipoReclamo(idTipoReclamo):
+    try:
+        resultado = Tipo_Reclamo.darBaja(idTipoReclamo)
+        if resultado.get("msj") is not None:
+            return jsonify({
+                "Status": "success",
+                "Msj": resultado["msj"],
+                "Msj2": resultado.get("msj2")
+            })
+        else:
+            return jsonify({
+                "Status": "error",
+                "Msj": "",
+                "Msj2": resultado.get("msj2")
+            })
+    except Exception as e:
+        return jsonify({
+            "Status": "error",
+            "Msj": repr(e),
+            "Msj2": resultado.get("msj2")
+        })
+
 #END REGION
 #REGION RECLAMO
 @atencion_bp.route('/GetData_Reclamo')
