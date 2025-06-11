@@ -41,10 +41,10 @@ class Reclamo:
             conexion = bd.Conexion()
             # Llamada al SP con variables de usuario para los OUT
             conexion.ejecutar(
-                "CALL SP_INSERTAR_RECLAMO(%s, %s, %s, %s, %s, @MSJ, @MSJ2)",
+                "CALL SP_INSERTAR_RECLAMO(%s, %s, %s, %s, %s, @MSJ, @MSJ2);",
                 (tipo_reclamo, detalle, monto, id_pasaje, motivo)
             )
-            resultado = conexion.obtener("SELECT @MSJ AS MSJ, @MSJ2 AS MSJ2")
+            resultado = conexion.obtener("SELECT @MSJ AS msj, @MSJ2 AS msj2;")
             return resultado[0] if resultado else None
         except Exception as e:
             return {"Status": 0, "Mensaje": f"Error: {e}"}
@@ -53,15 +53,15 @@ class Reclamo:
                 conexion.cerrar()
 
     @classmethod
-    def editar(cls, id, tipo_reclamo, detalle, monto, id_pasaje, motivo):
+    def editar(cls, id, tipo_reclamo, detalle, monto, id_pasaje, motivo,estado):
         conexion = None
         try:
             conexion = bd.Conexion()
             conexion.ejecutar(
-                "CALL SP_MODIFICAR_RECLAMO(%s, %s, %s, %s, %s, %s, @MSJ, @MSJ2)",
-                (id, tipo_reclamo, detalle, monto, id_pasaje, motivo)
+                "CALL SP_MODIFICAR_RECLAMO(%s, %s, %s, %s, %s, %s,%s, @MSJ, @MSJ2)",
+                (id, tipo_reclamo, detalle, monto, id_pasaje, motivo,estado)
             )
-            resultado = conexion.obtener("SELECT @MSJ AS MSJ, @MSJ2 AS MSJ2")
+            resultado = conexion.obtener("SELECT @MSJ AS msj, @MSJ2 AS msj2")
             return resultado[0] if resultado else None
         except Exception as e:
             return {"Status": 0, "Mensaje": f"Error: {e}"}
@@ -78,7 +78,20 @@ class Reclamo:
                 "CALL SP_ELIMINAR_RECLAMO(%s, @MSJ, @MSJ2)",
                 (id,)
             )
-            resultado = conexion.obtener("SELECT @MSJ AS MSJ, @MSJ2 AS MSJ2")
+            resultado = conexion.obtener("SELECT @MSJ AS msj, @MSJ2 AS msj2")
+            return resultado[0] if resultado else None
+        except Exception as e:
+            return {"Status": 0, "Mensaje": f"Error: {e}"}
+        finally:
+            if conexion:
+                conexion.cerrar()
+
+    @classmethod
+    def darBajaReclamo(cls,id):
+        try:
+            conexion = bd.Conexion()
+            conexion.ejecutar("CALL SP_DARBAJA_RECLAMO(%s,@MSJ,@MSJ2);",(id,))
+            resultado = conexion.obtener("SELECT @MSJ AS msj, @MSJ2 AS msj2;")
             return resultado[0] if resultado else None
         except Exception as e:
             return {"Status": 0, "Mensaje": f"Error: {e}"}

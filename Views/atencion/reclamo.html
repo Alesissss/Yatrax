@@ -1,6 +1,6 @@
 {% extends "index.html" %}
 
-{% block title %}YATRAX - Gestión de usuarios{% endblock %}
+{% block title %}YATRAX - Gestión de reclamos{% endblock %}
 
 {% block content %}
 <div class="card d-none" id="efec-cargando">
@@ -24,13 +24,11 @@
                     <thead class="bg-gray">
                         <tr>
                             <th class="text-center">ID</th>
-                            <th class="text-center">METODO PAGO</th>
-                            <th class="text-center">TIPO COMPROBANTE</th>
-                            <th class="text-center">CLIENTE</th>
-                            <th class="text-center">PROMOCION</th>
-                            <th class="text-center">VIAJE</th>
-                            <th class="text-center">CODIGO</th>
-                            <th class="text-center">ESTADO</th>
+                            <th class="text-center">ID_PASAJE</th>
+                            <th class="text-center">TIPO_RECLAMO</th>
+                            <th class="text-center">MOTIVO</th>
+                            <th class="text-center">MONTO</th>
+                            <th class="text-center">DETALLE</th>
                             <th class="text-center">ACCIÓN</th>
                         </tr>
                     </thead>
@@ -169,16 +167,16 @@
                     columns: ':not(.noVis)',
                 },
                 {
-                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nueva reserva',
+                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo reclamo',
                     className: 'btn bg-success m-1',
                     titleAttr: 'Nuevo',
                     action: function (e, dt, node, config) {
-                        fct_reservaNueva();
+                        fct_NuevoReclamo();
                     },
                 },
             ],
             ajax: {
-                url: "/trabajadores/atencion/GetData_Reservas",
+                url: "/trabajadores/atencion/GetData_Reclamo",
                 type: "GET",
                 datatype: "json",
                 data: function (d) {
@@ -198,21 +196,20 @@
             },
             columns: [
                 { data: "id", name: "Id" },
-                { data: "id_metodo_pago", name: "Metodo de pago" },
-                { data: "id_tipo_comprobante", name: "Tipo comprobante" },
-                { data: "id_cliente", name: "Cliente" },
-                { data: "id_promocion", name: "Promocion" },
-                { data: "id_viaje", name: "Viaje" },
-                { data: "codigo", name: "Codigo" },
+                { data: "idPasaje", name: "Id pasaje" },
+                { data: "id_tipo_reclamo", name: "Tipo reclamo" },
+                { data: "motivo", name: "motivo" },
+                { data: "monto", name: "monto" },
+                { data: "detalle", name: "detalle" },
                 {
                     data: "estado",
                     name: "estado",
                     render: function (data, type, row) {
-                        let estado = data === 'R' ? 'En proceso' : 'Reserva pagada';
-                        if (estado === "En proceso") {
-                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-danger fs-5">${estado}</span></h5>`;
-                        } else if (estado === "Reserva pagada") {
+                        let estado = data === 1 ? 'Vigente' : 'No vigente';
+                        if (estado === "Vigente") {
                             return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-success fs-5">${estado}</span></h5>`;
+                        } else if (estado === "No vigente") {
+                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-danger fs-5">${estado}</span></h5>`;
                         } else {
                             return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge fs-5" style="background-color: #800080; color: white;">${estado}</span></h5>`;
                         }
@@ -224,10 +221,10 @@
                     render: function (data, type, row) {
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_VerReserva('${data.id}')" title="Ver usuario"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_editarReserva('${data.id}')" title="Editar usuario"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_PagarReserva('${data.id}')" title="Pagar reserva">Pagar reserva</button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_eliminarReserva('${data.id}')" title="Eliminar usuario"><i class="bi bi-trash"></i></button>
+                            <button class="btn btn-xs m-1 btn-info" onclick="fct_VerReclamo('${data.id}')" title="Ver usuario"><i class="bi bi-eye"></i></button>
+                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_editarReclamo('${data.id}')" title="Editar usuario"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_darBajaReclamo('${data.id}')" title="Dar de baja reclamo"><i class="bi bi-arrow-down-circle"></i></button>
+                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_eliminarReclamo('${data.id}')" title="Eliminar usuario"><i class="bi bi-trash"></i></button>
                         </div>
                         `;
                     },
@@ -240,11 +237,11 @@
                     className: "text-center align-middle",
                 },
                 {
-                    targets: [1, 2, 3, 4, 5,6,7],
+                    targets: [1, 2, 3, 4, 5],
                     className: 'align-middle',
                 },
                 {
-                    targets: [8],
+                    targets: [6],
                     orderable: false,
                     width: '10%',
                 },
@@ -274,19 +271,19 @@
         });
     }
 
-    function fct_reservaNueva() {
-        window.location.href = '/trabajadores/atencion/RegistrarReserva';
+    function fct_NuevoReclamo() {
+        window.location.href = '/trabajadores/atencion/RegistrarReclamo';
     }
 
-    function fct_editarReserva(Id) {
-        window.location.href = `/trabajadores/atencion/EditarReserva/${Id}`;
+    function fct_editarReclamo(Id) {
+        window.location.href = `/trabajadores/atencion/EditarReclamo/${Id}`;
     }
 
-    function fct_VerReserva(Id) {
-        window.location.href = `/trabajadores/atencion/VerReserva/${Id}`;
+    function fct_VerReclamo(Id) {
+        window.location.href = `/trabajadores/atencion/VerReclamo/${Id}`;
     }
 
-    function fct_eliminarReserva(Id) {
+    function fct_eliminarReclamo(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
             text: "Esta acción eliminará la reserva. ¿Deseas continuar?",
@@ -300,7 +297,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/atencion/EliminarReserva/${Id}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/atencion/EliminarReclamo/${Id}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
@@ -325,15 +322,15 @@
         });
     }
 
-    function fct_PagarReserva(Id) {
+    function fct_darBajaReclamo(Id) {
         $.ajax({
-            url: `/trabajadores/atencion/CambiarEstado/${Id}`,  // Ruta creada en Flask
+            url: `/trabajadores/atencion/darBajaReclamo/${Id}`,  // Ruta creada en Flask
             method: "POST",
             success: function(response) {
                 if (response.Status === "success") {
                     toastr.success(response.Msj);
                 } else {
-                    toastr.error("Error al pagar reserva: " + response.Msj2);
+                    toastr.error("Error al dar baja: " + response.Msj2);
                 }
             },
             error: function(xhr, status, error) {

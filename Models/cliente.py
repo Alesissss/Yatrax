@@ -23,12 +23,12 @@ class Cliente:
         self.fechaRegistro = fechaRegistro
         self.usuario = usuario
     @classmethod    
-    def obtener_todos(cls):
+    def obtener_todos(cls, id_tipo_doc):
         conexion = bd.Conexion()
         try:
-            clientes = conexion.obtener("""select cl.id as ID, ps.nombre as nombre_pais, tp.abreviatura, cl.numero_documento, cl.nombre, CONCAT(cl.ape_paterno, ' ', cl.ape_materno) AS apellidos, cl.sexo, cl.f_nacimiento, cl.direccion, cl.telefono, cl.email, cl.estado
+            clientes = conexion.obtener("""select cl.id as ID, ps.nombre as nombre_pais, tp.abreviatura, cl.numero_documento, cl.nombre, CONCAT(cl.ape_paterno, ' ', cl.ape_materno) AS apellidos, cl.sexo, cl.f_nacimiento, cl.direccion, cl.telefono, cl.email, cl.estado, cl.id_tipo_doc
                                             from cliente cl inner join pais ps on cl.id_pais = ps.id
-                                            inner join tipo_documento tp on cl.id_tipo_doc = tp.id;""")
+                                            inner join tipo_documento tp on cl.id_tipo_doc = tp.id WHERE cl.id_tipo_doc = %s""", (id_tipo_doc,))
             return clientes
         finally:
             conexion.cerrar()
@@ -41,6 +41,20 @@ class Cliente:
                                             from cliente cl inner join pais ps on cl.id_pais = ps.id
                                             inner join tipo_documento tp on cl.id_tipo_doc = tp.id WHERE cl.id  = %s""", (cliente_id,))
             return cliente[0] if cliente else None
+        finally:
+            conexion.cerrar()
+            
+    @classmethod
+    def obtener_por_numero_documento(cls, numero_documento):
+        conexion = bd.Conexion()
+        try:
+            query = """
+                select cli.nombre, cli.ape_paterno, cli.ape_materno, cli.razon_social, cli.email, cli.numero_documento, cli.telefono, 
+                cli.f_nacimiento, cli.sexo from cliente cli inner join tipo_cliente tc on cli.id_tipo_cliente = tc.idTipoCliente 
+                where cli.numero_documento = %s
+            """
+            usuario = conexion.obtener(query, (numero_documento,))
+            return usuario[0] if usuario else None
         finally:
             conexion.cerrar()
 

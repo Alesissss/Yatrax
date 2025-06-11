@@ -1,6 +1,6 @@
 {% extends "index.html" %}
 
-{% block title %}YATRAX - Gestión de usuarios{% endblock %}
+{% block title %}YATRAX - Gestión de tipos de reclamo{% endblock %}
 
 {% block content %}
 <div class="card d-none" id="efec-cargando">
@@ -20,7 +20,7 @@
     <div class="panel-body">
         <div class="row">
             <div class="col-12">
-                <table id="tbl_Usuarios" class="table table-bordered table-short-rows">
+                <table id="tbl_tiposReclamo" class="table table-bordered table-short-rows">
                     <thead class="bg-gray">
                         <tr>
                             <th class="text-center">ID</th>
@@ -105,7 +105,7 @@
             lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
         });
 
-        fct_IniciarTablaUsuarios('#tbl_Usuarios');
+        fct_IniciarTablaUsuarios('#tbl_tiposReclamo');
     });
 
     function fct_IniciarTablaUsuarios(IdTabla) {
@@ -164,16 +164,16 @@
                     columns: ':not(.noVis)',
                 },
                 {
-                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nueva reserva',
+                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo tipo reclamo',
                     className: 'btn bg-success m-1',
                     titleAttr: 'Nuevo',
                     action: function (e, dt, node, config) {
-                        fct_reservaNueva();
+                        fct_nuevo_tipoReclamo();
                     },
                 },
             ],
             ajax: {
-                url: "/trabajadores/configuracion/GetData_MetodosPago",
+                url: "/trabajadores/atencion/GetData_TiposReclamo",
                 type: "GET",
                 dataSrc: function (json) {
                     if (json.Status === "info") {
@@ -209,10 +209,10 @@
                     render: function (data, type, row) {
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_VerReserva('${data.id}')" title="Ver usuario"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_editarReserva('${data.id}')" title="Editar usuario"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_PagarReserva('${data.id}')"><i class="bi bi-arrow-down-circle"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_eliminarReserva('${data.id}')" title="Eliminar usuario"><i class="bi bi-trash"></i></button>
+                            <button class="btn btn-xs m-1 btn-info" onclick="fct_verTipoReclamo('${data.id}')" title="Ver usuario"><i class="bi bi-eye"></i></button>
+                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_editar_tipoReclamo('${data.id}')" title="Editar usuario"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_darBaja_TipoReclamo('${data.id}')"><i class="bi bi-arrow-down-circle"></i></button>
+                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_eliminar_tipoReclamo('${data.id}')" title="Eliminar usuario"><i class="bi bi-trash"></i></button>
                         </div>
                         `;
                     },
@@ -259,19 +259,19 @@
         });
     }
 
-    function fct_reservaNueva() {
-        window.location.href = '/trabajadores/atencion/RegistrarReserva';
+    function fct_nuevo_tipoReclamo() {
+        window.location.href = '/trabajadores/atencion/RegistrarTipoReclamo';
     }
 
-    function fct_editarReserva(Id) {
-        window.location.href = `/trabajadores/atencion/EditarReserva/${Id}`;
+    function fct_editar_tipoReclamo(Id) {
+        window.location.href = `/trabajadores/atencion/EditarTipoReclamo/${Id}`;
     }
 
-    function fct_VerReserva(Id) {
-        window.location.href = `/trabajadores/atencion/VerReserva/${Id}`;
+    function fct_verTipoReclamo(Id) {
+        window.location.href = `/trabajadores/atencion/verTipoReclamo/${Id}`;
     }
 
-    function fct_eliminarReserva(Id) {
+    function fct_eliminar_tipoReclamo(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
             text: "Esta acción eliminará la reserva. ¿Deseas continuar?",
@@ -285,7 +285,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/atencion/EliminarReserva/${Id}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/atencion/EliminarTipoReclamo/${Id}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
@@ -294,7 +294,7 @@
                                 toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
                                 return;
                             }
-                            fct_IniciarTablaUsuarios('#tbl_Usuarios');
+                            fct_IniciarTablaUsuarios('#tbl_tiposReclamo');
                             toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                         } else {
                             toastr.error(response.Msj, "MENSAJE DE SISTEMA");
@@ -310,25 +310,25 @@
         });
     }
 
-    function fct_PagarReserva(Id) {
+    function fct_darBaja_TipoReclamo(Id) {
         $.ajax({
-            url: `/trabajadores/atencion/CambiarEstado/${Id}`,  // Ruta creada en Flask
+            url: `/trabajadores/atencion/darBajaTipoReclamo/${Id}`,  // Ruta creada en Flask
             method: "POST",
             success: function(response) {
                 if (response.Status === "success") {
                     toastr.success(response.Msj);
                 } else {
-                    toastr.error("Error al pagar reserva: " + response.Msj2);
+                    toastr.error("Error al dar baja tipo de reclamo: " + response.Msj2);
                 }
             },
             error: function(xhr, status, error) {
                 // Capturamos el 500 ó cualquier otro error HTTP
                 console.error("Error AJAX:", xhr.status, xhr.responseText);
-                alert("Ocurrió un error interno al intentar pagar la reserva.");
+                alert("Ocurrió un error interno al intentar dar de baja el tipo de reclamo.");
             }
         });
 
-        fct_IniciarTablaUsuarios('#tbl_Usuarios');
+        fct_IniciarTablaUsuarios('#tbl_tiposReclamo');
     }
 
     function ShowSpinner() {

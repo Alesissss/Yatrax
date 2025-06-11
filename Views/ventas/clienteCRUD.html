@@ -25,7 +25,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="txt_NumeroDocumento">Número de documento</label>
                             <div class="input-group">
-                                <input type="text" id="txt_NumeroDocumento" class="form-control"
+                                <input type="number" id="txt_NumeroDocumento" class="form-control"
                                     value="{{ cliente.numero_documento }}" {% if btnId=='btn_Aceptar' %}disabled{% endif
                                     %} placeholder="Número de documento">
                                 <div class="input-group-append">
@@ -45,10 +45,12 @@
                         <div class="col-md-6 mb-3">
                             <label for="cbx_Sexo">Sexo</label>
                             <div class="input-group">
-                                <select id="cbx_Sexo" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
-                                    <option disabled {% if cliente.sexo is none %}selected{% endif %}>--SELECCIONAR--</option>
-                                    <option value="Masculino" {% if cliente.sexo == 1 %}selected{% endif %}>Masculino</option>
-                                    <option value="Femenino" {% if cliente.sexo == 0 %}selected{% endif %}>Femenino</option>
+                                <select id="cbx_Sexo" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{% endif
+                                    %}>
+                                    <option value="" {% if cliente.sexo is none %}selected{% endif %}>--SELECCIONAR--
+                                    </option>
+                                    <option value="1" {% if cliente.sexo==1 %}selected{% endif %}>Masculino</option>
+                                    <option value="0" {% if cliente.sexo==0 %}selected{% endif %}>Femenino</option>
                                 </select>
                             </div>
                         </div>
@@ -71,7 +73,7 @@
                             </div>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label for="nombre">Nombres</label>
+                            <label for="nombre">Nombre</label>
                             <div class="input-group">
                                 <input type="text" id="nombre" class="form-control" placeholder="Nombres"
                                     value="{{ cliente.nombre }}" {% if btnId=='btn_Aceptar' %}disabled{% endif %}
@@ -91,7 +93,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="telefono">Teléfono</label>
                             <div class="input-group">
-                                <input type="text" id="telefono" class="form-control" placeholder="Teléfono"
+                                <input type="number" id="telefono" class="form-control" placeholder="Teléfono"
                                     value="{{ cliente.telefono }}" {% if btnId=='btn_Aceptar' %}disabled{% endif %}
                                     oninput="this.value = this.value.toUpperCase();">
                                 <div class="input-group-append">
@@ -102,7 +104,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="correo">Correo electrónico</label>
                             <div class="input-group">
-                                <input type="text" id="correo" class="form-control" placeholder="Correo electrónico"
+                                <input type="email" id="correo" class="form-control" placeholder="Correo electrónico"
                                     value="{{ cliente.email }}" {% if btnId=='btn_Aceptar' %}disabled{% endif %}
                                     oninput="this.value = this.value.toUpperCase();">
                                 <div class="input-group-append">
@@ -132,7 +134,18 @@
                                 </div>
                             </div>
                         </div>
-
+                        <div class="col-md-12 mb-3">
+                            <label for="cbx_estado">Estado</label>
+                            <div class="input-group">
+                                <select id="cbx_estado" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{%
+                                    endif %}>
+                                    <option value="" {% if cliente.estado is none %}selected{% endif %}>--SELECCIONAR--
+                                    </option>
+                                    <option value="1" {% if cliente.estado==1 %}selected{% endif %}>VIGENTE</option>
+                                    <option value="0" {% if cliente.estado==0 %}selected{% endif %}>NO VIGENTE</option>
+                                </select>
+                            </div>
+                        </div>
                         <!-- Botón de acción -->
                         <div class="col-md-12 text-center">
                             <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de
@@ -149,6 +162,33 @@
 
 {% block scripts %}
 <script>
+function fct_cambiarInputs() {
+    // Obtén el texto seleccionado (abreviatura) del combo
+    let abreviatura = $('#cbx_tipoDocumento option:selected').text().trim().toUpperCase();
+
+    if (abreviatura === 'RUC') {
+        // Oculta los campos para RUC
+        $('#txt_FechaNacimiento').closest('.col-md-6').hide();
+        $('#cbx_Sexo').closest('.col-md-6').hide();
+        $('#ape_pat').closest('.col-md-4').hide();
+        $('#ape_mat').closest('.col-md-4').hide();
+
+        // Cambia nombre y contraseña a col-12
+        $('#nombre').closest('.col-md-4').removeClass('col-md-4').addClass('col-md-6');
+        $('#contraseña').closest('.col-md-6').removeClass('col-md-6').addClass('col-md-12');
+    } else {
+        // Muestra los campos para otros documentos
+        $('#txt_FechaNacimiento').closest('.col-md-6').show();
+        $('#cbx_Sexo').closest('.col-md-6').show();
+        $('#ape_pat').closest('.col-md-4').show();
+        $('#ape_mat').closest('.col-md-4').show();
+
+        // Restaura nombre y contraseña a sus tamaños originales
+        $('#nombre').closest('.col-md-6').removeClass('col-md-6').addClass('col-md-4');
+        $('#contraseña').closest('.col-md-12').removeClass('col-md-12').addClass('col-md-6');
+    }
+}
+
     function fct_GetPaises() {
         $.getJSON('/trabajadores/ventas/GetData_Paises', function (response) {
             if (response.Status === 'success') {
@@ -219,20 +259,108 @@
         });
     }
 
+    function fct_ValidarNumeroDocumento() {
+        let tipoDocumento = $('#cbx_tipoDocumento').val();
+        let $numeroDocumento = $('#txt_NumeroDocumento');
+        let numeroDocumento = $numeroDocumento.val().trim();
+
+        // Definir longitudes máximas y mínimas según el tipo de documento
+        let maxLength = null;
+        let minLength = null;
+
+        if (tipoDocumento === "1") { // DNI
+            maxLength = 8;
+            minLength = 8;
+        } else if (tipoDocumento === "2") { // RUC
+            maxLength = 11;
+            minLength = 11;
+        } else if (tipoDocumento === "3") { // Carnet de Extranjería
+            maxLength = 20;
+            minLength = 9;
+        }
+
+        // Limitar la longitud máxima en el input
+        if (maxLength !== null) {
+            $numeroDocumento.attr('maxlength', maxLength);
+        } else {
+            $numeroDocumento.removeAttr('maxlength');
+        }
+
+        // Validación de longitud
+        if (minLength !== null && numeroDocumento.length < minLength) {
+            toastr.warning(`El número de documento debe tener al menos ${minLength} dígitos`, "MENSAJE DE SISTEMA");
+            return false;
+        }
+        if (maxLength !== null && numeroDocumento.length > maxLength) {
+            toastr.warning(`El número de documento no puede tener más de ${maxLength} dígitos`, "MENSAJE DE SISTEMA");
+            return false;
+        }
+        return true;
+    }
+
+    // Limitar en tiempo real la cantidad de caracteres permitidos según el tipo de documento
+    $(document).on('input', '#txt_NumeroDocumento', function () {
+        let tipoDocumento = $('#cbx_tipoDocumento').val();
+        let $this = $(this);
+        let maxLength = null;
+
+        if (tipoDocumento === "1") {
+            maxLength = 8;
+        } else if (tipoDocumento === "2") {
+            maxLength = 11;
+        } else if (tipoDocumento === "3") {
+            maxLength = 20;
+        }
+
+        if (maxLength !== null) {
+            let value = $this.val();
+            if (value.length > maxLength) {
+                $this.val(value.slice(0, maxLength));
+            }
+        }
+    });
+
+    // Cambiar maxlength cuando cambia el tipo de documento
+    $(document).on('change', '#cbx_tipoDocumento', function () {
+        let tipoDocumento = $(this).val();
+        let $numeroDocumento = $('#txt_NumeroDocumento');
+        let maxLength = null;
+
+        if (tipoDocumento === "1") {
+            maxLength = 8;
+        } else if (tipoDocumento === "2") {
+            maxLength = 11;
+        } else if (tipoDocumento === "3") {
+            maxLength = 20;
+        }
+
+        if (maxLength !== null) {
+            $numeroDocumento.attr('maxlength', maxLength);
+            // Truncar si ya hay más caracteres
+            let value = $numeroDocumento.val();
+            if (value.length > maxLength) {
+                $numeroDocumento.val(value.slice(0, maxLength));
+            }
+        } else {
+            $numeroDocumento.removeAttr('maxlength');
+        }
+    });
+
     $(document).ready(function () {
         fct_GetPaises();
         fct_GetTipoDocumento();
+        fct_ValidarNumeroDocumento();
+        fct_cambiarInputs();
+        $('#cbx_tipoDocumento').change(function () {
+            fct_cambiarInputs();
+        });
 
         $("#btn_Registrar").click(function () {
             let tipo_documento = $('#cbx_tipoDocumento').val();
             let numero_documento = $('#txt_NumeroDocumento').val().trim();
             let pais = $('#cbx_Pais').val();
             let sexo = $('#cbx_Sexo').val();
-            if (sexo === null || sexo === undefined || sexo === "--SELECCIONAR--") {
-                sexo = null;
-            } else {
-                sexo = sexo === 'Masculino' ? 1 : (sexo === 'Femenino' ? 0 : null);
-            }
+            sexo = (sexo === "" || sexo === null || sexo === undefined) ? null : Number(sexo);
             let ape_pat = $('#ape_pat').val().trim();
             let ape_mat = $('#ape_mat').val().trim();
             let nombre = $('#nombre').val().trim();
@@ -241,14 +369,25 @@
             let correo = $('#correo').val().trim();
             let contraseña = $('#contraseña').val().trim();
             let direccion = $('#direccion').val().trim();
+            let estado = $('#cbx_estado').val();
 
-            if (tipo_documento === 'DNI') {
-                if (!tipo_documento || !numero_documento || !pais || !sexo || !ape_pat || !ape_mat || !nombre || !fecha_nac || !telefono || !direccion || !correo || !contraseña) {
+            if (tipo_documento === null || tipo_documento === undefined) {
+                toastr.warning("El tipo de documento es obligatorio", "MENSAJE DE SISTEMA");
+                return;
+            }
+
+            if (tipo_documento === "1") {
+                if (!tipo_documento || !numero_documento || !pais || !sexo || !ape_pat || !ape_mat || !nombre || !fecha_nac || !telefono || !direccion || !correo || !contraseña || !estado) {
                     toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                     return;
                 }
-            } else if (tipo_documento === 'RUC') {
-                if (!tipo_documento || !numero_documento || !pais || !nombre || !telefono || !direccion || !correo || !contraseña) {
+            } else if (tipo_documento === "2") {
+                if (!tipo_documento || !numero_documento || !pais || !nombre || !telefono || !direccion || !correo || !contraseña || !estado) {
+                    toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                    return;
+                }
+            } else {
+                if (!tipo_documento || !numero_documento || !pais || !sexo || !ape_pat || !ape_mat || !nombre || !fecha_nac || !telefono || !direccion || !correo || !contraseña || !estado) {
                     toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                     return;
                 }
@@ -280,6 +419,7 @@
                     formData.append("correo", correo);
                     formData.append("contraseña", contraseña);
                     formData.append("direccion", direccion);
+                    formData.append("estado", estado);
 
                     $.ajax({
                         url: "/trabajadores/ventas/RegistrarCliente",
@@ -319,11 +459,8 @@
             let numero_documento = $('#txt_NumeroDocumento').val().trim();
             let pais = $('#cbx_Pais').val();
             let sexo = $('#cbx_Sexo').val();
-            if (sexo === null || sexo === undefined || sexo === "--SELECCIONAR--") {
-                sexo = null;
-            } else {
-                sexo = sexo === 'Masculino' ? 1 : (sexo === 'Femenino' ? 0 : null);
-            } let ape_pat = $('#ape_pat').val().trim();
+            sexo = (sexo === "" || sexo === null || sexo === undefined) ? null : Number(sexo);
+            let ape_pat = $('#ape_pat').val().trim();
             let ape_mat = $('#ape_mat').val().trim();
             let nombre = $('#nombre').val().trim();
             let fecha_nac = $('#txt_FechaNacimiento').val();
@@ -331,74 +468,79 @@
             let correo = $('#correo').val().trim();
             let contraseña = $('#contraseña').val().trim();
             let direccion = $('#direccion').val().trim();
+            let estado = $('#cbx_estado').val();
 
             if (tipo_documento === 'DNI') {
-                if (!tipo_documento || !numero_documento || !pais || !sexo || !ape_pat || !ape_mat || !nombre || !fecha_nac || !telefono || !direccion || !correo || !contraseña) {
+                if (!tipo_documento || !numero_documento || !pais || !sexo || !ape_pat || !ape_mat || !nombre || !fecha_nac || !telefono || !direccion || !correo || !contraseña || !estado) {
                     toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                     return;
                 }
             } else if (tipo_documento === 'RUC') {
-                if (!tipo_documento || !numero_documento || !pais || !nombre || !telefono || !direccion || !correo || !contraseña) {
+                if (!tipo_documento || !numero_documento || !pais || !nombre || !telefono || !direccion || !correo || !contraseña || !estado) {
                     toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                     return;
                 }
-            }
-
-            Swal.fire({
-                title: "¿Estás seguro?",
-                text: "Esta acción modificará al cliente. ¿Deseas continuar?",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Sí, editar cliente",
-                cancelButtonText: "Cancelar",
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-
-                    let formData = new FormData();
-                    formData.append("tipo_documento", tipo_documento);
-                    formData.append("numero_documento", numero_documento);
-                    formData.append("pais", pais);
-                    formData.append("Sexo", sexo);
-                    formData.append("ape_pat", ape_pat);
-                    formData.append("ape_mat", ape_mat);
-                    formData.append("nombre", nombre);
-                    formData.append("fecha_nac", fecha_nac);
-                    formData.append("telefono", telefono);
-                    formData.append("correo", correo);
-                    formData.append("contraseña", contraseña);
-                    formData.append("direccion", direccion);
-
-                    $.ajax({
-                        url: `/trabajadores/ventas/EditarCliente/${id}`,
-                        type: "POST",
-                        processData: false,
-                        contentType: false,
-                        data: formData,
-                        success: function (response) {
-                            if (response.Status === "success") {
-                                if (response.Msj2 !== '' && response.Msj2 !== null) {
-                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                                    return;
-                                } else {
-                                    toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                                    setTimeout(() => {
-                                        window.location.href = "/trabajadores/ventas/GestionarClientes";
-                                    }, 500);
-                                }
-                            } else {
-                                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
-                            }
-                        },
-                        error: function (xhr, Status, error) {
-                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
-                        }
-                    });
+            } else {
+                    toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                    return;
                 }
+
+                Swal.fire({
+                    title: "¿Estás seguro?",
+                    text: "Esta acción modificará al cliente. ¿Deseas continuar?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Sí, editar cliente",
+                    cancelButtonText: "Cancelar",
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+
+                        let formData = new FormData();
+                        formData.append("tipo_documento", tipo_documento);
+                        formData.append("numero_documento", numero_documento);
+                        formData.append("pais", pais);
+                        formData.append("Sexo", sexo);
+                        formData.append("ape_pat", ape_pat);
+                        formData.append("ape_mat", ape_mat);
+                        formData.append("nombre", nombre);
+                        formData.append("fecha_nac", fecha_nac);
+                        formData.append("telefono", telefono);
+                        formData.append("correo", correo);
+                        formData.append("contraseña", contraseña);
+                        formData.append("direccion", direccion);
+                        formData.append("estado", estado);
+
+                        $.ajax({
+                            url: `/trabajadores/ventas/EditarCliente/${id}`,
+                            type: "POST",
+                            processData: false,
+                            contentType: false,
+                            data: formData,
+                            success: function (response) {
+                                if (response.Status === "success") {
+                                    if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                        toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                        return;
+                                    } else {
+                                        toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                                        setTimeout(() => {
+                                            window.location.href = "/trabajadores/ventas/GestionarClientes";
+                                        }, 500);
+                                    }
+                                } else {
+                                    toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                                }
+                            },
+                            error: function (xhr, Status, error) {
+                                toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                            }
+                        });
+                    }
+                });
             });
-        });
 
         $("#btn_Aceptar").click(function () {
             window.location.href = "/trabajadores/ventas/GestionarClientes";

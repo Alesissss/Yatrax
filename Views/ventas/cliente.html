@@ -13,6 +13,12 @@
     </div>
     <div class="panel-body">
         <div class="row">
+            <div class="col-md-4 mb-3">
+                <span>Tipo de documento:</span>
+                <select id="cbx_documento">
+                </select>
+            </div>
+            <div class="col-md-8"></div>
             <div class="col-md-12">
 
                 <table id="tbl_Clientes" class="table table-bordered table-short-rows">
@@ -22,7 +28,7 @@
                             <th class="text-center">PAÍS</th>
                             <th class="text-center">TIPO DOCUMENTO</th>
                             <th class="text-center">N° DOCUMENTO</th>
-                            <th class="text-center">NOMBRES</th>
+                            <th class="text-center">NOMBRE</th>
                             <th class="text-center">APELLIDOS</th>
                             <th class="text-center">SEXO</th>
                             <th class="text-center">FECHA NACIMIENTO</th>
@@ -44,9 +50,53 @@
 {% endblock %}
 {% block scripts %}
 <script>
+
+    function fct_ObtenerTipoDocumento() {
+        $.ajax({
+            url: "/trabajadores/ventas/GetData_TipoDocumento",
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                if (data.Status === "error") {
+                    toastr.error('Ocurrió un error inesperado al intentar listar los tipos de documento');
+                    console.error(data.Msj);
+                    return;
+                }
+                let options = '<option value="" selected disabled>Seleccione un tipo de documento</option>';
+                $.each(data.data, function (index, item) {
+                    options += `<option value="${item.id}" data-abreviatura="${item.abreviatura}">${item.abreviatura}</option>`;
+                    console.log(item.id);
+                });
+                $('#cbx_documento').html(options);
+            },
+            error: function (xhr, status, error) {
+                toastr.error('Ocurrió un error al obtener los tipos de documento');
+                console.error('Error en la solicitud Ajax: ' + error);
+            }
+        });
+    }
     var dtClientes;
 
     $(document).ready(function () {
+        // Inicializar el selector de tipo de documento
+        fct_ObtenerTipoDocumento();
+        $('#cbx_documento').on('change', function () {
+            if (dtClientes) {
+                dtClientes.ajax.reload();
+                var tipoDoc = $(this).val();
+                if (tipoDoc === '2') {
+                    dtClientes.column(5).visible(false); 
+                    dtClientes.column(6).visible(false); 
+                    dtClientes.column(7).visible(false); 
+
+                } else {
+                    dtClientes.column(5).visible(true); 
+                    dtClientes.column(6).visible(false);
+                    dtClientes.column(7).visible(false); 
+
+                }
+            }
+        });
         // $('body').addClass('sidebar-collapse');
         var windowHeight = $('body > div.wrapper > div.content-wrapper').height() / 2;
         //CONFIGURACION POR DEFECTO DATATABLES
@@ -182,6 +232,8 @@
                 type: "GET",
                 datatype: "json",
                 data: function (d) {
+                    d.tipo_doc = $('#cbx_documento').val(); // Obtener el valor del selector de tipo de documento
+                    console.log('Valor de cbx_documento:', d.tipo_doc);
                 },
                 dataSrc: function (json) {
                     if (json.Status === "error") {

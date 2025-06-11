@@ -734,7 +734,11 @@ def eliminar_tipo_documento(id):
 @ventas_bp.route('/GetData_Cliente', methods=['GET'])
 def get_cliente():
     try:
-        clientes = Cliente.obtener_todos()
+        tipo_doc = request.args.get('tipo_doc').strip()  # Obtener el tipo de documento del query string
+        print(f"Tipo de documento recibido: {tipo_doc}")  # Para depuración
+        clientes = Cliente.obtener_todos(tipo_doc)
+        if not clientes:
+            return jsonify({'data': [], 'Status': 'success', 'Msj': 'No se encontraron clientes'})
         return jsonify({'data': clientes, 'Status': 'success', 'Msj': 'Listado de clientes retornado exitosamente'})
     except Exception as e:
         return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar clientes: {repr(e)}'})
@@ -745,7 +749,7 @@ def registrar_cliente():
         tipo_documento = request.form.get("tipo_documento", "").strip()
         numero_documento = request.form.get("numero_documento", "").strip()
         pais = request.form.get("pais", "").strip()
-        sexo = request.form.get("sexo", "").strip()
+        sexo = request.form.get("Sexo", "").strip()
         ape_pat = request.form.get("ape_pat", "").strip()
         ape_mat = request.form.get("ape_mat", "").strip()
         nombre = request.form.get("nombre", "").strip()
@@ -754,7 +758,7 @@ def registrar_cliente():
         correo = request.form.get("correo", "").strip()
         contrasena = request.form.get("contraseña", "").strip()
         direccion = request.form.get("direccion", "").strip()
-        estado = 1
+        estado = request.form.get("estado").strip()  # Asignar estado por defecto a 1 (activo)
         usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
 
         mensajes = Cliente.registrar(pais, tipo_documento, 3, numero_documento, nombre, ape_pat, ape_mat, sexo, fecha_nac, direccion, telefono, correo, contrasena, estado, usuario_actual)
@@ -796,20 +800,21 @@ def editar_cliente(id):
             tipo_documento = request.form.get("tipo_documento", "").strip()
             numero_documento = request.form.get("numero_documento", "").strip()
             pais = request.form.get("pais", "").strip()
-            sexo = request.form.get("sexo", "").strip()
+            sexo = request.form.get("Sexo", "").strip()
             ape_pat = request.form.get("ape_pat", "").strip()
             ape_mat = request.form.get("ape_mat", "").strip()
             nombre = request.form.get("nombre", "").strip()
             fecha_nac = request.form.get("fecha_nac", "").strip()
             telefono = request.form.get("telefono", "").strip()
             direccion = request.form.get("direccion", "").strip()
-            estado = 1
+            estado = request.form.get("estado").strip()  # Asignar estado por defecto a 1 (activo)
             email = request.form.get("correo", "").strip()
             password = request.form.get("contraseña", "").strip()
             tipo_cliente = 3  # si lo estás fijando manualmente
             usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
 
             mensajes = Cliente.actualizar_cliente(id, pais, tipo_cliente, tipo_documento, numero_documento, nombre, ape_pat, ape_mat, sexo, fecha_nac, direccion, telefono, email, password, estado, usuario_actual)
+            print(f"Mensajes de actualización de cliente: {sexo}")            
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 

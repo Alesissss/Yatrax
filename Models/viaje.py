@@ -79,7 +79,7 @@ class Viaje:
         try:
             conexion = bd.Conexion()
 
-            conexion.ejecutar(""" INSERT INTO viaje (idRuta, idVehiculo, estado, estadoViaje, esReprogramado, fechaHoraSalida, fechaHoraLlegada, usuario) VALUES (%s, %s, %s, 1, 0, %s, %s, %s) """, (idRuta, idVehiculo, estado, fecha_salida_estimada, fecha_llegada_estimada, usuario), auto_commit=False)
+            conexion.ejecutar(""" INSERT INTO viaje (idRuta, idVehiculo, estado, idEstadoViaje, esReprogramado, fechaHoraSalida, fechaHoraLlegada, usuario) VALUES (%s, %s, %s, 1, 0, %s, %s, %s) """, (idRuta, idVehiculo, estado, fecha_salida_estimada, fecha_llegada_estimada, usuario), auto_commit=False)
 
             resultado = conexion.obtener("SELECT LAST_INSERT_ID() AS idViaje;")
             idViaje = resultado[0]['idViaje'] 
@@ -186,7 +186,7 @@ class Viaje:
         conexion = bd.Conexion()
         try:
             lista_origenes = conexion.obtener(f"""
-                SELECT DISTINCT CONCAT(s_origen.ciudad,'-',s_destino.ciudad) as ruta
+                SELECT DISTINCT CONCAT(s_origen.ciudad,' - ',s_destino.ciudad) as ruta
                 FROM detalle_viaje dv INNER JOIN escala e_origen ON dv.idSucursalOrigen = e_origen.id
                 INNER JOIN sucursal s_origen ON s_origen.id = e_origen.id
                 INNER JOIN escala e_destino ON dv.idSucursalDestino = e_destino.id
@@ -205,67 +205,29 @@ class Viaje:
         try:
             datos_viaje = conexion.obtener("""
             SELECT 
-                datos_viaje.hora_salida,
-                datos_viaje.hora_llegada,
-                datos_viaje.sucursal_salida,
-                datos_viaje.sucursal_llegada,
-                datos_viaje.ciudad_salida,
-                datos_viaje.ciudad_llegada,
-                datos_viaje.tipo_viaje,
-                datos_viaje.servicio,
-                GROUP_CONCAT(
-                    CONCAT('Piso ', info_asientos.nroPiso, ': ', info_asientos.cantidad, ' asientos disponibles')
-                    ORDER BY info_asientos.nroPiso SEPARATOR ' | '
-                ) AS niveles_con_asientos
-
-            FROM (
-                SELECT 
-                    v.id AS id_viaje,
-                    DATE_FORMAT(v.fecha_salida_estimada, "%%H:%%i") AS hora_salida,
-                    DATE_FORMAT(v.fecha_llegada_estimada, "%%H:%%i") AS hora_llegada,
-                    s_origen.nombre AS sucursal_salida,
-                    s_destino.nombre AS sucursal_llegada,
-                    s_origen.ciudad AS ciudad_salida,
-                    s_destino.ciudad AS ciudad_llegada,
-                    IF(e_intermedias.total_escalas > 0, 'Escala', 'Directo') AS tipo_viaje,
-                    se.nombre AS servicio
-                FROM viaje v
-                INNER JOIN ruta r ON v.idRuta = r.id
-                INNER JOIN escala e_salida ON e_salida.idRuta = r.id AND e_salida.nro_orden = 1
-                INNER JOIN sucursal s_origen ON s_origen.id = e_salida.idSucursal
-                INNER JOIN (
-                    SELECT idRuta, MAX(nro_orden) AS max_orden
-                    FROM escala GROUP BY idRuta
-                ) e_max ON e_max.idRuta = r.id
-                INNER JOIN escala e_llegada ON e_llegada.idRuta = r.id AND e_llegada.nro_orden = e_max.max_orden
-                INNER JOIN sucursal s_destino ON s_destino.id = e_llegada.idSucursal
-                INNER JOIN vehiculo ve ON ve.id = v.idVehiculo
-                INNER JOIN tipo_vehiculo tv ON tv.id = ve.id_tipo_vehiculo
-                INNER JOIN servicio se ON se.id = tv.id_servicio
-                LEFT JOIN (
-                    SELECT idRuta, COUNT(*) AS total_escalas
-                    FROM escala WHERE nro_orden > 1
-                    GROUP BY idRuta
-                ) e_intermedias ON e_intermedias.idRuta = r.id
-                WHERE s_origen.ciudad = %s
-                AND s_destino.ciudad = %s
-                AND DATE(v.fecha_salida_estimada) = %s
-            ) AS datos_viaje
-
-            LEFT JOIN (
-                SELECT 
-                    v.id AS id_viaje,
-                    n.nroPiso,
-                    COUNT(a.id) AS cantidad
-                FROM viaje v
-                INNER JOIN vehiculo ve ON ve.id = v.idVehiculo
-                INNER JOIN tipo_vehiculo tv ON tv.id = ve.id_tipo_vehiculo
-                INNER JOIN nivel n ON n.id_tipo_vehiculo = tv.id
-                INNER JOIN asiento a ON a.id_vehiculo = v.id AND a.estado = 1
-                GROUP BY v.id, n.nroPiso
-            ) AS info_asientos ON info_asientos.id_viaje = datos_viaje.id_viaje
-
-            GROUP BY datos_viaje.id_viaje;
+            dv.id,
+            DATE_FORMAT(dv.fechaSalida,'%%H:%%i') as hora_salida,
+            DATE_FORMAT(dv.fechaLlegadaEstimada, '%%H:%%i') as hora_llegada,
+            s_origen.ciudad AS ciudad_origen,
+            s_destino.ciudad AS ciudad_destino,
+            s_origen.nombre AS sucursal_origen,
+            s_destino.nombre AS sucursal_destino,
+            se.nombre as servicio,
+            ve.id AS id_vehículo,
+            CASE 
+                WHEN e_destino.nro_orden - e_origen.nro_orden = 1 THEN 'Directo'
+                ELSE 'Escala'
+            END as tipo
+            FROM detalle_viaje dv INNER JOIN sucursal s_origen ON dv.idSucursalOrigen = s_origen.id
+            INNER JOIN sucursal s_destino ON dv.idSucursalDestino = s_destino.id
+            INNER JOIN viaje vi ON dv.idViaje = vi.id
+            INNER JOIN vehiculo ve ON ve.id = vi.idVehiculo
+            INNER JOIN tipo_vehiculo tv ON tv.id = ve.id_tipo_vehiculo
+            INNER JOIN servicio se ON se.id = tv.id_servicio
+            INNER JOIN ruta r ON r.id = vi.idRuta
+            INNER JOIN escala e_origen ON r.id = e_origen.idRuta AND s_origen.id = e_origen.idSucursal
+            INNER JOIN escala e_destino ON r.id = e_destino.idRuta AND s_destino.id = e_destino.idSucursal
+            WHERE s_origen.ciudad = %s AND s_destino.ciudad = %s AND DATE(dv.fechaSalida) = %s;
 
                              """, (origen,destino,fecha))
             return datos_viaje

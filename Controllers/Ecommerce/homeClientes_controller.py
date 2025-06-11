@@ -20,6 +20,7 @@ from Models.viaje import Viaje
 from Models.pasaje import Pasaje
 from Models.tipoComprobante import TipoComprobante
 from Models.metodo_pago import MetodoPago
+from Models.preguntas_frecuentes import PreguntasFrecuentes
 
 homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/home')
 
@@ -207,14 +208,27 @@ def get_persona_data():
         num_doc = request.args.get('numDoc')
         if not tipo_doc:
             return jsonify({'data': {}, 'Status': 'error', 'Msj': 'Debe proporcionar un DNI'})
+        
+        api_clientes = Cliente()
         api = ApiNetPe()
+        
         if tipo_doc == 'DNI':
+            datos_cliente = api_clientes.obtener_por_numero_documento(num_doc)
+            if datos_cliente:
+                return jsonify({'data': datos_cliente, 'Status': 'success', 'Msj': 'Datos obtenidos correctamente'})
+            else:
+                datos = api.get_person(num_doc)
+                if datos:
+                    return jsonify({'data': datos, 'Status': 'success', 'Msj': 'Datos obtenidos correctamente'})
+                else:
+                    return jsonify({'data': {}, 'Status': 'error', 'Msj': 'No se encontraron datos para el DNI proporcionado'})
+        elif tipo_doc == 'CE':
             datos = api.get_person(num_doc)
             if datos:
                 return jsonify({'data': datos, 'Status': 'success', 'Msj': 'Datos obtenidos correctamente'})
             else:
-                return jsonify({'data': {}, 'Status': 'error', 'Msj': 'No se encontraron datos para el DNI proporcionado'})
-        elif tipo_doc =='RUC':
+                return jsonify({'data': {}, 'Status': 'error', 'Msj': 'No se encontraron datos para el CE proporcionado'})
+        elif tipo_doc == 'RUC':
             datos = api.get_company(num_doc)
             
             if datos:
@@ -277,6 +291,7 @@ def registrar_cliente_form():
             return jsonify({"Status": "error", "Msj": "Error desconocido al registrar cliente"})
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
+
 # REGION TERMINOS Y CONDICIONES
 @homeClientes_bp.route('/ApiTerminosCondicionesActivo', methods=['GET'])
 def api_terminos_condiciones_activo():
@@ -334,6 +349,21 @@ def api_terminos_condiciones_activo():
 
 
 # END REGION TERMINOS Y CONDICIONES
+
+# REGION PREGUNTAS FRECUENTES
+
+@homeClientes_bp.route('/obtenerPreguntasFrecuentes', methods=['GET'])
+def obtener_preguntas_frecuentes():
+    try:
+        preguntas = PreguntasFrecuentes.obtener_todos()
+        if preguntas:
+            return jsonify({"Status": "success", "data": preguntas})
+        return jsonify({"Status": "info", "Msj": "Aún no hay preguntas frecuentes registradas", "data": []})
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Error al obtener las preguntas frecuentes: {repr(e)}", "data": []})
+
+# END REGION PREGUNTAS FRECUENTES
+
 @homeClientes_bp.route('/obtenerOrigenesDestinos',methods=['GET'])
 def obtenerOrigenesDestinos():
     try:
@@ -356,7 +386,6 @@ def buscarViajes():
         fecha_ida = request.form.get('fecha_ida')
         fecha_vuelta = request.form.get('fecha_vuelta')
         datos_viaje_ida = Viaje.buscarViajePorRutaYFecha(origen=origen, destino=destino, fecha= fecha_ida)
-        
         if fecha_vuelta:
             datos_viaje_vuelta = Viaje.buscarViajePorRutaYFecha(origen=origen, destino=destino, fecha= fecha_ida)
         return jsonify({
