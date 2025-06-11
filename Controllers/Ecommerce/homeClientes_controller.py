@@ -357,7 +357,6 @@ def buscarViajes():
         fecha_ida = request.form.get('fecha_ida')
         fecha_vuelta = request.form.get('fecha_vuelta')
         datos_viaje_ida = Viaje.buscarViajePorRutaYFecha(origen=origen, destino=destino, fecha= fecha_ida)
-        
         if fecha_vuelta:
             datos_viaje_vuelta = Viaje.buscarViajePorRutaYFecha(origen=origen, destino=destino, fecha= fecha_ida)
         return jsonify({

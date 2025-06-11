@@ -222,9 +222,9 @@
   <section class="container my-4 p-0 border border-secondary shadow-sm bg-light">
     <div class="d-flex flex-wrap justify-content-between border-bottom bg-white">
       <button class="btn tab-link active flex-fill" data-step="0">Elegir destino</button>
-      <button class="btn tab-link flex-fill" data-step="1">Itinerario ida</button>
-      <button class="btn tab-link flex-fill" data-step="2">Itinerario regreso</button>
-      <button class="btn tab-link flex-fill" data-step="3">Pago</button>
+      <button class="btn tab-link flex-fill" data-step="1" readonly>Itinerario ida</button>
+      <button class="btn tab-link flex-fill" data-step="2" readonly>Itinerario regreso</button>
+      <button class="btn tab-link flex-fill" data-step="3" readonly>Pago</button>
     </div>
     <div class="row mx-0 p-0">
       <form id="form-destino" class="p-4 bg-secondary-subtle">
@@ -235,14 +235,14 @@
           </div>
           <div class="col-md-3">
             <label for="ida">Ida</label>
-            <input type="date" name="fecha_ida" class="form-control" required>
+            <input type="date" name="fecha_ida" class="form-control" placeholder="-- Seleccionar fecha --" required>
           </div>
           <div class="col-md-3">
             <label for="vuelta">Vuelta</label>
-            <input type="date" name="fecha_vuelta" class="form-control">
+            <input type="date" name="fecha_vuelta" class="form-control" placeholder="-- Seleccionar fecha --" disabled>
           </div>
           <div class="col-md-3 d-grid">
-            
+
             <label style="color:#E2E3E5">...</label>
             <button style="background-color: var(--primary-color); border: 0px;" type="button"
               class="btn btn-primary fw-bold" onclick="buscarYMostrarItinerario()">
@@ -586,12 +586,15 @@
   }
 
   function buscarYMostrarItinerario() {
-    const datos = capturarDatos();
-
-    if (!datos.origen || !datos.destino || !datos.fecha_ida) {
+    const ruta = $('#cbx_Ciudades').val()
+    const ida = $('input[name="fecha_ida"]').val()
+    if (!ruta || !ida ) {
       toastr.warning("Debes completar origen, destino y fecha de ida.");
       return;
     }
+    const datos = capturarDatos();
+
+    
 
     $.ajax({
       url: '/ecommerce/home/buscarViajes',
@@ -600,6 +603,7 @@
       success: function (resp) {
         if (resp.Status == 'success') {
           toastr.success('VIAJES RETORNADOS CORRECTAMENTE', 'MENSAJE DEL SISTEMA');
+          console.log(resp.data_ida)
           cargarItinerario(resp.data_ida, 'contenedor_viajes_ida');
 
           // Si tiene fecha de vuelta, almacenamos para el paso 2
@@ -633,9 +637,26 @@
   $(document).ready(function () {
     fct_CargarRutas(); // todo lo hace esta función
     updateFormVisibility();
-    const hoy = new Date().toISOString().split('T')[0];
-    $('input[name="fecha_ida"]').val(hoy);
+    formatearFechas();
+
   });
+  function formatearFechas() {
+    const hoy = new Date();
+    const hoyLocal = hoy.toLocaleDateString('en-CA'); 
+    const ida = $('input[name="fecha_ida"]');
+    const vuelta = $('input[name="fecha_vuelta"]')
+
+    // ida.val(hoyLocal);
+    ida.attr('min', hoyLocal);
+    ida.on('change', function () {
+      let valIda = $(this).val();
+      if(vuelta.val() && vuelta.val() < valIda){
+        vuelta.val('')
+      }
+      vuelta.removeAttr('disabled');
+      vuelta.attr('min', valIda);
+    })
+  }
 
   function fct_CargarRutas() {
     $.getJSON('/ecommerce/home/GetRutasConcatenadas', function (response) {
@@ -644,7 +665,7 @@
 
         const items = data.map((item, index) => ({
           id: index,
-          text: item.ciudad
+          text: item.ruta
         }));
 
         $('#cbx_Ciudades').empty().select2({
@@ -672,6 +693,8 @@
       }
     });
   }
+
+
 
   /*BLOQUE PARA CARGAR CONTENIDO DINAMICO*/
   /*listar tipos de comprobantes*/
@@ -976,7 +999,12 @@
 
     itinerarios.forEach((it, index) => {
       const collapseId = `${contenedorId}-collapse-${index}`;
-
+      let color;
+      if(it.tipo == 'Escala'){
+        color = "#FFE05C"
+      } else {
+        color = "#B8B8B8"
+      }
       contenido += `
       <div class="accordion-item">
         <div class="row">
@@ -984,27 +1012,27 @@
             <div class="row d-flex justify-content-center">
               <div class="col-md-5 text-center">
                 <p><b>${it.hora_salida}</b></p>
-                <p>${it.sucursal_salida}</p>
-                <p>${it.ciudad_salida}</p>
+                <p>${it.sucursal_origen}</p>
+                <p>${it.ciudad_origen}</p>
               </div>
               <div class="col-md-2 d-flex justify-content-center align-items-center">
                 <p>→</p>
               </div>
               <div class="col-md-5 text-center">
                 <p><b>${it.hora_llegada}</b></p>
-                <p>${it.sucursal_llegada}</p>
-                <p>${it.ciudad_llegada}</p>
+                <p>${it.sucursal_destino}</p>
+                <p>${it.ciudad_destino}</p>
               </div>
             </div>
           </div>
           <div class="col-md-2 d-flex justify-content-center align-items-center p-2">
             <div class="row text-center">
               <div class="col-md-6"><p class="m-0">${it.servicio}</p></div>
-              <div class="col-md-6"><p class="m-0">${it.tipo_viaje}</p></div>
+              <div class="col-md-6 rounded" style = 'background-color: ${color} '><p class="m-0">${it.tipo}</p></div>
             </div>
           </div>
           <div class="col-md-3 d-flex justify-content-center align-items-center p-2">
-            <p class="text-center">${it.niveles_con_asientos}</p>
+            <p class="text-center p-0 m-0">${it.niveles_con_asientos}</p>
           </div>
           <div class="col-md-2 d-flex justify-content-center p-2 rounded-end">
             <button class="button btn" style="background-color: var(--success-color); color: white;" type="button"
@@ -1023,6 +1051,7 @@
     contenido += '</div>';
     contenedor.innerHTML = contenido;
   }
+
 
 
 
