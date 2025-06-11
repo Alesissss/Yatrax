@@ -198,7 +198,7 @@ def cambiarEstadoPasaje(id_pasaje):
 
 #END REGION RESERVAS
 #REGION TIPO RECLAMO
-@atencion_bp.route('/GetData_TipoReclamo')
+@atencion_bp.route('/GetData_TiposReclamo')
 def listarTiposReclamos():
     try:
         resultados = Tipo_Reclamo.obtener_todos()
@@ -209,7 +209,7 @@ def listarTiposReclamos():
 @atencion_bp.route('/RegistrarTipoReclamo',methods=["GET","POST"])
 def registrarTipoReclamo():
     if request.method == "GET":
-        return render_template("atencion/tipoReclamoCRUD.html")
+        return render_template("atencion/tipoReclamoCRUD.html",tittle="Nuevo tipo reclamo",btnId="btn_Registrar")
     else:
         try:
             nombre = request.form["nombre"]
@@ -263,10 +263,9 @@ def editarTipoReclamo():
                     "Msj2": resultado.get("msj2")
                 })
 
-@atencion_bp.route('/EliminarTipoReclamo',methods=["POST"])
-def eliminarTipoReclamo():
+@atencion_bp.route('/EliminarTipoReclamo/<int:idTipoReclamo>',methods=["POST"])
+def eliminarTipoReclamo(idTipoReclamo):
     try:
-        idTipoReclamo = int(request.form["id"])
         resultado = Tipo_Reclamo.eliminar(idTipoReclamo)
 
         if resultado.get("msj") is not None:
