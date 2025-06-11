@@ -23,12 +23,12 @@ class Cliente:
         self.fechaRegistro = fechaRegistro
         self.usuario = usuario
     @classmethod    
-    def obtener_todos(cls):
+    def obtener_todos(cls, id_tipo_doc):
         conexion = bd.Conexion()
         try:
-            clientes = conexion.obtener("""select cl.id as ID, ps.nombre as nombre_pais, tp.abreviatura, cl.numero_documento, cl.nombre, CONCAT(cl.ape_paterno, ' ', cl.ape_materno) AS apellidos, cl.sexo, cl.f_nacimiento, cl.direccion, cl.telefono, cl.email, cl.estado
+            clientes = conexion.obtener("""select cl.id as ID, ps.nombre as nombre_pais, tp.abreviatura, cl.numero_documento, cl.nombre, CONCAT(cl.ape_paterno, ' ', cl.ape_materno) AS apellidos, cl.sexo, cl.f_nacimiento, cl.direccion, cl.telefono, cl.email, cl.estado, cl.id_tipo_doc
                                             from cliente cl inner join pais ps on cl.id_pais = ps.id
-                                            inner join tipo_documento tp on cl.id_tipo_doc = tp.id;""")
+                                            inner join tipo_documento tp on cl.id_tipo_doc = tp.id WHERE cl.id_tipo_doc = %s""", (id_tipo_doc,))
             return clientes
         finally:
             conexion.cerrar()
