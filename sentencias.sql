@@ -210,6 +210,8 @@ DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPO_RECLAMO;
     -- eliminando tablas de reclamo y tipo_reclamo
     DROP TABLE IF EXISTS reclamo;
     DROP TABLE IF EXISTS tipo_reclamo;
+    DROP TABLE IF EXISTS detalle_pasaje;
+    DROP TABLE IF EXISTS pasajero;
     DROP TABLE IF EXISTS pasaje;
     DROP TABLE IF EXISTS preguntas_frecuentes;
     DROP TABLE IF EXISTS promocion;
@@ -725,10 +727,30 @@ CREATE TABLE viaje (
         idTipoComprobante INT NOT NULL REFERENCES tipo_comprobante(id)
     );
 
+    CREATE TABLE detalle_pasaje (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        idPasajero INT NOT NULL REFERENCES pasajero(id),
+        idPasaje INT NOT NULL REFERENCES pasaje(id),
+        esMenorEdad TINYINT NOT NULL, -- 1: es menor de edad, 0: no es menor de edad
+        viajeEnBrazos TINYINT NOT NULL, -- 1: viaja en brazos, 0: no viaja en brazo
+        fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE pasajero(
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        nombre VARCHAR(255) NOT NULL,
+        ape_paterno VARCHAR(100) NOT NULL,
+        ape_materno VARCHAR(100) NOT NULL,
+        idTipoDocumento INT NOT NULL REFERENCES tipo_documento(id),
+        numero_documento VARCHAR(11) NOT NULL, -- Se recomienda especificar una longitud
+        sexo TINYINT NOT NULL, -- 1: masculino, 0: femenino
+        f_nacimiento DATE NOT NULL,
+        telefono VARCHAR(15) NOT NULL,
+        email VARCHAR(255) NOT NULL
+    );
 
     CREATE TABLE pasaje(
         id INT AUTO_INCREMENT PRIMARY KEY,
-        idCliente INT NOT NULL REFERENCES cliente(id),
         idDetalleViajeAsiento INT NOT NULL REFERENCES detalle_viaje_asiento(id),
         numeroComprobante char(13) NOT NULL, -- Ej: A001-00000001
         -- operaciones con pasaje
