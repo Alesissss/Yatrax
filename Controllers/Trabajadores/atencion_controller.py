@@ -358,20 +358,21 @@ def registrarReclamo():
                     "Msj2": resultado.get("msj2")
                 })
     
-@atencion_bp.route('/EditarReclamo', methods=["GET","POST"])
-def editarReclamo():
+@atencion_bp.route('/EditarReclamo/<int:idReclamo>', methods=["GET","POST"])
+def editarReclamo(idReclamo):
     if request.method == "GET":
-        return render_template("")
+        reclamo = Reclamo.obtener_por_id(idReclamo)
+        return render_template("atencion/reclamoCRUD.html",reclamo=reclamo,tittle="Editar reclamo",btnId="btn_Actualizar")
     else:
         try:
-            idReclamo = int(request.form["idReclamo"])
             idTipoReclamo = int(request.form["idTipoReclamo"])
             detalle = request.form["detalle"]
             monto = request.form["monto"]
             idPasaje = request.form["id_pasaje"]
             motivo = request.form["motivo"]
+            estado = request.form["estado"]
 
-            resultado = Reclamo.editar(idReclamo,idTipoReclamo,detalle,monto,idPasaje,motivo)
+            resultado = Reclamo.editar(idReclamo,idTipoReclamo,detalle,monto,idPasaje,motivo,estado)
             if resultado.get("msj") is not None:
                 return jsonify({
                     "Status": "success",
@@ -413,5 +414,10 @@ def eliminarReclamo(idReclamo):
             "Msj": repr(e),
             "Msj2": resultado.get("msj2")
         })
+
+@atencion_bp.route('/VerReclamo/<int:idReclamo>')
+def verReclamo(idReclamo):
+    reclamo = Reclamo.obtener_por_id(idReclamo)
+    return render_template("atencion/reclamoCRUD.html",reclamo=reclamo,tittle="Editar reclamo",btnId="btn_Ver")
 
 #END REGION

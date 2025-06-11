@@ -221,8 +221,8 @@
                     render: function (data, type, row) {
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_VerReserva('${data.id}')" title="Ver usuario"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_editarReserva('${data.id}')" title="Editar usuario"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-xs m-1 btn-info" onclick="fct_VerReclamo('${data.id}')" title="Ver usuario"><i class="bi bi-eye"></i></button>
+                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_editarReclamo('${data.id}')" title="Editar usuario"><i class="bi bi-pencil-square"></i></button>
                             <button class="btn btn-xs m-1 btn-warning" onclick="fct_PagarReserva('${data.id}')" title="Pagar reserva">Pagar reserva</button>
                             <button class="btn btn-xs m-1 btn-danger" onclick = "fct_eliminarReclamo('${data.id}')" title="Eliminar usuario"><i class="bi bi-trash"></i></button>
                         </div>
@@ -275,12 +275,12 @@
         window.location.href = '/trabajadores/atencion/RegistrarReclamo';
     }
 
-    function fct_editarReserva(Id) {
-        window.location.href = `/trabajadores/atencion/EditarReserva/${Id}`;
+    function fct_editarReclamo(Id) {
+        window.location.href = `/trabajadores/atencion/EditarReclamo/${Id}`;
     }
 
-    function fct_VerReserva(Id) {
-        window.location.href = `/trabajadores/atencion/VerReserva/${Id}`;
+    function fct_VerReclamo(Id) {
+        window.location.href = `/trabajadores/atencion/VerReclamo/${Id}`;
     }
 
     function fct_eliminarReclamo(Id) {

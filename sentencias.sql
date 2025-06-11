@@ -758,7 +758,7 @@ CREATE TABLE tipo_reclamo(
         motivo TEXT NOT NULL,
         estado TINYINT NOT NULL,    
         FOREIGN KEY (idPasaje) REFERENCES pasaje (id),
-        FOREIGN KEY (id_tipo_reclamo) REFERENCES reclamo (id)
+        FOREIGN KEY (id_tipo_reclamo) REFERENCES tipo_reclamo (id)
     );
 
     INSERT INTO preguntas_frecuentes (pregunta, respuesta, estado, fecha_registro, usuario) VALUES ('¿Qué medios de pago aceptan para comprar pasajes en línea?','Aceptamos tarjetas de crédito y débito Visa, así como billeteras digitales como Yape y Plin.','1','2025-06-07 11:34:18','ander@gmail.com');
@@ -5640,7 +5640,7 @@ END$$
         SET MSJ  = NULL;
         SET MSJ2 = NULL;
 
-        INSERT INTO reclamo (tipo_reclamo, detalle, monto, idPasaje, motivo,estado)
+        INSERT INTO reclamo (id_tipo_reclamo, detalle, monto, idPasaje, motivo,estado)
         VALUES (p_tipo_reclamo, p_detalle, p_monto, p_idPasaje, p_motivo,1);
         SET MSJ = 'Reclamo insertado correctamente';
     END$$
@@ -5668,7 +5668,7 @@ END$$
         SET MSJ2 = NULL;
 
         UPDATE reclamo
-        SET tipo_reclamo = p_tipo_reclamo,
+        SET id_tipo_reclamo = p_tipo_reclamo,
             detalle       = p_detalle,
             monto         = p_monto,
             idPasaje      = p_idPasaje,

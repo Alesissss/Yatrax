@@ -24,8 +24,21 @@
                                     name="id"
                                     class="form-control"
                                     value="{{ reclamo.id }}"
-                                    {% if btnId == "btn_Ver" or btnId == "btn_Actualizar" %}disabled{% endif %}>
+                                    {% if btnId in ["btn_Ver", "btn_Actualizar"] %}disabled{% endif %}>
                             {% endif %}
+                        </div>
+
+                        <!-- ID Pasaje -->
+                        <div class="mb-3">
+                            <label for="txt_IdPasaje">ID Pasaje</label>
+                            <input
+                                type="text"
+                                id="txt_IdPasaje"
+                                name="id_pasaje"
+                                class="form-control"
+                                placeholder="ID del pasaje"
+                                value="{{ reclamo.idPasaje if reclamo else '' }}"
+                                {% if btnId == "btn_Ver" %}disabled{% endif %}>
                         </div>
 
                         <!-- Tipo de Reclamo -->
@@ -45,6 +58,19 @@
                                     </option>
                                 {% endfor %}
                             </select>
+                        </div>
+
+                        <!-- Motivo (ahora input text) -->
+                        <div class="mb-3">
+                            <label for="txt_Motivo">Motivo</label>
+                            <input
+                                type="text"
+                                id="txt_Motivo"
+                                name="motivo"
+                                class="form-control"
+                                placeholder="Motivo del reclamo"
+                                value="{{ reclamo.motivo if reclamo else '' }}"
+                                {% if btnId == "btn_Ver" %}disabled{% endif %}>
                         </div>
 
                         <!-- Detalle -->
@@ -73,31 +99,6 @@
                                 {% if btnId == "btn_Ver" %}disabled{% endif %}>
                         </div>
 
-                        <!-- ID Pasaje -->
-                        <div class="mb-3">
-                            <label for="txt_IdPasaje">ID Pasaje</label>
-                            <input
-                                type="text"
-                                id="txt_IdPasaje"
-                                name="id_pasaje"
-                                class="form-control"
-                                placeholder="ID del pasaje"
-                                value="{{ reclamo.idPasaje if reclamo else '' }}"
-                                {% if btnId == "btn_Ver" %}disabled{% endif %}>
-                        </div>
-
-                        <!-- Motivo -->
-                        <div class="mb-3">
-                            <label for="txt_Motivo">Motivo</label>
-                            <textarea
-                                id="txt_Motivo"
-                                name="motivo"
-                                class="form-control"
-                                rows="3"
-                                placeholder="Motivo del reclamo"
-                                {% if btnId == "btn_Ver" %}disabled{% endif %}>{{ reclamo.motivo if reclamo else '' }}</textarea>
-                        </div>
-
                         <!-- Estado (solo en edición/ver) -->
                         <div class="mb-3">
                             <label for="txt_Estado">Estado</label>
@@ -105,7 +106,7 @@
                                 id="txt_Estado"
                                 name="estado"
                                 class="form-control"
-                                {% if btnId == "btn_Registrar" or btnId == "btn_Ver" %}disabled{% endif %}>
+                                {% if btnId in ["btn_Registrar", "btn_Ver"] %}disabled{% endif %}>
                                 {% set opciones = { '1': 'Activo', '0': 'Inactivo' } %}
                                 <option disabled value="" {% if not reclamo %}selected{% endif %}>--SELECCIONAR--</option>
                                 {% for val, label in opciones.items() %}
@@ -135,9 +136,25 @@
 </div>
 {% endblock %}
 
-
 {% block scripts %}
 <script>
+    async function ListarTiposReclamos(){
+        let select = document.getElementById('sel_TipoReclamo');
+        let response = await fetch('/trabajadores/atencion/GetData_TiposReclamo');
+        let tiposReclamos = await response.json();
+        let data = tiposReclamos.data
+
+        data.forEach((opcion) => {
+            let option = document.createElement("option")
+            option.value = opcion.id
+            option.text = opcion.nombre
+            select.add(option)
+        });
+    }
+
+    window.addEventListener("DOMContentLoaded",()=>{
+        ListarTiposReclamos()
+    })
     // Volver al listado
     $("#btn_Volver").click(function(){
         window.location.href = "/trabajadores/atencion/GestionarReclamo";
@@ -146,10 +163,10 @@
     // Registrar nuevo reclamo
     $("#btn_Registrar").click(function(){
         var idTipo    = $("#sel_TipoReclamo").val();
+        var motivo    = $("#txt_Motivo").val().trim();
         var detalle   = $("#txt_Detalle").val().trim();
         var monto     = $("#txt_Monto").val().trim();
         var idPasaje  = $("#txt_IdPasaje").val().trim();
-        var motivo    = $("#txt_Motivo").val().trim();
 
         if(!idTipo || !detalle || !idPasaje || !motivo){
             toastr.warning("Todos los campos marcados son obligatorios","MENSAJE DE SISTEMA");
@@ -170,10 +187,10 @@
             if(result.isConfirmed){
                 var formData = new FormData();
                 formData.append("idTipoReclamo", idTipo);
+                formData.append("motivo", motivo);
                 formData.append("detalle", detalle);
                 formData.append("monto", monto);
                 formData.append("id_pasaje", idPasaje);
-                formData.append("motivo", motivo);
 
                 $.ajax({
                     url: "/trabajadores/atencion/RegistrarReclamo",
@@ -208,10 +225,10 @@
     $("#btn_Actualizar").click(function(){
         var id        = $("#txt_Id").val().trim();
         var idTipo    = $("#sel_TipoReclamo").val();
+        var motivo    = $("#txt_Motivo").val().trim();
         var detalle   = $("#txt_Detalle").val().trim();
         var monto     = $("#txt_Monto").val().trim();
         var idPasaje  = $("#txt_IdPasaje").val().trim();
-        var motivo    = $("#txt_Motivo").val().trim();
         var estado    = $("#txt_Estado").val();
 
         if(!idTipo || !detalle || !idPasaje || !motivo){
@@ -234,10 +251,10 @@
                 var formData = new FormData();
                 formData.append("id", id);
                 formData.append("idTipoReclamo", idTipo);
+                formData.append("motivo", motivo);
                 formData.append("detalle", detalle);
                 formData.append("monto", monto);
                 formData.append("id_pasaje", idPasaje);
-                formData.append("motivo", motivo);
                 formData.append("estado", estado);
 
                 $.ajax({
