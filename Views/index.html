@@ -359,6 +359,22 @@
                                     </a>
                                 </li>
                                 {% endif %}
+                                <!--Rutas en duro-->
+                                <li class="nav-item">
+                                    <a href="{{ url_for('atencion.Menu_TipoReclamo') }}"
+                                        class="nav-link {% if active_page == 'ejemplo' %}active{% endif %}">
+                                        <i class="bi bi-calendar-week nav-icon"></i>
+                                        <p>Gestionar tipo reclamo</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ url_for('atencion.Menu_Reclamo') }}"
+                                        class="nav-link {% if active_page == 'ejemplo' %}active{% endif %}">
+                                        <i class="bi bi-calendar-week nav-icon"></i>
+                                        <p>Gestionar reclamo</p>
+                                    </a>
+                                </li>
+                                <!--End Rutas-->
                             </ul>
                         </li>
                         {% endif %}

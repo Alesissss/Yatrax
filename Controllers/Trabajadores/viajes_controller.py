@@ -1461,17 +1461,18 @@ def registrar_viaje():
         idVehiculo = request.form.get("idVehiculo")
         estado = request.form.get("estado")
 
-        choferes_json = request.form.get("choferes")
+        detalles_viajes_json = request.form.get("detalles_viajes")
+        detalles_viajes = json.loads(detalles_viajes_json) if detalles_viajes_json else []
 
+        choferes_json = request.form.get("choferes")
         choferes = json.loads(choferes_json) if choferes_json else []
 
         tripulantes_json = request.form.get("tripulantes")
-
         tripulantes = json.loads(tripulantes_json) if tripulantes_json else []
 
         usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
 
-        mensajes = Viaje.registrar(idRuta, idVehiculo, estado, fechaHoraSalida, fechaHoraLlegada, choferes, tripulantes, usuario_actual)
+        mensajes = Viaje.registrar(idRuta, idVehiculo, estado, fechaHoraSalida, fechaHoraLlegada, detalles_viajes, choferes, tripulantes, usuario_actual)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 

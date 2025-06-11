@@ -141,6 +141,17 @@ DROP PROCEDURE IF EXISTS SP_CAMBIAR_ESTADO_PASAJE;
 
 DROP PROCEDURE IF EXISTS SP_CAMBIAR_CLAVE;
 
+-- Eliminar procedimientos de reclamo y tipo_reclamo
+DROP PROCEDURE IF EXISTS SP_INSERTAR_TIPO_RECLAMO;
+DROP PROCEDURE IF EXISTS SP_MODIFICAR_TIPO_RECLAMO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_RECLAMO;
+
+DROP PROCEDURE IF EXISTS SP_INSERTAR_RECLAMO;
+DROP PROCEDURE IF EXISTS SP_MODIFICAR_RECLAMO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_RECLAMO;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_CLIENTE;
+
+
 DROP PROCEDURE IF EXISTS SP_REGISTRAR_PROMOCION;
 DROP PROCEDURE IF EXISTS SP_EDITAR_PROMOCION;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_PROMOCION;
@@ -186,6 +197,9 @@ DROP TABLE IF EXISTS herramienta;
 DROP TABLE IF EXISTS tipo_herramienta;
 DROP TABLE IF EXISTS tipo_metodoPago;
 DROP TABLE IF EXISTS terminos_condiciones;
+-- eliminando tablas de reclamo y tipo_reclamo
+DROP TABLE IF EXISTS reclamo;
+DROP TABLE IF EXISTS tipo_reclamo;
 DROP TABLE IF EXISTS pasaje;
 DROP TABLE IF EXISTS preguntas_frecuentes;
 DROP TABLE IF EXISTS promocion;
@@ -636,6 +650,7 @@ CREATE TABLE viaje (
     estadoViaje INT NOT NULL,
     esReprogramado BOOLEAN DEFAULT 0,
     fechaHoraSalida DATETIME NOT NULL,
+    fechaHoraLlegada DATETIME NOT NULL,
     -- Auditoría
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NOT NULL,
@@ -649,6 +664,7 @@ CREATE TABLE detalle_viaje (
     idViaje INT NOT NULL REFERENCES viaje(id),
     idSucursalOrigen INT NOT NULL,
     idSucursalDestino INT NOT NULL,
+    precio DECIMAL(10,2) NOT NULL,
     fechaSalida DATETIME NOT NULL,
     fechaSalidaReal DATETIME NULL,
     fechaLlegadaEstimada DATETIME NOT NULL,
@@ -715,6 +731,25 @@ CREATE TABLE pasaje(
     idVenta INT NOT NULL REFERENCES venta(id),
     codigo CHAR(8),
     idPasaje INT NULL REFERENCES pasaje(id) -- Para operaciones con pasajes
+);
+
+-- Crear tablas tipo_reclamo y reclamo
+
+CREATE TABLE tipo_reclamo(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    estado TINYINT NOT NULL
+);
+
+CREATE TABLE reclamo(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_tipo_reclamo INT NOT NULL,
+    detalle TEXT NOT NULL,
+    monto NUMERIC(9,2),
+    idPasaje INT NOT NULL,
+    motivo TEXT NOT NULL,
+    FOREIGN KEY (idPasaje) REFERENCES pasaje (id),
+    FOREIGN KEY (id_tipo_reclamo) REFERENCES reclamo (id)
 );
 
 INSERT INTO preguntas_frecuentes (pregunta, respuesta, estado, fecha_registro, usuario) VALUES ('¿Qué medios de pago aceptan para comprar pasajes en línea?','Aceptamos tarjetas de crédito y débito Visa, así como billeteras digitales como Yape y Plin.','1','2025-06-07 11:34:18','ander@gmail.com');
@@ -1588,8 +1623,9 @@ DELIMITER ;
 -- Crear procedimiento SP_ELIMINAR_PERSONAL_INCIDENCIA
 DELIMITER $$
 CREATE PROCEDURE SP_ELIMINAR_PERSONAL_INCIDENCIA(
-    IN P_INCIDENCIA_ID INT,
-    IN P_PERSONAL_ID INT
+    IN P_PERSONAL_ID INT,
+    IN P_INCIDENCIA_ID INT
+ 
 )
 BEGIN
     DECLARE cIncidencia INT;
@@ -2041,7 +2077,7 @@ DELIMITER ;
 
 -- Crear procedimiento SP_REGISTRAR_CLIENTE
 DELIMITER $$
-CREATE PROCEDURE SP_REGISTRAR_CLIENTE_NATURAL(
+CREATE PROCEDURE SP_REGISTRAR_CLIENTE(
     IN P_ID_PAIS INT,
     IN P_ID_TIPO_DOC INT,
     IN P_ID_TIPO_CLIENTE INT,
@@ -5507,6 +5543,174 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+-- Procedimientos almacenados para reclamo y tipo reclamo
+DELIMITER $$
+
+CREATE PROCEDURE SP_INSERTAR_TIPO_RECLAMO(
+    IN p_nombre VARCHAR(100),
+    OUT MSJ VARCHAR(255),
+    OUT MSJ2 VARCHAR(255)
+)
+BEGIN
+    DECLARE v_count INT DEFAULT 0;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            MSJ2 = MESSAGE_TEXT;
+        SET MSJ = NULL;
+    END;
+
+    SET MSJ  = NULL;
+    SET MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO v_count
+      FROM tipo_reclamo
+     WHERE nombre = p_nombre;
+
+    IF v_count > 0 THEN
+        SET MSJ2 = 'Ya existe un tipo_reclamo con ese nombre';
+    ELSE
+        INSERT INTO tipo_reclamo (nombre,estado)
+        VALUES (p_nombre,1);
+        SET MSJ = 'Tipo_reclamo insertado correctamente';
+    END IF;
+END$$
+
+CREATE PROCEDURE SP_MODIFICAR_TIPO_RECLAMO(
+    IN p_id INT,
+    IN p_nombre VARCHAR(100),
+    IN p_estado TINYINT,
+    OUT MSJ VARCHAR(255),
+    OUT MSJ2 VARCHAR(255)
+)
+BEGIN
+    DECLARE v_count INT DEFAULT 0;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            MSJ2 = MESSAGE_TEXT;
+        SET MSJ = NULL;
+    END;
+
+    SET MSJ  = NULL;
+    SET MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO v_count
+      FROM tipo_reclamo
+     WHERE nombre = p_nombre
+       AND id <> p_id;
+
+    IF v_count > 0 THEN
+        SET MSJ2 = 'Ya existe un tipo_reclamo con ese nombre';
+    ELSE
+        UPDATE tipo_reclamo
+           SET nombre = p_nombre, estado = p_estado
+         WHERE id = p_id;
+        SET MSJ = 'Tipo_reclamo modificado correctamente';
+    END IF;
+END$$
+
+CREATE PROCEDURE SP_ELIMINAR_TIPO_RECLAMO(
+    IN p_id INT,
+    OUT MSJ VARCHAR(255),
+    OUT MSJ2 VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            MSJ2 = MESSAGE_TEXT;
+        SET MSJ = NULL;
+    END;
+
+    SET MSJ  = NULL;
+    SET MSJ2 = NULL;
+
+    DELETE FROM tipo_reclamo
+    WHERE id = p_id;
+    SET MSJ = 'Tipo_reclamo eliminado correctamente';
+END$$
+
+CREATE PROCEDURE SP_INSERTAR_RECLAMO(
+    IN p_tipo_reclamo INT,
+    IN p_detalle TEXT,
+    IN p_monto DECIMAL(9,2),
+    IN p_idPasaje INT,
+    IN p_motivo TEXT,
+    OUT MSJ VARCHAR(255),
+    OUT MSJ2 VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            MSJ2 = MESSAGE_TEXT;
+        SET MSJ = NULL;
+    END;
+
+    SET MSJ  = NULL;
+    SET MSJ2 = NULL;
+
+    INSERT INTO reclamo (tipo_reclamo, detalle, monto, idPasaje, motivo)
+    VALUES (p_tipo_reclamo, p_detalle, p_monto, p_idPasaje, p_motivo);
+    SET MSJ = 'Reclamo insertado correctamente';
+END$$
+
+CREATE PROCEDURE SP_MODIFICAR_RECLAMO(
+    IN p_id INT,
+    IN p_tipo_reclamo INT,
+    IN p_detalle TEXT,
+    IN p_monto DECIMAL(9,2),
+    IN p_idPasaje INT,
+    IN p_motivo TEXT,
+    OUT MSJ VARCHAR(255),
+    OUT MSJ2 VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            MSJ2 = MESSAGE_TEXT;
+        SET MSJ = NULL;
+    END;
+
+    SET MSJ  = NULL;
+    SET MSJ2 = NULL;
+
+    UPDATE reclamo
+       SET tipo_reclamo = p_tipo_reclamo,
+           detalle       = p_detalle,
+           monto         = p_monto,
+           idPasaje      = p_idPasaje,
+           motivo        = p_motivo
+     WHERE id = p_id;
+    SET MSJ = 'Reclamo modificado correctamente';
+END$$
+
+CREATE PROCEDURE SP_ELIMINAR_RECLAMO(
+    IN p_id INT,
+    OUT MSJ VARCHAR(255),
+    OUT MSJ2 VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            MSJ2 = MESSAGE_TEXT;
+        SET MSJ = NULL;
+    END;
+
+    SET MSJ  = NULL;
+    SET MSJ2 = NULL;
+
+    DELETE FROM reclamo
+    WHERE id = p_id;
+    SET MSJ = 'Reclamo eliminado correctamente';
+END$$
+
+DELIMITER ;
+
 
 
 -- SP para registrar una promoción
