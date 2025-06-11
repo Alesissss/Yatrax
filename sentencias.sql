@@ -636,7 +636,7 @@ CREATE TABLE cliente (
         id_tipo INT REFERENCES tipo_herramienta(id)
     );
 
-    CREATE TABLE nivel_herramienta(
+CREATE TABLE nivel_herramienta(
         id int AUTO_INCREMENT PRIMARY KEY,
         id_herramienta int REFERENCES herramienta(id),
         id_nivel int REFERENCES nivel(id),
@@ -645,7 +645,7 @@ CREATE TABLE cliente (
     
     );
 
-    CREATE TABLE estado_viaje (
+CREATE TABLE estado_viaje (
         id INT AUTO_INCREMENT PRIMARY KEY,
         nombre VARCHAR (100) NOT NULL  
     );
@@ -655,7 +655,7 @@ CREATE TABLE viaje (
     idRuta INT NOT NULL,
     idVehiculo INT NOT NULL,
     estado BOOLEAN NOT NULL, -- 1: vigente, 0: no vigente
-    idEstadoViaje INT NOT NULL REFERENCES estado_viaje(id),
+    idEstadoViaje INT NOT NULL,
     esReprogramado BOOLEAN DEFAULT 0,
     fechaHoraSalida DATETIME NOT NULL,
     fechaHoraLlegada DATETIME NOT NULL,
@@ -664,7 +664,7 @@ CREATE TABLE viaje (
     usuario VARCHAR(100) NOT NULL,
     FOREIGN KEY (idVehiculo) REFERENCES vehiculo(id),
     FOREIGN KEY (idRuta) REFERENCES ruta(id),
-    FOREIGN KEY (estadoViaje) REFERENCES estado_viaje(id)
+    FOREIGN KEY (idEstadoViaje) REFERENCES estado_viaje(id)
 );
 
     CREATE TABLE detalle_viaje (

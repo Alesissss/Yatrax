@@ -45,10 +45,12 @@
                         <div class="col-md-6 mb-3">
                             <label for="cbx_Sexo">Sexo</label>
                             <div class="input-group">
-                                <select id="cbx_Sexo" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
-                                    <option value="" {% if cliente.sexo is none %}selected{% endif %}>--SELECCIONAR--</option>
-                                    <option value="1" {% if cliente.sexo == 1 %}selected{% endif %}>Masculino</option>
-                                    <option value="0" {% if cliente.sexo == 0 %}selected{% endif %}>Femenino</option>
+                                <select id="cbx_Sexo" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{% endif
+                                    %}>
+                                    <option value="" {% if cliente.sexo is none %}selected{% endif %}>--SELECCIONAR--
+                                    </option>
+                                    <option value="1" {% if cliente.sexo==1 %}selected{% endif %}>Masculino</option>
+                                    <option value="0" {% if cliente.sexo==0 %}selected{% endif %}>Femenino</option>
                                 </select>
                             </div>
                         </div>
@@ -132,7 +134,18 @@
                                 </div>
                             </div>
                         </div>
-
+                        <div class="col-md-12 mb-3">
+                            <label for="cbx_estado">Estado</label>
+                            <div class="input-group">
+                                <select id="cbx_estado" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{%
+                                    endif %}>
+                                    <option value="" {% if cliente.estado is none %}selected{% endif %}>--SELECCIONAR--
+                                    </option>
+                                    <option value="1" {% if cliente.estado==1 %}selected{% endif %}>VIGENTE</option>
+                                    <option value="0" {% if cliente.estado==0 %}selected{% endif %}>NO VIGENTE</option>
+                                </select>
+                            </div>
+                        </div>
                         <!-- Botón de acción -->
                         <div class="col-md-12 text-center">
                             <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de
@@ -149,6 +162,33 @@
 
 {% block scripts %}
 <script>
+function fct_cambiarInputs() {
+    // Obtén el texto seleccionado (abreviatura) del combo
+    let abreviatura = $('#cbx_tipoDocumento option:selected').text().trim().toUpperCase();
+
+    if (abreviatura === 'RUC') {
+        // Oculta los campos para RUC
+        $('#txt_FechaNacimiento').closest('.col-md-6').hide();
+        $('#cbx_Sexo').closest('.col-md-6').hide();
+        $('#ape_pat').closest('.col-md-4').hide();
+        $('#ape_mat').closest('.col-md-4').hide();
+
+        // Cambia nombre y contraseña a col-12
+        $('#nombre').closest('.col-md-4').removeClass('col-md-4').addClass('col-md-6');
+        $('#contraseña').closest('.col-md-6').removeClass('col-md-6').addClass('col-md-12');
+    } else {
+        // Muestra los campos para otros documentos
+        $('#txt_FechaNacimiento').closest('.col-md-6').show();
+        $('#cbx_Sexo').closest('.col-md-6').show();
+        $('#ape_pat').closest('.col-md-4').show();
+        $('#ape_mat').closest('.col-md-4').show();
+
+        // Restaura nombre y contraseña a sus tamaños originales
+        $('#nombre').closest('.col-md-6').removeClass('col-md-6').addClass('col-md-4');
+        $('#contraseña').closest('.col-md-12').removeClass('col-md-12').addClass('col-md-6');
+    }
+}
+
     function fct_GetPaises() {
         $.getJSON('/trabajadores/ventas/GetData_Paises', function (response) {
             if (response.Status === 'success') {
@@ -190,7 +230,7 @@
         });
     }
 
-    function fct_GetTipoDocumento() {        
+    function fct_GetTipoDocumento() {
         $.getJSON('/trabajadores/ventas/GetData_TipoDocumento', function (response) {
             if (response.Status === 'success') {
                 let $combo = $('#cbx_tipoDocumento');
@@ -240,6 +280,11 @@
         fct_GetPaises();
         fct_GetTipoDocumento();
         fct_ValidarNumeroDocumento();
+        fct_cambiarInputs();
+        $('#cbx_tipoDocumento').change(function () {
+            fct_cambiarInputs();
+            fct_ValidarNumeroDocumento();
+        });
 
         $("#btn_Registrar").click(function () {
             let tipo_documento = $('#cbx_tipoDocumento').val();
@@ -255,6 +300,7 @@
             let correo = $('#correo').val().trim();
             let contraseña = $('#contraseña').val().trim();
             let direccion = $('#direccion').val().trim();
+            let estado = $('#cbx_estado').val();
 
             if (tipo_documento === null || tipo_documento === undefined) {
                 toastr.warning("El tipo de documento es obligatorio", "MENSAJE DE SISTEMA");
@@ -262,12 +308,17 @@
             }
 
             if (tipo_documento === "1") {
-                if (!tipo_documento || !numero_documento || !pais || !sexo || !ape_pat || !ape_mat || !nombre || !fecha_nac || !telefono || !direccion || !correo || !contraseña) {
+                if (!tipo_documento || !numero_documento || !pais || !sexo || !ape_pat || !ape_mat || !nombre || !fecha_nac || !telefono || !direccion || !correo || !contraseña || !estado) {
                     toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                     return;
                 }
             } else if (tipo_documento === "2") {
-                if (!tipo_documento || !numero_documento || !pais || !nombre || !telefono || !direccion || !correo || !contraseña) {
+                if (!tipo_documento || !numero_documento || !pais || !nombre || !telefono || !direccion || !correo || !contraseña || !estado) {
+                    toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                    return;
+                }
+            } else {
+                if (!tipo_documento || !numero_documento || !pais || !sexo || !ape_pat || !ape_mat || !nombre || !fecha_nac || !telefono || !direccion || !correo || !contraseña || !estado) {
                     toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                     return;
                 }
@@ -299,6 +350,7 @@
                     formData.append("correo", correo);
                     formData.append("contraseña", contraseña);
                     formData.append("direccion", direccion);
+                    formData.append("estado", estado);
 
                     $.ajax({
                         url: "/trabajadores/ventas/RegistrarCliente",
@@ -347,74 +399,79 @@
             let correo = $('#correo').val().trim();
             let contraseña = $('#contraseña').val().trim();
             let direccion = $('#direccion').val().trim();
+            let estado = $('#cbx_estado').val();
 
             if (tipo_documento === 'DNI') {
-                if (!tipo_documento || !numero_documento || !pais || !sexo || !ape_pat || !ape_mat || !nombre || !fecha_nac || !telefono || !direccion || !correo || !contraseña) {
+                if (!tipo_documento || !numero_documento || !pais || !sexo || !ape_pat || !ape_mat || !nombre || !fecha_nac || !telefono || !direccion || !correo || !contraseña || !estado) {
                     toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                     return;
                 }
             } else if (tipo_documento === 'RUC') {
-                if (!tipo_documento || !numero_documento || !pais || !nombre || !telefono || !direccion || !correo || !contraseña) {
+                if (!tipo_documento || !numero_documento || !pais || !nombre || !telefono || !direccion || !correo || !contraseña || !estado) {
                     toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                     return;
                 }
-            }
-
-            Swal.fire({
-                title: "¿Estás seguro?",
-                text: "Esta acción modificará al cliente. ¿Deseas continuar?",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Sí, editar cliente",
-                cancelButtonText: "Cancelar",
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-
-                    let formData = new FormData();
-                    formData.append("tipo_documento", tipo_documento);
-                    formData.append("numero_documento", numero_documento);
-                    formData.append("pais", pais);
-                    formData.append("Sexo", sexo);
-                    formData.append("ape_pat", ape_pat);
-                    formData.append("ape_mat", ape_mat);
-                    formData.append("nombre", nombre);
-                    formData.append("fecha_nac", fecha_nac);
-                    formData.append("telefono", telefono);
-                    formData.append("correo", correo);
-                    formData.append("contraseña", contraseña);
-                    formData.append("direccion", direccion);
-
-                    $.ajax({
-                        url: `/trabajadores/ventas/EditarCliente/${id}`,
-                        type: "POST",
-                        processData: false,
-                        contentType: false,
-                        data: formData,
-                        success: function (response) {
-                            if (response.Status === "success") {
-                                if (response.Msj2 !== '' && response.Msj2 !== null) {
-                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                                    return;
-                                } else {
-                                    toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                                    setTimeout(() => {
-                                        window.location.href = "/trabajadores/ventas/GestionarClientes";
-                                    }, 500);
-                                }
-                            } else {
-                                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
-                            }
-                        },
-                        error: function (xhr, Status, error) {
-                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
-                        }
-                    });
+            } else {
+                    toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                    return;
                 }
+
+                Swal.fire({
+                    title: "¿Estás seguro?",
+                    text: "Esta acción modificará al cliente. ¿Deseas continuar?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Sí, editar cliente",
+                    cancelButtonText: "Cancelar",
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+
+                        let formData = new FormData();
+                        formData.append("tipo_documento", tipo_documento);
+                        formData.append("numero_documento", numero_documento);
+                        formData.append("pais", pais);
+                        formData.append("Sexo", sexo);
+                        formData.append("ape_pat", ape_pat);
+                        formData.append("ape_mat", ape_mat);
+                        formData.append("nombre", nombre);
+                        formData.append("fecha_nac", fecha_nac);
+                        formData.append("telefono", telefono);
+                        formData.append("correo", correo);
+                        formData.append("contraseña", contraseña);
+                        formData.append("direccion", direccion);
+                        formData.append("estado", estado);
+
+                        $.ajax({
+                            url: `/trabajadores/ventas/EditarCliente/${id}`,
+                            type: "POST",
+                            processData: false,
+                            contentType: false,
+                            data: formData,
+                            success: function (response) {
+                                if (response.Status === "success") {
+                                    if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                        toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                        return;
+                                    } else {
+                                        toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                                        setTimeout(() => {
+                                            window.location.href = "/trabajadores/ventas/GestionarClientes";
+                                        }, 500);
+                                    }
+                                } else {
+                                    toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                                }
+                            },
+                            error: function (xhr, Status, error) {
+                                toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                            }
+                        });
+                    }
+                });
             });
-        });
 
         $("#btn_Aceptar").click(function () {
             window.location.href = "/trabajadores/ventas/GestionarClientes";
