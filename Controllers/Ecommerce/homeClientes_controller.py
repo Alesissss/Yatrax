@@ -233,7 +233,6 @@ def registrar_cliente_form():
     try:
         id_tipo_doc = request.form.get("tipo-doc")
         numero_documento = request.form.get("ytrx-doc-number", "").strip()
-        razon_social = request.form.get("ytrx-razon-social", "").strip()
         nombres = request.form.get("ytrx-fullname", "").strip()
         ape_paterno = request.form.get("ytrx-lastname-father", "").strip()
         ape_materno = request.form.get("ytrx-lastname-mother", "").strip()
@@ -251,21 +250,21 @@ def registrar_cliente_form():
             id_tipoCliente = TipoCliente.obtener_por_nombre("Adulto")
         
         # Registrar cliente
-        mensajes = Cliente.registrarForm(
+        mensajes = Cliente.registrar(
             id_pais=id_pais,
-            id_tipo_cliente=id_tipoCliente['ID'],
             id_tipo_doc=id_tipo_doc,
+            id_tipo_cliente=id_tipoCliente['ID'],
             numero_documento=numero_documento,
-            nombres=nombres,
+            nombre=nombres,
             ape_paterno=ape_paterno,
             ape_materno=ape_materno,
             sexo=sexo,
             f_nacimiento=f_nacimiento,
-            razon_social=razon_social,
             direccion=direccion,
             telefono=telefono,
             email=email,
             password=password,
+            estado=1,
             usuario=None
         )
         msj1 = mensajes.get('@MSJ')
