@@ -663,8 +663,8 @@
           .then((json) => {
             if (json.Status === "success") {
               const d = json.data;
-              if (d.nombres)
-                document.getElementById("nombresMenor").value = d.nombres;
+              if (d.nombre)
+                document.getElementById("nombresMenor").value = d.nombre;
               else document.getElementById("nombresMenor").value = "Nombres";
 
               if (d.apellidoPaterno)
@@ -694,11 +694,6 @@
             toastr.error("No se ha podido conectar con el servidor", "ERROR")
           );
         return;
-      }else{
-        toastr.warning(
-          "El número de documento debe tener 8 dígitos para DNI",
-          "MENSAJE DEL SISTEMA"
-        );
       }
 
       if (tipoDoc === "CE" && numDoc.length !== 11) {
@@ -721,15 +716,16 @@
         );
         return;
       }
-      if (!numDoc) {
-        toastr.warning(
-          "El número de documento es obligatorio",
-          "MENSAJE DEL SISTEMA"
-        );
-        return;
-      }
 
-      if (tipoDoc === "DNI" && numDoc.length == 8) {
+      // if (!numDoc) {
+      //   toastr.warning(
+      //     "El número de documento es obligatorio",
+      //     "MENSAJE DEL SISTEMA"
+      //   );
+      //   return;
+      // }
+
+      if (tipoDoc && (numDoc.length == 8 || numDoc.length == 11)) {
         fetch(
           `/ecommerce/home/api/get_persona_data?tipoDoc=${encodeURIComponent(
             tipoDoc
@@ -739,24 +735,20 @@
           .then((json) => {
             if (json.Status === "success") {
               const d = json.data;
-              if (d.nombres)
-                document.getElementById("nombres").value = d.nombres;
+              if (d.nombre)
+                document.getElementById("nombres").value = d.nombre;
               else document.getElementById("nombres").value = "Nombres";
 
               if (d.apellidoPaterno || d.ape_paterno)
-                document.getElementById("apellidoPaterno").value =
-                  d.apellidoPaterno || d.ape_paterno;
+                document.getElementById("apellidoPaterno").value = d.apellidoPaterno || d.ape_paterno;
               else
-                document.getElementById("apellidoPaterno").value =
-                  "Apellido paterno";
+                document.getElementById("apellidoPaterno").value = "Apellido paterno";
 
               if (d.apellidoMaterno || d.ape_materno)
-                document.getElementById("apellidoMaterno").value =
-                  d.apellidoMaterno || d.ape_materno;
+                document.getElementById("apellidoMaterno").value = d.apellidoMaterno || d.ape_materno;
               else
-                document.getElementById("apellidoMaterno").value =
-                  "Apellido materno";
-              
+                document.getElementById("apellidoMaterno").value = "Apellido materno";
+
               if (d.email) {
                 document.getElementById("correo").value = d.email;
               } else {
@@ -770,26 +762,19 @@
               }
 
               if (d.f_nacimiento){
-                document.getElementById("fechaNacimientoNuevo").value = moment(d.f_nacimiento).format("DD/MM/YYYY");
+                document.getElementById("fechaNacimientoNuevo").value = moment(d.f_nacimiento).format("YYYY-MM-DD");
                 validarEdadNuevoPasajero(); // Validar edad al cargar la fecha
               } else {
                 document.getElementById("fechaNacimientoNuevo").value = "";
               }
 
-              if (d.sexo) {
-                if (d.sexo === 1) {
-                  document.getElementById("sexoMasculino").checked = true;
-                  document.getElementById("sexoFemenino").checked = false;
-                } else if (d.sexo === 0) {
-                  document.getElementById("sexoFemenino").checked = true;
-                  document.getElementById("sexoMasculino").checked = false;
-                }
+              if (d.sexo != null) {  // esto cubre null y undefined
+                document.getElementById("sexoMasculino").checked = d.sexo === 1;
+                document.getElementById("sexoFemenino").checked = d.sexo !== 1;
               } else {
-                  document.getElementById("sexoMasculino").checked = false;
-                  document.getElementById("sexoFemenino").checked = false;
+                document.getElementById("sexoMasculino").checked = false;
+                document.getElementById("sexoFemenino").checked = false;
               }
-
-              toastr.success(json.Msj, "OK");
             } else {
               document.getElementById("nombres").value = "Nombres";
               document.getElementById("apellidoPaterno").value =
@@ -802,14 +787,6 @@
           .catch(() =>
             toastr.error("No se ha podido conectar con el servidor", "ERROR")
           );
-        return;
-      }
-
-      if (tipoDoc === "CE" && numDoc.length !== 12) {
-        toastr.warning(
-          "El número de CE debe tener al menos 11 dígitos",
-          "MENSAJE DEL SISTEMA"
-        );
         return;
       }
     }

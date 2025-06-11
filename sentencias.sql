@@ -1512,11 +1512,12 @@ INSERT INTO cliente (
 ('20881234500', 'Comercial Epsilon S.A.C.', NULL, NULL, NULL, NULL,'Av. Brasil 505', '945678901', 'epsilon@comercial.com', SHA2('123', 256), 1, 1, 1, 2, 'admin'),
 
 -- Clientes con DNI
-('12345678', 'Juan', 'Pérez', 'Lopez', 1, '1990-05-10', 'Mz A Lt 5', '956789012', 'juanp@example.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
-('87654321', 'Ana', 'García', 'Torres', 0, '1992-08-22', 'Jr. Ayacucho 123', '967890123', 'ana@example.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
-('11223344', 'Carlos', 'Ramirez', 'Paredes', 1, '1988-03-15', 'Av. Grau 456', '978901234', 'carlosr@example.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
-('44332211', 'María', 'López', 'Rojas', 0, '1995-12-01', 'Jr. Junín 789', '989012345', 'maria@example.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
-('55667788', 'Luis', 'Torres', 'Gómez', 1, '1991-09-30', 'Av. Salaverry 101', '990123456', 'luist@example.com', SHA2('123', 256), 1, 1, 1, 1, 'admin');
+('12345678', 'Juan', 'Pérez', 'Lopez', 1, '1990-05-10', 'Mz A Lt 5', '956789012', 'juanp@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
+('87654321', 'Ana', 'García', 'Torres', 0, '1992-08-22', 'Jr. Ayacucho 123', '967890123', 'ana@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
+('11223344', 'Carlos', 'Ramirez', 'Paredes', 1, '1988-03-15', 'Av. Grau 456', '978901234', 'carlosr@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
+('44332211', 'María', 'López', 'Rojas', 0, '1995-12-01', 'Jr. Junín 789', '989012345', 'maria@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
+('55667788', 'Luis', 'Torres', 'Gómez', 1, '1991-09-30', 'Av. Salaverry 101', '990123456', 'luist@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
+('60594837', 'Sebastian', 'Celiz', 'Guerrero', 1, '2010-09-30', 'Av. Brasil 101', '94435638', 'sebastian@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'admin');
 
     INSERT INTO `tipo_comprobante` (`nombre`, `estado`, `usuario`)
     VALUES ('boleta', 1, 'alexis@gmail.com');

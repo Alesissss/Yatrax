@@ -21,7 +21,7 @@ from Models.pasaje import Pasaje
 from Models.tipoComprobante import TipoComprobante
 from Models.metodo_pago import MetodoPago
 from Models.preguntas_frecuentes import PreguntasFrecuentes
-
+from Models.pasajero import Pasajero
 homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/home')
 
 # # ERRORES 
@@ -203,42 +203,56 @@ def get_rutasConcatenadas():
 # controller_clientes.py
 @homeClientes_bp.route('/api/get_persona_data', methods=['GET'])
 def get_persona_data():
+    def responder(datos):
+        if datos:
+            return jsonify({'data': datos, 'Status': 'success', 'Msj': 'Datos obtenidos correctamente'})
+        return None
+
     try:
         tipo_doc = request.args.get('tipoDoc')
         num_doc = request.args.get('numDoc')
-        if not tipo_doc:
-            return jsonify({'data': {}, 'Status': 'error', 'Msj': 'Debe proporcionar un DNI'})
-        
+
+        if not tipo_doc or not num_doc:
+            return jsonify({'data': {}, 'Status': 'error', 'Msj': 'Debe proporcionar un tipo y número de documento'})
+
+        api_pasajero = Pasajero()
         api_clientes = Cliente()
         api = ApiNetPe()
-        
+
         if tipo_doc == 'DNI':
-            datos_cliente = api_clientes.obtener_por_numero_documento(num_doc)
-            if datos_cliente:
-                return jsonify({'data': datos_cliente, 'Status': 'success', 'Msj': 'Datos obtenidos correctamente'})
-            else:
-                datos = api.get_person(num_doc)
-                if datos:
-                    return jsonify({'data': datos, 'Status': 'success', 'Msj': 'Datos obtenidos correctamente'})
-                else:
-                    return jsonify({'data': {}, 'Status': 'error', 'Msj': 'No se encontraron datos para el DNI proporcionado'})
-        elif tipo_doc == 'CE':
-            datos = api.get_person(num_doc)
-            if datos:
-                return jsonify({'data': datos, 'Status': 'success', 'Msj': 'Datos obtenidos correctamente'})
-            else:
-                return jsonify({'data': {}, 'Status': 'error', 'Msj': 'No se encontraron datos para el CE proporcionado'})
-        elif tipo_doc == 'RUC':
-            datos = api.get_company(num_doc)
-            
-            if datos:
-                return jsonify({'data': datos, 'Status': 'success', 'Msj': 'Datos obtenidos correctamente'})
-            else:
-                return jsonify({'data': {}, 'Status': 'error', 'Msj': 'No se encontraron datos para el RUC proporcionado'})
-        else:
-            return jsonify({'data': {}, 'Status': 'success', 'Msj': 'No hay datos para el tipo de documento ingresado'})
+            for fuente in [
+                lambda: api_clientes.obtener_por_numero_documento(num_doc),
+                lambda: api_pasajero.obtener_por_numero_documento(num_doc),
+                lambda: api.get_person(num_doc)
+            ]:
+                datos = fuente()
+                respuesta = responder(datos)
+                if respuesta:
+                    return respuesta
+
+        if tipo_doc == 'CE':
+            for fuente in [
+                lambda: api.get_person(num_doc),
+                lambda: api_pasajero.obtener_por_numero_documento(num_doc)
+            ]:
+                datos = fuente()
+                respuesta = responder(datos)
+                if respuesta:
+                    return respuesta
+
+        if tipo_doc == 'RUC':
+            for fuente in [
+                lambda: api.get_company(num_doc),
+                lambda: api_clientes.obtener_por_numero_documento(num_doc)
+            ]:
+                datos = fuente()
+                respuesta = responder(datos)
+                if respuesta:
+                    return respuesta
+
     except Exception as e:
         return jsonify({'data': {}, 'Status': 'error', 'Msj': f'Error en el servidor: {repr(e)}'})
+
 # FIN API NET RENIEC
 
 
