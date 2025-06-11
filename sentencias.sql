@@ -726,10 +726,29 @@ CREATE TABLE viaje (
         idTipoComprobante INT NOT NULL REFERENCES tipo_comprobante(id)
     );
 
+    CREATE TABLE detalle_pasaje (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        idPasajero INT NOT NULL REFERENCES pasajero(id),
+        idPasaje INT NOT NULL REFERENCES pasaje(id),
+        esMenorEdad TINYINT NOT NULL, -- 1: es menor de edad, 0: no es menor de edad
+        fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE pasajero(
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        nombre VARCHAR(255) NOT NULL,
+        ape_paterno VARCHAR(100) NOT NULL,
+        ape_materno VARCHAR(100) NOT NULL,
+        idTipoDocumento INT NOT NULL REFERENCES tipo_documento(id),
+        numero_documento VARCHAR(11) NOT NULL, -- Se recomienda especificar una longitud
+        sexo TINYINT NOT NULL, -- 1: masculino, 0: femenino
+        f_nacimiento DATE NOT NULL,
+        telefono VARCHAR(15) NOT NULL,
+        email VARCHAR(255) NOT NULL
+    );
 
     CREATE TABLE pasaje(
         id INT AUTO_INCREMENT PRIMARY KEY,
-        idCliente INT NOT NULL REFERENCES cliente(id),
         idDetalleViajeAsiento INT NOT NULL REFERENCES detalle_viaje_asiento(id),
         numeroComprobante char(13) NOT NULL, -- Ej: A001-00000001
         -- operaciones con pasaje
