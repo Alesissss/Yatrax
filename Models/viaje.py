@@ -79,7 +79,7 @@ class Viaje:
         try:
             conexion = bd.Conexion()
 
-            conexion.ejecutar(""" INSERT INTO viaje (idRuta, idVehiculo, estado, estadoViaje, esReprogramado, fechaHoraSalida, fechaHoraLlegada, usuario) VALUES (%s, %s, %s, 1, 0, %s, %s, %s) """, (idRuta, idVehiculo, estado, fecha_salida_estimada, fecha_llegada_estimada, usuario), auto_commit=False)
+            conexion.ejecutar(""" INSERT INTO viaje (idRuta, idVehiculo, estado, idEstadoViaje, esReprogramado, fechaHoraSalida, fechaHoraLlegada, usuario) VALUES (%s, %s, %s, 1, 0, %s, %s, %s) """, (idRuta, idVehiculo, estado, fecha_salida_estimada, fecha_llegada_estimada, usuario), auto_commit=False)
 
             resultado = conexion.obtener("SELECT LAST_INSERT_ID() AS idViaje;")
             idViaje = resultado[0]['idViaje'] 
