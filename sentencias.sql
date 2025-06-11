@@ -730,6 +730,7 @@ CREATE TABLE viaje (
         idPasajero INT NOT NULL REFERENCES pasajero(id),
         idPasaje INT NOT NULL REFERENCES pasaje(id),
         esMenorEdad TINYINT NOT NULL, -- 1: es menor de edad, 0: no es menor de edad
+        viajeEnBrazos TINYINT NOT NULL, -- 1: viaja en brazos, 0: no viaja en brazo
         fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
