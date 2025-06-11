@@ -441,6 +441,7 @@ CREATE TABLE cliente (
     nombre VARCHAR(255) NOT NULL,
     ape_paterno VARCHAR(50),
     ape_materno VARCHAR(50),
+    razon_social VARCHAR(255), -- Para clientes jurídicos
     sexo BOOLEAN,
     f_nacimiento DATE,
     direccion VARCHAR(255) NOT NULL,
