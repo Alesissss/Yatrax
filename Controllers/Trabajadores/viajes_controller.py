@@ -1403,7 +1403,7 @@ def get_personal_viaje():
 @viajes_bp.route("/GetData_RutasViajes", methods=["GET"])
 def get_rutas_viaje():
     try:
-        result = [{'id': ru['id'], 'nombre': ru['nombre'], 'distancia_estimada': ru['distancia_estimada'], 'tiempo_estimado': ru['tiempo_estimado'], 'tipo': ru['tipo'], 'escalas': Ruta.obtener_escalas_por_ruta(ru['id'])} for ru in Ruta.obtener_todos() if ru['estado'] == 1]
+        result = [{'id': ru['id'], 'nombre': ru['nombre'], 'distancia_estimada': ru['distancia_estimada'], 'tiempo_estimado': ru['tiempo_estimado'], 'tipo': ru['tipo'], 'escalas': [{'id': esc['id'], 'nro_orden': esc['nro_orden'], 'idSucursal': esc['idSucursal'], 'distancia_estimada': esc['distancia_estimada'], 'tiempo_estimado': float(esc['tiempo_estimado']) + 30, 'nombre': esc['nombre'], 'idRuta': esc['idRuta']} for esc in Ruta.obtener_escalas_por_ruta(ru['id'])]} for ru in Ruta.obtener_todos() if ru['estado'] == 1]
 
         return jsonify({'data': result, 'Status': 'success', 'Msj': 'Listado de rutas retornado exitosamente'})
     except Exception as e:
