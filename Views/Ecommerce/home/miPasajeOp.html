@@ -615,7 +615,7 @@
       .getElementById("numeroDocNuevo")
       .addEventListener("input", function () {
         clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(buscarPersona, 1000);
+        debounceTimer = setTimeout(buscarPersona, 500);
       });
 
     document
@@ -626,7 +626,7 @@
       .getElementById("numeroDocMenor")
       .addEventListener("input", function () {
         clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(buscarPersonaMenor, 1000);
+        debounceTimer = setTimeout(buscarPersonaMenor, 500);
       });
 
     document
@@ -694,6 +694,11 @@
             toastr.error("No se ha podido conectar con el servidor", "ERROR")
           );
         return;
+      }else{
+        toastr.warning(
+          "El número de documento debe tener 8 dígitos para DNI",
+          "MENSAJE DEL SISTEMA"
+        );
       }
 
       if (tipoDoc === "CE" && numDoc.length !== 11) {
@@ -764,11 +769,18 @@
                 document.getElementById("telefono").value = "Teléfono";
               }
 
+              if (d.f_nacimiento){
+                document.getElementById("fechaNacimientoNuevo").value = moment(d.f_nacimiento).format("DD/MM/YYYY");
+                validarEdadNuevoPasajero(); // Validar edad al cargar la fecha
+              } else {
+                document.getElementById("fechaNacimientoNuevo").value = "";
+              }
+
               if (d.sexo) {
-                if (d.sexo === '1') {
+                if (d.sexo === 1) {
                   document.getElementById("sexoMasculino").checked = true;
                   document.getElementById("sexoFemenino").checked = false;
-                } else if (d.sexo === '0') {
+                } else if (d.sexo === 0) {
                   document.getElementById("sexoFemenino").checked = true;
                   document.getElementById("sexoMasculino").checked = false;
                 }
