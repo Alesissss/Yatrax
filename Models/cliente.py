@@ -35,8 +35,26 @@ class Cliente:
     def obtener_por_id(cls, usuario_id):
         conexion = bd.Conexion()
         try:
-            usuario = conexion.obtener("SELECT usu.id, usu.nombres, usu.email, usu.imagen, usu.estado, usu.id_tipousuario, tu.nombres as tipousuario"
-                " FROM usuarios usu INNER JOIN tipo_usuario tu on usu.id_tipousuario = tu.id WHERE usu.estado_registro = 1 AND usu.id = %s", (usuario_id,))
+            query = """
+                SELECT usu.id, usu.nombres, usu.ape_paterno, usu.ape_materno, usu.f_nacimiento, usu.sexo, usu.telefono, usu.email, 
+                usu.numero_documento, usu.razon_social, usu.imagen, usu.estado, usu.id_tipousuario, tu.nombres as tipousuario
+                FROM usuarios usu INNER JOIN tipo_usuario tu on usu.id_tipousuario = tu.id WHERE usu.estado_registro = 1 AND usu.id = %s
+            """
+            usuario = conexion.obtener(query, (usuario_id,))
+            return usuario[0] if usuario else None
+        finally:
+            conexion.cerrar()
+            
+    @classmethod
+    def obtener_por_numero_documento(cls, numero_documento):
+        conexion = bd.Conexion()
+        try:
+            query = """
+                select cli.nombres, cli.ape_paterno, cli.ape_materno, cli.razon_social, cli.email, cli.numero_documento, cli.telefono, 
+                cli.f_nacimiento, cli.sexo from cliente cli inner join tipo_cliente tc on cli.id_tipo_cliente = tc.idTipoCliente 
+                where cli.numero_documento = %s
+            """
+            usuario = conexion.obtener(query, (numero_documento,))
             return usuario[0] if usuario else None
         finally:
             conexion.cerrar()
