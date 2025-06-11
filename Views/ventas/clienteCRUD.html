@@ -46,9 +46,9 @@
                             <label for="cbx_Sexo">Sexo</label>
                             <div class="input-group">
                                 <select id="cbx_Sexo" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
-                                    <option disabled {% if cliente.sexo is none %}selected{% endif %}>--SELECCIONAR--</option>
-                                    <option value="Masculino" {% if cliente.sexo == 1 %}selected{% endif %}>Masculino</option>
-                                    <option value="Femenino" {% if cliente.sexo == 0 %}selected{% endif %}>Femenino</option>
+                                    <option value="" {% if cliente.sexo is none %}selected{% endif %}>--SELECCIONAR--</option>
+                                    <option value="1" {% if cliente.sexo == 1 %}selected{% endif %}>Masculino</option>
+                                    <option value="0" {% if cliente.sexo == 0 %}selected{% endif %}>Femenino</option>
                                 </select>
                             </div>
                         </div>
@@ -102,7 +102,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="correo">Correo electrónico</label>
                             <div class="input-group">
-                                <input type="text" id="correo" class="form-control" placeholder="Correo electrónico"
+                                <input type="email" id="correo" class="form-control" placeholder="Correo electrónico"
                                     value="{{ cliente.email }}" {% if btnId=='btn_Aceptar' %}disabled{% endif %}
                                     oninput="this.value = this.value.toUpperCase();">
                                 <div class="input-group-append">
@@ -190,7 +190,7 @@
         });
     }
 
-    function fct_GetTipoDocumento() {
+    function fct_GetTipoDocumento() {        
         $.getJSON('/trabajadores/ventas/GetData_TipoDocumento', function (response) {
             if (response.Status === 'success') {
                 let $combo = $('#cbx_tipoDocumento');
@@ -219,20 +219,34 @@
         });
     }
 
+    function fct_ValidarNumeroDocumento() {
+        let tipoDocumento = $('#cbx_tipoDocumento').val();
+        let numeroDocumento = $('#txt_NumeroDocumento').val().trim();
+
+        if (tipoDocumento === "1" && numeroDocumento.length !== 8) {
+            toastr.warning("El número de documento debe tener 8 dígitos para DNI", "MENSAJE DE SISTEMA");
+            return false;
+        } else if (tipoDocumento === "2" && numeroDocumento.length !== 11) {
+            toastr.warning("El número de documento debe tener 11 dígitos para RUC", "MENSAJE DE SISTEMA");
+            return false;
+        } else if (tipoDocumento === "4" && (numeroDocumento.length < 9 || numeroDocumento.length > 20)) {
+            toastr.warning("El número de documento debe tener entre 9 y 20 dígitos para Carnet de Extranjería", "MENSAJE DE SISTEMA");
+            return false;
+        }
+        return true;
+    }
+
     $(document).ready(function () {
         fct_GetPaises();
         fct_GetTipoDocumento();
+        fct_ValidarNumeroDocumento();
 
         $("#btn_Registrar").click(function () {
             let tipo_documento = $('#cbx_tipoDocumento').val();
             let numero_documento = $('#txt_NumeroDocumento').val().trim();
             let pais = $('#cbx_Pais').val();
             let sexo = $('#cbx_Sexo').val();
-            if (sexo === null || sexo === undefined || sexo === "--SELECCIONAR--") {
-                sexo = null;
-            } else {
-                sexo = sexo === 'Masculino' ? 1 : (sexo === 'Femenino' ? 0 : null);
-            }
+            sexo = (sexo === "" || sexo === null || sexo === undefined) ? null : Number(sexo);
             let ape_pat = $('#ape_pat').val().trim();
             let ape_mat = $('#ape_mat').val().trim();
             let nombre = $('#nombre').val().trim();
@@ -242,12 +256,17 @@
             let contraseña = $('#contraseña').val().trim();
             let direccion = $('#direccion').val().trim();
 
-            if (tipo_documento === 'DNI') {
+            if (tipo_documento === null || tipo_documento === undefined) {
+                toastr.warning("El tipo de documento es obligatorio", "MENSAJE DE SISTEMA");
+                return;
+            }
+
+            if (tipo_documento === "1") {
                 if (!tipo_documento || !numero_documento || !pais || !sexo || !ape_pat || !ape_mat || !nombre || !fecha_nac || !telefono || !direccion || !correo || !contraseña) {
                     toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                     return;
                 }
-            } else if (tipo_documento === 'RUC') {
+            } else if (tipo_documento === "2") {
                 if (!tipo_documento || !numero_documento || !pais || !nombre || !telefono || !direccion || !correo || !contraseña) {
                     toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                     return;
@@ -319,11 +338,8 @@
             let numero_documento = $('#txt_NumeroDocumento').val().trim();
             let pais = $('#cbx_Pais').val();
             let sexo = $('#cbx_Sexo').val();
-            if (sexo === null || sexo === undefined || sexo === "--SELECCIONAR--") {
-                sexo = null;
-            } else {
-                sexo = sexo === 'Masculino' ? 1 : (sexo === 'Femenino' ? 0 : null);
-            } let ape_pat = $('#ape_pat').val().trim();
+            sexo = (sexo === "" || sexo === null || sexo === undefined) ? null : Number(sexo);
+            let ape_pat = $('#ape_pat').val().trim();
             let ape_mat = $('#ape_mat').val().trim();
             let nombre = $('#nombre').val().trim();
             let fecha_nac = $('#txt_FechaNacimiento').val();

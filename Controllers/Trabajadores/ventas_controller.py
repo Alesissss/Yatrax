@@ -745,7 +745,7 @@ def registrar_cliente():
         tipo_documento = request.form.get("tipo_documento", "").strip()
         numero_documento = request.form.get("numero_documento", "").strip()
         pais = request.form.get("pais", "").strip()
-        sexo = request.form.get("sexo", "").strip()
+        sexo = request.form.get("Sexo", "").strip()
         ape_pat = request.form.get("ape_pat", "").strip()
         ape_mat = request.form.get("ape_mat", "").strip()
         nombre = request.form.get("nombre", "").strip()
@@ -796,7 +796,7 @@ def editar_cliente(id):
             tipo_documento = request.form.get("tipo_documento", "").strip()
             numero_documento = request.form.get("numero_documento", "").strip()
             pais = request.form.get("pais", "").strip()
-            sexo = request.form.get("sexo", "").strip()
+            sexo = request.form.get("Sexo", "").strip()
             ape_pat = request.form.get("ape_pat", "").strip()
             ape_mat = request.form.get("ape_mat", "").strip()
             nombre = request.form.get("nombre", "").strip()
@@ -810,6 +810,7 @@ def editar_cliente(id):
             usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
 
             mensajes = Cliente.actualizar_cliente(id, pais, tipo_cliente, tipo_documento, numero_documento, nombre, ape_pat, ape_mat, sexo, fecha_nac, direccion, telefono, email, password, estado, usuario_actual)
+            print(f"Mensajes de actualización de cliente: {sexo}")            
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
