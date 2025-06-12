@@ -235,7 +235,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     const accordion = document.getElementById('accordionExample');
 
-    fetch('/trabajadores/configuracion/GetData_PreguntasFrecuentes')
+    fetch('/ecommerce/home/obtenerPreguntasFrecuentes')
       .then(res => res.json())
       .then(data => {
         if (data.Status === "success") {

@@ -154,6 +154,7 @@ DROP PROCEDURE IF EXISTS SP_INSERTAR_RECLAMO;
 DROP PROCEDURE IF EXISTS SP_MODIFICAR_RECLAMO;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_RECLAMO;
 DROP PROCEDURE IF EXISTS SP_REGISTRAR_CLIENTE;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_RECLAMO;
 
 
 DROP PROCEDURE IF EXISTS SP_REGISTRAR_PROMOCION;
@@ -209,6 +210,8 @@ DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPO_RECLAMO;
     -- eliminando tablas de reclamo y tipo_reclamo
     DROP TABLE IF EXISTS reclamo;
     DROP TABLE IF EXISTS tipo_reclamo;
+    DROP TABLE IF EXISTS detalle_pasaje;
+    DROP TABLE IF EXISTS pasajero;
     DROP TABLE IF EXISTS pasaje;
     DROP TABLE IF EXISTS preguntas_frecuentes;
     DROP TABLE IF EXISTS promocion;
@@ -440,6 +443,7 @@ CREATE TABLE cliente (
     nombre VARCHAR(255) NOT NULL,
     ape_paterno VARCHAR(50),
     ape_materno VARCHAR(50),
+    razon_social VARCHAR(255), -- Para clientes jurídicos
     sexo BOOLEAN,
     f_nacimiento DATE,
     direccion VARCHAR(255) NOT NULL,
@@ -451,8 +455,7 @@ CREATE TABLE cliente (
     id_tipo_cliente INT NOT NULL,
     id_tipo_doc INT NOT NULL,
     fechaRegistro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    usuario VARCHAR(100) NOT NULL,
-    
+    usuario VARCHAR(100) NULL,
     -- Claves foráneas
     CONSTRAINT fk_pais FOREIGN KEY (id_pais) REFERENCES PAIS(id),
     CONSTRAINT fk_tipo_cliente FOREIGN KEY (id_tipo_cliente) REFERENCES TIPO_CLIENTE(idTipoCliente),
@@ -724,10 +727,30 @@ CREATE TABLE viaje (
         idTipoComprobante INT NOT NULL REFERENCES tipo_comprobante(id)
     );
 
+    CREATE TABLE detalle_pasaje (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        idPasajero INT NOT NULL REFERENCES pasajero(id),
+        idPasaje INT NOT NULL REFERENCES pasaje(id),
+        esMenorEdad TINYINT NOT NULL, -- 1: es menor de edad, 0: no es menor de edad
+        viajeEnBrazos TINYINT NOT NULL, -- 1: viaja en brazos, 0: no viaja en brazo
+        fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE pasajero(
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        nombre VARCHAR(255) NOT NULL,
+        ape_paterno VARCHAR(100) NOT NULL,
+        ape_materno VARCHAR(100) NOT NULL,
+        idTipoDocumento INT NOT NULL REFERENCES tipo_documento(id),
+        numero_documento VARCHAR(11) NOT NULL, -- Se recomienda especificar una longitud
+        sexo TINYINT NOT NULL, -- 1: masculino, 0: femenino
+        f_nacimiento DATE NOT NULL,
+        telefono VARCHAR(15) NOT NULL,
+        email VARCHAR(255) NOT NULL
+    );
 
     CREATE TABLE pasaje(
         id INT AUTO_INCREMENT PRIMARY KEY,
-        idCliente INT NOT NULL REFERENCES cliente(id),
         idDetalleViajeAsiento INT NOT NULL REFERENCES detalle_viaje_asiento(id),
         numeroComprobante char(13) NOT NULL, -- Ej: A001-00000001
         -- operaciones con pasaje
@@ -1489,11 +1512,12 @@ INSERT INTO cliente (
 ('20881234500', 'Comercial Epsilon S.A.C.', NULL, NULL, NULL, NULL,'Av. Brasil 505', '945678901', 'epsilon@comercial.com', SHA2('123', 256), 1, 1, 1, 2, 'admin'),
 
 -- Clientes con DNI
-('12345678', 'Juan', 'Pérez', 'Lopez', 1, '1990-05-10', 'Mz A Lt 5', '956789012', 'juanp@example.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
-('87654321', 'Ana', 'García', 'Torres', 0, '1992-08-22', 'Jr. Ayacucho 123', '967890123', 'ana@example.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
-('11223344', 'Carlos', 'Ramirez', 'Paredes', 1, '1988-03-15', 'Av. Grau 456', '978901234', 'carlosr@example.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
-('44332211', 'María', 'López', 'Rojas', 0, '1995-12-01', 'Jr. Junín 789', '989012345', 'maria@example.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
-('55667788', 'Luis', 'Torres', 'Gómez', 1, '1991-09-30', 'Av. Salaverry 101', '990123456', 'luist@example.com', SHA2('123', 256), 1, 1, 1, 1, 'admin');
+('12345678', 'Juan', 'Pérez', 'Lopez', 1, '1990-05-10', 'Mz A Lt 5', '956789012', 'juanp@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
+('87654321', 'Ana', 'García', 'Torres', 0, '1992-08-22', 'Jr. Ayacucho 123', '967890123', 'ana@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
+('11223344', 'Carlos', 'Ramirez', 'Paredes', 1, '1988-03-15', 'Av. Grau 456', '978901234', 'carlosr@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
+('44332211', 'María', 'López', 'Rojas', 0, '1995-12-01', 'Jr. Junín 789', '989012345', 'maria@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
+('55667788', 'Luis', 'Torres', 'Gómez', 1, '1991-09-30', 'Av. Salaverry 101', '990123456', 'luist@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
+('60594837', 'Sebastian', 'Celiz', 'Guerrero', 1, '2010-09-30', 'Av. Brasil 101', '94435638', 'sebastian@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'admin');
 
     INSERT INTO `tipo_comprobante` (`nombre`, `estado`, `usuario`)
     VALUES ('boleta', 1, 'alexis@gmail.com');
