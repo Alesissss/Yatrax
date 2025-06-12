@@ -142,3 +142,20 @@ class Ruta:
             return resultado[0]  # Retorna un diccionario con los mensajes
         finally:
             conexion.cerrar()
+            
+    @classmethod
+    def obtener_rutas_activas_viaje(cls):
+        conexion = bd.Conexion()
+        try:
+            rutas = conexion.obtener("""
+                SELECT CONCAT(ru.nombre, ' : ', GROUP_CONCAT(suc.nombre ORDER BY es.nro_orden SEPARATOR '  -  ')) AS resultado
+                FROM viaje vi
+                INNER JOIN ruta ru ON ru.id = vi.idRuta
+                INNER JOIN escala es ON es.idRuta = ru.id
+                INNER JOIN sucursal suc ON suc.id = es.idSucursal
+                WHERE vi.idEstadoViaje = 1
+                GROUP BY ru.id
+                """)
+            return rutas
+        finally:
+            conexion.cerrar()

@@ -689,7 +689,7 @@ CREATE TABLE viaje (
         id INT AUTO_INCREMENT PRIMARY KEY,
         idDetalle_Viaje INT NOT NULL REFERENCES detalle_viaje(id),
         idAsiento INT NULL REFERENCES asiento(id),
-        esDisponible TINYINT NOT NULL, -- 1: disponible, 0: no disponible
+        esDisponible BOOLEAN NOT NULL DEFAULT 1, -- 1: disponible, 0: no disponible
         -- Auditoría
         fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
         usuario VARCHAR(100) NOT NULL
@@ -742,7 +742,7 @@ CREATE TABLE viaje (
         ape_paterno VARCHAR(100) NOT NULL,
         ape_materno VARCHAR(100) NOT NULL,
         idTipoDocumento INT NOT NULL REFERENCES tipo_documento(id),
-        numero_documento VARCHAR(11) NOT NULL, -- Se recomienda especificar una longitud
+        numero_documento VARCHAR(12) NOT NULL, -- Se recomienda especificar una longitud
         sexo TINYINT NOT NULL, -- 1: masculino, 0: femenino
         f_nacimiento DATE NOT NULL,
         telefono VARCHAR(15) NOT NULL,
@@ -752,16 +752,16 @@ CREATE TABLE viaje (
     CREATE TABLE pasaje(
         id INT AUTO_INCREMENT PRIMARY KEY,
         idDetalleViajeAsiento INT NOT NULL REFERENCES detalle_viaje_asiento(id),
-        numeroComprobante char(13) NOT NULL, -- Ej: A001-00000001
+        numeroComprobante char(13) NULL, -- Ej: A001-00000001
         -- operaciones con pasaje
-        esPasajeNormal TINYINT NULL DEFAULT 1, -- 1: es pasaje normal, 0: no es pasaje normal
+        esPasajeNormal TINYINT NULL DEFAULT 0, -- 1: es pasaje normal, 0: no es pasaje normal
         esPasajeLibre TINYINT NULL DEFAULT 0, -- 1: es pasaje libre, 0: no es pasaje libre
         esTransferencia TINYINT NULL DEFAULT 0, -- 1: es transferencia, 0: no es transferencia
         esReserva TINYINT NULL DEFAULT 0, -- 1: es pasaje reserva, 0: no es pasaje reserva
         esCambioRuta TINYINT NULL DEFAULT 0, -- 1: es cambio de ruta, 0: no es cambio de ruta
         idVenta INT NOT NULL REFERENCES venta(id),
-        codigo CHAR(8),
-        idPasaje INT NULL REFERENCES pasaje(id) -- Para operaciones con pasajes
+        codigo CHAR(8) NOT NULL, -- AA0202
+        idPasaje INT NULL -- Para operaciones con pasajes
     );
 
     -- Crear tablas tipo_reclamo y reclamo
@@ -839,9 +839,9 @@ CREATE TABLE tipo_reclamo(
     ('2', '5', '8', '1001.93', '793.63', '2025-06-10 19:32:46', 'edgar@gmail.com');
 
 
-
     -- INSERTS terminos y condicones
     INSERT INTO terminos_condiciones(id, nombre, archivo, estado, fecha_registro, usuario) VALUES (1,'TyC-v2025-001','TyC_v2025-001.txt',1,'2025-05-29 01:51:30','ander@gmail.com');
+    INSERT INTO terminos_condiciones(id, nombre, archivo, estado, fecha_registro, usuario) VALUES (2,'Versión guía','versionPreliminar.txt',0,'2025-05-29 01:51:30','ander@gmail.com');
 
     -- INSERTS estado_viaje
     INSERT INTO estado_viaje (id, nombre) VALUES (1, 'PENDIENTE');
@@ -1207,6 +1207,170 @@ CREATE TABLE tipo_reclamo(
     INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (3,'Ander','ander@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/ander.jpg', 1, 1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
     INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (4,'Luis','luis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/luis.jpg', 1, 1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
 
+insert into vehiculo (placa, anio, color, estado, id_tipo_vehiculo, usuario) values ( 'YTS-333', 2024, 'Rojo', 1, 3, 'ander@gmail.com');
+insert into vehiculo (placa, anio, color, estado, id_tipo_vehiculo, usuario) values ( 'B4N-D3R', 2023, 'Rojo', 1, 2, 'ander@gmail.com');
+
+INSERT INTO `nivel_herramienta` (`id`, `id_herramienta`, `id_nivel`, `x_dimension`, `y_dimension`) VALUES
+(1, 3, 1, 2, 6),
+(2, 3, 1, 1, 4),
+(3, 3, 1, 2, 3),
+(4, 3, 1, 2, 9),
+(5, 3, 1, 1, 7),
+(6, 3, 1, 6, 3),
+(7, 7, 1, 6, 7),
+(8, 5, 1, 6, 8),
+(9, 4, 1, 3, 1),
+(10, 4, 1, 3, 4),
+(11, 3, 1, 2, 1),
+(12, 4, 1, 3, 7),
+(13, 3, 1, 2, 4),
+(14, 3, 1, 1, 2),
+(15, 3, 1, 1, 8),
+(16, 3, 1, 2, 7),
+(17, 3, 1, 1, 5),
+(18, 3, 1, 6, 1),
+(19, 3, 1, 6, 4),
+(20, 5, 1, 6, 9),
+(21, 3, 1, 1, 3),
+(22, 3, 1, 2, 2),
+(23, 3, 1, 2, 8),
+(24, 3, 1, 1, 6),
+(25, 3, 1, 2, 5),
+(26, 3, 1, 1, 9),
+(27, 3, 1, 6, 2),
+(28, 7, 1, 6, 6),
+(29, 3, 1, 6, 5),
+(30, 3, 1, 1, 1),
+(31, 3, 2, 5, 3),
+(32, 3, 2, 5, 6),
+(33, 7, 2, 6, 7),
+(34, 4, 2, 4, 1),
+(35, 3, 2, 5, 9),
+(36, 4, 2, 4, 4),
+(37, 3, 2, 2, 1),
+(38, 4, 2, 4, 7),
+(39, 3, 2, 2, 4),
+(40, 3, 2, 1, 2),
+(41, 3, 2, 1, 8),
+(42, 4, 2, 4, 10),
+(43, 3, 2, 2, 7),
+(44, 3, 2, 1, 5),
+(45, 3, 2, 1, 11),
+(46, 3, 2, 6, 1),
+(47, 3, 2, 2, 10),
+(48, 5, 2, 5, 12),
+(49, 3, 2, 6, 4),
+(50, 3, 2, 6, 10),
+(51, 3, 2, 5, 2),
+(52, 3, 2, 5, 8),
+(53, 3, 2, 5, 5),
+(54, 7, 2, 6, 6),
+(55, 3, 2, 5, 11),
+(56, 3, 2, 1, 1),
+(57, 3, 2, 2, 6),
+(58, 3, 2, 1, 4),
+(59, 3, 2, 1, 10),
+(60, 3, 2, 2, 3),
+(61, 3, 2, 2, 9),
+(62, 3, 2, 1, 7),
+(63, 3, 2, 6, 3),
+(64, 3, 2, 2, 12),
+(65, 4, 2, 3, 1),
+(66, 4, 2, 3, 4),
+(67, 3, 2, 6, 9),
+(68, 4, 2, 3, 7),
+(69, 4, 2, 3, 10),
+(70, 3, 2, 5, 1),
+(71, 3, 2, 5, 4),
+(72, 3, 2, 5, 10),
+(73, 5, 2, 6, 12),
+(74, 3, 2, 5, 7),
+(75, 3, 2, 1, 3),
+(76, 3, 2, 2, 2),
+(77, 3, 2, 2, 8),
+(78, 3, 2, 1, 6),
+(79, 3, 2, 2, 5),
+(80, 3, 2, 2, 11),
+(81, 3, 2, 1, 9),
+(82, 3, 2, 1, 12),
+(83, 3, 2, 6, 2),
+(84, 3, 2, 6, 8),
+(85, 3, 2, 6, 5),
+(86, 3, 2, 6, 11),
+(87, 3, 3, 5, 3),
+(88, 3, 3, 5, 6),
+(89, 3, 3, 5, 9),
+(90, 3, 3, 2, 1),
+(91, 3, 3, 2, 4),
+(92, 3, 3, 1, 2),
+(93, 3, 3, 1, 8),
+(94, 3, 3, 2, 7),
+(95, 3, 3, 1, 5),
+(96, 3, 3, 1, 11),
+(97, 3, 3, 6, 1),
+(98, 3, 3, 2, 10),
+(99, 5, 3, 5, 12),
+(100, 3, 3, 6, 4),
+(101, 3, 3, 6, 10),
+(102, 3, 3, 6, 7),
+(103, 6, 3, 4, 12),
+(104, 3, 3, 5, 2),
+(105, 3, 3, 5, 8),
+(106, 3, 3, 5, 5),
+(107, 7, 3, 6, 6),
+(108, 3, 3, 5, 11),
+(109, 3, 3, 1, 1),
+(110, 3, 3, 2, 6),
+(111, 3, 3, 1, 4),
+(112, 3, 3, 1, 10),
+(113, 3, 3, 2, 3),
+(114, 3, 3, 2, 9),
+(115, 3, 3, 1, 7),
+(116, 3, 3, 6, 3),
+(117, 3, 3, 2, 12),
+(118, 4, 3, 3, 1),
+(119, 4, 3, 3, 4),
+(120, 3, 3, 6, 9),
+(121, 4, 3, 3, 7),
+(122, 4, 3, 3, 10),
+(123, 3, 3, 5, 1),
+(124, 3, 3, 5, 4),
+(125, 7, 3, 6, 5),
+(126, 3, 3, 5, 10),
+(127, 5, 3, 6, 12),
+(128, 3, 3, 5, 7),
+(129, 3, 3, 1, 3),
+(130, 3, 3, 2, 2),
+(131, 3, 3, 2, 8),
+(132, 3, 3, 1, 6),
+(133, 3, 3, 2, 5),
+(134, 3, 3, 2, 11),
+(135, 3, 3, 1, 9),
+(136, 3, 3, 1, 12),
+(137, 3, 3, 6, 2),
+(138, 3, 3, 6, 8),
+(139, 3, 3, 6, 11),
+(140, 6, 3, 4, 1);
+
+INSERT INTO `viaje` (`id`, `idRuta`, `idVehiculo`, `estado`, `idEstadoViaje`, `esReprogramado`, `fechaHoraSalida`, `fechaHoraLlegada`, `fecha_registro`, `usuario`) VALUES
+(1, 5, 1, 1, 1, 0, '2025-06-12 07:00:00', '2025-06-12 11:03:48', '2025-06-12 04:58:34', 'ander@gmail.com'),
+(2, 8, 2, 1, 1, 0, '2025-06-12 16:00:00', '2025-06-13 05:43:37', '2025-06-12 04:59:42', 'ander@gmail.com');
+
+INSERT INTO `detalle_viaje` (`id`, `idViaje`, `idSucursalOrigen`, `idSucursalDestino`, `precio`, `fechaSalida`, `fechaSalidaReal`, `fechaLlegadaEstimada`, `fechaLlegadaReal`, `fecha_registro`, `usuario`) VALUES
+(1, 1, 7, 11, 10.00, '2025-06-12 03:32:00', NULL, '2025-06-12 14:10:46', NULL, '2025-06-12 03:33:21', 'ander@gmail.com'),
+(2, 1, 7, 6, 10.00, '2025-06-12 03:32:00', NULL, '2025-06-13 04:31:18', NULL, '2025-06-12 03:33:21', 'ander@gmail.com'),
+(3, 1, 11, 6, 10.00, '2025-06-12 14:10:46', NULL, '2025-06-13 04:31:18', NULL, '2025-06-12 03:33:21', 'ander@gmail.com'),
+(4, 1, 2, 6, 100.00, '2025-06-12 07:00:00', NULL, '2025-06-12 11:03:48', NULL, '2025-06-12 04:58:34', 'ander@gmail.com'),
+(5, 2, 8, 5, 200.00, '2025-06-12 16:00:00', NULL, '2025-06-13 05:43:37', NULL, '2025-06-12 04:59:42', 'ander@gmail.com');
+
+INSERT INTO `detalle_personal` (`id`, `idPersonal`, `idTipoPersonal`, `idViaje`, `fecha_registro`, `usuario`) VALUES
+(1, 1, 1, 1, '2025-06-12 04:58:34', 'ander@gmail.com'),
+(2, 3, 2, 1, '2025-06-12 04:58:34', 'ander@gmail.com'),
+(3, 4, 2, 1, '2025-06-12 04:58:34', 'ander@gmail.com'),
+(4, 2, 1, 2, '2025-06-12 04:59:42', 'ander@gmail.com'),
+(5, 3, 2, 2, '2025-06-12 04:59:42', 'ander@gmail.com'),
+(6, 4, 2, 2, '2025-06-12 04:59:42', 'ander@gmail.com');
+
     -- Tabla de configuración general
     INSERT INTO conf_general (id, igv, tarifaBase, max_pasajes_venta, viajesReprogramables) VALUES (1, 0.18, 10, 4, 0);
 
@@ -1505,19 +1669,20 @@ INSERT INTO cliente (
     id_pais, id_tipo_cliente, id_tipo_doc, usuario
 ) VALUES
 -- Clientes con RUC
-('20481234567', 'Empresa Alpha SAC', NULL, NULL, NULL, NULL,'Av. Perú 101', '987654321', 'contacto@alpha.com', SHA2('123', 256), 1, 1, 1, 2, 'admin'),
-('20553334441', 'Servicios Beta SRL', NULL, NULL, NULL, NULL,'Calle Lima 202', '912345678', 'contacto@beta.com', SHA2('123', 256), 1, 1, 1, 2, 'admin'),
-('20661234589', 'Consultora Gamma EIRL', NULL, NULL, NULL, NULL,'Jr. Cusco 303', '923456789', 'info@gamma.com', SHA2('123', 256), 1, 1, 1, 2, 'admin'),
-('20771234987', 'Constructora Delta S.A.', NULL, NULL, NULL, NULL,'Av. Arequipa 404', '934567890', 'delta@construct.com', SHA2('123', 256), 1, 1, 1, 2, 'admin'),
-('20881234500', 'Comercial Epsilon S.A.C.', NULL, NULL, NULL, NULL,'Av. Brasil 505', '945678901', 'epsilon@comercial.com', SHA2('123', 256), 1, 1, 1, 2, 'admin'),
+('20481234567', 'EMPRESA ALPHA SAC', NULL, NULL, NULL, NULL, 'AV. PERÚ 101', '987654321', 'contacto@alpha.com', SHA2('123', 256), 1, 1, 1, 2, 'ADMIN'),
+('20553334441', 'SERVICIOS BETA SRL', NULL, NULL, NULL, NULL, 'CALLE LIMA 202', '912345678', 'contacto@beta.com', SHA2('123', 256), 1, 1, 1, 2, 'ADMIN'),
+('20661234589', 'CONSULTORA GAMMA EIRL', NULL, NULL, NULL, NULL, 'JR. CUSCO 303', '923456789', 'info@gamma.com', SHA2('123', 256), 1, 1, 1, 2, 'ADMIN'),
+('20771234987', 'CONSTRUCTORA DELTA S.A.', NULL, NULL, NULL, NULL, 'AV. AREQUIPA 404', '934567890', 'delta@construct.com', SHA2('123', 256), 1, 1, 1, 2, 'ADMIN'),
+('20881234500', 'COMERCIAL EPSILON S.A.C.', NULL, NULL, NULL, NULL, 'AV. BRASIL 505', '945678901', 'epsilon@comercial.com', SHA2('123', 256), 1, 1, 1, 2, 'ADMIN'),
 
--- Clientes con DNI
-('12345678', 'Juan', 'Pérez', 'Lopez', 1, '1990-05-10', 'Mz A Lt 5', '956789012', 'juanp@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
-('87654321', 'Ana', 'García', 'Torres', 0, '1992-08-22', 'Jr. Ayacucho 123', '967890123', 'ana@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
-('11223344', 'Carlos', 'Ramirez', 'Paredes', 1, '1988-03-15', 'Av. Grau 456', '978901234', 'carlosr@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
-('44332211', 'María', 'López', 'Rojas', 0, '1995-12-01', 'Jr. Junín 789', '989012345', 'maria@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
-('55667788', 'Luis', 'Torres', 'Gómez', 1, '1991-09-30', 'Av. Salaverry 101', '990123456', 'luist@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
-('60594837', 'Sebastian', 'Celiz', 'Guerrero', 1, '2010-09-30', 'Av. Brasil 101', '94435638', 'sebastian@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'admin');
+-- CLIENTES CON DNI
+('12345678', 'JUAN', 'PÉREZ', 'LOPEZ', 1, '1990-05-10', 'MZ A LT 5', '956789012', 'juanp@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'ADMIN'),
+('87654321', 'ANA', 'GARCÍA', 'TORRES', 0, '1992-08-22', 'JR. AYACUCHO 123', '967890123', 'ana@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'ADMIN'),
+('11223344', 'CARLOS', 'RAMIREZ', 'PAREDES', 1, '1988-03-15', 'AV. GRAU 456', '978901234', 'carlosr@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'ADMIN'),
+('44332211', 'MARÍA', 'LÓPEZ', 'ROJAS', 0, '1995-12-01', 'JR. JUNÍN 789', '989012345', 'maria@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'ADMIN'),
+('55667788', 'LUIS', 'TORRES', 'GÓMEZ', 1, '1991-09-30', 'AV. SALAVERRY 101', '990123456', 'luist@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'ADMIN'),
+('60594837', 'SEBASTIAN', 'CELIZ', 'GUERRERO', 1, '2010-09-30', 'AV. BRASIL 101', '94435638', 'sebastian@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'ADMIN');
+
 
     INSERT INTO `tipo_comprobante` (`nombre`, `estado`, `usuario`)
     VALUES ('boleta', 1, 'alexis@gmail.com');
@@ -5360,181 +5525,170 @@ DELIMITER ;
     END $$
     DELIMITER ;
 
-    DELIMITER $$
-
-    CREATE PROCEDURE SP_INSERTAR_PASAJE(
-        IN p_id_metodo_pago       INT,
-        IN p_id_tipo_comprobante  INT,
-        IN p_id_cliente           INT,
-        IN p_id_promocion         INT,
-        IN p_id_viaje             INT,
-        IN p_estado               CHAR(1),
-        IN p_codigo               CHAR(12),      -- Puede recibir NULL si no se proporciona
-        OUT MSJ                   VARCHAR(255),
-        OUT MSJ2                  VARCHAR(255)
-    )
+-- Crear procedimiento SP_INSERTAR_PASAJE
+DELIMITER $$
+CREATE PROCEDURE SP_INSERTAR_PASAJE(
+    IN P_idDetalleViajeAsiento INT,
+    IN P_numeroComprobante CHAR(13),
+    IN P_esPasajeNormal TINYINT,
+    IN P_esPasajeLibre TINYINT,
+    IN P_esTransferencia TINYINT,
+    IN P_esReserva TINYINT,
+    IN P_esCambioRuta TINYINT,
+    IN P_idVenta INT,
+    IN P_codigo CHAR(8),
+    IN P_idPasaje INT
+)
+BEGIN
+    DECLARE cExist INT DEFAULT 0;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
-        DECLARE EXIT HANDLER FOR SQLEXCEPTION 
-        BEGIN
-            SET MSJ  = NULL;
-            SET MSJ2 = 'Error al registrar el pasaje.';
-        END;
+        SET @MSJ2 = 'Error inesperado al registrar el pasaje';
+    END;
+    SET @MSJ = NULL; SET @MSJ2 = NULL;
 
-        IF p_codigo IS NOT NULL THEN
-            INSERT INTO pasaje (
-                id_metodo_pago,
-                id_tipo_comprobante,
-                id_cliente,
-                id_promocion,
-                id_viaje,
-                estado,
-                codigo
-            )
-            VALUES (
-                p_id_metodo_pago,
-                p_id_tipo_comprobante,
-                p_id_cliente,
-                p_id_promocion,
-                p_id_viaje,
-                p_estado,
-                p_codigo
-            );
-        ELSE
-            INSERT INTO pasaje (
-                id_metodo_pago,
-                id_tipo_comprobante,
-                id_cliente,
-                id_promocion,
-                id_viaje,
-                estado,
-                codigo
-            )
-            VALUES (
-                p_id_metodo_pago,
-                p_id_tipo_comprobante,
-                p_id_cliente,
-                p_id_promocion,
-                p_id_viaje,
-                p_estado,
-                NULL
-            );
-        END IF;
+    -- Verificar duplicado por detalle+comprobante
+    SELECT COUNT(*) INTO cExist
+      FROM pasaje
+     WHERE idDetalleViajeAsiento = P_idDetalleViajeAsiento
+       AND numeroComprobante     = P_numeroComprobante;
 
-        SET MSJ  = 'Pasaje registrado correctamente.';
-        SET MSJ2 = NULL;
-    END$$
+    IF cExist > 0 THEN
+        SET @MSJ2 = 'El pasaje ya existe';
+    ELSE
+        INSERT INTO pasaje (
+            idDetalleViajeAsiento,
+            numeroComprobante,
+            esPasajeNormal,
+            esPasajeLibre,
+            esTransferencia,
+            esReserva,
+            esCambioRuta,
+            idVenta,
+            codigo,
+            idPasaje
+        ) VALUES (
+            P_idDetalleViajeAsiento,
+            P_numeroComprobante,
+            P_esPasajeNormal,
+            P_esPasajeLibre,
+            P_esTransferencia,
+            P_esReserva,
+            P_esCambioRuta,
+            P_idVenta,
+            P_codigo,
+            P_idPasaje
+        );
+        SET @MSJ = 'Pasaje registrado correctamente';
+    END IF;
+END $$
+DELIMITER ;
 
-    DELIMITER ;
-
-    DELIMITER $$
-    -- Crear procedimiento para modificar pasaje
-    CREATE PROCEDURE SP_MODIFICAR_PASAJE(
-        IN p_id INT,
-        IN p_id_metodo_pago INT,
-        IN p_id_tipo_comprobante INT,
-        IN p_id_cliente INT,
-        IN p_id_promocion INT,
-        IN p_id_viaje INT,
-        IN p_estado CHAR(1),
-        OUT MSJ VARCHAR(255),
-        OUT MSJ2 VARCHAR(255)
-    )
+-- Crear procedimiento SP_MODIFICAR_PASAJE
+DELIMITER $$
+CREATE PROCEDURE SP_MODIFICAR_PASAJE(
+    IN P_id INT,
+    IN P_idDetalleViajeAsiento INT,
+    IN P_numeroComprobante CHAR(13),
+    IN P_esPasajeNormal TINYINT,
+    IN P_esPasajeLibre TINYINT,
+    IN P_esTransferencia TINYINT,
+    IN P_esReserva TINYINT,
+    IN P_esCambioRuta TINYINT,
+    IN P_idVenta INT,
+    IN P_codigo CHAR(8),
+    IN P_idPasaje INT
+)
+BEGIN
+    DECLARE cExist INT DEFAULT 0;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
-        DECLARE v_existe INT;
+        SET @MSJ2 = 'Error inesperado al modificar el pasaje';
+    END;
+    SET @MSJ = NULL; SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO v_existe FROM pasaje WHERE id = p_id;
+    -- Verificar existencia
+    SELECT COUNT(*) INTO cExist FROM pasaje WHERE id = P_id;
+    IF cExist = 0 THEN
+        SET @MSJ2 = 'El pasaje que intenta modificar no existe';
+    ELSE
+        UPDATE pasaje
+           SET idDetalleViajeAsiento = P_idDetalleViajeAsiento,
+               numeroComprobante     = P_numeroComprobante,
+               esPasajeNormal        = P_esPasajeNormal,
+               esPasajeLibre         = P_esPasajeLibre,
+               esTransferencia       = P_esTransferencia,
+               esReserva             = P_esReserva,
+               esCambioRuta          = P_esCambioRuta,
+               idVenta               = P_idVenta,
+               codigo                = P_codigo,
+               idPasaje              = P_idPasaje
+         WHERE id = P_id;
+        SET @MSJ = 'Pasaje modificado correctamente';
+    END IF;
+END $$
+DELIMITER ;
 
-        IF v_existe = 0 THEN
-            SET MSJ = NULL;
-            SET MSJ2 = 'No se encontró el pasaje para modificar.';
-        ELSE
-            BEGIN
-                DECLARE EXIT HANDLER FOR SQLEXCEPTION 
-                BEGIN
-                    SET MSJ = NULL;
-                    SET MSJ2 = 'Error al modificar el pasaje.';
-                END;
-
-                UPDATE pasaje
-                SET id_metodo_pago = p_id_metodo_pago,
-                    id_tipo_comprobante = p_id_tipo_comprobante,
-                    id_cliente = p_id_cliente,
-                    id_promocion = p_id_promocion,
-                    id_viaje = p_id_viaje,
-                    estado = p_estado
-                WHERE id = p_id;
-
-                SET MSJ = 'Pasaje modificado correctamente.';
-                SET MSJ2 = NULL;
-            END;
-        END IF;
-    END$$
-    DELIMITER ;
-
-    DELIMITER $$
-
-    CREATE PROCEDURE SP_CAMBIAR_ESTADO_PASAJE(
-        IN p_id_pasaje INT,       -- 1) ID del pasaje a modificar
-        IN p_estado    CHAR(1),   -- 2) Nuevo valor de estado ('R', 'P', etc.)
-        OUT MSJ        VARCHAR(255),
-        OUT MSJ2       VARCHAR(255)
-    )
+-- Crear procedimiento SP_ELIMINAR_PASAJE
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_PASAJE(
+    IN P_id INT
+)
+BEGIN
+    DECLARE cExist INT DEFAULT 0;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
-        DECLARE EXIT HANDLER FOR SQLEXCEPTION
-        BEGIN
-            SET MSJ  = NULL;
-            SET MSJ2 = 'Error al modificar el estado del pasaje.';
-        END;
+        SET @MSJ2 = 'Error inesperado al eliminar el pasaje';
+    END;
+    SET @MSJ = NULL; SET @MSJ2 = NULL;
 
-        -- Verificar si existe el pasaje; si no existe, se asignan mensajes de error
-        IF NOT EXISTS (SELECT 1 FROM pasaje WHERE id = p_id_pasaje) THEN
-            SET MSJ  = NULL;
-            SET MSJ2 = CONCAT('No existe pasaje con id ', p_id_pasaje);
-        ELSE
-            -- Si existe, actualizamos solo el campo "estado"
-            UPDATE pasaje
-            SET estado = p_estado
-            WHERE id = p_id_pasaje;
+    SELECT COUNT(*) INTO cExist FROM pasaje WHERE id = P_id;
+    IF cExist = 0 THEN
+        SET @MSJ2 = 'El pasaje que intenta eliminar no existe';
+    ELSE
+        DELETE FROM pasaje WHERE id = P_id;
+        SET @MSJ = 'Pasaje eliminado correctamente';
+    END IF;
+END $$
+DELIMITER ;
 
-            SET MSJ  = 'Estado del pasaje actualizado correctamente.';
-            SET MSJ2 = NULL;
-        END IF;
-    END$$
+DELIMITER $$
 
-    DELIMITER ;
-
-    DELIMITER $$
-    -- Crear procedimiento para eliminar pasaje
-    CREATE PROCEDURE SP_ELIMINAR_PASAJE(
-        IN p_id INT,
-        OUT MSJ VARCHAR(255),
-        OUT MSJ2 VARCHAR(255)
-    )
+CREATE PROCEDURE SP_CAMBIAR_ESTADO_PASAJE(
+    IN  p_idPasaje INT,
+    OUT p_MSJ    VARCHAR(255),
+    OUT p_MSJ2   VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
-        DECLARE v_existe INT;
+        -- Si ocurre cualquier error, devolvemos mensaje de error
+        SET p_MSJ  = '';
+        SET p_MSJ2 = 'Error al cambiar el estado del pasaje';
+    END;
 
-        SELECT COUNT(*) INTO v_existe FROM pasaje WHERE id = p_id;
+    -- Actualizamos los flags: ponemos PasajeNormal=1 y el resto a 0
+    UPDATE pasaje
+    SET 
+        esPasajeNormal  = 1,
+        esPasajeLibre   = 0,
+        esTransferencia = 0,
+        esReserva       = 0,
+        esCambioRuta    = 0
+    WHERE id = p_idPasaje;
 
-        IF v_existe = 0 THEN
-            SET MSJ = NULL;
-            SET MSJ2 = 'No se encontró el pasaje para eliminar.';
-        ELSE
-            BEGIN
-                DECLARE EXIT HANDLER FOR SQLEXCEPTION 
-                BEGIN
-                    SET MSJ = NULL;
-                    SET MSJ2 = 'Error al eliminar el pasaje.';
-                END;
+    -- Comprobamos si realmente se actualizó alguna fila
+    IF ROW_COUNT() = 0 THEN
+        SET p_MSJ  = '';
+        SET p_MSJ2 = CONCAT('No se encontró pasaje con id=', p_idPasaje);
+    ELSE
+        SET p_MSJ  = 'El pasaje se marcó como Normal correctamente.';
+        SET p_MSJ2 = '';
+    END IF;
+END$$
 
-                DELETE FROM pasaje WHERE id = p_id;
+DELIMITER ;
 
-                SET MSJ = 'Pasaje eliminado correctamente.';
-                SET MSJ2 = NULL;
-            END;
-        END IF;
-    END$$
-
-    DELIMITER ;
 
     -- Procedimientos almacenados para reclamo y tipo reclamo
     DELIMITER $$

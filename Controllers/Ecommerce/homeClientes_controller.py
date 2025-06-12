@@ -4,7 +4,7 @@ import re
 import random
 from correo import enviar_correo
 from flask import Blueprint, request, jsonify, render_template, session, redirect, url_for, abort,current_app
-
+from Models.pasaje import Pasaje
 from flask_mail import Mail
 
 from Models.conf_plantillas import Conf_Plantillas
@@ -25,6 +25,7 @@ from Models.metodo_pago import MetodoPago
 from Models.herramienta import Herramienta
 from Models.preguntas_frecuentes import PreguntasFrecuentes
 from Models.pasajero import Pasajero
+from Models.ruta import Ruta
 homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/home')
 
 # # ERRORES 
@@ -184,6 +185,10 @@ def transferencia_pasaje():
 def mi_pasaje_operaciones():
     return render_template('Ecommerce/home/miPasajeOp.html')
 
+@homeClientes_bp.route('/seguimientoViaje')
+def seguimiento_viaje():
+    return render_template('Ecommerce/home/seguimientoViaje.html')
+
 @homeClientes_bp.route('/pago')
 def pago_pasajes():
     return render_template('Ecommerce/home/pago.html')
@@ -228,7 +233,7 @@ def get_persona_data():
         if datos:
             print(datos)
             return jsonify({'data': datos, 'Status': 'success', 'Msj': 'Datos obtenidos correctamente'})
-        return None
+        return None  # Si no hay datos, no responde nada aún
 
     try:
         tipo_doc = request.args.get('tipoDoc')
@@ -241,39 +246,36 @@ def get_persona_data():
         api_clientes = Cliente()
         api = ApiNetPe()
 
-        if tipo_doc == 'DNI':
-            for fuente in [
+        fuentes_por_tipo = {
+            'DNI': [
                 lambda: api_clientes.obtener_por_numero_documento(num_doc),
                 lambda: api_pasajero.obtener_por_numero_documento(num_doc),
                 lambda: api.get_person(num_doc)
-            ]:
-                datos = fuente()
-                respuesta = responder(datos)
-                if respuesta:
-                    return respuesta
-
-        if tipo_doc == 'CE':
-            for fuente in [
+            ],
+            'CE': [
                 lambda: api.get_person(num_doc),
                 lambda: api_pasajero.obtener_por_numero_documento(num_doc)
-            ]:
-                datos = fuente()
-                respuesta = responder(datos)
-                if respuesta:
-                    return respuesta
-
-        if tipo_doc == 'RUC':
-            for fuente in [
+            ],
+            'RUC': [
                 lambda: api.get_company(num_doc),
                 lambda: api_clientes.obtener_por_numero_documento(num_doc)
-            ]:
-                datos = fuente()
-                respuesta = responder(datos)
-                if respuesta:
-                    return respuesta
+            ]
+        }
+
+        fuentes = fuentes_por_tipo.get(tipo_doc, [])
+
+        for fuente in fuentes:
+            datos = fuente()
+            respuesta = responder(datos)
+            if respuesta:
+                return respuesta
+
+        # Si no se encontró nada, devuelve una lista vacía
+        return jsonify([])
 
     except Exception as e:
         return jsonify({'data': {}, 'Status': 'error', 'Msj': f'Error en el servidor: {repr(e)}'})
+
 
 # FIN API NET RENIEC
 
@@ -470,6 +472,33 @@ def obtener_diseno_vehiculo():
 
 # END REGION COMPRA PASAJE
 
+# REGION RUTAS SEGUIMIENTO
+@homeClientes_bp.route('/obtenerRutasSeguimiento', methods=['GET'])
+def obtener_rutas_seguimiento():
+    try:
+        rutas = Ruta.obtener_rutas_activas_viaje()
+        if not rutas:
+            return jsonify({"Status": "info", "data": [], "Msj": "No hay rutas activas para seguimiento."})
+
+        # Formatear las rutas para el seguimiento
+        rutas_seguimiento = []
+        for ruta in rutas:
+            ruta_info = {
+                "id": ruta['ID'],
+                "nombre": ruta['nombre'],
+                "descripcion": ruta['descripcion'],
+                "fecha_inicio": ruta['fecha_inicio'],
+                "fecha_fin": ruta['fecha_fin'],
+                "estado": ruta['estado']
+            }
+            rutas_seguimiento.append(ruta_info)
+
+        return jsonify({"Status": "success", "data": rutas_seguimiento, "Msj": "Rutas obtenidas correctamente."})
+    except Exception as e:
+        return jsonify({"Status": "error", "data": [], "Msj": f"Error al obtener las rutas: {repr(e)}"})
+
+# END RUTAS SEGUIMIENTO
+
 #REGION RESERVA
 @homeClientes_bp.route("/listarTiposComprobante")
 def listadoTiposComprobantes():
@@ -490,30 +519,34 @@ def listadoMetodosPago():
 @homeClientes_bp.route('/reservarPasaje', methods=["POST"])
 def reservarPasaje():
     try:
-        id_metodo_pago = request.form["metodo_pago"]
-        id_tipo_comprobante = request.form["tipo_comprobante"]
-        id_cliente = request.form["cliente"]
-        id_promocion = request.form.get("promocion", 0)
-        id_viaje = request.form["viaje"]
-        codigo_aleatorio = random.randint(10**11, 10**12 - 1)
+        id_detalle_asiento = int(request.form["id_detalle_asiento"])
+        numero_comprobante   = request.form["numero_comprobante"]
+        id_venta             = int(request.form["id_venta"])
+        codigo               = request.form["codigo"]
 
-        resultado = Pasaje.registrarReserva(id_metodo_pago,id_tipo_comprobante,id_cliente,id_promocion,id_viaje,codigo_aleatorio)
+        resultado = Pasaje.registrarReserva(
+            id_detalle_asiento,
+            numero_comprobante,
+            id_venta,
+            codigo
+        )
 
         if resultado.get("msj"):
-            #correoCliente = request.form["correo_cliente"]
-            datosEnvio = {
-                'asunto':'Reserva de pasaje Yatrax',
-                'remitente': 'yatraxyatusa@gmail.com',
-                'destinatario': "christiancubasjaramillo@gmail.com",
-                'mensaje': 'El codigo de su reserva es : '+str(codigo_aleatorio)
-            }
-
-            enviar_correo(current_app.extensions['mail'],datosEnvio)
-
-            return jsonify({"status": 1,"mensaje": resultado["msj"],"codigo_reserva":codigo_aleatorio})
+            return jsonify({
+                "Status": "success",
+                "Msj": resultado["msj"],
+                "Msj2": resultado["msj2"]
+            })
         else:
-            return jsonify({"status": 0,"mensaje": resultado.get("msj2", "Ocurrió un error inesperado.")})
+            return jsonify({
+                "Status": "error",
+                "Msj": "",
+                "Msj2": resultado["msj2"]
+            })
     except Exception as e:
-        return jsonify({"status": -1,"mensaje": "Ha ocurrido un error","error": repr(e)})
-
+        return jsonify({
+            "Status": "error",
+            "Msj": str(e),
+            "Msj2": ""
+        })
 #END REGION

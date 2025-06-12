@@ -208,6 +208,24 @@
                                         <p>Gestionar tipos de documentos</p>
                                     </a>
                                 </li>
+
+                                
+                                <!-- -- vender pasaje y transacciones -->
+                                <li class="nav-item align-items-center">
+                                    <a href="{{ url_for('ventas.Menu_VenderPasajes') }}"
+                                        class="nav-link {% if active_page == 'venderPasajes' %}active{% endif %}">
+                                        <i class="bi bi-ticket nav-icon"></i>
+                                        <p>Vender pasaje</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ url_for('ventas.Menu_TransaccionesPasajes') }}"
+                                        class="nav-link {% if active_page == 'transaccionesPasajes' %}active{% endif %}">
+                                        <i class="bi bi-gear nav-icon"></i>
+                                        <p>Transanacción de pasajes</p>
+                                    </a>
+                                </li>
+                                <!-- -- fin vender pasaje -->
                                 {% endif %}
                             </ul>
                         </li>

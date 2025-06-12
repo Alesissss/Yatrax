@@ -21,13 +21,13 @@ class Viaje:
     def obtener_todos(cls):
         conexion = bd.Conexion()
         try:
-            viajes = conexion.obtener(""" SELECT v.id, v.idRuta, v.estado, v.estadoViaje AS idEstadoViaje, ev.nombre AS estado_viaje, r.nombre AS ruta, 
+            viajes = conexion.obtener(""" SELECT v.id, v.idRuta, v.estado, v.idEstadoViaje, ev.nombre AS estado_viaje, r.nombre AS ruta, 
                 r.tipo AS tipo_ruta, tv.id_servicio, s.nombre AS servicio, CONCAT(tv.nombre, ' - ', ve.placa) AS vehiculo, 
-                v.esReprogramado, v.esPostergado, v.fecha_salida_estimada, v.fecha_llegada_estimada
+                v.esReprogramado, v.fechaHoraSalida, v.fechaHoraLlegada
                 FROM viaje v
                 INNER JOIN ruta r on v.idRuta = r.id
                 INNER JOIN vehiculo ve on ve.id = v.idVehiculo
-                INNER JOIN estado_viaje ev on v.estadoViaje = ev.id
+                INNER JOIN estado_viaje ev on v.idEstadoViaje = ev.id
                 INNER JOIN tipo_vehiculo tv on tv.id = ve.id_tipo_vehiculo
                 INNER JOIN servicio s on s.id = tv.id_servicio;
             """)
@@ -75,7 +75,7 @@ class Viaje:
             conexion.cerrar()
     # REGISTRAR
     @classmethod
-    def registrar(cls, idRuta, idVehiculo, estado, fecha_salida_estimada, fecha_llegada_estimada, detalles_viajes, choferes, tripulantes, usuario):
+    def registrar(cls, idRuta, idVehiculo, estado, fecha_salida_estimada, fecha_llegada_estimada, detalles_viajes, choferes, tripulantes, asientos, usuario):
         try:
             conexion = bd.Conexion()
 
@@ -88,6 +88,13 @@ class Viaje:
             for detalle in detalles_viajes:
                 conexion.ejecutar("INSERT INTO detalle_viaje (idViaje, idSucursalOrigen, idSucursalDestino, precio, fechaSalida, fechaLlegadaEstimada, usuario) VALUES (%s, %s, %s, %s, %s, %s, %s)",
                                   (idViaje, detalle['id_sucursal_origen'], detalle['id_sucursal_destino'], detalle['precio'], detalle['fecha_salida'], detalle['fecha_llegada'], usuario), auto_commit=False)
+                
+                idDetalle_Viaje = conexion.obtener("SELECT LAST_INSERT_ID() AS idDetalle_Viaje;")
+                idDetalle_Viaje = idDetalle_Viaje[0]['idDetalle_Viaje'] 
+
+                # Insertar los asientos de subviajes
+                for asiento in asientos:
+                    conexion.ejecutar("INSERT INTO detalle_viaje_asiento (idDetalle_Viaje, idAsiento, usuario) VALUES (%s, %s, %s)", (idDetalle_Viaje, asiento['id'], usuario), auto_commit=False)
 
             # Insertar los choferes
             for chofer in choferes:
