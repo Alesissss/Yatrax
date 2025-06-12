@@ -1,5 +1,7 @@
 import hashlib
 import bd
+import string
+import random
 
 class Pasaje:
     def __init__(self,id,id_metodo_pago,id_tipo_comprobante,id_cliente,id_promocion,id_viaje,estado):
@@ -127,6 +129,27 @@ class Pasaje:
         finally:
             if conexion is not None:
                 conexion.cerrar()
+                
+    @classmethod
+    def generar_codigo_unico(cls, length=8):
+        alphabet = string.ascii_uppercase + string.digits
+        conexion = bd.Conexion()
+        try:
+            while True:
+                code = ''.join(random.choices(alphabet, k=length))
+                conexion.ejecutar(
+                    "SELECT 1 FROM pasaje WHERE codigo = %s LIMIT 1",
+                    (code,)
+                )
+                if not conexion.obtener():
+                    return code
+        finally:
+            conexion.cerrar()
+            # Si existe, se itera de nuevo
+            # Se esta considerando 26 caracteres alfabéticos y 10 dígitos, lo que da un total de 36 caracteres por 8 posiciones,
+            # lo que da un total de 2,821,109,907,456 combinaciones posibles.
+    
+    
 
 
 
