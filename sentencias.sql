@@ -761,7 +761,7 @@ CREATE TABLE viaje (
         esCambioRuta TINYINT NULL DEFAULT 0, -- 1: es cambio de ruta, 0: no es cambio de ruta
         idVenta INT NOT NULL REFERENCES venta(id),
         codigo CHAR(8) NOT NULL, -- AA0202
-        idPasaje INT NULL REFERENCES pasaje(id) -- Para operaciones con pasajes
+        idPasaje INT NULL -- Para operaciones con pasajes
     );
 
     -- Crear tablas tipo_reclamo y reclamo
