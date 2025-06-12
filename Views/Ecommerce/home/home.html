@@ -297,8 +297,6 @@
       let response = await fetch("/ecommerce/home/listarTiposComprobante");
       let data = await response.json();
 
-      console.log(data);
-
       data.forEach((tipo) => {
         let option = document.createElement("option");
         option.value = tipo.ID;
@@ -316,8 +314,6 @@
       const metodoPago = document.getElementById("metodo_pago");
       let response = await fetch("/ecommerce/home/listadoMetodosPago");
       let data = await response.json();
-
-      console.log(data);
 
       data.forEach((tipo) => {
         const option = document.createElement("option");
@@ -439,7 +435,7 @@
             selectTipoComprobante.id = "tipo_comprobante"
             selectTipoComprobante.name = "tipo_comprobante";
             selectTipoComprobante.className = "mt-2 mb-3 py-1 col-6";
-            selectTipoComprobante.disabled = false;
+            selectTipoComprobante.disabled = true;
             document.getElementById("tipo_transaccion").appendChild(selectTipoComprobante);
             listarTipoComprobantes();
 
