@@ -50,11 +50,17 @@ homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/hom
 # def error_general(error):
 #    return render_template("Ecommerce/error.html", error="Ocurrió un error inesperado"), 500
 
+# FUNCIONES AUXILIARES
+
+def renderizarCompra():
+    return render_template('Ecommerce/home/ventaPasajes.html')
+
 # VIEWS
 @homeClientes_bp.route('/inicio')
 def index():
     datos_recibidos = {
-        "servicios":Servicio.obtener_todos()
+        "servicios":Servicio.obtener_todos(),
+        "contenido_venta": renderizarCompra()
     }
     return render_template('Ecommerce/home/home.html', active_page="home",datos=datos_recibidos)
 
