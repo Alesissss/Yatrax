@@ -150,41 +150,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
-    // Al hacer clic en el botón "Elegir"
-    document.querySelectorAll('.mostrarContenido').forEach(btn => {
-        btn.addEventListener('click', async function () {
-            const detalleViajeId = this.getAttribute("data-viaje");
-            const collapseId = this.getAttribute("data-bs-target"); // Ej: "#collapse1"
-            const contenedor = document.querySelector(`${collapseId} .contenedorDiseño`);
-
-            try {
-                const response = await fetch(`/ecommerce/home/obtener_diseno_vehiculo?detalle_viaje_id=${detalleViajeId}`);
-                const data = await response.json(); // esto funcionará porque el backend ahora retorna jsonify()
-
-                if (data.Status === "success") {
-                    contenedor.innerHTML = data.html;
-
-                    // Ejecutar scripts embebidos del HTML
-                    const scripts = contenedor.querySelectorAll("script");
-                    scripts.forEach(oldScript => {
-                        const newScript = document.createElement("script");
-                        if (oldScript.src) {
-                            newScript.src = oldScript.src;
-                        } else {
-                            newScript.textContent = oldScript.textContent;
-                        }
-                        document.body.appendChild(newScript);
-                        oldScript.remove();
-                    });
-                } else {
-                    contenedor.innerHTML = `<div class="alert alert-danger">Error al cargar diseño</div>`;
-                }
-            } catch (error) {
-                contenedor.innerHTML = `<div class="alert alert-danger">Error al cargar diseño: ${error.message}</div>`;
-                console.error("Error al renderizar el diseño del vehículo:", error);
-            }
-        });
-    });
 
     fct_CargarRutas();
     updateFormVisibility();
@@ -221,10 +186,17 @@ function cargarItinerario(itinerarios, contenedorId) {
 
 
 function inicializarEventosPostRender() {
+
+    //Api RENIEC
     let debounceTimer;
 
+    //Captura el input del NroDocumento
     const docInput = document.getElementById("numeroDocNuevo");
+    //Captura el input del tipoDocumento
     const tipoDoc = document.getElementById("tipo_doc");
+    //Estos dos datos nos permitirá consultar todo
+
+    //Este input permite validar la fecha de nacimiento (Mayor o menor de edad)
     const fechaNac = document.getElementById("fechaNacimientoNuevo");
 
     if (docInput) {
@@ -242,7 +214,10 @@ function inicializarEventosPostRender() {
         fechaNac.addEventListener("change", validarEdadNuevoPasajero);
     }
 
+    //Funcion que llama verdaderamente al API de la reniec
     function buscarPersona() {
+
+        //Captura el tipo y el numero de doc para poder usar el API Reniec
         const tipoDocVal = document.getElementById("tipo_doc").value;
         const numDoc = document.getElementById("numeroDocNuevo").value.trim();
 
@@ -310,54 +285,84 @@ function inicializarEventosPostRender() {
             toastr.warning("Menores a 18 años necesitan presentar autorización de sus padres o tutores para viajar", "MENSAJE DEL SISTEMA");
         }
     }
-    function generarMatriz(piso) {
-        const filas = 15;
-        const columnas = 6;
-        const contenedor = document.getElementById(`matrizContainer_${piso}`);
 
-        if (!contenedor || contenedor.children.length > 0) return;
+    //Fin api reniec
 
-        contenedor.innerHTML = '';
+}
 
-        // Estilos de grilla
-        contenedor.style.display = 'grid';
-        contenedor.style.gridTemplateColumns = `repeat(${columnas}, 40px)`;
-        contenedor.style.gridTemplateRows = `repeat(${filas}, 40px)`;
-        contenedor.style.gap = '2px';
-        contenedor.style.justifyContent = 'center';
+function generarMatriz(id_boton, piso) {
+    let botones_guardados
+    ruta = "/ecommerce/home/obtener_diseno_vehiculo"
+    enviar = { "id_dv": id_boton }
+    fetch(ruta, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(enviar)
+    })
+        .then(res => res.json())
+        .then(res => {
+            botones_guardados = res.data
+            const filas = 15;
+            const columnas = 6;
+            console.log(`matrizContainer_${piso}`)
+            const contenedor = document.getElementById(`matrizContainer_${piso}`);
 
-        for (let i = 1; i <= filas; i++) {
-            for (let j = 1; j <= columnas; j++) {
-                const btn = document.createElement('button');
-                btn.className = 'btn btn-light border-dark';
-                btn.style.width = '40px';
-                btn.style.height = '40px';
-                btn.setAttribute('data-x', j);
-                btn.setAttribute('data-y', i);
-                btn.setAttribute('data-tipo', '');
+            if (!contenedor || contenedor.children.length > 0) return;
 
-                // Verifica si hay herramienta en esta posición
-                const boton_existente = botones_guardados.find(b =>
-                    parseInt(b.x_dimension) === j &&
-                    parseInt(b.y_dimension) === i &&
-                    parseInt(b.piso) === piso
-                );
+            contenedor.innerHTML = '';
 
-                if (boton_existente) {
-                    const iconoHTML = obtenerIcono(boton_existente.id_herramienta);
-                    btn.innerHTML = iconoHTML;
-                    btn.setAttribute('data-tipo', boton_existente.id_herramienta);
+            // Estilos de grilla
+            contenedor.style.display = 'grid';
+            contenedor.style.gridTemplateColumns = `repeat(${columnas}, 40px)`;
+            contenedor.style.gridTemplateRows = `repeat(${filas}, 40px)`;
+            contenedor.style.gap = '2px';
+            contenedor.style.justifyContent = 'center';
+
+            for (let i = 1; i <= filas; i++) {
+                for (let j = 1; j <= columnas; j++) {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn btn-light border-dark';
+                    btn.style.width = '40px';
+                    btn.style.height = '40px';
+                    btn.setAttribute('data-x', j);
+                    btn.setAttribute('data-y', i);
+                    btn.setAttribute('data-tipo', '');
+
+                    // Verifica si hay herramienta en esta posición
+                    const boton_existente = botones_guardados.find(b =>
+                        parseInt(b.x_dimension) === j &&
+                        parseInt(b.y_dimension) === i &&
+                        parseInt(b.piso) === piso
+                    );
+
+                    if (boton_existente) {
+                        const iconoHTML = obtenerIcono(boton_existente.id_herramienta);
+                        btn.innerHTML = iconoHTML;
+                        btn.setAttribute('data-tipo', boton_existente.id_herramienta);
+                    }
+
+                    contenedor.appendChild(btn);
                 }
-
-                contenedor.appendChild(btn);
             }
-        }
-    }
+        });
 
 
 
 
 }
+
+const list_herramientas = JSON.parse('{{ herramientas | tojson }}');
+
+function obtenerIcono(idHerramienta) {
+    const herramienta_dict = list_herramientas.find(h => h.id === parseInt(idHerramienta));
+    if (herramienta_dict) {
+        return `<i class="${herramienta_dict.icono}"></i>`
+    }
+    return '';
+}
+
 
 
 
