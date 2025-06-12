@@ -254,3 +254,19 @@ class Viaje:
             return id[0]
         finally:
             conexion.cerrar()
+    
+    @classmethod
+    def obtener_asientos(cls,id_dv):
+        try:
+            conexion = bd.Conexion()
+            listado = conexion.obtener("""
+                SELECT DISTINCT a.id as id_asiento, nh.x_dimension, nh.y_dimension, n.nroPiso, h.icono 
+                FROM detalle_viaje_asiento dva INNER JOIN asiento a ON dva.idAsiento = a.id
+                INNER JOIN nivel_herramienta nh ON nh.id = a.id
+                INNER JOIN nivel n ON nh.id_nivel = n.id
+                INNER JOIN herramienta h ON nh.id_herramienta = h.id
+                WHERE dva.idDetalle_Viaje = 4;
+            """, (id_dv,))
+            return listado
+        finally:
+            conexion.cerrar()

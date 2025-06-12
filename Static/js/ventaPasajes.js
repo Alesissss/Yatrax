@@ -338,7 +338,7 @@ function generarMatriz(id_boton, piso) {
                     );
 
                     if (boton_existente) {
-                        const iconoHTML = obtenerIcono(boton_existente.id_herramienta);
+                        const iconoHTML = obtenerIcono(boton_existente.icono);
                         btn.innerHTML = iconoHTML;
                         btn.setAttribute('data-tipo', boton_existente.id_herramienta);
                     }
@@ -353,14 +353,8 @@ function generarMatriz(id_boton, piso) {
 
 }
 
-const list_herramientas = JSON.parse('{{ herramientas | tojson }}');
-
-function obtenerIcono(idHerramienta) {
-    const herramienta_dict = list_herramientas.find(h => h.id === parseInt(idHerramienta));
-    if (herramienta_dict) {
-        return `<i class="${herramienta_dict.icono}"></i>`
-    }
-    return '';
+function obtenerIcono(icono) {
+    return `<i class="${icono}"></i>`
 }
 
 

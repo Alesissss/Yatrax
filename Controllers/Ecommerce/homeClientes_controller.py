@@ -446,23 +446,10 @@ from flask import jsonify, render_template
 @homeClientes_bp.route("/obtener_diseno_vehiculo", methods=['POST'])
 def obtener_diseno_vehiculo():
     detalle_viaje_id = request.json.get("id_dv")
-    datos = Viaje.obtener_tipo_vehiculo_por_dv(detalle_viaje_id)
-    tipo_vehiculo_id = datos["id_tipo_vehiculo"]
-    niveles = TipoVehiculo.obtener_niveles_por_tipoVehiculo(tipo_vehiculo_id)
-
-    
-
-    botones = []
-    for nivel in niveles:
-        for herramienta in nivel["herramientas"]:
-            botones.append({
-                "x_dimension": herramienta["x_dimension"],
-                "y_dimension": herramienta["y_dimension"],
-                "id_herramienta": herramienta["id_herramienta"],
-                "piso": nivel["nroPiso"]
-            })
+    datos = Viaje.obtener_asientos(detalle_viaje_id)
+    print(datos)
     return jsonify({
-        "data": botones,
+        "data": datos,
         "Status": "success",
         "msg": "Retornado con éxito" 
     })

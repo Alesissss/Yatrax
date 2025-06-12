@@ -37,7 +37,7 @@ class TipoVehiculo:
             return listado
         finally:
             conexion.cerrar()
-
+    
     @classmethod
     def obtenerUno(cls,idTipoVehiculo):
         try:
@@ -180,6 +180,31 @@ class TipoVehiculo:
             if conexion:
                 conexion.cerrar()
     @classmethod
+    def obtener_niveles_por_tipoVehiculo(cls, id_tipo_vehiculo):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+
+            # Obtener todos los niveles de este tipo de vehículo
+            niveles = conexion.obtener(
+                "SELECT id, nroPiso, x_dimension, y_dimension, estado FROM nivel WHERE id_tipo_vehiculo = %s ORDER BY nroPiso ASC",
+                (id_tipo_vehiculo,)
+            )
+
+            # Para cada nivel, obtener sus herramientas
+            for nivel in niveles:
+                id_nivel = nivel['id']
+                herramientas = conexion.obtener(
+                    "SELECT id_herramienta, x_dimension, y_dimension, icono FROM nivel_herramienta INNER JOIN herramienta WHERE id_nivel = %s",
+                    (id_nivel,)
+                )
+                nivel['herramientas'] = herramientas
+
+            return niveles  # lista de dicts, cada uno con su info y sus herramientas
+
+        finally:
+            if conexion:
+                conexion.cerrar()
     def obtener_niveles_por_tipoVehiculo(cls, id_tipo_vehiculo):
         conexion = None
         try:
