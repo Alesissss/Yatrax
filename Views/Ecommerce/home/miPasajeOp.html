@@ -543,11 +543,15 @@
 
               if (d.apellidoMaterno || d.ape_materno) {
                 document.getElementById("apellidoMaternoMenor").value = d.apellidoMaterno || d.ape_materno;
+              } else {
+                document.getElementById("apellidoMaternoMenor").value = "";
               }
 
               if (d.f_nacimiento) {
                 document.getElementById("fechaNacimientoMenor").value = moment(d.f_nacimiento).format("YYYY-MM-DD");
                 validarEdadMenor();
+              } else {
+                document.getElementById("fechaNacimientoMenor").value = "";
               }
 
               if (d.sexo != null) {
@@ -611,15 +615,21 @@
 
               if (d.email) {
                 document.getElementById("correo").value = d.email;
+              }else {
+                document.getElementById("correo").value = "";
               }
 
               if (d.telefono) {
                 document.getElementById("telefono").value = d.telefono;
+              }else {
+                document.getElementById("telefono").value = "";
               }
 
               if (d.f_nacimiento) {
                 document.getElementById("fechaNacimientoNuevo").value = moment(d.f_nacimiento).format("YYYY-MM-DD");
                 validarEdadNuevoPasajero(); // Validar edad al cargar la fecha
+              }else {
+                document.getElementById("fechaNacimientoNuevo").value = "";
               }
 
               if (d.sexo != null) {  // esto cubre null y undefined
@@ -629,6 +639,15 @@
                 document.getElementById("sexoMasculino").checked = false;
                 document.getElementById("sexoFemenino").checked = false;
               }
+            }else{
+              document.getElementById("nombres").value = "";
+              document.getElementById("apellidoPaterno").value = "";
+              document.getElementById("apellidoMaterno").value = "";
+              document.getElementById("correo").value = "";
+              document.getElementById("telefono").value = "";
+              document.getElementById("fechaNacimientoNuevo").value = "";
+              document.getElementById("sexoMasculino").checked = false;
+              document.getElementById("sexoFemenino").checked = false;
             }
           })
           .catch(() =>
