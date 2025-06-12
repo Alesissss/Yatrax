@@ -16,7 +16,24 @@ class Pasaje:
         conexion = None
         try:
             conexion = bd.Conexion()
-            listado = conexion.obtener("select * from pasaje where estado='R'")
+            listado = conexion.obtener("""
+                SELECT 
+                pas.id as id,
+                pas.idVenta as id_venta,
+                cli.nombre as cliente,
+                cli.numero_documento as num_doc,
+                suc_origen.nombre AS origen,
+                suc_destino.nombre AS destino,
+                pas.codigo as codigo,
+                pas.esReserva as reserva,
+                pas.esPasajeNormal as pagado
+                FROM pasaje pas
+                LEFT JOIN cliente cli ON pas.idCliente = cli.id
+                LEFT JOIN detalle_viaje_asiento deta ON pas.idDetalleViajeAsiento = deta.id
+                LEFT JOIN detalle_viaje det ON det.id = deta.idDetalle_Viaje
+                LEFT JOIN sucursal suc_origen ON det.idSucursalOrigen = suc_origen.id
+                LEFT JOIN sucursal suc_destino ON det.idSucursalDestino = suc_destino.id;
+            """)
             return listado
         finally:
             if conexion != None:
@@ -27,7 +44,7 @@ class Pasaje:
         conexion = None
         try:
             conexion = bd.Conexion()
-            reserva = conexion.obtener("select * from pasaje where estado='R' and id=%s",(id,))
+            reserva = conexion.obtener("select * from pasaje where esReserva=1 and id=%s",(id,))
             return reserva[0]
         finally:
             if conexion != None:
