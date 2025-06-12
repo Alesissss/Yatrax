@@ -1,0 +1,16 @@
+<div class="row justify-content-center">
+  {% for piso in botones|map(attribute='piso')|unique|sort %}
+    <div class="col-md-10 mb-3">
+      <h6 class="text-center">Piso {{ piso }}</h6>
+      <div id="matrizContainer_{{ piso }}"></div>
+    </div>
+  {% endfor %}
+</div>
+
+<script>
+  const botones_guardados = JSON.parse("{{ botones|tojson }}");
+  const list_herramientas = JSON.parse("{{ herramientas|tojson }}");
+
+  const pisos = [...new Set(botones_guardados.map(b => b.piso))];
+  pisos.forEach(piso => generarMatriz(piso));
+</script>

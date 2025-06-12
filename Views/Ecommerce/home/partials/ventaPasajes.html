@@ -1,75 +1,48 @@
 <style>
-    .step {
-        display: none;
-        padding: 2rem;
-        transition: opacity 0.3s ease;
-    }
+  .step {
+    display: none;
+    padding: 2rem;
+    transition: opacity 0.3s ease;
+  }
 
-    .step.active {
-        display: block;
-    }
+  .step.active {
+    display: block;
+  }
 
-    .tab-link {
-        position: relative;
-    }
+  .tab-link {
+    position: relative;
+  }
 
-    .tab-link.disabled {
-        pointer-events: none;
-        background-color: var(--primary-color);
-        /* No clickeable */
-        color: rgb(255, 255, 255) !important;
-        /* Texto en gris claro */
-        cursor: default;
-        /* Cursor normal */
-    }
+  .tab-link.disabled {
+    pointer-events: none;
+    background-color: var(--primary-color);
+    color: rgb(255, 255, 255) !important;
+    cursor: default;
+  }
 
-    .tab-link.disabled::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(255, 255, 255, 0.6);
-        /* Capa translúcida blanca */
-        border-radius: inherit;
-        /* Borde redondeado del botón */
-    }
+  .tab-link.disabled::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.6);
+    border-radius: inherit;
+  }
 
-    .tab-link.active {
-        background-color: var(--primary-color);
-        color: white;
-    }
+  .tab-link.active {
+    background-color: var(--primary-color);
+    color: white;
+  }
 
-    .itinerario-header {
-        background-color: var(--primary-color);
-        color: white;
-        padding: 0.75rem;
-        border-top-left-radius: 0.5rem;
-        border-top-right-radius: 0.5rem;
-        font-weight: bold;
-    }
-
-    .accordion-button:focus {
-        box-shadow: none;
-    }
-
-    .accordion-collapse,
-    .accordion-body {
-        width: 100%;
-    }
-
-    .select2-container--bootstrap-5 .select2-selection--single {
-        height: auto;
-        line-height: normal;
-        display: flex;
-        align-items: center;
-    }
-
-    .hidden {
-        display: none !important;
-    }
+  .hidden {
+    display: none !important;
+  }
 </style>
+
+
+
 <section class="container my-4 p-0 border border-secondary shadow-sm bg-light">
     <div class="d-flex flex-wrap justify-content-between border-bottom bg-white">
         <button class="btn tab-link active flex-fill" data-step="0">Elegir destino</button>
