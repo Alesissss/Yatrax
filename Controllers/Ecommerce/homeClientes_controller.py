@@ -206,7 +206,7 @@ def get_persona_data():
     def responder(datos):
         if datos:
             return jsonify({'data': datos, 'Status': 'success', 'Msj': 'Datos obtenidos correctamente'})
-        return None
+        return None  # Si no hay datos, no responde nada aún
 
     try:
         tipo_doc = request.args.get('tipoDoc')
@@ -219,39 +219,36 @@ def get_persona_data():
         api_clientes = Cliente()
         api = ApiNetPe()
 
-        if tipo_doc == 'DNI':
-            for fuente in [
+        fuentes_por_tipo = {
+            'DNI': [
                 lambda: api_clientes.obtener_por_numero_documento(num_doc),
                 lambda: api_pasajero.obtener_por_numero_documento(num_doc),
                 lambda: api.get_person(num_doc)
-            ]:
-                datos = fuente()
-                respuesta = responder(datos)
-                if respuesta:
-                    return respuesta
-
-        if tipo_doc == 'CE':
-            for fuente in [
+            ],
+            'CE': [
                 lambda: api.get_person(num_doc),
                 lambda: api_pasajero.obtener_por_numero_documento(num_doc)
-            ]:
-                datos = fuente()
-                respuesta = responder(datos)
-                if respuesta:
-                    return respuesta
-
-        if tipo_doc == 'RUC':
-            for fuente in [
+            ],
+            'RUC': [
                 lambda: api.get_company(num_doc),
                 lambda: api_clientes.obtener_por_numero_documento(num_doc)
-            ]:
-                datos = fuente()
-                respuesta = responder(datos)
-                if respuesta:
-                    return respuesta
+            ]
+        }
+
+        fuentes = fuentes_por_tipo.get(tipo_doc, [])
+
+        for fuente in fuentes:
+            datos = fuente()
+            respuesta = responder(datos)
+            if respuesta:
+                return respuesta
+
+        # Si no se encontró nada, devuelve una lista vacía
+        return jsonify([])
 
     except Exception as e:
         return jsonify({'data': {}, 'Status': 'error', 'Msj': f'Error en el servidor: {repr(e)}'})
+
 
 # FIN API NET RENIEC
 

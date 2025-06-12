@@ -735,8 +735,8 @@
           .then((json) => {
             if (json.Status === "success") {
               const d = json.data;
-              if (d.nombre)
-                document.getElementById("nombres").value = d.nombre;
+              if (d.nombre || d.nombres)
+                document.getElementById("nombres").value = d.nombre || d.nombres;
               else document.getElementById("nombres").value = "Nombres";
 
               if (d.apellidoPaterno || d.ape_paterno)
@@ -775,13 +775,6 @@
                 document.getElementById("sexoMasculino").checked = false;
                 document.getElementById("sexoFemenino").checked = false;
               }
-            } else {
-              document.getElementById("nombres").value = "Nombres";
-              document.getElementById("apellidoPaterno").value =
-                "Apellido paterno";
-              document.getElementById("apellidoMaterno").value =
-                "Apellido materno";
-              toastr.error(json.Msj, "ERROR");
             }
           })
           .catch(() =>
