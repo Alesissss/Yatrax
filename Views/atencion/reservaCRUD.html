@@ -34,7 +34,8 @@
                        id="txt_DetalleAsiento"
                        class="form-control"
                        placeholder="ID detalle viaje asiento"
-                       value="{{ reserva.idDetalleViajeAsiento if reserva is defined else '' }}">
+                       value="{{ reserva.idDetalleViajeAsiento if reserva is defined else '' }}"
+                       {% if btnId == "btn_Ver" %}disabled{% endif %}>
                 <div class="input-group-append">
                   <div class="input-group-text"><i class="fas fa-chair"></i></div>
                 </div>
@@ -49,7 +50,8 @@
                        id="txt_NumeroComp"
                        class="form-control"
                        placeholder="A001-00000001"
-                       value="{{ reserva.numeroComprobante if reserva is defined else '' }}">
+                       value="{{ reserva.numeroComprobante if reserva is defined else '' }}"
+                       {% if btnId == "btn_Ver" %}disabled{% endif %}>
                 <div class="input-group-append">
                   <div class="input-group-text"><i class="fas fa-receipt"></i></div>
                 </div>
@@ -67,7 +69,7 @@
                            id="rad_es_pasaje_normal"
                            name="tipo_pasaje"
                            value="es_pasaje_normal"
-                           {% if reserva is defined and reserva.esPasajeNormal == 1 %}checked{% endif %}>
+                           {% if reserva is defined and reserva.esPasajeNormal == 1 %}checked{% endif %} {% if btnId == "btn_Ver" %}disabled{% endif %}>
                     <label class="form-check-label" for="rad_es_pasaje_normal">Normal</label>
                   </div>
                 </div>
@@ -78,7 +80,7 @@
                            id="rad_es_pasaje_libre"
                            name="tipo_pasaje"
                            value="es_pasaje_libre"
-                           {% if reserva is defined and reserva.esPasajeLibre == 1 %}checked{% endif %}>
+                           {% if reserva is defined and reserva.esPasajeLibre == 1 %}checked{% endif %} {% if btnId == "btn_Ver" %}disabled{% endif %}>
                     <label class="form-check-label" for="rad_es_pasaje_libre">Libre</label>
                   </div>
                 </div>
@@ -89,7 +91,7 @@
                            id="rad_es_transferencia"
                            name="tipo_pasaje"
                            value="es_transferencia"
-                           {% if reserva is defined and reserva.esTransferencia == 1 %}checked{% endif %}>
+                           {% if reserva is defined and reserva.esTransferencia == 1 %}checked{% endif %} {% if btnId == "btn_Ver" %}disabled{% endif %}>
                     <label class="form-check-label" for="rad_es_transferencia">Transferencia</label>
                   </div>
                 </div>
@@ -100,7 +102,7 @@
                            id="rad_es_reserva"
                            name="tipo_pasaje"
                            value="es_reserva"
-                           {% if reserva is defined and reserva.esReserva == 1 %}checked{% endif %}>
+                           {% if reserva is defined and reserva.esReserva == 1 %}checked{% endif %} {% if btnId == "btn_Ver" %}disabled{% endif %}>
                     <label class="form-check-label" for="rad_es_reserva">Reserva</label>
                   </div>
                 </div>
@@ -111,7 +113,7 @@
                            id="rad_es_cambio_ruta"
                            name="tipo_pasaje"
                            value="es_cambio_ruta"
-                           {% if reserva is defined and reserva.esCambioRuta == 1 %}checked{% endif %}>
+                           {% if reserva is defined and reserva.esCambioRuta == 1 %}checked{% endif %} {% if btnId == "btn_Ver" %}disabled{% endif %}>
                     <label class="form-check-label" for="rad_es_cambio_ruta">Cambio de Ruta</label>
                   </div>
                 </div>
@@ -126,7 +128,8 @@
                        id="txt_Venta"
                        class="form-control"
                        placeholder="ID Venta"
-                       value="{{ reserva.idVenta if reserva is defined else '' }}">
+                       value="{{ reserva.idVenta if reserva is defined else '' }}"
+                       {% if btnId == "btn_Ver" %}disabled{% endif %}>
                 <div class="input-group-append">
                   <div class="input-group-text"><i class="fas fa-shopping-cart"></i></div>
                 </div>
@@ -142,7 +145,8 @@
                        class="form-control"
                        placeholder="Código"
                        value="{{ reserva.codigo if reserva is defined else '' }}"
-                       oninput="this.value = this.value.toUpperCase();">
+                       oninput="this.value = this.value.toUpperCase();"
+                       {% if btnId == "btn_Ver" %}disabled{% endif %}>
                 <div class="input-group-append">
                   <div class="input-group-text"><i class="fas fa-code"></i></div>
                 </div>
@@ -152,7 +156,7 @@
             {#–– Botones ––#}
             <div class="col-md-12 text-center">
               <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado</button>
-              <button id="btn_Aceptar" type="button" class="btn btn-primary">Aceptar</button>
+              <button id="btn_Aceptar" type="button" class="btn btn-primary" {% if btnId == "btn_Ver" %}disabled{% endif %}>Aceptar</button>
             </div>
 
           </div>

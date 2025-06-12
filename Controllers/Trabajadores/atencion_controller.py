@@ -200,10 +200,10 @@ def eliminarReserva(id):
             "Msj2": ""
         })
 
-@atencion_bp.route('/VerReserva/<int:id>')
-def verReserva(id):
-    reserva = Pasaje.obtener_una_reserva(id)
-    return render_template("atencion/reservaCRUD.html",tittle="Ver reserva",reserva=reserva)
+@atencion_bp.route('/VerReserva/<int:idReserva>')
+def verReserva(idReserva):
+    reserva = Pasaje.obtener_por_id(idReserva)
+    return render_template("atencion/reservaCRUD.html",tittle="Ver reserva",reserva=reserva,btnId="btn_Ver")
 
 @atencion_bp.route('/CambiarEstado/<int:id_pasaje>', methods=["POST"])
 def cambiarEstadoPasaje(id_pasaje):
