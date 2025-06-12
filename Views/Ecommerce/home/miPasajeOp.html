@@ -1,5 +1,5 @@
-{% extends "maestra.html" %} 
-{% block titulo %}YATRAX - Tranferencia de pasaje{%endblock %} 
+{% extends "maestra.html" %}
+{% block titulo %}YATRAX - Tranferencia de pasaje{%endblock %}
 {% block contenido %}
 
 <style>
@@ -24,13 +24,8 @@
   <div class="d-flex justify-content-center mt-3 mb-3">
     <div class="d-flex align-items-center">
       <label for="comprobante" class="me-2 mb-0">Número de comprobante</label>
-      <input
-        type="text"
-        id="comprobante"
-        class="form-control me-2"
-        placeholder="# A001 - 12345678"
-        style="max-width: 200px"
-      />
+      <input type="text" id="comprobante" class="form-control me-2" placeholder="# A001 - 12345678"
+        style="max-width: 200px" />
       <button id="btnBuscar" class="btn btn-primary">Buscar</button>
     </div>
   </div>
@@ -41,43 +36,19 @@
     <div class="row gy-3">
       <div class="col-md-6">
         <label class="form-label">Tipo documento</label>
-        <input
-          id="tipoDocAnt"
-          type="text"
-          class="form-control bgcustom"
-          value="DNI"
-          readonly
-        />
+        <input id="tipoDocAnt" type="text" class="form-control bgcustom" value="DNI" readonly />
       </div>
       <div class="col-md-3">
         <label class="form-label">Origen</label>
-        <input
-          id="origenViaje"
-          type="text"
-          class="form-control bgcustom"
-          value="Origen"
-          readonly
-        />
+        <input id="origenViaje" type="text" class="form-control bgcustom" value="Origen" readonly />
       </div>
       <div class="col-md-3">
         <label class="form-label">Destino</label>
-        <input
-          id="destinoViaje"
-          type="text"
-          class="form-control bgcustom"
-          value="Destino"
-          readonly
-        />
+        <input id="destinoViaje" type="text" class="form-control bgcustom" value="Destino" readonly />
       </div>
       <div class="col-md-6">
         <label class="form-label">Número de documento</label>
-        <input
-          id="numDocAnt"
-          type="text"
-          class="form-control bgcustom"
-          value="Número de documento"
-          readonly
-        />
+        <input id="numDocAnt" type="text" class="form-control bgcustom" value="Número de documento" readonly />
       </div>
       <div class="col-md-3">
         <label class="form-label">Fecha de viaje</label>
@@ -89,33 +60,15 @@
       </div>
       <div class="col-md-6">
         <label class="form-label">Nombre completo</label>
-        <input
-          id="nombreComAnt"
-          type="text"
-          class="form-control bgcustom"
-          value="Nombre completo"
-          readonly
-        />
+        <input id="nombreComAnt" type="text" class="form-control bgcustom" value="Nombre completo" readonly />
       </div>
       <div class="col-md-3">
         <label class="form-label">Asiento</label>
-        <input
-          id="asientoViaje"
-          type="text"
-          class="form-control bgcustom"
-          value="N° Asiento"
-          readonly
-        />
+        <input id="asientoViaje" type="text" class="form-control bgcustom" value="N° Asiento" readonly />
       </div>
       <div class="col-md-3">
         <label class="form-label">Servicio</label>
-        <input
-          id="servicioViaje"
-          type="text"
-          class="form-control bgcustom"
-          value="Servicio"
-          readonly
-        />
+        <input id="servicioViaje" type="text" class="form-control bgcustom" value="Servicio" readonly />
       </div>
     </div>
   </div>
@@ -138,7 +91,7 @@
 
   <!-- Contenido dinámico según operación seleccionada -->
   <div id="contenidoOperacion" style="display: none;">
-    
+
     <!-- Datos del nuevo pasajero - Solo para transferencia -->
     <div id="datosNuevoPasajero" class="border p-3 mb-4" style="display: none;">
       <h5><strong>Datos del nuevo pasajero</strong></h5>
@@ -153,58 +106,28 @@
         </div>
         <div class="col-md-4">
           <label class="form-label">Número de documento</label>
-          <input
-            type="text"
-            id="numeroDocNuevo"
-            maxlength="11"
-            class="form-control"
-            placeholder="Número de documento"
-          />
+          <input type="text" id="numeroDocNuevo" maxlength="11" class="form-control"
+            placeholder="Número de documento" />
         </div>
         <div class="col-md-4">
           <label class="form-label">Correo</label>
-          <input
-            type="email"
-            id="correo"
-            class="form-control"
-            placeholder="Correo"
-          />
+          <input type="email" id="correo" class="form-control" placeholder="Correo" />
         </div>
         <div class="col-md-4">
           <label class="form-label">Nombres</label>
-          <input
-            type="text"
-            id="nombres"
-            class="form-control"
-            placeholder="Nombres"
-          />
+          <input type="text" id="nombres" class="form-control" placeholder="Nombres" />
         </div>
         <div class="col-md-4">
           <label class="form-label">Apellido paterno</label>
-          <input
-            type="text"
-            id="apellidoPaterno"
-            class="form-control"
-            placeholder="Apellido paterno"
-          />
+          <input type="text" id="apellidoPaterno" class="form-control" placeholder="Apellido paterno" />
         </div>
         <div class="col-md-4">
           <label class="form-label">Apellido materno</label>
-          <input
-            type="text"
-            id="apellidoMaterno"
-            class="form-control"
-            placeholder="Apellido materno"
-          />
+          <input type="text" id="apellidoMaterno" class="form-control" placeholder="Apellido materno" />
         </div>
         <div class="col-md-4">
           <label class="form-label">Teléfono</label>
-          <input
-            type="tel"
-            id="telefono"
-            class="form-control"
-            placeholder="Teléfono"
-          />
+          <input type="tel" id="telefono" class="form-control" placeholder="Teléfono" />
         </div>
         <div class="col-md-4">
           <label class="form-label">Fecha de nacimiento</label>
@@ -213,23 +136,11 @@
         <div class="col-md-4 align-content-center">
           <div class="form-label">Sexo</div>
           <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="sexoNuevo"
-              id="sexoMasculino"
-              value="M"
-            />
+            <input class="form-check-input" type="radio" name="sexoNuevo" id="sexoMasculino" value="M" />
             <label class="form-check-label" for="sexoMasculino">Masculino</label>
           </div>
           <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="sexoNuevo"
-              id="sexoFemenino"
-              value="F"
-            />
+            <input class="form-check-input" type="radio" name="sexoNuevo" id="sexoFemenino" value="F" />
             <label class="form-check-label" for="sexoFemenino">Femenino</label>
           </div>
         </div>
@@ -239,11 +150,7 @@
       <div class="form-check mt-3" id="menorWrapper">
         <input class="form-check-input" type="checkbox" id="conMenor" />
         <label class="form-check-label" for="conMenor">Con menor de edad en brazos</label>
-        <i
-          id="editMenor"
-          class="fa-solid fa-pencil text-primary ms-2"
-          style="display: none"
-        ></i>
+        <i id="editMenor" class="fa-solid fa-pencil text-primary ms-2" style="display: none"></i>
       </div>
 
       <!-- Bloque extra del menor -->
@@ -259,12 +166,7 @@
           </div>
           <div class="col-md-4">
             <label class="form-label">Número de documento</label>
-            <input
-              type="text"
-              id="numeroDocMenor"
-              class="form-control"
-              placeholder="Número de documento"
-            />
+            <input type="text" id="numeroDocMenor" class="form-control" placeholder="Número de documento" />
           </div>
           <div class="col-md-4">
             <label class="form-label">Fecha de nacimiento</label>
@@ -272,30 +174,15 @@
           </div>
           <div class="col-md-4">
             <label class="form-label">Nombres</label>
-            <input
-              type="text"
-              id="nombresMenor"
-              class="form-control"
-              placeholder="Nombres"
-            />
+            <input type="text" id="nombresMenor" class="form-control" placeholder="Nombres" />
           </div>
           <div class="col-md-4">
             <label class="form-label">Apellido paterno</label>
-            <input
-              type="text"
-              id="apellidoPaternoMenor"
-              class="form-control"
-              placeholder="Apellido paterno"
-            />
+            <input type="text" id="apellidoPaternoMenor" class="form-control" placeholder="Apellido paterno" />
           </div>
           <div class="col-md-4">
             <label class="form-label">Apellido materno</label>
-            <input
-              type="text"
-              id="apellidoMaternoMenor"
-              class="form-control"
-              placeholder="Apellido materno"
-            />
+            <input type="text" id="apellidoMaternoMenor" class="form-control" placeholder="Apellido materno" />
           </div>
           <div class="col-md-4">
             <label class="form-label">Relación con el menor</label>
@@ -309,23 +196,11 @@
           <div class="col-md-4 align-content-center">
             <div class="form-label">Sexo</div>
             <div class="form-check form-check-inline">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="sexoMenor"
-                id="sexoMenorM"
-                value="M"
-              />
+              <input class="form-check-input" type="radio" name="sexoMenor" id="sexoMenorM" value="M" />
               <label class="form-check-label" for="sexoMenorM">Masculino</label>
             </div>
             <div class="form-check form-check-inline">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="sexoMenor"
-                id="sexoMenorF"
-                value="F"
-              />
+              <input class="form-check-input" type="radio" name="sexoMenor" id="sexoMenorF" value="F" />
               <label class="form-check-label" for="sexoMenorF">Femenino</label>
             </div>
           </div>
@@ -335,11 +210,7 @@
       <!-- Checkbox de menor de edad - Solo para transferencia -->
       <div class="form-check mt-3">
         <input class="form-check-input" type="checkbox" id="esMenor" disabled />
-        <label
-          class="form-check-label disabled"
-          for="esMenor"
-          style="color: rgb(0, 0, 0)"
-        >Es menor de edad</label>
+        <label class="form-check-label disabled" for="esMenor" style="color: rgb(0, 0, 0)">Es menor de edad</label>
       </div>
     </div>
 
@@ -379,13 +250,13 @@
     const MenorBlock = document.getElementById("MenorBlock");
     const editMenor = document.getElementById("editMenor");
     const buscarDatos = document.getElementById("btnBuscar");
-    
+
     // Elementos para manejo de operaciones
     const btnTransferir = document.getElementById("btnTransferir");
     const btnCambioRuta = document.getElementById("btnCambioRuta");
     const btnReembolso = document.getElementById("btnReembolso");
     const btnConvertirLibre = document.getElementById("btnConvertirLibre");
-    
+
     const contenidoOperacion = document.getElementById("contenidoOperacion");
     const datosNuevoPasajero = document.getElementById("datosNuevoPasajero");
     const contenidoOtrasOperaciones = document.getElementById("contenidoOtrasOperaciones");
@@ -422,7 +293,7 @@
         datosNuevoPasajero.style.display = 'none';
         contenidoOtrasOperaciones.style.display = 'block';
         checkboxCargo.style.display = 'none';
-        
+
         // Actualizar contenido según operación
         switch (operacion) {
           case 'cambio-ruta':
@@ -479,42 +350,41 @@
       editMenor.style.display = "none";
     }
 
-    // Cuando tildas/desmarcas el checkbox
     conMenor.addEventListener("change", () => {
       if (conMenor.checked) showMenor();
       else hideMenor();
     });
 
-    // Clic fuera del área menorWrapper + MenorBlock
-    document.addEventListener("click", (e) => {
-      if (!conMenor.checked) return;
+    // // Clic fuera del área menorWrapper + MenorBlock
+    // document.addEventListener("click", (e) => {
+    //   if (!conMenor.checked) return;
 
-      if (!menorWrap.contains(e.target) && !MenorBlock.contains(e.target)) {
-        const anyFilled = Array.from(
-          MenorBlock.querySelectorAll("input, select")
-        ).some((el) => el.value.trim() !== "");
+    //   if (!menorWrap.contains(e.target) && !MenorBlock.contains(e.target)) {
+    //     const anyFilled = Array.from(
+    //       MenorBlock.querySelectorAll("input, select")
+    //     ).some((el) => el.value.trim() !== "");
 
-        if (!anyFilled) {
-          conMenor.checked = false;
-          hideMenor();
-        } else {
-          MenorBlock.querySelectorAll("input, select").forEach(
-            (el) => (el.disabled = true)
-          );
-          editMenor.style.display = "inline-block";
-        }
-      }
-    });
+    //     if (!anyFilled) {
+    //       conMenor.checked = false;
+    //       hideMenor();
+    //     } else {
+    //       MenorBlock.querySelectorAll("input, select").forEach(
+    //         (el) => (el.disabled = true)
+    //       );
+    //       editMenor.style.display = "inline-block";
+    //     }
+    //   }
+    // });
 
-    // Al hacer click en el lápiz → desbloquea edición
-    editMenor.addEventListener("click", (e) => {
-      e.stopPropagation();
-      MenorBlock.querySelectorAll("input, select").forEach(
-        (el) => (el.disabled = false)
-      );
-      editMenor.style.display = "none";
-      MenorBlock.querySelector("select, input").focus();
-    });
+    // // Al hacer click en el lápiz → desbloquea edición
+    // editMenor.addEventListener("click", (e) => {
+    //   e.stopPropagation();
+    //   MenorBlock.querySelectorAll("input, select").forEach(
+    //     (el) => (el.disabled = false)
+    //   );
+    //   editMenor.style.display = "none";
+    //   MenorBlock.querySelector("select, input").focus();
+    // });
 
     document
       .getElementById("comprobante")
@@ -600,8 +470,21 @@
           "MENSAJE DEL SISTEMA"
         );
         document.getElementById("esMenor").checked = true;
+        document.getElementById("conMenor").disabled = true;
+        document.getElementById("conMenor").checked = false;
+        if (document.getElementById("conMenor").checked) {
+          showMenor();
+        } else {
+          hideMenor();
+        }
       } else {
         document.getElementById("esMenor").checked = false;
+        document.getElementById("conMenor").disabled = false;
+        if (document.getElementById("conMenor").checked) {
+          showMenor();
+        } else {
+          hideMenor();
+        }
       }
     }
 
@@ -633,69 +516,63 @@
       .getElementById("tipoDocMenor")
       .addEventListener("change", buscarPersonaMenor);
 
-    // Función de búsqueda para el menor
+
     function buscarPersonaMenor() {
       const tipoDoc = document.getElementById("tipoDocMenor").value;
       const numDoc = document.getElementById("numeroDocMenor").value.trim();
 
       if (!tipoDoc) {
-        toastr.warning(
-          "El tipo de documento es obligatorio",
-          "MENSAJE DEL SISTEMA"
-        );
-        return;
-      }
-      if (!numDoc) {
-        toastr.warning(
-          "El número de documento es obligatorio",
-          "MENSAJE DEL SISTEMA"
-        );
+        toastr.warning("El tipo de documento es obligatorio", "MENSAJE DEL SISTEMA");
         return;
       }
 
-      if (tipoDoc === "DNI" && numDoc.length == 8) {
-        fetch(
-          `/ecommerce/home/api/get_persona_data?tipoDoc=${encodeURIComponent(
-            tipoDoc
-          )}&numDoc=${encodeURIComponent(numDoc)}`
-        )
+      if (tipoDoc && (numDoc.length == 8 || numDoc.length == 12)) {
+        fetch(`/ecommerce/home/api/get_persona_data?tipoDoc=${encodeURIComponent(tipoDoc)}&numDoc=${encodeURIComponent(numDoc)}`)
           .then((r) => r.json())
           .then((json) => {
             if (json.Status === "success") {
               const d = json.data;
-              if (d.nombre)
-                document.getElementById("nombresMenor").value = d.nombre;
-              else document.getElementById("nombresMenor").value = "Nombres";
 
-              if (d.apellidoPaterno)
-                document.getElementById("apellidoPaternoMenor").value =
-                  d.apellidoPaterno;
-              else
-                document.getElementById("apellidoPaternoMenor").value =
-                  "Apellido paterno";
+              if (d.nombre || d.nombres) {
+                document.getElementById("nombresMenor").value = d.nombre || d.nombres;
+              }
 
-              if (d.apellidoMaterno)
-                document.getElementById("apellidoMaternoMenor").value =
-                  d.apellidoMaterno;
-              else
-                document.getElementById("apellidoMaternoMenor").value =
-                  "Apellido materno";
-              toastr.success(json.Msj, "OK");
+              if (d.apellidoPaterno || d.ape_paterno) {
+                document.getElementById("apellidoPaternoMenor").value = d.apellidoPaterno || d.ape_paterno;
+              }
+
+              if (d.apellidoMaterno || d.ape_materno) {
+                document.getElementById("apellidoMaternoMenor").value = d.apellidoMaterno || d.ape_materno;
+              }
+
+              if (d.f_nacimiento) {
+                document.getElementById("fechaNacimientoMenor").value = moment(d.f_nacimiento).format("YYYY-MM-DD");
+                validarEdadMenor();
+              }
+
+              if (d.sexo != null) {
+                document.getElementById("sexoMasculinoMenor").checked = d.sexo === 1;
+                document.getElementById("sexoFemeninoMenor").checked = d.sexo !== 1;
+              } else {
+                document.getElementById("sexoMasculinoMenor").checked = false;
+                document.getElementById("sexoFemeninoMenor").checked = false;
+              }
             } else {
-              document.getElementById("nombresMenor").value = "Nombres";
-              document.getElementById("apellidoPaternoMenor").value =
-                "Apellido paterno";
-              document.getElementById("apellidoMaternoMenor").value =
-                "Apellido materno";
-              toastr.error(json.Msj, "ERROR");
+              document.getElementById("nombresMenor").value = placeholder = "Nombres";
+              document.getElementById("apellidoPaternoMenor").value = "";
+              document.getElementById("apellidoMaternoMenor").value = "";
+              document.getElementById("fechaNacimientoMenor").value = "";
+              document.getElementById("sexoMasculinoMenor").checked = false;
+              document.getElementById("sexoFemeninoMenor").checked = false;
             }
           })
-          .catch(() =>
-            toastr.error("No se ha podido conectar con el servidor", "ERROR")
-          );
+          .catch((e) => {
+            toastr.error("No se ha podido conectar con el servidor" + e.error(), "ERROR");
+          });
         return;
       }
     }
+
 
     // Función de búsqueda
     function buscarPersona() {
@@ -710,14 +587,6 @@
         return;
       }
 
-      // if (!numDoc) {
-      //   toastr.warning(
-      //     "El número de documento es obligatorio",
-      //     "MENSAJE DEL SISTEMA"
-      //   );
-      //   return;
-      // }
-
       if (tipoDoc && (numDoc.length == 8 || numDoc.length == 12)) {
         fetch(
           `/ecommerce/home/api/get_persona_data?tipoDoc=${encodeURIComponent(
@@ -728,37 +597,29 @@
           .then((json) => {
             if (json.Status === "success") {
               const d = json.data;
-              if (d.nombre || d.nombres)
+              if (d.nombre || d.nombres) {
                 document.getElementById("nombres").value = d.nombre || d.nombres;
-              else document.getElementById("nombres").value = "Nombres";
+              }
 
-              if (d.apellidoPaterno || d.ape_paterno)
+              if (d.apellidoPaterno || d.ape_paterno) {
                 document.getElementById("apellidoPaterno").value = d.apellidoPaterno || d.ape_paterno;
-              else
-                document.getElementById("apellidoPaterno").value = "Apellido paterno";
+              }
 
-              if (d.apellidoMaterno || d.ape_materno)
+              if (d.apellidoMaterno || d.ape_materno) {
                 document.getElementById("apellidoMaterno").value = d.apellidoMaterno || d.ape_materno;
-              else
-                document.getElementById("apellidoMaterno").value = "Apellido materno";
+              }
 
               if (d.email) {
                 document.getElementById("correo").value = d.email;
-              } else {
-                document.getElementById("correo").value = "Correo";
               }
 
               if (d.telefono) {
                 document.getElementById("telefono").value = d.telefono;
-              } else {
-                document.getElementById("telefono").value = "Teléfono";
               }
 
-              if (d.f_nacimiento){
+              if (d.f_nacimiento) {
                 document.getElementById("fechaNacimientoNuevo").value = moment(d.f_nacimiento).format("YYYY-MM-DD");
                 validarEdadNuevoPasajero(); // Validar edad al cargar la fecha
-              } else {
-                document.getElementById("fechaNacimientoNuevo").value = "";
               }
 
               if (d.sexo != null) {  // esto cubre null y undefined
