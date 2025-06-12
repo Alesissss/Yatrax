@@ -24,11 +24,11 @@
                     <thead class="bg-gray">
                         <tr>
                             <th class="text-center">ID</th>
-                            <th class="text-center">METODO PAGO</th>
-                            <th class="text-center">TIPO COMPROBANTE</th>
+                            <th class="text-center">ID_VENTA</th>
                             <th class="text-center">CLIENTE</th>
-                            <th class="text-center">PROMOCION</th>
-                            <th class="text-center">VIAJE</th>
+                            <th class="text-center">NUMERO DOCUMENTO</th>
+                            <th class="text-center">ORIGEN</th>
+                            <th class="text-center">DESTINO</th>
                             <th class="text-center">CODIGO</th>
                             <th class="text-center">ESTADO</th>
                             <th class="text-center">ACCIÓN</th>
@@ -198,20 +198,20 @@
             },
             columns: [
                 { data: "id", name: "Id" },
-                { data: "id_metodo_pago", name: "Metodo de pago" },
-                { data: "id_tipo_comprobante", name: "Tipo comprobante" },
-                { data: "id_cliente", name: "Cliente" },
-                { data: "id_promocion", name: "Promocion" },
-                { data: "id_viaje", name: "Viaje" },
+                { data: "id_venta", name: "IdVenta" },
+                { data: "cliente", name: "Cliente" },
+                { data: "num_doc", name: "Numero de documento" },
+                { data: "origen", name: "Origen" },
+                { data: "destino", name: "Destino" },
                 { data: "codigo", name: "Codigo" },
                 {
-                    data: "estado",
-                    name: "estado",
+                    data: "reserva",
+                    name: "reserva",
                     render: function (data, type, row) {
-                        let estado = data === 'R' ? 'En proceso' : 'Reserva pagada';
-                        if (estado === "En proceso") {
+                        let estado = data === 1 ? 'Reservado' : 'Pagado';
+                        if (estado === "Reservado") {
                             return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-danger fs-5">${estado}</span></h5>`;
-                        } else if (estado === "Reserva pagada") {
+                        } else if (estado === "Pagado") {
                             return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-success fs-5">${estado}</span></h5>`;
                         } else {
                             return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge fs-5" style="background-color: #800080; color: white;">${estado}</span></h5>`;
