@@ -134,3 +134,24 @@ class Pasaje:
         finally:
             if conexion:
                 conexion.cerrar()
+
+    @classmethod
+    def pagarReserva(cls, id_pasaje):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            # Llama al SP con la variable de salida en @MSJ y @MSJ2
+            conexion.ejecutar(
+                "CALL SP_CAMBIAR_ESTADO_PASAJE(%s, @MSJ, @MSJ2);",
+                (id_pasaje,)
+            )
+            # Recupera los mensajes de salida
+            resultado = conexion.obtener(
+                "SELECT @MSJ AS msj, @MSJ2 AS msj2;"
+            )
+            return resultado[0] if resultado else {"msj": None, "msj2": "Error al recuperar mensajes"}
+        except Exception as e:
+            return {"msj": None, "msj2": f"Error al cambiar estado de pasaje: {e}"}
+        finally:
+            if conexion:
+                conexion.cerrar()

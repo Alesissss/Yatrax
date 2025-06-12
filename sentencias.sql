@@ -5488,6 +5488,44 @@ BEGIN
 END $$
 DELIMITER ;
 
+DELIMITER $$
+
+CREATE PROCEDURE SP_CAMBIAR_ESTADO_PASAJE(
+    IN  p_idPasaje INT,
+    OUT p_MSJ    VARCHAR(255),
+    OUT p_MSJ2   VARCHAR(255)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        -- Si ocurre cualquier error, devolvemos mensaje de error
+        SET p_MSJ  = '';
+        SET p_MSJ2 = 'Error al cambiar el estado del pasaje';
+    END;
+
+    -- Actualizamos los flags: ponemos PasajeNormal=1 y el resto a 0
+    UPDATE pasaje
+    SET 
+        esPasajeNormal  = 1,
+        esPasajeLibre   = 0,
+        esTransferencia = 0,
+        esReserva       = 0,
+        esCambioRuta    = 0
+    WHERE id = p_idPasaje;
+
+    -- Comprobamos si realmente se actualizó alguna fila
+    IF ROW_COUNT() = 0 THEN
+        SET p_MSJ  = '';
+        SET p_MSJ2 = CONCAT('No se encontró pasaje con id=', p_idPasaje);
+    ELSE
+        SET p_MSJ  = 'El pasaje se marcó como Normal correctamente.';
+        SET p_MSJ2 = '';
+    END IF;
+END$$
+
+DELIMITER ;
+
+
     -- Procedimientos almacenados para reclamo y tipo reclamo
     DELIMITER $$
 

@@ -209,7 +209,7 @@ def verReserva(idReserva):
 def cambiarEstadoPasaje(id_pasaje):
     try:
         nuevo_estado = "P"
-        resultado = Pasaje.cambiarEstado(id_pasaje, nuevo_estado)
+        resultado = Pasaje.pagarReserva(id_pasaje)
         if resultado["msj"] is not None:
             return jsonify({"Status": "success", "Msj": resultado["msj"],"Msj2":resultado["msj2"]})
         else:
