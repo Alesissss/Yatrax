@@ -102,6 +102,23 @@ def Menu_TipoDocumento():
 @ventas_bp.route('/TipoDocumentoNuevo')
 def TipoDocumento_Nuevo():
     return render_template('ventas/tipoDocumentoCRUD.html', active_page="tipoDocumento", active_menu = 'mVentas', tipoDocumento = {}, tittle = 'Registrar tipo documento', btnId = 'btn_Registrar')
+
+@ventas_bp.route('/VenderPasajes')
+def Menu_VenderPasajes():
+    return render_template('ventas/pasajes.html', active_page="venderPasajes", active_menu='mVentas')
+
+@ventas_bp.route('/VenderPasajesNuevo')
+def VenderPasajes_Nuevo():
+    return render_template('ventas/pasajesCRUD.html', active_page="venderPasajes", active_menu='mVentas', pasaje = {}, tittle = 'Registrar pasaje', btnId = 'btn_Registrar')
+
+@ventas_bp.route('/TransaccionesPasajes')
+def Menu_TransaccionesPasajes():
+    return render_template('ventas/pasajesTransacciones.html', active_page="transaccionesPasajes", active_menu='mVentas')
+
+@ventas_bp.route('/TransaccionesPasajesNuevo')
+def TransaccionesPasajes_Nuevo():
+    return render_template('ventas/pasajesTransaccionesCRUD.html', active_page="transaccionesPasajes", active_menu='mVentas', transaccion = {}, tittle = 'Registrar transacción de pasajes', btnId = 'btn_Registrar')
+
 # END VIEWS
 
 # FUNCIONES
@@ -861,5 +878,10 @@ def dar_baja_cliente(id):  # Recibe el ID de la URL
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
 # END REGION CLIENTE 
+
+# REGION PASAJES Y OPRERACIONES
+
+# END REGION PASAJES Y OPRERACIONES
+
 
 # END FUNCIONES
