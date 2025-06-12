@@ -48,7 +48,7 @@ class Asiento:
         try:
             asientos = conexion.obtener(""" SELECT a.id, a.nombre, a.estado 
                 FROM asiento a 
-                INNER JOIN nivel_herramienta nh ON a.id_nivel_herramienta = nh.id_nivel 
+                INNER JOIN nivel_herramienta nh ON a.id_nivel_herramienta = nh.id 
                 INNER JOIN herramienta h ON h.id = nh.id_herramienta
                 INNER JOIN tipo_herramienta th ON th.id = h.id_tipo
                 WHERE th.id = 1 AND a.id_vehiculo = %s """, (vehiculo_id,))

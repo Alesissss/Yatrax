@@ -24,7 +24,7 @@
                             <th class="text-center">SERVICIO</th>
                             <th class="text-center">FECHA SALIDA ESTIMADA</th>
                             <th class="text-center">FECHA LLEGADA ESTIMADA</th>
-                            <th class="text-center">PRECIO POR ASIENTO</th>
+                            <th class="text-center">ESTADO DE VIAJE</th>
                             <th class="text-center">ESTADO</th>
                             <th class="text-center">ACCIÓN</th>
                         </tr>
@@ -199,24 +199,30 @@
                 { data: "vehiculo", name: "vehiculo" },
                 { data: "servicio", name: "servicio" },
                 { 
-                    data: "fecha_salida_estimada", 
-                    name: "fecha_salida_estimada",
+                    data: "fechaHoraSalida", 
+                    name: "fechaHoraSalida",
                     render: function (data, type, row) {
                         return moment(data).format('YYYY-MM-DD HH:mm:ss');
                     },
                 },
                 { 
-                    data: "fecha_llegada_estimada", 
-                    name: "fecha_llegada_estimada",
+                    data: "fechaHoraLlegada", 
+                    name: "fechaHoraLlegada",
                     render: function (data, type, row) {
                         return moment(data).format('YYYY-MM-DD HH:mm:ss');
                     },
                 },
-                { 
-                    data: "id", 
-                    name: "id",
+                {
+                    data: "estado_viaje",
+                    name: "estado_viaje",
                     render: function (data, type, row) {
-                        return data;
+                        if (data === "PENDIENTE") {
+                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-warning fs-5">${data}</span></h5>`;
+                        } else if (data === "No vigente") {
+                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-danger fs-5">${data}</span></h5>`;
+                        } else {
+                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge fs-5" style="background-color: #800080; color: white;">${data}</span></h5>`;
+                        }
                     },
                 },
                 {
