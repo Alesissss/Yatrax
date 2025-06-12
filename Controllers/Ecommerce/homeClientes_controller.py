@@ -22,6 +22,7 @@ from Models.tipoComprobante import TipoComprobante
 from Models.metodo_pago import MetodoPago
 from Models.preguntas_frecuentes import PreguntasFrecuentes
 from Models.pasajero import Pasajero
+from Models.ruta import Ruta
 homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/home')
 
 # # ERRORES 
@@ -168,6 +169,10 @@ def transferencia_pasaje():
 @homeClientes_bp.route('/miPasajeOperaciones')
 def mi_pasaje_operaciones():
     return render_template('Ecommerce/home/miPasajeOp.html')
+
+@homeClientes_bp.route('/seguimientoViaje')
+def seguimiento_viaje():
+    return render_template('Ecommerce/home/seguimientoViaje.html')
 
 @homeClientes_bp.route('/pago')
 def pago_pasajes():
@@ -423,6 +428,33 @@ def buscarViajes():
     
 
 # END REGION COMPRA PASAJE
+
+# REGION RUTAS SEGUIMIENTO
+@homeClientes_bp.route('/obtenerRutasSeguimiento', methods=['GET'])
+def obtener_rutas_seguimiento():
+    try:
+        rutas = Ruta.obtener_rutas_activas_viaje()
+        if not rutas:
+            return jsonify({"Status": "info", "data": [], "Msj": "No hay rutas activas para seguimiento."})
+
+        # Formatear las rutas para el seguimiento
+        rutas_seguimiento = []
+        for ruta in rutas:
+            ruta_info = {
+                "id": ruta['ID'],
+                "nombre": ruta['nombre'],
+                "descripcion": ruta['descripcion'],
+                "fecha_inicio": ruta['fecha_inicio'],
+                "fecha_fin": ruta['fecha_fin'],
+                "estado": ruta['estado']
+            }
+            rutas_seguimiento.append(ruta_info)
+
+        return jsonify({"Status": "success", "data": rutas_seguimiento, "Msj": "Rutas obtenidas correctamente."})
+    except Exception as e:
+        return jsonify({"Status": "error", "data": [], "Msj": f"Error al obtener las rutas: {repr(e)}"})
+
+# END RUTAS SEGUIMIENTO
 
 #REGION RESERVA
 @homeClientes_bp.route("/listarTiposComprobante")
