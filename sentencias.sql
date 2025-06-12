@@ -689,7 +689,7 @@ CREATE TABLE viaje (
         id INT AUTO_INCREMENT PRIMARY KEY,
         idDetalle_Viaje INT NOT NULL REFERENCES detalle_viaje(id),
         idAsiento INT NULL REFERENCES asiento(id),
-        esDisponible TINYINT NOT NULL, -- 1: disponible, 0: no disponible
+        esDisponible TINYINT NOT NULL DEFAULT 1, -- 1: disponible, 0: no disponible
         -- Auditoría
         fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
         usuario VARCHAR(100) NOT NULL
@@ -742,7 +742,7 @@ CREATE TABLE viaje (
         ape_paterno VARCHAR(100) NOT NULL,
         ape_materno VARCHAR(100) NOT NULL,
         idTipoDocumento INT NOT NULL REFERENCES tipo_documento(id),
-        numero_documento VARCHAR(11) NOT NULL, -- Se recomienda especificar una longitud
+        numero_documento VARCHAR(12) NOT NULL, -- Se recomienda especificar una longitud
         sexo TINYINT NOT NULL, -- 1: masculino, 0: femenino
         f_nacimiento DATE NOT NULL,
         telefono VARCHAR(15) NOT NULL,
@@ -752,16 +752,16 @@ CREATE TABLE viaje (
     CREATE TABLE pasaje(
         id INT AUTO_INCREMENT PRIMARY KEY,
         idDetalleViajeAsiento INT NOT NULL REFERENCES detalle_viaje_asiento(id),
-        numeroComprobante char(13) NOT NULL, -- Ej: A001-00000001
+        numeroComprobante char(13) NULL, -- Ej: A001-00000001
         -- operaciones con pasaje
-        esPasajeNormal TINYINT NULL DEFAULT 1, -- 1: es pasaje normal, 0: no es pasaje normal
+        esPasajeNormal TINYINT NULL DEFAULT 0, -- 1: es pasaje normal, 0: no es pasaje normal
         esPasajeLibre TINYINT NULL DEFAULT 0, -- 1: es pasaje libre, 0: no es pasaje libre
         esTransferencia TINYINT NULL DEFAULT 0, -- 1: es transferencia, 0: no es transferencia
         esReserva TINYINT NULL DEFAULT 0, -- 1: es pasaje reserva, 0: no es pasaje reserva
         esCambioRuta TINYINT NULL DEFAULT 0, -- 1: es cambio de ruta, 0: no es cambio de ruta
         idVenta INT NOT NULL REFERENCES venta(id),
-        codigo CHAR(8),
-        idPasaje INT NULL REFERENCES pasaje(id) -- Para operaciones con pasajes
+        codigo CHAR(8) NOT NULL, -- AA0202
+        idPasaje INT NULL -- Para operaciones con pasajes
     );
 
     -- Crear tablas tipo_reclamo y reclamo

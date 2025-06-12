@@ -695,13 +695,6 @@
           );
         return;
       }
-
-      if (tipoDoc === "CE" && numDoc.length !== 11) {
-        toastr.warning(
-          "El número de CE debe tener al menos 7 dígitos",
-          "MENSAJE DEL SISTEMA"
-        );
-      }
     }
 
     // Función de búsqueda
@@ -725,7 +718,7 @@
       //   return;
       // }
 
-      if (tipoDoc && (numDoc.length == 8 || numDoc.length == 11)) {
+      if (tipoDoc && (numDoc.length == 8 || numDoc.length == 12)) {
         fetch(
           `/ecommerce/home/api/get_persona_data?tipoDoc=${encodeURIComponent(
             tipoDoc
@@ -735,8 +728,8 @@
           .then((json) => {
             if (json.Status === "success") {
               const d = json.data;
-              if (d.nombre)
-                document.getElementById("nombres").value = d.nombre;
+              if (d.nombre || d.nombres)
+                document.getElementById("nombres").value = d.nombre || d.nombres;
               else document.getElementById("nombres").value = "Nombres";
 
               if (d.apellidoPaterno || d.ape_paterno)
@@ -775,13 +768,6 @@
                 document.getElementById("sexoMasculino").checked = false;
                 document.getElementById("sexoFemenino").checked = false;
               }
-            } else {
-              document.getElementById("nombres").value = "Nombres";
-              document.getElementById("apellidoPaterno").value =
-                "Apellido paterno";
-              document.getElementById("apellidoMaterno").value =
-                "Apellido materno";
-              toastr.error(json.Msj, "ERROR");
             }
           })
           .catch(() =>
