@@ -162,32 +162,32 @@
 
 {% block scripts %}
 <script>
-function fct_cambiarInputs() {
-    // Obtén el texto seleccionado (abreviatura) del combo
-    let abreviatura = $('#cbx_tipoDocumento option:selected').text().trim().toUpperCase();
+    function fct_cambiarInputs() {
+        // Obtén el texto seleccionado (abreviatura) del combo
+        let abreviatura = $('#cbx_tipoDocumento option:selected').text().trim().toUpperCase();
 
-    if (abreviatura === 'RUC') {
-        // Oculta los campos para RUC
-        $('#txt_FechaNacimiento').closest('.col-md-6').hide();
-        $('#cbx_Sexo').closest('.col-md-6').hide();
-        $('#ape_pat').closest('.col-md-4').hide();
-        $('#ape_mat').closest('.col-md-4').hide();
+        if (abreviatura === 'RUC') {
+            // Oculta los campos para RUC
+            $('#txt_FechaNacimiento').closest('.col-md-6').hide();
+            $('#cbx_Sexo').closest('.col-md-6').hide();
+            $('#ape_pat').closest('.col-md-4').hide();
+            $('#ape_mat').closest('.col-md-4').hide();
 
-        // Cambia nombre y contraseña a col-12
-        $('#nombre').closest('.col-md-4').removeClass('col-md-4').addClass('col-md-6');
-        $('#contraseña').closest('.col-md-6').removeClass('col-md-6').addClass('col-md-12');
-    } else {
-        // Muestra los campos para otros documentos
-        $('#txt_FechaNacimiento').closest('.col-md-6').show();
-        $('#cbx_Sexo').closest('.col-md-6').show();
-        $('#ape_pat').closest('.col-md-4').show();
-        $('#ape_mat').closest('.col-md-4').show();
+            // Cambia nombre y contraseña a col-12
+            $('#nombre').closest('.col-md-4').removeClass('col-md-4').addClass('col-md-6');
+            $('#contraseña').closest('.col-md-6').removeClass('col-md-6').addClass('col-md-12');
+        } else {
+            // Muestra los campos para otros documentos
+            $('#txt_FechaNacimiento').closest('.col-md-6').show();
+            $('#cbx_Sexo').closest('.col-md-6').show();
+            $('#ape_pat').closest('.col-md-4').show();
+            $('#ape_mat').closest('.col-md-4').show();
 
-        // Restaura nombre y contraseña a sus tamaños originales
-        $('#nombre').closest('.col-md-6').removeClass('col-md-6').addClass('col-md-4');
-        $('#contraseña').closest('.col-md-12').removeClass('col-md-12').addClass('col-md-6');
+            // Restaura nombre y contraseña a sus tamaños originales
+            $('#nombre').closest('.col-md-6').removeClass('col-md-6').addClass('col-md-4');
+            $('#contraseña').closest('.col-md-12').removeClass('col-md-12').addClass('col-md-6');
+        }
     }
-}
 
     function fct_GetPaises() {
         $.getJSON('/trabajadores/ventas/GetData_Paises', function (response) {
@@ -259,10 +259,68 @@ function fct_cambiarInputs() {
         });
     }
 
+    function buscarPersona() {
+        const $tipoDoc = $('#cbx_tipoDocumento');
+        const $numDoc = $('#txt_NumeroDocumento').val().trim();
+        const seleccionado = $tipoDoc.find('option:selected').text().trim();
+
+        if (!seleccionado || seleccionado === '--SELECCIONAR--') {
+            toastr.warning("El tipo de documento es obligatorio", "MENSAJE DE SISTEMA");
+            return;
+        }
+        if (!$numDoc) {
+            toastr.warning("El número de documento es obligatorio", "MENSAJE DE SISTEMA");
+            return;
+        }
+
+        if (seleccionado === "DNI" && $numDoc.length === 8) {
+            fetch(`/ecommerce/home/api/get_persona_data?tipoDoc=${encodeURIComponent(seleccionado)}&numDoc=${encodeURIComponent($numDoc)}`)
+                .then(r => r.json())
+                .then(json => {
+                    if (json.Status === "success") {
+                        const d = json.data;
+                        // Siempre asigna aunque esté vacío, pero no pongas el texto por defecto si viene vacío
+                        $('#nombre').val(d.nombres !== undefined && d.nombres !== null ? d.nombres : "");
+                        $('#ape_pat').val(d.apellidoPaterno !== undefined && d.apellidoPaterno !== null ? d.apellidoPaterno : "");
+                        $('#ape_mat').val(d.apellidoMaterno !== undefined && d.apellidoMaterno !== null ? d.apellidoMaterno : "");
+                        if (json.Msj && json.Msj !== "OK") {
+                            toastr.success(json.Msj, "MENSAJE DE SISTEMA");
+                        }
+                    } else {
+                        $('#nombre').val("");
+                        $('#ape_pat').val("");
+                        $('#ape_mat').val("");
+                        toastr.error(json.Msj, "ERROR");
+                    }
+                })
+                .catch(() => toastr.error("No se ha podido conectar con el servidor", "ERROR"));
+            return;
+        }
+
+        if (seleccionado === "RUC" && $numDoc.length === 11) {
+            fetch(`/ecommerce/home/api/get_persona_data?tipoDoc=${encodeURIComponent(seleccionado)}&numDoc=${encodeURIComponent($numDoc)}`)
+                .then(r => r.json())
+                .then(json => {
+                    if (json.Status === "success") {
+                        const d = json.data;
+                        $('#nombre').val(d.razonSocial ? d.razonSocial : "RAZONSOCIAL");
+                    } else {
+                        $('#nombre').val("RAZONSOCIAL");
+                        toastr.error(json.Msj, "ERROR");
+                    }
+                })
+                .catch(() => toastr.error("No se ha podido conectar con el servidor", "ERROR"));
+            return;
+        }
+    }
+
     function fct_ValidarNumeroDocumento() {
         let tipoDocumento = $('#cbx_tipoDocumento').val();
         let $numeroDocumento = $('#txt_NumeroDocumento');
         let numeroDocumento = $numeroDocumento.val().trim();
+        let telefono = $('#telefono').val().trim();
+        let correo = $('#correo').val().trim();
+        let fechaNacimiento = $('#txt_FechaNacimiento').val();
 
         // Definir longitudes máximas y mínimas según el tipo de documento
         let maxLength = null;
@@ -286,15 +344,49 @@ function fct_cambiarInputs() {
             $numeroDocumento.removeAttr('maxlength');
         }
 
-        // Validación de longitud
-        if (minLength !== null && numeroDocumento.length < minLength) {
-            toastr.warning(`El número de documento debe tener al menos ${minLength} dígitos`, "MENSAJE DE SISTEMA");
+        // Validación de longitud exacta para 1 y 2, rango para 3
+        if (tipoDocumento === "1" && numeroDocumento.length !== 8) {
+            toastr.warning("El número de documento (DNI) debe tener exactamente 8 dígitos", "MENSAJE DE SISTEMA");
             return false;
         }
-        if (maxLength !== null && numeroDocumento.length > maxLength) {
-            toastr.warning(`El número de documento no puede tener más de ${maxLength} dígitos`, "MENSAJE DE SISTEMA");
+        if (tipoDocumento === "2" && numeroDocumento.length !== 11) {
+            toastr.warning("El número de documento (RUC) debe tener exactamente 11 dígitos", "MENSAJE DE SISTEMA");
             return false;
         }
+        if (tipoDocumento === "3" && (numeroDocumento.length < 9 || numeroDocumento.length > 20)) {
+            toastr.warning("El número de documento (Carnet de Extranjería) debe tener entre 9 y 20 dígitos", "MENSAJE DE SISTEMA");
+            return false;
+        }
+
+        // Validar teléfono: exactamente 9 dígitos
+        if (telefono && !/^\d{9}$/.test(telefono)) {
+            toastr.warning("El teléfono debe tener exactamente 9 dígitos", "MENSAJE DE SISTEMA");
+            return false;
+        }
+
+        // Validar correo: debe terminar en @example.com (puedes cambiar example.com por el dominio deseado)
+        // Validar correo: debe terminar en @loquesea.com
+        let correoRegex = /^[^@]+@[^@]+\.com$/i;
+        if (correo && !correoRegex.test(correo)) {
+            toastr.warning("Ingrese un correo válido", "MENSAJE DE SISTEMA");
+            return false;
+        }
+
+        // Validar fecha de nacimiento: mayor de 18 años
+        if (fechaNacimiento) {
+            let fechaNac = new Date(fechaNacimiento);
+            let hoy = new Date();
+            let edad = hoy.getFullYear() - fechaNac.getFullYear();
+            let m = hoy.getMonth() - fechaNac.getMonth();
+            if (m < 0 || (m === 0 && hoy.getDate() < fechaNac.getDate())) {
+                edad--;
+            }
+            if (edad < 18) {
+                toastr.warning("El cliente debe ser mayor de 18 años", "MENSAJE DE SISTEMA");
+                return false;
+            }
+        }
+
         return true;
     }
 
@@ -347,12 +439,17 @@ function fct_cambiarInputs() {
     });
 
     $(document).ready(function () {
+
         fct_GetPaises();
         fct_GetTipoDocumento();
         fct_ValidarNumeroDocumento();
         fct_cambiarInputs();
         $('#cbx_tipoDocumento').change(function () {
             fct_cambiarInputs();
+        });
+
+        $('#txt_NumeroDocumento').on('focusout', function () {
+            buscarPersona();
         });
 
         $("#btn_Registrar").click(function () {
@@ -375,9 +472,29 @@ function fct_cambiarInputs() {
                 toastr.warning("El tipo de documento es obligatorio", "MENSAJE DE SISTEMA");
                 return;
             }
+            // Validar número de documento antes de continuar
+            if (!fct_ValidarNumeroDocumento()) {
+                return;
+            }
 
             if (tipo_documento === "1") {
-                if (!tipo_documento || !numero_documento || !pais || !sexo || !ape_pat || !ape_mat || !nombre || !fecha_nac || !telefono || !direccion || !correo || !contraseña || !estado) {
+                if (
+                    !tipo_documento ||
+                    !numero_documento ||
+                    !pais ||
+                    sexo === null ||
+                    sexo === "" ||
+                    sexo === undefined ||
+                    !ape_pat ||
+                    !ape_mat ||
+                    !nombre ||
+                    !fecha_nac ||
+                    !telefono ||
+                    !direccion ||
+                    !correo ||
+                    !contraseña ||
+                    !estado
+                ) {
                     toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                     return;
                 }
@@ -387,7 +504,23 @@ function fct_cambiarInputs() {
                     return;
                 }
             } else {
-                if (!tipo_documento || !numero_documento || !pais || !sexo || !ape_pat || !ape_mat || !nombre || !fecha_nac || !telefono || !direccion || !correo || !contraseña || !estado) {
+                if (
+                    !tipo_documento ||
+                    !numero_documento ||
+                    !pais ||
+                    sexo === null ||
+                    sexo === "" ||
+                    sexo === undefined ||
+                    !ape_pat ||
+                    !ape_mat ||
+                    !nombre ||
+                    !fecha_nac ||
+                    !telefono ||
+                    !direccion ||
+                    !correo ||
+                    !contraseña ||
+                    !estado
+                ) {
                     toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                     return;
                 }
@@ -470,77 +603,97 @@ function fct_cambiarInputs() {
             let direccion = $('#direccion').val().trim();
             let estado = $('#cbx_estado').val();
 
-            if (tipo_documento === 'DNI') {
-                if (!tipo_documento || !numero_documento || !pais || !sexo || !ape_pat || !ape_mat || !nombre || !fecha_nac || !telefono || !direccion || !correo || !contraseña || !estado) {
+            if (!fct_ValidarNumeroDocumento()) {
+                return;
+            }
+
+            if (tipo_documento === "1") {
+                if (
+                    !tipo_documento ||
+                    !numero_documento ||
+                    !pais ||
+                    sexo === null ||
+                    sexo === "" ||
+                    sexo === undefined ||
+                    !ape_pat ||
+                    !ape_mat ||
+                    !nombre ||
+                    !fecha_nac ||
+                    !telefono ||
+                    !direccion ||
+                    !correo ||
+                    !contraseña ||
+                    !estado
+                ) {
                     toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                     return;
                 }
-            } else if (tipo_documento === 'RUC') {
+            } else if (tipo_documento === "2") {
                 if (!tipo_documento || !numero_documento || !pais || !nombre || !telefono || !direccion || !correo || !contraseña || !estado) {
                     toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                     return;
                 }
             } else {
-                    toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
-                    return;
-                }
+                toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                return;
+            }
 
-                Swal.fire({
-                    title: "¿Estás seguro?",
-                    text: "Esta acción modificará al cliente. ¿Deseas continuar?",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#3085d6",
-                    cancelButtonColor: "#d33",
-                    confirmButtonText: "Sí, editar cliente",
-                    cancelButtonText: "Cancelar",
-                    reverseButtons: true
-                }).then((result) => {
-                    if (result.isConfirmed) {
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción modificará al cliente. ¿Deseas continuar?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, editar cliente",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
 
-                        let formData = new FormData();
-                        formData.append("tipo_documento", tipo_documento);
-                        formData.append("numero_documento", numero_documento);
-                        formData.append("pais", pais);
-                        formData.append("Sexo", sexo);
-                        formData.append("ape_pat", ape_pat);
-                        formData.append("ape_mat", ape_mat);
-                        formData.append("nombre", nombre);
-                        formData.append("fecha_nac", fecha_nac);
-                        formData.append("telefono", telefono);
-                        formData.append("correo", correo);
-                        formData.append("contraseña", contraseña);
-                        formData.append("direccion", direccion);
-                        formData.append("estado", estado);
+                    let formData = new FormData();
+                    formData.append("tipo_documento", tipo_documento);
+                    formData.append("numero_documento", numero_documento);
+                    formData.append("pais", pais);
+                    formData.append("Sexo", sexo);
+                    formData.append("ape_pat", ape_pat);
+                    formData.append("ape_mat", ape_mat);
+                    formData.append("nombre", nombre);
+                    formData.append("fecha_nac", fecha_nac);
+                    formData.append("telefono", telefono);
+                    formData.append("correo", correo);
+                    formData.append("contraseña", contraseña);
+                    formData.append("direccion", direccion);
+                    formData.append("estado", estado);
 
-                        $.ajax({
-                            url: `/trabajadores/ventas/EditarCliente/${id}`,
-                            type: "POST",
-                            processData: false,
-                            contentType: false,
-                            data: formData,
-                            success: function (response) {
-                                if (response.Status === "success") {
-                                    if (response.Msj2 !== '' && response.Msj2 !== null) {
-                                        toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                                        return;
-                                    } else {
-                                        toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                                        setTimeout(() => {
-                                            window.location.href = "/trabajadores/ventas/GestionarClientes";
-                                        }, 500);
-                                    }
+                    $.ajax({
+                        url: `/trabajadores/ventas/EditarCliente/${id}`,
+                        type: "POST",
+                        processData: false,
+                        contentType: false,
+                        data: formData,
+                        success: function (response) {
+                            if (response.Status === "success") {
+                                if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                    return;
                                 } else {
-                                    toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                                    toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                                    setTimeout(() => {
+                                        window.location.href = "/trabajadores/ventas/GestionarClientes";
+                                    }, 500);
                                 }
-                            },
-                            error: function (xhr, Status, error) {
-                                toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                            } else {
+                                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
                             }
-                        });
-                    }
-                });
+                        },
+                        error: function (xhr, Status, error) {
+                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                        }
+                    });
+                }
             });
+        });
 
         $("#btn_Aceptar").click(function () {
             window.location.href = "/trabajadores/ventas/GestionarClientes";

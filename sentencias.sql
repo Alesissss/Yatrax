@@ -1505,19 +1505,20 @@ INSERT INTO cliente (
     id_pais, id_tipo_cliente, id_tipo_doc, usuario
 ) VALUES
 -- Clientes con RUC
-('20481234567', 'Empresa Alpha SAC', NULL, NULL, NULL, NULL,'Av. Perú 101', '987654321', 'contacto@alpha.com', SHA2('123', 256), 1, 1, 1, 2, 'admin'),
-('20553334441', 'Servicios Beta SRL', NULL, NULL, NULL, NULL,'Calle Lima 202', '912345678', 'contacto@beta.com', SHA2('123', 256), 1, 1, 1, 2, 'admin'),
-('20661234589', 'Consultora Gamma EIRL', NULL, NULL, NULL, NULL,'Jr. Cusco 303', '923456789', 'info@gamma.com', SHA2('123', 256), 1, 1, 1, 2, 'admin'),
-('20771234987', 'Constructora Delta S.A.', NULL, NULL, NULL, NULL,'Av. Arequipa 404', '934567890', 'delta@construct.com', SHA2('123', 256), 1, 1, 1, 2, 'admin'),
-('20881234500', 'Comercial Epsilon S.A.C.', NULL, NULL, NULL, NULL,'Av. Brasil 505', '945678901', 'epsilon@comercial.com', SHA2('123', 256), 1, 1, 1, 2, 'admin'),
+('20481234567', 'EMPRESA ALPHA SAC', NULL, NULL, NULL, NULL, 'AV. PERÚ 101', '987654321', 'contacto@alpha.com', SHA2('123', 256), 1, 1, 1, 2, 'ADMIN'),
+('20553334441', 'SERVICIOS BETA SRL', NULL, NULL, NULL, NULL, 'CALLE LIMA 202', '912345678', 'contacto@beta.com', SHA2('123', 256), 1, 1, 1, 2, 'ADMIN'),
+('20661234589', 'CONSULTORA GAMMA EIRL', NULL, NULL, NULL, NULL, 'JR. CUSCO 303', '923456789', 'info@gamma.com', SHA2('123', 256), 1, 1, 1, 2, 'ADMIN'),
+('20771234987', 'CONSTRUCTORA DELTA S.A.', NULL, NULL, NULL, NULL, 'AV. AREQUIPA 404', '934567890', 'delta@construct.com', SHA2('123', 256), 1, 1, 1, 2, 'ADMIN'),
+('20881234500', 'COMERCIAL EPSILON S.A.C.', NULL, NULL, NULL, NULL, 'AV. BRASIL 505', '945678901', 'epsilon@comercial.com', SHA2('123', 256), 1, 1, 1, 2, 'ADMIN'),
 
--- Clientes con DNI
-('12345678', 'Juan', 'Pérez', 'Lopez', 1, '1990-05-10', 'Mz A Lt 5', '956789012', 'juanp@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
-('87654321', 'Ana', 'García', 'Torres', 0, '1992-08-22', 'Jr. Ayacucho 123', '967890123', 'ana@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
-('11223344', 'Carlos', 'Ramirez', 'Paredes', 1, '1988-03-15', 'Av. Grau 456', '978901234', 'carlosr@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
-('44332211', 'María', 'López', 'Rojas', 0, '1995-12-01', 'Jr. Junín 789', '989012345', 'maria@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
-('55667788', 'Luis', 'Torres', 'Gómez', 1, '1991-09-30', 'Av. Salaverry 101', '990123456', 'luist@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'admin'),
-('60594837', 'Sebastian', 'Celiz', 'Guerrero', 1, '2010-09-30', 'Av. Brasil 101', '94435638', 'sebastian@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'admin');
+-- CLIENTES CON DNI
+('12345678', 'JUAN', 'PÉREZ', 'LOPEZ', 1, '1990-05-10', 'MZ A LT 5', '956789012', 'juanp@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'ADMIN'),
+('87654321', 'ANA', 'GARCÍA', 'TORRES', 0, '1992-08-22', 'JR. AYACUCHO 123', '967890123', 'ana@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'ADMIN'),
+('11223344', 'CARLOS', 'RAMIREZ', 'PAREDES', 1, '1988-03-15', 'AV. GRAU 456', '978901234', 'carlosr@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'ADMIN'),
+('44332211', 'MARÍA', 'LÓPEZ', 'ROJAS', 0, '1995-12-01', 'JR. JUNÍN 789', '989012345', 'maria@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'ADMIN'),
+('55667788', 'LUIS', 'TORRES', 'GÓMEZ', 1, '1991-09-30', 'AV. SALAVERRY 101', '990123456', 'luist@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'ADMIN'),
+('60594837', 'SEBASTIAN', 'CELIZ', 'GUERRERO', 1, '2010-09-30', 'AV. BRASIL 101', '94435638', 'sebastian@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'ADMIN');
+
 
     INSERT INTO `tipo_comprobante` (`nombre`, `estado`, `usuario`)
     VALUES ('boleta', 1, 'alexis@gmail.com');
