@@ -28,8 +28,8 @@
                             <th class="text-center">PAÍS</th>
                             <th class="text-center">TIPO DOCUMENTO</th>
                             <th class="text-center">N° DOCUMENTO</th>
-                            <th class="text-center">NOMBRE</th>
                             <th class="text-center">APELLIDOS</th>
+                            <th class="text-center">NOMBRE</th>
                             <th class="text-center">SEXO</th>
                             <th class="text-center">FECHA NACIMIENTO</th>
                             <th class="text-center">DIRECCIÓN</th>
@@ -75,9 +75,35 @@
             }
         });
     }
+
+    function validarEdad() {
+        const fechaNacimiento = $('#ytrx-birthdate').val();
+        if (!fechaNacimiento) return;
+
+        let fechaActual = new Date();
+        let fechaNac = new Date(fechaNacimiento);
+        let edad = fechaActual.getFullYear() - fechaNac.getFullYear();
+        let mes = fechaActual.getMonth() - fechaNac.getMonth();
+
+        if (
+            mes < 0 ||
+            (mes === 0 && fechaActual.getDate() < fechaNac.getDate())
+        ) {
+            edad--;
+        }
+        if (edad < 18) {
+            toastr.warning(
+                "Menores a 18 años no pueden registrarse",
+                "MENSAJE DEL SISTEMA"
+            );
+            $('#ytrx-birthdate').val('');
+        }
+    }
+
     var dtClientes;
 
     $(document).ready(function () {
+        validarEdad();
         // Inicializar el selector de tipo de documento
         fct_ObtenerTipoDocumento();
         $('#cbx_documento').on('change', function () {
@@ -85,14 +111,14 @@
                 dtClientes.ajax.reload();
                 var tipoDoc = $(this).val();
                 if (tipoDoc === '2') {
-                    dtClientes.column(5).visible(false); 
-                    dtClientes.column(6).visible(false); 
-                    dtClientes.column(7).visible(false); 
+                    dtClientes.column(4).visible(false);
+                    dtClientes.column(6).visible(false);
+                    dtClientes.column(7).visible(false);
 
                 } else {
-                    dtClientes.column(5).visible(true); 
-                    dtClientes.column(6).visible(false);
-                    dtClientes.column(7).visible(false); 
+                    dtClientes.column(4).visible(true);
+                    dtClientes.column(6).visible(true);
+                    dtClientes.column(7).visible(true);
 
                 }
             }
@@ -253,8 +279,8 @@
                 { data: "nombre_pais", name: "nombre_pais" },
                 { data: "abreviatura", name: "abreviatura" },
                 { data: "numero_documento", name: "numero_documento" },
-                { data: "nombre", name: "nombre" },
                 { data: "apellidos", name: "apellidos" },
+                { data: "nombre", name: "nombre" },
                 {
                     data: "sexo", name: "sexo",
                     render: function (data, type, row) {
