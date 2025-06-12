@@ -4,7 +4,7 @@ import re
 import random
 from correo import enviar_correo
 from flask import Blueprint, request, jsonify, render_template, session, redirect, url_for, abort,current_app
-
+from Models.pasaje import Pasaje
 from flask_mail import Mail
 
 from Models.conf_plantillas import Conf_Plantillas
@@ -444,30 +444,34 @@ def listadoMetodosPago():
 @homeClientes_bp.route('/reservarPasaje', methods=["POST"])
 def reservarPasaje():
     try:
-        id_metodo_pago = request.form["metodo_pago"]
-        id_tipo_comprobante = request.form["tipo_comprobante"]
-        id_cliente = request.form["cliente"]
-        id_promocion = request.form.get("promocion", 0)
-        id_viaje = request.form["viaje"]
-        codigo_aleatorio = random.randint(10**11, 10**12 - 1)
+        id_detalle_asiento = int(request.form["id_detalle_asiento"])
+        numero_comprobante   = request.form["numero_comprobante"]
+        id_venta             = int(request.form["id_venta"])
+        codigo               = request.form["codigo"]
 
-        resultado = Pasaje.registrarReserva(id_metodo_pago,id_tipo_comprobante,id_cliente,id_promocion,id_viaje,codigo_aleatorio)
+        resultado = Pasaje.registrarReserva(
+            id_detalle_asiento,
+            numero_comprobante,
+            id_venta,
+            codigo
+        )
 
         if resultado.get("msj"):
-            #correoCliente = request.form["correo_cliente"]
-            datosEnvio = {
-                'asunto':'Reserva de pasaje Yatrax',
-                'remitente': 'yatraxyatusa@gmail.com',
-                'destinatario': "christiancubasjaramillo@gmail.com",
-                'mensaje': 'El codigo de su reserva es : '+str(codigo_aleatorio)
-            }
-
-            enviar_correo(current_app.extensions['mail'],datosEnvio)
-
-            return jsonify({"status": 1,"mensaje": resultado["msj"],"codigo_reserva":codigo_aleatorio})
+            return jsonify({
+                "Status": "success",
+                "Msj": resultado["msj"],
+                "Msj2": resultado["msj2"]
+            })
         else:
-            return jsonify({"status": 0,"mensaje": resultado.get("msj2", "Ocurrió un error inesperado.")})
+            return jsonify({
+                "Status": "error",
+                "Msj": "",
+                "Msj2": resultado["msj2"]
+            })
     except Exception as e:
-        return jsonify({"status": -1,"mensaje": "Ha ocurrido un error","error": repr(e)})
-
+        return jsonify({
+            "Status": "error",
+            "Msj": str(e),
+            "Msj2": ""
+        })
 #END REGION
