@@ -689,7 +689,7 @@ CREATE TABLE viaje (
         id INT AUTO_INCREMENT PRIMARY KEY,
         idDetalle_Viaje INT NOT NULL REFERENCES detalle_viaje(id),
         idAsiento INT NULL REFERENCES asiento(id),
-        esDisponible TINYINT NOT NULL DEFAULT 1, -- 1: disponible, 0: no disponible
+        esDisponible BOOLEAN NOT NULL DEFAULT 1, -- 1: disponible, 0: no disponible
         -- Auditoría
         fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
         usuario VARCHAR(100) NOT NULL
