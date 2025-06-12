@@ -142,7 +142,18 @@ class Pasaje:
             # Se esta considerando 26 caracteres alfabéticos y 10 dígitos, lo que da un total de 36 caracteres por 8 posiciones,
             # lo que da un total de 2,821,109,907,456 combinaciones posibles.
     
-    
+    @classmethod
+    def obtenerDetallePasaje(cls, numComprobante):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            filas = conexion.obtener(
+                "SELECT * FROM pasaje WHERE numero_comprobante = %s;", (numComprobante,)
+            )
+            return filas[0] if filas else None
+        finally:
+            if conexion:
+                conexion.cerrar()
 
     @classmethod
     def eliminarReserva(cls, id_pasaje):
