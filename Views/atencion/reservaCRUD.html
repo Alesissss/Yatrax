@@ -1,6 +1,5 @@
 {% extends "index.html" %}
-
-{% block title %}YATRAX - {{ tittle }}{% endblock %}
+{% block title %}YATRAX – {{ tittle }}{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -12,7 +11,7 @@
         </div>
         <div class="card-body">
           <div class="row">
-            <!-- ID (solo lectura en edición/visualización) -->
+            {#–– ID (solo lectura al editar) ––#}
             <div class="col-md-12 mb-3">
               <label for="txt_Id">ID</label>
               <div class="input-group">
@@ -27,123 +26,139 @@
               </div>
             </div>
 
-            <!-- Método de Pago -->
+            {#–– id_detalle_asiento ––#}
             <div class="col-md-12 mb-3">
-              <label for="txt_MetodoPago">Método de Pago</label>
-              <div class="input-group">
-                       <select name="id_metodo_pago" id="txt_MetodoPago" class="form-control" placeholder="ID Método de Pago" {% if btnId=='btn_Aceptar' %}disabled{% endif %}></select>
-                <div class="input-group-append">
-                  <div class="input-group-text"><i class="fas fa-credit-card"></i></div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Tipo de Comprobante -->
-            <div class="col-md-12 mb-3">
-              <label for="txt_TipoComprobante">Tipo de Comprobante</label>
-              <div class="input-group">
-                <div class="input-group">
-                  <select name="id_tipo_comprobante" id="txt_TipoComprobante" class="form-control" placeholder="ID Método de Pago" {% if btnId=='btn_Aceptar' %}disabled{% endif %}></select>
-                  <div class="input-group-text"><i class="fas fa-file-invoice"></i></div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Cliente -->
-            <div class="col-md-12 mb-3">
-              <label for="txt_Cliente">Cliente</label>
+              <label for="txt_DetalleAsiento">Detalle Viaje Asiento</label>
               <div class="input-group">
                 <input type="number"
-                       id="txt_Cliente"
+                       id="txt_DetalleAsiento"
                        class="form-control"
-                       placeholder="ID Cliente"
-                       name="id_cliente"
-                       value="{{ reserva.id_cliente if reserva is defined else '' }}"
-                       {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
+                       placeholder="ID detalle viaje asiento"
+                       value="{{ reserva.idDetalleViajeAsiento if reserva is defined else '' }}"
+                       {% if btnId == "btn_Ver" %}disabled{% endif %}>
                 <div class="input-group-append">
-                  <div class="input-group-text"><i class="fas fa-user"></i></div>
+                  <div class="input-group-text"><i class="fas fa-chair"></i></div>
                 </div>
               </div>
             </div>
 
-            <!-- Promoción -->
+            {#–– numero_comprobante ––#}
             <div class="col-md-12 mb-3">
-              <label for="txt_Promocion">Promoción</label>
+              <label for="txt_NumeroComp">Número Comprobante</label>
+              <div class="input-group">
+                <input type="text"
+                       id="txt_NumeroComp"
+                       class="form-control"
+                       placeholder="A001-00000001"
+                       value="{{ reserva.numeroComprobante if reserva is defined else '' }}"
+                       {% if btnId == "btn_Ver" %}disabled{% endif %}>
+                <div class="input-group-append">
+                  <div class="input-group-text"><i class="fas fa-receipt"></i></div>
+                </div>
+              </div>
+            </div>
+
+            {#–– Tipo de pasaje como radios ––#}
+            <div class="col-md-12 mb-3">
+              <label>Tipo de pasaje</label>
+              <div class="form-row">
+                <div class="col-6 mb-2">
+                  <div class="form-check">
+                    <input class="form-check-input"
+                           type="radio"
+                           id="rad_es_pasaje_normal"
+                           name="tipo_pasaje"
+                           value="es_pasaje_normal"
+                           {% if reserva is defined and reserva.esPasajeNormal == 1 %}checked{% endif %} {% if btnId == "btn_Ver" %}disabled{% endif %}>
+                    <label class="form-check-label" for="rad_es_pasaje_normal">Normal</label>
+                  </div>
+                </div>
+                <div class="col-6 mb-2">
+                  <div class="form-check">
+                    <input class="form-check-input"
+                           type="radio"
+                           id="rad_es_pasaje_libre"
+                           name="tipo_pasaje"
+                           value="es_pasaje_libre"
+                           {% if reserva is defined and reserva.esPasajeLibre == 1 %}checked{% endif %} {% if btnId == "btn_Ver" %}disabled{% endif %}>
+                    <label class="form-check-label" for="rad_es_pasaje_libre">Libre</label>
+                  </div>
+                </div>
+                <div class="col-6 mb-2">
+                  <div class="form-check">
+                    <input class="form-check-input"
+                           type="radio"
+                           id="rad_es_transferencia"
+                           name="tipo_pasaje"
+                           value="es_transferencia"
+                           {% if reserva is defined and reserva.esTransferencia == 1 %}checked{% endif %} {% if btnId == "btn_Ver" %}disabled{% endif %}>
+                    <label class="form-check-label" for="rad_es_transferencia">Transferencia</label>
+                  </div>
+                </div>
+                <div class="col-6 mb-2">
+                  <div class="form-check">
+                    <input class="form-check-input"
+                           type="radio"
+                           id="rad_es_reserva"
+                           name="tipo_pasaje"
+                           value="es_reserva"
+                           {% if reserva is defined and reserva.esReserva == 1 %}checked{% endif %} {% if btnId == "btn_Ver" %}disabled{% endif %}>
+                    <label class="form-check-label" for="rad_es_reserva">Reserva</label>
+                  </div>
+                </div>
+                <div class="col-6 mb-2">
+                  <div class="form-check">
+                    <input class="form-check-input"
+                           type="radio"
+                           id="rad_es_cambio_ruta"
+                           name="tipo_pasaje"
+                           value="es_cambio_ruta"
+                           {% if reserva is defined and reserva.esCambioRuta == 1 %}checked{% endif %} {% if btnId == "btn_Ver" %}disabled{% endif %}>
+                    <label class="form-check-label" for="rad_es_cambio_ruta">Cambio de Ruta</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {#–– id_venta ––#}
+            <div class="col-md-12 mb-3">
+              <label for="txt_Venta">ID Venta</label>
               <div class="input-group">
                 <input type="number"
-                       id="txt_Promocion"
-                       name="id_promocion"
+                       id="txt_Venta"
                        class="form-control"
-                       placeholder="ID Promoción"
-                       value="{{ reserva.id_promocion if reserva is defined else '' }}"
-                       {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
+                       placeholder="ID Venta"
+                       value="{{ reserva.idVenta if reserva is defined else '' }}"
+                       {% if btnId == "btn_Ver" %}disabled{% endif %}>
                 <div class="input-group-append">
-                  <div class="input-group-text"><i class="fas fa-tags"></i></div>
+                  <div class="input-group-text"><i class="fas fa-shopping-cart"></i></div>
                 </div>
               </div>
             </div>
 
-            <!-- Viaje -->
-            <div class="col-md-12 mb-3">
-              <label for="txt_Viaje">Viaje</label>
-              <div class="input-group">
-                <input type="number"
-                       id="txt_Viaje"
-                       name="id_viaje"
-                       class="form-control"
-                       placeholder="ID Viaje"
-                       value="{{ reserva.id_viaje if reserva is defined else '' }}"
-                       {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
-                <div class="input-group-append">
-                  <div class="input-group-text"><i class="fas fa-plane"></i></div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Código -->
+            {#–– codigo ––#}
             <div class="col-md-12 mb-3">
               <label for="txt_Codigo">Código</label>
               <div class="input-group">
                 <input type="text"
                        id="txt_Codigo"
-                       name="codigo"
                        class="form-control"
-                       placeholder="Código de Reserva"
-                       disabled = true
+                       placeholder="Código"
                        value="{{ reserva.codigo if reserva is defined else '' }}"
                        oninput="this.value = this.value.toUpperCase();"
-                       {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
+                       {% if btnId == "btn_Ver" %}disabled{% endif %}>
                 <div class="input-group-append">
-                  <div class="input-group-text"><i class="fas fa-barcode"></i></div>
+                  <div class="input-group-text"><i class="fas fa-code"></i></div>
                 </div>
               </div>
             </div>
 
-            <!-- Estado -->
-            <div class="col-md-12 mb-3">
-              <label for="cbx_Estado">Estado</label>
-              <div class="input-group">
-                <select id="cbx_Estado" name="estado"
-                        class="form-control"
-                        {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
-                  <option disabled value="">--SELECCIONAR--</option>
-                  <option value="R"
-                    {% if reserva is defined and reserva.estado == 'R' %}selected{% endif %}>
-                    En proceso
-                  </option>
-                  <option value="P"
-                    {% if reserva is defined and reserva.estado == 'P' %}selected{% endif %}>
-                    Reserva pagada
-                  </option>
-                </select>
-              </div>
+            {#–– Botones ––#}
+            <div class="col-md-12 text-center">
+              <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado</button>
+              <button id="btn_Aceptar" type="button" class="btn btn-primary" {% if btnId == "btn_Ver" %}disabled{% endif %}>Aceptar</button>
             </div>
 
-            <!-- Botones -->
-            <div class="col-md-12 text-center">
-              <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de reservas</button>
-              <button id="{{ btnId }}" type="button" class="btn btn-primary">Aceptar</button>
-            </div>
           </div>
         </div>
       </div>
@@ -152,221 +167,75 @@
 </div>
 {% endblock %}
 
+
 {% block scripts %}
 <script>
-  async function listarMetodoPago(){
-    let cbo_metodo_pago = document.getElementById("txt_MetodoPago")
-    let response = await fetch("/trabajadores/configuracion/GetData_TipoMetodoPago")
-    let json = await response.json()
-    let data = json.data
+  const RESERVA = {{ reserva|default({})|tojson() }};
 
-    data.forEach((metodo_pago) => {
-      let opcion = document.createElement("option")
-      opcion.value=metodo_pago.ID
-      opcion.text=metodo_pago.NOMBRE
+  $('#btn_Volver').click(() => {
+    window.location.href = "/trabajadores/atencion/GestionarReservas";
+  });
 
-      const idMetodoPago = Number("{{ reserva.id_metodo_pago if reserva else '' }}");
-      if (metodo_pago.ID == idMetodoPago){
-        opcion.selected=true
-      }
+  function formData() {
+    const tipo = $('input[name="tipo_pasaje"]:checked').val() || '';
+    const fields = [
+      'es_pasaje_normal',
+      'es_pasaje_libre',
+      'es_transferencia',
+      'es_reserva',
+      'es_cambio_ruta'
+    ];
+    const flags = {};
+    fields.forEach(f => flags[f] = (f === tipo ? 1 : 0));
 
-      cbo_metodo_pago.appendChild(opcion)
-    });
+    return {
+      id_detalle_asiento:  Number($('#txt_DetalleAsiento').val()) || 0,
+      numero_comprobante:  $('#txt_NumeroComp').val().trim(),
+      ...flags,
+      id_venta:            Number($('#txt_Venta').val()) || 0,
+      codigo:              $('#txt_Codigo').val().trim()
+    };
   }
 
-  async function listarTipoComprobante(){
-    let cbo_tipo_comprobante = document.getElementById("txt_TipoComprobante")
-    let response = await fetch("/trabajadores/ventas/GetData_TipoComprobante")
-    let json = await response.json()
-    let data = json.data
-    console.log(data)
-
-    data.forEach((tipo_comprobante) => {
-      let opcion = document.createElement("option")
-      opcion.value=tipo_comprobante.ID
-      opcion.text=tipo_comprobante.TIPO
-
-      idTipoComprobante = Number("{{ reserva.id_tipo_comprobante if reserva else '' }}");
-      if (tipo_comprobante.ID == idTipoComprobante){
-        opcion.selected=true
-      }
-
-      cbo_tipo_comprobante.appendChild(opcion)
-    });
-  }
-
-  $(document).ready(function () {
-    listarMetodoPago()
-    listarTipoComprobante()
-    console.log("{{ reserva }}")
-
-    $("#btn_Registrar").click(function () {
-      let metodoPago      = $("#txt_MetodoPago").val().trim();
-      let tipoComprobante = $("#txt_TipoComprobante").val().trim();
-      let cliente         = $("#txt_Cliente").val().trim();
-      let promocion       = $("#txt_Promocion").val().trim();
-      let viaje           = $("#txt_Viaje").val().trim();
-      let codigo          = $("#txt_Codigo").val().trim();
-      let estado          = $("#cbx_Estado").val();
-
-      if (!metodoPago || !tipoComprobante || !cliente || !viaje || !codigo || !estado) {
-        toastr.warning("Todos los campos obligatorios", "MENSAJE DE SISTEMA");
+  $(function(){
+    $('#btn_Aceptar').click(async () => {
+      const data = formData();
+      if (!data.id_detalle_asiento || !data.codigo) {
+        toastr.warning("ID detalle y Código son obligatorios", "ATENCIÓN");
         return;
       }
+      const isEdit = Boolean(RESERVA.id);
 
-      Swal.fire({
-        title: "¿Estás seguro?",
-        text: "Esta acción registrará la reserva. ¿Deseas continuar?",
+      const { isConfirmed } = await Swal.fire({
+        title: isEdit ? "Confirmar edición" : "Confirmar registro",
+        text: isEdit
+          ? "Se va a modificar la reserva existente."
+          : "Se va a registrar una nueva reserva.",
         icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Sí, registrar reserva",
-        cancelButtonText: "Cancelar",
-        reverseButtons: true
-      }).then((result) => {
-        if (result.isConfirmed) {
-          let formData = new FormData();
-          formData.append("id_metodo_pago", metodoPago);
-          formData.append("id_tipo_comprobante", tipoComprobante);
-          formData.append("id_cliente", cliente);
-          formData.append("id_promocion", promocion);
-          formData.append("id_viaje", viaje);
-          formData.append("codigo", codigo);
-          formData.append("estado", estado);
-
-          console.log("→ [Registrar] formData values:", {
-            id_metodo_pago: metodoPago,
-            id_tipo_comprobante: tipoComprobante,
-            id_cliente: cliente,
-            id_promocion: promocion,
-            id_viaje: viaje,
-            codigo: codigo,
-            estado: estado
-          });
-
-          $.ajax({
-            url: "/trabajadores/atencion/RegistrarReserva",
-            method: "POST",
-            processData: false,
-            contentType: false,
-            data: formData,
-            success: function (response) {
-              console.log("→ [Registrar] response:", response);
-              if (response.Status === "success") {
-                if (response.Msj2 !== '' && response.Msj2 !== null) {
-                  toastr.warning(response.Msj2, "MENSAJE DE SISTEMA");
-                  return;
-                }
-                toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                setTimeout(function () {
-                  window.location.href = "/trabajadores/atencion/GestionarReservas";
-                }, 500);
-              } else {
-                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
-                console.error("Error del servidor al registrar:", response.Msj2);
-              }
-            },
-            error: function (xhr, status, error) {
-              toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
-              console.error("Error AJAX al registrar:", { xhr: xhr, status: status, error: error });
-            }
-          });
-        }
+        confirmButtonText: isEdit ? "Sí, modificar" : "Sí, registrar",
+        cancelButtonText: "cancelar",
+        cancelButtonColor: "#dc3545"
       });
-    });
+      if (!isConfirmed) return;
 
-    $("#btn_Editar").click(function () {
-      // Capturamos el id de la reserva que viene inyectado por Jinja
-      const id = Number("{{ reserva.id if reserva is defined else 0 }}");
-      // Capturamos valores nuevamente
-      let metodoPago      = $("#txt_MetodoPago").val().trim();
-      let tipoComprobante = $("#txt_TipoComprobante").val().trim();
-      let cliente         = $("#txt_Cliente").val().trim();
-      let promocion       = $("#txt_Promocion").val().trim();
-      let viaje           = $("#txt_Viaje").val().trim();
-      let codigo          = $("#txt_Codigo").val().trim();
-      let estado          = $("#cbx_Estado").val();
+      const url = isEdit
+        ? `/trabajadores/atencion/EditarReserva/${RESERVA.id}`
+        : "/trabajadores/atencion/RegistrarReserva";
 
-      // Mostrar en consola los valores antes de la petición
-      console.log("→ [Editar] Parámetros a enviar:",
-        { id, id_metodo_pago: metodoPago, id_tipo_comprobante: tipoComprobante,
-          id_cliente: cliente, id_promocion: promocion, id_viaje: viaje,
-          codigo: codigo, estado: estado }
-      );
-
-      if (!metodoPago || !tipoComprobante || !cliente || !viaje || !codigo || !estado) {
-        toastr.warning("Todos los campos obligatorios", "MENSAJE DE SISTEMA");
-        return;
-      }
-
-      Swal.fire({
-        title: "¿Estás seguro?",
-        text: "Esta acción modificará la reserva. ¿Deseas continuar?",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Sí, editar reserva",
-        cancelButtonText: "Cancelar",
-        reverseButtons: true
-      }).then((result) => {
-        if (result.isConfirmed) {
-          let formData = new FormData();
-          formData.append("id_metodo_pago", metodoPago);
-          formData.append("id_tipo_comprobante", tipoComprobante);
-          formData.append("id_cliente", cliente);
-          formData.append("id_promocion", promocion);
-          formData.append("id_viaje", viaje);
-          formData.append("codigo", codigo);
-          formData.append("estado", estado);
-
-          $.ajax({
-            url: `/trabajadores/atencion/EditarReserva/${id}`,
-            method: "POST",
-            processData: false,
-            contentType: false,
-            data: formData,
-            success: function (response) {
-              console.log("→ [Editar] response:", response);
-              if (response.Status === "success") {
-                if (response.Msj2 !== '' && response.Msj2 !== null) {
-                  toastr.warning(response.Msj2, "MENSAJE DE SISTEMA");
-                  return;
-                }
-                toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                setTimeout(function () {
-                  window.location.href = "/trabajadores/atencion/GestionarReservas";
-                }, 500);
-              } else {
-                // Mostrar en consola el mensaje de error que venga (Msj2)
-                console.error("Error del servidor al editar:", response.Msj2);
-                toastr.error(response.Msj2, "MENSAJE DE SISTEMA");
-              }
-            },
-            error: function (xhr, status, error) {
-              toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
-              // Desplegar en consola todos los detalles del error HTTP
-              console.error("Error AJAX al editar:", {
-                status: status,
-                error: error,
-                url: `/trabajadores/atencion/EditarReserva/${id}`,
-                responseText: xhr.responseText
-              });
-            }
-          });
-        }
-      });
-    });
-
-    // Botón Aceptar / Ver
-    $("#btn_Aceptar").click(function () {
-      window.location.href = "/trabajadores/atencion/GestionarReservas";
-    });
-
-    // Botón Volver
-    $("#btn_Volver").click(function () {
-      window.location.href = "/trabajadores/atencion/GestionarReservas";
+      $.post(url, data)
+        .done(resp => {
+          if (resp.Status === 'success') {
+            toastr.success(resp.Msj);
+            setTimeout(()=>location.href="/trabajadores/atencion/GestionarReservas",500);
+          } else {
+            toastr.error(resp.Msj2 || resp.Msj);
+          }
+        })
+        .fail((xhr, status) => {
+          toastr.error("Error en el servidor");
+          console.error(xhr, status);
+        });
     });
   });
 </script>
