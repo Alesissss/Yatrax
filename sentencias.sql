@@ -5360,181 +5360,132 @@ DELIMITER ;
     END $$
     DELIMITER ;
 
-    DELIMITER $$
-
-    CREATE PROCEDURE SP_INSERTAR_PASAJE(
-        IN p_id_metodo_pago       INT,
-        IN p_id_tipo_comprobante  INT,
-        IN p_id_cliente           INT,
-        IN p_id_promocion         INT,
-        IN p_id_viaje             INT,
-        IN p_estado               CHAR(1),
-        IN p_codigo               CHAR(12),      -- Puede recibir NULL si no se proporciona
-        OUT MSJ                   VARCHAR(255),
-        OUT MSJ2                  VARCHAR(255)
-    )
+-- Crear procedimiento SP_INSERTAR_PASAJE
+DELIMITER $$
+CREATE PROCEDURE SP_INSERTAR_PASAJE(
+    IN P_idDetalleViajeAsiento INT,
+    IN P_numeroComprobante CHAR(13),
+    IN P_esPasajeNormal TINYINT,
+    IN P_esPasajeLibre TINYINT,
+    IN P_esTransferencia TINYINT,
+    IN P_esReserva TINYINT,
+    IN P_esCambioRuta TINYINT,
+    IN P_idVenta INT,
+    IN P_codigo CHAR(8),
+    IN P_idPasaje INT
+)
+BEGIN
+    DECLARE cExist INT DEFAULT 0;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
-        DECLARE EXIT HANDLER FOR SQLEXCEPTION 
-        BEGIN
-            SET MSJ  = NULL;
-            SET MSJ2 = 'Error al registrar el pasaje.';
-        END;
+        SET @MSJ2 = 'Error inesperado al registrar el pasaje';
+    END;
+    SET @MSJ = NULL; SET @MSJ2 = NULL;
 
-        IF p_codigo IS NOT NULL THEN
-            INSERT INTO pasaje (
-                id_metodo_pago,
-                id_tipo_comprobante,
-                id_cliente,
-                id_promocion,
-                id_viaje,
-                estado,
-                codigo
-            )
-            VALUES (
-                p_id_metodo_pago,
-                p_id_tipo_comprobante,
-                p_id_cliente,
-                p_id_promocion,
-                p_id_viaje,
-                p_estado,
-                p_codigo
-            );
-        ELSE
-            INSERT INTO pasaje (
-                id_metodo_pago,
-                id_tipo_comprobante,
-                id_cliente,
-                id_promocion,
-                id_viaje,
-                estado,
-                codigo
-            )
-            VALUES (
-                p_id_metodo_pago,
-                p_id_tipo_comprobante,
-                p_id_cliente,
-                p_id_promocion,
-                p_id_viaje,
-                p_estado,
-                NULL
-            );
-        END IF;
+    -- Verificar duplicado por detalle+comprobante
+    SELECT COUNT(*) INTO cExist
+      FROM pasaje
+     WHERE idDetalleViajeAsiento = P_idDetalleViajeAsiento
+       AND numeroComprobante     = P_numeroComprobante;
 
-        SET MSJ  = 'Pasaje registrado correctamente.';
-        SET MSJ2 = NULL;
-    END$$
+    IF cExist > 0 THEN
+        SET @MSJ2 = 'El pasaje ya existe';
+    ELSE
+        INSERT INTO pasaje (
+            idDetalleViajeAsiento,
+            numeroComprobante,
+            esPasajeNormal,
+            esPasajeLibre,
+            esTransferencia,
+            esReserva,
+            esCambioRuta,
+            idVenta,
+            codigo,
+            idPasaje
+        ) VALUES (
+            P_idDetalleViajeAsiento,
+            P_numeroComprobante,
+            P_esPasajeNormal,
+            P_esPasajeLibre,
+            P_esTransferencia,
+            P_esReserva,
+            P_esCambioRuta,
+            P_idVenta,
+            P_codigo,
+            P_idPasaje
+        );
+        SET @MSJ = 'Pasaje registrado correctamente';
+    END IF;
+END $$
+DELIMITER ;
 
-    DELIMITER ;
-
-    DELIMITER $$
-    -- Crear procedimiento para modificar pasaje
-    CREATE PROCEDURE SP_MODIFICAR_PASAJE(
-        IN p_id INT,
-        IN p_id_metodo_pago INT,
-        IN p_id_tipo_comprobante INT,
-        IN p_id_cliente INT,
-        IN p_id_promocion INT,
-        IN p_id_viaje INT,
-        IN p_estado CHAR(1),
-        OUT MSJ VARCHAR(255),
-        OUT MSJ2 VARCHAR(255)
-    )
+-- Crear procedimiento SP_MODIFICAR_PASAJE
+DELIMITER $$
+CREATE PROCEDURE SP_MODIFICAR_PASAJE(
+    IN P_id INT,
+    IN P_idDetalleViajeAsiento INT,
+    IN P_numeroComprobante CHAR(13),
+    IN P_esPasajeNormal TINYINT,
+    IN P_esPasajeLibre TINYINT,
+    IN P_esTransferencia TINYINT,
+    IN P_esReserva TINYINT,
+    IN P_esCambioRuta TINYINT,
+    IN P_idVenta INT,
+    IN P_codigo CHAR(8),
+    IN P_idPasaje INT
+)
+BEGIN
+    DECLARE cExist INT DEFAULT 0;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
-        DECLARE v_existe INT;
+        SET @MSJ2 = 'Error inesperado al modificar el pasaje';
+    END;
+    SET @MSJ = NULL; SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO v_existe FROM pasaje WHERE id = p_id;
+    -- Verificar existencia
+    SELECT COUNT(*) INTO cExist FROM pasaje WHERE id = P_id;
+    IF cExist = 0 THEN
+        SET @MSJ2 = 'El pasaje que intenta modificar no existe';
+    ELSE
+        UPDATE pasaje
+           SET idDetalleViajeAsiento = P_idDetalleViajeAsiento,
+               numeroComprobante     = P_numeroComprobante,
+               esPasajeNormal        = P_esPasajeNormal,
+               esPasajeLibre         = P_esPasajeLibre,
+               esTransferencia       = P_esTransferencia,
+               esReserva             = P_esReserva,
+               esCambioRuta          = P_esCambioRuta,
+               idVenta               = P_idVenta,
+               codigo                = P_codigo,
+               idPasaje              = P_idPasaje
+         WHERE id = P_id;
+        SET @MSJ = 'Pasaje modificado correctamente';
+    END IF;
+END $$
+DELIMITER ;
 
-        IF v_existe = 0 THEN
-            SET MSJ = NULL;
-            SET MSJ2 = 'No se encontró el pasaje para modificar.';
-        ELSE
-            BEGIN
-                DECLARE EXIT HANDLER FOR SQLEXCEPTION 
-                BEGIN
-                    SET MSJ = NULL;
-                    SET MSJ2 = 'Error al modificar el pasaje.';
-                END;
-
-                UPDATE pasaje
-                SET id_metodo_pago = p_id_metodo_pago,
-                    id_tipo_comprobante = p_id_tipo_comprobante,
-                    id_cliente = p_id_cliente,
-                    id_promocion = p_id_promocion,
-                    id_viaje = p_id_viaje,
-                    estado = p_estado
-                WHERE id = p_id;
-
-                SET MSJ = 'Pasaje modificado correctamente.';
-                SET MSJ2 = NULL;
-            END;
-        END IF;
-    END$$
-    DELIMITER ;
-
-    DELIMITER $$
-
-    CREATE PROCEDURE SP_CAMBIAR_ESTADO_PASAJE(
-        IN p_id_pasaje INT,       -- 1) ID del pasaje a modificar
-        IN p_estado    CHAR(1),   -- 2) Nuevo valor de estado ('R', 'P', etc.)
-        OUT MSJ        VARCHAR(255),
-        OUT MSJ2       VARCHAR(255)
-    )
+-- Crear procedimiento SP_ELIMINAR_PASAJE
+DELIMITER $$
+CREATE PROCEDURE SP_ELIMINAR_PASAJE(
+    IN P_id INT
+)
+BEGIN
+    DECLARE cExist INT DEFAULT 0;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
-        DECLARE EXIT HANDLER FOR SQLEXCEPTION
-        BEGIN
-            SET MSJ  = NULL;
-            SET MSJ2 = 'Error al modificar el estado del pasaje.';
-        END;
+        SET @MSJ2 = 'Error inesperado al eliminar el pasaje';
+    END;
+    SET @MSJ = NULL; SET @MSJ2 = NULL;
 
-        -- Verificar si existe el pasaje; si no existe, se asignan mensajes de error
-        IF NOT EXISTS (SELECT 1 FROM pasaje WHERE id = p_id_pasaje) THEN
-            SET MSJ  = NULL;
-            SET MSJ2 = CONCAT('No existe pasaje con id ', p_id_pasaje);
-        ELSE
-            -- Si existe, actualizamos solo el campo "estado"
-            UPDATE pasaje
-            SET estado = p_estado
-            WHERE id = p_id_pasaje;
-
-            SET MSJ  = 'Estado del pasaje actualizado correctamente.';
-            SET MSJ2 = NULL;
-        END IF;
-    END$$
-
-    DELIMITER ;
-
-    DELIMITER $$
-    -- Crear procedimiento para eliminar pasaje
-    CREATE PROCEDURE SP_ELIMINAR_PASAJE(
-        IN p_id INT,
-        OUT MSJ VARCHAR(255),
-        OUT MSJ2 VARCHAR(255)
-    )
-    BEGIN
-        DECLARE v_existe INT;
-
-        SELECT COUNT(*) INTO v_existe FROM pasaje WHERE id = p_id;
-
-        IF v_existe = 0 THEN
-            SET MSJ = NULL;
-            SET MSJ2 = 'No se encontró el pasaje para eliminar.';
-        ELSE
-            BEGIN
-                DECLARE EXIT HANDLER FOR SQLEXCEPTION 
-                BEGIN
-                    SET MSJ = NULL;
-                    SET MSJ2 = 'Error al eliminar el pasaje.';
-                END;
-
-                DELETE FROM pasaje WHERE id = p_id;
-
-                SET MSJ = 'Pasaje eliminado correctamente.';
-                SET MSJ2 = NULL;
-            END;
-        END IF;
-    END$$
-
-    DELIMITER ;
+    SELECT COUNT(*) INTO cExist FROM pasaje WHERE id = P_id;
+    IF cExist = 0 THEN
+        SET @MSJ2 = 'El pasaje que intenta eliminar no existe';
+    ELSE
+        DELETE FROM pasaje WHERE id = P_id;
+        SET @MSJ = 'Pasaje eliminado correctamente';
+    END IF;
+END $$
+DELIMITER ;
 
     -- Procedimientos almacenados para reclamo y tipo reclamo
     DELIMITER $$
