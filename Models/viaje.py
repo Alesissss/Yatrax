@@ -233,4 +233,17 @@ class Viaje:
             return datos_viaje
         finally:
             conexion.cerrar()
-
+    @classmethod
+    def obtener_tipo_vehiculo_por_dv(cls,id_viaje):
+        conexion = bd.Conexion()
+        try:
+            id = conexion.obtener("""
+                SELECT tv.id as id_tipo_vehiculo
+                FROM detalle_viaje dv INNER JOIN viaje v ON v.id = dv.idViaje
+                INNER JOIN vehiculo ve ON ve.id = v.idVehiculo
+                INNER JOIN tipo_vehiculo tv ON tv.id = ve.id_tipo_vehiculo
+                WHERE dv.id = %s
+                                  """,(id_viaje,))
+            return id[0]
+        finally:
+            conexion.cerrar()

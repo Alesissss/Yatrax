@@ -11,15 +11,18 @@ from Models.conf_plantillas import Conf_Plantillas
 from Models.api_net import ApiNetPe
 from Models.servicio import Servicio
 from Models.cliente import Cliente
+from Models.tipo_herramienta import TipoHerramienta
 
 from Models.tipoDocumento import TipoDocumento
 from Models.tipoCliente import TipoCliente
+from Models.tipoVehiculo import TipoVehiculo
 from Models.pais import Pais
 from Models.terminos_condiciones import TerminosCondiciones
 from Models.viaje import Viaje
 from Models.pasaje import Pasaje
 from Models.tipoComprobante import TipoComprobante
 from Models.metodo_pago import MetodoPago
+from Models.herramienta import Herramienta
 from Models.preguntas_frecuentes import PreguntasFrecuentes
 from Models.pasajero import Pasajero
 homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/home')
@@ -53,7 +56,19 @@ homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/hom
 # FUNCIONES AUXILIARES
 
 def renderizarCompra():
-    return render_template('Ecommerce/home/ventaPasajes.html')
+    return render_template('Ecommerce/home/partials/ventaPasajes.html')
+
+
+@homeClientes_bp.route('/renderizar_itinerario', methods=['POST'])
+def renderizar_itinerario():
+    data = request.get_json()
+    itinerarios = data.get('itinerarios', [])
+
+    # Renderiza el HTML del itinerario con Jinja
+    html_renderizado = render_template('Ecommerce/home/partials/itinerario.html', itinerarios=itinerarios)
+    return jsonify({'html': html_renderizado})
+
+
 
 # VIEWS
 @homeClientes_bp.route('/inicio')
@@ -211,6 +226,7 @@ def get_rutasConcatenadas():
 def get_persona_data():
     def responder(datos):
         if datos:
+            print(datos)
             return jsonify({'data': datos, 'Status': 'success', 'Msj': 'Datos obtenidos correctamente'})
         return None
 
@@ -422,8 +438,35 @@ def buscarViajes():
             "Status": "error"
         })
 
+from flask import jsonify, render_template
 
-    
+@homeClientes_bp.route("/ecommerce/home/obtener_diseno_vehiculo")
+def obtener_diseno_vehiculo():
+    detalle_viaje_id = request.args.get("detalle_viaje_id")
+
+    datos = Viaje.obtener_tipo_vehiculo_por_dv(detalle_viaje_id)
+    tipo_vehiculo_id = datos["id_tipo_vehiculo"]
+
+    niveles = TipoVehiculo.obtener_niveles_por_tipoVehiculo(tipo_vehiculo_id)
+    botones = []
+    for nivel in niveles:
+        for herramienta in nivel["herramientas"]:
+            botones.append({
+                "x_dimension": herramienta["x_dimension"],
+                "y_dimension": herramienta["y_dimension"],
+                "id_herramienta": herramienta["id_herramienta"],
+                "piso": nivel["nroPiso"]
+            })
+
+    herramientas = Herramienta.obtener_todos()  
+
+    html = render_template("Ecommerce/home/partials/matriz_niveles.html", botones=botones, herramientas=herramientas)
+
+    return jsonify({
+        "Status": "success",
+        "html": html
+    })
+
 
 # END REGION COMPRA PASAJE
 
