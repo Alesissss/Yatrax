@@ -742,7 +742,7 @@ CREATE TABLE viaje (
         ape_paterno VARCHAR(100) NOT NULL,
         ape_materno VARCHAR(100) NOT NULL,
         idTipoDocumento INT NOT NULL REFERENCES tipo_documento(id),
-        numero_documento VARCHAR(11) NOT NULL, -- Se recomienda especificar una longitud
+        numero_documento VARCHAR(12) NOT NULL, -- Se recomienda especificar una longitud
         sexo TINYINT NOT NULL, -- 1: masculino, 0: femenino
         f_nacimiento DATE NOT NULL,
         telefono VARCHAR(15) NOT NULL,

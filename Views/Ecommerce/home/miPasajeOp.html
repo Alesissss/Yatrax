@@ -695,13 +695,6 @@
           );
         return;
       }
-
-      if (tipoDoc === "CE" && numDoc.length !== 11) {
-        toastr.warning(
-          "El número de CE debe tener al menos 7 dígitos",
-          "MENSAJE DEL SISTEMA"
-        );
-      }
     }
 
     // Función de búsqueda
@@ -725,7 +718,7 @@
       //   return;
       // }
 
-      if (tipoDoc && (numDoc.length == 8 || numDoc.length == 11)) {
+      if (tipoDoc && (numDoc.length == 8 || numDoc.length == 12)) {
         fetch(
           `/ecommerce/home/api/get_persona_data?tipoDoc=${encodeURIComponent(
             tipoDoc
