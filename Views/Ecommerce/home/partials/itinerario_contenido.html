@@ -38,36 +38,50 @@
   </div>
 
   <!-- Formulario -->
+
   <div class="col-md-4">
-    <div class="border p-3 rounded bg-light">
-      <div id="infoAsientoSeleccionado" class="mb-2 fw-bold text-primary">
-        Asiento: <span id="asiento-numero">--</span> (<span id="asiento-precio">S/0.00</span>)
+    <div class="row">
+      <div class="col-md-12">
+        <div id="temporizador">Tiempo restante: 10</div>
       </div>
-      <select id="tipo_doc" class="form-select mb-2">
-        <option value="DNI">DNI</option>
-        <option value="CE">CE</option>
-      </select>
-      <input class="form-control mb-2" id="numeroDocNuevo" placeholder="N° Documento">
-      <input class="form-control mb-2" id="nombres" placeholder="Nombres">
-      <input class="form-control mb-2" id="apellidoPaterno" placeholder="Apellido paterno">
-      <input class="form-control mb-2" id="apellidoMaterno" placeholder="Apellido materno">
-      <input class="form-control mb-2" id="fechaNacimientoNuevo" type="date" placeholder="Fecha nacimiento">
-      <input class="form-control mb-2" id="telefono" placeholder="Teléfono">
-      <div class="mb-2">
-        <label class="me-2">Sexo:</label>
-        <input type="radio" class="form-check-input" name="sexo" id="sexoMasculino"> <label for="sexoMasculino">Masculino</label>
-        <input type="radio" class="form-check-input" name="sexo" id="sexoFemenino"> <label for="sexoFemenino">Femenino</label>
-      </div>
-      <input class="form-control mb-2" id="correo" placeholder="Correo electrónico" type="email">
-      <div class="form-check">
-        <input class="form-check-input" type="checkbox" id="brazos">
-        <label class="form-check-label" for="brazos">Con menor en brazos</label>
-      </div>
-      <div class="form-check mb-2">
-        <input class="form-check-input" type="checkbox" id="esMenor">
-        <label class="form-check-label" for="esMenor">Es menor de edad</label>
-      </div>
-      <button class="btn btn-outline-primary w-100">Guardar datos</button>
     </div>
+    <div class="row">
+      <div class="col-md-12 d-none" id="contenido_datos">
+        <div class="border p-3 rounded bg-light">
+          <div id="infoAsientoSeleccionado" class="mb-2 fw-bold text-primary">
+            Asiento: <span id="asiento-numero">--</span> (<span id="asiento-precio">S/0.00</span>)
+          </div>
+          <select id="tipo_doc" class="form-select mb-2">
+            <option value="DNI">DNI</option>
+            <option value="CE">CE</option>
+          </select>
+          <input class="form-control mb-2" id="numeroDocNuevo" placeholder="N° Documento">
+          <input class="form-control mb-2" id="nombres" placeholder="Nombres">
+          <input class="form-control mb-2" id="apellidoPaterno" placeholder="Apellido paterno">
+          <input class="form-control mb-2" id="apellidoMaterno" placeholder="Apellido materno">
+          <input class="form-control mb-2" id="fechaNacimientoNuevo" type="date" placeholder="Fecha nacimiento">
+          <input class="form-control mb-2" id="telefono" placeholder="Teléfono">
+          <div class="mb-2">
+            <label class="me-2">Sexo:</label>
+            <input type="radio" class="form-check-input" name="sexo" id="sexoMasculino"> <label
+              for="sexoMasculino">Masculino</label>
+            <input type="radio" class="form-check-input" name="sexo" id="sexoFemenino"> <label
+              for="sexoFemenino">Femenino</label>
+          </div>
+          <input class="form-control mb-2" id="correo" placeholder="Correo electrónico" type="email">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="brazos">
+            <label class="form-check-label" for="brazos">Con menor en brazos</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="esMenor">
+            <label class="form-check-label" for="esMenor">Es menor de edad</label>
+          </div>
+          <button class="btn btn-outline-primary w-100">Guardar datos</button>
+        </div>
+      </div>
+
+    </div>
+
   </div>
 </div>

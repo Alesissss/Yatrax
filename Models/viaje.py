@@ -260,13 +260,14 @@ class Viaje:
         try:
             conexion = bd.Conexion()
             listado = conexion.obtener("""
-                SELECT DISTINCT a.id as id_asiento, nh.x_dimension, nh.y_dimension, n.nroPiso, h.icono 
+                SELECT DISTINCT dva.id as id_asiento, dva.esDisponible as estado, h.id_tipo as tipo_herramienta, a.nombre as nombre, nh.x_dimension, nh.y_dimension, n.nroPiso, h.icono 
                 FROM detalle_viaje_asiento dva INNER JOIN asiento a ON dva.idAsiento = a.id
                 INNER JOIN nivel_herramienta nh ON nh.id = a.id
                 INNER JOIN nivel n ON nh.id_nivel = n.id
                 INNER JOIN herramienta h ON nh.id_herramienta = h.id
-                WHERE dva.idDetalle_Viaje = 4;
+                WHERE dva.idDetalle_Viaje = %s;
             """, (id_dv,))
+
             return listado
         finally:
             conexion.cerrar()

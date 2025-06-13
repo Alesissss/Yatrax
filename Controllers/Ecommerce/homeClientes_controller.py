@@ -447,7 +447,6 @@ from flask import jsonify, render_template
 def obtener_diseno_vehiculo():
     detalle_viaje_id = request.json.get("id_dv")
     datos = Viaje.obtener_asientos(detalle_viaje_id)
-    print(datos)
     return jsonify({
         "data": datos,
         "Status": "success",
