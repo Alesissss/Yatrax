@@ -158,9 +158,9 @@ def renderizarCompra():
 def renderizar_itinerario():
     data = request.get_json()
     itinerarios = data.get('itinerarios', [])
-
+    sufijo = data.get('sufijo')
     # Renderiza el HTML del itinerario con Jinja
-    html_renderizado = render_template('Ecommerce/home/partials/itinerario.html', itinerarios=itinerarios)
+    html_renderizado = render_template('Ecommerce/home/partials/itinerario.html', itinerarios=itinerarios, sufijo = sufijo)
     return jsonify({'html': html_renderizado})
 
 
@@ -519,7 +519,7 @@ def buscarViajes():
         fecha_vuelta = request.form.get('fecha_vuelta')
         datos_viaje_ida = Viaje.buscarViajePorRutaYFecha(origen=origen, destino=destino, fecha= fecha_ida)
         if fecha_vuelta:
-            datos_viaje_vuelta = Viaje.buscarViajePorRutaYFecha(origen=origen, destino=destino, fecha= fecha_vuelta)
+            datos_viaje_vuelta = Viaje.buscarViajePorRutaYFecha(origen=destino, destino=origen, fecha= fecha_vuelta)
         return jsonify({
             "data_ida":datos_viaje_ida,
             "data_vuelta":datos_viaje_vuelta,
@@ -528,8 +528,8 @@ def buscarViajes():
         })
     except Exception as e:
         return jsonify({
-            "data_ida":datos_viaje_ida,
-            "data_vuelta":datos_viaje_vuelta,
+            "data_ida":[],
+            "data_vuelta":[],
             "Msg":"Hubo un error al buscar los viajes; " + repr(e),
             "Status": "error"
         })
@@ -540,7 +540,6 @@ from flask import jsonify, render_template
 def obtener_diseno_vehiculo():
     detalle_viaje_id = request.json.get("id_dv")
     datos = Viaje.obtener_asientos(detalle_viaje_id)
-    print(datos)
     return jsonify({
         "data": datos,
         "Status": "success",

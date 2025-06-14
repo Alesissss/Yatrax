@@ -25,7 +25,6 @@ viajes_bp = Blueprint('viajes', __name__, url_prefix='/trabajadores/viajes')
 # ERRORES 
 # Manejar errores 401 (Página no autorizada)
 
-"""
 @viajes_bp.errorhandler(401)
 def error_401(error):
     return render_template("error.html", error="Página no autorizada"), 401
@@ -70,8 +69,6 @@ def verificar_sesion():
     # if not any(menu['nombre'] == 'M_VIAJES' for menu in menus) and request.endpoint not in rutas_permitidas:
     #     abort(403)  # Autenticado, pero no tiene permiso para ese módulo
 
-
-"""
 
 # VIEWS
 @viajes_bp.route('/GestionarHorarios')

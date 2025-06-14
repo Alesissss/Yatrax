@@ -272,7 +272,8 @@ class Viaje:
                 JOIN nivel n ON nh.id_nivel = n.id
                 JOIN herramienta h ON nh.id_herramienta = h.id
                 LEFT JOIN asiento a ON nh.id = a.id_nivel_herramienta
-                LEFT JOIN detalle_viaje_asiento dva ON dva.idAsiento = a.id AND dva.idDetalle_Viaje = %s
+                LEFT JOIN detalle_viaje_asiento dva ON dva.idAsiento = a.id
+                where dva.idDetalle_Viaje = %s
            """, (id_dv,))
 
             return listado
