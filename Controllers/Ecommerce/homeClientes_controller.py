@@ -57,7 +57,8 @@ homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/hom
 # FUNCIONES AUXILIARES
 
 def renderizarCompra():
-    return render_template('Ecommerce/home/partials/ventaPasajes.html')
+    herramientas = Herramienta.obtener_todos()
+    return render_template('Ecommerce/home/partials/ventaPasajes.html', herramientas = herramientas)
 
 
 @homeClientes_bp.route('/renderizar_itinerario', methods=['POST'])
@@ -425,7 +426,7 @@ def buscarViajes():
         fecha_vuelta = request.form.get('fecha_vuelta')
         datos_viaje_ida = Viaje.buscarViajePorRutaYFecha(origen=origen, destino=destino, fecha= fecha_ida)
         if fecha_vuelta:
-            datos_viaje_vuelta = Viaje.buscarViajePorRutaYFecha(origen=origen, destino=destino, fecha= fecha_ida)
+            datos_viaje_vuelta = Viaje.buscarViajePorRutaYFecha(origen=origen, destino=destino, fecha= fecha_vuelta)
         return jsonify({
             "data_ida":datos_viaje_ida,
             "data_vuelta":datos_viaje_vuelta,
@@ -442,31 +443,15 @@ def buscarViajes():
 
 from flask import jsonify, render_template
 
-@homeClientes_bp.route("/ecommerce/home/obtener_diseno_vehiculo")
+@homeClientes_bp.route("/obtener_diseno_vehiculo", methods=['POST'])
 def obtener_diseno_vehiculo():
-    detalle_viaje_id = request.args.get("detalle_viaje_id")
-
-    datos = Viaje.obtener_tipo_vehiculo_por_dv(detalle_viaje_id)
-    tipo_vehiculo_id = datos["id_tipo_vehiculo"]
-
-    niveles = TipoVehiculo.obtener_niveles_por_tipoVehiculo(tipo_vehiculo_id)
-    botones = []
-    for nivel in niveles:
-        for herramienta in nivel["herramientas"]:
-            botones.append({
-                "x_dimension": herramienta["x_dimension"],
-                "y_dimension": herramienta["y_dimension"],
-                "id_herramienta": herramienta["id_herramienta"],
-                "piso": nivel["nroPiso"]
-            })
-
-    herramientas = Herramienta.obtener_todos()  
-
-    html = render_template("Ecommerce/home/partials/matriz_niveles.html", botones=botones, herramientas=herramientas)
-
+    detalle_viaje_id = request.json.get("id_dv")
+    datos = Viaje.obtener_asientos(detalle_viaje_id)
+    print(datos)
     return jsonify({
+        "data": datos,
         "Status": "success",
-        "html": html
+        "msg": "Retornado con éxito" 
     })
 
 

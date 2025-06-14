@@ -908,16 +908,20 @@ CREATE TABLE tipo_reclamo(
 
     -- INSERT HERRAMIENTA
 
-    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (1, 'Asiento a 140°','fas fa-chair',1);
-    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (2, 'Asiento a 160°','fas fa-chair',1);
-    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (3, 'Asiento cama','fas fa-chair',1);
+    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (1, 'Asiento a 140°','img/herramienta/asiento_140.png',1);
+    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (2, 'Asiento a 160°','img/herramienta/asiento_160.png',1);
+    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (3, 'Asiento cama','img/herramienta/asiento_180.png',1);
 
-    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (4, 'Televisor','fas fa-desktop',4);
+    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (4, 'Televisor','img/herramienta/tv.png',4);
 
-    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (5, 'Baño','fas fa-restroom',3);
-    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (6, 'Extintor','fas fa-fire-extinguisher',3);
+    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (5, 'Baño','img/herramienta/toilet.png',3);
+    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (6, 'Extintor','img/herramienta/extintor.png',3);
 
-    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (7, 'Puerta','fas fa-door-closed',2);
+    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (7, 'Puerta','img/herramienta/puerta.png',2);
+    
+    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (8, 'Subida','img/herramienta/escalera_hacia_arriba.png',2);
+    
+    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (9, 'Bajada','img/herramienta/escalera_hacia_abajo.png',2);
 
     -- INSERTS PAIS
     INSERT INTO pais (id, nombre, name, iso2, iso3, phone_code, continente) VALUES (1,'Afganistán','Afghanistan','AF','AFG','93','Asia');

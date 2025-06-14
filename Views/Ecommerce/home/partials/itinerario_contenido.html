@@ -13,6 +13,29 @@
     margin-right: 0.5em;
     border: 1px solid #ccc;
   }
+
+  .asiento-seleccionado {
+    background-color: #0d6efd !important;
+    /* azul Bootstrap */
+    color: white !important;
+    animation: rebote 0.2s ease;
+    transform: scale(1.05);
+    z-index: 2;
+  }
+
+  @keyframes rebote {
+    0% {
+      transform: scale(1);
+    }
+
+    50% {
+      transform: scale(1.1);
+    }
+
+    100% {
+      transform: scale(1.05);
+    }
+  }
 </style>
 
 
@@ -30,45 +53,31 @@
 
   <!-- Mapa de asientos -->
   <div class="col-md-6">
-    <h6 class="text-center">1° Piso</h6>
-    <div class="d-flex flex-wrap justify-content-center gap-2 mb-3 contenedorDiseño" id="piso1">
-
+    <div id="contenedor_piso_1">
+      <h6 class="text-center">1° Piso</h6>
+      <div class="gap-2 mb-3" id="matrizContainer_1"></div>
     </div>
-    <h6 class="text-center">2° Piso</h6>
-    <div class="d-flex flex-wrap justify-content-center gap-2 contenedorDiseño" id="piso2"></div>
+
+    <div id="contenedor_piso_2">
+      <h6 class="text-center">2° Piso</h6>
+      <div class="gap-2" id="matrizContainer_2"></div>
+    </div>
   </div>
 
   <!-- Formulario -->
+
   <div class="col-md-4">
-    <div class="border p-3 rounded bg-light">
-      <div id="infoAsientoSeleccionado" class="mb-2 fw-bold text-primary">
-        Asiento: <span id="asiento-numero">--</span> (<span id="asiento-precio">S/0.00</span>)
+    <div class="row">
+      <div class="col-md-12">
+        <div id="temporizador">Tiempo restante: 10</div>
       </div>
-      <select id="tipo_doc" class="form-select mb-2">
-        <option value="DNI">DNI</option>
-        <option value="CE">CE</option>
-      </select>
-      <input class="form-control mb-2" id="numeroDocNuevo" placeholder="N° Documento">
-      <input class="form-control mb-2" id="nombres" placeholder="Nombres">
-      <input class="form-control mb-2" id="apellidoPaterno" placeholder="Apellido paterno">
-      <input class="form-control mb-2" id="apellidoMaterno" placeholder="Apellido materno">
-      <input class="form-control mb-2" id="fechaNacimientoNuevo" type="date" placeholder="Fecha nacimiento">
-      <input class="form-control mb-2" id="telefono" placeholder="Teléfono">
-      <div class="mb-2">
-        <label class="me-2">Sexo:</label>
-        <input type="radio" class="form-check-input" name="sexo" id="sexoMasculino"> <label for="sexoMasculino">Masculino</label>
-        <input type="radio" class="form-check-input" name="sexo" id="sexoFemenino"> <label for="sexoFemenino">Femenino</label>
-      </div>
-      <input class="form-control mb-2" id="correo" placeholder="Correo electrónico" type="email">
-      <div class="form-check">
-        <input class="form-check-input" type="checkbox" id="brazos">
-        <label class="form-check-label" for="brazos">Con menor en brazos</label>
-      </div>
-      <div class="form-check mb-2">
-        <input class="form-check-input" type="checkbox" id="esMenor">
-        <label class="form-check-label" for="esMenor">Es menor de edad</label>
-      </div>
-      <button class="btn btn-outline-primary w-100">Guardar datos</button>
     </div>
+    <div class="row">
+      <div class="col-md-12 d-none" id="contenido_datos">
+        <div class="accordion" id="accordionPasajeros"></div>
+      </div>
+
+    </div>
+
   </div>
 </div>
