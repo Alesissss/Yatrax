@@ -221,14 +221,14 @@ function seleccionarAsiento() {
         btn.addEventListener('click', async function () {
             const contenedor = document.getElementById("contenido_datos");
             const accordion = document.getElementById("accordionPasajeros");
-            const codigoAsiento = btn.innerText.trim();
-            const accordionItemId = `collapse-${codigoAsiento}`;
+            const nombreAsiento = btn.innerText.trim();
+            const accordionItemId = `collapse-${btn.id}`;
 
             // Si ya estaba seleccionado (intenta deseleccionar)
             if (btn.classList.contains("asiento-seleccionado")) {
                 const confirm = await Swal.fire({
                     title: '¿Deseas quitar este asiento?',
-                    text: `Se eliminarán los datos ingresados para el asiento ${codigoAsiento}.`,
+                    text: `Se eliminarán los datos ingresados para el asiento ${nombreAsiento}.`,
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonText: 'Sí, eliminar',
@@ -267,7 +267,7 @@ function seleccionarAsiento() {
 
             // Crear el acordeón si no existe
             if (!document.getElementById(accordionItemId)) {
-                const headerId = `heading-${codigoAsiento}`;
+                const headerId = `heading-${btn.id}`;
 
                 const nuevoForm = document.createElement("div");
                 nuevoForm.classList.add("accordion-item");
@@ -275,19 +275,19 @@ function seleccionarAsiento() {
                 nuevoForm.innerHTML = `
                     <h2 class="accordion-header" id="${headerId}">
                         <button class="accordion-button ${accordion.children.length > 0 ? 'collapsed' : ''}" type="button" data-bs-toggle="collapse" data-bs-target="#${accordionItemId}" aria-expanded="true" aria-controls="${accordionItemId}">
-                        Asiento ${codigoAsiento}
+                        Asiento ${btn.id}
                         </button>
                     </h2>
                     <div id="${accordionItemId}" class="accordion-collapse collapse ${accordion.children.length === 0 ? 'show' : ''}" aria-labelledby="${headerId}" data-bs-parent="#accordionPasajeros">
                         <div class="accordion-body">
-                        ${generarFormularioHTML(codigoAsiento)}
+                        ${generarFormularioHTML(nombreAsiento, btn.id)}
                         </div>
                     </div>
                     `;
 
                 accordion.appendChild(nuevoForm);
                 accordion.appendChild(nuevoForm);
-                api_reniec(codigoAsiento); // <== NUEVA LÍNEA
+                api_reniec(btn.id); // <== NUEVA LÍNEA
 
             }
 
@@ -298,35 +298,34 @@ function seleccionarAsiento() {
     });
 }
 
-function generarFormularioHTML(asiento) {
+function generarFormularioHTML(asiento_nombre,asiento_id) {
   return `
-    <div class="mb-2 fw-bold text-primary">Asiento: ${asiento} (<span>S/0.00</span>)</div>
-    <select class="form-select mb-2" id="tipo_doc_${asiento}">
+    <div class="mb-2 fw-bold text-primary">Asiento: ${asiento_nombre} (<span>S/0.00</span>)</div>
+    <select class="form-select mb-2" id="tipo_doc_${asiento_id}">
       <option value="DNI">DNI</option>
       <option value="CE">CE</option>
     </select>
-    <input class="form-control mb-2" id="numeroDocNuevo_${asiento}" placeholder="N° Documento">
-    <input class="form-control mb-2" id="nombres_${asiento}" placeholder="Nombres">
-    <input class="form-control mb-2" id="apellidoPaterno_${asiento}" placeholder="Apellido paterno">
-    <input class="form-control mb-2" id="apellidoMaterno_${asiento}" placeholder="Apellido materno">
-    <input class="form-control mb-2" id="fechaNacimientoNuevo_${asiento}" type="date" placeholder="Fecha nacimiento">
-    <input class="form-control mb-2" id="telefono_${asiento}" placeholder="Teléfono">
+    <input class="form-control mb-2" id="numeroDocNuevo_${asiento_id}" placeholder="N° Documento">
+    <input class="form-control mb-2" id="nombres_${asiento_id}" placeholder="Nombres">
+    <input class="form-control mb-2" id="apellidoPaterno_${asiento_id}" placeholder="Apellido paterno">
+    <input class="form-control mb-2" id="apellidoMaterno_${asiento_id}" placeholder="Apellido materno">
+    <input class="form-control mb-2" id="fechaNacimientoNuevo_${asiento_id}" type="date" placeholder="Fecha nacimiento">
+    <input class="form-control mb-2" id="telefono_${asiento_id}" placeholder="Teléfono">
     <div class="mb-2">
       <label class="me-2">Sexo:</label>
-      <input type="radio" class="form-check-input" name="sexo-${asiento}" id="sexoMasculino_${asiento}"> <label for="sexoMasculino_${asiento}" value="M">Masculino</label>
-      <input type="radio" class="form-check-input" name="sexo-${asiento}" id="sexoFemenino_${asiento}"> <label for="sexoFemenino_${asiento}" value="F">Femenino</label>
+      <input type="radio" class="form-check-input" name="sexo-${asiento_id}" id="sexoMasculino_${asiento_id}"> <label for="sexoMasculino_${asiento_id}" value="M">Masculino</label>
+      <input type="radio" class="form-check-input" name="sexo-${asiento_id}" id="sexoFemenino_${asiento_id}"> <label for="sexoFemenino_${asiento_id}" value="F">Femenino</label>
     </div>
-    <input class="form-control mb-2" id="correo_${asiento}" placeholder="Correo electrónico" type="email">
+    <input class="form-control mb-2" id="correo_${asiento_id}" placeholder="Correo electrónico" type="email">
     <div class="form-check">
-      <input class="form-check-input" type="checkbox" id="brazos_${asiento}">
-      <label class="form-check-label" for="brazos_${asiento}">Con menor en brazos</label>
+      <input class="form-check-input" type="checkbox" id="brazos_${asiento_id}">
+      <label class="form-check-label" for="brazos_${asiento_id}">Con menor en brazos</label>
     </div>
     <div class="form-check mb-2">
-      <input class="form-check-input" type="checkbox" id="esMenor_${asiento}">
-      <label class="form-check-label" for="esMenor_${asiento}">Es menor de edad</label>
+      <input class="form-check-input" type="checkbox" id="esMenor_${asiento_id}">
+      <label class="form-check-label" for="esMenor_${asiento_id}">Es menor de edad</label>
     </div>
-    <button class="btn btn-outline-primary w-100" id="enviarDatos" onclick='enviarDatosPasajero()'>Guardar datos</button>
-    <script type="module" src="../js/ventaPasajes.js"></script>
+    <button class="btn btn-outline-primary w-100" onclick='enviarDatosPasajero("${asiento_nombre}",${asiento_id})'>Guardar datos</button>
   `;
 }
 
@@ -349,19 +348,19 @@ class Venta {
   }
 }
 
-function enviarDatosPasajero(){
-    alert("Agregar logica para almacenar parte de los datos antes de hacer la venta")
-    let numDoc = document.getElementById("numeroDocNuevo_")
-    let nombres = document.getElementById("nombres_")
-    let apellidoPaterno = document.getElementById("apellidoPaterno_")
-    let apellidoMaterno = document.getElementById("apellidoMaterno_")
-    let fechaNacimiento = document.getElementById("fechaNacimientoNuevo_")
-    let telefono = document.getElementById("telefono_")
-    let recuperarSeleccion = document.querySelector('input[name="sexo-"]:checked')?.value
-    let sexo = (recuperarSeleccion === 'M') ? 1 : 0;
-    let correo = document.getElementById("correo_")
-    let brazos = document.getElementById("brazos_").checked
-    let esMenor = document.getElementById("esMenor_").checked
+function enviarDatosPasajero(nombre_asiento, id_asiento) {
+    const numDoc = document.getElementById(`numeroDocNuevo_${id_asiento}`);
+    const nombres = document.getElementById(`nombres_${id_asiento}`);
+    const apellidoPaterno = document.getElementById(`apellidoPaterno_${id_asiento}`);
+    const apellidoMaterno = document.getElementById(`apellidoMaterno_${id_asiento}`);
+    const fechaNacimiento = document.getElementById(`fechaNacimientoNuevo_${id_asiento}`);
+    const telefono = document.getElementById(`telefono_${id_asiento}`);
+    const correo = document.getElementById(`correo_${id_asiento}`);
+    const brazos = document.getElementById(`brazos_${id_asiento}`).checked;
+    const esMenor = document.getElementById(`esMenor_${id_asiento}`).checked;
+
+    const recuperarSeleccion = document.querySelector(`input[name="sexo-${id_asiento}"]:checked`)?.id;
+    const sexo = recuperarSeleccion?.includes("Masculino") ? 1 : 0;
 
     const venta = new Venta(
         numDoc.value,
@@ -377,8 +376,14 @@ function enviarDatosPasajero(){
         esMenor
     );
 
-    localStorage.setItem("venta",JSON.stringify(venta))
+    // Puedes guardar en un arreglo por id_asiento
+    const ventasGuardadas = JSON.parse(sessionStorage.getItem("ventas") || "{}");
+    ventasGuardadas[id_asiento] = venta;
+    sessionStorage.setItem("ventas", JSON.stringify(ventasGuardadas));
+
+    toastr.success(`Datos del asiento ${nombre_asiento} guardados correctamente.`);
 }
+
 
 function handleClick(e) {
     console.log("Hola desde asiento", e.currentTarget);
