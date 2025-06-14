@@ -1,5 +1,6 @@
 let currentStep = 0;
 let maxStep = 0; // Controla hasta qué pestaña está desbloqueado el acceso
+const MAX_ASIENTOS = 4;
 
 function updateFormVisibility() {
     const form = document.getElementById('form-destino');
@@ -192,7 +193,8 @@ function inicializarEventosPostRender() {
 function funcionalidadElegir() {
     document.querySelectorAll(".mostrarContenido").forEach(btn => {
         btn.addEventListener('click', function () {
-            generarMatriz(btn.id, 1);
+            generar_matrices(btn.id)
+
         });
 
         const targetId = btn.getAttribute('data-bs-target');
@@ -215,111 +217,223 @@ function seleccionarAsiento() {
         console.warn("No se encontraron asientos con data-tipo='1'");
     }
     asientos.forEach(btn => {
-        btn.removeEventListener('click', handleClick); // evitar múltiples binds
-        btn.addEventListener('click', handleClick);
-        btn.addEventListener('click',function() {
-            funcionalidadBotonAsiento();
+
+        btn.addEventListener('click', async function () {
+            const contenedor = document.getElementById("contenido_datos");
+            const accordion = document.getElementById("accordionPasajeros");
+            const codigoAsiento = btn.innerText.trim();
+            const accordionItemId = `collapse-${codigoAsiento}`;
+
+            // Si ya estaba seleccionado (intenta deseleccionar)
+            if (btn.classList.contains("asiento-seleccionado")) {
+                const confirm = await Swal.fire({
+                    title: '¿Deseas quitar este asiento?',
+                    text: `Se eliminarán los datos ingresados para el asiento ${codigoAsiento}.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar',
+                });
+
+                if (confirm.isConfirmed) {
+                    btn.classList.remove("asiento-seleccionado");
+
+                    const accordionItem = document.getElementById(accordionItemId)?.closest(".accordion-item");
+                    if (accordionItem) accordionItem.remove();
+
+                    // Si no queda ningún asiento, ocultamos todo
+                    if (accordion.children.length === 0) {
+                        contenedor.classList.add("d-none");
+                    }
+                }
+
+                return; // no continuar
+            }
+
+            // Verifica si se ha alcanzado el máximo
+            const seleccionados = document.querySelectorAll(".asiento-seleccionado");
+            if (seleccionados.length >= MAX_ASIENTOS) {
+                toastr.warning(`Solo puedes seleccionar hasta ${MAX_ASIENTOS} asientos.`);
+                return;
+            }
+
+            // Selecciona asiento
+            btn.classList.add("asiento-seleccionado");
+
+            // Mostrar contenedor si estaba oculto
+            if (contenedor.classList.contains("d-none")) {
+                contenedor.classList.remove("d-none");
+            }
+
+            // Crear el acordeón si no existe
+            if (!document.getElementById(accordionItemId)) {
+                const headerId = `heading-${codigoAsiento}`;
+
+                const nuevoForm = document.createElement("div");
+                nuevoForm.classList.add("accordion-item");
+
+                nuevoForm.innerHTML = `
+                    <h2 class="accordion-header" id="${headerId}">
+                        <button class="accordion-button ${accordion.children.length > 0 ? 'collapsed' : ''}" type="button" data-bs-toggle="collapse" data-bs-target="#${accordionItemId}" aria-expanded="true" aria-controls="${accordionItemId}">
+                        Asiento ${codigoAsiento}
+                        </button>
+                    </h2>
+                    <div id="${accordionItemId}" class="accordion-collapse collapse ${accordion.children.length === 0 ? 'show' : ''}" aria-labelledby="${headerId}" data-bs-parent="#accordionPasajeros">
+                        <div class="accordion-body">
+                        ${generarFormularioHTML(codigoAsiento)}
+                        </div>
+                    </div>
+                    `;
+
+                accordion.appendChild(nuevoForm);
+                accordion.appendChild(nuevoForm);
+                api_reniec(codigoAsiento); // <== NUEVA LÍNEA
+
+            }
+
+            funcionalidadBotonAsiento(); // tu lógica personalizada
         });
-        
+
+
     });
 }
+
+function generarFormularioHTML(asiento) {
+  return `
+    <div class="mb-2 fw-bold text-primary">Asiento: ${asiento} (<span>S/0.00</span>)</div>
+    <select class="form-select mb-2" id="tipo_doc_${asiento}">
+      <option value="DNI">DNI</option>
+      <option value="CE">CE</option>
+    </select>
+    <input class="form-control mb-2" id="numeroDocNuevo_${asiento}" placeholder="N° Documento">
+    <input class="form-control mb-2" id="nombres_${asiento}" placeholder="Nombres">
+    <input class="form-control mb-2" id="apellidoPaterno_${asiento}" placeholder="Apellido paterno">
+    <input class="form-control mb-2" id="apellidoMaterno_${asiento}" placeholder="Apellido materno">
+    <input class="form-control mb-2" id="fechaNacimientoNuevo_${asiento}" type="date" placeholder="Fecha nacimiento">
+    <input class="form-control mb-2" id="telefono_${asiento}" placeholder="Teléfono">
+    <div class="mb-2">
+      <label class="me-2">Sexo:</label>
+      <input type="radio" class="form-check-input" name="sexo-${asiento}" id="sexoMasculino_${asiento}"> <label for="sexoMasculino_${asiento}">Masculino</label>
+      <input type="radio" class="form-check-input" name="sexo-${asiento}" id="sexoFemenino_${asiento}"> <label for="sexoFemenino_${asiento}">Femenino</label>
+    </div>
+    <input class="form-control mb-2" id="correo_${asiento}" placeholder="Correo electrónico" type="email">
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" id="brazos_${asiento}">
+      <label class="form-check-label" for="brazos_${asiento}">Con menor en brazos</label>
+    </div>
+    <div class="form-check mb-2">
+      <input class="form-check-input" type="checkbox" id="esMenor_${asiento}">
+      <label class="form-check-label" for="esMenor_${asiento}">Es menor de edad</label>
+    </div>
+    <button class="btn btn-outline-primary w-100">Guardar datos</button>
+  `;
+}
+
+
 
 function handleClick(e) {
     console.log("Hola desde asiento", e.currentTarget);
 }
 
 
-function generarMatriz(id_boton, piso) {
+function generar_matrices(id_boton) {
     const ruta = "/ecommerce/home/obtener_diseno_vehiculo";
     const enviar = { id_dv: id_boton };
 
     fetch(ruta, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(enviar),
     })
         .then(res => res.json())
         .then(res => {
             const datos = res.data;
-            const filas = 15;
-            const columnas = 6;
-            const contenedor = document.getElementById(`matrizContainer_${piso}`);
 
-            if (!contenedor || contenedor.children.length > 0) return;
+            const datosPiso1 = datos.filter(d => d.nroPiso == 1);
+            const datosPiso2 = datos.filter(d => d.nroPiso == 2);
 
-            contenedor.innerHTML = '';
+            generarMatrizDesdeDatos(datosPiso1, 1);
 
-            // Estilos del contenedor
-            contenedor.style.display = 'grid';
-            contenedor.style.gridTemplateColumns = `repeat(${columnas}, 40px)`;
-            contenedor.style.gridTemplateRows = `repeat(${filas}, 40px)`;
-            contenedor.style.padding = '10px';
-            contenedor.style.margin = '0 auto';
-            contenedor.style.width = 'max-content';
-            contenedor.style.justifyContent = 'center';
-            contenedor.style.border = "2px solid #000";
-
-            for (let y = 1; y <= filas; y++) {
-                for (let x = 1; x <= columnas; x++) {
-                    const dato = datos.find(d =>
-                        parseInt(d.x_dimension) === x &&
-                        parseInt(d.y_dimension) === y &&
-                        parseInt(d.nroPiso) === piso
-                    );
-
-                    const btn = document.createElement('button');
-                    btn.style.width = '40px';
-                    btn.style.height = '40px';
-                    btn.setAttribute('data-x', x);
-                    btn.setAttribute('data-y', y);
-
-                    if (dato) {
-                        btn.id = `${dato.id_asiento}`;
-                        btn.setAttribute('data-tipo', dato.tipo_herramienta);
-                        btn.style.cursor = 'pointer';
-
-                        if (dato.tipo_herramienta === 1) {
-                            // Es un asiento
-                            if (dato.estado === 1) {
-
-                                btn.className = 'border border-dark border-2 bg-white';
-                                btn.innerText = dato.nombre;
-                            } else {
-                                btn.innerHTML = `<i class="${dato.icono}"></i>`;
-                            }
-                        } else {
-                            // Es otro tipo de herramienta
-                            btn.style.border = 'none';
-                            btn.style.background = 'transparent';
-                            btn.style.cursor = 'default';
-                            btn.disabled = true;
-                            btn.innerHTML = `<i class="${dato.icono}"></i>`;
-                        }
-
-                    } else {
-                        // Espacio sin herramienta
-                        btn.style.border = 'none';
-                        btn.style.background = 'transparent';
-                        btn.style.cursor = 'default';
-                        btn.disabled = true;
-                    }
-
-                    contenedor.appendChild(btn);
-                }
+            if (datosPiso2.length > 0) {
+                document.getElementById('contenedor_piso_2').style.display = 'block';
+                generarMatrizDesdeDatos(datosPiso2, 2);
+            } else {
+                document.getElementById('contenedor_piso_2').style.display = 'none';
             }
         });
 }
 
+function generarMatrizDesdeDatos(datos, piso) {
+    const filas = 15;
+    const columnas = 6;
+    const contenedor = document.getElementById(`matrizContainer_${piso}`);
+
+    if (!contenedor) return;
+    contenedor.innerHTML = '';
+
+    contenedor.style.display = 'grid';
+    contenedor.style.gridTemplateColumns = `repeat(${columnas}, 40px)`;
+    contenedor.style.gridTemplateRows = `repeat(${filas}, 40px)`;
+    contenedor.style.padding = '10px';
+    contenedor.style.margin = '0 auto';
+    contenedor.style.width = 'max-content';
+    contenedor.style.justifyContent = 'center';
+    contenedor.style.border = "2px solid #000";
+
+    for (let y = 1; y <= filas; y++) {
+        for (let x = 1; x <= columnas; x++) {
+            const dato = datos.find(d =>
+                parseInt(d.x_dimension) === x &&
+                parseInt(d.y_dimension) === y
+            );
+
+            const btn = document.createElement('button');
+            btn.style.width = '40px';
+            btn.style.height = '40px';
+            btn.setAttribute('data-x', x);
+            btn.setAttribute('data-y', y);
+
+            if (dato) {
+                btn.id = dato.id_asiento ?? '';
+                btn.setAttribute('data-tipo', dato.tipo_herramienta);
+                btn.style.cursor = 'pointer';
+
+                if (dato.tipo_herramienta === 1) {
+                    // Asiento
+                    if (dato.estado === 1) {
+                        btn.className = 'border border-dark border-2 bg-white';
+                        btn.innerText = dato.nombre;
+                    } else {
+                        btn.innerHTML = obtenerIcono(dato.icono);
+                    }
+                } else {
+                    // Otra herramienta
+                    btn.style.border = 'none';
+                    btn.style.background = 'transparent';
+                    btn.style.cursor = 'default';
+                    btn.disabled = true;
+                    btn.innerHTML = obtenerIcono(dato.icono);
+                }
+            } else {
+                btn.style.border = 'none';
+                btn.style.background = 'transparent';
+                btn.style.cursor = 'default';
+                btn.disabled = true;
+            }
+
+            contenedor.appendChild(btn);
+        }
+    }
+}
 
 function obtenerIcono(icono) {
-    return `<i class="${icono}"></i>`
+    return `<img src="/Static/${icono}" width="32" height="32" style="display: block; margin: auto;" alt="icono">`;
 }
 
 
-//Api RENIEC
 
+//Api RENIEC
+/*
 function api_reniec() {
     let debounceTimer;
 
@@ -420,6 +534,94 @@ function validarEdadNuevoPasajero() {
         toastr.warning("Menores a 18 años necesitan presentar autorización de sus padres o tutores para viajar", "MENSAJE DEL SISTEMA");
     }
 }
+*/
+function api_reniec(asiento) {
+    let debounceTimer;
+    const docInput = document.getElementById(`numeroDocNuevo_${asiento}`);
+    const tipoDoc = document.getElementById(`tipo_doc_${asiento}`);
+    const fechaNac = document.getElementById(`fechaNacimientoNuevo_${asiento}`);
+
+    if (docInput) {
+        docInput.addEventListener("input", function () {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => buscarPersona(asiento), 1000);
+        });
+    }
+
+    if (tipoDoc) {
+        tipoDoc.addEventListener("change", () => buscarPersona(asiento));
+    }
+
+    if (fechaNac) {
+        fechaNac.addEventListener("change", () => validarEdadNuevoPasajero(asiento));
+    }
+}
+
+function buscarPersona(asiento) {
+    const tipoDocVal = document.getElementById(`tipo_doc_${asiento}`).value;
+    const numDoc = document.getElementById(`numeroDocNuevo_${asiento}`).value.trim();
+
+    if (!tipoDocVal) {
+        toastr.warning("El tipo de documento es obligatorio", "MENSAJE DEL SISTEMA");
+        return;
+    }
+
+    if (tipoDocVal && (numDoc.length == 8 || numDoc.length == 11)) {
+        fetch(`/ecommerce/home/api/get_persona_data?tipoDoc=${encodeURIComponent(tipoDocVal)}&numDoc=${encodeURIComponent(numDoc)}`)
+            .then((r) => r.json())
+            .then((json) => {
+                if (json.Status === "success") {
+                    const d = json.data;
+
+                    document.getElementById(`nombres_${asiento}`).value = d.nombres || d.nombre || "";
+                    document.getElementById(`apellidoPaterno_${asiento}`).value = d.apellidoPaterno || d.ape_paterno || "";
+                    document.getElementById(`apellidoMaterno_${asiento}`).value = d.apellidoMaterno || d.ape_materno || "";
+                    document.getElementById(`correo_${asiento}`).value = d.email || "";
+                    document.getElementById(`telefono_${asiento}`).value = d.telefono || "";
+
+                    if (d.f_nacimiento) {
+                        document.getElementById(`fechaNacimientoNuevo_${asiento}`).value = moment(d.f_nacimiento).format("YYYY-MM-DD");
+                        validarEdadNuevoPasajero(asiento);
+                    }
+
+                    if (d.sexo != null) {
+                        document.getElementById(`sexoMasculino_${asiento}`).checked = d.sexo === 1;
+                        document.getElementById(`sexoFemenino_${asiento}`).checked = d.sexo !== 1;
+                    }
+                } else {
+                    document.getElementById(`nombres_${asiento}`).value = "Nombres";
+                    document.getElementById(`apellidoPaterno_${asiento}`).value = "Apellido paterno";
+                    document.getElementById(`apellidoMaterno_${asiento}`).value = "Apellido materno";
+                    toastr.error(json.Msj, "ERROR");
+                }
+            })
+            .catch(err => {
+                toastr.error("Ocurrió un error: " + (err.message || err));
+            });
+    }
+}
+
+
+
+function validarEdadNuevoPasajero() {
+    const fechaNacimiento = document.getElementById("fechaNacimientoNuevo").value;
+    if (!fechaNacimiento) return;
+
+    const fechaActual = new Date();
+    const fechaNac = new Date(fechaNacimiento);
+    let edad = fechaActual.getFullYear() - fechaNac.getFullYear();
+    const mes = fechaActual.getMonth() - fechaNac.getMonth();
+
+    if (mes < 0 || (mes === 0 && fechaActual.getDate() < fechaNac.getDate())) {
+        edad--;
+    }
+
+    document.getElementById("esMenor").checked = edad < 18;
+
+    if (edad < 18) {
+        toastr.warning("Menores a 18 años necesitan presentar autorización de sus padres o tutores para viajar", "MENSAJE DEL SISTEMA");
+    }
+}
 
 //Fin api reniec
 
@@ -446,7 +648,7 @@ function iniciarTemporizador(segundos) {
     }, 1000); // Cada 1 segundo
 }
 
-function funcionalidadBotonAsiento(btn_id){
+function funcionalidadBotonAsiento(btn_id) {
     const container = document.getElementById("contenido_datos");
     container.classList.remove("d-none");
 }

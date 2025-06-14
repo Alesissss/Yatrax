@@ -199,7 +199,6 @@ class Viaje:
                 INNER JOIN escala e_destino ON dv.idSucursalDestino = e_destino.id
                 INNER JOIN sucursal s_destino ON s_destino.id = e_destino.id
                 INNER JOIN viaje v ON v.id = dv.idViaje
-                WHERE v.id = 1;
             """                 
             )
             return lista_origenes
@@ -260,13 +259,21 @@ class Viaje:
         try:
             conexion = bd.Conexion()
             listado = conexion.obtener("""
-                SELECT DISTINCT dva.id as id_asiento, dva.esDisponible as estado, h.id_tipo as tipo_herramienta, a.nombre as nombre, nh.x_dimension, nh.y_dimension, n.nroPiso, h.icono 
-                FROM detalle_viaje_asiento dva INNER JOIN asiento a ON dva.idAsiento = a.id
-                INNER JOIN nivel_herramienta nh ON nh.id = a.id
-                INNER JOIN nivel n ON nh.id_nivel = n.id
-                INNER JOIN herramienta h ON nh.id_herramienta = h.id
-                WHERE dva.idDetalle_Viaje = %s;
-            """, (id_dv,))
+                SELECT 
+                    dva.id AS id_asiento,
+                    dva.esDisponible AS estado,
+                    h.id_tipo AS tipo_herramienta,
+                    a.nombre AS nombre,
+                    nh.x_dimension,
+                    nh.y_dimension,
+                    n.nroPiso,
+                    h.icono
+                FROM nivel_herramienta nh
+                JOIN nivel n ON nh.id_nivel = n.id
+                JOIN herramienta h ON nh.id_herramienta = h.id
+                LEFT JOIN asiento a ON nh.id = a.id_nivel_herramienta
+                LEFT JOIN detalle_viaje_asiento dva ON dva.idAsiento = a.id AND dva.idDetalle_Viaje = %s
+           """, (id_dv,))
 
             return listado
         finally:

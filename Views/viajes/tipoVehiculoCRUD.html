@@ -120,102 +120,209 @@
 
 {% block scripts %}
 <!-- Script para usar botones -->
-<script>
-
-</script>
 
 <!-- Script para cargar datos -->
-<script>
-    function fct_GetMarcas() {
-        $.getJSON('/trabajadores/viajes/GetMarcasTipoVehiculo', function (response) {
-            if (response.Status === 'success') {
-                let items = '<option disabled>--SELECCIONAR--</option>';
-
-                $.each(response.data, function (index, item) {
-                    if (item.id === Number("{{ tipoVehiculo.id_marca }}")) {
-                        items += `<option selected value="${item.id}">${item.nombre}</option>`;
-                    } else {
-                        items += `<option value="${item.id}">${item.nombre}</option>`;
-                    }
-                });
-
-                $('#cbx_Marca').html(items);
-            } else {
-                console.error('Error al obtener las marcas:', response.Msj);
-            }
-        });
-    }
-
-    function fct_GetServicios() {
-        $.getJSON('/trabajadores/viajes/GetServiciosTipoVehiculo', function (response) {
-            if (response.Status === 'success') {
-                let items = '<option disabled>--SELECCIONAR--</option>';
-
-                $.each(response.data, function (index, item) {
-                    if (item.id === Number("{{ tipoVehiculo.id_servicio }}")) {
-                        items += `<option selected value="${item.id}">${item.nombre}</option>`;
-                    } else {
-                        items += `<option value="${item.id}">${item.nombre}</option>`;
-                    }
-                });
-
-                $('#cbx_Servicio').html(items);
-            } else {
-                console.error('Error al obtener los servicios:', response.Msj);
-            }
-        });
-    }
-
-</script>
-
 <!-- Funciones auxiliares -->
 
 <script>
-    window.btnId = "{{ btnId }}";
-    function irAlSiguienteTab() {
-        const tabs = Array.from(document.querySelectorAll('#tipoVehiculoTabs .nav-link'));
-        const activeTab = tabs.find(tab => tab.classList.contains('active'));
+    // =============================================
+    // MÓDULO PRINCIPAL - GESTIÓN DE TIPOS DE VEHÍCULO
+    // =============================================
 
-        if (!activeTab) return;
+    /**
+     * Controlador principal que organiza todas las funcionalidades
+     */
+    const TipoVehiculoController = (function () {
+        // Constantes y configuraciones
+        const MAX_PISOS = 2;
+        const DEFAULT_HERRAMIENTA = 1;
 
-        const currentIndex = tabs.indexOf(activeTab);
-        const nextTab = tabs[currentIndex + 1];
+        // Variables de estado
+        let herramientaSeleccionada = null;
+        let ultimoTipoAsientoSeleccionado = DEFAULT_HERRAMIENTA;
 
-        if (nextTab) {
-            $(nextTab).tab('show');
-        } else {
-            toastr.info("Ya estás en el último tab.");
+        // Datos iniciales
+        const list_herramientas = JSON.parse('{{ herramientas | tojson }}');
+        const botones_guardados = JSON.parse('{{ botones | tojson }}');
+        const btnId = "{{ btnId }}";
+        const isModoEdicion = btnId === "btn_Actualizar";
+        const isModoRegresar = btnId === "btn_Regresar";
+
+        // ======================
+        // Funciones de utilidad
+        // ======================
+
+        /**
+         * Muestra un toast de error
+         * @param {string} mensaje 
+         * @param {string} [titulo] 
+         */
+        function mostrarError(mensaje, titulo = 'Error') {
+            toastr.error(mensaje, titulo);
+            console.error(titulo + ':', mensaje);
         }
-        return currentIndex + 1;
-    }
 
-
-    let herramientaSeleccionada = null;
-    const list_herramientas = JSON.parse('{{ herramientas | tojson }}');
-    const botones_guardados = JSON.parse('{{ botones | tojson }}');
-
-    function generarTabsNivel() {
-        const cantidad = parseInt(document.getElementById("cantidadPisos").value);
-        if (!cantidad || cantidad < 1) {
-            toastr.warning("Ingrese una cantidad válida de pisos.");
-            return;
+        /**
+         * Obtiene el HTML del ícono desde la lista de herramientas
+         * @param {number|string} idHerramienta 
+         * @returns {string}
+         */
+        function obtenerIcono(idHerramienta) {
+            const herramienta = list_herramientas.find(h => h.id === parseInt(idHerramienta));
+            return herramienta
+                ? `<img src="/Static/${herramienta.icono}" width="32" height="32" style="display: block; margin: auto;" alt="icono">`
+                : '';
         }
 
-        const tabs = document.getElementById("tipoVehiculoTabs");
-        const content = document.getElementById("tipoVehiculoTabsContent");
+        /**
+         * Crea un botón con las propiedades especificadas
+         * @param {string} texto 
+         * @param {string} claseColor 
+         * @param {string} tooltip 
+         * @param {Function} accion 
+         * @returns {HTMLButtonElement}
+         */
+        function crearBoton(texto, claseColor, tooltip, accion) {
+            const btn = document.createElement('button');
+            btn.className = `btn btn-sm rounded-circle ${claseColor}`;
+            btn.style.width = '30px';
+            btn.style.height = '30px';
+            btn.style.fontSize = '12px';
+            btn.style.padding = '0';
+            btn.innerHTML = texto;
+            btn.title = tooltip;
 
-        // Obtener tabs ya existentes (excluyendo el primero, que es el de datos)
-        const existingTabs = Array.from(tabs.querySelectorAll('li'))
-            .filter(tab => tab.querySelector('a')?.id?.startsWith('nivel-'));
+            if (!isModoRegresar) {
+                btn.addEventListener('click', accion);
+            } else {
+                btn.disabled = true;
+            }
 
-        const existingCount = existingTabs.length;
+            return btn;
+        }
 
-        if (existingCount < cantidad) {
-            // Faltan tabs → agregar los que faltan
+        // ======================
+        // Funciones de API
+        // ======================
+
+        /**
+         * Obtiene las marcas de vehículos desde el servidor
+         * @returns {Promise<void>}
+         */
+        async function obtenerMarcas() {
+            try {
+                const response = await $.getJSON('/trabajadores/viajes/GetMarcasTipoVehiculo');
+
+                if (response.Status === 'success') {
+                    let items = '<option disabled>--SELECCIONAR--</option>';
+
+                    $.each(response.data, function (index, item) {
+                        const selected = item.id === Number("{{ tipoVehiculo.id_marca }}") ? 'selected' : '';
+                        items += `<option ${selected} value="${item.id}">${item.nombre}</option>`;
+                    });
+
+                    $('#cbx_Marca').html(items);
+                } else {
+                    mostrarError('Error al obtener las marcas:', response.Msj);
+                }
+            } catch (error) {
+                mostrarError('Error en la solicitud de marcas', error);
+            }
+        }
+
+        /**
+         * Obtiene los servicios de vehículos desde el servidor
+         * @returns {Promise<void>}
+         */
+        async function obtenerServicios() {
+            try {
+                const response = await $.getJSON('/trabajadores/viajes/GetServiciosTipoVehiculo');
+
+                if (response.Status === 'success') {
+                    let items = '<option disabled>--SELECCIONAR--</option>';
+
+                    $.each(response.data, function (index, item) {
+                        const selected = item.id === Number("{{ tipoVehiculo.id_servicio }}") ? 'selected' : '';
+                        items += `<option ${selected} value="${item.id}">${item.nombre}</option>`;
+                    });
+
+                    $('#cbx_Servicio').html(items);
+                } else {
+                    mostrarError('Error al obtener los servicios:', response.Msj);
+                }
+            } catch (error) {
+                mostrarError('Error en la solicitud de servicios', error);
+            }
+        }
+
+        // ======================
+        // Funciones de UI - Tabs
+        // ======================
+
+        /**
+         * Navega al siguiente tab disponible
+         * @returns {number} Índice del nuevo tab activo
+         */
+        function irAlSiguienteTab() {
+            const tabs = Array.from(document.querySelectorAll('#tipoVehiculoTabs .nav-link'));
+            const activeTab = tabs.find(tab => tab.classList.contains('active'));
+
+            if (!activeTab) return;
+
+            const currentIndex = tabs.indexOf(activeTab);
+            const nextTab = tabs[currentIndex + 1];
+
+            if (nextTab) {
+                $(nextTab).tab('show');
+            } else {
+                toastr.info("Ya estás en el último tab.");
+            }
+
+            return currentIndex + 1;
+        }
+
+        /**
+         * Genera los tabs de nivel basados en la cantidad de pisos especificada
+         */
+        function generarTabsNivel() {
+            const cantidad = parseInt(document.getElementById("cantidadPisos").value);
+
+            if (!cantidad || cantidad < 1) {
+                toastr.warning("Ingrese una cantidad válida de pisos.");
+                return;
+            }
+
+            const tabs = document.getElementById("tipoVehiculoTabs");
+            const content = document.getElementById("tipoVehiculoTabsContent");
+
+            // Obtener tabs existentes (excluyendo el primero que es de datos)
+            const existingTabs = Array.from(tabs.querySelectorAll('li'))
+                .filter(tab => tab.querySelector('a')?.id?.startsWith('nivel-'));
+
+            const existingCount = existingTabs.length;
+
+            // Ajustar cantidad de tabs
+            if (existingCount < cantidad) {
+                agregarTabsFaltantes(existingCount, cantidad, tabs, content);
+            } else if (existingCount > cantidad) {
+                eliminarTabsSobrantes(existingCount, cantidad);
+            }
+
+            actualizarBotonesTabs(cantidad);
+        }
+
+        /**
+         * Agrega los tabs que faltan
+         * @param {number} existingCount 
+         * @param {number} cantidad 
+         * @param {HTMLElement} tabs 
+         * @param {HTMLElement} content 
+         */
+        function agregarTabsFaltantes(existingCount, cantidad, tabs, content) {
             for (let i = existingCount + 1; i <= cantidad; i++) {
                 const tabId = `nivel-${i}`;
-                const matrizId = i;
 
+                // Crear nuevo tab
                 const newTab = document.createElement('li');
                 newTab.className = 'nav-item';
                 newTab.innerHTML = `
@@ -224,657 +331,660 @@
             `;
                 tabs.appendChild(newTab);
 
-                const newContent = cargarContenido(tabId, matrizId, cantidad);
+                // Crear contenido del tab
+                const newContent = crearContenidoTab(tabId, i, cantidad);
                 content.appendChild(newContent);
-            }
 
-        } else if (existingCount > cantidad) {
-            // Sobran tabs → eliminar los que sobran
+                activarEventosDrag();
+            }
+        }
+
+        /**
+         * Elimina los tabs que sobran
+         * @param {number} existingCount 
+         * @param {number} cantidad 
+         */
+        function eliminarTabsSobrantes(existingCount, cantidad) {
             for (let i = existingCount; i > cantidad; i--) {
                 const tabId = `nivel-${i}`;
                 const tabElement = document.getElementById(`${tabId}-tab`);
                 const paneElement = document.getElementById(tabId);
 
-                if (tabElement) {
-                    tabElement.closest('li').remove();
-                }
-                if (paneElement) {
-                    paneElement.remove();
-                }
+                if (tabElement) tabElement.closest('li').remove();
+                if (paneElement) paneElement.remove();
             }
         }
 
-        // Si cantidad == existingCount → no hacer nada
-        // Actualizar botones de todos los niveles: solo el último debe tener "Aceptar"
-        document.querySelectorAll('.tab-pane').forEach((pane, index) => {
-            const footer = pane.querySelector('.card-footer');
-            if (!footer) return;
+        /**
+         * Actualiza los botones de los tabs
+         * @param {number} cantidad 
+         */
+        function actualizarBotonesTabs(cantidad) {
+            document.querySelectorAll('.tab-pane').forEach((pane, index) => {
+                const footer = pane.querySelector('.card-footer');
+                if (!footer) return;
 
-            // Eliminar botones anteriores
-            const oldBtn = footer.querySelector(`#${window.btnId}`);
-            if (oldBtn) oldBtn.remove();
+                // Eliminar botones anteriores
+                footer.querySelector(`#${btnId}`)?.remove();
+                footer.querySelector('#btn_Siguiente')?.remove();
 
-            const oldNext = footer.querySelector('#btn_Siguiente');
-            if (oldNext) oldNext.remove();
+                const isLast = (index === cantidad); // índice 0 es el tab de "Datos"
+                const newBtn = document.createElement('button');
+                newBtn.className = 'btn btn-primary mb-2';
 
-            const isLast = (index === cantidad); // índice 0 es el tab de "Datos", por eso `=== cantidad`
-            const newBtn = document.createElement('button');
-            newBtn.className = 'btn btn-primary mb-2';
+                if (isLast && !isModoRegresar) {
+                    newBtn.textContent = "Aceptar";
+                    newBtn.id = btnId;
+                } else {
+                    newBtn.textContent = "Siguiente";
+                    newBtn.id = "btn_Siguiente";
+                }
 
-            if (isLast && window.btnId !== "btn_Regresar") {
-                newBtn.textContent = "Aceptar";
-                newBtn.id = window.btnId;
-            } else {
-                newBtn.textContent = "Siguiente";
-                newBtn.id = "btn_Siguiente";
-            }
-
-            footer.appendChild(newBtn);
-        });
-    }
-
-    function cargarContenido(tabId, matrizId, cantidad) {
-
-        const newContent = document.createElement('div');
-        newContent.className = 'tab-pane fade';
-        newContent.id = tabId;
-        newContent.setAttribute('role', 'tabpanel');
-        newContent.setAttribute('aria-labelledby', `${tabId}-tab`);
-
-        let botoncito = `<button id="btn_Siguiente" type="button" class="btn btn-primary mb-2">Siguiente</button>`;
-        if (matrizId == cantidad && window.btnId !== "btn_Regresar") {
-            botoncito = `<button type="button" class="btn btn-primary mb-2" id="${window.btnId}">Aceptar</button>`;
+                footer.appendChild(newBtn);
+            });
         }
 
+        /**
+         * Crea el contenido HTML para un tab de nivel
+         * @param {string} tabId 
+         * @param {number} matrizId 
+         * @param {number} cantidad 
+         * @returns {HTMLElement}
+         */
+        function crearContenidoTab(tabId, matrizId, cantidad) {
+            const newContent = document.createElement('div');
+            newContent.className = 'tab-pane fade';
+            newContent.id = tabId;
+            newContent.setAttribute('role', 'tabpanel');
+            newContent.setAttribute('aria-labelledby', `${tabId}-tab`);
 
-        newContent.innerHTML = `
-        <div class="row justify-content-center">
-            <div class="col-md-5">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Controles</h3>
-                    </div>
-                    <div class="card-body">
-                        <div id="accordion">
-                            {% for tipo_herramienta in tipo_herramientas %}
-                            <div class="card card-{{ loop.cycle('info','primary') }}">
-                                <div class="card-header">
-                                    <h4 class="card-title w-100">
-                                <a class="d-block w-100 collapsed" data-toggle="collapse"
-                                                                href="#collapse{{ loop.index }}"
-                                                                aria-expanded="false">{{ tipo_herramienta.nombre }}</a>
-                                                        </h4>
+            const botonTexto = matrizId === cantidad && !isModoRegresar
+                ? `<button type="button" class="btn btn-primary mb-2" id="${btnId}">Aceptar</button>`
+                : `<button id="btn_Siguiente" type="button" class="btn btn-primary mb-2">Siguiente</button>`;
+
+            newContent.innerHTML = `
+            <div class="row justify-content-center">
+                <div class="col-md-5">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Controles</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="accordion">
+                                {% for tipo_herramienta in tipo_herramientas %}
+                                <div class="card card-{{ loop.cycle('info','primary') }}">
+                                    <div class="card-header">
+                                        <h4 class="card-title w-100">
+                                            <a class="d-block w-100 collapsed" data-toggle="collapse"
+                                                href="#collapse{{ loop.index }}"
+                                                aria-expanded="false">{{ tipo_herramienta.nombre }}</a>
+                                        </h4>
+                                    </div>
+                                    <div id="collapse{{ loop.index }}" class="collapse"
+                                        data-parent="#accordion">
+                                        <div class="card-body bg-white">
+                                            {% for herramienta in herramientas %}
+                                            {% if herramienta.id_tipo==tipo_herramienta.id %}
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <div class="align-items-center mb-2">
+                                                        <img src="{{ url_for('static', filename= herramienta.icono) }}"
+                                                            width="32" height="32" alt="icono"
+                                                            draggable="true" data-tipo="{{ herramienta.id }}"
+                                                            title="{{ herramienta.nombre }}"
+                                                            class="control mr-2">
+                                                        <span>{{ herramienta.nombre }}</span>
                                                     </div>
-                                                    <div id="collapse{{ loop.index }}" class="collapse"
-                                                        data-parent="#accordion">
-                                                        <div class="card-body d-flex flex-wrap bg-white">
-                                                            {% for herramienta in herramientas %}
-                                                            {% if herramienta.id_tipo==tipo_herramienta.id %}
-                                                            <i class="{{ herramienta.icono }} fa-lg m-2 control"
-                                                    draggable="true" data-tipo="{{ herramienta.id }}"
-                                                    title="{{ herramienta.nombre }}" style="font-size: 14px;">  {{ herramienta.nombre }}</i>
-                                                {% endif %}
+                                                </div>
+                                            </div>
+                                            {% endif %}
                                             {% endfor %}
                                         </div>
                                     </div>
                                 </div>
-                            {% endfor %}
+                                {% endfor %}
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-7">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Diseño</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="row justify-content-center" id="matrizContainer_${matrizId}"></div>
+                <div class="col-md-7">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Diseño</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row justify-content-center" id="matrizContainer_${matrizId}"></div>
+                        </div>
                     </div>
                 </div>
+                <div class="card-footer text-center">
+                    <button id="btn_Listado" type="button" class="btn btn-danger mb-2">Volver al listado</button>
+                    ${botonTexto}
+                </div>
             </div>
-            <div class="card-footer text-center">
-                                <button id="btn_Listado" type="button" class="btn btn-danger mb-2">Volver al
-                                    listado</button>
-                                ${botoncito}
-                            </div>
-        </div>
-    `;
-        return newContent;
-    }
+        `;
 
-    function activarEventosDrag() {
-        document.querySelectorAll('.control').forEach(el => {
-            el.addEventListener('click', () => {
-                document.querySelectorAll('.control').forEach(c => c.classList.remove('selected'));
-                el.classList.add('selected');
-                herramientaSeleccionada = el.getAttribute('data-tipo');
-            });
-        });
-    }
-
-    function generarMatriz(piso) {
-        const filas = 15;
-        const columnas = 6;
-        const contenedor = document.getElementById(`matrizContainer_${piso}`);
-
-        if (contenedor.children.length > 0) return;
-
-        contenedor.innerHTML = '';
-
-        // Configurar el grid con espacio extra para los botones
-        contenedor.style.display = 'grid';
-        contenedor.style.gridTemplateColumns = `40px repeat(${columnas}, 40px)`;
-        contenedor.style.gridTemplateRows = `40px repeat(${filas}, 40px)`;
-        contenedor.style.gap = '2px';
-        contenedor.style.justifyContent = 'center';
-
-        // Celda vacía en la esquina superior izquierda
-        const esquina = document.createElement('div');
-        esquina.style.width = '40px';
-        esquina.style.height = '40px';
-        contenedor.appendChild(esquina);
-
-        // Botones de columna (+) en la fila superior
-        for (let j = 1; j <= columnas; j++) {
-            const btnColumna = document.createElement('button');
-            btnColumna.className = 'btn btn-success btn-sm rounded-circle';
-            btnColumna.style.width = '30px';
-            btnColumna.style.height = '30px';
-            btnColumna.style.fontSize = '12px';
-            btnColumna.style.padding = '0';
-            btnColumna.innerHTML = '+';
-            btnColumna.title = `Llenar columna ${j}`;
-
-            // Evento para llenar toda la columna
-            if ("{{ btnId }}" !== "btn_Regresar") {
-                btnColumna.addEventListener('click', function () {
-                    llenarColumna(piso, j);
-                });
-            } else {
-                btnColumna.disabled = true;
-            }
-
-            contenedor.appendChild(btnColumna);
+            return newContent;
         }
 
-        // Generar filas con botones de fila (-) y celdas
-        for (let i = 1; i <= filas; i++) {
-            // Botón de fila (-) al inicio de cada fila
-            const btnFila = document.createElement('button');
-            btnFila.className = 'btn btn-danger btn-sm rounded-circle';
-            btnFila.style.width = '30px';
-            btnFila.style.height = '30px';
-            btnFila.style.fontSize = '12px';
-            btnFila.style.padding = '0';
-            btnFila.innerHTML = '−';
-            btnFila.title = `Vaciar fila ${i}`;
+        // ======================
+        // Funciones de Matriz
+        // ======================
 
-            // Evento para vaciar toda la fila
-            if ("{{ btnId }}" !== "btn_Regresar") {
-                btnFila.addEventListener('click', function () {
-                    vaciarFila(piso, i);
-                });
-            } else {
-                btnFila.disabled = true;
+        /**
+         * Genera una matriz de diseño para un piso específico
+         * @param {number} piso 
+         */
+        function generarMatriz(piso) {
+            const filas = 15;
+            const columnas = 6;
+            const contenedor = document.getElementById(`matrizContainer_${piso}`);
+
+            if (contenedor.children.length > 0) return;
+            contenedor.innerHTML = '';
+
+            // Configurar grid
+            contenedor.style.display = 'grid';
+            contenedor.style.gridTemplateColumns = `40px repeat(${columnas}, 40px)`;
+            contenedor.style.gridTemplateRows = `40px repeat(${filas}, 40px)`;
+            contenedor.style.gap = '2px';
+            contenedor.style.justifyContent = 'center';
+
+            // Celda vacía en esquina superior izquierda
+            const esquina = document.createElement('div');
+            esquina.style.width = '40px';
+            esquina.style.height = '40px';
+            contenedor.appendChild(esquina);
+
+            // Botones de columna (+)
+            for (let j = 1; j <= columnas; j++) {
+                const btnColumna = crearBoton('+', 'btn-success', `Llenar columna ${j}`, () => llenarColumna(piso, j));
+                contenedor.appendChild(btnColumna);
             }
 
-            contenedor.appendChild(btnFila);
+            // Filas
+            for (let i = 1; i <= filas; i++) {
+                // Botón de fila (-)
+                const btnFila = crearBoton('−', 'btn-danger', `Vaciar fila ${i}`, () => vaciarFila(piso, i));
+                contenedor.appendChild(btnFila);
 
-            // Generar celdas de la fila
-            for (let j = 1; j <= columnas; j++) {
-                const btn = document.createElement('button');
-                btn.className = 'btn btn-light border-dark';
-                btn.style.width = '40px';
-                btn.style.height = '40px';
-                btn.setAttribute('data-x', j);
-                btn.setAttribute('data-y', i);
-                btn.setAttribute('data-tipo', '');
-
-                // Verificar si hay un botón en esta posición
-                const boton_existente = botones_guardados.find(b =>
-                    parseInt(b.x_dimension) === j &&
-                    parseInt(b.y_dimension) === i &&
-                    parseInt(b.piso) === piso
-                );
-
-                if (boton_existente) {
-                    const iconoHTML = obtenerIcono(boton_existente.id_herramienta);
-                    btn.innerHTML = iconoHTML;
-                    btn.setAttribute('data-tipo', boton_existente.id_herramienta);
+                // Celdas de la fila
+                for (let j = 1; j <= columnas; j++) {
+                    crearCeldaMatriz(piso, i, j, contenedor);
                 }
+            }
+        }
 
-                // Drag-over y drop
-                btn.addEventListener('dragover', e => e.preventDefault());
-                btn.addEventListener('drop', function (e) {
-                    e.preventDefault();
-                    if (herramientaSeleccionada && "{{ btnId }}" !== "btn_Regresar") {
-                        this.setAttribute('data-tipo', herramientaSeleccionada);
-                        this.innerHTML = obtenerIcono(herramientaSeleccionada);
+        /**
+         * Crea una celda de la matriz
+         * @param {number} piso 
+         * @param {number} fila 
+         * @param {number} columna 
+         * @param {HTMLElement} contenedor 
+         */
+        function crearCeldaMatriz(piso, fila, columna, contenedor) {
+            const btn = document.createElement('button');
+            btn.className = 'btn btn-light border-dark';
+            btn.style.width = '40px';
+            btn.style.height = '40px';
+            btn.style.display = 'flex';
+            btn.style.alignItems = 'center';
+            btn.style.justifyContent = 'center';
+            btn.style.padding = '0';
+
+            btn.setAttribute('data-x', columna);
+            btn.setAttribute('data-y', fila);
+            btn.setAttribute('data-tipo', '');
+
+            // Si hay herramienta preexistente
+            const existente = botones_guardados.find(b =>
+                parseInt(b.x_dimension) === columna &&
+                parseInt(b.y_dimension) === fila &&
+                parseInt(b.piso) === piso
+            );
+
+            if (existente) {
+                btn.setAttribute('data-tipo', existente.id_herramienta);
+                btn.innerHTML = obtenerIcono(existente.id_herramienta);
+            }
+
+            // Drag & drop
+            btn.addEventListener('dragover', e => e.preventDefault());
+            btn.addEventListener('drop', function (e) {
+                e.preventDefault();
+                if (herramientaSeleccionada && !isModoRegresar) {
+                    this.setAttribute('data-tipo', herramientaSeleccionada);
+                    this.innerHTML = obtenerIcono(herramientaSeleccionada);
+                }
+            });
+
+            // Click para alternar herramienta
+            if (!isModoRegresar) {
+                btn.addEventListener('click', function () {
+                    const tipoActual = this.getAttribute('data-tipo');
+                    if (tipoActual === '') {
+                        const tipoAUsar = ultimoTipoAsientoSeleccionado || DEFAULT_HERRAMIENTA;
+                        this.setAttribute('data-tipo', tipoAUsar);
+                        this.innerHTML = obtenerIcono(tipoAUsar);
+                    } else {
+                        this.setAttribute('data-tipo', '');
+                        this.innerHTML = '';
                     }
                 });
-
-                // Click individual (funcionalidad corregida)
-                if ("{{ btnId }}" !== "btn_Regresar") {
-                    btn.addEventListener('click', function () {
-                        const tipoActual = this.getAttribute('data-tipo');
-
-                        if (tipoActual === '') {
-                            // Si la celda está vacía, usar el tipo seleccionado
-                            let tipoAUsar = ultimoTipoAsientoSeleccionado || 1;
-                            let herramienta_dict = list_herramientas.find(h => h.id === parseInt(tipoAUsar));
-
-                            this.setAttribute('data-tipo', `${tipoAUsar}`);
-                            this.innerHTML = `<i class="${herramienta_dict.icono}"></i>`;
-                        } else {
-                            // Si la celda tiene algo, vaciarla
-                            this.setAttribute('data-tipo', '');
-                            this.innerHTML = '';
-                        }
-                    });
-                }
-
-                contenedor.appendChild(btn);
             }
+
+            contenedor.appendChild(btn);
         }
-    }
 
-    // Variable global para recordar el último tipo de asiento seleccionado
-    let ultimoTipoAsientoSeleccionado = 1;
+        /**
+         * Llena toda una columna con la herramienta seleccionada
+         * @param {number} piso 
+         * @param {number} columna 
+         */
+        function llenarColumna(piso, columna) {
+            // Determinar qué tipo de asiento usar
+            let tipoAsiento = herramientaSeleccionada
+                ? parseInt(herramientaSeleccionada)
+                : ultimoTipoAsientoSeleccionado;
 
-    // Función para llenar toda una columna
-    function llenarColumna(piso, columna) {
-        // Determinar qué tipo de asiento usar
-        let tipoAsiento = ultimoTipoAsientoSeleccionado;
-
-        // Si hay una herramienta seleccionada del drag, usarla
-        if (herramientaSeleccionada) {
-            tipoAsiento = parseInt(herramientaSeleccionada);
             ultimoTipoAsientoSeleccionado = tipoAsiento;
-        }
 
-        const contenedor = document.getElementById(`matrizContainer_${piso}`);
-        const botones = contenedor.querySelectorAll(`button[data-x="${columna}"]`);
+            const contenedor = document.getElementById(`matrizContainer_${piso}`);
+            const botones = contenedor.querySelectorAll(`button[data-x="${columna}"]`);
 
-        botones.forEach(btn => {
-            if (btn.hasAttribute('data-y')) { // Solo los botones de asientos, no los de control
-                btn.setAttribute('data-tipo', tipoAsiento);
-                btn.innerHTML = obtenerIcono(tipoAsiento);
-            }
-        });
-
-        // Mostrar mensaje informativo
-        const herramienta = list_herramientas.find(h => h.id === tipoAsiento);
-        toastr.info(`Columna ${columna} llenada con: ${herramienta ? herramienta.nombre : 'Asiento'}`, 'Columna Completada');
-    }
-
-    // Función para vaciar toda una fila
-    function vaciarFila(piso, fila) {
-        const contenedor = document.getElementById(`matrizContainer_${piso}`);
-        const botones = contenedor.querySelectorAll(`button[data-y="${fila}"]`);
-
-        botones.forEach(btn => {
-            if (btn.hasAttribute('data-x')) { // Solo los botones de asientos, no los de control
-                btn.setAttribute('data-tipo', '');
-                btn.innerHTML = '';
-            }
-        });
-
-        toastr.info(`Fila ${fila} vaciada completamente`, 'Fila Limpiada');
-    }
-
-    // Función mejorada para activar eventos de drag (reemplaza la función existente)
-    function activarEventosDrag() {
-        document.querySelectorAll('.control').forEach(icono => {
-            // Evento drag para arrastrar y soltar
-            icono.addEventListener('dragstart', function (e) {
-                herramientaSeleccionada = this.getAttribute('data-tipo');
-                ultimoTipoAsientoSeleccionado = parseInt(herramientaSeleccionada);
+            botones.forEach(btn => {
+                if (btn.hasAttribute('data-y')) { // Solo los botones de asientos, no los de control
+                    btn.setAttribute('data-tipo', tipoAsiento);
+                    btn.innerHTML = obtenerIcono(tipoAsiento);
+                }
             });
 
-            // Evento click para seleccionar tipo de herramienta para uso individual
-            icono.addEventListener('click', function (e) {
-                // Prevenir el comportamiento por defecto si es necesario
-                e.preventDefault();
+            // Mostrar mensaje informativo
+            const herramienta = list_herramientas.find(h => h.id === tipoAsiento);
+            toastr.info(`Columna ${columna} llenada con: ${herramienta?.nombre || 'Asiento'}`, 'Columna Completada');
+        }
 
-                const tipoSeleccionado = parseInt(this.getAttribute('data-tipo'));
-                ultimoTipoAsientoSeleccionado = tipoSeleccionado;
-                herramientaSeleccionada = this.getAttribute('data-tipo'); // También actualizar esta variable
+        /**
+         * Vacía toda una fila
+         * @param {number} piso 
+         * @param {number} fila 
+         */
+        function vaciarFila(piso, fila) {
+            const contenedor = document.getElementById(`matrizContainer_${piso}`);
+            const botones = contenedor.querySelectorAll(`button[data-y="${fila}"]`);
 
-                // Remover selección visual anterior
-                document.querySelectorAll('.control').forEach(c => {
-                    c.classList.remove('bg-warning', 'control-selected');
-                    c.style.backgroundColor = '';
-                    c.style.color = '';
+            botones.forEach(btn => {
+                if (btn.hasAttribute('data-x')) { // Solo los botones de asientos, no los de control
+                    btn.setAttribute('data-tipo', '');
+                    btn.innerHTML = '';
+                }
+            });
+
+            toastr.info(`Fila ${fila} vaciada completamente`, 'Fila Limpiada');
+        }
+
+        // ======================
+        // Funciones de Drag & Drop
+        // ======================
+
+        /**
+         * Activa los eventos de drag and drop para los controles
+         */
+        function activarEventosDrag() {
+            document.querySelectorAll('.control').forEach(icono => {
+                // Evento drag para arrastrar y soltar
+                icono.addEventListener('dragstart', function (e) {
+                    herramientaSeleccionada = this.getAttribute('data-tipo');
+                    ultimoTipoAsientoSeleccionado = parseInt(herramientaSeleccionada);
                 });
 
-                // Agregar selección visual al control actual
-                this.classList.add('control-selected');
-                this.style.backgroundColor = '#ffc107';
-                this.style.color = '#000';
+                // Evento click para seleccionar tipo de herramienta
+                icono.addEventListener('click', function (e) {
+                    e.preventDefault();
 
-                const herramienta = list_herramientas.find(h => h.id === tipoSeleccionado);
-                toastr.info(`Tipo seleccionado: ${herramienta ? herramienta.nombre : 'Herramienta'}`, 'Herramienta Seleccionada');
-            });
-        });
-    }
+                    const tipoSeleccionado = parseInt(this.getAttribute('data-tipo'));
+                    ultimoTipoAsientoSeleccionado = tipoSeleccionado;
+                    herramientaSeleccionada = this.getAttribute('data-tipo');
 
-    // Función para inicializar el sistema de selección
-    function inicializarSistemaSeleccion() {
-        // Establecer valores por defecto
-        if (!ultimoTipoAsientoSeleccionado) {
-            ultimoTipoAsientoSeleccionado = 1; // Asiento básico por defecto
-        }
+                    // Remover selección visual anterior
+                    document.querySelectorAll('.control').forEach(c => {
+                        c.classList.remove('bg-warning', 'control-selected');
+                        c.style.backgroundColor = '';
+                        c.style.color = '';
+                    });
 
-        // Seleccionar visualmente el primer asiento por defecto
-        const primerAsiento = document.querySelector('.control[data-tipo="1"]');
-        if (primerAsiento) {
-            primerAsiento.click(); // Esto activará la selección visual
-        }
-    }
+                    // Agregar selección visual al control actual
+                    this.classList.add('control-selected');
+                    this.style.backgroundColor = '#ffc107';
+                    this.style.color = '#000';
 
-    function obtenerIcono(idHerramienta) {
-        const herramienta_dict = list_herramientas.find(h => h.id === parseInt(idHerramienta));
-        if (herramienta_dict) {
-            return `<i class="${herramienta_dict.icono}"></i>`
-        }
-        return '';
-    }
-    function dict_botones_por_piso() {
-        const resultados = {};
-
-        const matrices = document.querySelectorAll('[id^="matrizContainer_"]');
-
-        matrices.forEach(matriz => {
-            const piso = parseInt(matriz.id.split('_')[1]);
-            const botones = Array.from(matriz.querySelectorAll('button'))
-                .filter(btn => {
-                    const tipo = btn.dataset.tipo;
-                    return tipo !== undefined && tipo !== null && tipo !== "";
-                })
-                .map(btn => ({
-                    x: parseInt(btn.dataset.x),
-                    y: parseInt(btn.dataset.y),
-                    tipo: parseInt(btn.dataset.tipo)
-                }));
-
-            resultados[piso] = botones;
-        });
-
-        return resultados;
-    }
-
-
-</script>
-
-<script>
-
-    $(document).on('click', '#btn_Siguiente', function () {
-        irAlSiguienteTab();
-    });
-
-    const cantidadPisosInput = document.getElementById('cantidadPisos');
-
-    cantidadPisosInput.addEventListener('input', () => {
-        let val = parseInt(cantidadPisosInput.value);
-        if (isNaN(val) || val < 1) cantidadPisosInput.value = 1;
-        else if (val > 2) cantidadPisosInput.value = 2;
-    });
-
-
-    $(document).on('click', '#btn_Registrar', function (e) {
-        e.preventDefault();
-        const nombre = $("#txt_Nombre").val().trim();
-        const marca = $("#cbx_Marca").val().trim();
-        const estado = $('#cbx_Estado').val();
-        const servicio = $('#cbx_Servicio').val();
-        const cantidadPisos = parseInt($('#cantidadPisos').val());
-
-        if (!nombre || !estado || !marca || !cantidadPisos || cantidadPisos < 1) {
-            toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
-            return;
-        }
-
-        const herramientasPorPiso = dict_botones_por_piso();
-
-        const hayDatos = Object.values(herramientasPorPiso).some(arr => arr.length > 0);
-        if (!hayDatos) {
-            toastr.error("Debe diseñar al menos un nivel para continuar", 'MENSAJE DE SISTEMA');
-            return;
-        }
-
-        const niveles = [];
-        for (let i = 1; i <= cantidadPisos; i++) {
-            const herramientas = herramientasPorPiso[i] || [];
-
-            let maxX = -Infinity;
-            let maxY = -Infinity;
-
-            herramientas.forEach(el => {
-                if (el.x > maxX) maxX = el.x;
-                if (el.y > maxY) maxY = el.y;
-            });
-
-            niveles.push({
-                nroPiso: i,
-                x_dimension: maxX === -Infinity ? 0 : maxX,
-                y_dimension: maxY === -Infinity ? 0 : maxY,
-                herramientas: herramientas
+                    const herramienta = list_herramientas.find(h => h.id === tipoSeleccionado);
+                    toastr.info(`Tipo seleccionado: ${herramienta?.nombre || 'Herramienta'}`, 'Herramienta Seleccionada');
+                });
             });
         }
 
-        Swal.fire({
-            title: "¿Estás seguro?",
-            text: "Esta acción registrará al tipo de vehículo y sus niveles. ¿Deseas continuar?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Sí, registrar tipo vehículo",
-            cancelButtonText: "Cancelar",
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
+        /**
+         * Inicializa el sistema de selección de herramientas
+         */
+        function inicializarSistemaSeleccion() {
+            if (!ultimoTipoAsientoSeleccionado) {
+                ultimoTipoAsientoSeleccionado = DEFAULT_HERRAMIENTA;
+            }
 
-                let formData = new FormData();
-                formData.append("nombre", nombre);
-                formData.append("estado", estado);
-                formData.append("marca", marca);
-                formData.append("servicio", servicio);
-                formData.append("cantidadPisos", cantidadPisos);
-                formData.append("niveles", JSON.stringify(niveles));
+            // Seleccionar visualmente el primer asiento por defecto
+            const primerAsiento = document.querySelector('.control[data-tipo="1"]');
+            if (primerAsiento && btnId === "btn_Registrar") {
+                primerAsiento.click();
+            }
 
-                $.ajax({
+        }
+
+        // ======================
+        // Funciones de Datos
+        // ======================
+
+        /**
+         * Obtiene un diccionario con las herramientas por piso
+         * @returns {Object} {piso: [{x, y, tipo}]}
+         */
+        function obtenerHerramientasPorPiso() {
+            const resultados = {};
+
+            document.querySelectorAll('[id^="matrizContainer_"]').forEach(matriz => {
+                const piso = parseInt(matriz.id.split('_')[1]);
+                const botones = Array.from(matriz.querySelectorAll('button'))
+                    .filter(btn => {
+                        const tipo = btn.dataset.tipo;
+                        return tipo && tipo !== "";
+                    })
+                    .map(btn => ({
+                        x: parseInt(btn.dataset.x),
+                        y: parseInt(btn.dataset.y),
+                        tipo: parseInt(btn.dataset.tipo)
+                    }));
+
+                resultados[piso] = botones;
+            });
+
+            return resultados;
+        }
+
+        /**
+         * Valida los datos del formulario antes de enviar
+         * @returns {boolean}
+         */
+        function validarFormulario() {
+            const nombre = $("#txt_Nombre").val().trim();
+            const marca = $("#cbx_Marca").val().trim();
+            const estado = $('#cbx_Estado').val();
+            const servicio = $('#cbx_Servicio').val();
+            const cantidadPisos = parseInt($('#cantidadPisos').val());
+
+            if (!nombre || !estado || !marca || !cantidadPisos || cantidadPisos < 1) {
+                toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                return false;
+            }
+
+            const herramientasPorPiso = obtenerHerramientasPorPiso();
+            const hayDatos = Object.values(herramientasPorPiso).some(arr => arr.length > 0);
+
+            if (!hayDatos) {
+                toastr.error("Debe diseñar al menos un nivel para continuar", 'MENSAJE DE SISTEMA');
+                return false;
+            }
+
+            return true;
+        }
+
+        /**
+         * Prepara los datos para enviar al servidor
+         * @returns {Object}
+         */
+        function prepararDatosEnvio() {
+            const nombre = $("#txt_Nombre").val().trim();
+            const marca = $("#cbx_Marca").val().trim();
+            const estado = $('#cbx_Estado').val();
+            const servicio = $('#cbx_Servicio').val();
+            const cantidadPisos = parseInt($('#cantidadPisos').val());
+            const herramientasPorPiso = obtenerHerramientasPorPiso();
+
+            const niveles = [];
+            for (let i = 1; i <= cantidadPisos; i++) {
+                const herramientas = herramientasPorPiso[i] || [];
+
+                let maxX = -Infinity;
+                let maxY = -Infinity;
+
+                herramientas.forEach(el => {
+                    if (el.x > maxX) maxX = el.x;
+                    if (el.y > maxY) maxY = el.y;
+                });
+
+                niveles.push({
+                    nroPiso: i,
+                    x_dimension: maxX === -Infinity ? 0 : maxX,
+                    y_dimension: maxY === -Infinity ? 0 : maxY,
+                    herramientas: herramientas
+                });
+            }
+
+            return {
+                nombre,
+                estado,
+                marca,
+                servicio,
+                cantidadPisos,
+                niveles
+            };
+        }
+
+        // ======================
+        // Funciones de Eventos
+        // ======================
+
+        /**
+         * Maneja el evento de registrar un tipo de vehículo
+         * @param {Event} e 
+         */
+        async function manejarRegistro(e) {
+            e.preventDefault();
+
+            if (!validarFormulario()) return;
+
+            const confirmacion = await Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción registrará al tipo de vehículo y sus niveles. ¿Deseas continuar?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, registrar tipo vehículo",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            });
+
+            if (!confirmacion.isConfirmed) return;
+
+            const datos = prepararDatosEnvio();
+            let formData = new FormData();
+
+            formData.append("nombre", datos.nombre);
+            formData.append("estado", datos.estado);
+            formData.append("marca", datos.marca);
+            formData.append("servicio", datos.servicio);
+            formData.append("cantidadPisos", datos.cantidadPisos);
+            formData.append("niveles", JSON.stringify(datos.niveles));
+
+            try {
+                const response = await $.ajax({
                     url: '/trabajadores/viajes/registrarTipoVehiculo',
                     type: "POST",
                     processData: false,
                     contentType: false,
-                    data: formData,
-                    success: function (response) {
-                        if (response.Status === "success") {
-                            if (response.Msj2 !== '' && response.Msj2 !== null) {
-                                toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                                return;
-                            } else {
-                                toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                                setTimeout(() => {
-                                    window.location.href = '/trabajadores/viajes/GestionarTipoVehiculo';
-                                }, 500);
-                            }
-                        } else {
-                            toastr.error(response.Msj, "MENSAJE DE SISTEMA");
-                            console.error('Error: ' + response.Msj);
-                        }
-                    },
-                    error: function (xhr, Status, error) {
-                        toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
-                        console.error('Error:' + error);
-                    }
+                    data: formData
                 });
+
+                if (response.Status === "success") {
+                    if (response.Msj2) {
+                        toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                    } else {
+                        toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                        setTimeout(() => {
+                            window.location.href = '/trabajadores/viajes/GestionarTipoVehiculo';
+                        }, 500);
+                    }
+                } else {
+                    mostrarError(response.Msj, "MENSAJE DE SISTEMA");
+                }
+            } catch (error) {
+                mostrarError("Error en el servidor", "MENSAJE DE SISTEMA");
             }
-        });
-
-        // ... tu lógica de validación, Swal, formData y AJAX aquí ...
-    });
-
-    $(document).on('click', '#btn_Actualizar', function (e) {
-        e.preventDefault();
-
-        const id = Number("{{ tipoVehiculo.id }}");
-
-        // Capturar datos del tipo vehículo
-        const nombre = $("#txt_Nombre").val().trim();
-        const marca = $("#cbx_Marca").val().trim();
-        const estado = $('#cbx_Estado').val();
-        const servicio = $('#cbx_Servicio').val();
-        const cantidadPisos = parseInt($('#cantidadPisos').val());
-
-        if (!nombre || !estado || !marca || !cantidadPisos || cantidadPisos < 1) {
-            toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
-            return;
         }
 
-        // Capturar herramientas por piso
-        const herramientasPorPiso = dict_botones_por_piso();
+        /**
+         * Maneja el evento de actualizar un tipo de vehículo
+         * @param {Event} e 
+         */
+        async function manejarActualizacion(e) {
+            e.preventDefault();
 
-        // Validar que al menos un nivel tenga algo diseñado
-        const hayDatos = Object.values(herramientasPorPiso).some(arr => arr.length > 0);
-        if (!hayDatos) {
-            toastr.error("Debe diseñar al menos un nivel para continuar", 'MENSAJE DE SISTEMA');
-            return;
-        }
+            if (!validarFormulario()) return;
 
-        // Construir array de niveles
-        const niveles = [];
-        for (let i = 1; i <= cantidadPisos; i++) {
-            const herramientas = herramientasPorPiso[i] || [];
-
-            let maxX = -Infinity;
-            let maxY = -Infinity;
-
-            herramientas.forEach(el => {
-                if (el.x > maxX) maxX = el.x;
-                if (el.y > maxY) maxY = el.y;
+            const confirmacion = await Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción modificará el tipo vehículo y sus niveles. ¿Deseas continuar?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, editar tipo vehículo",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
             });
 
-            niveles.push({
-                nroPiso: i,
-                x_dimension: maxX === -Infinity ? 0 : maxX,
-                y_dimension: maxY === -Infinity ? 0 : maxY,
-                herramientas: herramientas
-            });
-        }
+            if (!confirmacion.isConfirmed) return;
 
-        // Confirmación
-        Swal.fire({
-            title: "¿Estás seguro?",
-            text: "Esta acción modificará el tipo vehículo y sus niveles. ¿Deseas continuar?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Sí, editar tipo vehículo",
-            cancelButtonText: "Cancelar",
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                let formData = new FormData();
-                formData.append("nombre", nombre);
-                formData.append("estado", estado);
-                formData.append("marca", marca);
-                formData.append("servicio", servicio);
-                formData.append("cantidadPisos", cantidadPisos);
-                formData.append("niveles", JSON.stringify(niveles)); // Serializamos los niveles
+            const id = Number("{{ tipoVehiculo.id }}");
+            const datos = prepararDatosEnvio();
+            let formData = new FormData();
 
-                $.ajax({
+            formData.append("nombre", datos.nombre);
+            formData.append("estado", datos.estado);
+            formData.append("marca", datos.marca);
+            formData.append("servicio", datos.servicio);
+            formData.append("cantidadPisos", datos.cantidadPisos);
+            formData.append("niveles", JSON.stringify(datos.niveles));
+
+            try {
+                const response = await $.ajax({
                     url: `/trabajadores/viajes/editarTipoVehiculo/${id}`,
                     type: "POST",
                     processData: false,
                     contentType: false,
-                    data: formData,
-                    success: function (response) {
-                        if (response.Status === "success") {
-                            if (response.Msj2 !== '' && response.Msj2 !== null) {
-                                toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                                return;
-                            } else {
-                                toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                                setTimeout(() => {
-                                    window.location.href = '/trabajadores/viajes/GestionarTipoVehiculo';
-                                }, 500);
-                            }
-                        } else {
-                            toastr.error(response.Msj, "MENSAJE DE SISTEMA");
-                        }
-                    },
-                    error: function () {
-                        toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
-                    }
+                    data: formData
                 });
-            }
-        });
-    })
 
-    $(document).on('click', '#btn_Listado', function (e) {
-        window.location.href = "/trabajadores/viajes/GestionarTipoVehiculo"
-    })
-    $("#btn_Siguiente_tab_01").click(function () {
-        generarTabsNivel(); // crea los tabs
-
-        setTimeout(() => {
-
-            const cantidad = parseInt(document.getElementById("cantidadPisos").value);
-            for (let i = 1; i <= cantidad; i++) {
-                generarMatriz(i); // matrizContainer_1, matrizContainer_2, etc.
-            }
-
-            activarEventosDrag();
-            inicializarSistemaSeleccion();
-            irAlSiguienteTab();
-        }, 100);
-    });
-
-</script>
-<script>
-
-    $(document).ready(function () {
-
-        fct_GetMarcas();
-        fct_GetServicios();
-
-        $("#btn_Regresar").click(() => {
-            window.location.href = "/trabajadores/viajes/GestionarTipoVehiculo"
-        })
-
-
-        if ("{{ btnId }}" === "btn_Regresar") {
-            document.querySelectorAll('.control').forEach(icono => {
-                icono.setAttribute('draggable', 'false');
-            });
-        }
-        if (herramientaSeleccionada && "{{ btnId }}" !== "btn_Regresar") {
-            this.setAttribute('data-tipo', herramientaSeleccionada);
-            this.innerHTML = obtenerIcono(herramientaSeleccionada);
-        }
-        if ("{{ btnId }}" !== "btn_Registrar") {
-            setTimeout(() => {
-                $('#cantidadPisos').val("{{ niveles|length }}");
-                generarTabsNivel();
-
-                setTimeout(() => {
-                    const cantidad = parseInt(document.getElementById("cantidadPisos").value);
-                    for (let i = 1; i <= cantidad; i++) {
-                        generarMatriz(i); // esta matriz ya usa `botones_guardados`
+                if (response.Status === "success") {
+                    if (response.Msj2) {
+                        toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                    } else {
+                        toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                        setTimeout(() => {
+                            window.location.href = '/trabajadores/viajes/GestionarTipoVehiculo';
+                        }, 500);
                     }
-                    activarEventosDrag(); // solo habilita si no es modo ver
-                }, 100);
+                } else {
+                    mostrarError(response.Msj, "MENSAJE DE SISTEMA");
+                }
+            } catch (error) {
+                mostrarError("Error en el servidor", "MENSAJE DE SISTEMA");
+            }
+        }
+
+        /**
+         * Maneja el evento de ir al siguiente tab
+         */
+        function manejarSiguienteTab() {
+            generarTabsNivel();
+
+            setTimeout(() => {
+                const cantidad = parseInt(document.getElementById("cantidadPisos").value);
+                for (let i = 1; i <= cantidad; i++) {
+                    generarMatriz(i);
+                }
+
+                activarEventosDrag();
+                inicializarSistemaSeleccion();
+                irAlSiguienteTab();
             }, 100);
         }
 
-        setTimeout(() => {
-            inicializarSistemaSeleccion();
-        }, 200);
+        /**
+         * Inicializa el controlador
+         */
+        function init() {
+            // Cargar datos iniciales
+            obtenerMarcas();
+            obtenerServicios();
 
+            // Configurar eventos
+            $(document).on('click', '#btn_Siguiente', irAlSiguienteTab);
+            $(document).on('click', '#btn_Siguiente_tab_01', manejarSiguienteTab);
+            $(document).on('click', '#btn_Registrar', manejarRegistro);
+            $(document).on('click', '#btn_Actualizar', manejarActualizacion);
+            $(document).on('click', '#btn_Listado', () => {
+                window.location.href = "/trabajadores/viajes/GestionarTipoVehiculo";
+            });
+            $(document).on('click', '#btn_Regresar', () => {
+                window.location.href = "/trabajadores/viajes/GestionarTipoVehiculo";
+            });
+
+            // Validar input de cantidad de pisos
+            document.getElementById('cantidadPisos').addEventListener('input', (e) => {
+                let val = parseInt(e.target.value);
+                if (isNaN(val) || val < 1) e.target.value = 1;
+                else if (val > MAX_PISOS) e.target.value = MAX_PISOS;
+            });
+
+            // Configuración inicial para modo edición/ver
+            if (isModoEdicion || isModoRegresar) {
+                setTimeout(() => {
+                    $('#cantidadPisos').val("{{ niveles|length }}");
+                    generarTabsNivel();
+
+                    setTimeout(() => {
+                        const cantidad = parseInt(document.getElementById("cantidadPisos").value);
+                        for (let i = 1; i <= cantidad; i++) {
+                            generarMatriz(i);
+                        }
+                        activarEventosDrag();
+                    }, 100);
+                }, 100);
+            }
+
+            // Deshabilitar drag en modo ver
+            if (isModoRegresar) {
+                document.querySelectorAll('.control').forEach(icono => {
+                    icono.setAttribute('draggable', 'false');
+                });
+            }
+
+            // Inicializar selección
+            setTimeout(() => {
+                inicializarSistemaSeleccion();
+            }, 200);
+        }
+
+        // Retornar métodos públicos
+        return {
+            init
+        };
+    })();
+
+    // Inicializar el controlador cuando el documento esté listo
+    $(document).ready(function () {
+        TipoVehiculoController.init();
     });
 </script>
 

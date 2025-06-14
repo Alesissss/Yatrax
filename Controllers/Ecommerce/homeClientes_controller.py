@@ -426,7 +426,7 @@ def buscarViajes():
         fecha_vuelta = request.form.get('fecha_vuelta')
         datos_viaje_ida = Viaje.buscarViajePorRutaYFecha(origen=origen, destino=destino, fecha= fecha_ida)
         if fecha_vuelta:
-            datos_viaje_vuelta = Viaje.buscarViajePorRutaYFecha(origen=origen, destino=destino, fecha= fecha_ida)
+            datos_viaje_vuelta = Viaje.buscarViajePorRutaYFecha(origen=origen, destino=destino, fecha= fecha_vuelta)
         return jsonify({
             "data_ida":datos_viaje_ida,
             "data_vuelta":datos_viaje_vuelta,
@@ -447,6 +447,7 @@ from flask import jsonify, render_template
 def obtener_diseno_vehiculo():
     detalle_viaje_id = request.json.get("id_dv")
     datos = Viaje.obtener_asientos(detalle_viaje_id)
+    print(datos)
     return jsonify({
         "data": datos,
         "Status": "success",
