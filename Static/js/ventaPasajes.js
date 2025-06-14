@@ -325,11 +325,13 @@ function generarFormularioHTML(asiento) {
       <input class="form-check-input" type="checkbox" id="esMenor_${asiento}">
       <label class="form-check-label" for="esMenor_${asiento}">Es menor de edad</label>
     </div>
-    <button class="btn btn-outline-primary w-100">Guardar datos</button>
+    <button class="btn btn-outline-primary w-100" id="enviarDatos" onclick='enviarDatosPasajero()'>Guardar datos</button>
   `;
 }
 
-
+function enviarDatosPasajero(){
+    alert("Agregar logica para almacenar parte de los datos antes de hacer la venta")
+}
 
 function handleClick(e) {
     console.log("Hola desde asiento", e.currentTarget);
