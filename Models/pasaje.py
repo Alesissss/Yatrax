@@ -143,6 +143,40 @@ class Pasaje:
             # lo que da un total de 2,821,109,907,456 combinaciones posibles.
     
     @classmethod
+    def generar_numComprobante(cls):
+        conexion = bd.Conexion()
+        try:
+            conexion.ejecutar("SELECT MAX(numeroComprobante) FROM pasaje")
+            row = conexion.obtener()
+            ultimo = row[0] if row and row[0] else None
+
+            if not ultimo:
+                return 'A000-00000001'
+
+            letra = ultimo[0]
+            serie = int(ultimo[1:4])
+            corr  = int(ultimo[5:]) + 1
+
+            if corr > 99999999:
+                corr = 0
+                serie += 1
+
+                if serie > 999:
+                    serie = 0
+                    if letra.upper() == 'Z':
+                        raise ValueError("Se alcanzó el límite máximo: Z999-99999999")
+                    letra = chr(ord(letra.upper()) + 1)
+
+            s_txt = f"{serie:03d}"
+            c_txt = f"{corr:08d}"
+
+            return f"{letra}{s_txt}-{c_txt}"
+
+        finally:
+            conexion.cerrar()
+
+    
+    @classmethod
     def obtenerDatosPasaje(cls, numComprobante):
         conexion = None
         try:
