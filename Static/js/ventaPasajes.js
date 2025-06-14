@@ -1,3 +1,10 @@
+/* Region de importaciones y desacoplamiento*/
+
+import { Venta } from "./clases/Venta.js";
+/* Probar si el buscarPersona funciona ya que no puedo probarlo por lo que la funcion que esta malno me permite el listado de itineracios*/
+//   import { buscarPersona } from "./funciones/apiReniec.js";
+
+/*En Region*/
 let currentStep = 0;
 let maxStep = 0; // Controla hasta qué pestaña está desbloqueado el acceso
 const MAX_ASIENTOS = 4;
@@ -339,25 +346,7 @@ function generarFormularioHTML(asiento_nombre,asiento_id) {
   `;
 }
 
-
-/* Hay que ver si trabajamos con ES6 para poder colcoar esta clase en un archivo y solo llamar a la clase desde cada una de las parte e ir editando y asignando el resto de valores del resto de fases para despúes de asignar ya se registre la venta */
-
-class Venta {
-  constructor(numDoc, nombres, apellidoPaterno, apellidoMaterno, fechaNacimiento, telefono, recuperarSeleccion, sexo, correo, brazos, esMenor) {
-    this.numDoc = numDoc;
-    this.nombres = nombres;
-    this.apellidoPaterno = apellidoPaterno;
-    this.apellidoMaterno = apellidoMaterno;
-    this.fechaNacimiento = fechaNacimiento;
-    this.telefono = telefono;
-    this.recuperarSeleccion = recuperarSeleccion;
-    this.sexo = sexo;
-    this.correo = correo;
-    this.brazos = brazos;
-    this.esMenor = esMenor;
-  }
-}
-
+/* Recuperar datos */
 function enviarDatosPasajero(nombre_asiento, id_asiento) {
     const numDoc = document.getElementById(`numeroDocNuevo_${id_asiento}`);
     const nombres = document.getElementById(`nombres_${id_asiento}`);
@@ -385,6 +374,8 @@ function enviarDatosPasajero(nombre_asiento, id_asiento) {
         brazos,
         esMenor
     );
+
+    console.log(venta.numDoc,venta.nombres,venta.nombres)
 
     // Puedes guardar en un arreglo por id_asiento
     const ventasGuardadas = JSON.parse(sessionStorage.getItem("ventas") || "{}");

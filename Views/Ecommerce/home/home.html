@@ -230,7 +230,7 @@
 </main>
 {% endblock %}
 {% block scripts %}
-
+<script type="module" src="{{url_for('static',filename='js/clases/Venta.js')}}"></script>
 <script>
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -286,9 +286,6 @@
         accordion.innerHTML = "<p>Error cargando preguntas frecuentes.</p>";
       });
   });
-
-  
-
 
 
   /*BLOQUE PARA CARGAR CONTENIDO DINAMICO*/
@@ -566,5 +563,5 @@
   const cliente_id = "{{ session['cliente']['id'] if session.get('cliente') and session['cliente'].get('id') else 'ANÓNIMO' }}";
   console.log("Cliente ID usado:", cliente_id);
 </script>
-<script src="{{ url_for('static', filename='js/ventaPasajes.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/ventaPasajes.js') }}"></script>
 {% endblock %}
