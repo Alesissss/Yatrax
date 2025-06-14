@@ -313,8 +313,8 @@ function generarFormularioHTML(asiento) {
     <input class="form-control mb-2" id="telefono_${asiento}" placeholder="Teléfono">
     <div class="mb-2">
       <label class="me-2">Sexo:</label>
-      <input type="radio" class="form-check-input" name="sexo-${asiento}" id="sexoMasculino_${asiento}"> <label for="sexoMasculino_${asiento}">Masculino</label>
-      <input type="radio" class="form-check-input" name="sexo-${asiento}" id="sexoFemenino_${asiento}"> <label for="sexoFemenino_${asiento}">Femenino</label>
+      <input type="radio" class="form-check-input" name="sexo-${asiento}" id="sexoMasculino_${asiento}"> <label for="sexoMasculino_${asiento}" value="M">Masculino</label>
+      <input type="radio" class="form-check-input" name="sexo-${asiento}" id="sexoFemenino_${asiento}"> <label for="sexoFemenino_${asiento}" value="F">Femenino</label>
     </div>
     <input class="form-control mb-2" id="correo_${asiento}" placeholder="Correo electrónico" type="email">
     <div class="form-check">
@@ -326,11 +326,58 @@ function generarFormularioHTML(asiento) {
       <label class="form-check-label" for="esMenor_${asiento}">Es menor de edad</label>
     </div>
     <button class="btn btn-outline-primary w-100" id="enviarDatos" onclick='enviarDatosPasajero()'>Guardar datos</button>
+    <script type="module" src="../js/ventaPasajes.js"></script>
   `;
+}
+
+
+/* Hay que ver si trabajamos con ES6 para poder colcoar esta clase en un archivo y solo llamar a la clase desde cada una de las parte e ir editando y asignando el resto de valores del resto de fases para despúes de asignar ya se registre la venta */
+
+class Venta {
+  constructor(numDoc, nombres, apellidoPaterno, apellidoMaterno, fechaNacimiento, telefono, recuperarSeleccion, sexo, correo, brazos, esMenor) {
+    this.numDoc = numDoc;
+    this.nombres = nombres;
+    this.apellidoPaterno = apellidoPaterno;
+    this.apellidoMaterno = apellidoMaterno;
+    this.fechaNacimiento = fechaNacimiento;
+    this.telefono = telefono;
+    this.recuperarSeleccion = recuperarSeleccion;
+    this.sexo = sexo;
+    this.correo = correo;
+    this.brazos = brazos;
+    this.esMenor = esMenor;
+  }
 }
 
 function enviarDatosPasajero(){
     alert("Agregar logica para almacenar parte de los datos antes de hacer la venta")
+    let numDoc = document.getElementById("numeroDocNuevo_")
+    let nombres = document.getElementById("nombres_")
+    let apellidoPaterno = document.getElementById("apellidoPaterno_")
+    let apellidoMaterno = document.getElementById("apellidoMaterno_")
+    let fechaNacimiento = document.getElementById("fechaNacimientoNuevo_")
+    let telefono = document.getElementById("telefono_")
+    let recuperarSeleccion = document.querySelector('input[name="sexo-"]:checked')?.value
+    let sexo = (recuperarSeleccion === 'M') ? 1 : 0;
+    let correo = document.getElementById("correo_")
+    let brazos = document.getElementById("brazos_").checked
+    let esMenor = document.getElementById("esMenor_").checked
+
+    const venta = new Venta(
+        numDoc.value,
+        nombres.value,
+        apellidoPaterno.value,
+        apellidoMaterno.value,
+        fechaNacimiento.value,
+        telefono.value,
+        recuperarSeleccion,
+        sexo,
+        correo.value,
+        brazos,
+        esMenor
+    );
+
+    localStorage.setItem("venta",JSON.stringify(venta))
 }
 
 function handleClick(e) {
