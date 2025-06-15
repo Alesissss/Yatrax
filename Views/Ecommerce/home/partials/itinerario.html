@@ -1,0 +1,89 @@
+<style>
+  .itinerario-header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.75rem;
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+    font-weight: bold;
+  }
+
+  .accordion-button:focus {
+    box-shadow: none;
+  }
+
+  .accordion-collapse,
+  .accordion-body {
+    width: 100%;
+  }
+</style>
+
+
+<div class="accordion accordion-flush p-0 m-0" id="accordionFlushExample">
+  {% for it in itinerarios %}
+  {% set collapse_id = "contenedor_viajes_ida-collapse-" ~ loop.index0 %}
+  {% set color = "#FFE05C" if it.tipo == "Escala" else "#B8B8B8" %}
+  <div class="accordion-item">
+    <div class="row">
+
+      <!-- Origen - Destino -->
+      <div class="col-md-5 d-flex justify-content-center p-2">
+        <div class="row d-flex justify-content-center">
+          <div class="col-md-5 text-center">
+            <p><b>{{ it.hora_salida }}</b></p>
+            <p>{{ it.sucursal_origen }}</p>
+            <p>{{ it.ciudad_origen }}</p>
+          </div>
+          <div class="col-md-2 d-flex justify-content-center align-items-center">
+            <p>→</p>
+          </div>
+          <div class="col-md-5 text-center">
+            <p><b>{{ it.hora_llegada }}</b></p>
+            <p>{{ it.sucursal_destino }}</p>
+            <p>{{ it.ciudad_destino }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Servicio -->
+      <div class="col-md-2 d-flex justify-content-center align-items-center p-2">
+        <div class="row text-center">
+          <div class="col-md-6">
+            <p class="m-0">{{ it.servicio }}</p>
+          </div>
+          <div class="col-md-6 rounded" id="tipo_viaje" style='background-color: {{ color }}' ;>
+            <p class="m-0">{{ it.tipo }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Asientos -->
+      <div class="col-md-3 d-flex justify-content-center align-items-center p-2">
+        <p class="text-center p-0 m-0">{{ it.niveles_con_asientos|safe }}</p>
+      </div>
+
+      <!-- Botón -->
+      <div class="col-md-2 d-flex justify-content-center align-items-center p-2 rounded-end">
+        <button type="button" class="button btn mostrarContenido_{{ sufijo }}"
+          style="background-color: var(--success-color); color: white;" data-viaje="{{ it.id }}" id="{{it.id}}"
+          data-bs-toggle="collapse" data-bs-target="#{{ collapse_id }}" aria-expanded="false"
+          aria-controls="{{ collapse_id }}">
+          Elegir
+        </button>
+      </div>
+
+      <!-- Contenido colapsable -->
+      <div id="{{ collapse_id }}" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+        <div class="accordion-body">
+          {% include "Ecommerce/home/partials/itinerario_contenido.html" with context %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<script>
+
+</script>

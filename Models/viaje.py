@@ -199,7 +199,6 @@ class Viaje:
                 INNER JOIN escala e_destino ON dv.idSucursalDestino = e_destino.id
                 INNER JOIN sucursal s_destino ON s_destino.id = e_destino.id
                 INNER JOIN viaje v ON v.id = dv.idViaje
-                WHERE v.id = 1;
             """                 
             )
             return lista_origenes
@@ -240,4 +239,43 @@ class Viaje:
             return datos_viaje
         finally:
             conexion.cerrar()
+    @classmethod
+    def obtener_tipo_vehiculo_por_dv(cls,id_viaje):
+        conexion = bd.Conexion()
+        try:
+            id = conexion.obtener("""
+                SELECT tv.id as id_tipo_vehiculo
+                FROM detalle_viaje dv INNER JOIN viaje v ON v.id = dv.idViaje
+                INNER JOIN vehiculo ve ON ve.id = v.idVehiculo
+                INNER JOIN tipo_vehiculo tv ON tv.id = ve.id_tipo_vehiculo
+                WHERE dv.id = %s
+                                  """,(id_viaje,))
+            return id[0]
+        finally:
+            conexion.cerrar()
+    
+    @classmethod
+    def obtener_asientos(cls,id_dv):
+        try:
+            conexion = bd.Conexion()
+            listado = conexion.obtener("""
+                SELECT 
+                    dva.id AS id_asiento,
+                    dva.esDisponible AS estado,
+                    h.id_tipo AS tipo_herramienta,
+                    a.nombre AS nombre,
+                    nh.x_dimension,
+                    nh.y_dimension,
+                    n.nroPiso,
+                    h.icono
+                FROM nivel_herramienta nh
+                JOIN nivel n ON nh.id_nivel = n.id
+                JOIN herramienta h ON nh.id_herramienta = h.id
+                LEFT JOIN asiento a ON nh.id = a.id_nivel_herramienta
+                LEFT JOIN detalle_viaje_asiento dva ON dva.idAsiento = a.id
+                where dva.idDetalle_Viaje = %s
+           """, (id_dv,))
 
+            return listado
+        finally:
+            conexion.cerrar()

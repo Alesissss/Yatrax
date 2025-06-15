@@ -142,7 +142,75 @@ class Pasaje:
             # Se esta considerando 26 caracteres alfabéticos y 10 dígitos, lo que da un total de 36 caracteres por 8 posiciones,
             # lo que da un total de 2,821,109,907,456 combinaciones posibles.
     
+    @classmethod
+    def generar_numComprobante(cls):
+        conexion = bd.Conexion()
+        try:
+            conexion.ejecutar("SELECT MAX(numeroComprobante) FROM pasaje")
+            row = conexion.obtener()
+            ultimo = row[0] if row and row[0] else None
+
+            if not ultimo:
+                return 'A000-00000001'
+
+            letra = ultimo[0]
+            serie = int(ultimo[1:4])
+            corr  = int(ultimo[5:]) + 1
+
+            if corr > 99999999:
+                corr = 0
+                serie += 1
+
+                if serie > 999:
+                    serie = 0
+                    if letra.upper() == 'Z':
+                        raise ValueError("Se alcanzó el límite máximo: Z999-99999999")
+                    letra = chr(ord(letra.upper()) + 1)
+
+            s_txt = f"{serie:03d}"
+            c_txt = f"{corr:08d}"
+
+            return f"{letra}{s_txt}-{c_txt}"
+
+        finally:
+            conexion.cerrar()
+
     
+    @classmethod
+    def obtenerDatosPasaje(cls, numComprobante):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            query = """
+                SELECT 
+                    td.abreviatura AS tipo_documento,
+                    pa.numero_documento,
+                    CONCAT_WS(' ', pa.nombre, pa.ape_paterno, pa.ape_materno) AS nombre_completo,
+                    s_origen.ciudad AS origen,
+                    s_destino.ciudad AS destino,
+                    dv.fechaSalida AS fecha_salida,
+                    DATE_FORMAT(dv.fechaSalida, '%%H:%%i') AS hora_salida,
+                    a.nombre AS asiento,
+                    ser.nombre AS servicio
+                        FROM pasaje pas 
+                        INNER JOIN detalle_viaje_asiento dva ON dva.id = pas.idDetalleViajeAsiento
+                        INNER JOIN detalle_viaje dv ON dv.id = dva.idDetalle_Viaje
+                        INNER JOIN detalle_pasaje dp ON dp.idPasaje = pas.id 
+                        INNER JOIN pasajero pa ON pa.id = dp.id
+                        INNER JOIN tipo_documento td ON td.id = pa.idTipoDocumento
+                        INNER JOIN asiento a ON a.id = dva.idAsiento
+                        INNER JOIN sucursal s_origen ON s_origen.id = dv.idSucursalOrigen
+                        INNER JOIN sucursal s_destino ON s_destino.id = dv.idSucursalDestino
+                        INNER JOIN vehiculo ve ON ve.id = a.id_vehiculo
+                        INNER JOIN tipo_vehiculo tv ON tv.id = ve.id_tipo_vehiculo
+                        INNER JOIN servicio ser ON ser.id = tv.id_servicio
+                        WHERE dp.viajeEnBrazos != 0 AND pas.numeroComprobante=%s;
+            """
+            filas = conexion.obtener(query, (numComprobante,))
+            return filas[0] if filas else None
+        finally:
+            if conexion:
+                conexion.cerrar()
 
     @classmethod
     def eliminarReserva(cls, id_pasaje):

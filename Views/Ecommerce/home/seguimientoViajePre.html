@@ -1,0 +1,533 @@
+{% extends "maestra.html" %}
+{% block titulo %}YATRAX - Tranferencia de pasaje{%endblock %}
+
+{% block contenido %}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .card {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border: none;
+    }
+
+    .tracking-header {
+        /* background: linear-gradient(135deg, #0c396e, #345fbb); */
+        background: rgb(43, 94, 172);
+        color: white;
+        padding: 20px;
+        border-radius: 10px 10px 0 0;
+    }
+
+    #map {
+        height: 400px;
+        width: 100%;
+        border-radius: 8px;
+        border: 2px solid #dee2e6;
+    }
+
+    .route-selector {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 1px solid #e9ecef;
+    }
+
+    .travel-log {
+        background-color: white;
+        border-radius: 8px;
+        padding: 20px;
+        max-height: 500px;
+        overflow-y: auto;
+        border: 1px solid #e9ecef;
+    }
+
+    .travel-log-item {
+        display: flex;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #f1f3f4;
+    }
+
+    .travel-log-item:last-child {
+        border-bottom: none;
+    }
+
+    .log-time {
+        font-weight: bold;
+        color: #007bff;
+        margin-right: 15px;
+        min-width: 80px;
+    }
+
+    .log-icon {
+        margin-right: 10px;
+        color: #28a745;
+    }
+
+    .tooltip-ruta {
+        background-color: #1d3557;
+        color: white;
+        font-weight: bold;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        border: 1px solid #a8dadc;
+    }
+
+    .status-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+    }
+
+    .vehicle-marker {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.1);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .alert-info-custom {
+        background-color: #fff3cd;
+        border-color: #ffeaa7;
+        color: #856404;
+    }
+</style>
+</head>
+
+<body>
+    <div class="container-fluid py-2">
+        <div class="row justify-content-center">
+            <div class="col-md-12 col-lg-8">
+                <div class="card">
+                    <div class="tracking-header">
+                        <h3 class="mb-0 text-center">
+                            <i class="fas fa-route me-2"></i>
+                            Tracking de Rutas
+                        </h3>
+                        <p class="mb-0 text-center mt-2">Ingrese la ruta para poder hacer seguimiento en tiempo real al
+                            viaje programado</p>
+                    </div>
+
+                    <div class="card-body">
+                        <!-- Selector de Ruta -->
+                        <div class="route-selector">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <label for="selectRuta" class="form-label fw-bold">Ruta:</label>
+                                    <div class="input-group">
+                                        <select id="cbx_Ruta" class="form-control">
+                                            <option disabled>--SELECCIONAR--</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <!-- <div class="col-md-4 text-end">
+                                    <div class="alert alert-info-custom mb-0 p-2">
+                                        <small><strong>Nota:</strong> se debe listar las rutas donde viajes activos</small>
+                                    </div>
+                                </div> -->
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <!-- Mapa -->
+                                <div class="position-relative">
+                                    <div class="status-badge">
+                                        <span id="statusBadge" class="badge bg-secondary">Sin ruta seleccionada</span>
+                                    </div>
+                                    <div id="map"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12 mt-4">
+                                <!-- Registro del Viaje -->
+                                <div class="travel-log">
+                                    <h5 class="mb-3">
+                                        <i class="fas fa-clipboard-list me-2"></i>
+                                        Registro del viaje
+                                    </h5>
+                                    <div id="travelLogContent">
+                                        <div class="text-center text-muted py-4">
+                                            <i class="fas fa-info-circle fa-2x mb-2"></i>
+                                            <p>Seleccione una ruta para ver el registro del viaje</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Viaje No Iniciado -->
+    <div class="modal fade" id="modalViajeNoIniciado" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Viaje No Iniciado
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <i class="fas fa-clock fa-3x text-warning mb-3"></i>
+                    <h4>El viaje aún no ha iniciado</h4>
+                    <p class="text-muted">La ruta seleccionada tiene un viaje programado pero aún no ha comenzado. El
+                        tracking estará disponible una vez que el viaje inicie.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Entendido</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center d-none"
+        id="loadingSpinner" style="background-color: rgba(0,0,0,0.5); z-index: 9999;">
+        <div class="text-center">
+            <i class="fas fa-3x fa-sync-alt fa-spin text-white"></i>
+            <p class="text-white mt-2">Cargando ruta...</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+
+        function cargarRutas() {
+            $.getJSON('/ecommerce/home/obtenerRutasSeguimiento', function(data) {
+                if (data.Status === "success") {
+                    const selectRuta = document.getElementById('cbx_Ruta');
+                    data.data.forEach(ruta => {
+                        const option = document.createElement('option');
+                        option.value = ruta.id;
+                        option.textContent = ruta.resultado;
+                        selectRuta.appendChild(option);
+                    });
+                } else {
+                    console.error("Error al cargar rutas:", data.Msj);
+                }
+            });
+        }
+
+        // Configuración del mapa
+        let map;
+        let currentRoute;
+        let vehicleMarker;
+        let routeMarkers = [];
+        let travelInterval;
+
+        // Datos simulados de rutas
+        const rutasData = {
+            'chiclayo-lima': {
+                nombre: 'Ruta Chiclayo - Lima - Arequipa',
+                tipo: 'Escala',
+                estado: 'EN_CURSO', // NO_INICIADO, EN_CURSO, FINALIZADO
+                escalas: [
+                    { nombre: 'Sucursal Chiclayo', lat: -6.7714, lng: -79.8371, orden: 1 },
+                    { nombre: 'Sucursal Lima', lat: -12.0464, lng: -77.0428, orden: 2 },
+                    { nombre: 'Sucursal Arequipa', lat: -16.4090, lng: -71.5375, orden: 3 }
+                ],
+                registroViaje: [
+                    { tiempo: '10:00 am', descripcion: 'Salida desde Sucursal Chiclayo', icono: 'fa-play' },
+                    { tiempo: '10:20 am', descripcion: 'Av. Lora y Lora...', icono: 'fa-map-marker-alt' },
+                    { tiempo: '10:45 am', descripcion: 'Carretera Panamericana norte km 5...', icono: 'fa-road' }
+                ],
+                vehiculoActual: { lat: -8.5000, lng: -78.0000 } // Posición actual del vehículo
+            },
+            'lima-cusco': {
+                nombre: 'Ruta Lima - Cusco',
+                tipo: 'Directo',
+                estado: 'NO_INICIADO',
+                escalas: [
+                    { nombre: 'Sucursal Lima', lat: -12.0464, lng: -77.0428, orden: 1 },
+                    { nombre: 'Sucursal Cusco', lat: -13.5319, lng: -71.9675, orden: 2 }
+                ],
+                registroViaje: [],
+                vehiculoActual: null
+            },
+            'arequipa-tacna': {
+                nombre: 'Ruta Arequipa - Tacna',
+                tipo: 'Directo',
+                estado: 'EN_CURSO',
+                escalas: [
+                    { nombre: 'Sucursal Arequipa', lat: -16.4090, lng: -71.5375, orden: 1 },
+                    { nombre: 'Sucursal Tacna', lat: -18.0131, lng: -70.2597, orden: 2 }
+                ],
+                registroViaje: [
+                    { tiempo: '08:30 am', descripcion: 'Salida desde Sucursal Arequipa', icono: 'fa-play' },
+                    { tiempo: '09:15 am', descripcion: 'Carretera hacia Moquegua', icono: 'fa-road' }
+                ],
+                vehiculoActual: { lat: -17.2000, lng: -70.9000 }
+            },
+            'trujillo-chiclayo': {
+                nombre: 'Ruta Trujillo - Chiclayo',
+                tipo: 'Directo',
+                estado: 'FINALIZADO',
+                escalas: [
+                    { nombre: 'Sucursal Trujillo', lat: -8.1116, lng: -79.0297, orden: 1 },
+                    { nombre: 'Sucursal Chiclayo', lat: -6.7714, lng: -79.8371, orden: 2 }
+                ],
+                registroViaje: [
+                    { tiempo: '07:00 am', descripcion: 'Salida desde Sucursal Trujillo', icono: 'fa-play' },
+                    { tiempo: '09:30 am', descripcion: 'Llegada a Sucursal Chiclayo', icono: 'fa-flag-checkered' }
+                ],
+                vehiculoActual: null
+            }
+        };
+
+        // Iconos personalizados
+        const iconoSucursal = L.icon({
+            iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+        const iconoVehiculo = L.divIcon({
+            html: '<i class="fas fa-bus fa-2x text-primary vehicle-marker"></i>',
+            iconSize: [30, 30],
+            iconAnchor: [15, 15],
+            className: 'vehicle-icon'
+        });
+
+        // Inicializar mapa
+        function initMap() {
+            map = L.map('map').setView([-9.19, -75.0152], 6);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 18,
+                minZoom: 5,
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+        }
+
+        // Limpiar mapa
+        function clearMap() {
+            if (currentRoute) {
+                map.removeLayer(currentRoute);
+            }
+            if (vehicleMarker) {
+                map.removeLayer(vehicleMarker);
+            }
+            routeMarkers.forEach(marker => map.removeLayer(marker));
+            routeMarkers = [];
+            if (travelInterval) {
+                clearInterval(travelInterval);
+            }
+        }
+
+        // Dibujar ruta
+        function drawRoute(rutaKey) {
+            const ruta = rutasData[rutaKey];
+            if (!ruta) return;
+
+            showSpinner();
+
+            // Actualizar badge de estado
+            updateStatusBadge(ruta.estado);
+
+            // Verificar estado del viaje
+            if (ruta.estado === 'NO_INICIADO') {
+                showSpinner(false);
+                const modal = new bootstrap.Modal(document.getElementById('modalViajeNoIniciado'));
+                modal.show();
+                return;
+            }
+
+            // Agregar marcadores de sucursales
+            ruta.escalas.forEach(escala => {
+                const marker = L.marker([escala.lat, escala.lng], { icon: iconoSucursal })
+                    .addTo(map)
+                    .bindPopup(`<b>${escala.nombre}</b><br>Orden: ${escala.orden}`);
+                routeMarkers.push(marker);
+            });
+
+            // Crear waypoints para la ruta
+            const waypoints = ruta.escalas.map(escala => L.latLng(escala.lat, escala.lng));
+
+            // Dibujar ruta
+            currentRoute = L.Routing.control({
+                waypoints: waypoints,
+                routeWhileDragging: false,
+                createMarker: function () { return null; }, // No crear marcadores adicionales
+                lineOptions: {
+                    styles: [{ color: '#007bff', weight: 4, opacity: 0.8 }]
+                }
+            }).addTo(map);
+
+            // Ajustar vista del mapa
+            const group = new L.featureGroup(routeMarkers);
+            map.fitBounds(group.getBounds().pad(0.1));
+
+            // Mostrar vehículo si está en curso
+            if (ruta.estado === 'EN_CURSO' && ruta.vehiculoActual) {
+                showVehicle(ruta.vehiculoActual);
+                startVehicleAnimation(rutaKey);
+            }
+
+            // Actualizar registro de viaje
+            updateTravelLog(ruta.registroViaje);
+
+            setTimeout(() => showSpinner(false), 1000);
+        }
+
+        // Mostrar vehículo en el mapa
+        function showVehicle(position) {
+            if (vehicleMarker) {
+                map.removeLayer(vehicleMarker);
+            }
+            vehicleMarker = L.marker([position.lat, position.lng], { icon: iconoVehiculo })
+                .addTo(map)
+                .bindPopup('<b>Vehículo en ruta</b><br>Posición actual');
+        }
+
+        // Animar movimiento del vehículo (simulado)
+        function startVehicleAnimation(rutaKey) {
+            const ruta = rutasData[rutaKey];
+            let currentPos = ruta.vehiculoActual;
+            let targetIndex = 1; // Próximo destino
+
+            travelInterval = setInterval(() => {
+                if (targetIndex >= ruta.escalas.length) {
+                    clearInterval(travelInterval);
+                    return;
+                }
+
+                const target = ruta.escalas[targetIndex];
+                const deltaLat = (target.lat - currentPos.lat) * 0.01;
+                const deltaLng = (target.lng - currentPos.lng) * 0.01;
+
+                currentPos.lat += deltaLat;
+                currentPos.lng += deltaLng;
+
+                // Actualizar posición del vehículo
+                if (vehicleMarker) {
+                    vehicleMarker.setLatLng([currentPos.lat, currentPos.lng]);
+                }
+
+                // Verificar si llegó al destino
+                const distance = Math.abs(target.lat - currentPos.lat) + Math.abs(target.lng - currentPos.lng);
+                if (distance < 0.1) {
+                    targetIndex++;
+                    // Agregar nuevo registro al log
+                    const currentTime = new Date().toLocaleTimeString('es-ES', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    ruta.registroViaje.push({
+                        tiempo: currentTime,
+                        descripcion: `Llegada a ${target.nombre}`,
+                        icono: 'fa-map-marker-alt'
+                    });
+                    updateTravelLog(ruta.registroViaje);
+                }
+            }, 2000);
+        }
+
+        // Actualizar badge de estado
+        function updateStatusBadge(estado) {
+            const badge = document.getElementById('statusBadge');
+            badge.className = 'badge ';
+
+            switch (estado) {
+                case 'NO_INICIADO':
+                    badge.className += 'bg-warning text-dark';
+                    badge.textContent = 'Viaje no iniciado';
+                    break;
+                case 'EN_CURSO':
+                    badge.className += 'bg-success';
+                    badge.textContent = 'Viaje en curso';
+                    break;
+                case 'FINALIZADO':
+                    badge.className += 'bg-secondary';
+                    badge.textContent = 'Viaje finalizado';
+                    break;
+                default:
+                    badge.className += 'bg-secondary';
+                    badge.textContent = 'Sin ruta seleccionada';
+            }
+        }
+
+        // Actualizar registro de viaje
+        function updateTravelLog(registros) {
+            const container = document.getElementById('travelLogContent');
+
+            if (registros.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-info-circle fa-2x mb-2"></i>
+                        <p>No hay registros de viaje disponibles</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = registros.map(registro => `
+                <div class="travel-log-item">
+                    <div class="log-time">${registro.tiempo}</div>
+                    <i class="fas ${registro.icono} log-icon"></i>
+                    <div class="flex-grow-1">${registro.descripcion}</div>
+                </div>
+            `).join('');
+        }
+
+        // Mostrar/ocultar spinner
+        function showSpinner(show = true) {
+            const spinner = document.getElementById('loadingSpinner');
+            if (show) {
+                spinner.classList.remove('d-none');
+            } else {
+                spinner.classList.add('d-none');
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function () {
+            initMap();
+
+            // Selector de ruta
+            document.getElementById('selectRuta').addEventListener('change', function () {
+                const selectedRoute = this.value;
+
+                clearMap();
+
+                if (selectedRoute) {
+                    drawRoute(selectedRoute);
+                } else {
+                    updateStatusBadge('');
+                    updateTravelLog([]);
+                }
+            });
+        });
+    </script>
+
+    {% endblock %}

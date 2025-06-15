@@ -162,62 +162,61 @@ DROP PROCEDURE IF EXISTS SP_EDITAR_PROMOCION;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_PROMOCION;
 DROP PROCEDURE IF EXISTS SP_DAR_BAJA_PROMOCION;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPO_RECLAMO;
-    DROP PROCEDURE IF EXISTS SP_INSERTAR_RECLAMO;
-    DROP PROCEDURE IF EXISTS SP_MODIFICAR_RECLAMO;
-    DROP PROCEDURE IF EXISTS SP_ELIMINAR_RECLAMO;
+DROP PROCEDURE IF EXISTS SP_INSERTAR_RECLAMO;
+DROP PROCEDURE IF EXISTS SP_MODIFICAR_RECLAMO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_RECLAMO;
 
-    -- Luego eliminamos las tablas, primero la que depende de la otra
-    DROP TABLE IF EXISTS conf_general;
-    DROP TABLE IF EXISTS cliente;
-    DROP TABLE IF EXISTS detalle_personal;
-    DROP TABLE IF EXISTS viaje;
-    DROP TABLE IF EXISTS estado_viaje;
-    DROP TABLE IF EXISTS personal_incidencia;
-    DROP TABLE IF EXISTS incidencia;
-    DROP TABLE IF EXISTS servicio_microservicio;
-    DROP TABLE IF EXISTS microservicio;
-    DROP TABLE IF EXISTS escala;
-    DROP TABLE IF EXISTS conf_plantillas;
-    DROP TABLE IF EXISTS conf_dclaims;
-    DROP TABLE IF EXISTS conf_dmenus;
-    DROP TABLE IF EXISTS conf_claims;
-    DROP TABLE IF EXISTS conf_menus;
-    DROP TABLE IF EXISTS usuarios;
-    DROP TABLE IF EXISTS tipo_usuario;
-    DROP TABLE IF EXISTS sucursal;
-    DROP TABLE IF EXISTS horario;
-    DROP TABLE IF EXISTS asiento;
-    DROP TABLE IF EXISTS tipo_cliente;
-    DROP TABLE IF EXISTS ubigeo;
-    DROP TABLE IF EXISTS metodo_pago;
-    DROP TABLE IF EXISTS personal;
-    DROP TABLE IF EXISTS tipo_personal;
-    DROP TABLE IF EXISTS tipo_comprobante;
-    DROP TABLE IF EXISTS tipo_documento;
-    DROP TABLE IF EXISTS nivel_herramienta;
-    DROP TABLE IF EXISTS nivel;
-    DROP TABLE IF EXISTS vehiculo;
-    DROP TABLE IF EXISTS tipo_vehiculo;
-    DROP TABLE IF EXISTS servicio;
-    DROP TABLE IF EXISTS marca;
-    DROP TABLE IF EXISTS ruta;
-    DROP TABLE IF EXISTS ciudad;
-    DROP TABLE IF EXISTS pais;
-    DROP TABLE IF EXISTS herramienta;
-    DROP TABLE IF EXISTS tipo_herramienta;
-    DROP TABLE IF EXISTS tipo_metodoPago;
-    DROP TABLE IF EXISTS terminos_condiciones;
-    -- eliminando tablas de reclamo y tipo_reclamo
-    DROP TABLE IF EXISTS reclamo;
-    DROP TABLE IF EXISTS tipo_reclamo;
-    DROP TABLE IF EXISTS detalle_pasaje;
-    DROP TABLE IF EXISTS pasajero;
-    DROP TABLE IF EXISTS pasaje;
-    DROP TABLE IF EXISTS preguntas_frecuentes;
-    DROP TABLE IF EXISTS promocion;
-    DROP TABLE IF EXISTS detalle_viaje_asiento;
-    DROP TABLE IF EXISTS detalle_viaje;
-    DROP TABLE IF EXISTS venta;
+-- Eliminar tablas si existen
+DROP TABLE IF EXISTS conf_general;
+DROP TABLE IF EXISTS reclamo;
+DROP TABLE IF EXISTS tipo_reclamo;
+DROP TABLE IF EXISTS detalle_personal;
+DROP TABLE IF EXISTS detalle_pasaje;
+DROP TABLE IF EXISTS pasaje;
+DROP TABLE IF EXISTS detalle_viaje_asiento;
+DROP TABLE IF EXISTS detalle_viaje;
+DROP TABLE IF EXISTS pasajero;
+DROP TABLE IF EXISTS viaje;
+DROP TABLE IF EXISTS venta;
+DROP TABLE IF EXISTS cliente;
+DROP TABLE IF EXISTS tipo_cliente;
+DROP TABLE IF EXISTS estado_viaje;
+DROP TABLE IF EXISTS personal_incidencia;
+DROP TABLE IF EXISTS incidencia;
+DROP TABLE IF EXISTS servicio_microservicio;
+DROP TABLE IF EXISTS microservicio;
+DROP TABLE IF EXISTS escala;
+DROP TABLE IF EXISTS conf_plantillas;
+DROP TABLE IF EXISTS conf_dclaims;
+DROP TABLE IF EXISTS conf_dmenus;
+DROP TABLE IF EXISTS conf_claims;
+DROP TABLE IF EXISTS conf_menus;
+DROP TABLE IF EXISTS usuarios;
+DROP TABLE IF EXISTS tipo_usuario;
+DROP TABLE IF EXISTS sucursal;
+DROP TABLE IF EXISTS horario;
+DROP TABLE IF EXISTS asiento;
+DROP TABLE IF EXISTS ubigeo;
+DROP TABLE IF EXISTS metodo_pago;
+DROP TABLE IF EXISTS personal;
+DROP TABLE IF EXISTS nivel_herramienta;
+DROP TABLE IF EXISTS nivel;
+DROP TABLE IF EXISTS vehiculo;
+DROP TABLE IF EXISTS tipo_vehiculo;
+DROP TABLE IF EXISTS servicio;
+DROP TABLE IF EXISTS marca;
+DROP TABLE IF EXISTS ruta;
+DROP TABLE IF EXISTS ciudad;
+DROP TABLE IF EXISTS pais;
+DROP TABLE IF EXISTS herramienta;
+DROP TABLE IF EXISTS tipo_herramienta;
+DROP TABLE IF EXISTS tipo_metodoPago;
+DROP TABLE IF EXISTS terminos_condiciones;
+DROP TABLE IF EXISTS preguntas_frecuentes;
+DROP TABLE IF EXISTS promocion;
+DROP TABLE IF EXISTS tipo_personal;
+DROP TABLE IF EXISTS tipo_comprobante;
+DROP TABLE IF EXISTS tipo_documento;
 
     -- Crear tabla preguntas_frecuentes
     CREATE TABLE preguntas_frecuentes (
@@ -369,11 +368,12 @@ DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPO_RECLAMO;
         password VARCHAR(255) NOT NULL,
         imagen VARCHAR(255) NOT NULL,
         estado BOOLEAN NOT NULL,
-        id_tipousuario INT not null REFERENCES tipo_usuario (id),
+        id_tipousuario INT NOT NULL,
         estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
         estado_registro INT not null DEFAULT 1,
         fecha_registro DATETIME not null DEFAULT CURRENT_TIMESTAMP, 
-        usuario VARCHAR(100) not null
+        usuario VARCHAR(100) not null,
+        FOREIGN KEY (id_tipousuario) REFERENCES tipo_usuario(id)
     );
 
     CREATE TABLE ciudad(
@@ -461,19 +461,6 @@ CREATE TABLE cliente (
     CONSTRAINT fk_tipo_cliente FOREIGN KEY (id_tipo_cliente) REFERENCES TIPO_CLIENTE(idTipoCliente),
     CONSTRAINT fk_tipo_doc FOREIGN KEY (id_tipo_doc) REFERENCES TIPO_DOCUMENTO(id)
 );
-
-    CREATE TABLE asiento (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-
-        nombre varchar(5) NOT NULL,
-        id_vehiculo INT REFERENCES vehiculo(id),
-        id_nivel_herramienta INT NOT NULL,
-        estado TINYINT NOT NULL CHECK (estado IN (0, 1, 2, 3)),
-
-        fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
-        usuario VARCHAR(100) NOT NULL
-    );
-
     -- Crear tabla conf_general
     CREATE TABLE conf_general (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -636,16 +623,18 @@ CREATE TABLE cliente (
         id INT AUTO_INCREMENT PRIMARY KEY,
         nombre varchar(60),
         icono varchar(200),
-        id_tipo INT REFERENCES tipo_herramienta(id)
+        id_tipo INT NOT NULL,
+        FOREIGN KEY (id_tipo) REFERENCES tipo_herramienta(id)
     );
 
 CREATE TABLE nivel_herramienta(
         id int AUTO_INCREMENT PRIMARY KEY,
-        id_herramienta int REFERENCES herramienta(id),
-        id_nivel int REFERENCES nivel(id),
+        id_herramienta int NOT NULL,
+        id_nivel int NOT NULL,
         x_dimension int not null,
-        y_dimension int not null
-    
+        y_dimension int not null,
+        FOREIGN KEY (id_nivel) REFERENCES nivel(id),
+        FOREIGN KEY (id_herramienta) REFERENCES herramienta(id)
     );
 
 CREATE TABLE estado_viaje (
@@ -670,101 +659,119 @@ CREATE TABLE viaje (
     FOREIGN KEY (idEstadoViaje) REFERENCES estado_viaje(id)
 );
 
-    CREATE TABLE detalle_viaje (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        idViaje INT NOT NULL REFERENCES viaje(id),
-        idSucursalOrigen INT NOT NULL,
-        idSucursalDestino INT NOT NULL,
-        precio DECIMAL(10,2) NOT NULL,
-        fechaSalida DATETIME NOT NULL,
-        fechaSalidaReal DATETIME NULL,
-        fechaLlegadaEstimada DATETIME NOT NULL,
-        fechaLlegadaReal DATETIME NULL,
-        -- Auditoría
-        fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
-        usuario VARCHAR(100) NOT NULL
-    );
+CREATE TABLE pasajero(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    ape_paterno VARCHAR(100) NOT NULL,
+    ape_materno VARCHAR(100) NOT NULL,
+    idTipoDocumento INT NOT NULL,
+    numero_documento VARCHAR(12) NOT NULL, -- Se recomienda especificar una longitud
+    sexo TINYINT NOT NULL, -- 1: masculino, 0: femenino
+    f_nacimiento DATE NOT NULL,
+    telefono VARCHAR(15) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    usuario VARCHAR(100) NOT NULL,
+    FOREIGN KEY (idTipoDocumento) REFERENCES tipo_documento(id)
+);
+CREATE TABLE detalle_viaje (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idViaje INT NOT NULL,
+    idSucursalOrigen INT NOT NULL,
+    idSucursalDestino INT NOT NULL,
+    precio DECIMAL(10,2) NOT NULL,
+    fechaSalida DATETIME NOT NULL,
+    fechaSalidaReal DATETIME NULL,
+    fechaLlegadaEstimada DATETIME NOT NULL,
+    fechaLlegadaReal DATETIME NULL,
+    -- Auditoría
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL,
+    FOREIGN KEY (idViaje) REFERENCES viaje(id)
+);
+CREATE TABLE asiento (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre varchar(5) NOT NULL,
+    id_vehiculo INT NOT NULL,
+    id_nivel_herramienta INT NOT NULL,
+    estado TINYINT NOT NULL CHECK (estado IN (0, 1, 2, 3)),
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL,
+    FOREIGN KEY (id_vehiculo) REFERENCES vehiculo(id),
+    FOREIGN KEY (id_nivel_herramienta) REFERENCES nivel_herramienta(id)
+);
+CREATE TABLE detalle_viaje_asiento(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idDetalle_Viaje INT NOT NULL ,
+    idAsiento INT NULL, -- Puede ser NULL si el viaje es libre
+    esDisponible BOOLEAN NOT NULL DEFAULT 1, -- 1: disponible, 0: no disponible
+    -- Auditoría
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL,
+    FOREIGN KEY (idDetalle_Viaje) REFERENCES detalle_viaje(id),
+    FOREIGN KEY (idAsiento) REFERENCES asiento(id)
+);
+CREATE TABLE detalle_personal (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idPersonal INT NOT NULL,
+    idTipoPersonal INT NOT NULL,
+    idViaje INT NOT NULL,
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL,
+    FOREIGN KEY (idPersonal) REFERENCES personal(id),
+    FOREIGN KEY (idViaje) REFERENCES viaje(id)
+);
+CREATE TABLE promocion (
+    id INT AUTO_INCREMENT PRIMARY KEY, 
+    nombre varchar(100) NOT NULL, 
+    estado TINYINT NOT NULL, 
+    fecha_inicio date NOT NULL, 
+    fecha_fin date NOT NULL, 
+    codigo char(8) NOT NULL, 
+    monto_promo DECIMAL(9, 2) NOT NULL
+);
+CREATE TABLE venta (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idCliente INT NOT NULL,
+    fecha DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    subTotal DECIMAL(10,2) NOT NULL,
+    igv DECIMAL(10,2) NOT NULL,
+    idPromocion INT NULL,
+    idMetodoPago INT NOT NULL,
+    idTipoComprobante INT NOT NULL,
+    FOREIGN KEY (idCliente) REFERENCES cliente(id),
+    FOREIGN KEY (idMetodoPago) REFERENCES metodo_pago(id),
+    FOREIGN KEY (idTipoComprobante) REFERENCES tipo_comprobante(idTipoComprobante),
+    FOREIGN KEY (idPromocion) REFERENCES promocion(id)
+);
 
-    CREATE TABLE detalle_viaje_asiento(
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        idDetalle_Viaje INT NOT NULL REFERENCES detalle_viaje(id),
-        idAsiento INT NULL REFERENCES asiento(id),
-        esDisponible BOOLEAN NOT NULL DEFAULT 1, -- 1: disponible, 0: no disponible
-        -- Auditoría
-        fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
-        usuario VARCHAR(100) NOT NULL
-    );
+CREATE TABLE pasaje(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idDetalleViajeAsiento INT NOT NULL,
+    numeroComprobante char(13) NULL, -- Ej: A001-00000001
+    -- operaciones con pasaje
+    esPasajeNormal TINYINT NULL DEFAULT 0, -- 1: es pasaje normal, 0: no es pasaje normal
+    esPasajeLibre TINYINT NULL DEFAULT 0, -- 1: es pasaje libre, 0: no es pasaje libre
+    esTransferencia TINYINT NULL DEFAULT 0, -- 1: es transferencia, 0: no es transferencia
+    esReserva TINYINT NULL DEFAULT 0, -- 1: es pasaje reserva, 0: no es pasaje reserva
+    esCambioRuta TINYINT NULL DEFAULT 0, -- 1: es cambio de ruta, 0: no es cambio de ruta
+    idVenta INT NOT NULL,
+    codigo CHAR(8) NOT NULL, -- AA0202
+    enTransaccion TINYINT NULL DEFAULT 0, -- 1: en transacción, 0: no en transacción
+    idPasaje INT NULL, -- Para operaciones con pasajes
+    FOREIGN KEY (idDetalleViajeAsiento) REFERENCES detalle_viaje_asiento(id),
+    FOREIGN KEY (idVenta) REFERENCES venta(id)
+);
 
-    CREATE TABLE detalle_personal (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        idPersonal INT NOT NULL,
-        idTipoPersonal INT NOT NULL,
-        idViaje INT NOT NULL,
-        fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
-        usuario VARCHAR(100) NOT NULL,
-        FOREIGN KEY (idPersonal) REFERENCES personal(id),
-        FOREIGN KEY (idViaje) REFERENCES viaje(id)
-    );
-
-    CREATE TABLE promocion (
-        id INT AUTO_INCREMENT PRIMARY KEY, 
-        nombre varchar(100) NOT NULL, 
-        estado TINYINT NOT NULL, 
-        fecha_inicio date NOT NULL, 
-        fecha_fin date NOT NULL, 
-        codigo char(8) NOT NULL, 
-        monto_promo DECIMAL(9, 2) NOT NULL
-    );
-
-    CREATE TABLE venta (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        idCliente INT NOT NULL REFERENCES cliente(id),
-        fecha DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        subTotal DECIMAL(10,2) NOT NULL,
-        igv DECIMAL(10,2) NOT NULL,
-        idPromocion INT NOT NULL REFERENCES promocion(id),
-        idMetodoPago INT NOT NULL REFERENCES metodo_pago(id),
-        idTipoComprobante INT NOT NULL REFERENCES tipo_comprobante(id)
-    );
-
-    CREATE TABLE detalle_pasaje (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        idPasajero INT NOT NULL REFERENCES pasajero(id),
-        idPasaje INT NOT NULL REFERENCES pasaje(id),
-        esMenorEdad TINYINT NOT NULL, -- 1: es menor de edad, 0: no es menor de edad
-        viajeEnBrazos TINYINT NOT NULL, -- 1: viaja en brazos, 0: no viaja en brazo
-        fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
-
-    CREATE TABLE pasajero(
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        nombre VARCHAR(255) NOT NULL,
-        ape_paterno VARCHAR(100) NOT NULL,
-        ape_materno VARCHAR(100) NOT NULL,
-        idTipoDocumento INT NOT NULL REFERENCES tipo_documento(id),
-        numero_documento VARCHAR(12) NOT NULL, -- Se recomienda especificar una longitud
-        sexo TINYINT NOT NULL, -- 1: masculino, 0: femenino
-        f_nacimiento DATE NOT NULL,
-        telefono VARCHAR(15) NOT NULL,
-        email VARCHAR(255) NOT NULL
-    );
-
-    CREATE TABLE pasaje(
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        idDetalleViajeAsiento INT NOT NULL REFERENCES detalle_viaje_asiento(id),
-        numeroComprobante char(13) NULL, -- Ej: A001-00000001
-        -- operaciones con pasaje
-        esPasajeNormal TINYINT NULL DEFAULT 0, -- 1: es pasaje normal, 0: no es pasaje normal
-        esPasajeLibre TINYINT NULL DEFAULT 0, -- 1: es pasaje libre, 0: no es pasaje libre
-        esTransferencia TINYINT NULL DEFAULT 0, -- 1: es transferencia, 0: no es transferencia
-        esReserva TINYINT NULL DEFAULT 0, -- 1: es pasaje reserva, 0: no es pasaje reserva
-        esCambioRuta TINYINT NULL DEFAULT 0, -- 1: es cambio de ruta, 0: no es cambio de ruta
-        idVenta INT NOT NULL REFERENCES venta(id),
-        codigo CHAR(8) NOT NULL, -- AA0202
-        idPasaje INT NULL -- Para operaciones con pasajes
-    );
-
-    -- Crear tablas tipo_reclamo y reclamo
+CREATE TABLE detalle_pasaje (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idPasajero INT NOT NULL,
+    idPasaje INT NOT NULL,
+    esMenorEdad TINYINT NOT NULL, -- 1: es menor de edad, 0: no es menor de edad
+    viajeEnBrazos TINYINT NOT NULL, -- 1: viaja en brazos, 0: no viaja en brazo
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (idPasajero) REFERENCES pasajero(id),
+    FOREIGN KEY (idPasaje) REFERENCES pasaje(id)
+);
 
 CREATE TABLE tipo_reclamo(
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -839,9 +846,9 @@ CREATE TABLE tipo_reclamo(
     ('2', '5', '8', '1001.93', '793.63', '2025-06-10 19:32:46', 'edgar@gmail.com');
 
 
-
     -- INSERTS terminos y condicones
     INSERT INTO terminos_condiciones(id, nombre, archivo, estado, fecha_registro, usuario) VALUES (1,'TyC-v2025-001','TyC_v2025-001.txt',1,'2025-05-29 01:51:30','ander@gmail.com');
+    INSERT INTO terminos_condiciones(id, nombre, archivo, estado, fecha_registro, usuario) VALUES (2,'Versión guía','versionPreliminar.txt',0,'2025-05-29 01:51:30','ander@gmail.com');
 
     -- INSERTS estado_viaje
     INSERT INTO estado_viaje (id, nombre) VALUES (1, 'PENDIENTE');
@@ -908,16 +915,20 @@ CREATE TABLE tipo_reclamo(
 
     -- INSERT HERRAMIENTA
 
-    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (1, 'Asiento a 140°','fas fa-chair',1);
-    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (2, 'Asiento a 160°','fas fa-chair',1);
-    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (3, 'Asiento cama','fas fa-chair',1);
+    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (1, 'Asiento a 140°','img/herramienta/asiento_140.png',1);
+    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (2, 'Asiento a 160°','img/herramienta/asiento_160.png',1);
+    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (3, 'Asiento cama','img/herramienta/asiento_180.png',1);
 
-    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (4, 'Televisor','fas fa-desktop',4);
+    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (4, 'Televisor','img/herramienta/tv.png',4);
 
-    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (5, 'Baño','fas fa-restroom',3);
-    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (6, 'Extintor','fas fa-fire-extinguisher',3);
+    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (5, 'Baño','img/herramienta/toilet.png',3);
+    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (6, 'Extintor','img/herramienta/extintor.png',3);
 
-    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (7, 'Puerta','fas fa-door-closed',2);
+    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (7, 'Puerta','img/herramienta/puerta.png',2);
+    
+    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (8, 'Subida','img/herramienta/escalera_hacia_arriba.png',2);
+    
+    INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (9, 'Bajada','img/herramienta/escalera_hacia_abajo.png',2);
 
     -- INSERTS PAIS
     INSERT INTO pais (id, nombre, name, iso2, iso3, phone_code, continente) VALUES (1,'Afganistán','Afghanistan','AF','AFG','93','Asia');
@@ -1206,6 +1217,9 @@ CREATE TABLE tipo_reclamo(
     INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (2,'Edgar','edgar@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/edgar.png', 1, 1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
     INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (3,'Ander','ander@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/ander.jpg', 1, 1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
     INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (4,'Luis','luis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/luis.jpg', 1, 1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
+
+insert into vehiculo (placa, anio, color, estado, id_tipo_vehiculo, usuario) values ( 'YTS-333', 2024, 'Rojo', 1, 3, 'ander@gmail.com');
+insert into vehiculo (placa, anio, color, estado, id_tipo_vehiculo, usuario) values ( 'B4N-D3R', 2023, 'Rojo', 1, 2, 'ander@gmail.com');
 
     -- Tabla de configuración general
     INSERT INTO conf_general (id, igv, tarifaBase, max_pasajes_venta, viajesReprogramables) VALUES (1, 0.18, 10, 4, 0);

@@ -1,0 +1,83 @@
+<style>
+  .select2-container--bootstrap-5 .select2-selection--single {
+    height: auto;
+    line-height: normal;
+    display: flex;
+    align-items: center;
+  }
+
+  .legend-box {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 0.5em;
+    border: 1px solid #ccc;
+  }
+
+  .asiento-seleccionado {
+    background-color: #0d6efd !important;
+    /* azul Bootstrap */
+    color: white !important;
+    animation: rebote 0.2s ease;
+    transform: scale(1.05);
+    z-index: 2;
+  }
+
+  @keyframes rebote {
+    0% {
+      transform: scale(1);
+    }
+
+    50% {
+      transform: scale(1.1);
+    }
+
+    100% {
+      transform: scale(1.05);
+    }
+  }
+</style>
+
+
+<div class="row">
+  <!-- Leyenda -->
+  <div class="col-md-2">
+    <h6>Leyenda</h6>
+    <ul class="list-unstyled small">
+      <li><span class="legend-box" style="background:#f0f0f0;"></span> Asiento libre</li>
+      <li><span class="legend-box" style="background:#ffcdd2;"></span> Ocupado por caballero</li>
+      <li><span class="legend-box" style="background:#e1bee7;"></span> Ocupado por dama</li>
+      <li><span class="legend-box" style="background:#ffeb3b;"></span> Seleccionado</li>
+    </ul>
+  </div>
+
+  <!-- Mapa de asientos -->
+  <div class="col-md-6">
+    <div id="contenedor_piso_1_{{ sufijo }}">
+      <h6 class="text-center">1° Piso</h6>
+      <div class="gap-2 mb-3" id="matrizContainer_1_{{ sufijo }}"></div>
+    </div>
+
+    <div id="contenedor_piso_2_{{ sufijo }}">
+      <h6 class="text-center">2° Piso</h6>
+      <div class="gap-2" id="matrizContainer_2_{{ sufijo }}"></div>
+    </div>
+  </div>
+
+  <!-- Formulario -->
+
+  <div class="col-md-4">
+    <div class="row">
+      <div class="col-md-12">
+        <div id="temporizador_{{ sufijo }}">Tiempo restante: 10</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12 d-none" id="contenido_datos_{{ sufijo }}">
+        <div class="accordion" id="accordionPasajeros_{{ sufijo }}"></div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
