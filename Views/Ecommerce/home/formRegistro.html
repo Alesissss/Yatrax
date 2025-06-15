@@ -351,22 +351,12 @@
         document.getElementById("ytrx-gender").selectedIndex = 0;
         document.getElementById("ytrx-birthdate").value = "";
         document.getElementById("ytrx-fullname").required = false;
-      } else if (seleccionado === "DNI") {
-        grupoNombres.style.display = "block";
-        grupoApellidos.style.display = "flex";
-        grupoSexo.style.display = "flex";
-        grupoNacimiento.style.display = "block";
-        document.getElementById("ytrx-fullname").required = true;
       } else {
-        razonSocial.style.display = "none";
         grupoNombres.style.display = "block";
         grupoApellidos.style.display = "flex";
         grupoSexo.style.display = "flex";
         grupoNacimiento.style.display = "block";
         document.getElementById("ytrx-fullname").required = true;
-        document.getElementById("ytrx-lastname-father").value = "";
-        document.getElementById("ytrx-lastname-mother").style.display = "block";
-        document.getElementById("ytrx-lastname-mother").style.width = "100%";
       }
     });
 
