@@ -1,44 +1,44 @@
 <style>
-  .step {
-    display: none;
-    padding: 2rem;
-    transition: opacity 0.3s ease;
-  }
+    .step {
+        display: none;
+        padding: 2rem;
+        transition: opacity 0.3s ease;
+    }
 
-  .step.active {
-    display: block;
-  }
+    .step.active {
+        display: block;
+    }
 
-  .tab-link {
-    position: relative;
-  }
+    .tab-link {
+        position: relative;
+    }
 
-  .tab-link.disabled {
-    pointer-events: none;
-    background-color: var(--primary-color);
-    color: rgb(255, 255, 255) !important;
-    cursor: default;
-  }
+    .tab-link.disabled {
+        pointer-events: none;
+        background-color: var(--primary-color);
+        color: rgb(255, 255, 255) !important;
+        cursor: default;
+    }
 
-  .tab-link.disabled::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.6);
-    border-radius: inherit;
-  }
+    .tab-link.disabled::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.6);
+        border-radius: inherit;
+    }
 
-  .tab-link.active {
-    background-color: var(--primary-color);
-    color: white;
-  }
+    .tab-link.active {
+        background-color: var(--primary-color);
+        color: white;
+    }
 
-  .hidden {
-    display: none !important;
-  }
+    .hidden {
+        display: none !important;
+    }
 </style>
 
 
@@ -127,13 +127,26 @@
         </div>
     </div>
     <div class="step" id="step-2">
-        <div class="text-center">
-            <h3>Itinerario de regreso</h3>
-            <p>Seleccione su horario preferido para el viaje de regreso.</p>
-            <div class="mt-4">
-                <button class="btn btn-primary btn-siguiente" onclick="nextStep()">Siguiente <i
-                        class="fas fa-arrow-right"></i></button>
+        <div class="row rounded">
+            <div class="col-md-5 d-flex justify-content-center p-2 rounded-start"
+                style="background-color: var(--primary-color); color: #e8f5e9;">
+                <h6>Horario</h6>
             </div>
+            <div class="col-md-2 d-flex justify-content-center p-2"
+                style="background-color: var(--primary-color); color: #e8f5e9;">
+                <h6>Servicio</h6>
+            </div>
+            <div class="col-md-3 d-flex justify-content-center p-2"
+                style="background-color: var(--primary-color); color: #e8f5e9;">
+                <h6>Asiento</h6>
+            </div>
+            <div class="col-md-2 d-flex justify-content-center p-2 rounded-end"
+                style="background-color: var(--primary-color); color: #e8f5e9;">
+                <h6>Elegir</h6>
+            </div>
+        </div>
+        <div id="contenedor_viajes_vuelta" class="row">
+
         </div>
     </div>
 

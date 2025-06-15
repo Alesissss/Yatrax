@@ -2,6 +2,8 @@ import hashlib
 import os
 import re
 import random
+#extra agregado para la transaccion
+import bd
 from correo import enviar_correo
 from flask import Blueprint, request, jsonify, render_template, session, redirect, url_for, abort,current_app
 from Models.pasaje import Pasaje
@@ -55,6 +57,97 @@ homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/hom
 #    return render_template("Ecommerce/error.html", error="Ocurrió un error inesperado"), 500
 
 # FUNCIONES AUXILIARES
+#REGION PROTOTIPO DE PRUEBA 
+@homeClientes_bp.route('/registrar_venta', methods=['POST'])
+def registrar_venta():
+    data = request.json
+    try:
+        conn = bd.Conexion()
+        cursor = conn.cursor()
+        conn.autocommit = False
+
+        # 1. Datos del cliente
+        numero_documento = data['numero_documento']
+        nombre = data['nombre']
+        ape_paterno = data['ape_paterno']
+        ape_materno = data['ape_materno']
+        razon_social = data.get('razon_social')  # opcional
+        sexo = data['sexo']
+        f_nacimiento = data['f_nacimiento']
+        direccion = data['direccion']
+        telefono = data['telefono']
+        email = data['email']
+        password = data['password']
+        estado = True
+        id_pais =  1 #data['id_pais']
+        id_tipo_cliente = data['id_tipo_cliente']
+        id_tipo_doc = data['id_tipo_doc']
+        usuario = data.get('usuario', 'sistema')
+
+        # 2. Datos de la venta
+        sub_total = data['subTotal']
+        igv = 0.18 #data['igv']
+        id_promocion = 1 #data['idPromocion']
+        id_metodo_pago = data['idMetodoPago']
+        id_tipo_comprobante = data['idTipoComprobante']
+
+        # 3. Asiento y viaje
+        id_asiento = data['idAsiento']
+        id_detalle_viaje = data['idDetalleViaje']
+        id_detalle_viaje_asiento = data['id_detalle_viaje_asiento']
+
+        # Verificar que el asiento esté libre (estado = 0)
+        cursor.execute("SELECT estado FROM asiento WHERE id = ?", id_asiento)
+        estado = cursor.fetchone()
+        if not estado or estado[0] != 0:
+            return jsonify({'error': 'El asiento ya está ocupado o no existe'}), 400
+
+        # Insertar cliente
+        cursor.execute("INSERT INTO cliente (numero_documento, nombre, ape_paterno, ape_materno, razon_social, sexo, f_nacimiento, direccion, telefono, email, password, estado, id_pais, id_tipo_cliente, id_tipo_doc, usuario) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            numero_documento, nombre, ape_paterno, ape_materno, razon_social, sexo, f_nacimiento, direccion, telefono, email, password, estado, id_pais, id_tipo_cliente, id_tipo_doc, usuario)
+
+        cursor.execute("SELECT @@IDENTITY")
+        id_cliente = cursor.fetchone()[0]
+
+        # Insertar venta
+        cursor.execute("INSERT INTO venta (idCliente, subTotal, igv, idPromocion, idMetodoPago, idTipoComprobante) VALUES (?, ?, ?, ?, ?, ?)",
+            id_cliente, sub_total, igv, id_promocion, id_metodo_pago, id_tipo_comprobante)
+        cursor.execute("SELECT @@IDENTITY")
+        id_venta = cursor.fetchone()[0]
+
+        # Insertar pasaje
+        cursor.execute("""
+            INSERT INTO pasaje (
+                idDetalleViajeAsiento, numeroComprobante,
+                esPasajeNormal, esPasajeLibre, esTransferencia, esReserva, esCambioRuta,
+                idVenta, codigo, idPasaje
+            )
+            VALUES (?, NULL, ?, ?, ?, ?, ?, ?, ?, NULL)
+        """, id_detalle_viaje_asiento,
+              1,  # esPasajeNormal
+              0, 0, 0, 0,
+              id_venta,
+              "AA0001"  # código del pasaje, sugerido automatizar
+        )
+
+        # Insertar en detalle_viaje_asiento (marcar como no disponible)
+        cursor.execute("INSERT INTO detalle_viaje_asiento (idDetalle_Viaje, idAsiento, esDisponible, usuario) VALUES (?, ?, 0, ?)",
+            id_detalle_viaje, id_asiento, usuario)
+
+        # Actualizar estado del asiento
+        cursor.execute("UPDATE asiento SET estado = 1 WHERE id = ?", id_asiento)
+
+        conn.commit()
+        return jsonify({'mensaje': 'Venta registrada correctamente'}), 200
+
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+# END PROTOTIPO
 
 def renderizarCompra():
     herramientas = Herramienta.obtener_todos()
@@ -65,9 +158,9 @@ def renderizarCompra():
 def renderizar_itinerario():
     data = request.get_json()
     itinerarios = data.get('itinerarios', [])
-
+    sufijo = data.get('sufijo')
     # Renderiza el HTML del itinerario con Jinja
-    html_renderizado = render_template('Ecommerce/home/partials/itinerario.html', itinerarios=itinerarios)
+    html_renderizado = render_template('Ecommerce/home/partials/itinerario.html', itinerarios=itinerarios, sufijo = sufijo)
     return jsonify({'html': html_renderizado})
 
 
@@ -426,7 +519,7 @@ def buscarViajes():
         fecha_vuelta = request.form.get('fecha_vuelta')
         datos_viaje_ida = Viaje.buscarViajePorRutaYFecha(origen=origen, destino=destino, fecha= fecha_ida)
         if fecha_vuelta:
-            datos_viaje_vuelta = Viaje.buscarViajePorRutaYFecha(origen=origen, destino=destino, fecha= fecha_vuelta)
+            datos_viaje_vuelta = Viaje.buscarViajePorRutaYFecha(origen=destino, destino=origen, fecha= fecha_vuelta)
         return jsonify({
             "data_ida":datos_viaje_ida,
             "data_vuelta":datos_viaje_vuelta,
@@ -435,8 +528,8 @@ def buscarViajes():
         })
     except Exception as e:
         return jsonify({
-            "data_ida":datos_viaje_ida,
-            "data_vuelta":datos_viaje_vuelta,
+            "data_ida":[],
+            "data_vuelta":[],
             "Msg":"Hubo un error al buscar los viajes; " + repr(e),
             "Status": "error"
         })
@@ -447,7 +540,6 @@ from flask import jsonify, render_template
 def obtener_diseno_vehiculo():
     detalle_viaje_id = request.json.get("id_dv")
     datos = Viaje.obtener_asientos(detalle_viaje_id)
-    print(datos)
     return jsonify({
         "data": datos,
         "Status": "success",

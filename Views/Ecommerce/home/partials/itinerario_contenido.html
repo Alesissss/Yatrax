@@ -53,14 +53,14 @@
 
   <!-- Mapa de asientos -->
   <div class="col-md-6">
-    <div id="contenedor_piso_1">
+    <div id="contenedor_piso_1_{{ sufijo }}">
       <h6 class="text-center">1° Piso</h6>
-      <div class="gap-2 mb-3" id="matrizContainer_1"></div>
+      <div class="gap-2 mb-3" id="matrizContainer_1_{{ sufijo }}"></div>
     </div>
 
-    <div id="contenedor_piso_2">
+    <div id="contenedor_piso_2_{{ sufijo }}">
       <h6 class="text-center">2° Piso</h6>
-      <div class="gap-2" id="matrizContainer_2"></div>
+      <div class="gap-2" id="matrizContainer_2_{{ sufijo }}"></div>
     </div>
   </div>
 
@@ -69,12 +69,12 @@
   <div class="col-md-4">
     <div class="row">
       <div class="col-md-12">
-        <div id="temporizador">Tiempo restante: 10</div>
+        <div id="temporizador_{{ sufijo }}">Tiempo restante: 10</div>
       </div>
     </div>
     <div class="row">
-      <div class="col-md-12 d-none" id="contenido_datos">
-        <div class="accordion" id="accordionPasajeros"></div>
+      <div class="col-md-12 d-none" id="contenido_datos_{{ sufijo }}">
+        <div class="accordion" id="accordionPasajeros_{{ sufijo }}"></div>
       </div>
 
     </div>

@@ -51,9 +51,9 @@
           <div class="col-md-6">
             <p class="m-0">{{ it.servicio }}</p>
           </div>
-          <div class="col-md-6 rounded" id ="tipo_viaje" style='background-color: {{ color }}';>
+          <div class="col-md-6 rounded" id="tipo_viaje" style='background-color: {{ color }}' ;>
             <p class="m-0">{{ it.tipo }}</p>
-          </div>    
+          </div>
         </div>
       </div>
 
@@ -64,15 +64,10 @@
 
       <!-- Botón -->
       <div class="col-md-2 d-flex justify-content-center align-items-center p-2 rounded-end">
-        <button type="button"
-                class="button btn mostrarContenido"
-                style="background-color: var(--success-color); color: white;"
-                data-viaje="{{ it.id }}"
-                id = "{{it.id}}"
-                data-bs-toggle="collapse"
-                data-bs-target="#{{ collapse_id }}"
-                aria-expanded="false"
-                aria-controls="{{ collapse_id }}">
+        <button type="button" class="button btn mostrarContenido_{{ sufijo }}"
+          style="background-color: var(--success-color); color: white;" data-viaje="{{ it.id }}" id="{{it.id}}"
+          data-bs-toggle="collapse" data-bs-target="#{{ collapse_id }}" aria-expanded="false"
+          aria-controls="{{ collapse_id }}">
           Elegir
         </button>
       </div>
@@ -80,9 +75,10 @@
       <!-- Contenido colapsable -->
       <div id="{{ collapse_id }}" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
         <div class="accordion-body">
-          {% include "Ecommerce/home/partials/itinerario_contenido.html" %}
+          {% include "Ecommerce/home/partials/itinerario_contenido.html" with context %}
         </div>
       </div>
+
     </div>
   </div>
   {% endfor %}

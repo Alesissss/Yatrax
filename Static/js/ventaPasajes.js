@@ -1,6 +1,14 @@
+/* Region de importaciones y desacoplamiento*/
+
+import { Venta } from "./clases/Venta.js";
+/* Probar si el buscarPersona funciona ya que no puedo probarlo por lo que la funcion que esta malno me permite el listado de itineracios*/
+//   import { buscarPersona } from "./funciones/apiReniec.js";
+
+/*En Region*/
 let currentStep = 0;
 let maxStep = 0; // Controla hasta qué pestaña está desbloqueado el acceso
 const MAX_ASIENTOS = 4;
+let ITINERARIO_REGRESO;
 
 function updateFormVisibility() {
     const form = document.getElementById('form-destino');
@@ -65,10 +73,13 @@ function ejecutarBusqueda() {
                     toastr.warning("No se han encontrado viajes para esas fechas");
                     return;
                 }
-                cargarItinerario(resp.data_ida, 'contenedor_viajes_ida');
+                cargarItinerario(resp.data_ida, 'contenedor_viajes_ida','ida');
                 currentStep = 1;
                 maxStep = 1; // Reinicia el máximo al tab 1 tras una nueva búsqueda
                 updateFormVisibility();
+                if(resp.data_vuelta){
+                    ITINERARIO_REGRESO = resp.data_vuelta;
+                }
                 toastr.success('VIAJES RETORNADOS CORRECTAMENTE');
             } else {
                 toastr.warning('ERROR AL BUSCAR EL VIAJE: ' + resp.Msj);
@@ -162,21 +173,24 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 
-function cargarItinerario(itinerarios, contenedorId) {
+function cargarItinerario(itinerarios, contenedorId, sufijo) {
     const contenedor = document.getElementById(contenedorId);
     contenedor.innerHTML = ''; // Limpia
 
     fetch('/ecommerce/home/renderizar_itinerario', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ itinerarios })
+        body: JSON.stringify({ 
+            itinerarios,
+            sufijo:sufijo
+        })
     })
         .then(res => {
             return res.json();  // <- solo si estás 100% seguro de que recibes JSON
         })
         .then(data => {
-            document.getElementById("contenedor_viajes_ida").innerHTML = data.html;
-            inicializarEventosPostRender();
+            contenedor.innerHTML = data.html;
+            inicializarEventosPostRender(sufijo);
         })
         .catch(err => {
             toastr.error("Error al renderizar el itinerario: " + (err.message || err));
@@ -185,16 +199,16 @@ function cargarItinerario(itinerarios, contenedorId) {
 }
 
 
-function inicializarEventosPostRender() {
+function inicializarEventosPostRender(sufijo) {
     api_reniec();
-    funcionalidadElegir();
+    funcionalidadElegir(sufijo);
 }
 
-function funcionalidadElegir() {
-    document.querySelectorAll(".mostrarContenido").forEach(btn => {
+function funcionalidadElegir(sufijo) {
+    document.querySelectorAll(`.mostrarContenido_${sufijo}`).forEach(btn => {
         btn.addEventListener('click', function () {
-            generar_matrices(btn.id)
-
+            const sufijo = currentStep === 1 ? 'ida' : 'vuelta';
+            generar_matrices(btn.id, sufijo);
         });
 
         const targetId = btn.getAttribute('data-bs-target');
@@ -202,16 +216,16 @@ function funcionalidadElegir() {
 
         if (target) {
             target.addEventListener('shown.bs.collapse', function () {
-                seleccionarAsiento();
-                iniciarTemporizador(300);
+                const sufijo = currentStep === 1 ? 'ida' : 'vuelta';
+                seleccionarAsiento(sufijo);
+                iniciarTemporizador(300, sufijo);
             });
         }
-
-    })
-
+    });
 }
 
-function seleccionarAsiento() {
+
+function seleccionarAsiento(sufijo) {
     const asientos = document.querySelectorAll('[data-tipo="1"]');
     if (asientos.length === 0) {
         console.warn("No se encontraron asientos con data-tipo='1'");
@@ -219,16 +233,16 @@ function seleccionarAsiento() {
     asientos.forEach(btn => {
 
         btn.addEventListener('click', async function () {
-            const contenedor = document.getElementById("contenido_datos");
-            const accordion = document.getElementById("accordionPasajeros");
-            const codigoAsiento = btn.innerText.trim();
-            const accordionItemId = `collapse-${codigoAsiento}`;
+            const contenedor = document.getElementById(`contenido_datos_${sufijo}`);
+            const accordion = document.getElementById(`accordionPasajeros_${sufijo}`);
+            const nombreAsiento = btn.innerText.trim();
+            const accordionItemId = `collapse-${btn.id}-${sufijo}`;
 
             // Si ya estaba seleccionado (intenta deseleccionar)
-            if (btn.classList.contains("asiento-seleccionado")) {
+            if (btn.classList.contains("asiento-seleccionado")) { 
                 const confirm = await Swal.fire({
                     title: '¿Deseas quitar este asiento?',
-                    text: `Se eliminarán los datos ingresados para el asiento ${codigoAsiento}.`,
+                    text: `Se eliminarán los datos ingresados para el asiento ${nombreAsiento}.`,
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonText: 'Sí, eliminar',
@@ -267,7 +281,7 @@ function seleccionarAsiento() {
 
             // Crear el acordeón si no existe
             if (!document.getElementById(accordionItemId)) {
-                const headerId = `heading-${codigoAsiento}`;
+                const headerId = `heading-${btn.id}-${sufijo}`;
 
                 const nuevoForm = document.createElement("div");
                 nuevoForm.classList.add("accordion-item");
@@ -275,60 +289,101 @@ function seleccionarAsiento() {
                 nuevoForm.innerHTML = `
                     <h2 class="accordion-header" id="${headerId}">
                         <button class="accordion-button ${accordion.children.length > 0 ? 'collapsed' : ''}" type="button" data-bs-toggle="collapse" data-bs-target="#${accordionItemId}" aria-expanded="true" aria-controls="${accordionItemId}">
-                        Asiento ${codigoAsiento}
+                        Asiento ${btn.id}   
                         </button>
                     </h2>
-                    <div id="${accordionItemId}" class="accordion-collapse collapse ${accordion.children.length === 0 ? 'show' : ''}" aria-labelledby="${headerId}" data-bs-parent="#accordionPasajeros">
+                    <div id="${accordionItemId}" class="accordion-collapse collapse ${accordion.children.length === 0 ? 'show' : ''}" aria-labelledby="${headerId}" data-bs-parent="#accordionPasajeros_${sufijo}">
                         <div class="accordion-body">
-                        ${generarFormularioHTML(codigoAsiento)}
+                        ${generarFormularioHTML(nombreAsiento, btn.id)}
+                        </div>
+                        <div class="accordion-footer">
+                            <button class="btn btn-outline-primary w-100" onclick='acabarPrimerItinerario()'>Confirmar datos</button>
                         </div>
                     </div>
                     `;
 
                 accordion.appendChild(nuevoForm);
                 accordion.appendChild(nuevoForm);
-                api_reniec(codigoAsiento); // <== NUEVA LÍNEA
+                api_reniec(btn.id); // <== NUEVA LÍNEA
 
             }
 
-            funcionalidadBotonAsiento(); // tu lógica personalizada
+            funcionalidadBotonAsiento(sufijo); // tu lógica personalizada
         });
 
 
     });
 }
 
-function generarFormularioHTML(asiento) {
+function generarFormularioHTML(asiento_nombre,asiento_id) {
   return `
-    <div class="mb-2 fw-bold text-primary">Asiento: ${asiento} (<span>S/0.00</span>)</div>
-    <select class="form-select mb-2" id="tipo_doc_${asiento}">
+    <div class="mb-2 fw-bold text-primary">Asiento: ${asiento_nombre} (<span>S/0.00</span>)</div>
+    <select class="form-select mb-2" id="tipo_doc_${asiento_id}">
       <option value="DNI">DNI</option>
       <option value="CE">CE</option>
     </select>
-    <input class="form-control mb-2" id="numeroDocNuevo_${asiento}" placeholder="N° Documento">
-    <input class="form-control mb-2" id="nombres_${asiento}" placeholder="Nombres">
-    <input class="form-control mb-2" id="apellidoPaterno_${asiento}" placeholder="Apellido paterno">
-    <input class="form-control mb-2" id="apellidoMaterno_${asiento}" placeholder="Apellido materno">
-    <input class="form-control mb-2" id="fechaNacimientoNuevo_${asiento}" type="date" placeholder="Fecha nacimiento">
-    <input class="form-control mb-2" id="telefono_${asiento}" placeholder="Teléfono">
+    <input class="form-control mb-2" id="numeroDocNuevo_${asiento_id}" placeholder="N° Documento">
+    <input class="form-control mb-2" id="nombres_${asiento_id}" placeholder="Nombres">
+    <input class="form-control mb-2" id="apellidoPaterno_${asiento_id}" placeholder="Apellido paterno">
+    <input class="form-control mb-2" id="apellidoMaterno_${asiento_id}" placeholder="Apellido materno">
+    <input class="form-control mb-2" id="fechaNacimientoNuevo_${asiento_id}" type="date" placeholder="Fecha nacimiento">
+    <input class="form-control mb-2" id="telefono_${asiento_id}" placeholder="Teléfono">
     <div class="mb-2">
       <label class="me-2">Sexo:</label>
-      <input type="radio" class="form-check-input" name="sexo-${asiento}" id="sexoMasculino_${asiento}"> <label for="sexoMasculino_${asiento}">Masculino</label>
-      <input type="radio" class="form-check-input" name="sexo-${asiento}" id="sexoFemenino_${asiento}"> <label for="sexoFemenino_${asiento}">Femenino</label>
+      <input type="radio" class="form-check-input" name="sexo-${asiento_id}" id="sexoMasculino_${asiento_id}"> <label for="sexoMasculino_${asiento_id}" value="M">Masculino</label>
+      <input type="radio" class="form-check-input" name="sexo-${asiento_id}" id="sexoFemenino_${asiento_id}"> <label for="sexoFemenino_${asiento_id}" value="F">Femenino</label>
     </div>
-    <input class="form-control mb-2" id="correo_${asiento}" placeholder="Correo electrónico" type="email">
+    <input class="form-control mb-2" id="correo_${asiento_id}" placeholder="Correo electrónico" type="email">
     <div class="form-check">
-      <input class="form-check-input" type="checkbox" id="brazos_${asiento}">
-      <label class="form-check-label" for="brazos_${asiento}">Con menor en brazos</label>
+      <input class="form-check-input" type="checkbox" id="brazos_${asiento_id}">
+      <label class="form-check-label" for="brazos_${asiento_id}">Con menor en brazos</label>
     </div>
     <div class="form-check mb-2">
-      <input class="form-check-input" type="checkbox" id="esMenor_${asiento}">
-      <label class="form-check-label" for="esMenor_${asiento}">Es menor de edad</label>
+      <input class="form-check-input" type="checkbox" id="esMenor_${asiento_id}">
+      <label class="form-check-label" for="esMenor_${asiento_id}">Es menor de edad</label>
     </div>
-    <button class="btn btn-outline-primary w-100">Guardar datos</button>
+    <button class="btn btn-outline-primary w-100" onclick='enviarDatosPasajero("${asiento_nombre}",${asiento_id})'>Guardar datos</button>
   `;
 }
 
+/* Recuperar datos */
+function enviarDatosPasajero(nombre_asiento, id_asiento) {
+    const numDoc = document.getElementById(`numeroDocNuevo_${id_asiento}`);
+    const nombres = document.getElementById(`nombres_${id_asiento}`);
+    const apellidoPaterno = document.getElementById(`apellidoPaterno_${id_asiento}`);
+    const apellidoMaterno = document.getElementById(`apellidoMaterno_${id_asiento}`);
+    const fechaNacimiento = document.getElementById(`fechaNacimientoNuevo_${id_asiento}`);
+    const telefono = document.getElementById(`telefono_${id_asiento}`);
+    const correo = document.getElementById(`correo_${id_asiento}`);
+    const brazos = document.getElementById(`brazos_${id_asiento}`).checked;
+    const esMenor = document.getElementById(`esMenor_${id_asiento}`).checked;
+
+    const recuperarSeleccion = document.querySelector(`input[name="sexo-${id_asiento}"]:checked`)?.id;
+    const sexo = recuperarSeleccion?.includes("Masculino") ? 1 : 0;
+
+    const venta = new Venta(
+        numDoc.value,
+        nombres.value,
+        apellidoPaterno.value,
+        apellidoMaterno.value,
+        fechaNacimiento.value,
+        telefono.value,
+        recuperarSeleccion,
+        sexo,
+        correo.value,
+        brazos,
+        esMenor
+    );
+
+    console.log(venta.numDoc,venta.nombres,venta.nombres)
+
+    // Puedes guardar en un arreglo por id_asiento
+    const ventasGuardadas = JSON.parse(sessionStorage.getItem("ventas") || "{}");
+    ventasGuardadas[id_asiento] = venta;
+    sessionStorage.setItem("ventas", JSON.stringify(ventasGuardadas));
+
+    toastr.success(`Datos del asiento ${nombre_asiento} guardados correctamente.`);
+}
 
 
 function handleClick(e) {
@@ -336,7 +391,7 @@ function handleClick(e) {
 }
 
 
-function generar_matrices(id_boton) {
+function generar_matrices(id_boton,sufijo) {
     const ruta = "/ecommerce/home/obtener_diseno_vehiculo";
     const enviar = { id_dv: id_boton };
 
@@ -352,21 +407,21 @@ function generar_matrices(id_boton) {
             const datosPiso1 = datos.filter(d => d.nroPiso == 1);
             const datosPiso2 = datos.filter(d => d.nroPiso == 2);
 
-            generarMatrizDesdeDatos(datosPiso1, 1);
+            generarMatrizDesdeDatos(datosPiso1, 1,sufijo);
 
             if (datosPiso2.length > 0) {
-                document.getElementById('contenedor_piso_2').style.display = 'block';
-                generarMatrizDesdeDatos(datosPiso2, 2);
+                document.getElementById(`contenedor_piso_2_${sufijo}`).style.display = 'block';
+                generarMatrizDesdeDatos(datosPiso2, 2,sufijo);
             } else {
-                document.getElementById('contenedor_piso_2').style.display = 'none';
+                document.getElementById(`contenedor_piso_2_${sufijo}`).style.display = 'none';
             }
         });
 }
 
-function generarMatrizDesdeDatos(datos, piso) {
+function generarMatrizDesdeDatos(datos, piso,sufijo) {
     const filas = 15;
     const columnas = 6;
-    const contenedor = document.getElementById(`matrizContainer_${piso}`);
+    const contenedor = document.getElementById(`matrizContainer_${piso}_${sufijo}`);
 
     if (!contenedor) return;
     contenedor.innerHTML = '';
@@ -625,8 +680,8 @@ function validarEdadNuevoPasajero() {
 
 //Fin api reniec
 
-function iniciarTemporizador(segundos) {
-    const elemento = document.getElementById('temporizador');
+function iniciarTemporizador(segundos,sufijo) {
+    const elemento = document.getElementById(`temporizador_${sufijo}`);
     let tiempoRestante = segundos;
 
     const intervalo = setInterval(() => {
@@ -648,9 +703,23 @@ function iniciarTemporizador(segundos) {
     }, 1000); // Cada 1 segundo
 }
 
-function funcionalidadBotonAsiento(btn_id) {
-    const container = document.getElementById("contenido_datos");
+function funcionalidadBotonAsiento(sufijo) {
+    const container = document.getElementById(`contenido_datos_${sufijo}`);
     container.classList.remove("d-none");
+}
+
+function acabarPrimerItinerario(){
+    
+    console.log("ITINERARIO_REGRESO", ITINERARIO_REGRESO);
+    if (typeof ITINERARIO_REGRESO === 'undefined') {
+        currentStep = 3;
+    } else {
+        currentStep = 2;
+        console.log("ITINERARIO_REGRESO", ITINERARIO_REGRESO);
+
+        cargarItinerario(ITINERARIO_REGRESO, 'contenedor_viajes_vuelta','vuelta');
+    }
+    updateFormVisibility();
 }
 
 
