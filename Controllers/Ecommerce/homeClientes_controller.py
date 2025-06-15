@@ -484,7 +484,31 @@ def obtener_rutas_seguimiento():
 
 # END RUTAS SEGUIMIENTO
 
-#REGION RESERVA
+#REGION TRANSACCIONES PASAJE
+@homeClientes_bp.route("/obtenerDatosPasaje", methods=["GET"])
+def obtenerDatosPasaje():
+    try:
+        numComprobante = request.args.get("numComprobante")
+        pasaje = Pasaje.obtenerDatosPasaje(numComprobante)
+        if pasaje:
+            return jsonify({
+                "Status": "success",
+                "data": pasaje,
+                "Msj": "Datos del pasaje obtenidos correctamente"
+            })
+        else:
+            return jsonify({
+                "Status": "error",
+                "data": {},
+                "Msj": "No se encontró el pasaje con el número de comprobante proporcionado"
+            })
+    except Exception as e:
+        return jsonify({
+            "Status": "error",
+            "data": {},
+            "Msj": f"Error al obtener los datos del pasaje: {repr(e)}"
+        })
+
 @homeClientes_bp.route("/listarTiposComprobante")
 def listadoTiposComprobantes():
     try:
@@ -534,4 +558,5 @@ def reservarPasaje():
             "Msj": str(e),
             "Msj2": ""
         })
+        
 #END REGION

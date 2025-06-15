@@ -56,11 +56,11 @@
       </div>
       <div class="col-md-3">
         <label class="form-label">Fecha de viaje</label>
-        <input type="date" class="form-control bgcustom" readonly />
+        <input id="fechaSalida" type="date" class="form-control bgcustom" readonly />
       </div>
       <div class="col-md-3">
         <label class="form-label">Hora de viaje</label>
-        <input type="time" class="form-control bgcustom" readonly />
+        <input id="horaSalida" type="time" class="form-control bgcustom" readonly />
       </div>
       <div class="col-md-6">
         <label class="form-label">Nombre completo</label>
@@ -332,6 +332,39 @@
     btnConvertirLibre.addEventListener('click', () => {
       mostrarContenidoOperacion('convertir-libre', btnConvertirLibre);
     });
+
+    // Evento para buscar datos al hacer clic en el botón de búsqueda
+    buscarDatos.addEventListener("click", () => {
+      let numComprobante = document.getElementById("comprobante").value.trim();
+      if (numComprobante === "") {
+        toastr.warning("El número de comprobante es obligatorio", "MENSAJE DEL SISTEMA");
+        return;
+      }
+      fetch(`ecommerce/home/obtenerDatosPasajero?comprobante=${encodeURIComponent(numComprobante)}`)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status === "success") {
+            // Actualizar los campos con los datos obtenidos
+            document.getElementById("tipoDocAnt").value = data.tipo_documento;
+            document.getElementById("numDocAnt").value = data.numero_documento;
+            document.getElementById("nombreComAnt").value = data.nombre_completo;
+            document.getElementById("origenViaje").value = data.origen;
+            document.getElementById("destinoViaje").value = data.destino;
+            document.querySelector("#fechaSalida").value = moment(data.fecha_salida).format("YYYY-MM-DD");
+            document.querySelector("#horaSalida").value = moment(data.hora_salida).format("HH:mm");
+            document.getElementById("asientoViaje").value = data.asiento;
+            document.getElementById("servicioViaje").value = data.servicio;
+
+            // Mostrar el contenido de la operación
+            contenidoOperacion.style.display = "block";
+          } else {
+            toastr.error("El número de comprobante no es válido", "ERROR");
+          }
+        })
+        .catch((error) => {
+          toastr.error("Error al obtener los datos del pasajero: " + error.message, "ERROR");
+        });
+    })
 
     // Resto del código existente para el manejo del menor
     function showMenor() {
