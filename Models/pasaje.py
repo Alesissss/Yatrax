@@ -3,7 +3,8 @@ import string
 import random
 import os
 import xml.etree.ElementTree as ET
-
+from jinja2 import Environment, FileSystemLoader
+from weasyprint import HTML
 class Pasaje:
     def __init__(self, id, id_detalle_asiento, numero_comprobante, es_pasaje_normal,
                  es_pasaje_libre, es_transferencia, es_reserva, es_cambio_ruta,
@@ -315,12 +316,39 @@ class Pasaje:
                 conexion.cerrar()
                 
     @classmethod
-    def obtener_data_pasaje_venta(cls, id_venta):
+    def obtener_numComprobante_venta(cls, id_venta):
         conexion = None
         try:
             conexion = bd.Conexion()
-            filas = conexion.obtener("SELECT * FROM pasaje WHERE id_venta = %s;", (id_venta,))
+            filas = conexion.obtener("SELECT numeroComprobante FROM pasaje WHERE id_venta = %s;", (id_venta,))
             return filas[0] if filas else None
         finally:
             if conexion:
                 conexion.cerrar()
+    
+    @classmethod         
+    def generar_pdf_desde_xml(ruta_xml):
+        tree = ET.parse(ruta_xml)
+        root = tree.getroot()
+
+        datos = {
+            'ruc': root.findtext('ruc'),
+            'cliente_nombre': root.findtext('cliente/nombre'),
+            'cliente_dni': root.findtext('cliente/dni'),
+            'ruta': root.findtext('servicio/ruta'),
+            'fecha': root.findtext('servicio/fecha'),
+            'hora': root.findtext('servicio/hora'),
+            'asiento': root.findtext('servicio/asiento'),
+            'importe': root.findtext('importe')
+        }
+
+        env = Environment(loader=FileSystemLoader('Views/Ecommerce/home'))
+        template = env.get_template('comprobante_template.html')
+        html_renderizado = template.render(datos)
+
+        nombre_archivo = os.path.splitext(os.path.basename(ruta_xml))[0] + ".pdf"
+        ruta_pdf = os.path.join('Static', 'pdf', nombre_archivo)
+        os.makedirs(os.path.dirname(ruta_pdf), exist_ok=True)
+
+        HTML(string=html_renderizado).write_pdf(ruta_pdf)
+        return ruta_pdf

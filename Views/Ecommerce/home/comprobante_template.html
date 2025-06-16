@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; }
+        h1 { text-align: center; font-size: 20px; }
+        .detalle { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>YATRAX S.A.</h1>
+    <p><strong>R.U.C.:</strong> {{ ruc }}</p>
+
+    <div class="detalle">
+        <p><strong>Cliente:</strong> {{ cliente_nombre }}</p>
+        <p><strong>DNI:</strong> {{ cliente_dni }}</p>
+        <p><strong>Ruta:</strong> {{ ruta }}</p>
+        <p><strong>Fecha de viaje:</strong> {{ fecha }}</p>
+        <p><strong>Hora de viaje:</strong> {{ hora }}</p>
+        <p><strong>Nro de Asiento:</strong> {{ asiento }}</p>
+        <p><strong>Importe:</strong> S/ {{ importe }}</p>
+    </div>
+
+    <p style="margin-top: 40px;"><strong>Condición de Pago:</strong> CONTADO</p>
+</body>
+</html>

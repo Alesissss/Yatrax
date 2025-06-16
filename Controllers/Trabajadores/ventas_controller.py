@@ -887,19 +887,36 @@ def dar_baja_cliente(id):  # Recibe el ID de la URL
 
 # END REGION PASAJES Y OPRERACIONES
 
-@ventas_bp.route("/registrar_comprobante", methods=["POST"])
-def registrar_comprobante():
-    
+@ventas_bp.route("/registrar_comprobantes_y_generar_xml", methods=["POST"])
+def registrar_comprobantes_y_generar_xml():
+    rutas_xml = []
+
     ultimaVenta = Pasaje.obtener_ultima_venta()
-    if ultimaVenta:
-        idVenta = ultimaVenta.get('numero')
+    if not ultimaVenta:
+        return []
 
-    comprobantes = Pasaje.obtener_data_pasaje_venta(idVenta)
+    idVenta = ultimaVenta.get('numero')
+    comprobantes = Pasaje.obtener_numComprobante_venta(idVenta)
+
     for comprobante in comprobantes:
-        ruta_xml = Pasaje.generar_xml_comprobante(comprobante)
-        print(f"XML generado en: {ruta_xml}")
-    
+        numero = comprobante.get('numeroComprobante')
+        if numero:
+            data = Pasaje.obtenerDatosPasaje(numero)
+            ruta_xml = Pasaje.generar_xml_comprobante(data)
+            rutas_xml.append(ruta_xml)
 
-    return "Comprobante registrado y XML generado"
+    return rutas_xml
+
+@ventas_bp.route("/generar_comprobante_pdf", methods=["POST"])
+def generar_comprobante_pdf():
+    rutas_pdf = []
+    rutas_xml = registrar_comprobantes_y_generar_xml()
+
+    for ruta_xml in rutas_xml:
+        ruta_pdf = Pasaje.generar_pdf_desde_xml(ruta_xml)
+        rutas_pdf.append(ruta_pdf)
+
+    return rutas_pdf
+
 
 # END FUNCIONES
