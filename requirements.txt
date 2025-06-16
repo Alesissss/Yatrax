@@ -4,4 +4,6 @@ requests
 Flask-Mail
 extensions
 config
+weasyprint==65.1
+
 # $ pip install -r requirements.txt
