@@ -1039,7 +1039,13 @@ def editar_marca(id):
 def eliminar_marca(id):
     try:
         mensajes = Marca.eliminar(id)
-        return jsonify(mensajes)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Error: {repr(e)}"})
 

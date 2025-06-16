@@ -13,7 +13,7 @@ class TipoUsuario:
     def obtener_todos(cls):
         conexion = bd.Conexion()
         try:
-            tipo_usuarios = conexion.obtener("SELECT * FROM tipo_usuario where")
+            tipo_usuarios = conexion.obtener("SELECT * FROM tipo_usuario")
             return tipo_usuarios
         finally:
             conexion.cerrar()

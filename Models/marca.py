@@ -48,7 +48,8 @@ class Marca:
         conexion = bd.Conexion()
         try:
             conexion.ejecutar("CALL SP_ELIMINAR_MARCA(%s)", (id,))
-            return {"Status": "success", "Msj": "Marca eliminada exitosamente"}
+            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
+            return resultado[0]
         finally:
             conexion.cerrar()
 
