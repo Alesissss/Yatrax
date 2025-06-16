@@ -123,6 +123,8 @@ def Menu_ProgramarViajeNuevo():
 
 # FUNCIONES
 
+
+
 # REGION NIVEL
 @viajes_bp.route("/GetData_Nivel", methods=["GET"])
 def get_niveles():

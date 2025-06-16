@@ -1,0 +1,92 @@
+from datetime import datetime
+import bd  # Utilizamos tu clase Conexion personalizada
+
+class Venta:
+
+    @classmethod
+    def registrar_operacion(cls, contacto: dict, pago: dict, ventas: dict):
+        conexion = bd.Conexion()
+        try:
+            # 1. Registrar CLIENTE
+            insert_cliente = """
+                INSERT INTO cliente (nombre, ape_paterno, ape_materno, numero_documento, tipoDocumento, telefono, email)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """
+            conexion.ejecutar(insert_cliente, (
+                contacto.get("nombres"),
+                contacto.get("apellido_paterno"),
+                contacto.get("apellido_materno"),
+                contacto.get("numero_documento"),
+                contacto.get("tipo_documento"),
+                contacto.get("telefono"),
+                contacto.get("email")
+            ), auto_commit=False)
+            id_cliente = conexion.cursor.lastrowid
+
+            # 2. Registrar VENTA
+            insert_venta = """
+                INSERT INTO venta (idCliente, fecha, subTotal, total, idMetodoPago, idTipoComprobante)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """
+            conexion.ejecutar(insert_venta, (
+                id_cliente,
+                datetime.now(),
+                0.0,  # Puedes calcularlo luego
+                0.0,
+                pago.get("metodo_especifico"),
+                contacto.get("tipo_comprobante")
+            ), auto_commit=False)
+            id_venta = conexion.cursor.lastrowid
+
+            # 3. Registrar PASAJEROS, PASAJE y DETALLE_PASAJE
+            for key, pasajero in ventas.items():
+
+                insert_pasajero = """
+                    INSERT INTO pasajero (nombre, ape_paterno, ape_materno, numero_documento, tipo_documento, sexo, f_nacimiento, telefono, email)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """
+                conexion.ejecutar(insert_pasajero, (
+                    pasajero.get("nombres"),
+                    pasajero.get("apellidoPaterno"),
+                    pasajero.get("apellidoMaterno"),
+                    pasajero.get("numDoc"),
+                    contacto.get("tipo_documento"),
+                    pasajero.get("sexo"),
+                    pasajero.get("fechaNacimiento"),
+                    pasajero.get("telefono"),
+                    pasajero.get("correo")
+                ), auto_commit=False)
+                id_pasajero = conexion.cursor.lastrowid
+
+                insert_pasaje = """
+                    INSERT INTO pasaje (idDetalleViajeAsiento, nombre, idVenta)
+                    VALUES (%s, %s, %s)
+                """
+                conexion.ejecutar(insert_pasaje, (
+                    pasajero.get("idDetalleViajeAsiento"),
+                    pasajero.get("nombres"),
+                    id_venta
+                ), auto_commit=False)
+                id_pasaje = conexion.cursor.lastrowid
+
+                insert_detalle = """
+                    INSERT INTO detalle_pasaje (idPasajero, idPasaje, esMenorEdad, viajaEnBrazos, fecha_registro)
+                    VALUES (%s, %s, %s, %s, %s)
+                """
+                conexion.ejecutar(insert_detalle, (
+                    id_pasajero,
+                    id_pasaje,
+                    int(pasajero.get("esMenor", False)),
+                    int(pasajero.get("brazos", False)),
+                    datetime.now()
+                ), auto_commit=False)
+
+            conexion.conn.commit()
+            return {"status": 1, "msg": "Venta registrada correctamente", "id_venta": id_venta}
+
+        except Exception as e:
+            conexion.conn.rollback()
+            return {"status": -1, "msg": f"Error al registrar venta: {str(e)}"}
+
+        finally:
+            conexion.cerrar()

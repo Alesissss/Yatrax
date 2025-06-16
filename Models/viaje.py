@@ -271,10 +271,31 @@ class Viaje:
                 FROM nivel_herramienta nh
                 JOIN nivel n ON nh.id_nivel = n.id
                 JOIN herramienta h ON nh.id_herramienta = h.id
-                LEFT JOIN asiento a ON nh.id = a.id_nivel_herramienta
-                LEFT JOIN detalle_viaje_asiento dva ON dva.idAsiento = a.id
-                where dva.idDetalle_Viaje = %s
-           """, (id_dv,))
+                INNER JOIN asiento a ON nh.id = a.id_nivel_herramienta
+                INNER JOIN detalle_viaje_asiento dva ON dva.idAsiento = a.id
+                WHERE dva.idDetalle_Viaje = %s
+
+                UNION
+
+                SELECT 
+                    NULL AS id_asiento,
+                    NULL AS estado,
+                    h.id_tipo,
+                    NULL AS nombre,
+                    nh.x_dimension,
+                    nh.y_dimension,
+                    n.nroPiso,
+                    h.icono
+                FROM nivel_herramienta nh
+                JOIN nivel n ON nh.id_nivel = n.id
+                JOIN herramienta h ON nh.id_herramienta = h.id
+                JOIN tipo_vehiculo tv ON tv.id = n.id_tipo_vehiculo
+                JOIN vehiculo v ON v.id_tipo_vehiculo = tv.id
+                JOIN viaje vi ON vi.idVehiculo = v.id
+                JOIN detalle_viaje dv ON dv.idViaje = vi.id
+                WHERE dv.id = %s AND h.id_tipo != 1;
+                
+           """, (id_dv,id_dv))
 
             return listado
         finally:
