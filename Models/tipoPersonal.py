@@ -1,13 +1,11 @@
 import bd
 
 class TipoPersonal:
-    def __init__(self, id=None, nombre=None, estado=None, estadoProceso=None, estadoRegistro=None, fechaRegistro=None, usuario=None):
+    def __init__(self, id=None, nombre=None, estado=None, fechaRegistro=None, usuario=None):
         self.id = id
         self.nombre = nombre
         self.estado = estado
         #Auditoría
-        self.estadoProceso = estadoProceso
-        self.estadoRegistro = estadoRegistro
         self.fechaRegistro = fechaRegistro
         self.usuario = usuario
 
@@ -15,7 +13,7 @@ class TipoPersonal:
     def obtener_todos(cls):
         conexion = bd.Conexion()
         try:
-            tipo_usuarios = conexion.obtener("SELECT id, nombre, estado FROM tipo_personal where estado_registro = 1")
+            tipo_usuarios = conexion.obtener("SELECT id, nombre, estado FROM tipo_personal")
             return tipo_usuarios
         finally:
             conexion.cerrar()
@@ -24,7 +22,7 @@ class TipoPersonal:
     def obtener_por_id(cls, tipoPersonal_id):
         conexion = bd.Conexion()
         try:
-            tipo_personal = conexion.obtener("SELECT id, nombre, estado FROM tipo_personal WHERE estado_registro = 1 AND id = %s", (tipoPersonal_id,))
+            tipo_personal = conexion.obtener("SELECT id, nombre, estado FROM tipo_personal WHERE id = %s", (tipoPersonal_id,))
             return tipo_personal[0] if tipo_personal else None
         finally:
             conexion.cerrar()

@@ -2,13 +2,11 @@ import bd
 import hashlib
 
 class TipoComprobante:
-    def __init__(self, idTipoComprobante = None, nombre = None, estado = None, estadoProceso = None, estadoRegistro = None, fechaRegistro = None, usuario = None):
+    def __init__(self, idTipoComprobante = None, nombre = None, estado = None, fechaRegistro = None, usuario = None):
         self.idTipoCliente = idTipoComprobante
         self.nombre = nombre
         self.estado = estado
         #Auditoría
-        self.estadoProceso = estadoProceso
-        self.estadoRegistro = estadoRegistro
         self.fechaRegistro = fechaRegistro
         self.usuario = usuario
 
@@ -16,7 +14,7 @@ class TipoComprobante:
     def obtener_todos(cls):
         try:
             conexion = bd.Conexion()
-            tipos_comprobante = conexion.obtener("Select idTipoComprobante as ID, nombre as TIPO, estado from tipo_comprobante where estado_registro = 1")
+            tipos_comprobante = conexion.obtener("Select idTipoComprobante as ID, nombre as TIPO, estado from tipo_comprobante")
             return tipos_comprobante
         finally:
             conexion.cerrar()
@@ -25,7 +23,7 @@ class TipoComprobante:
     def obtener_por_id(cls, idTipoComprobante):
         try:
             conexion = bd.Conexion()
-            tipo_comprobante = conexion.obtener("Select idTipoComprobante as ID, nombre, estado from tipo_comprobante where estado_registro = 1 and idTipoComprobante =  %s", (idTipoComprobante,))
+            tipo_comprobante = conexion.obtener("Select idTipoComprobante as ID, nombre, estado from tipo_comprobante where idTipoComprobante =  %s", (idTipoComprobante,))
             return tipo_comprobante[0] if tipo_comprobante else None
         finally:
                 conexion.cerrar()

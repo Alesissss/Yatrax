@@ -1,15 +1,13 @@
 import bd
 
 class Ruta:
-    def __init__(self, id=None, nombre=None, sucursalOrigen=None, sucursalDestino=None, estado=None, estadoProceso=None, estadoRegistro=None, fechaRegistro=None, usuario=None):
+    def __init__(self, id=None, nombre=None, sucursalOrigen=None, sucursalDestino=None, estado=None, fechaRegistro=None, usuario=None):
         self.id = id
         self.nombre = nombre
         self.sucursalOrigen = sucursalOrigen
         self.sucursalDestino = sucursalDestino
         self.estado = estado
         #Auditoría
-        self.estadoProceso = estadoProceso
-        self.estadoRegistro = estadoRegistro
         self.fechaRegistro = fechaRegistro
         self.usuario = usuario
 

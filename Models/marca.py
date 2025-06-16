@@ -10,7 +10,7 @@ class Marca:
     def obtener_todos(cls):
         conexion = bd.Conexion()
         try:
-            return conexion.obtener("SELECT id, nombre, logo , estado FROM marca WHERE estado_registro = 1")
+            return conexion.obtener("SELECT id, nombre, logo , estado FROM marca")
         finally:
             conexion.cerrar()
 
@@ -48,7 +48,8 @@ class Marca:
         conexion = bd.Conexion()
         try:
             conexion.ejecutar("CALL SP_ELIMINAR_MARCA(%s)", (id,))
-            return {"Status": "success", "Msj": "Marca eliminada exitosamente"}
+            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
+            return resultado[0]
         finally:
             conexion.cerrar()
 

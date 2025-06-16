@@ -296,8 +296,6 @@ DROP TABLE IF EXISTS tipo_documento;
         idTipoComprobante INT AUTO_INCREMENT PRIMARY KEY,
         nombre VARCHAR(50) NOT NULL,
         estado BOOLEAN NOT NULL,
-        estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
-        estado_registro INT NOT NULL DEFAULT 1,
         fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
         usuario VARCHAR(100) not null
     );
@@ -321,8 +319,6 @@ DROP TABLE IF EXISTS tipo_documento;
         id INT AUTO_INCREMENT PRIMARY KEY,
         nombre VARCHAR(50) NOT NULL,
         estado BOOLEAN NOT NULL,
-        estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
-        estado_registro INT NOT NULL DEFAULT 1,
         fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
         usuario VARCHAR(100) not null
     );
@@ -332,8 +328,6 @@ DROP TABLE IF EXISTS tipo_documento;
         nombre varchar(50) NOT NULL,
         abreviatura varchar(10) NOT NULL,
         estado BOOLEAN NOT NULL,
-        estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
-        estado_registro INT NOT NULL DEFAULT 1,
         fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
         usuario VARCHAR(100) not null
     );
@@ -343,8 +337,6 @@ DROP TABLE IF EXISTS tipo_documento;
         idTipoCliente INT AUTO_INCREMENT PRIMARY KEY,
         nombre VARCHAR(50) NOT NULL,
         estado BOOLEAN NOT NULL,
-        estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
-        estado_registro INT NOT NULL DEFAULT 1,
         fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
         usuario VARCHAR(100) not null
     );
@@ -354,8 +346,6 @@ DROP TABLE IF EXISTS tipo_documento;
         id int AUTO_INCREMENT PRIMARY key,
         nombre varchar(100) NOT NULL,
         estado BOOLEAN NOT NULL,
-        estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
-        estado_registro INT not null DEFAULT 1,
         fecha_registro DATETIME not null DEFAULT CURRENT_TIMESTAMP, 
         usuario VARCHAR(100) not null
     );
@@ -369,8 +359,6 @@ DROP TABLE IF EXISTS tipo_documento;
         imagen VARCHAR(255) NOT NULL,
         estado BOOLEAN NOT NULL,
         id_tipousuario INT NOT NULL,
-        estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
-        estado_registro INT not null DEFAULT 1,
         fecha_registro DATETIME not null DEFAULT CURRENT_TIMESTAMP, 
         usuario VARCHAR(100) not null,
         FOREIGN KEY (id_tipousuario) REFERENCES tipo_usuario(id)
@@ -387,8 +375,6 @@ DROP TABLE IF EXISTS tipo_documento;
         horario_entrada time NOT NULL,
         horario_salida time NOT NULL,
         estado char(1) NOT NULL,
-        estado_proceso varchar(100) NOT NULL DEFAULT 'REGISTRADO',
-        estado_registro int(11) NOT NULL,
         fecha_registro datetime NOT NULL DEFAULT current_timestamp()
     );
 
@@ -403,8 +389,6 @@ DROP TABLE IF EXISTS tipo_documento;
         longitud DECIMAL(9,6) NOT NULL,
         estado TINYINT NOT NULL DEFAULT 1,
         abreviatura CHAR(3) NOT NULL,
-        estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
-        estado_registro INT NOT NULL DEFAULT 1,
         fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
         usuario VARCHAR(100) NOT NULL
     );
@@ -417,8 +401,6 @@ DROP TABLE IF EXISTS tipo_documento;
         tiempo_estimado DECIMAL(9,2),
         tipo VARCHAR(100) NOT NULL,
         estado BOOLEAN NOT NULL DEFAULT 1,
-        estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
-        estado_registro INT NOT NULL DEFAULT 1,
         fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
         usuario VARCHAR(100) NOT NULL
     );
@@ -523,8 +505,6 @@ CREATE TABLE cliente (
         nombre VARCHAR(100) NOT NULL,
         logo VARCHAR(255) NOT NULL,
         estado BOOLEAN NOT NULL,
-        estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
-        estado_registro INT NOT NULL DEFAULT 1,
         fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
         usuario VARCHAR(100) NOT NULL
     );
@@ -583,8 +563,6 @@ CREATE TABLE cliente (
         estado BOOLEAN NOT NULL,
         id_tipo_metodoPago INT NOT NULL,
         qr VARCHAR(255) NULL,
-        estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
-        estado_registro INT not null DEFAULT 1,
         fecha_registro DATETIME not null DEFAULT CURRENT_TIMESTAMP, 
         usuario VARCHAR(100) not null,
         foreign key (id_tipo_metodoPago) references tipo_metodoPago(idTipoMetodoPago) -- Relación con tipo_metodoPago
@@ -598,8 +576,6 @@ CREATE TABLE cliente (
         imagen VARCHAR(255) NOT NULL,
         estado BOOLEAN NOT NULL,
         id_tipopersonal INT NOT NULL,
-        estado_proceso VARCHAR(100) NOT NULL DEFAULT 'REGISTRADO',
-        estado_registro INT NOT NULL DEFAULT 1,
         fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
         usuario VARCHAR(100) NOT NULL,
         FOREIGN KEY (id_tipopersonal) REFERENCES tipo_personal(id) -- Relación con tipo_personal
@@ -800,28 +776,28 @@ CREATE TABLE tipo_reclamo(
     INSERT INTO preguntas_frecuentes (pregunta, respuesta, estado, fecha_registro, usuario) VALUES ('¿Qué documentos debo presentar para abordar el bus?','Es obligatorio presentar el DNI físico del pasajero. En el caso de menores de edad, también se debe presentar una carta notarial de autorización de viaje y el DNI o partida original.','1','2025-06-07 11:34:18','ander@gmail.com');
     INSERT INTO preguntas_frecuentes (pregunta, respuesta, estado, fecha_registro, usuario) VALUES ('¿Qué es un pasaje libre y cómo funciona?','Es un pasaje que puede ser activado en otra fecha dentro de los 90 días posteriores a la compra, sujeto a disponibilidad. Puedes convertir tu pasaje normal a pasaje libre hasta 6 horas antes del viaje pagando S/ 5.00.','1','2025-06-07 11:34:18','ander@gmail.com');
 
-    INSERT INTO sucursal (`cod_sucursal`, `ciudad`, `nombre`, `direccion`, `latitud`, `longitud`, `estado`, `abreviatura`, `estado_proceso`, `estado_registro`, `fecha_registro`, `usuario`) 
-    VALUES ('CIX-01', 'Chiclayo', 'BALTA', 'Emtrafesa, 110, Avenida José Balta, Urbanizacion Santa Victoria, Chiclayo, Lambayeque, 14001, Perú', '-6.776610', '-79.838656', '1', 'CIX', 'REGISTRADO', '1', '2025-06-02 11:34:18', 'edgar@gmail.com'),
-    ('CIX-02', 'Chiclayo', 'CHAVEZ', 'Calle Francisco de Orellana, Chiclayo, Lambayeque, 14001, Perú', '-6.764886', '-79.830315', '1', 'CIX', 'REGISTRADO', '1', '2025-06-02 11:37:36', 'edgar@gmail.com'),
-    ('CIX-03', 'Chiclayo', 'CATOLICA', 'Universidad Católica Santo Toribio de Mogrovejo, Panamericana Norte, Ciudad El Chofer, Chiclayo, Lambayeque, 14013, Perú', '-6.759932', '-79.862134', '1', 'CIX', 'REGISTRADO', '1', '2025-06-02 11:39:17', 'edgar@gmail.com'),
-    ('IMA-01', 'Lima', 'PLAZA NORTE', 'Plaza Norte, 1400, Avenida Tomás Valle, Urbanización Mesa Redonda, Independencia, Lima, Lima Metropolitana, Lima, 15028, Perú', '-12.006144', '-77.058837', '1', 'IMA', 'REGISTRADO', '1', '2025-06-02 11:39:59', 'edgar@gmail.com'),
-    ('IMA-02', 'Lima', 'PLAZA SAN MIGUEL', 'Plaza San Miguel, 2000, Avenida La Marina, Virgen de Fatima, San Miguel, Lima, Lima Metropolitana, Lima, 15088, Perú', '-12.076740', '-77.082720', '1', 'IMA', 'REGISTRADO', '1', '2025-06-02 11:40:35', 'edgar@gmail.com'),
-    ('CJA-01', 'Cajamarca', 'CUMBE', 'El Cumbe, Avenida San Martín de Porres, Urbanización Ramon Castilla, Mollepampa, Cajamarca, 06002, Perú', '-7.164035', '-78.510006', '1', 'CJA', 'REGISTRADO', '1', '2025-06-02 11:42:04', 'edgar@gmail.com'),
-    ('HUA-01', 'Huamanga', 'SAN JUAN BAUTISTA', 'Terminal San Juan Bautista, Avenida Venezuela, Asociación La Victoria, San Juan Bautista, Huamanga, Ayacucho, 05002, Perú', '-13.170961', '-74.214658', '1', 'HUA', 'REGISTRADO', '1', '2025-06-02 11:43:48', 'edgar@gmail.com'),
-    ('AQP-01', 'Arequipa', 'FLORES HERMANOS', 'Avenida Pedro P. Diaz, Urbanización Campiña, Arequipa, 04002, Perú', '-16.422245', '-71.543607', '1', 'AQP', 'REGISTRADO', '1', '2025-06-02 11:45:18', 'edgar@gmail.com'),
-    ('PUN-01', 'Puno', 'EL SOL', 'Avenida El Sol, Laykakota, Puno, 05151, Perú', '-15.849338', '-70.018838', '1', 'PUN', 'REGISTRADO', '1', '2025-06-02 11:46:46', 'edgar@gmail.com'),
-    ('COR-01', 'Coronel Portillo', 'GUSBET', 'Gran Hotel Gusbet, Tupac Amaru, Area Metropolitana de Pucallpa, Las Palmeras, Yarinacocha, Coronel Portillo, Ucayali, 25004, Perú', '-8.360615', '-74.579561', '1', 'COR', 'REGISTRADO', '1', '2025-06-02 11:50:16', 'edgar@gmail.com'),
-    ('HUU-01', 'Huánuco', 'PLAZA REY', 'Rey Tours, 1215, Jirón 28 de Julio, Huánuco, 10003, Perú', '-9.927278', '-76.237774', '1', 'HUU', 'REGISTRADO', '1', '2025-06-02 11:51:14', 'edgar@gmail.com');
+    INSERT INTO sucursal (`cod_sucursal`, `ciudad`, `nombre`, `direccion`, `latitud`, `longitud`, `estado`, `abreviatura`, `fecha_registro`, `usuario`) 
+    VALUES ('CIX-01', 'Chiclayo', 'BALTA', 'Emtrafesa, 110, Avenida José Balta, Urbanizacion Santa Victoria, Chiclayo, Lambayeque, 14001, Perú', '-6.776610', '-79.838656', '1', 'CIX', '2025-06-02 11:34:18', 'edgar@gmail.com'),
+    ('CIX-02', 'Chiclayo', 'CHAVEZ', 'Calle Francisco de Orellana, Chiclayo, Lambayeque, 14001, Perú', '-6.764886', '-79.830315', '1', 'CIX', '2025-06-02 11:37:36', 'edgar@gmail.com'),
+    ('CIX-03', 'Chiclayo', 'CATOLICA', 'Universidad Católica Santo Toribio de Mogrovejo, Panamericana Norte, Ciudad El Chofer, Chiclayo, Lambayeque, 14013, Perú', '-6.759932', '-79.862134', '1', 'CIX', '2025-06-02 11:39:17', 'edgar@gmail.com'),
+    ('IMA-01', 'Lima', 'PLAZA NORTE', 'Plaza Norte, 1400, Avenida Tomás Valle, Urbanización Mesa Redonda, Independencia, Lima, Lima Metropolitana, Lima, 15028, Perú', '-12.006144', '-77.058837', '1', 'IMA', '2025-06-02 11:39:59', 'edgar@gmail.com'),
+    ('IMA-02', 'Lima', 'PLAZA SAN MIGUEL', 'Plaza San Miguel, 2000, Avenida La Marina, Virgen de Fatima, San Miguel, Lima, Lima Metropolitana, Lima, 15088, Perú', '-12.076740', '-77.082720', '1', 'IMA', '2025-06-02 11:40:35', 'edgar@gmail.com'),
+    ('CJA-01', 'Cajamarca', 'CUMBE', 'El Cumbe, Avenida San Martín de Porres, Urbanización Ramon Castilla, Mollepampa, Cajamarca, 06002, Perú', '-7.164035', '-78.510006', '1', 'CJA', '2025-06-02 11:42:04', 'edgar@gmail.com'),
+    ('HUA-01', 'Huamanga', 'SAN JUAN BAUTISTA', 'Terminal San Juan Bautista, Avenida Venezuela, Asociación La Victoria, San Juan Bautista, Huamanga, Ayacucho, 05002, Perú', '-13.170961', '-74.214658', '1', 'HUA', '2025-06-02 11:43:48', 'edgar@gmail.com'),
+    ('AQP-01', 'Arequipa', 'FLORES HERMANOS', 'Avenida Pedro P. Diaz, Urbanización Campiña, Arequipa, 04002, Perú', '-16.422245', '-71.543607', '1', 'AQP', '2025-06-02 11:45:18', 'edgar@gmail.com'),
+    ('PUN-01', 'Puno', 'EL SOL', 'Avenida El Sol, Laykakota, Puno, 05151, Perú', '-15.849338', '-70.018838', '1', 'PUN', '2025-06-02 11:46:46', 'edgar@gmail.com'),
+    ('COR-01', 'Coronel Portillo', 'GUSBET', 'Gran Hotel Gusbet, Tupac Amaru, Area Metropolitana de Pucallpa, Las Palmeras, Yarinacocha, Coronel Portillo, Ucayali, 25004, Perú', '-8.360615', '-74.579561', '1', 'COR','2025-06-02 11:50:16', 'edgar@gmail.com'),
+    ('HUU-01', 'Huánuco', 'PLAZA REY', 'Rey Tours, 1215, Jirón 28 de Julio, Huánuco, 10003, Perú', '-9.927278', '-76.237774', '1', 'HUU', '2025-06-02 11:51:14', 'edgar@gmail.com');
 
-    INSERT INTO ruta (`id`,`nombre`, `distancia_estimada`, `tiempo_estimado`, `tipo`, `estado`, `estado_proceso`, `estado_registro`, `fecha_registro`, `usuario`) 
-    VALUES (1,'COSTA COMPLETA IDA', '1766.48', '1477.55', 'ESCALA', '1', 'MODIFICADO', '1', '2025-06-02 12:02:38', 'edgar@gmail.com'),
-    (2,'COSTA COMPLETA VUELTA', '1767.03', '1506.97', 'ESCALA', '1', 'MODIFICADO', '1', '2025-06-02 12:04:19', 'edgar@gmail.com'),
-    (3,'SIERRA COMPLETA IDA', '2595.83', '2366.86', 'ESCALA', '1', 'MODIFICADO', '1', '2025-06-02 12:05:35', 'edgar@gmail.com'),
-    (4,'SIERRA COMPLETA VUELTA', '2595.10', '2371.92', 'ESCALA', '1', 'MODIFICADO', '1', '2025-06-02 12:06:08', 'edgar@gmail.com'),
-    (5,'COSTA NORTE IDA', '763.92', '685.04', 'DIRECTO', '1', 'REGISTRADO', '1', '2025-06-02 12:08:42', 'edgar@gmail.com'),
-    (6,'COSTA NORTE VUELTA', '765.10', '713.35', 'DIRECTO', '1', 'REGISTRADO', '1', '2025-06-02 12:08:56', 'edgar@gmail.com'),
-    (7,'COSTA SUR IDA', '1002.56', '792.50', 'DIRECTO', '1', 'REGISTRADO', '1', '2025-06-02 12:09:18', 'edgar@gmail.com'),
-    (8,'COSTA SUR VUELTA', '1001.93', '793.63', 'DIRECTO', '1', 'REGISTRADO', '1', '2025-06-02 12:09:40', 'edgar@gmail.com');
+    INSERT INTO ruta (`id`,`nombre`, `distancia_estimada`, `tiempo_estimado`, `tipo`, `estado`, `fecha_registro`, `usuario`) 
+    VALUES (1,'COSTA COMPLETA IDA', '1766.48', '1477.55', 'ESCALA', '1', '2025-06-02 12:02:38', 'edgar@gmail.com'),
+    (2,'COSTA COMPLETA VUELTA', '1767.03', '1506.97', 'ESCALA', '1', '2025-06-02 12:04:19', 'edgar@gmail.com'),
+    (3,'SIERRA COMPLETA IDA', '2595.83', '2366.86', 'ESCALA', '1', '2025-06-02 12:05:35', 'edgar@gmail.com'),
+    (4,'SIERRA COMPLETA VUELTA', '2595.10', '2371.92', 'ESCALA', '1', '2025-06-02 12:06:08', 'edgar@gmail.com'),
+    (5,'COSTA NORTE IDA', '763.92', '685.04', 'DIRECTO', '1', '2025-06-02 12:08:42', 'edgar@gmail.com'),
+    (6,'COSTA NORTE VUELTA', '765.10', '713.35', 'DIRECTO', '1', '2025-06-02 12:08:56', 'edgar@gmail.com'),
+    (7,'COSTA SUR IDA', '1002.56', '792.50', 'DIRECTO', '1', '2025-06-02 12:09:18', 'edgar@gmail.com'),
+    (8,'COSTA SUR VUELTA', '1001.93', '793.63', 'DIRECTO', '1', '2025-06-02 12:09:40', 'edgar@gmail.com');
 
     INSERT INTO `escala` (`nro_orden`, `idSucursal`, `idRuta`, `distancia_estimada`, `tiempo_estimado`, `fecha_registro`, `usuario`) 
     VALUES ('1', '2', '1', '0.00', '0.00', '2025-06-10 19:28:47', 'edgar@gmail.com'),
@@ -888,11 +864,11 @@ CREATE TABLE tipo_reclamo(
 
     -- INSERT MARCA
 
-    INSERT INTO `marca` (`id`,`nombre`, `logo`, `estado`, `estado_proceso`, `estado_registro`, `fecha_registro`, `usuario`) 
-    VALUES (1,'Mercedes-Benz', '/Static/img/marca/MercedesBenz.png', '1', 'REGISTRADO', '1', '2025-05-26 11:40:29', 'edgar@gmail.com'), 
-    (2,'Dodge', '/Static/img/marca/Dodge.png', '1', 'REGISTRADO', '1', '2025-05-26 11:40:50', 'edgar@gmail.com'), 
-    (3,'Volkswagen','/Static/img/marca/Volkswagen.png', '1', 'REGISTRADO', '1', '2025-05-26 11:41:09', 'edgar@gmail.com'), 
-    (4,'Hyundai','/Static/img/marca/Hyundai.png', '1', 'REGISTRADO', '1', '2025-05-26 11:41:28', 'edgar@gmail.com');
+    INSERT INTO `marca` (`id`,`nombre`, `logo`, `estado`, `fecha_registro`, `usuario`) 
+    VALUES (1,'Mercedes-Benz', '/Static/img/marca/MercedesBenz.png', '1', '2025-05-26 11:40:29', 'edgar@gmail.com'), 
+    (2,'Dodge', '/Static/img/marca/Dodge.png', '1', '2025-05-26 11:40:50', 'edgar@gmail.com'), 
+    (3,'Volkswagen','/Static/img/marca/Volkswagen.png', '1', '2025-05-26 11:41:09', 'edgar@gmail.com'), 
+    (4,'Hyundai','/Static/img/marca/Hyundai.png', '1', '2025-05-26 11:41:28', 'edgar@gmail.com');
 
     -- INSERT TIPO_VEHICULO
     INSERT INTO `tipo_vehiculo` (`id`, `nombre`, `id_marca`, `id_servicio`, `estado`, `fecha_registro`, `usuario`) 
@@ -1210,13 +1186,13 @@ CREATE TABLE tipo_reclamo(
     INSERT INTO ciudad (nombre, abreviatura) VALUES ('Tumbes','TBP');
 
     -- Tabla Tipo Usuario
-    INSERT INTO tipo_usuario (id,nombre, estado, estado_proceso,estado_registro,fecha_registro, usuario) VALUES (1,'ADMINISTRADOR', 1, 'REGISTRADO',1,'2025-03-06 20:02:56','SYSTEM');
+    INSERT INTO tipo_usuario (id,nombre, estado, fecha_registro, usuario) VALUES (1,'ADMINISTRADOR', 1, '2025-03-06 20:02:56','SYSTEM');
 
     -- Tabla Usuario
-    INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (1,'Alexis','alexis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/alexis.jpeg', 1, 1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
-    INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (2,'Edgar','edgar@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/edgar.png', 1, 1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
-    INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (3,'Ander','ander@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/ander.jpg', 1, 1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
-    INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,estado_proceso,estado_registro,fecha_registro,usuario) VALUES (4,'Luis','luis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/luis.jpg', 1, 1,'MODIFICADO',1,'2025-03-06 20:06:14','SYSTEM');
+    INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,fecha_registro,usuario) VALUES (1,'Alexis','alexis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/alexis.jpeg', 1, 1,'2025-03-06 20:06:14','SYSTEM');
+    INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,fecha_registro,usuario) VALUES (2,'Edgar','edgar@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/edgar.png', 1, 1,'2025-03-06 20:06:14','SYSTEM');
+    INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,fecha_registro,usuario) VALUES (3,'Ander','ander@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/ander.jpg', 1, 1,'2025-03-06 20:06:14','SYSTEM');
+    INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,fecha_registro,usuario) VALUES (4,'Luis','luis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/luis.jpg', 1, 1,'2025-03-06 20:06:14','SYSTEM');
 
 insert into vehiculo (placa, anio, color, estado, id_tipo_vehiculo, usuario) values ( 'YTS-333', 2024, 'Rojo', 1, 3, 'ander@gmail.com');
 insert into vehiculo (placa, anio, color, estado, id_tipo_vehiculo, usuario) values ( 'B4N-D3R', 2023, 'Rojo', 1, 2, 'ander@gmail.com');
@@ -1544,7 +1520,7 @@ INSERT INTO cliente (
     VALUES ('Efectivo', 1, 'alexis@gmail.com');
 
     INSERT INTO `metodo_pago` 
-        (`nombre`, `logo`, `estado`, `id_tipo_metodoPago`, `qr`, `estado_proceso`, `estado_registro`, `usuario`)
+        (`nombre`, `logo`, `estado`, `id_tipo_metodoPago`, `qr`, `usuario`)
     VALUES
         (
         'Efectivo',
@@ -1552,8 +1528,6 @@ INSERT INTO cliente (
         1,
         1,
         '/static/img/efectivo.png',
-        'REGISTRADO',
-        1,
         'alexis@gmail.com'
         );
 
@@ -1976,7 +1950,7 @@ INSERT INTO cliente (
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cEmail FROM usuarios WHERE EMAIL = P_EMAIL AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cEmail FROM usuarios WHERE EMAIL = P_EMAIL;
 
         IF cEmail > 0 THEN
             SET @MSJ2 = 'El correo que intenta registrar ya está registrado';
@@ -2010,8 +1984,8 @@ INSERT INTO cliente (
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cUsuario FROM usuarios WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
-        SELECT COUNT(*) INTO cEmail FROM usuarios WHERE EMAIL = P_EMAIL AND ID != P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cUsuario FROM usuarios WHERE ID = P_ID;
+        SELECT COUNT(*) INTO cEmail FROM usuarios WHERE EMAIL = P_EMAIL AND ID != P_ID;
 
         IF cUsuario <= 0 THEN
             SET @MSJ2 = 'El usuario que intenta editar no existe';
@@ -2023,9 +1997,8 @@ INSERT INTO cliente (
                 EMAIL = P_EMAIL,
                 IMAGEN = P_IMAGEN,
                 ESTADO = P_ESTADO,
-                ID_TIPOUSUARIO = P_IDTIPOUSUARIO, 
-                estado_proceso = 'MODIFICADO' 
-            WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+                ID_TIPOUSUARIO = P_IDTIPOUSUARIO
+            WHERE ID = P_ID;
 
             SET @MSJ = 'Se modificó correctamente al usuario';
         END IF;
@@ -2048,11 +2021,9 @@ INSERT INTO cliente (
             SET MSJ = 'Error inesperado al ejecutar el procedimiento almacenado';
         END;
 
-        -- Verificar si existe el correo con ESTADO_REGISTRO = 1 y ESTADO = 1
         SELECT COUNT(*) INTO cEmail 
         FROM usuarios 
         WHERE EMAIL = P_EMAIL 
-        AND ESTADO_REGISTRO = 1 
         AND ESTADO = 1;
 
         IF cEmail = 0 THEN
@@ -2062,7 +2033,6 @@ INSERT INTO cliente (
             UPDATE usuarios 
             SET PASSWORD = P_PASSWORD
             WHERE EMAIL = P_EMAIL 
-            AND ESTADO_REGISTRO = 1 
             AND ESTADO = 1;
 
             SET MSJ = 'Contraseña modificada correctamente';
@@ -2086,12 +2056,12 @@ INSERT INTO cliente (
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cUsuario FROM usuarios WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cUsuario FROM usuarios WHERE ID = P_ID;
 
         IF cUsuario <= 0 THEN
             SET @MSJ2 = 'El usuario que intenta dar de baja no existe';
         ELSE
-            UPDATE usuarios SET ESTADO = 0, ESTADO_PROCESO = 'MODIFICADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+            UPDATE usuarios SET ESTADO = 0 WHERE ID = P_ID;
 
             SET @MSJ = 'Se dio de baja correctamente al usuario';
         END IF;
@@ -2113,14 +2083,13 @@ INSERT INTO cliente (
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cUsuario FROM usuarios WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cUsuario FROM usuarios WHERE ID = P_ID;
 
         IF cUsuario <= 0 THEN
             SET @MSJ2 = 'El usuario que intenta eliminar no existe';
         ELSE
-            UPDATE usuarios SET ESTADO_REGISTRO = 2, ESTADO_PROCESO = 'ELIMINADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
-
-        SET @MSJ = 'Se eliminó correctamente al usuario';
+            DELETE FROM usuarios WHERE ID = P_ID;
+            SET @MSJ = 'Se eliminó correctamente al usuario';
     END IF;
 END $$
 DELIMITER ;
@@ -2421,9 +2390,9 @@ DELIMITER ;
 
         SELECT COUNT(*) INTO cSucursal
         FROM sucursal 
-        WHERE nombre = P_NOMBRE AND estado_registro = 1 AND abreviatura = P_ABREVIATURA;
+        WHERE nombre = P_NOMBRE AND abreviatura = P_ABREVIATURA;
 
-        SELECT COALESCE(MAX(CAST(SUBSTRING_INDEX(cod_sucursal, '-', -1) AS UNSIGNED)), 0) + 1 INTO cCorrelativo FROM sucursal WHERE abreviatura = P_ABREVIATURA AND estado_registro = 1;
+        SELECT COALESCE(MAX(CAST(SUBSTRING_INDEX(cod_sucursal, '-', -1) AS UNSIGNED)), 0) + 1 INTO cCorrelativo FROM sucursal WHERE abreviatura = P_ABREVIATURA;
 
         SET cAUX = CONCAT(P_ABREVIATURA, '-', LPAD(cCorrelativo, 2, '0'));
 
@@ -2468,11 +2437,11 @@ DELIMITER ;
 
         SELECT COUNT(*) INTO cSucursal 
         FROM sucursal 
-        WHERE id = P_ID AND estado_registro = 1;
+        WHERE id = P_ID;
 
         SELECT COUNT(*) INTO cNombre 
         FROM sucursal 
-        WHERE nombre = P_NOMBRE AND id != P_ID AND estado_registro = 1;
+        WHERE nombre = P_NOMBRE AND id != P_ID;
 
         SELECT CASE WHEN abreviatura != P_ABREVIATURA THEN TRUE ELSE FALSE END INTO abreviatura_cambiada
         FROM sucursal WHERE id = P_ID LIMIT 1;
@@ -2481,7 +2450,7 @@ DELIMITER ;
             SELECT COALESCE(MAX(CAST(SUBSTRING_INDEX(cod_sucursal, '-', -1) AS UNSIGNED)), 0) + 1
             INTO cCorrelativo
             FROM sucursal 
-            WHERE abreviatura = P_ABREVIATURA AND estado_registro = 1 AND id != P_ID;
+            WHERE abreviatura = P_ABREVIATURA AND id != P_ID;
 
             SET cAUX = CONCAT(P_ABREVIATURA, '-', LPAD(cCorrelativo, 2, '0'));
         ELSE
@@ -2502,9 +2471,8 @@ DELIMITER ;
                 longitud = P_LONGITUD,
                 estado = P_ESTADO,
                 abreviatura = P_ABREVIATURA,
-                usuario = P_USUARIO,
-                estado_proceso = 'MODIFICADO'
-            WHERE id = P_ID AND estado_registro = 1;
+                usuario = P_USUARIO
+            WHERE id = P_ID;
 
             SET @MSJ = 'Se modificó correctamente la sucursal';
         END IF;
@@ -2528,15 +2496,14 @@ DELIMITER ;
 
         SELECT COUNT(*) INTO cSucursal 
         FROM sucursal 
-        WHERE id = P_ID AND estado_registro = 1;
+        WHERE id = P_ID;
 
         IF cSucursal <= 0 THEN
             SET @MSJ2 = 'La sucursal que intenta dar de baja no existe';
         ELSE
             UPDATE sucursal 
-            SET estado = 0, usuario = P_USUARIO,
-                estado_proceso = 'MODIFICADO'
-            WHERE id = P_ID AND estado_registro = 1;
+            SET estado = 0, usuario = P_USUARIO
+            WHERE id = P_ID;
 
             SET @MSJ = 'Se dio de baja correctamente la sucursal';
         END IF;
@@ -2565,10 +2532,7 @@ DELIMITER ;
         IF cSucursal <= 0 THEN
             SET @MSJ2 = 'La sucursal que intenta eliminar no existe';
         ELSE
-            UPDATE sucursal 
-            SET ESTADO_REGISTRO = 2, ESTADO_PROCESO = 'ELIMINADO', usuario = P_USUARIO
-            WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
-
+            DELETE FROM sucursal WHERE ID = P_ID;
             SET @MSJ = 'Se eliminó correctamente la sucursal';
         END IF;
     END $$
@@ -2720,7 +2684,7 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cNombre FROM tipo_usuario WHERE nombre = P_NOMBRE AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cNombre FROM tipo_usuario WHERE nombre = P_NOMBRE;
 
         IF cNombre > 0 THEN
             SET @MSJ2 = 'El tipo de usuario que intenta registrar ya está registrado';
@@ -2751,8 +2715,8 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cTipoUsuario FROM tipo_usuario WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
-        SELECT COUNT(*) INTO cNombre FROM tipo_usuario WHERE NOMBRE = P_NOMBRE AND ID != P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cTipoUsuario FROM tipo_usuario WHERE ID = P_ID;
+        SELECT COUNT(*) INTO cNombre FROM tipo_usuario WHERE NOMBRE = P_NOMBRE AND ID != P_ID;
 
         IF cTipoUsuario <= 0 THEN
             SET @MSJ2 = 'El tipo de usuario que intenta editar no existe';
@@ -2761,9 +2725,8 @@ DELIMITER ;
         ELSE
             UPDATE tipo_usuario 
             SET NOMBRE = P_NOMBRE, 
-                ESTADO = P_ESTADO, 
-                estado_proceso = 'MODIFICADO' 
-            WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+                ESTADO = P_ESTADO
+            WHERE ID = P_ID;
 
             SET @MSJ = 'Se modificó correctamente al tipo de usuario';
         END IF;
@@ -2785,13 +2748,12 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cTipoUsuario FROM tipo_usuario WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cTipoUsuario FROM tipo_usuario WHERE ID = P_ID;
 
         IF cTipoUsuario <= 0 THEN
             SET @MSJ2 = 'El tipo de usuario que intenta dar de baja no existe';
         ELSE
-            UPDATE tipo_usuario SET ESTADO = 0, ESTADO_PROCESO = 'MODIFICADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
-
+            UPDATE tipo_usuario SET ESTADO = 0 WHERE ID = P_ID;
             SET @MSJ = 'Se dio de baja correctamente al tipo de usuario';
         END IF;
     END $$
@@ -2812,14 +2774,12 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cTipoUsuario FROM tipo_usuario WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cTipoUsuario FROM tipo_usuario WHERE ID = P_ID;
 
         IF cTipoUsuario <= 0 THEN
             SET @MSJ2 = 'El tipo de usuario que intenta eliminar no existe';
         ELSE
-            UPDATE tipo_usuario SET ESTADO_REGISTRO = 2, ESTADO_PROCESO = 'ELIMINADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
-
-            SET @MSJ = 'Se eliminó correctamente al tipo de usuario';
+            DELETE FROM tipo_usuario WHERE ID = P_ID;
         END IF;
     END $$
     DELIMITER ;
@@ -2841,7 +2801,7 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cNombre FROM tipo_personal WHERE NOMBRE = P_NOMBRE AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cNombre FROM tipo_personal WHERE NOMBRE = P_NOMBRE;
 
         IF cNombre > 0 THEN
             SET @MSJ2 = 'El tipo de personal que intenta registrar ya está registrado';
@@ -2872,8 +2832,8 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cTipoPersonal FROM tipo_personal WHERE id = P_ID AND ESTADO_REGISTRO = 1;
-        SELECT COUNT(*) INTO cNombre FROM tipo_personal WHERE NOMBRE = P_NOMBRE AND id != P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cTipoPersonal FROM tipo_personal WHERE id = P_ID;
+        SELECT COUNT(*) INTO cNombre FROM tipo_personal WHERE NOMBRE = P_NOMBRE AND id != P_ID;
 
         IF cTipoPersonal <= 0 THEN
             SET @MSJ2 = 'El tipo de personal que intenta editar no existe';
@@ -2882,9 +2842,8 @@ DELIMITER ;
         ELSE
             UPDATE tipo_personal 
             SET NOMBRE = P_NOMBRE, 
-                ESTADO = P_ESTADO, 
-                ESTADO_PROCESO = 'MODIFICADO' 
-            WHERE id = P_ID AND ESTADO_REGISTRO = 1;
+                ESTADO = P_ESTADO
+            WHERE id = P_ID;
 
             SET @MSJ = 'Se modificó correctamente al tipo de personal';
         END IF;
@@ -2906,13 +2865,12 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cTipoPersonal FROM tipo_personal WHERE id = P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cTipoPersonal FROM tipo_personal WHERE id = P_ID;
 
         IF cTipoPersonal <= 0 THEN
             SET @MSJ2 = 'El tipo de personal que intenta dar de baja no existe';
         ELSE
-            UPDATE tipo_personal SET ESTADO = 0, ESTADO_PROCESO = 'MODIFICADO' WHERE id = P_ID AND ESTADO_REGISTRO = 1;
-
+            UPDATE tipo_personal SET ESTADO = 0 WHERE id = P_ID;
             SET @MSJ = 'Se dio de baja correctamente al tipo de personal';
         END IF;
     END $$
@@ -2933,13 +2891,12 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cTipoPersonal FROM tipo_personal WHERE id = P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cTipoPersonal FROM tipo_personal WHERE id = P_ID;
 
         IF cTipoPersonal <= 0 THEN
             SET @MSJ2 = 'El tipo de personal que intenta eliminar no existe';
         ELSE
-            UPDATE tipo_personal SET ESTADO_REGISTRO = 2, ESTADO_PROCESO = 'ELIMINADO' WHERE id = P_ID AND ESTADO_REGISTRO = 1;
-
+            DELETE FROM tipo_personal WHERE id = P_ID;
             SET @MSJ = 'Se eliminó correctamente al tipo de personal';
         END IF;
     END $$
@@ -3781,8 +3738,8 @@ DELIMITER ;
         IF P_HORARIO_ENTRADA >= P_HORARIO_SALIDA THEN
             SET @MSJ2 = 'El horario de entrada es mayor que el de salida';
         ELSE
-            INSERT INTO horario (horario_entrada, horario_salida, estado, estado_registro) 
-            VALUES (P_HORARIO_ENTRADA, P_HORARIO_SALIDA, P_ESTADO, 1);
+            INSERT INTO horario (horario_entrada, horario_salida, estado) 
+            VALUES (P_HORARIO_ENTRADA, P_HORARIO_SALIDA, P_ESTADO);
             SET @MSJ = 'Se registró correctamente el horario';
         END IF;
     END$$
@@ -3807,7 +3764,7 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cHorarios FROM horario WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cHorarios FROM horario WHERE ID = P_ID;
 
         IF cHorarios <= 0 THEN
             SET @MSJ2 = 'El horario que intenta editar no existe';
@@ -3817,9 +3774,8 @@ DELIMITER ;
             UPDATE horario
             SET horario_entrada = P_HORARIO_ENTRADA, 
                 horario_salida = P_HORARIO_SALIDA,
-                estado = P_ESTADO,
-                estado_proceso = 'MODIFICADO' 
-            WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+                estado = P_ESTADO
+            WHERE ID = P_ID;
 
             SET @MSJ = 'Se modificó correctamente al horario';
         END IF;
@@ -3841,12 +3797,12 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cHorarios FROM horario WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cHorarios FROM horario WHERE ID = P_ID;
 
         IF cHorarios <= 0 THEN
             SET @MSJ2 = 'El horario que intenta dar de baja no existe';
         ELSE
-            UPDATE horario SET ESTADO = 'I' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+            UPDATE horario SET ESTADO = 'I' WHERE ID = P_ID;
 
             SET @MSJ = 'Se dio de baja correctamente el horario';
         END IF;
@@ -4027,8 +3983,8 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cNombre FROM tipo_documento WHERE NOMBRE = P_NOMBRE AND ESTADO_REGISTRO = 1;
-        SELECT COUNT(*) INTO cAbreviatura FROM tipo_documento WHERE ABREVIATURA = P_ABREVIATURA AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cNombre FROM tipo_documento WHERE NOMBRE = P_NOMBRE;
+        SELECT COUNT(*) INTO cAbreviatura FROM tipo_documento WHERE ABREVIATURA = P_ABREVIATURA ;
 
         IF cNombre > 0 THEN
             SET @MSJ2 = 'El tipo de documento que intenta registrar ya está registrado';
@@ -4063,9 +4019,9 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cExiste FROM tipo_documento WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
-        SELECT COUNT(*) INTO cNombre FROM tipo_documento WHERE NOMBRE = P_NOMBRE AND ID != P_ID AND ESTADO_REGISTRO = 1;
-        SELECT COUNT(*) INTO cAbreviatura FROM tipo_documento WHERE ABREVIATURA = P_ABREVIATURA AND ID != P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cExiste FROM tipo_documento WHERE ID = P_ID;
+        SELECT COUNT(*) INTO cNombre FROM tipo_documento WHERE NOMBRE = P_NOMBRE AND ID != P_ID;
+        SELECT COUNT(*) INTO cAbreviatura FROM tipo_documento WHERE ABREVIATURA = P_ABREVIATURA AND ID != P_ID;
 
         IF cExiste = 0 THEN
             SET @MSJ2 = 'El tipo de documento que intenta actualizar no existe';
@@ -4077,9 +4033,8 @@ DELIMITER ;
             UPDATE tipo_documento 
             SET NOMBRE = P_NOMBRE, 
                 ABREVIATURA = P_ABREVIATURA, 
-                ESTADO = P_ESTADO, 
-                ESTADO_PROCESO = 'MODIFICADO' 
-            WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+                ESTADO = P_ESTADO
+            WHERE ID = P_ID;
 
             SET @MSJ = 'Se actualizó correctamente el tipo de documento';
         END IF;
@@ -4101,12 +4056,12 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cTipoDocumento FROM tipo_documento WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cTipoDocumento FROM tipo_documento WHERE ID = P_ID;
 
         IF cTipoDocumento <= 0 THEN
             SET @MSJ2 = 'El tipo de documento que intenta eliminar no existe';
         ELSE
-            UPDATE tipo_documento SET ESTADO_REGISTRO = 2, ESTADO_PROCESO = 'ELIMINADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+            DELETE FROM tipo_documento WHERE ID = P_ID;
             SET @MSJ = 'Se eliminó correctamente el tipo de documento';
         END IF;
     END $$
@@ -4127,12 +4082,12 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cTipoDocumento FROM tipo_documento WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cTipoDocumento FROM tipo_documento WHERE ID = P_ID;
 
         IF cTipoDocumento = 0 THEN
             SET @MSJ2 = 'El tipo de documento que intenta dar de baja no existe';
         ELSE
-            UPDATE tipo_documento SET ESTADO = 0, ESTADO_PROCESO = 'MODIFICADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+            UPDATE tipo_documento SET ESTADO = 0 WHERE ID = P_ID;
             SET @MSJ = 'Se dio de baja correctamente el tipo de documento';
         END IF;
     END $$
@@ -4157,7 +4112,7 @@ DELIMITER ;
 
         SELECT COUNT(*) INTO cExiste 
         FROM tipo_cliente 
-        WHERE nombre = P_NOMBRE AND ESTADO_REGISTRO = 1;
+        WHERE nombre = P_NOMBRE;
 
         IF cExiste > 0 THEN
             SET @MSJ2 = 'Ya existe un tipo de cliente con ese nombre';
@@ -4189,8 +4144,8 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cExiste FROM tipo_cliente WHERE idTipoCliente = P_ID AND ESTADO_REGISTRO = 1;
-        SELECT COUNT(*) INTO cNombre FROM tipo_cliente WHERE NOMBRE = P_NOMBRE AND idTipoCliente != P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cExiste FROM tipo_cliente WHERE idTipoCliente = P_ID;
+        SELECT COUNT(*) INTO cNombre FROM tipo_cliente WHERE NOMBRE = P_NOMBRE AND idTipoCliente != P_ID;
 
         IF cExiste = 0 THEN
             SET @MSJ2 = 'No se encontró el tipo de cliente que desea actualizar';
@@ -4198,8 +4153,8 @@ DELIMITER ;
             SET @MSJ2 = 'El nombre ingresado ya existe';
         ELSE
             UPDATE tipo_cliente 
-            SET nombre = P_NOMBRE, estado = P_ESTADO, estado_proceso = 'MODIFICADO'
-            WHERE idTipoCliente = P_ID AND ESTADO_REGISTRO = 1;
+            SET nombre = P_NOMBRE, estado = P_ESTADO
+            WHERE idTipoCliente = P_ID;
 
             SET @MSJ = 'Se actualizó correctamente el tipo de cliente';
         END IF;
@@ -4222,14 +4177,14 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cExiste FROM tipo_cliente WHERE idTipoCliente = P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cExiste FROM tipo_cliente WHERE idTipoCliente = P_ID;
 
         IF cExiste = 0 THEN
             SET @MSJ2 = 'El tipo de cliente que intenta dar de baja no existe';
         ELSE
             UPDATE tipo_cliente 
-            SET estado = 0, ESTADO_PROCESO = 'MODIFICADO'
-            WHERE idTipoCliente = P_ID AND ESTADO_REGISTRO = 1;
+            SET estado = 0
+            WHERE idTipoCliente = P_ID;
 
             SET @MSJ = 'Se dio de baja correctamente al tipo de cliente';
         END IF;
@@ -4251,13 +4206,13 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cUsuario FROM tipo_cliente where idTipoCliente = P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cUsuario FROM tipo_cliente where idTipoCliente = P_ID;
 
         IF cUsuario <= 0 THEN
             SET @MS2J = 'El tipo de cliente que intenta eliminar no existe';
         ELSE
-            UPDATE tipo_cliente SET ESTADO_REGISTRO =2, ESTADO_PROCESO = 'ELIMINADO' WHERE idTipoCliente = P_ID  AND ESTADO_REGISTRO = 1;
-            SET @MSJ = 'Se eliminó correctamente al usuario';
+            DELETE FROM tipo_cliente WHERE idTipoCliente = P_ID;
+            SET @MSJ = 'Se eliminó correctamente al tipo de cliente';
         END IF;
     END $$
 
@@ -4346,7 +4301,7 @@ DELIMITER ;
 
         SELECT COUNT(*) INTO cExiste 
         FROM tipo_comprobante
-        WHERE nombre = P_NOMBRE AND ESTADO_REGISTRO = 1;
+        WHERE nombre = P_NOMBRE;
 
         IF cExiste > 0 THEN
             SET @MSJ2 = 'Ya existe un tipo de comprobante con ese nombre';
@@ -4378,8 +4333,8 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cExiste FROM tipo_comprobante WHERE idTipoComprobante = P_ID AND ESTADO_REGISTRO = 1;
-        SELECT COUNT(*) INTO cNombre FROM tipo_comprobante WHERE NOMBRE = P_NOMBRE AND idTipoComprobante != P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cExiste FROM tipo_comprobante WHERE idTipoComprobante = P_ID;
+        SELECT COUNT(*) INTO cNombre FROM tipo_comprobante WHERE NOMBRE = P_NOMBRE AND idTipoComprobante != P_ID;
 
         IF cExiste = 0 THEN
             SET @MSJ2 = 'No se encontró el tipo de comprobante que desea actualizar';
@@ -4387,8 +4342,8 @@ DELIMITER ;
             SET @MS2J = 'El nombre ingresado ya existe';
         ELSE
             UPDATE tipo_comprobante 
-            SET nombre = P_NOMBRE, estado = P_ESTADO, estado_proceso = 'MODIFICADO'
-            WHERE idTipoComprobante = P_ID AND ESTADO_REGISTRO = 1;
+            SET nombre = P_NOMBRE, estado = P_ESTADO
+            WHERE idTipoComprobante = P_ID;
 
             SET @MSJ = 'Se actualizó correctamente el tipo de comprobante';
         END IF;
@@ -4411,14 +4366,14 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cExiste FROM tipo_comprobante WHERE idTipoComprobante = P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cExiste FROM tipo_comprobante WHERE idTipoComprobante = P_ID;
 
         IF cExiste = 0 THEN
             SET @MSJ2 = 'El tipo de comprobante que intenta dar de baja no existe';
         ELSE
             UPDATE tipo_comprobante 
-            SET estado = 0, ESTADO_PROCESO = 'MODIFICADO'
-            WHERE idTipoComprobante = P_ID AND ESTADO_REGISTRO = 1;
+            SET estado = 0
+            WHERE idTipoComprobante = P_ID;
 
             SET @MSJ = 'Se dio de baja correctamente al tipo de comprobante';
         END IF;
@@ -4440,12 +4395,12 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cUsuario FROM tipo_comprobante where idTipoComprobante = P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cUsuario FROM tipo_comprobante where idTipoComprobante = P_ID;
 
         IF cUsuario <= 0 THEN
             SET @MS2J = 'El tipo de comprobante que intenta eliminar no existe';
         ELSE
-            UPDATE tipo_comprobante SET ESTADO_REGISTRO =2, ESTADO_PROCESO = 'ELIMINADO' WHERE idTipoComprobante = P_ID  AND ESTADO_REGISTRO = 1;
+            DELETE FROM tipo_comprobante WHERE idTipoComprobante = P_ID;
             SET @MSJ = 'Se eliminó correctamente el tipo de comprobante';
         END IF;
     END $$
@@ -4724,13 +4679,13 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cNombre FROM metodo_pago WHERE NOMBRE = P_NOMBRE and ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cNombre FROM metodo_pago WHERE NOMBRE = P_NOMBRE;
 
         IF cNombre > 0 THEN
             SET @MSJ2 = 'El método de pago que intenta registrar ya está registrado';
         ELSE
-            INSERT INTO metodo_pago (NOMBRE, LOGO, ESTADO, ESTADO_PROCESO, ESTADO_REGISTRO, FECHA_REGISTRO, USUARIO, qr, id_tipo_metodoPago) 
-            VALUES (P_NOMBRE, P_LOGO, P_ESTADO, DEFAULT, DEFAULT, CURRENT_TIMESTAMP, P_USUARIO, P_QR, P_TIPO_METODO_PAGO);
+            INSERT INTO metodo_pago (NOMBRE, LOGO, ESTADO, FECHA_REGISTRO, USUARIO, qr, id_tipo_metodoPago) 
+            VALUES (P_NOMBRE, P_LOGO, P_ESTADO, CURRENT_TIMESTAMP, P_USUARIO, P_QR, P_TIPO_METODO_PAGO);
 
             SET @MSJ = 'Se registró correctamente el método de pago';
         END IF;
@@ -4759,10 +4714,10 @@ DELIMITER ;
         SET @MSJ2 = NULL;
 
         -- Verificar si el método de pago existe
-        SELECT COUNT(*) INTO cMetodoPago FROM metodo_pago WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cMetodoPago FROM metodo_pago WHERE ID = P_ID;
         
         -- Verificar si el nombre del método de pago ya está registrado (excluyendo el registro actual)
-        SELECT COUNT(*) INTO cNombre FROM metodo_pago WHERE NOMBRE = P_NOMBRE AND ID != P_ID and ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cNombre FROM metodo_pago WHERE NOMBRE = P_NOMBRE AND ID != P_ID;
 
         IF cMetodoPago <= 0 THEN
             SET @MSJ2 = 'El método de pago que intenta editar no existe';
@@ -4774,11 +4729,9 @@ DELIMITER ;
             SET NOMBRE = P_NOMBRE, 
                 LOGO = P_LOGO,
                 ESTADO = P_ESTADO,
-                ESTADO_PROCESO = 'MODIFICADO',
-                ESTADO_REGISTRO = 1, -- El estado de registro permanece en 1
                 QR= P_QR,
                 id_tipo_metodoPago = P_TIPO_METODO_PAGO
-            WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+            WHERE ID = P_ID;
             SET @MSJ = 'Se modificó correctamente el método de pago';
         END IF;
     END $$
@@ -4800,15 +4753,14 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cMetodoPago FROM metodo_pago WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cMetodoPago FROM metodo_pago WHERE ID = P_ID;
 
         IF cMetodoPago <= 0 THEN
             SET @MSJ2 = 'El método de pago que intenta dar de baja no existe';
         ELSE
             UPDATE metodo_pago 
-            SET ESTADO = 0, 
-                ESTADO_PROCESO = 'DADO DE BAJA' 
-            WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+            SET ESTADO = 0
+            WHERE ID = P_ID;
 
             SET @MSJ = 'Se dio de baja correctamente el método de pago';
         END IF;
@@ -4830,16 +4782,12 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cMetodoPago FROM metodo_pago WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cMetodoPago FROM metodo_pago WHERE ID = P_ID;
 
         IF cMetodoPago <= 0 THEN
             SET @MSJ2 = 'El método de pago que intenta eliminar no existe';
         ELSE
-            UPDATE metodo_pago 
-            SET ESTADO_REGISTRO = 2, 
-                ESTADO_PROCESO = 'ELIMINADO' 
-            WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
-
+            DELETE FROM metodo_pago WHERE ID = P_ID;
             SET @MSJ = 'Se eliminó correctamente el método de pago';
         END IF;
     END $$
@@ -4864,13 +4812,13 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cNombre FROM marca WHERE NOMBRE = P_NOMBRE and ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cNombre FROM marca WHERE NOMBRE = P_NOMBRE;
 
         IF cNombre > 0 THEN
             SET @MSJ2 = 'La marca ya está registrada';
         ELSE
-            INSERT INTO marca (NOMBRE, ESTADO, ESTADO_PROCESO, ESTADO_REGISTRO, FECHA_REGISTRO, USUARIO, LOGO) 
-            VALUES (P_NOMBRE, P_ESTADO, DEFAULT, DEFAULT, CURRENT_TIMESTAMP, P_USUARIO, P_LOGO); -- Incluir logo
+            INSERT INTO marca (NOMBRE, ESTADO, FECHA_REGISTRO, USUARIO, LOGO) 
+            VALUES (P_NOMBRE, P_ESTADO, CURRENT_TIMESTAMP, P_USUARIO, P_LOGO); -- Incluir logo
 
             SET @MSJ = 'Marca registrada correctamente';
         END IF;
@@ -4895,8 +4843,8 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cMarca FROM marca WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
-        SELECT COUNT(*) INTO cNombre FROM marca WHERE NOMBRE = P_NOMBRE AND ID != P_ID and ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cMarca FROM marca WHERE ID = P_ID;
+        SELECT COUNT(*) INTO cNombre FROM marca WHERE NOMBRE = P_NOMBRE AND ID != P_ID;
 
         IF cMarca <= 0 THEN
             SET @MSJ2 = 'Marca no encontrada';
@@ -4906,10 +4854,8 @@ DELIMITER ;
             UPDATE marca 
             SET NOMBRE = P_NOMBRE, 
                 ESTADO = P_ESTADO,
-                LOGO = P_LOGO, -- Actualizar logo
-                ESTADO_PROCESO = 'MODIFICADO',
-                ESTADO_REGISTRO = 1 
-            WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+                LOGO = P_LOGO -- Actualizar logo
+            WHERE ID = P_ID;
 
             SET @MSJ = 'Marca modificada correctamente';
         END IF;
@@ -4930,15 +4876,14 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cMarca FROM marca WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cMarca FROM marca WHERE ID = P_ID;
 
         IF cMarca <= 0 THEN
             SET @MSJ2 = 'Marca no encontrada';
         ELSE
             UPDATE marca 
-            SET ESTADO = 0, 
-                ESTADO_PROCESO = 'DADO DE BAJA' 
-            WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+            SET ESTADO = 0
+            WHERE ID = P_ID;
 
             SET @MSJ = 'Marca dada de baja correctamente';
         END IF;
@@ -4959,16 +4904,12 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cMarca FROM marca WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cMarca FROM marca WHERE ID = P_ID;
 
         IF cMarca <= 0 THEN
             SET @MSJ2 = 'Marca no encontrada';
         ELSE
-            UPDATE marca 
-            SET ESTADO_REGISTRO = 2, 
-                ESTADO_PROCESO = 'ELIMINADA' 
-            WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
-
+            DELETE FROM marca WHERE ID = P_ID;
             SET @MSJ = 'Marca eliminada correctamente';
         END IF;
     END $$ 
@@ -4993,7 +4934,7 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cNombre FROM ruta WHERE nombre = P_NOMBRE AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cNombre FROM ruta WHERE nombre = P_NOMBRE;
 
         IF cNombre > 0 THEN
             SET @MSJ2 = 'El nombre de ruta que intenta registrar ya está registrado';
@@ -5027,8 +4968,8 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cExiste FROM ruta WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
-        SELECT COUNT(*) INTO cNombre FROM ruta WHERE NOMBRE = P_NOMBRE AND ID != P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cExiste FROM ruta WHERE ID = P_ID;
+        SELECT COUNT(*) INTO cNombre FROM ruta WHERE NOMBRE = P_NOMBRE AND ID != P_ID;
 
         IF cExiste <= 0 THEN
             SET @MSJ2 = 'La ruta que intenta editar no existe';
@@ -5040,9 +4981,8 @@ DELIMITER ;
                 DISTANCIA_ESTIMADA = P_DISTANCIA,
                 TIEMPO_ESTIMADO = P_TIEMPO,
                 TIPO = P_TIPO,
-                ESTADO = P_ESTADO, 
-                estado_proceso = 'MODIFICADO' 
-            WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+                ESTADO = P_ESTADO
+            WHERE ID = P_ID;
 
             SET @MSJ = 'Se modificó correctamente la ruta';
         END IF;
@@ -5064,12 +5004,12 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cExiste FROM ruta WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cExiste FROM ruta WHERE ID = P_ID;
 
         IF cExiste <= 0 THEN
             SET @MSJ2 = 'La ruta que intenta dar de baja no existe';
         ELSE
-            UPDATE ruta SET ESTADO = 0, ESTADO_PROCESO = 'MODIFICADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+            UPDATE ruta SET ESTADO = 0 WHERE ID = P_ID;
 
             SET @MSJ = 'Se dio de baja correctamente a la ruta';
         END IF;
@@ -5091,13 +5031,11 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cExiste FROM ruta WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cExiste FROM ruta WHERE ID = P_ID;
 
         IF cExiste <= 0 THEN
             SET @MSJ2 = 'La ruta que intenta eliminar no existe';
         ELSE
-            -- UPDATE ruta SET ESTADO_REGISTRO = 2, ESTADO_PROCESO = 'ELIMINADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
-
             DELETE FROM escala WHERE idRuta = P_ID;
             DELETE FROM ruta WHERE id = P_ID;
 
@@ -5155,7 +5093,7 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cPersonal FROM personal WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cPersonal FROM personal WHERE ID = P_ID;
 
         IF cPersonal <= 0 THEN
             SET @MSJ2 = 'El personal que intenta editar no existe';
@@ -5164,9 +5102,8 @@ DELIMITER ;
             SET NOMBRE = P_NOMBRE,
                 IMAGEN = P_IMAGEN,
                 ESTADO = P_ESTADO,
-                ID_TIPOPERSONAL = P_IDTIPOPERSONAL, 
-                ESTADO_PROCESO = 'MODIFICADO' 
-            WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+                ID_TIPOPERSONAL = P_IDTIPOPERSONAL
+            WHERE ID = P_ID;
             SET @MSJ = 'Se modificó correctamente al personal';
         END IF;
     END $$
@@ -5190,12 +5127,12 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cPersonal FROM personal WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cPersonal FROM personal WHERE ID = P_ID;
 
         IF cPersonal <= 0 THEN
             SET @MSJ2 = 'El personal que intenta dar de baja no existe';
         ELSE
-            UPDATE personal SET ESTADO = 0, ESTADO_PROCESO = 'MODIFICADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+            UPDATE personal SET ESTADO = 0 WHERE ID = P_ID;
 
             SET @MSJ = 'Se dio de baja correctamente al personal';
         END IF;
@@ -5220,13 +5157,12 @@ DELIMITER ;
         SET @MSJ = NULL;
         SET @MSJ2 = NULL;
 
-        SELECT COUNT(*) INTO cPersonal FROM personal WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
+        SELECT COUNT(*) INTO cPersonal FROM personal WHERE ID = P_ID;
 
         IF cPersonal <= 0 THEN
             SET @MSJ2 = 'El personal que intenta eliminar no existe';
         ELSE
-            UPDATE personal SET ESTADO_REGISTRO = 2, ESTADO_PROCESO = 'ELIMINADO' WHERE ID = P_ID AND ESTADO_REGISTRO = 1;
-
+            DELETE FROM personal WHERE ID = P_ID;
             SET @MSJ = 'Se eliminó correctamente al personal';
         END IF;
     END $$

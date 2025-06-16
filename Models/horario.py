@@ -3,21 +3,19 @@ import bd
 from datetime import timedelta
 
 class Horario:
-    def __init__(self, id=None, horario_entrada=None, horario_salida=None, estado=None, estado_proceso=None, estado_registro=None, fecha_registro=None):
+    def __init__(self, id=None, horario_entrada=None, horario_salida=None, estado=None, fecha_registro=None):
         self.id = id
         self.horario_entrada = horario_entrada
         self.horario_salida = horario_salida
         self.estado = estado
         #Auditoría
-        self.estado_proceso = estado_proceso
-        self.estado_registro = estado_registro
         self.fecha_registro = fecha_registro
 
     @classmethod
     def obtener_todos(cls):
         conexion = bd.Conexion()
         try:
-            horarios = conexion.obtener("SELECT id, horario_entrada, horario_salida, estado FROM horario where estado_registro = 1")
+            horarios = conexion.obtener("SELECT id, horario_entrada, horario_salida, estado FROM horario")
             def formatear_tiempo(td):
                 if isinstance(td, timedelta):
                     total_segundos = int(td.total_seconds())
@@ -37,7 +35,7 @@ class Horario:
     def obtener_por_id(cls, horario_id):
         conexion = bd.Conexion()
         try:
-            horario = conexion.obtener(f"SELECT id, horario_entrada, horario_salida, estado, estado_proceso FROM horario WHERE id = {horario_id}")
+            horario = conexion.obtener(f"SELECT id, horario_entrada, horario_salida, estado FROM horario WHERE id = {horario_id}")
             return horario[0] if horario else None
         finally:
             conexion.cerrar()
