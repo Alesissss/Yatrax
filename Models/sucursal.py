@@ -1,7 +1,7 @@
 import bd
 
 class Sucursal:
-    def __init__(self, id=None, cod_sucursal=None, ciudad=None, nombre=None, direccion=None, latitud=None, longitud=None, estado=1, abreviatura=None, estado_proceso='REGISTRADO', estado_registro=1, fecha_registro=None, usuario=None):
+    def __init__(self, id=None, cod_sucursal=None, ciudad=None, nombre=None, direccion=None, latitud=None, longitud=None, estado=1, abreviatura=None, fecha_registro=None, usuario=None):
         self.id = id
         self.cod_sucursal = cod_sucursal
         self.ciudad = ciudad
@@ -12,8 +12,6 @@ class Sucursal:
         self.estado = estado
         self.abreviatura = abreviatura
         #Auditoría
-        self.estado_proceso = estado_proceso
-        self.estado_registro = estado_registro
         self.fecha_registro = fecha_registro
         self.usuario = usuario
 
@@ -23,8 +21,8 @@ class Sucursal:
         try:
             query = """
                 SELECT id, cod_sucursal, ciudad, nombre, direccion, latitud, longitud, estado, abreviatura,
-                       estado_proceso, estado_registro, fecha_registro, usuario
-                FROM sucursal WHERE estado_registro = 1
+                       fecha_registro, usuario
+                FROM sucursal
             """
             return conexion.obtener(query)
         finally:
@@ -36,8 +34,8 @@ class Sucursal:
         try:
             query = """
                 SELECT id, cod_sucursal, ciudad, nombre, direccion, latitud, longitud, estado, abreviatura, 
-                       estado_proceso, estado_registro, fecha_registro, usuario
-                FROM sucursal WHERE id = %s and estado_registro = 1
+                       fecha_registro, usuario
+                FROM sucursal WHERE id = %s
             """
             resultado = conexion.obtener(query, (id,))
             return resultado[0] if resultado else None

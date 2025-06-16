@@ -10,7 +10,7 @@ class Marca:
     def obtener_todos(cls):
         conexion = bd.Conexion()
         try:
-            return conexion.obtener("SELECT id, nombre, logo , estado FROM marca WHERE estado_registro = 1")
+            return conexion.obtener("SELECT id, nombre, logo , estado FROM marca")
         finally:
             conexion.cerrar()
 
