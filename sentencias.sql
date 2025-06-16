@@ -1194,9 +1194,6 @@ CREATE TABLE tipo_reclamo(
     INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,fecha_registro,usuario) VALUES (3,'Ander','ander@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/ander.jpg', 1, 1,'2025-03-06 20:06:14','SYSTEM');
     INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,fecha_registro,usuario) VALUES (4,'Luis','luis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '/Static/img/trabajadores/luis.jpg', 1, 1,'2025-03-06 20:06:14','SYSTEM');
 
-insert into vehiculo (placa, anio, color, estado, id_tipo_vehiculo, usuario) values ( 'YTS-333', 2024, 'Rojo', 1, 3, 'ander@gmail.com');
-insert into vehiculo (placa, anio, color, estado, id_tipo_vehiculo, usuario) values ( 'B4N-D3R', 2023, 'Rojo', 1, 2, 'ander@gmail.com');
-
     -- Tabla de configuración general
     INSERT INTO conf_general (id, igv, tarifaBase, max_pasajes_venta, viajesReprogramables) VALUES (1, 0.18, 10, 4, 0);
 
@@ -5792,6 +5789,7 @@ CREATE PROCEDURE SP_ELIMINAR_PROMOCION (
     IN p_id INT
 )
 BEGIN
+    
     DELETE FROM promocion WHERE id = p_id;
     SET @MSJ = 'Promoción eliminada correctamente';
 END$$
