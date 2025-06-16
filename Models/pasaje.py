@@ -5,10 +5,6 @@ import os
 import xml.etree.ElementTree as ET
 from jinja2 import Environment, FileSystemLoader
 from weasyprint import HTML
-
-import warnings
-warnings.filterwarnings("ignore", category=UserWarning, module="gi")
-
 class Pasaje:
     def __init__(self, id, id_detalle_asiento, numero_comprobante, es_pasaje_normal,
                  es_pasaje_libre, es_transferencia, es_reserva, es_cambio_ruta,
