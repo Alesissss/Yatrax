@@ -1,5 +1,8 @@
 import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort, json
+from xml.etree import ElementTree as ET
+from jinja2 import Environment, FileSystemLoader
+from weasyprint import HTML
 from werkzeug.utils import secure_filename
 from Models.tipoCliente import TipoCliente
 from Models.microservicio import MicroServicio
@@ -8,6 +11,7 @@ from Models.tipoComprobante import TipoComprobante
 from Models.tipoDocumento import TipoDocumento
 from Models.cliente import Cliente
 from Models.pais import Pais
+from Models.pasaje import Pasaje
 from Models.herramienta import Herramienta
 
 ventas_bp = Blueprint('ventas', __name__, url_prefix='/trabajadores/ventas')
@@ -903,6 +907,37 @@ def dar_baja_cliente(id):  # Recibe el ID de la URL
 # REGION PASAJES Y OPRERACIONES
 
 # END REGION PASAJES Y OPRERACIONES
+
+@ventas_bp.route("/registrar_comprobantes_y_generar_xml", methods=["POST"])
+def registrar_comprobantes_y_generar_xml():
+    rutas_xml = []
+
+    ultimaVenta = Pasaje.obtener_ultima_venta()
+    if not ultimaVenta:
+        return []
+
+    idVenta = ultimaVenta.get('numero')
+    comprobantes = Pasaje.obtener_numComprobante_venta(idVenta)
+
+    for comprobante in comprobantes:
+        numero = comprobante.get('numeroComprobante')
+        if numero:
+            data = Pasaje.obtenerDatosPasaje(numero)
+            ruta_xml = Pasaje.generar_xml_comprobante(data)
+            rutas_xml.append(ruta_xml)
+
+    return rutas_xml
+
+@ventas_bp.route("/generar_comprobante_pdf", methods=["POST"])
+def generar_comprobante_pdf():
+    rutas_pdf = []
+    rutas_xml = registrar_comprobantes_y_generar_xml()
+
+    for ruta_xml in rutas_xml:
+        ruta_pdf = Pasaje.generar_pdf_desde_xml(ruta_xml)
+        rutas_pdf.append(ruta_pdf)
+
+    return rutas_pdf
 
 
 # END FUNCIONES

@@ -11,8 +11,6 @@ class Personal:
         self.estado = estado
         self.id_tipoPersonal = id_tipoPersonal
         # Auditoría
-        self.estadoProceso = estadoProceso
-        self.estadoRegistro = estadoRegistro
         self.fechaRegistro = fechaRegistro
         self.usuario = usuario
 
@@ -22,7 +20,7 @@ class Personal:
         conexion = bd.Conexion()
         try:
             personal = conexion.obtener("SELECT per.id, per.nombre, per.imagen, per.estado, per.id_tipopersonal, tp.nombre as tipopersonal"
-                                        " FROM personal per INNER JOIN tipo_personal tp on per.id_tipopersonal = tp.id WHERE per.estado_registro = 1")
+                                        " FROM personal per INNER JOIN tipo_personal tp on per.id_tipopersonal = tp.id")
             return personal
         finally:
             conexion.cerrar()
@@ -33,7 +31,7 @@ class Personal:
         conexion = bd.Conexion()
         try:
             personal = conexion.obtener("SELECT per.id, per.nombre, per.imagen, per.estado, per.id_tipopersonal, tp.nombre as tipopersonal"
-                                        " FROM personal per INNER JOIN tipo_personal tp on per.id_tipopersonal = tp.id WHERE per.estado_registro = 1 AND per.id = %s", (personal_id,))
+                                        " FROM personal per INNER JOIN tipo_personal tp on per.id_tipopersonal = tp.id WHERE per.id = %s", (personal_id,))
             return personal[0] if personal else None
         finally:
             conexion.cerrar()

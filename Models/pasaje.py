@@ -1,7 +1,10 @@
 import bd
 import string
 import random
-
+import os
+import xml.etree.ElementTree as ET
+from jinja2 import Environment, FileSystemLoader
+from weasyprint import HTML
 class Pasaje:
     def __init__(self, id, id_detalle_asiento, numero_comprobante, es_pasaje_normal,
                  es_pasaje_libre, es_transferencia, es_reserva, es_cambio_ruta,
@@ -142,6 +145,24 @@ class Pasaje:
             # Se esta considerando 26 caracteres alfabéticos y 10 dígitos, lo que da un total de 36 caracteres por 8 posiciones,
             # lo que da un total de 2,821,109,907,456 combinaciones posibles.
     
+    # @classmethod
+    # def generar_codigo_reserva(cls):
+    #     conexion = bd.Conexion()
+    #     try:
+    #         while True:
+    #             codigo = f"RES-{''.join(random.choices(string.ascii_uppercase, k=5))}-{random.randint(1000, 9999)}"
+    #             conexion.ejecutar(
+    #                 "SELECT 1 FROM pasaje WHERE codigo = %s LIMIT 1",
+    #                 (codigo,)
+    #             )
+    #             if not conexion.obtener():
+    #                 return codigo
+    #     finally:
+    #         conexion.cerrar()
+    #         # Genera un código de reserva único con el formato "RES-XXXXX-YYYY"
+    #         # donde XXXXX es una cadena aleatoria de 5 letras y YYYY es un número entre 1000 y 9999.
+    #         # lo que da un total de 11,881,376,000 combinaciones posibles.
+
     @classmethod
     def generar_numComprobante(cls):
         conexion = bd.Conexion()
@@ -191,7 +212,11 @@ class Pasaje:
                     dv.fechaSalida AS fecha_salida,
                     DATE_FORMAT(dv.fechaSalida, '%%H:%%i') AS hora_salida,
                     a.nombre AS asiento,
-                    ser.nombre AS servicio
+                    ser.nombre AS servicio,
+                    pas.codigo AS codigo_pasaje,
+                    pas.enTransaccion AS estado_transaccion,
+                    v.idEstadoViaje AS estado_viaje,
+                    pas.numeroComprobante,
                         FROM pasaje pas 
                         INNER JOIN detalle_viaje_asiento dva ON dva.id = pas.idDetalleViajeAsiento
                         INNER JOIN detalle_viaje dv ON dv.id = dva.idDetalle_Viaje
@@ -204,6 +229,7 @@ class Pasaje:
                         INNER JOIN vehiculo ve ON ve.id = a.id_vehiculo
                         INNER JOIN tipo_vehiculo tv ON tv.id = ve.id_tipo_vehiculo
                         INNER JOIN servicio ser ON ser.id = tv.id_servicio
+                        INNER JOIN viaje v ON v.id = dv.idViaje
                         WHERE dp.viajeEnBrazos != 0 AND pas.numeroComprobante=%s;
             """
             filas = conexion.obtener(query, (numComprobante,))
@@ -246,3 +272,83 @@ class Pasaje:
         finally:
             if conexion:
                 conexion.cerrar()
+    
+    @classmethod
+    def generar_xml_comprobante(datos):
+        comprobante = ET.Element('comprobante')
+
+        ET.SubElement(comprobante, 'ruc').text = datos['ruc']
+        
+        cliente = ET.SubElement(comprobante, 'cliente')
+        ET.SubElement(cliente, 'nombre').text = datos['nombre_completo']
+        ET.SubElement(cliente, 'tipo_documento').text = datos['tipo_documento']
+        ET.SubElement(cliente, 'numero_documento').text = datos['numero_documento']
+
+        servicio = ET.SubElement(comprobante, 'servicio')
+        ET.SubElement(servicio, 'origen').text = datos['origen']
+        ET.SubElement(servicio, 'destino').text = datos['destino']
+        ET.SubElement(servicio, 'fecha_salida').text = datos['fecha_salida']
+        ET.SubElement(servicio, 'hora_salida').text = datos['hora_salida']
+        ET.SubElement(servicio, 'asiento').text = datos['asiento']
+        ET.SubElement(servicio, 'codigo_pasaje').text = datos['codigo_pasaje']
+        # ET.SubElement(comprobante, 'importe').text = datos['importe']
+
+        tree = ET.ElementTree(comprobante)
+        carpeta = os.path.join('Static', 'xml')
+        os.makedirs(carpeta, exist_ok=True)
+        
+        nombre_archivo = f"{datos['numeroComprobante'].replace('/', '-')}.xml"
+        ruta_archivo = os.path.join(carpeta, nombre_archivo)
+
+        tree.write(ruta_archivo, encoding='utf-8', xml_declaration=True)
+        return ruta_archivo 
+    
+    @classmethod
+    def obtener_ultima_venta(cls):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            conexion.ejecutar("SELECT MAX(id) FROM pasaje;")
+            resultado = conexion.obtener()
+            return resultado[0] if resultado and resultado[0] else 0
+        finally:
+            if conexion:
+                conexion.cerrar()
+                
+    @classmethod
+    def obtener_numComprobante_venta(cls, id_venta):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            filas = conexion.obtener("SELECT numeroComprobante FROM pasaje WHERE id_venta = %s;", (id_venta,))
+            return filas[0] if filas else None
+        finally:
+            if conexion:
+                conexion.cerrar()
+    
+    @classmethod         
+    def generar_pdf_desde_xml(ruta_xml):
+        tree = ET.parse(ruta_xml)
+        root = tree.getroot()
+
+        datos = {
+            'ruc': root.findtext('ruc'),
+            'cliente_nombre': root.findtext('cliente/nombre'),
+            'cliente_dni': root.findtext('cliente/dni'),
+            'ruta': root.findtext('servicio/ruta'),
+            'fecha': root.findtext('servicio/fecha'),
+            'hora': root.findtext('servicio/hora'),
+            'asiento': root.findtext('servicio/asiento'),
+            'importe': root.findtext('importe')
+        }
+
+        env = Environment(loader=FileSystemLoader('Views/Ecommerce/home'))
+        template = env.get_template('comprobante_template.html')
+        html_renderizado = template.render(datos)
+
+        nombre_archivo = os.path.splitext(os.path.basename(ruta_xml))[0] + ".pdf"
+        ruta_pdf = os.path.join('Static', 'pdf', nombre_archivo)
+        os.makedirs(os.path.dirname(ruta_pdf), exist_ok=True)
+
+        HTML(string=html_renderizado).write_pdf(ruta_pdf)
+        return ruta_pdf

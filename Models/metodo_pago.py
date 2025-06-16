@@ -11,7 +11,7 @@ class MetodoPago:
     def obtener_todos(cls):
         conexion = bd.Conexion()
         try:
-            return conexion.obtener("SELECT mp.id, mp.nombre, logo, mp.estado, qr , id_tipo_metodoPago, tmp.nombre as tipoMetodo FROM metodo_pago mp inner join tipo_metodopago tmp on tmp.idTipoMetodoPago= mp.id_tipo_metodoPago where mp.estado_registro = 1")
+            return conexion.obtener("SELECT mp.id, mp.nombre, logo, mp.estado, qr , id_tipo_metodoPago, tmp.nombre as tipoMetodo FROM metodo_pago mp inner join tipo_metodopago tmp on tmp.idTipoMetodoPago= mp.id_tipo_metodoPago")
         finally:
             conexion.cerrar()
 
