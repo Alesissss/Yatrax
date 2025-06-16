@@ -19,6 +19,25 @@
   #MenorBlock {
     background: #72a6d6;
   }
+
+  .modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+  }
+
+  .modal-title {
+    font-weight: bold;
+    color: #495057;
+  }
+
+  .alert-danger {
+    margin-bottom: 1rem;
+  }
+
+  .intentos-restantes {
+    font-size: 0.9em;
+    color: #6c757d;
+  }
 </style>
 
 <div class="container p-5 mt-4">
@@ -26,11 +45,19 @@
   <h2 class="bg-secondary text-white p-2">Mi pasaje</h2>
 
   <div class="d-flex justify-content-center mt-3 mb-3">
-    <div class="d-flex align-items-center">
-      <label for="comprobante" class="me-2 mb-0">Número de comprobante</label>
-      <input type="text" id="comprobante" class="form-control me-2" placeholder="# A001 - 12345678"
-        style="max-width: 200px" />
-      <button id="btnBuscar" class="btn btn-primary">Buscar</button>
+    <div class="text-center">
+      <!-- Fila principal con label, input y botón -->
+      <div class="d-flex align-items-center justify-content-center mb-2">
+        <label for="comprobante" class="me-2 mb-0">Número de comprobante</label>
+        <input type="text" id="comprobante" class="form-control me-2" placeholder="# A001 - 12345678"
+          style="max-width: 200px" />
+        <button id="btnBuscar" class="btn btn-primary">Buscar</button>
+      </div>
+      <!-- Texto de ayuda debajo -->
+      <div class="text-muted small">
+        ¿Cuál es mi comprobante?
+        <a href="#">Ver aquí</a>
+      </div>
     </div>
   </div>
 
@@ -74,6 +101,11 @@
         <label class="form-label">Servicio</label>
         <input id="servicioViaje" type="text" class="form-control bgcustom" value="Servicio" readonly />
       </div>
+
+      <!-- contenido invisible -->
+      <input type="hidden" id="pasCod" value="" />
+      <input type="hidden" id="pasEstTran" value="" />
+      <input type="hidden" id="pasEstViaje" value="" />
     </div>
   </div>
 
@@ -90,6 +122,60 @@
     </div>
     <div class="col-lg-3 col-md-6 col-sm-6">
       <button class="btn btn-secondary w-100" id="btnConvertirLibre">Convertir pasaje libre</button>
+    </div>
+  </div>
+
+  <!-- Modal de validación de código -->
+  <div class="modal fade" id="modalValidacionCodigo" tabindex="-1" aria-labelledby="modalValidacionCodigoLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalValidacionCodigoLabel">
+            <i class="fas fa-lock me-2"></i>
+            <span id="tituloOperacionModal">Validación de Operación</span>
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="alertError" class="alert alert-danger d-none" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            El código ingresado no es correcto. Por favor, inténtelo nuevamente.
+          </div>
+
+          <p class="mb-3">
+            <i class="fas fa-info-circle me-2 text-info"></i>
+            Para continuar con la transacción de <strong><span id="nombreOperacionModal"></span></strong>,
+            debe ingresar el código de su pasaje.
+          </p>
+
+          <div class="mb-3">
+            <label for="codigoPasajeInput" class="form-label">
+              <i class="fas fa-ticket-alt me-2"></i>
+              Código del pasaje:
+            </label>
+            <input type="text" class="form-control" id="codigoPasajeInput" placeholder="Ingrese el código de su pasaje"
+              maxlength="10">
+          </div>
+
+          <div class="intentos-restantes text-end">
+            <small>
+              <i class="fas fa-clock me-1"></i>
+              Intentos restantes: <span id="intentosRestantes">3</span>
+            </small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times me-2"></i>
+            Cancelar
+          </button>
+          <button type="button" class="btn btn-primary" id="btnValidarCodigo">
+            <i class="fas fa-check me-2"></i>
+            Validar
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -249,6 +335,21 @@
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
+
+    // Variables para el modal
+    let operacionSeleccionada = null;
+    let botonSeleccionado = null;
+    let intentosRestantes = 3;
+
+    // Elementos del modal
+    const modalValidacion = new bootstrap.Modal(document.getElementById('modalValidacionCodigo'));
+    const tituloOperacionModal = document.getElementById('tituloOperacionModal');
+    const nombreOperacionModal = document.getElementById('nombreOperacionModal');
+    const codigoPasajeInput = document.getElementById('codigoPasajeInput');
+    const btnValidarCodigo = document.getElementById('btnValidarCodigo');
+    const alertError = document.getElementById('alertError');
+    const intentosRestantesSpan = document.getElementById('intentosRestantes');
+
     const conMenor = document.getElementById("conMenor");
     const menorWrap = document.getElementById("menorWrapper");
     const MenorBlock = document.getElementById("MenorBlock");
@@ -268,6 +369,8 @@
     const descripcionOperacion = document.getElementById("descripcionOperacion");
     const checkboxCargo = document.getElementById("checkboxCargo");
 
+    resetearModal(); // Inicializar el modal al cargar la página
+
     // Array de botones de operaciones
     const botonesOperaciones = [btnTransferir, btnCambioRuta, btnReembolso, btnConvertirLibre];
 
@@ -277,6 +380,78 @@
         btn.classList.remove('btn-primary');
         btn.classList.add('btn-secondary');
       });
+    }
+
+    // Función para resetear el estado del modal
+    function resetearModal() {
+      intentosRestantes = 3;
+      intentosRestantesSpan.textContent = intentosRestantes;
+      codigoPasajeInput.value = '';
+      codigoPasajeInput.classList.remove('is-invalid');
+      alertError.classList.add('d-none');
+    }
+
+    // Función para abrir modal con la operación seleccionada
+    function abrirModalValidacion(operacion, boton) {
+      operacionSeleccionada = operacion;
+      botonSeleccionado = boton;
+
+      // Configurar títulos según operación
+      const titulos = {
+        'transferir': 'Transferir pasaje',
+        'cambio-ruta': 'Cambio de ruta',
+        'reembolso': 'Reembolso',
+        'convertir-libre': 'Convertir pasaje libre'
+      };
+
+      tituloOperacionModal.textContent = `Validación - ${titulos[operacion]}`;
+      nombreOperacionModal.textContent = titulos[operacion].toLowerCase();
+
+      resetearModal();
+      modalValidacion.show();
+
+      // Enfocar el input
+      setTimeout(() => {
+        codigoPasajeInput.focus();
+      }, 500);
+    }
+
+    // Función para validar código
+    function validarCodigo() {
+      const codigoIngresado = codigoPasajeInput.value.trim();
+      const codigoCorrecto = document.getElementById('pasCod').value;
+
+      if (codigoIngresado === '') {
+        codigoPasajeInput.classList.add('is-invalid');
+        return;
+      }
+
+      if (codigoIngresado === codigoCorrecto) {
+        // Código correcto - cerrar modal y mostrar contenido
+        modalValidacion.hide();
+        mostrarContenidoOperacion(operacionSeleccionada, botonSeleccionado);
+      } else {
+        // Código incorrecto
+        intentosRestantes--;
+        intentosRestantesSpan.textContent = intentosRestantes;
+
+        alertError.classList.remove('d-none');
+        codigoPasajeInput.classList.add('is-invalid');
+        codigoPasajeInput.value = '';
+
+        if (intentosRestantes <= 0) {
+          // Se acabaron los intentos - cerrar modal automáticamente
+          setTimeout(() => {
+            modalValidacion.hide();
+            alert('Se ha alcanzado el máximo de intentos. Por favor, verifique su código de pasaje.');
+          }, 2000);
+        } else {
+          // Aún hay intentos - enfocar input
+          setTimeout(() => {
+            codigoPasajeInput.focus();
+          }, 100);
+        }
+      }
     }
 
     // Función para mostrar contenido según operación
@@ -316,21 +491,76 @@
       }
     }
 
-    // Event listeners para botones de operaciones
+    // // Event listeners para botones de operaciones
+    // btnTransferir.addEventListener('click', () => {
+    //   mostrarContenidoOperacion('transferir', btnTransferir);
+    // });
+
+    // btnCambioRuta.addEventListener('click', () => {
+    //   mostrarContenidoOperacion('cambio-ruta', btnCambioRuta);
+    // });
+
+    // btnReembolso.addEventListener('click', () => {
+    //   mostrarContenidoOperacion('reembolso', btnReembolso);
+    // });
+
+    // btnConvertirLibre.addEventListener('click', () => {
+    //   mostrarContenidoOperacion('convertir-libre', btnConvertirLibre);
+    // });
+
+    // Event listeners para botones de operaciones - ahora abren modal
     btnTransferir.addEventListener('click', () => {
-      mostrarContenidoOperacion('transferir', btnTransferir);
+      const pasCod = document.getElementById('pasCod').value;
+      if (!pasCod) {
+        toastr.warning("Debe buscar un pasaje primero", "MENSAJE DEL SISTEMA");
+        return;
+      }
+      abrirModalValidacion('transferir', btnTransferir);
     });
 
     btnCambioRuta.addEventListener('click', () => {
-      mostrarContenidoOperacion('cambio-ruta', btnCambioRuta);
+      const pasCod = document.getElementById('pasCod').value;
+      if (!pasCod) {
+        toastr.warning("Debe buscar un pasaje primero", "MENSAJE DEL SISTEMA");
+        return;
+      }
+      abrirModalValidacion('cambio-ruta', btnCambioRuta);
     });
 
     btnReembolso.addEventListener('click', () => {
-      mostrarContenidoOperacion('reembolso', btnReembolso);
+      const pasCod = document.getElementById('pasCod').value;
+      if (!pasCod) {
+        toastr.warning("Debe buscar un pasaje primero", "MENSAJE DEL SISTEMA");
+        return;
+      }
+      abrirModalValidacion('reembolso', btnReembolso);
     });
 
     btnConvertirLibre.addEventListener('click', () => {
-      mostrarContenidoOperacion('convertir-libre', btnConvertirLibre);
+      const pasCod = document.getElementById('pasCod').value;
+      if (!pasCod) {
+        toastr.warning("Debe buscar un pasaje primero", "MENSAJE DEL SISTEMA");
+        return;
+      }
+      abrirModalValidacion('convertir-libre', btnConvertirLibre);
+    });
+
+    // Event listeners del modal
+    btnValidarCodigo.addEventListener('click', validarCodigo);
+
+    // Permitir validar con Enter
+    codigoPasajeInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        validarCodigo();
+      }
+    });
+
+    // Limpiar errores al escribir
+    codigoPasajeInput.addEventListener('input', () => {
+      codigoPasajeInput.classList.remove('is-invalid');
+      if (codigoPasajeInput.value.trim() !== '') {
+        alertError.classList.add('d-none');
+      }
     });
 
     // Evento para buscar datos al hacer clic en el botón de búsqueda
@@ -340,10 +570,17 @@
         toastr.warning("El número de comprobante es obligatorio", "MENSAJE DEL SISTEMA");
         return;
       }
-      fetch(`ecommerce/home/obtenerDatosPasajero?comprobante=${encodeURIComponent(numComprobante)}`)
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.status === "success") {
+      // Validar formato del número de comprobante
+      const regex = /^[A-Z]\d{3}-\d{8}$/;
+      if (!regex.test(numComprobante)) {
+        toastr.warning("El formato del número de comprobante es incorrecto. Debe ser como 'A001-12345678'", "MENSAJE DEL SISTEMA");
+        return;
+      }
+      fetch(`/ecommerce/home/obtenerDatosPasaje?comprobante=${encodeURIComponent(numComprobante)}`)
+        .then((r) => r.json())
+        .then((json) => {
+          if (json.status === "success") {
+            const data = json.data;
             // Actualizar los campos con los datos obtenidos
             document.getElementById("tipoDocAnt").value = data.tipo_documento;
             document.getElementById("numDocAnt").value = data.numero_documento;
@@ -355,11 +592,14 @@
             document.getElementById("asientoViaje").value = data.asiento;
             document.getElementById("servicioViaje").value = data.servicio;
 
+            document.getElementById("pasCod").value = data.codigo_pasaje;
+            document.getElementById("pasEstTran").value = data.estado_transaccion;
+            document.getElementById("pasEstViaje").value = data.estado_viaje;
+
             // Mostrar el contenido de la operación
             contenidoOperacion.style.display = "block";
-          } else {
-            toastr.error("El número de comprobante no es válido", "ERROR");
-          }
+          } else
+            toastr.error("No se encontraron datos para el comprobante ingresado", "ERROR");
         })
         .catch((error) => {
           toastr.error("Error al obtener los datos del pasajero: " + error.message, "ERROR");
@@ -426,7 +666,7 @@
     document
       .getElementById("comprobante")
       .addEventListener("input", function (e) {
-        this.value = this.value.replace(/[^A-Za-z0-9-]/g, "");
+        this.value = this.value.replace(/[^A-Za-z0-9-]/g, "").toUpperCase();
         if (this.value.length > 4 && !this.value.includes("-")) {
           this.value = this.value.slice(0, 4) + "-" + this.value.slice(4);
         }
@@ -652,20 +892,20 @@
 
               if (d.email) {
                 document.getElementById("correo").value = d.email;
-              }else {
+              } else {
                 document.getElementById("correo").value = "";
               }
 
               if (d.telefono) {
                 document.getElementById("telefono").value = d.telefono;
-              }else {
+              } else {
                 document.getElementById("telefono").value = "";
               }
 
               if (d.f_nacimiento) {
                 document.getElementById("fechaNacimientoNuevo").value = moment(d.f_nacimiento).format("YYYY-MM-DD");
                 validarEdadNuevoPasajero(); // Validar edad al cargar la fecha
-              }else {
+              } else {
                 document.getElementById("fechaNacimientoNuevo").value = "";
               }
 
@@ -676,7 +916,7 @@
                 document.getElementById("sexoMasculino").checked = false;
                 document.getElementById("sexoFemenino").checked = false;
               }
-            }else{
+            } else {
               document.getElementById("nombres").value = "";
               document.getElementById("apellidoPaterno").value = "";
               document.getElementById("apellidoMaterno").value = "";

@@ -191,7 +191,10 @@ class Pasaje:
                     dv.fechaSalida AS fecha_salida,
                     DATE_FORMAT(dv.fechaSalida, '%%H:%%i') AS hora_salida,
                     a.nombre AS asiento,
-                    ser.nombre AS servicio
+                    ser.nombre AS servicio,
+                    pas.codigo AS codigo_pasaje,
+                    pas.enTransaccion AS estado_transaccion,
+                    v.idEstadoViaje AS estado_viaje
                         FROM pasaje pas 
                         INNER JOIN detalle_viaje_asiento dva ON dva.id = pas.idDetalleViajeAsiento
                         INNER JOIN detalle_viaje dv ON dv.id = dva.idDetalle_Viaje
@@ -204,6 +207,7 @@ class Pasaje:
                         INNER JOIN vehiculo ve ON ve.id = a.id_vehiculo
                         INNER JOIN tipo_vehiculo tv ON tv.id = ve.id_tipo_vehiculo
                         INNER JOIN servicio ser ON ser.id = tv.id_servicio
+                        INNER JOIN viaje v ON v.id = dv.idViaje
                         WHERE dp.viajeEnBrazos != 0 AND pas.numeroComprobante=%s;
             """
             filas = conexion.obtener(query, (numComprobante,))
