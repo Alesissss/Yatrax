@@ -144,20 +144,23 @@ class Pasaje:
             # Se esta considerando 26 caracteres alfabéticos y 10 dígitos, lo que da un total de 36 caracteres por 8 posiciones,
             # lo que da un total de 2,821,109,907,456 combinaciones posibles.
     
-    @classmethod
-    def generar_codigo_reserva(cls):
-        conexion = bd.Conexion()
-        try:
-            while True:
-                codigo = f"RES-{''.join(random.choices(string.ascii_uppercase, k=5))}-{random.randint(1000, 9999)}"
-                conexion.ejecutar(
-                    "SELECT 1 FROM pasaje WHERE codigo = %s LIMIT 1",
-                    (codigo,)
-                )
-                if not conexion.obtener():
-                    return codigo
-        finally:
-            conexion.cerrar()
+    # @classmethod
+    # def generar_codigo_reserva(cls):
+    #     conexion = bd.Conexion()
+    #     try:
+    #         while True:
+    #             codigo = f"RES-{''.join(random.choices(string.ascii_uppercase, k=5))}-{random.randint(1000, 9999)}"
+    #             conexion.ejecutar(
+    #                 "SELECT 1 FROM pasaje WHERE codigo = %s LIMIT 1",
+    #                 (codigo,)
+    #             )
+    #             if not conexion.obtener():
+    #                 return codigo
+    #     finally:
+    #         conexion.cerrar()
+    #         # Genera un código de reserva único con el formato "RES-XXXXX-YYYY"
+    #         # donde XXXXX es una cadena aleatoria de 5 letras y YYYY es un número entre 1000 y 9999.
+    #         # lo que da un total de 11,881,376,000 combinaciones posibles.
 
     @classmethod
     def generar_numComprobante(cls):
