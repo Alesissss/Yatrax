@@ -12,6 +12,7 @@ from Models.tipoDocumento import TipoDocumento
 from Models.cliente import Cliente
 from Models.pais import Pais
 from Models.pasaje import Pasaje
+from Models.herramienta import Herramienta
 
 ventas_bp = Blueprint('ventas', __name__, url_prefix='/trabajadores/ventas')
 
@@ -63,6 +64,23 @@ def verificar_sesion():
 
 # VIEWS
 
+# AUXILIARES
+
+def renderizarCompra():
+    herramientas = Herramienta.obtener_todos()
+    return render_template('Ecommerce/home/partials/ventaPasajes.html', herramientas = herramientas)
+
+@ventas_bp.route('/renderizar_itinerario', methods=['POST'])
+def renderizar_itinerario():
+    data = request.get_json()
+    itinerarios = data.get('itinerarios', [])
+    sufijo = data.get('sufijo')
+    # Renderiza el HTML del itinerario con Jinja
+    html_renderizado = render_template('Ecommerce/home/partials/itinerario.html', itinerarios=itinerarios, sufijo = sufijo)
+    return jsonify({'html': html_renderizado})
+
+# END AUXILIARES
+
 @ventas_bp.route('/GestionarTipoCliente')
 def Menu_TipoClientes():
     return render_template('ventas/tipocliente.html', active_page="tipoCliente", active_menu='mVentas')
@@ -113,7 +131,10 @@ def Menu_VenderPasajes():
 
 @ventas_bp.route('/VenderPasajesNuevo')
 def VenderPasajes_Nuevo():
-    return render_template('ventas/pasajesCRUD.html', active_page="venderPasajes", active_menu='mVentas', pasaje = {}, tittle = 'Registrar pasaje', btnId = 'btn_Registrar')
+    datos_recibidos = {
+        "contenido_venta": renderizarCompra()
+    }
+    return render_template('ventas/pasajesCRUD.html', active_page="venderPasajes", active_menu='mVentas', pasaje = {}, tittle = 'Registrar pasaje', btnId = 'btn_Registrar',datos=datos_recibidos)
 
 @ventas_bp.route('/TransaccionesPasajes')
 def Menu_TransaccionesPasajes():

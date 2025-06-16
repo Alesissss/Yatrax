@@ -28,6 +28,9 @@ from Models.herramienta import Herramienta
 from Models.preguntas_frecuentes import PreguntasFrecuentes
 from Models.pasajero import Pasajero
 from Models.ruta import Ruta
+from Models.tipoMetodoPago import TipoMetodoPago
+from Models.asiento import Asiento
+from Models.venta import Venta
 homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/home')
 
 # # ERRORES 
@@ -168,6 +171,7 @@ def renderizar_itinerario():
 # VIEWS
 @homeClientes_bp.route('/inicio')
 def index():
+    
     datos_recibidos = {
         "servicios":Servicio.obtener_todos(),
         "contenido_venta": renderizarCompra()
@@ -545,6 +549,70 @@ def obtener_diseno_vehiculo():
         "Status": "success",
         "msg": "Retornado con éxito" 
     })
+
+@homeClientes_bp.route("/cargar_metodos",methods=["GET"])
+def cargar_metodos():
+    try:
+        lista = TipoMetodoPago.obtener_tipos_y_metodos()
+        por_tipo = dict()
+        for elemento in lista:
+            id_tipo_metodo = str(elemento["id_tipo_metodo"])  # convertimos a str para usar como clave
+            elemento_sin_id = elemento.copy()
+            elemento_sin_id.pop("id_tipo_metodo", None)
+
+            if id_tipo_metodo in por_tipo:
+                por_tipo[id_tipo_metodo].append(elemento_sin_id)
+            else:
+                por_tipo[id_tipo_metodo] = [elemento_sin_id]
+            
+        return {"data":por_tipo, "msg":"Listado correctamente de los métodos","status":1}
+    except Exception as e:
+        return {"data":[], "msg":f"Error al listar los métodos: {repr(e)}","status":-1}
+
+@homeClientes_bp.route("/ocuparAsiento", methods=["POST"])
+def ocupar_asiento():
+    try:
+        id_asiento = request.json.get("asiento_id")
+        
+        estado_actual = Asiento.obtener_estado(id_asiento)
+        if estado_actual['estado'] == 0:
+            return {"data": [], "msg": "El asiento ya está ocupado", "status": 0}
+        Asiento.ocupar_asiento(id_asiento)
+        return {"data": [], "msg": "Asiento ocupado correctamente", "status": 1}
+    except Exception as e:
+        return {"data": [], "msg": f"Error al ocupar el asiento: {repr(e)}", "status": -1}
+
+@homeClientes_bp.route("/liberarAsiento", methods=["POST"])
+def liberar_asiento():
+    try:
+        id_asiento = request.json.get("asiento_id")
+        
+        estado_actual = Asiento.obtener_estado(id_asiento)
+        if estado_actual['estado'] == 1:
+            return {"data": [], "msg": "El asiento ya está libre", "status": 0}
+        
+        Asiento.liberar_asiento(id_asiento)
+        return {"data": [], "msg": "Asiento liberado correctamente", "status": 1}
+    except Exception as e:
+        return {"data": [], "msg": f"Error al liberar el asiento: {repr(e)}", "status": -1}
+    
+@homeClientes_bp.route("/procesar_pago", methods=["POST"])
+def procesar_pago():
+    try:
+        data = request.get_json()
+
+        contacto = data.get("contacto", {})
+        pago = data.get("pago", {})
+        ventas = data.get("ventas", {})
+
+        resultado = Venta.registrar_operacion(contacto, pago, ventas)
+        return resultado
+
+    except Exception as e:
+        return {"data": [], "msg": f"Error al procesar el pago: {repr(e)}", "status": -1}
+
+
+
 
 
 # END REGION COMPRA PASAJE
