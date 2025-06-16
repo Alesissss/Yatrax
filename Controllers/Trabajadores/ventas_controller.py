@@ -1,5 +1,8 @@
 import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort, json
+from xml.etree import ElementTree as ET
+from jinja2 import Environment, FileSystemLoader
+from weasyprint import HTML
 from werkzeug.utils import secure_filename
 from Models.tipoCliente import TipoCliente
 from Models.microservicio import MicroServicio
@@ -8,6 +11,7 @@ from Models.tipoComprobante import TipoComprobante
 from Models.tipoDocumento import TipoDocumento
 from Models.cliente import Cliente
 from Models.pais import Pais
+from Models.pasaje import Pasaje
 
 ventas_bp = Blueprint('ventas', __name__, url_prefix='/trabajadores/ventas')
 
@@ -883,5 +887,19 @@ def dar_baja_cliente(id):  # Recibe el ID de la URL
 
 # END REGION PASAJES Y OPRERACIONES
 
+@ventas_bp.route("/registrar_comprobante", methods=["POST"])
+def registrar_comprobante():
+    
+    ultimaVenta = Pasaje.obtener_ultima_venta()
+    if ultimaVenta:
+        idVenta = ultimaVenta.get('numero')
+
+    comprobantes = Pasaje.obtener_data_pasaje_venta(idVenta)
+    for comprobante in comprobantes:
+        ruta_xml = Pasaje.generar_xml_comprobante(comprobante)
+        print(f"XML generado en: {ruta_xml}")
+    
+
+    return "Comprobante registrado y XML generado"
 
 # END FUNCIONES

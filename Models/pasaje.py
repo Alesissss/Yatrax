@@ -1,6 +1,8 @@
 import bd
 import string
 import random
+import os
+import xml.etree.ElementTree as ET
 
 class Pasaje:
     def __init__(self, id, id_detalle_asiento, numero_comprobante, es_pasaje_normal,
@@ -143,6 +145,21 @@ class Pasaje:
             # lo que da un total de 2,821,109,907,456 combinaciones posibles.
     
     @classmethod
+    def generar_codigo_reserva(cls):
+        conexion = bd.Conexion()
+        try:
+            while True:
+                codigo = f"RES-{''.join(random.choices(string.ascii_uppercase, k=5))}-{random.randint(1000, 9999)}"
+                conexion.ejecutar(
+                    "SELECT 1 FROM pasaje WHERE codigo = %s LIMIT 1",
+                    (codigo,)
+                )
+                if not conexion.obtener():
+                    return codigo
+        finally:
+            conexion.cerrar()
+
+    @classmethod
     def generar_numComprobante(cls):
         conexion = bd.Conexion()
         try:
@@ -194,7 +211,8 @@ class Pasaje:
                     ser.nombre AS servicio,
                     pas.codigo AS codigo_pasaje,
                     pas.enTransaccion AS estado_transaccion,
-                    v.idEstadoViaje AS estado_viaje
+                    v.idEstadoViaje AS estado_viaje,
+                    pas.numeroComprobante,
                         FROM pasaje pas 
                         INNER JOIN detalle_viaje_asiento dva ON dva.id = pas.idDetalleViajeAsiento
                         INNER JOIN detalle_viaje dv ON dv.id = dva.idDetalle_Viaje
@@ -247,6 +265,59 @@ class Pasaje:
             return resultado[0] if resultado else {"msj": None, "msj2": "Error al recuperar mensajes"}
         except Exception as e:
             return {"msj": None, "msj2": f"Error al cambiar estado de pasaje: {e}"}
+        finally:
+            if conexion:
+                conexion.cerrar()
+    
+    @classmethod
+    def generar_xml_comprobante(datos):
+        comprobante = ET.Element('comprobante')
+
+        ET.SubElement(comprobante, 'ruc').text = datos['ruc']
+        
+        cliente = ET.SubElement(comprobante, 'cliente')
+        ET.SubElement(cliente, 'nombre').text = datos['nombre_completo']
+        ET.SubElement(cliente, 'tipo_documento').text = datos['tipo_documento']
+        ET.SubElement(cliente, 'numero_documento').text = datos['numero_documento']
+
+        servicio = ET.SubElement(comprobante, 'servicio')
+        ET.SubElement(servicio, 'origen').text = datos['origen']
+        ET.SubElement(servicio, 'destino').text = datos['destino']
+        ET.SubElement(servicio, 'fecha_salida').text = datos['fecha_salida']
+        ET.SubElement(servicio, 'hora_salida').text = datos['hora_salida']
+        ET.SubElement(servicio, 'asiento').text = datos['asiento']
+        ET.SubElement(servicio, 'codigo_pasaje').text = datos['codigo_pasaje']
+        # ET.SubElement(comprobante, 'importe').text = datos['importe']
+
+        tree = ET.ElementTree(comprobante)
+        carpeta = os.path.join('Static', 'xml')
+        os.makedirs(carpeta, exist_ok=True)
+        
+        nombre_archivo = f"{datos['numeroComprobante'].replace('/', '-')}.xml"
+        ruta_archivo = os.path.join(carpeta, nombre_archivo)
+
+        tree.write(ruta_archivo, encoding='utf-8', xml_declaration=True)
+        return ruta_archivo 
+    
+    @classmethod
+    def obtener_ultima_venta(cls):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            conexion.ejecutar("SELECT MAX(id) FROM pasaje;")
+            resultado = conexion.obtener()
+            return resultado[0] if resultado and resultado[0] else 0
+        finally:
+            if conexion:
+                conexion.cerrar()
+                
+    @classmethod
+    def obtener_data_pasaje_venta(cls, id_venta):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            filas = conexion.obtener("SELECT * FROM pasaje WHERE id_venta = %s;", (id_venta,))
+            return filas[0] if filas else None
         finally:
             if conexion:
                 conexion.cerrar()
