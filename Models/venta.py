@@ -42,20 +42,20 @@ class Venta:
             id_cliente = conexion.cursor.lastrowid
 
             # 2. Registrar VENTA
-            if pago.get("")
-            insert_venta = """
-                INSERT INTO venta (idCliente, fecha, subTotal, igv, idMetodoPago, idTipoComprobante)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """
-            conexion.ejecutar(insert_venta, (
-                id_cliente,
-                datetime.now(),
-                0.0,  # Puedes calcularlo luego
-                0.0,
-                pago.get("metodo_especifico"),
-                contacto.get("tipo_comprobante")
-            ), auto_commit=False)
-            id_venta = conexion.cursor.lastrowid
+            if pago.get(""):
+                insert_venta = """
+                    INSERT INTO venta (idCliente, fecha, subTotal, igv, idMetodoPago, idTipoComprobante)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """
+                conexion.ejecutar(insert_venta, (
+                    id_cliente,
+                    datetime.now(),
+                    0.0,  # Puedes calcularlo luego
+                    0.0,
+                    pago.get("metodo_especifico"),
+                    contacto.get("tipo_comprobante")
+                ), auto_commit=False)
+                id_venta = conexion.cursor.lastrowid
 
             # 3. Registrar PASAJEROS, PASAJE y DETALLE_PASAJE
             for key, pasajero in ventas.items():
