@@ -1,5 +1,6 @@
 from datetime import datetime
 from Models.tipoDocumento import TipoDocumento
+from Models.promocion import Promocion
 import bd  # Utilizamos tu clase Conexion personalizada
 
 class Venta:
@@ -40,28 +41,44 @@ class Venta:
                 ), auto_commit=False)
             
             id_cliente = conexion.cursor.lastrowid
-
+            montoVenta = 100
+            if pago.get("datos_especificos")["codigo_promocional"]:
+                codPromo = Promocion.obtener_por_codigo(pago.get("datos_especificos")["codigo_promocional"])
+                insert_venta = """
+                    INSERT INTO venta (idCliente, fecha, subTotal, igv, idMetodoPago, idTipoComprobante, idPromocion)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """
+                conexion.ejecutar(insert_venta, (
+                    id_cliente,
+                    datetime.now(),
+                    0.0,  # Puedes calcularlo luego
+                    0.0,
+                    pago.get("metodo_especifico"),
+                    contacto.get("tipo_comprobante"),
+                    codPromo
+                ), auto_commit=False)
+            else:
+                insert_venta = """
+                    INSERT INTO venta (idCliente, fecha, subTotal, igv, idMetodoPago, idTipoComprobante)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """
+                conexion.ejecutar(insert_venta, (
+                    id_cliente,
+                    datetime.now(),
+                    0.0,  # Puedes calcularlo luego
+                    0.0,
+                    pago.get("metodo_especifico"),
+                    contacto.get("tipo_comprobante")
+                ), auto_commit=False)
             # 2. Registrar VENTA
-            if pago.get("")
-            insert_venta = """
-                INSERT INTO venta (idCliente, fecha, subTotal, igv, idMetodoPago, idTipoComprobante)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """
-            conexion.ejecutar(insert_venta, (
-                id_cliente,
-                datetime.now(),
-                0.0,  # Puedes calcularlo luego
-                0.0,
-                pago.get("metodo_especifico"),
-                contacto.get("tipo_comprobante")
-            ), auto_commit=False)
+            
             id_venta = conexion.cursor.lastrowid
 
             # 3. Registrar PASAJEROS, PASAJE y DETALLE_PASAJE
             for key, pasajero in ventas.items():
 
                 insert_pasajero = """
-                    INSERT INTO pasajero (nombre, ape_paterno, ape_materno, numero_documento, tipo_documento, sexo, f_nacimiento, telefono, email)
+                    INSERT INTO pasajero (nombre, ape_paterno, ape_materno, numero_documento, idTipoDocumento, sexo, f_nacimiento, telefono, email)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """
                 conexion.ejecutar(insert_pasajero, (
@@ -69,14 +86,14 @@ class Venta:
                     pasajero.get("apellidoPaterno"),
                     pasajero.get("apellidoMaterno"),
                     pasajero.get("numDoc"),
-                    contacto.get("tipo_documento"),
+                    TipoDocumento.obtener_por_nombre(pasajero.get("tipoDoc")),
                     pasajero.get("sexo"),
                     pasajero.get("fechaNacimiento"),
                     pasajero.get("telefono"),
                     pasajero.get("correo")
                 ), auto_commit=False)
                 id_pasajero = conexion.cursor.lastrowid
-
+    
                 insert_pasaje = """
                     INSERT INTO pasaje (idDetalleViajeAsiento, nombre, idVenta)
                     VALUES (%s, %s, %s)

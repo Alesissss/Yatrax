@@ -50,8 +50,9 @@ const AppState = {
 // =============================================================================
 
 class Venta {
-    constructor(numDoc, nombres, apellidoPaterno, apellidoMaterno, fechaNacimiento,
+    constructor(tipo_doc, numDoc, nombres, apellidoPaterno, apellidoMaterno, fechaNacimiento,
         telefono, seleccionSexo, sexo, correo, brazos, esMenor) {
+        this.tipoDoc = tipo_doc
         this.numDoc = numDoc;
         this.nombres = nombres;
         this.apellidoPaterno = apellidoPaterno;
@@ -1199,6 +1200,7 @@ const FormManager = {
     },
 
     recopilarDatosFormulario(idAsiento) {
+        const tipoDoc = document.getElementById(`tipo_doc_${idAsiento}`).value;
         const numDoc = document.getElementById(`numeroDocNuevo_${idAsiento}`).value;
         const nombres = document.getElementById(`nombres_${idAsiento}`).value;
         const apellidoPaterno = document.getElementById(`apellidoPaterno_${idAsiento}`).value;
@@ -1212,7 +1214,7 @@ const FormManager = {
         const recuperarSeleccion = document.querySelector(`input[name="sexo-${idAsiento}"]:checked`)?.id;
         const sexo = recuperarSeleccion?.includes("Masculino") ? 1 : 0;
 
-        return [numDoc, nombres, apellidoPaterno, apellidoMaterno, fechaNacimiento,
+        return [tipoDoc, numDoc, nombres, apellidoPaterno, apellidoMaterno, fechaNacimiento,
             telefono, recuperarSeleccion, sexo, correo, brazos, esMenor];
     }
 };
@@ -2038,13 +2040,17 @@ const PaymentManager = {
                     </div>
                 </div>
             `;
-        } else if (tipoMetodo === "Billetera virtual") {
+        } else if (tipoMetodo === "BILLETERA VIRTUAL") {
             if (metodo.qr) {
                 divExtra.innerHTML = `
                     <div class="text-center">
                         <p class="mb-3">Escanea el código QR con tu app de ${metodo.metodo}</p>
                         <img src="${metodo.qr}" alt="QR ${metodo.metodo}" style="max-width: 200px; border: 1px solid #ddd; border-radius: 8px;">
                         <p class="mt-3 text-muted small">Una vez realizado el pago, haz clic en "Finalizar Pago"</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Código promocional (opcional)</label>
+                        <input id="codigo_promocional_billetera" class="form-control" placeholder="Ingrese código promocional">
                     </div>
                 `;
             }
@@ -2220,7 +2226,7 @@ const PaymentManager = {
 
         // Capturar datos específicos según el método
         if (document.getElementById("numero_tarjeta")) {
-            datosPago.tarjeta = {
+            datosPago.datos_especificos = {
                 numero: document.getElementById("numero_tarjeta").value.replace(/\s/g, ''),
                 titular: document.getElementById("titular_tarjeta").value,
                 mes_vencimiento: document.getElementById("mes_vencimiento").value,
@@ -2231,9 +2237,15 @@ const PaymentManager = {
         }
 
         if (document.getElementById("codigo_promocional_efectivo")) {
-            datosPago.efectivo = {
+            datosPago.datos_especificos = {
                 codigo_promocional: document.getElementById("codigo_promocional_efectivo").value || null,
                 codigo_reserva: document.getElementById("codigo_reserva")?.textContent || null
+            };
+        }
+
+        if (document.getElementById("codigo_promocional_billetera")) {
+            datosPago.datos_especificos = {
+                codigo_promocional: document.getElementById("codigo_promocional_billetera").value || null,
             };
         }
 
