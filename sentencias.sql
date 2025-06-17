@@ -2698,7 +2698,9 @@ BEGIN
 
     SELECT COUNT(*) INTO cCliente FROM cliente WHERE ID = P_ID;
 
-    IF cCliente <= 0 THEN
+    IF (SELECT 1 FROM venta WHERE idCliente = P_ID) THEN
+        SET @MSJ2 = 'El cliente no se puede eliminar porque otros registros depende de este';
+    ELSEIF cCliente <= 0 THEN
         SET @MSJ2 = 'El cliente que intenta eliminar no existe';
     ELSE
         DELETE FROM cliente WHERE ID = P_ID;
