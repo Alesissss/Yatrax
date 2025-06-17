@@ -133,11 +133,11 @@ class Pasaje:
         try:
             while True:
                 code = ''.join(random.choices(alphabet, k=length))
-                conexion.ejecutar(
+                resultado = conexion.obtener(
                     "SELECT 1 FROM pasaje WHERE codigo = %s LIMIT 1",
                     (code,)
                 )
-                if not conexion.obtener():
+                if not resultado:
                     return code
         finally:
             conexion.cerrar()
@@ -167,8 +167,7 @@ class Pasaje:
     def generar_numComprobante(cls):
         conexion = bd.Conexion()
         try:
-            conexion.ejecutar("SELECT MAX(numeroComprobante) FROM pasaje")
-            row = conexion.obtener()
+            row = conexion.obtener("SELECT MAX(numeroComprobante) FROM pasaje")
             ultimo = row[0] if row and row[0] else None
 
             if not ultimo:
