@@ -28,13 +28,12 @@ class Venta:
                 ), auto_commit=False)
             else:
                 insert_cliente = """
-                    INSERT INTO cliente (razon_social, numero_documento, tipoDocumento, telefono, email,direccion)
+                    INSERT INTO cliente (nombre, numero_documento, tipoDocumento, telefono, email,direccion)
                     VALUES (%s, %s, %s, %s, %s, %s, %s)
                 """
                 conexion.ejecutar(insert_cliente, (
                 contacto.get("razon_social"),
                 contacto.get("ruc"),
-                contacto.get("numero_documento"),
                 TipoDocumento.obtener_por_nombre(contacto.get("tipo_documento")),
                 contacto.get("telefono"),
                 contacto.get("email"),
