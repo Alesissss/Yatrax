@@ -75,6 +75,7 @@
       <!-- Contenido colapsable -->
       <div id="{{ collapse_id }}" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
         <div class="accordion-body">
+          {% set id = it.id %}
           {% include "Ecommerce/home/partials/itinerario_contenido.html" with context %}
         </div>
       </div>
