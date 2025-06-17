@@ -3229,7 +3229,10 @@ BEGIN
     ELSEIF cTipoUsuario <= 0 THEN
         SET @MSJ2 = 'El tipo de usuario que intenta eliminar no existe';
     ELSE
+        DELETE FROM conf_dclaims WHERE idTipoUsuario = P_ID;
+        DELETE FROM conf_dmenus WHERE idTipoUsuario = P_ID;
         DELETE FROM tipo_usuario WHERE id = P_ID;
+        SET @MSJ = 'El tipo de usuario se eliminó correctamente';
     END IF;
 END $$
 
