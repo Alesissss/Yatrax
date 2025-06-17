@@ -604,10 +604,15 @@ def procesar_pago():
         ventas = data.get("ventas", {})
 
         resultado = Venta.registrar_operacion(contacto, pago, ventas)
-        return resultado
+
+        if resultado["status"] == 1:
+            return jsonify({"Status": "success", "codigo_confirmacion": f"VENTA-{resultado['id_venta']}"})
+        else:
+            return jsonify({"Status": "error", "Msj": resultado["msg"]})
 
     except Exception as e:
-        return {"data": [], "msg": f"Error al procesar el pago: {repr(e)}", "status": -1}
+        return jsonify({"Status": "error", "Msj": f"Error inesperado: {repr(e)}"})
+
 
 
 
