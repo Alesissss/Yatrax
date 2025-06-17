@@ -1354,7 +1354,7 @@ def ver_asiento(id):
 @viajes_bp.route("/DarBajaAsiento/<int:id>", methods=['POST'])
 def dar_baja_asiento(id):
     try:
-        mensajes = Asiento.darBaja(id)
+        mensajes = Asiento.dar_baja(id)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 
