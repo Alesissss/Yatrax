@@ -130,6 +130,7 @@ class Pasaje:
     def generar_codigo_unico(cls, length=8):
         alphabet = string.ascii_uppercase + string.digits
         conexion = bd.Conexion()
+        print(9)
         try:
             while True:
                 code = ''.join(random.choices(alphabet, k=length))
@@ -139,6 +140,7 @@ class Pasaje:
                 )
                 if not resultado:
                     return code
+            print(10)
         finally:
             conexion.cerrar()
             # Si existe, se itera de nuevo
@@ -167,16 +169,18 @@ class Pasaje:
     def generar_numComprobante(cls):
         conexion = bd.Conexion()
         try:
-            row = conexion.obtener("SELECT MAX(numeroComprobante) FROM pasaje")
+            row = conexion.obtener("SELECT MAX(numeroComprobante) as numero FROM pasaje")
             ultimo = row[0] if row and row[0] else None
-
-            if not ultimo:
+            print(5)
+            if not ultimo['numero']:
                 return 'A000-00000001'
-
+            print(6)
+            print(ultimo)
+            ultimo = ultimo['numero']
             letra = ultimo[0]
             serie = int(ultimo[1:4])
             corr  = int(ultimo[5:]) + 1
-
+            print(7)
             if corr > 99999999:
                 corr = 0
                 serie += 1
@@ -189,7 +193,7 @@ class Pasaje:
 
             s_txt = f"{serie:03d}"
             c_txt = f"{corr:08d}"
-
+            print(8)
             return f"{letra}{s_txt}-{c_txt}"
 
         finally:

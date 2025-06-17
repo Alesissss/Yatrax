@@ -107,6 +107,7 @@ class Venta:
                     INSERT INTO pasaje (idDetalleViajeAsiento, numeroComprobante, esPasajeNormal, esPasajeLibre, esTransferencia, esReserva, esCambioRuta, idVenta, codigo, enTransaccion)
                     VALUES (%s, %s, %s,%s, %s, %s,%s, %s, %s,%s)
                 """
+                print(4)
                 conexion.ejecutar(insert_pasaje, (
                     # idDetalleViajeAsiento
                     key,
@@ -132,7 +133,7 @@ class Venta:
                 id_pasaje = conexion.cursor.lastrowid
                 print(4)
                 insert_detalle = """
-                    INSERT INTO detalle_pasaje (idPasajero, idPasaje, esMenorEdad, viajaEnBrazos, fecha_registro)
+                    INSERT INTO detalle_pasaje (idPasajero, idPasaje, esMenorEdad, viajeEnBrazos, fecha_registro)
                     VALUES (%s, %s, %s, %s, %s)
                 """
                 conexion.ejecutar(insert_detalle, (
