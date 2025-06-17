@@ -167,8 +167,8 @@ class Pasaje:
     def generar_numComprobante(cls):
         conexion = bd.Conexion()
         try:
-            conexion.ejecutar("SELECT MAX(numeroComprobante) FROM pasaje")
-            row = conexion.obtener()
+            row=conexion.obtener("SELECT MAX(numeroComprobante) FROM pasaje")
+            
             ultimo = row[0] if row and row[0] else None
 
             if not ultimo:
