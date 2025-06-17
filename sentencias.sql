@@ -2698,7 +2698,9 @@ BEGIN
 
     SELECT COUNT(*) INTO cCliente FROM cliente WHERE ID = P_ID;
 
-    IF cCliente <= 0 THEN
+    IF (SELECT 1 FROM venta WHERE idCliente = P_ID) THEN
+        SET @MSJ2 = 'El cliente no se puede eliminar porque otros registros depende de este';
+    ELSEIF cCliente <= 0 THEN
         SET @MSJ2 = 'El cliente que intenta eliminar no existe';
     ELSE
         DELETE FROM cliente WHERE ID = P_ID;
@@ -6255,3 +6257,123 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+-- Crear procedimiento SP_REGISTRAR_MARCA
+DELIMITER $$ 
+CREATE PROCEDURE SP_REGISTRAR_MARCA(
+    IN P_NOMBRE VARCHAR(100),
+    IN P_ESTADO BOOLEAN,
+    IN P_USUARIO VARCHAR(100),
+    IN P_LOGO VARCHAR(255) -- Parámetro para el logo
+)
+BEGIN
+    DECLARE cNombre INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+    
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+    
+    SELECT COUNT(*) INTO cNombre FROM marca WHERE NOMBRE = P_NOMBRE;
+    IF cNombre > 0 THEN
+        SET @MSJ2 = 'La marca ya está registrada';
+    ELSE
+        INSERT INTO marca (NOMBRE, ESTADO, FECHA_REGISTRO, USUARIO, LOGO) 
+        VALUES (P_NOMBRE, P_ESTADO, CURRENT_TIMESTAMP, P_USUARIO, P_LOGO); -- Incluir logo
+        SET @MSJ = 'Marca registrada correctamente';
+    END IF;
+END $$ 
+
+-- Crear procedimiento SP_EDITAR_MARCA
+DELIMITER $$ 
+CREATE PROCEDURE SP_EDITAR_MARCA(
+    IN P_ID INT,
+    IN P_NOMBRE VARCHAR(100),
+    IN P_ESTADO BOOLEAN,
+    IN P_LOGO VARCHAR(255) -- Parámetro para el logo
+)
+BEGIN
+    DECLARE cMarca INT;
+    DECLARE cNombre INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cMarca FROM marca WHERE ID = P_ID;
+    SELECT COUNT(*) INTO cNombre FROM marca WHERE NOMBRE = P_NOMBRE AND ID != P_ID;
+
+    IF cMarca <= 0 THEN
+        SET @MSJ2 = 'Marca no encontrada';
+    ELSEIF cNombre != 0 THEN
+        SET @MSJ2 = 'El nombre de la marca ya existe';
+    ELSE
+        UPDATE marca 
+        SET NOMBRE = P_NOMBRE, 
+            ESTADO = P_ESTADO,
+            LOGO = P_LOGO -- Actualizar logo
+        WHERE ID = P_ID;
+        SET @MSJ = 'Marca modificada correctamente';
+    END IF;
+END $$ 
+
+-- Crear procedimiento SP_DARBAJA_MARCA
+DELIMITER $$ 
+CREATE PROCEDURE SP_DARBAJA_MARCA(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cMarca INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cMarca FROM marca WHERE ID = P_ID;
+
+    IF cMarca <= 0 THEN
+        SET @MSJ2 = 'Marca no encontrada';
+    ELSE
+        UPDATE marca 
+        SET ESTADO = 0
+        WHERE ID = P_ID;
+        SET @MSJ = 'Marca dada de baja correctamente';
+    END IF;
+END $$ 
+
+-- Crear procedimiento SP_ELIMINAR_MARCA
+DELIMITER $$ 
+CREATE PROCEDURE SP_ELIMINAR_MARCA(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cMarca INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cMarca FROM marca WHERE ID = P_ID;
+
+    IF EXISTS (SELECT 1 FROM tipo_vehiculo WHERE id_marca = P_ID) THEN
+        SET @MSJ2 = 'No se puede eliminar la marca porque otros registros dependen de este';
+    ELSEIF cMarca <= 0 THEN
+        SET @MSJ2 = 'Marca no encontrada';
+    ELSE
+        DELETE FROM marca WHERE ID = P_ID;
+        SET @MSJ = 'Marca eliminada correctamente';
+    END IF;
+END $$ 
