@@ -421,22 +421,22 @@ CREATE TABLE escala (
 
 CREATE TABLE cliente (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    numero_documento VARCHAR(11) NOT NULL, -- Se recomienda especificar una longitud
-    nombre VARCHAR(255) NOT NULL,
+    numero_documento VARCHAR(11), -- Se recomienda especificar una longitud
+    nombre VARCHAR(255),
     ape_paterno VARCHAR(50),
     ape_materno VARCHAR(50),
     razon_social VARCHAR(255), -- Para clientes jurídicos
     sexo BOOLEAN,
     f_nacimiento DATE,
-    direccion VARCHAR(255) NOT NULL,
-    telefono VARCHAR(15) NOT NULL,
-    email VARCHAR(255) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    estado BOOLEAN NOT NULL,
-    id_pais INT NOT NULL,
-    id_tipo_cliente INT NOT NULL,
-    id_tipo_doc INT NOT NULL,
-    fechaRegistro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    direccion VARCHAR(255),
+    telefono VARCHAR(15),
+    email VARCHAR(255),
+    password VARCHAR(255),
+    estado BOOLEAN,
+    id_pais INT,
+    id_tipo_cliente INT,
+    id_tipo_doc INT,
+    fechaRegistro DATETIME DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NULL,
     -- Claves foráneas
     CONSTRAINT fk_pais FOREIGN KEY (id_pais) REFERENCES PAIS(id),
@@ -446,11 +446,11 @@ CREATE TABLE cliente (
 
 -- Crear tabla conf_general
 CREATE TABLE conf_general (
-id INT AUTO_INCREMENT PRIMARY KEY,
-tarifaBase DECIMAL(9,2) NOT NULL,
-igv DECIMAL(9,2) NOT NULL,
-max_pasajes_venta INT NOT NULL,
-viajesReprogramables BOOLEAN NOT NULL
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tarifaBase DECIMAL(9,2) NOT NULL,
+    igv DECIMAL(9,2) NOT NULL,
+    max_pasajes_venta INT NOT NULL,
+    viajesReprogramables BOOLEAN NOT NULL
 );
 
 -- Crear tabla menus
@@ -2128,7 +2128,9 @@ BEGIN
 
     SELECT COUNT(*) INTO cID FROM incidencia WHERE id = P_ID;
 
-    IF cID <= 0 THEN
+    IF EXISTS (SELECT 1 FROM personal_incidencia WHERE incidenciaid = P_ID) THEN
+        SET @MSJ2 = 'No puede eliminar la incidencia seleccionada porque existen otros registros que dependen de este'; 
+    ELSEIF cID <= 0 THEN
         SET @MSJ2 = 'La incidencia que intenta eliminar no existe';
     ELSE
         DELETE FROM incidencia WHERE id = P_ID;
@@ -2950,7 +2952,9 @@ BEGIN
     FROM sucursal 
     WHERE id = P_ID;
 
-    IF cSucursal <= 0 THEN
+    IF EXISTS (SELECT 1 FROM escala WHERE idSucursal = P_ID) THEN
+        SET @MSJ2 = 'Esta sucursal no se puede eliminar porque otros registros dependen de este';
+    ELSEIF cSucursal <= 0 THEN
         SET @MSJ2 = 'La sucursal que intenta eliminar no existe';
     ELSE
         DELETE FROM sucursal WHERE id = P_ID;
@@ -3088,7 +3092,9 @@ BEGIN
 
     SELECT COUNT(*) INTO cAsiento FROM asiento WHERE id = P_ID;
 
-    IF cAsiento = 0 THEN
+    IF EXISTS (SELECT 1 FROM viaje WHERE idVehiculo = (SELECT id_vehiculo FROM asiento WHERE id = P_ID)) THEN
+        SET @MSJ2 = 'Este asiento no se puede eliminar porque otros registros dependen de este';
+    ELSEIF cAsiento = 0 THEN
         SET @MSJ2 = 'El asiento que intenta eliminar no existe';
     ELSE
         DELETE FROM asiento WHERE id = P_ID;
@@ -3218,10 +3224,15 @@ BEGIN
 
     SELECT COUNT(*) INTO cTipoUsuario FROM tipo_usuario WHERE id = P_ID;
 
-    IF cTipoUsuario <= 0 THEN
+    IF EXISTS (SELECT 1 FROM usuarios WHERE id_tipousuario = P_ID) THEN
+        SET @MSJ2 = 'El tipo de usuario no se puede eliminar porque otros registros dependen de este';
+    ELSEIF cTipoUsuario <= 0 THEN
         SET @MSJ2 = 'El tipo de usuario que intenta eliminar no existe';
     ELSE
+        DELETE FROM conf_dclaims WHERE idTipoUsuario = P_ID;
+        DELETE FROM conf_dmenus WHERE idTipoUsuario = P_ID;
         DELETE FROM tipo_usuario WHERE id = P_ID;
+        SET @MSJ = 'El tipo de usuario se eliminó correctamente';
     END IF;
 END $$
 
@@ -3347,7 +3358,9 @@ BEGIN
 
     SELECT COUNT(*) INTO cTipoPersonal FROM tipo_personal WHERE id = P_ID;
 
-    IF cTipoPersonal <= 0 THEN
+    IF EXISTS (SELECT 1 FROM personal WHERE id_tipopersonal = P_ID) THEN
+        SET @MSJ2 = 'El tipo de personal no se puede eliminar porque otros registros dependen de este';
+    ELSEIF cTipoPersonal <= 0 THEN
         SET @MSJ2 = 'El tipo de personal que intenta eliminar no existe';
     ELSE
         DELETE FROM tipo_personal WHERE id = P_ID;
@@ -3852,7 +3865,9 @@ BEGIN
     FROM tipo_vehiculo
     WHERE id = p_id;
 
-    IF v_existe = 0 THEN
+    IF EXISTS (SELECT 1 FROM vehiculo WHERE id_tipo_vehiculo = P_ID) THEN
+        SET MSJ2 = 'No se puede eliminar el tipo de vehículo porque otros registros dependen de este';
+    ELSEIF v_existe = 0 THEN
         SET MSJ2 = 'El tipo de vehículo no existe';
     ELSE
         START TRANSACTION;
@@ -4174,20 +4189,27 @@ BEGIN
     FROM vehiculo
     WHERE id = p_idVehiculo;
 
-    DELETE FROM vehiculo
-    WHERE id = p_idVehiculo;
-
-    IF ROW_COUNT() = 0 THEN
-        SET @MSJ2 = 'No se encontró el vehículo para eliminar';
+    IF EXISTS (SELECT 1 FROM viaje WHERE idVehiculo = p_idVehiculo) THEN
+        SET @MSJ2 = 'No se puede eliminar el vehículo porque otros registros dependen de este';
         ROLLBACK;
     ELSE
-        UPDATE tipo_vehiculo
-        SET cantidad = cantidad - 1
-        WHERE id = v_idTipoVehiculo;
-
+        DELETE FROM asiento WHERE id_vehiculo = p_idVehiculo;
+        DELETE FROM vehiculo WHERE id = p_idVehiculo;
         SET @MSJ = 'Vehículo eliminado correctamente';
         COMMIT;
     END IF;
+
+    -- IF ROW_COUNT() = 0 THEN
+    --     SET @MSJ2 = 'No se encontró el vehículo para eliminar';
+    --     ROLLBACK;
+    -- ELSE
+    --     UPDATE tipo_vehiculo
+    --     SET cantidad = cantidad - 1
+    --     WHERE id = v_idTipoVehiculo;
+
+    --     SET @MSJ = 'Vehículo eliminado correctamente';
+    --     COMMIT;
+    -- END IF;
 END $$
 
 -- Registrar horario
@@ -4575,7 +4597,9 @@ BEGIN
 
     SELECT COUNT(*) INTO cTipoDocumento FROM tipo_documento WHERE id = P_ID;
 
-    IF cTipoDocumento <= 0 THEN
+    IF EXISTS (SELECT 1 FROM pasajero WHERE idTipoDocumento = P_ID) THEN
+        SET @MSJ2 = 'El tipo de documento no se puede eliminar porque otros registros dependen de este';
+    ELSEIF cTipoDocumento <= 0 THEN
         SET @MSJ2 = 'El tipo de documento que intenta eliminar no existe';
     ELSE
         DELETE FROM tipo_documento WHERE id = P_ID;
@@ -4734,7 +4758,9 @@ BEGIN
     FROM tipo_cliente 
     WHERE idTipoCliente = P_ID;
 
-    IF cUsuario <= 0 THEN
+    IF EXISTS (SELECT 1 FROM cliente WHERE id_tipo_cliente = P_ID) THEN
+        SET @MSJ2 = 'El tipo de cliente no se puede eliminar porque otros registros dependen de este';
+    ELSEIF cUsuario <= 0 THEN
         SET @MSJ2 = 'El tipo de cliente que intenta eliminar no existe';
     ELSE
         DELETE FROM tipo_cliente 
@@ -4929,7 +4955,9 @@ BEGIN
     FROM tipo_comprobante 
     WHERE idTipoComprobante = P_ID;
 
-    IF cUsuario <= 0 THEN
+    IF EXISTS (SELECT 1 FROM venta WHERE idTipoComprobante = P_ID) THEN
+        SET @MSJ2 = 'El tipo de comprobante no se puede eliminar porque otros registros dependen de este';
+    ELSEIF cUsuario <= 0 THEN
         SET @MSJ2 = 'El tipo de comprobante que intenta eliminar no existe';
     ELSE
         DELETE FROM tipo_comprobante 
@@ -5349,7 +5377,9 @@ BEGIN
     FROM metodo_pago 
     WHERE id = P_ID;
 
-    IF cMetodoPago <= 0 THEN
+    IF EXISTS (SELECT 1 FROM venta WHERE idMetodoPago = P_ID) THEN
+        SET @MSJ2 = 'El método de no se puede eliminar porque otros registros dependen de este';
+    ELSEIF cMetodoPago <= 0 THEN
         SET @MSJ2 = 'El método de pago que intenta eliminar no existe';
     ELSE
         DELETE FROM metodo_pago 
@@ -5475,7 +5505,10 @@ BEGIN
     SET @MSJ2 = NULL;
 
     SELECT COUNT(*) INTO cExiste FROM ruta WHERE ID = P_ID;
-    IF cExiste <= 0 THEN
+
+    IF EXISTS (SELECT 1 FROM viaje WHERE idRuta = P_ID) THEN
+        SET @MSJ2 = 'La ruta seleccionada no se puede eliminar porque otros registros dependen de este';
+    ELSEIF cExiste <= 0 THEN
         SET @MSJ2 = 'La ruta que intenta eliminar no existe';
     ELSE
         DELETE FROM escala WHERE idRuta = P_ID;
@@ -5585,7 +5618,10 @@ BEGIN
     SET @MSJ2 = NULL;
 
     SELECT COUNT(*) INTO cPersonal FROM personal WHERE ID = P_ID;
-    IF cPersonal <= 0 THEN
+    
+    IF EXISTS (SELECT 1 FROM detalle_personal WHERE idPersonal = P_ID) THEN
+        SET @MSJ2 = 'El personal seleccionado no se puede eliminar porque otros registros dependen de este';
+    ELSEIF cPersonal <= 0 THEN
         SET @MSJ2 = 'El personal que intenta eliminar no existe';
     ELSE
         DELETE FROM personal WHERE ID = P_ID;
@@ -5715,7 +5751,9 @@ BEGIN
     FROM tipo_metodoPago 
     WHERE idTipoMetodoPago = P_ID;
 
-    IF cExiste <= 0 THEN
+    IF EXISTS (SELECT 1 FROM metodo_pago WHERE id_tipo_metodoPago = P_ID) THEN
+        SET @MSJ2 = 'El tipo de método de pago seleccionado no se puede eliminar porque otros registros dependen de este';
+    ELSEIF cExiste <= 0 THEN
         SET @MSJ2 = 'El tipo de método de pago que intenta eliminar no existe';
     ELSE
         DELETE FROM tipo_metodoPago 
@@ -5973,9 +6011,13 @@ BEGIN
     SET MSJ  = NULL;
     SET MSJ2 = NULL;
 
-    DELETE FROM tipo_reclamo
-    WHERE id = p_id;
-    SET MSJ = 'Tipo_reclamo eliminado correctamente';
+    IF EXISTS (SELECT 1 FROM reclamo WHERE id_tipo_reclamo = p_id) THEN
+        SET MSJ2 = 'El tipo reclamo no se puede eliminar porque otros registros dependen de este';
+    ELSE
+        DELETE FROM tipo_reclamo
+        WHERE id = p_id;
+        SET MSJ = 'Tipo reclamo eliminado correctamente';
+    END IF;
 END$$
 
 CREATE PROCEDURE SP_DARBAJA_TIPO_RECLAMO (
@@ -6204,9 +6246,12 @@ CREATE PROCEDURE SP_ELIMINAR_PROMOCION (
     IN p_id INT
 )
 BEGIN
-    
-    DELETE FROM promocion WHERE id = p_id;
-    SET @MSJ = 'Promoción eliminada correctamente';
+    IF EXISTS (SELECT 1 FROM venta WHERE idPromocion = p_id) THEN
+        SET @MSJ2 = 'La promoción no se puede eliminar porque otros registros dependen de este';
+    ELSE
+        DELETE FROM promocion WHERE id = p_id;
+        SET @MSJ = 'Promoción eliminada correctamente';
+    END IF;
 END$$
 
 DELIMITER ;
