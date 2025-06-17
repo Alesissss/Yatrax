@@ -1,4 +1,5 @@
 from datetime import datetime
+from Models.tipoDocumento import TipoDocumento
 import bd  # Utilizamos tu clase Conexion personalizada
 
 class Venta:
@@ -7,25 +8,43 @@ class Venta:
     def registrar_operacion(cls, contacto: dict, pago: dict, ventas: dict):
         conexion = bd.Conexion()
         try:
+            # TIPO COMPROBANTE 1 == BOLETA ,  2 == FACTURA
+            if(contacto.get("tipo_comprobante") == "1"):
             # 1. Registrar CLIENTE
-            insert_cliente = """
-                INSERT INTO cliente (nombre, ape_paterno, ape_materno, numero_documento, tipoDocumento, telefono, email)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """
-            conexion.ejecutar(insert_cliente, (
+                insert_cliente = """
+                    INSERT INTO cliente (nombre, ape_paterno, ape_materno, numero_documento, tipoDocumento, telefono, email)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """
+                conexion.ejecutar(insert_cliente, (
                 contacto.get("nombres"),
                 contacto.get("apellido_paterno"),
                 contacto.get("apellido_materno"),
                 contacto.get("numero_documento"),
-                contacto.get("tipo_documento"),
+                TipoDocumento.obtener_por_nombre(contacto.get("tipo_documento")),
                 contacto.get("telefono"),
                 contacto.get("email")
-            ), auto_commit=False)
+                ), auto_commit=False)
+            else:
+                insert_cliente = """
+                    INSERT INTO cliente (razon_social, numero_documento, tipoDocumento, telefono, email,direccion)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """
+                conexion.ejecutar(insert_cliente, (
+                contacto.get("razon_social"),
+                contacto.get("ruc"),
+                contacto.get("numero_documento"),
+                TipoDocumento.obtener_por_nombre(contacto.get("tipo_documento")),
+                contacto.get("telefono"),
+                contacto.get("email"),
+                contacto.get("direccion")
+                ), auto_commit=False)
+            
             id_cliente = conexion.cursor.lastrowid
 
             # 2. Registrar VENTA
+            if pago.get("")
             insert_venta = """
-                INSERT INTO venta (idCliente, fecha, subTotal, total, idMetodoPago, idTipoComprobante)
+                INSERT INTO venta (idCliente, fecha, subTotal, igv, idMetodoPago, idTipoComprobante)
                 VALUES (%s, %s, %s, %s, %s, %s)
             """
             conexion.ejecutar(insert_venta, (

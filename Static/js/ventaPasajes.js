@@ -10,7 +10,7 @@ const CONFIG = {
         RENDERIZAR_ITINERARIO: '/ecommerce/home/renderizar_itinerario',
         OBTENER_DISENO_VEHICULO: '/ecommerce/home/obtener_diseno_vehiculo',
         API_PERSONA: '/ecommerce/home/api/get_persona_data',
-        API_SUNAT: '/api/consultar-sunat',
+        API_SUNAT: '/ecommerce/home/api/get_persona_data',
         METODOS: '/ecommerce/home/cargar_metodos',
         PROCESAR_PAGO: '/ecommerce/home/procesar_pago',
         MARCAR_ASIENTO_OCUPADO: '/ecommerce/home/ocuparAsiento',
@@ -168,16 +168,90 @@ const SearchManager = {
         }
         return true;
     },
-
-    buscarYMostrarItinerario() {
+    // ✅ FUNCIÓN MODIFICADA: Búsqueda con verificación automática
+    async buscarYMostrarItinerario() {
         if (!this.validarDatos()) return;
 
-        if (AppState.currentStep > 0) {
-            this.confirmarNuevaBusqueda().then(confirmed => {
-                if (confirmed) this.ejecutarBusqueda();
-            });
-        } else {
-            this.ejecutarBusqueda();
+        // ✅ VERIFICAR: Si hay datos previos, limpiar automáticamente
+        const hayDatosPrevios = this.verificarDatosPrevios();
+
+        if (hayDatosPrevios) {
+            console.log('🔍 Datos previos detectados - Iniciando limpieza automática...');
+            await this.limpiarDatosPreviosCompleto();
+        }
+
+        // Ejecutar búsqueda normal
+        this.ejecutarBusqueda();
+    },
+
+    // ✅ NUEVA FUNCIÓN: Verificar si hay datos previos
+    verificarDatosPrevios() {
+        // Verificar sessionStorage
+        const ventasStorage = sessionStorage.getItem('ventas');
+        const hayVentas = ventasStorage && Object.keys(JSON.parse(ventasStorage)).length > 0;
+
+        // Verificar asientos seleccionados en memoria
+        const hayAsientosSeleccionados = SeatManager.asientosSeleccionados.size > 0;
+
+        // Verificar si hay progreso en la aplicación
+        const hayProgreso = AppState.currentStep > 0;
+
+        console.log(`📊 Verificación de datos previos:`, {
+            ventasStorage: !!hayVentas,
+            asientosSeleccionados: hayAsientosSeleccionados,
+            progreso: hayProgreso
+        });
+
+        return hayVentas || hayAsientosSeleccionados || hayProgreso;
+    },
+
+    // ✅ NUEVA FUNCIÓN: Limpieza automática completa
+    async limpiarDatosPreviosCompleto() {
+        console.log('🧹 Iniciando limpieza automática completa...');
+
+        try {
+            // 1. Liberar asientos en backend (TODOS los que estén seleccionados)
+            if (SeatManager.asientosSeleccionados.size > 0) {
+                console.log(`🔓 Liberando ${SeatManager.asientosSeleccionados.size} asientos en backend...`);
+                await SeatManager.liberarTodosLosAsientos();
+            }
+
+            // 2. También liberar asientos desde sessionStorage por si quedaron huérfanos
+            await this.liberarAsientosDesdeStorage();
+
+            // 3. Resetear sistema completo (frontend)
+            App.resetearSistemaCompleto();
+
+            console.log('✅ Limpieza automática completada');
+
+        } catch (error) {
+            console.error('❌ Error en limpieza automática:', error);
+            // Continuar con la búsqueda aunque haya error en limpieza
+            App.resetearSistemaCompleto();
+        }
+    },
+
+    // ✅ NUEVA FUNCIÓN: Liberar asientos desde sessionStorage
+    async liberarAsientosDesdeStorage() {
+        const ventasStorage = sessionStorage.getItem('ventas');
+        if (!ventasStorage) return;
+
+        try {
+            const ventas = JSON.parse(ventasStorage);
+            const asientosEnStorage = Object.keys(ventas);
+
+            if (asientosEnStorage.length > 0) {
+                console.log(`🔓 Liberando ${asientosEnStorage.length} asientos desde storage...`);
+
+                const promesasLiberacion = asientosEnStorage.map(asientoId =>
+                    SeatManager.marcarAsientoComoDisponible(asientoId)
+                );
+
+                await Promise.allSettled(promesasLiberacion);
+                console.log('✅ Asientos del storage liberados');
+            }
+        } catch (error) {
+            console.error('❌ Error liberando asientos desde storage:', error);
         }
     },
 
@@ -293,7 +367,7 @@ const RouteManager = {
 };
 
 // =============================================================================
-// GESTIÓN DE ITINERARIOS
+// GESTIÓN DE ITINERARIOS - VERSIÓN CORREGIDA
 // =============================================================================
 
 const ItineraryManager = {
@@ -310,33 +384,74 @@ const ItineraryManager = {
 
             const data = await response.json();
             contenedor.innerHTML = data.html;
-            this.inicializarEventosPostRender(sufijo);
+
+            // ✅ CORRECCIÓN: Usar timeout más largo para asegurar que el DOM esté listo
+            setTimeout(() => {
+                this.inicializarEventosPostRender(sufijo);
+            }, 200);
+
         } catch (err) {
             toastr.error("Error al renderizar el itinerario: " + (err.message || err));
         }
     },
 
     inicializarEventosPostRender(sufijo) {
+        console.log(`🚀 Inicializando eventos post-render para: ${sufijo}`);
+
         ReniecAPI.initialize();
         this.configurarFuncionalidadElegir(sufijo);
+
+        // ✅ CORRECCIÓN: Verificar que los elementos existan antes de configurar
+        const botones = document.querySelectorAll(`.mostrarContenido_${sufijo}`);
+        console.log(`📊 Encontrados ${botones.length} botones para ${sufijo}`);
     },
 
     configurarFuncionalidadElegir(sufijo) {
-        document.querySelectorAll(`.mostrarContenido_${sufijo}`).forEach(btn => {
-            btn.addEventListener('click', () => {
-                VehicleLayoutManager.generarMatrices(btn.id, sufijo);
-            });
+        // ✅ CORRECCIÓN: Usar delegación de eventos más robusta
+        document.addEventListener('click', (event) => {
+            // Verificar si el elemento clickeado tiene la clase correcta
+            if (event.target.classList.contains(`mostrarContenido_${sufijo}`)) {
+                const btn = event.target;
+                console.log(`🎯 Click detectado en botón: ${btn.id} para ${sufijo}`);
 
+                // Prevenir ejecución múltiple
+                event.stopPropagation();
+
+                // Ejecutar generación de matrices
+                VehicleLayoutManager.generarMatrices(btn.id, sufijo);
+            }
+        });
+
+        // ✅ CORRECCIÓN: Configurar eventos de acordeón con mejor manejo
+        document.querySelectorAll(`.mostrarContenido_${sufijo}`).forEach(btn => {
             const targetId = btn.getAttribute('data-bs-target');
             const target = document.querySelector(targetId);
 
             if (target) {
+                // ✅ NUEVO: Manejar evento shown.bs.collapse correctamente
                 target.addEventListener('shown.bs.collapse', () => {
-                    SeatManager.inicializarSeleccionAsientos(sufijo);
-                    TimerManager.iniciar(300, sufijo);
+                    console.log(`📂 Acordeón abierto para ${sufijo}`);
+
+                    // Pequeño delay para asegurar que el contenido esté renderizado
+                    setTimeout(() => {
+                        SeatManager.inicializarSeleccionAsientos(sufijo);
+                        TimerManager.iniciar(300, sufijo);
+
+                        // ✅ CORRECCIÓN: Restaurar estado si hay asientos seleccionados
+                        VehicleLayoutManager.restaurarEstadoAsientos(sufijo);
+                    }, 150);
+                });
+
+                // ✅ NUEVO: Manejar evento hidden.bs.collapse
+                target.addEventListener('hidden.bs.collapse', () => {
+                    console.log(`📁 Acordeón cerrado para ${sufijo}`);
+                    // Detener timer cuando se cierre el acordeón
+                    TimerManager.detener(sufijo);
                 });
             }
         });
+
+        console.log(`✅ Funcionalidad de elegir configurada para ${sufijo}`);
     },
 
     finalizarPrimerItinerario() {
@@ -351,7 +466,11 @@ const ItineraryManager = {
             setTimeout(() => PaymentManager.initialize(), 100);
         } else {
             AppState.setCurrentStep(2);
-            this.cargarItinerario(AppState.itinerarioRegreso, 'contenedor_viajes_vuelta', 'vuelta');
+
+            // ✅ CORRECCIÓN: Usar timeout más largo para vuelta
+            setTimeout(() => {
+                this.cargarItinerario(AppState.itinerarioRegreso, 'contenedor_viajes_vuelta', 'vuelta');
+            }, 300);
         }
         NavigationManager.updateFormVisibility();
     },
@@ -381,15 +500,15 @@ const ItineraryManager = {
         return true;
     }
 };
-
-
 // =============================================================================
-// GESTIÓN DE DISEÑO DEL VEHÍCULO
+// GESTIÓN DE DISEÑO DEL VEHÍCULO - VERSIÓN CORREGIDA
 // =============================================================================
 
 const VehicleLayoutManager = {
     async generarMatrices(idBoton, sufijo) {
         try {
+            console.log(`🎨 Generando matrices para ${idBoton} - ${sufijo}`);
+
             const response = await fetch(CONFIG.RUTAS.OBTENER_DISENO_VEHICULO, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -402,20 +521,26 @@ const VehicleLayoutManager = {
             const datosPiso1 = datos.filter(d => d.nroPiso == 1);
             const datosPiso2 = datos.filter(d => d.nroPiso == 2);
 
-            this.generarMatrizDesdeDatos(datosPiso1, 1, sufijo);
+            // ✅ CORRECCIÓN: Regenerar matriz manteniendo asientos seleccionados
+            this.generarMatrizDesdeDatos(datosPiso1, 1, `${idBoton}_${sufijo}`, sufijo);
 
             if (datosPiso2.length > 0) {
-                document.getElementById(`contenedor_piso_2_${sufijo}`).style.display = 'block';
-                this.generarMatrizDesdeDatos(datosPiso2, 2, sufijo);
+                document.getElementById(`contenedor_piso_2_${idBoton}_${sufijo}`).style.display = 'block';
+                this.generarMatrizDesdeDatos(datosPiso2, 2, `${idBoton}_${sufijo}`, sufijo);
             } else {
-                document.getElementById(`contenedor_piso_2_${sufijo}`).style.display = 'none';
+                document.getElementById(`contenedor_piso_2_${idBoton}_${sufijo}`).style.display = 'none';
             }
+
+            // ✅ CORRECCIÓN: Restaurar estado de asientos después de regenerar
+            this.restaurarEstadoAsientos(sufijo);
+
         } catch (error) {
+            console.error("Error detallado:", error);
             toastr.error("Error al cargar el diseño del vehículo");
         }
     },
 
-    generarMatrizDesdeDatos(datos, piso, sufijo) {
+    generarMatrizDesdeDatos(datos, piso, sufijo, tipoItinerario) {
         const contenedor = document.getElementById(`matrizContainer_${piso}_${sufijo}`);
         if (!contenedor) return;
 
@@ -424,7 +549,8 @@ const VehicleLayoutManager = {
 
         for (let y = 1; y <= CONFIG.GRILLA.FILAS; y++) {
             for (let x = 1; x <= CONFIG.GRILLA.COLUMNAS; x++) {
-                const btn = this.crearElementoMatriz(datos, x, y);
+                // ✅ CORRECCIÓN: Pasar tipoItinerario para identificar correctamente
+                const btn = this.crearElementoMatriz(datos, x, y, tipoItinerario);
                 contenedor.appendChild(btn);
             }
         }
@@ -443,7 +569,7 @@ const VehicleLayoutManager = {
         });
     },
 
-    crearElementoMatriz(datos, x, y) {
+    crearElementoMatriz(datos, x, y, tipoItinerario) {
         const dato = datos.find(d =>
             parseInt(d.x_dimension) === x && parseInt(d.y_dimension) === y
         );
@@ -458,7 +584,7 @@ const VehicleLayoutManager = {
         btn.setAttribute('data-y', y);
 
         if (dato) {
-            this.configurarElementoConDatos(btn, dato);
+            this.configurarElementoConDatos(btn, dato, tipoItinerario);
         } else {
             this.configurarElementoVacio(btn);
         }
@@ -466,26 +592,33 @@ const VehicleLayoutManager = {
         return btn;
     },
 
-    configurarElementoConDatos(btn, dato) {
+    configurarElementoConDatos(btn, dato, tipoItinerario) {
         btn.id = dato.id_asiento ?? '';
         btn.setAttribute('data-tipo', dato.tipo_herramienta);
         btn.style.cursor = 'pointer';
 
         if (dato.tipo_herramienta === 1) {
-            // Asiento
-            if (dato.estado === 1) {
+            // ✅ CORRECCIÓN: Verificar si el asiento ya está en nuestro control local
+            const estaSeleccionadoLocalmente = SeatManager.asientosSeleccionados.has(dato.id_asiento);
+
+            if (estaSeleccionadoLocalmente) {
+                // Asiento seleccionado por nosotros - verde
+                btn.className = 'border border-dark border-2 asiento-seleccionado';
+                btn.style.backgroundColor = '#28a745';
+                btn.style.color = 'white';
+                btn.innerText = dato.nombre;
+                btn.style.cursor = 'pointer';
+            } else if (dato.estado === 1) {
                 // Asiento disponible - blanco con borde negro
                 btn.className = 'border border-dark border-2 bg-white';
                 btn.innerText = dato.nombre;
                 btn.style.cursor = 'pointer';
             } else {
-                // Asiento ocupado - negro con texto blanco
+                // Asiento ocupado por otros - negro con texto blanco
                 btn.className = 'border border-dark border-2 bg-dark text-white';
                 btn.innerText = dato.nombre;
                 btn.style.cursor = 'not-allowed';
                 btn.disabled = true;
-                
-                // Opcional: agregar tooltip para indicar que está ocupado
                 btn.title = 'Asiento ocupado';
             }
         } else {
@@ -515,63 +648,174 @@ const VehicleLayoutManager = {
 
     obtenerIcono(icono) {
         return `<img src="/Static/${icono}" width="32" height="32" style="display: block; margin: auto;" alt="icono">`;
+    },
+
+    // ✅ NUEVA FUNCIÓN: Restaurar estado visual de asientos seleccionados
+    restaurarEstadoAsientos(sufijo) {
+        console.log(`🔄 Restaurando estado de asientos para ${sufijo}`);
+
+        // Restaurar estado visual de asientos seleccionados
+        SeatManager.asientosSeleccionados.forEach(asientoId => {
+            const btnAsiento = document.getElementById(asientoId);
+            if (btnAsiento && btnAsiento.getAttribute('data-tipo') === '1') {
+                btnAsiento.classList.add("asiento-seleccionado");
+                btnAsiento.style.backgroundColor = '#28a745';
+                btnAsiento.style.color = 'white';
+
+                console.log(`✅ Asiento ${asientoId} restaurado como seleccionado`);
+            }
+        });
+
+        // Reinicializar eventos de selección después de regenerar
+        setTimeout(() => {
+            SeatManager.inicializarSeleccionAsientos(sufijo);
+        }, 100);
     }
 };
-
 // =============================================================================
 // GESTIÓN DE ASIENTOS CON VALIDACIONES Y API (PARTE 1)
 // =============================================================================
 
 const SeatManager = {
     asientosSeleccionados: new Set(),
+    // =============================================================================
+    // GESTIÓN DE ASIENTOS - FUNCIÓN DE INICIALIZACIÓN MEJORADA
+    // =============================================================================
 
+    // ✅ CORRECCIÓN: Mejorar inicialización de selección de asientos
     inicializarSeleccionAsientos(sufijo) {
+        console.log(`💺 Inicializando selección de asientos para: ${sufijo}`);
+
+        // Remover listeners anteriores para evitar duplicados
+        const asientosPrevios = document.querySelectorAll(`[data-tipo="1"][data-listener-${sufijo}="true"]`);
+        asientosPrevios.forEach(btn => {
+            btn.removeAttribute(`data-listener-${sufijo}`);
+        });
+
         const asientos = document.querySelectorAll('[data-tipo="1"]');
+        console.log(`📊 Encontrados ${asientos.length} asientos en total`);
+
         if (asientos.length === 0) {
             console.warn("No se encontraron asientos con data-tipo='1'");
             return;
         }
 
+        let asientosConfigurados = 0;
+
         asientos.forEach(btn => {
-            // Solo agregar el event listener si no está ocupado
-            if (btn.classList.contains('border-dark')) {
-                btn.addEventListener('click', (event) => this.manejarClickAsiento(event, sufijo));
+            // ✅ CORRECCIÓN: Solo agregar listener si no está deshabilitado y no tiene listener previo
+            const yaConfigurado = btn.getAttribute(`data-listener-${sufijo}`) === 'true';
+
+            if (!btn.disabled && !yaConfigurado) {
+                // Marcar como configurado para evitar duplicados
+                btn.setAttribute(`data-listener-${sufijo}`, 'true');
+
+                // Remover listeners anteriores
+                const nuevoBtn = btn.cloneNode(true);
+                btn.parentNode.replaceChild(nuevoBtn, btn);
+
+                // Agregar nuevo listener
+                nuevoBtn.addEventListener('click', (event) => {
+                    console.log(`🎯 Click en asiento: ${event.target.id} (${sufijo})`);
+                    this.manejarClickAsiento(event, sufijo);
+                });
+
+                asientosConfigurados++;
+            }
+        });
+
+        console.log(`✅ ${asientosConfigurados} asientos configurados con listeners para ${sufijo}`);
+
+        // ✅ CORRECCIÓN: Restaurar estado visual inmediatamente
+        this.restaurarEstadoVisualAsientos(sufijo);
+    },
+
+    // ✅ NUEVA FUNCIÓN: Restaurar estado visual específicamente
+    restaurarEstadoVisualAsientos(sufijo) {
+        this.asientosSeleccionados.forEach(asientoId => {
+            const btnAsiento = document.getElementById(asientoId);
+            if (btnAsiento && btnAsiento.getAttribute('data-tipo') === '1') {
+                // Verificar que no esté ya marcado para evitar duplicados
+                if (!btnAsiento.classList.contains("asiento-seleccionado")) {
+                    btnAsiento.classList.add("asiento-seleccionado");
+                    btnAsiento.style.backgroundColor = '#28a745';
+                    btnAsiento.style.color = 'white';
+
+                    console.log(`🔄 Estado visual restaurado para asiento: ${asientoId}`);
+                }
+
+                // Mostrar contenedor de datos si hay asientos seleccionados
+                const contenedor = document.getElementById(`contenido_datos_${sufijo}`);
+                if (contenedor && contenedor.classList.contains("d-none")) {
+                    contenedor.classList.remove("d-none");
+                }
             }
         });
     },
-
+    // ✅ FUNCIÓN MEJORADA: Liberar todos los asientos con mejor logging
     async liberarTodosLosAsientos() {
         console.log('🔓 Liberando todos los asientos seleccionados...');
 
         const promesasLiberacion = [];
+        const asientosParaLiberar = [...this.asientosSeleccionados]; // Crear copia del Set
 
         // Liberar desde el Set de asientos seleccionados
-        for (const asientoId of this.asientosSeleccionados) {
-            const sufijo = AppState.currentStep <= 1 ? 'ida' : 'vuelta';
-            promesasLiberacion.push(this.marcarAsientoComoDisponible(asientoId, sufijo));
+        for (const asientoId of asientosParaLiberar) {
+            promesasLiberacion.push(
+                this.marcarAsientoComoDisponible(asientoId)
+                    .then(resultado => ({ asientoId, resultado, origen: 'memoria' }))
+                    .catch(error => ({ asientoId, error, origen: 'memoria' }))
+            );
         }
 
-        // También liberar asientos desde sessionStorage por si acaso
+        // También liberar asientos desde sessionStorage por si hay inconsistencias
         const ventas = JSON.parse(sessionStorage.getItem("ventas") || "{}");
         for (const asientoId in ventas) {
             if (!this.asientosSeleccionados.has(asientoId)) {
-                const sufijo = AppState.currentStep <= 1 ? 'ida' : 'vuelta';
-                promesasLiberacion.push(this.marcarAsientoComoDisponible(asientoId, sufijo));
+                promesasLiberacion.push(
+                    this.marcarAsientoComoDisponible(asientoId)
+                        .then(resultado => ({ asientoId, resultado, origen: 'storage' }))
+                        .catch(error => ({ asientoId, error, origen: 'storage' }))
+                );
             }
         }
 
         // Ejecutar todas las liberaciones en paralelo
         if (promesasLiberacion.length > 0) {
             try {
-                await Promise.allSettled(promesasLiberacion);
-                console.log(`✅ ${promesasLiberacion.length} asientos liberados exitosamente`);
+                const resultados = await Promise.allSettled(promesasLiberacion);
+
+                let exitosos = 0;
+                let fallidos = 0;
+
+                resultados.forEach((resultado, index) => {
+                    if (resultado.status === 'fulfilled') {
+                        const { asientoId, resultado: res, error, origen } = resultado.value;
+                        if (error) {
+                            console.warn(`⚠️ Error liberando asiento ${asientoId} (${origen}):`, error);
+                            fallidos++;
+                        } else {
+                            console.log(`✅ Asiento ${asientoId} liberado exitosamente (${origen})`);
+                            exitosos++;
+                        }
+                    } else {
+                        console.error(`❌ Error en promesa de liberación:`, resultado.reason);
+                        fallidos++;
+                    }
+                });
+
+                console.log(`📊 Resultado: ${exitosos} exitosos, ${fallidos} fallidos de ${promesasLiberacion.length} total`);
+
             } catch (error) {
                 console.error('❌ Error liberando algunos asientos:', error);
             }
+        } else {
+            console.log('ℹ️ No hay asientos para liberar');
         }
 
-        // Limpiar el Set local
+        // Limpiar el Set local independientemente del resultado de la API
         this.asientosSeleccionados.clear();
+        console.log('🧹 Set de asientos seleccionados limpiado');
     },
 
     async manejarClickAsiento(event, sufijo) {
@@ -674,7 +918,7 @@ const SeatManager = {
             this.asientosSeleccionados.delete(asientoId);
 
             btn.classList.remove("asiento-seleccionado");
-             // 🔧 RESTAURAR ESTADO VISUAL ORIGINAL DEL ASIENTO
+            // 🔧 RESTAURAR ESTADO VISUAL ORIGINAL DEL ASIENTO
             btn.className = 'border border-dark border-2 bg-white'; // Restaurar clases originales
             btn.innerText = nombreAsiento; // Restaurar el nombre del asiento
             btn.style.backgroundColor = ''; // Limpiar estilos inline
@@ -893,12 +1137,6 @@ const SeatManager = {
                  data-bs-parent="#accordionPasajeros_${sufijo}">
                 <div class="accordion-body">
                     ${FormManager.generarFormularioHTML(nombreAsiento, btnId)}
-                </div>
-                <div class="accordion-footer">
-                    <button class="btn btn-outline-primary w-100" 
-                            onclick='ItineraryManager.finalizarPrimerItinerario()'>
-                        Confirmar datos
-                    </button>
                 </div>
             </div>
         `;
@@ -1276,53 +1514,53 @@ const PaymentManager = {
             return this.obtenerMetodosPagoMock(); // Fallback al mock
         }
     },
-/*
-    obtenerMetodosPagoMock() {
-        return {
-            "1": [
-                {
-                    id_metodo: "1",
-                    tipo_metodo: "Tarjeta",
-                    metodo: "Visa",
-                    qr: null,
-                    logo: "visa-logo.png"
-                },
-                {
-                    id_metodo: "2",
-                    tipo_metodo: "Tarjeta",
-                    metodo: "Mastercard",
-                    qr: null,
-                    logo: "mastercard-logo.png"
-                }
-            ],
-            "2": [
-                {
-                    id_metodo: "3",
-                    tipo_metodo: "Billetera virtual",
-                    metodo: "Yape",
-                    qr: "/static/img/qr-yape.png",
-                    logo: "yape-logo.png"
-                },
-                {
-                    id_metodo: "4",
-                    tipo_metodo: "Billetera virtual",
-                    metodo: "Plin",
-                    qr: "/static/img/qr-plin.png",
-                    logo: "plin-logo.png"
-                }
-            ],
-            "3": [
-                {
-                    id_metodo: "5",
-                    tipo_metodo: "Efectivo",
-                    metodo: "Pago en ventanilla",
-                    qr: null,
-                    logo: "efectivo-logo.png"
-                }
-            ]
-        };
-    },
-*/
+    /*
+        obtenerMetodosPagoMock() {
+            return {
+                "1": [
+                    {
+                        id_metodo: "1",
+                        tipo_metodo: "Tarjeta",
+                        metodo: "Visa",
+                        qr: null,
+                        logo: "visa-logo.png"
+                    },
+                    {
+                        id_metodo: "2",
+                        tipo_metodo: "Tarjeta",
+                        metodo: "Mastercard",
+                        qr: null,
+                        logo: "mastercard-logo.png"
+                    }
+                ],
+                "2": [
+                    {
+                        id_metodo: "3",
+                        tipo_metodo: "Billetera virtual",
+                        metodo: "Yape",
+                        qr: "/static/img/qr-yape.png",
+                        logo: "yape-logo.png"
+                    },
+                    {
+                        id_metodo: "4",
+                        tipo_metodo: "Billetera virtual",
+                        metodo: "Plin",
+                        qr: "/static/img/qr-plin.png",
+                        logo: "plin-logo.png"
+                    }
+                ],
+                "3": [
+                    {
+                        id_metodo: "5",
+                        tipo_metodo: "Efectivo",
+                        metodo: "Pago en ventanilla",
+                        qr: null,
+                        logo: "efectivo-logo.png"
+                    }
+                ]
+            };
+        },
+    */
     generarFormularioContactoDinamico() {
         const accordionBody = document.querySelector('#collapseContacto .accordion-body');
         if (!accordionBody) return;
@@ -1487,7 +1725,7 @@ const PaymentManager = {
         } else if (tipoComprobante == '2') {
             // Consultar SUNAT para RUC (11 dígitos)
             if (numeroDoc.length === 11) {
-                await this.consultarSunatContacto(numeroDoc);
+                await this.consultarSunatContacto("RUC", numeroDoc);
             }
         }
     },
@@ -1522,10 +1760,10 @@ const PaymentManager = {
         }
     },
 
-    async consultarSunatContacto(ruc) {
+    async consultarSunatContacto(tipoDocVal, ruc) {
         try {
             const response = await fetch(
-                `${CONFIG.RUTAS.API_SUNAT}?ruc=${encodeURIComponent(ruc)}`
+                `${CONFIG.RUTAS.API_SUNAT}?tipoDoc=${encodeURIComponent(tipoDocVal)}&numDoc=${encodeURIComponent(ruc)}`
             );
             const json = await response.json();
 
@@ -2252,41 +2490,126 @@ const App = {
         this.inicializarComponentes();
     },
 
+    // =============================================================================
+    // INICIALIZACIÓN - LIMPIEZA AUTOMÁTICA EN RECARGA
+    // =============================================================================
+
+    // ✅ FUNCIÓN MODIFICADA: Limpieza automática al recargar
     limpiarProgresoAlRecargar() {
         // 🔓 INTERCEPTAR ANTES DE LA RECARGA/CIERRE PARA LIBERAR ASIENTOS VÍA API
         window.addEventListener('beforeunload', async (event) => {
-            // Si hay progreso guardado, liberar asientos antes de salir
-            if (AppState.currentStep > 0 || sessionStorage.getItem('ventas')) {
+            // Solo mostrar advertencia y limpiar si hay datos
+            const hayDatos = this.verificarDatosParaLimpiar();
+
+            if (hayDatos) {
                 // Mostrar advertencia al usuario
                 event.preventDefault();
                 event.returnValue = '¿Estás seguro de que quieres salir? Se perderá todo tu progreso.';
-                
+
                 // 🔓 LIBERAR ASIENTOS VÍA API ANTES DE SALIR
                 try {
                     await this.liberarAsientosAntesDeSalir();
                 } catch (error) {
                     console.error('❌ Error liberando asientos antes de salir:', error);
                 }
-                
+
                 return event.returnValue;
             }
         });
 
-        // Detectar si la página se recargó (no es navegación normal) y limpiar frontend
+        // ✅ DETECTAR RECARGA Y LIMPIAR AUTOMÁTICAMENTE
         if (performance.navigation.type === 1 || performance.getEntriesByType('navigation')[0]?.type === 'reload') {
+            this.procesarRecargaPagina();
+        }
+    },
+
+    // ✅ NUEVA FUNCIÓN: Verificar si hay datos para limpiar
+    verificarDatosParaLimpiar() {
+        const ventasStorage = sessionStorage.getItem('ventas');
+        const hayVentas = ventasStorage && Object.keys(JSON.parse(ventasStorage)).length > 0;
+        const hayAsientosSeleccionados = SeatManager && SeatManager.asientosSeleccionados && SeatManager.asientosSeleccionados.size > 0;
+        const hayProgreso = AppState.currentStep > 0;
+
+        return hayVentas || hayAsientosSeleccionados || hayProgreso;
+    },
+
+    // ✅ NUEVA FUNCIÓN: Procesar recarga de página
+    async procesarRecargaPagina() {
+        console.log('🔄 Recarga detectada - Verificando datos para limpiar...');
+
+        const hayDatos = this.verificarDatosParaLimpiar();
+
+        if (hayDatos) {
+            console.log('📊 Datos detectados tras recarga - Iniciando limpieza automática...');
+            await this.ejecutarLimpiezaTrasRecarga();
+        } else {
+            console.log('✅ No hay datos que limpiar tras recarga');
+            // Solo limpiar frontend básico por si acaso
             this.limpiarSoloFrontend();
         }
     },
+
+    // ✅ NUEVA FUNCIÓN: Ejecutar limpieza tras recarga
+    async ejecutarLimpiezaTrasRecarga() {
+        try {
+            // 1. Intentar liberar asientos en backend desde sessionStorage
+            const ventasStorage = sessionStorage.getItem('ventas');
+            if (ventasStorage) {
+                const ventas = JSON.parse(ventasStorage);
+                const asientosIds = Object.keys(ventas);
+
+                if (asientosIds.length > 0) {
+                    console.log(`🔓 Liberando ${asientosIds.length} asientos en backend tras recarga...`);
+                    await this.liberarAsientosEspecificos(asientosIds);
+                }
+            }
+
+            // 2. Limpiar frontend
+            this.limpiarSoloFrontend();
+
+            console.log('✅ Limpieza tras recarga completada');
+
+        } catch (error) {
+            console.warn('⚠️ Error en limpieza tras recarga:', error);
+            // Limpiar frontend aunque falle el backend
+            this.limpiarSoloFrontend();
+        }
+    },
+
+    // ✅ NUEVA FUNCIÓN: Liberar asientos específicos
+    async liberarAsientosEspecificos(asientosIds) {
+        const promesasLiberacion = asientosIds.map(asientoId =>
+            fetch(CONFIG.RUTAS.MARCAR_ASIENTO_DISPONIBLE, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    asiento_id: asientoId,
+                    motivo: 'recarga_pagina',
+                    timestamp: new Date().toISOString()
+                }),
+                keepalive: true // Importante para que funcione al cerrar página
+            }).catch(error => {
+                console.warn(`⚠️ Error liberando asiento ${asientoId}:`, error);
+                return null; // No fallar todo el proceso por un asiento
+            })
+        );
+
+        const resultados = await Promise.allSettled(promesasLiberacion);
+        const exitosos = resultados.filter(r => r.status === 'fulfilled' && r.value !== null).length;
+
+        console.log(`✅ ${exitosos}/${asientosIds.length} asientos liberados en backend`);
+    },
+
     async liberarAsientosAntesDeSalir() {
         console.log('🔓 Liberando asientos antes de salir/recargar...');
-        
+
         const promesasLiberacion = [];
-        
+
         // Obtener asientos del sessionStorage (más confiable antes de salir)
         const ventas = JSON.parse(sessionStorage.getItem("ventas") || "{}");
         for (const asientoId in ventas) {
             const sufijo = AppState.currentStep <= 1 ? 'ida' : 'vuelta';
-            
+
             // Llamada directa a la API sin Promise.allSettled para mayor velocidad
             const promesa = fetch(CONFIG.RUTAS.MARCAR_ASIENTO_DISPONIBLE, {
                 method: 'POST',
@@ -2300,10 +2623,10 @@ const App = {
                 }),
                 keepalive: true // IMPORTANTE: mantiene la petición aunque se cierre la página
             });
-            
+
             promesasLiberacion.push(promesa);
         }
-        
+
         // Ejecutar todas las liberaciones
         if (promesasLiberacion.length > 0) {
             try {
@@ -2318,7 +2641,7 @@ const App = {
     // 🧹 NUEVA FUNCIÓN: Solo limpiar frontend (después de recarga)
     limpiarSoloFrontend() {
         console.log('🧹 Limpiando solo frontend después de recarga...');
-        
+
         // Solo limpiar estado local y UI
         AppState.resetProgress();
         sessionStorage.clear();
@@ -2326,15 +2649,15 @@ const App = {
         this.limpiarContenedoresDinamicos();
         this.limpiarAsientosSeleccionados();
         TimerManager.detenerTodos();
-        
+
         if (typeof PaymentManager !== 'undefined') {
             PaymentManager.limpiarFormularioPago();
         }
-        
+
         if (typeof SeatManager !== 'undefined') {
             SeatManager.asientosSeleccionados.clear();
         }
-        
+
         console.log('✅ Frontend limpiado tras recarga');
     },
 
@@ -2402,13 +2725,20 @@ const App = {
             if (contenidoDatos) contenidoDatos.classList.add('d-none');
         });
 
-        // Limpiar matrices de asientos
         ['ida', 'vuelta'].forEach(sufijo => {
-            [1, 2].forEach(piso => {
-                const matriz = document.getElementById(`matrizContainer_${piso}_${sufijo}`);
-                if (matriz) matriz.innerHTML = '';
+            const contenedoresPiso2 = document.querySelectorAll(`[id^="contenedor_piso_2_"][id$="_${sufijo}"]`);
+            contenedoresPiso2.forEach(el => {
+                el.style.display = 'none';
+                el.innerHTML = '';
             });
         });
+
+        // Limpiar matrices de asientos
+        ['ida', 'vuelta'].forEach(sufijo => {
+            const matrices = document.querySelectorAll(`[id^="matrizContainer_"][id$="_${sufijo}"]`);
+            matrices.forEach(m => m.innerHTML = '');
+        });
+
     },
 
     limpiarAsientosSeleccionados() {

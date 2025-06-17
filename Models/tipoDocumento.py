@@ -67,3 +67,12 @@ class TipoDocumento:
             return resultado[0]
         finally:
             conexion.cerrar()
+            
+    @classmethod
+    def obtener_por_nombre(cls, abrev):
+        try:
+            conexion = bd.Conexion()
+            tipo_documento = conexion.obtener("select id from tipo_documento where LOWER(abreviatura) =  LOWER(%s)", (abrev,))
+            return tipo_documento[0] if tipo_documento else None
+        finally:
+                conexion.cerrar()

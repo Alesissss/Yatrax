@@ -163,10 +163,8 @@ def renderizar_itinerario():
     itinerarios = data.get('itinerarios', [])
     sufijo = data.get('sufijo')
     # Renderiza el HTML del itinerario con Jinja
-    html_renderizado = render_template('Ecommerce/home/partials/itinerario.html', itinerarios=itinerarios, sufijo = sufijo)
+    html_renderizado = render_template('Ecommerce/home/partials/itinerario.html', itinerarios=itinerarios, sufijo = sufijo )
     return jsonify({'html': html_renderizado})
-
-
 
 # VIEWS
 @homeClientes_bp.route('/inicio')
