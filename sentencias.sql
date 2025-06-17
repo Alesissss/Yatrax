@@ -421,22 +421,22 @@ CREATE TABLE escala (
 
 CREATE TABLE cliente (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    numero_documento VARCHAR(11) NOT NULL, -- Se recomienda especificar una longitud
-    nombre VARCHAR(255) NOT NULL,
+    numero_documento VARCHAR(11), -- Se recomienda especificar una longitud
+    nombre VARCHAR(255),
     ape_paterno VARCHAR(50),
     ape_materno VARCHAR(50),
     razon_social VARCHAR(255), -- Para clientes jurídicos
     sexo BOOLEAN,
     f_nacimiento DATE,
-    direccion VARCHAR(255) NOT NULL,
-    telefono VARCHAR(15) NOT NULL,
-    email VARCHAR(255) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    estado BOOLEAN NOT NULL,
-    id_pais INT NOT NULL,
-    id_tipo_cliente INT NOT NULL,
-    id_tipo_doc INT NOT NULL,
-    fechaRegistro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    direccion VARCHAR(255),
+    telefono VARCHAR(15),
+    email VARCHAR(255),
+    password VARCHAR(255),
+    estado BOOLEAN,
+    id_pais INT,
+    id_tipo_cliente INT,
+    id_tipo_doc INT,
+    fechaRegistro DATETIME DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NULL,
     -- Claves foráneas
     CONSTRAINT fk_pais FOREIGN KEY (id_pais) REFERENCES PAIS(id),

@@ -1,6 +1,7 @@
 from datetime import datetime
 from Models.tipoDocumento import TipoDocumento
 from Models.promocion import Promocion
+from Models.pasaje import Pasaje
 import bd  # Utilizamos tu clase Conexion personalizada
 
 class Venta:
@@ -13,7 +14,7 @@ class Venta:
             if(contacto.get("tipo_comprobante") == "1"):
             # 1. Registrar CLIENTE
                 insert_cliente = """
-                    INSERT INTO cliente (nombre, ape_paterno, ape_materno, numero_documento, tipoDocumento, telefono, email)
+                    INSERT INTO cliente (nombre, ape_paterno, ape_materno, numero_documento, id_tipo_doc, telefono, email)
                     VALUES (%s, %s, %s, %s, %s, %s, %s)
                 """
                 conexion.ejecutar(insert_cliente, (
@@ -95,11 +96,26 @@ class Venta:
                 id_pasajero = conexion.cursor.lastrowid
     
                 insert_pasaje = """
-                    INSERT INTO pasaje (idDetalleViajeAsiento, nombre, idVenta)
-                    VALUES (%s, %s, %s)
+                    INSERT INTO pasaje (idDetalleViajeAsiento, numeroComprobante, esPasajeNormal, esPasajeLibre, esTransferencia, esReserva, esCambioRuta, idVenta, codigo, enTransaccion)
+                    VALUES (%s, %s, %s,%s, %s, %s,%s, %s, %s,%s)
                 """
                 conexion.ejecutar(insert_pasaje, (
-                    pasajero.get("idDetalleViajeAsiento"),
+                    key,
+                    Pasaje.generar_numComprobante(),
+                    # esPasajeNormal
+                    1,
+                    # esPasajeLibre
+                    0,
+                    # esTransferencia
+                    0,
+                    # esReserva
+                    0,
+                    # esCambioRuta
+                    0,
+                    # idVenta
+                    id_venta,
+
+
                     pasajero.get("nombres"),
                     id_venta
                 ), auto_commit=False)
