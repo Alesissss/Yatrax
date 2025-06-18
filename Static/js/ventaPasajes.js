@@ -3,7 +3,9 @@
 // =============================================================================
 
 const CONFIG = {
-    MAX_ASIENTOS: 4,
+    MAX_ASIENTOS: 4, // Valor por defecto
+    IGV: 0.18, // En decimal, en porcentaje 18%
+    TIEMPO_MAXIMO_COMPRA: 5, // En minutos
     RUTAS: {
         BUSCAR_VIAJES: '/ecommerce/home/buscarViajes',
         OBTENER_RUTAS: '/ecommerce/home/GetRutasConcatenadas',
@@ -21,6 +23,27 @@ const CONFIG = {
         COLUMNAS: 6
     }
 };
+
+$.ajax({
+    url: '/ecommerce/home/GetConfGeneral',  // Ruta de la API
+    method: 'GET',  // Método GET
+    success: function(data) {
+        // Verificamos si la respuesta es exitosa
+        if (data.Status === 'success' && data.data) {
+            CONFIG.MAX_ASIENTOS = data.data.max_pasajes_venta;
+            CONFIG.TIEMPO_MAXIMO_COMPRA = data.data.tiempo_maximo_venta_minutos;
+            CONFIG.IGV = data.data.igv;
+            console.log("MAX_ASIENTOS actualizado:", CONFIG.MAX_ASIENTOS);
+        } else {
+            console.error("Error al recuperar la configuración general");
+        }
+    },
+    error: function(xhr, status, error) {
+        console.error("Error en la llamada AJAX:", error);
+    }
+});
+
+
 
 // =============================================================================
 // ESTADO GLOBAL DE LA APLICACIÓN

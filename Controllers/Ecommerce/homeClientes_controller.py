@@ -31,6 +31,8 @@ from Models.ruta import Ruta
 from Models.tipoMetodoPago import TipoMetodoPago
 from Models.asiento import Asiento
 from Models.venta import Venta
+from Models.conf_general import ConfGeneral
+
 homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/home')
 
 # # ERRORES 
@@ -723,3 +725,24 @@ def reservarPasaje():
         })
         
 #END REGION
+
+# REGION CONF_GENERAL
+
+@homeClientes_bp.route("/GetConfGeneral")
+def get_conf_general():
+    try:
+        result = ConfGeneral.obtener()
+        
+        # Convertir los valores a flotantes antes de devolverlos
+        if result:
+            result['igv'] = float(result['igv'])
+            result['max_pasajes_venta'] = float(result['max_pasajes_venta'])
+            result['tarifaBase'] = float(result['tarifaBase'])
+            result['tiempo_maximo_venta_minutos'] = float(result['tiempo_maximo_venta_minutos'])
+            result['viajesReprogramables'] = int(result['viajesReprogramables'])  # Puedes usar int si es un valor booleano 0/1
+        
+        return jsonify({'data': result, 'Status': 'success', 'Msj': 'Configuración general recuperada exitosamente'})
+    except Exception as e:
+        return jsonify({'data': {}, 'Status': 'error', 'Msj': f'Ocurrió un error al listar configuración general: {repr(e)}'})
+
+# END REGION CONF_GENERAL
