@@ -219,21 +219,21 @@ class Pasaje:
                     pas.codigo AS codigo_pasaje,
                     pas.enTransaccion AS estado_transaccion,
                     v.idEstadoViaje AS estado_viaje,
-                    pas.numeroComprobante,
-                        FROM pasaje pas 
-                        INNER JOIN detalle_viaje_asiento dva ON dva.id = pas.idDetalleViajeAsiento
-                        INNER JOIN detalle_viaje dv ON dv.id = dva.idDetalle_Viaje
-                        INNER JOIN detalle_pasaje dp ON dp.idPasaje = pas.id 
-                        INNER JOIN pasajero pa ON pa.id = dp.id
-                        INNER JOIN tipo_documento td ON td.id = pa.idTipoDocumento
-                        INNER JOIN asiento a ON a.id = dva.idAsiento
-                        INNER JOIN sucursal s_origen ON s_origen.id = dv.idSucursalOrigen
-                        INNER JOIN sucursal s_destino ON s_destino.id = dv.idSucursalDestino
-                        INNER JOIN vehiculo ve ON ve.id = a.id_vehiculo
-                        INNER JOIN tipo_vehiculo tv ON tv.id = ve.id_tipo_vehiculo
-                        INNER JOIN servicio ser ON ser.id = tv.id_servicio
-                        INNER JOIN viaje v ON v.id = dv.idViaje
-                        WHERE dp.viajeEnBrazos != 0 AND pas.numeroComprobante=%s;
+                    pas.numeroComprobante
+                FROM pasaje pas 
+                INNER JOIN detalle_viaje_asiento dva ON dva.id = pas.idDetalleViajeAsiento
+                INNER JOIN detalle_viaje dv ON dv.id = dva.idDetalle_Viaje
+                INNER JOIN detalle_pasaje dp ON dp.idPasaje = pas.id 
+                INNER JOIN pasajero pa ON pa.id = dp.idPasajero
+                INNER JOIN tipo_documento td ON td.id = pa.idTipoDocumento
+                INNER JOIN asiento a ON a.id = dva.idAsiento
+                INNER JOIN sucursal s_origen ON s_origen.id = dv.idSucursalOrigen
+                INNER JOIN sucursal s_destino ON s_destino.id = dv.idSucursalDestino
+                INNER JOIN vehiculo ve ON ve.id = a.id_vehiculo
+                INNER JOIN tipo_vehiculo tv ON tv.id = ve.id_tipo_vehiculo
+                INNER JOIN servicio ser ON ser.id = tv.id_servicio
+                INNER JOIN viaje v ON v.id = dv.idViaje
+                WHERE dp.viajeEnBrazos != 1 AND pas.numeroComprobante = %s;
             """
             filas = conexion.obtener(query, (numComprobante,))
             return filas[0] if filas else None

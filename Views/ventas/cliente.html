@@ -276,7 +276,13 @@
             },
             columns: [
                 { data: "ID", name: "ID" },
-                { data: "nombre_pais", name: "nombre_pais" },
+                { 
+                    data: "nombre_pais", 
+                    name: "nombre_pais",
+                    render: function(data, type, row) {
+                        return data ? data.toUpperCase() : '';
+                    }
+                },
                 { data: "abreviatura", name: "abreviatura" },
                 { data: "numero_documento", name: "numero_documento" },
                 { data: "apellidos", name: "apellidos" },
@@ -284,7 +290,7 @@
                 {
                     data: "sexo", name: "sexo",
                     render: function (data, type, row) {
-                        return data === 1 ? 'Masculino' : 'Femenino';
+                        return data === 1 ? 'MASCULINO' : 'FEMENINO';
                     }
                 },
                 {
@@ -296,7 +302,11 @@
                 },
                 { data: "direccion", name: "direccion" },
                 { data: "telefono", name: "telefono" },
-                { data: "email", name: "email" },
+                { data: "email", name: "email",
+                    render: function(data,type,row) {
+                        return data ? data.toUpperCase() : '';
+                    }
+                 },
                 {
                     data: "estado",
                     name: "estado",

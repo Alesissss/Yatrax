@@ -290,7 +290,7 @@
                         $('#nombre').val("");
                         $('#ape_pat').val("");
                         $('#ape_mat').val("");
-                        toastr.error(json.Msj, "ERROR");
+                        toastr.warning("No se encontró el DNI o no existe", "Alerta de sistema");
                     }
                 })
                 .catch(() => toastr.error("No se ha podido conectar con el servidor", "ERROR"));
@@ -359,6 +359,13 @@
         }
 
         // Validar teléfono: exactamente 9 dígitos
+        // Limitar el teléfono a máximo 9 dígitos en tiempo real
+        $('#telefono').on('input', function () {
+            let value = $(this).val();
+            if (value.length > 9) {
+            $(this).val(value.slice(0, 9));
+            }
+        });
         if (telefono && !/^\d{9}$/.test(telefono)) {
             toastr.warning("El teléfono debe tener exactamente 9 dígitos", "MENSAJE DE SISTEMA");
             return false;
