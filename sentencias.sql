@@ -450,6 +450,7 @@ CREATE TABLE conf_general (
     tarifaBase DECIMAL(9,2) NOT NULL,
     igv DECIMAL(9,2) NOT NULL,
     max_pasajes_venta INT NOT NULL,
+    tiempo_maximo_venta_minutos DECIMAL(9,2),
     viajesReprogramables BOOLEAN NOT NULL
 );
 
@@ -1499,7 +1500,7 @@ INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuari
 '/Static/img/trabajadores/luis.jpg', 1, 1,'2025-03-06 20:06:14','SYSTEM');
 
 -- Tabla de configuración general
-INSERT INTO conf_general (id, igv, tarifaBase, max_pasajes_venta, viajesReprogramables) VALUES (1, 0.18, 10, 4, 0);
+INSERT INTO conf_general (id, igv, tarifaBase, max_pasajes_venta, tiempo_maximo_venta_minutos, viajesReprogramables) VALUES (1, 0.18, 10, 4, 10, 0);
 
 -- Tabla menus
 INSERT INTO conf_menus (id, nombre, estado) VALUES (1, 'M_USUARIOS', 1);
@@ -6376,4 +6377,40 @@ BEGIN
         DELETE FROM marca WHERE ID = P_ID;
         SET @MSJ = 'Marca eliminada correctamente';
     END IF;
-END $$ 
+END $$
+
+-- Crear procedimiento SP_MODIFICAR_CONF_GENERAL
+DELIMITER $$
+
+CREATE PROCEDURE SP_MODIFICAR_CONF_GENERAL(
+    IN P_IGV DECIMAL(5,2),
+    IN P_TARIFABASE DECIMAL(9,2),
+    IN P_MAXPASAJESVENTA INT,
+    IN P_TIEMPO_MAXIMO_VENTA_MINUTOS INT,
+    IN P_VIAJES_REPROGRAMABLES INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = CONCAT('Error inesperado al ejecutar el procedimiento almacenado');
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    IF EXISTS (SELECT 1 FROM conf_general LIMIT 1) THEN
+        UPDATE conf_general
+        SET igv = P_IGV, 
+            tarifaBase = P_TARIFABASE,
+            max_pasajes_venta = P_MAXPASAJESVENTA,
+            tiempo_maximo_venta_minutos = P_TIEMPO_MAXIMO_VENTA_MINUTOS,
+            viajesReprogramables = P_VIAJES_REPROGRAMABLES;
+
+        SET @MSJ = 'Configuración general modificada correctamente';
+    ELSE
+        SET @MSJ2 = 'No se encontró la configuración general';
+    END IF;
+
+END $$
+
+DELIMITER ;
