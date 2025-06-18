@@ -84,7 +84,7 @@ def Menu_SancionPersonal():
 
 @personal_bp.route('/SancionPersonalNuevo')
 def SancionPersonalNuevo():
-    return render_template('personal/sancionPersonalCRUD.html', active_page='sancionPersonal', active_menu='mPersonal', sancionPersonal = {}, tittle = 'Registrar sanción a personal', btnId = 'btn_Registrar')
+    return render_template('personal/sancionPersonalCRUD.html', active_page='sancionPersonal', active_menu='mPersonal', sancion_personal = {}, tittle = 'Registrar sanción a personal', btnId = 'btn_Registrar')
 
 # END VIEWS
 
@@ -336,7 +336,7 @@ def registrar_sancionPersonal():
 @personal_bp.route("/EditarSancionPersonal/<int:personalid>/<int:sancionid>", methods=["GET", "POST"])
 def editar_personalSancion(personalid, sancionid):
     try:
-        sancionPersonal = Personal_Sancion.obtener_por_id(personalid, sancionid)
+        sancion_personal = Personal_Sancion.obtener_por_id(personalid, sancionid)
         if request.method == "POST":
             descripcion = request.form.get("descripcion").strip()
             estado = request.form.get("estado")
@@ -352,9 +352,9 @@ def editar_personalSancion(personalid, sancionid):
             else:
                 return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar sanción a personal'})
 
-        if sancionPersonal:
-            return render_template('personal/sancionPersonalCRUD.html', active_page='sancionPersonal', active_menu='mPersonal', sancionPersonal = sancionPersonal, tittle='Editar sanción a personal', btnId='btn_Editar')
-        return render_template('personal/sancionPersonalCRUD.html', active_page='sancionPersonal', active_menu='mPersonal', sancionPersonal = {}, tittle='Editar sanción a personal', btnId='btn_Editar')
+        if sancion_personal:
+            return render_template('personal/sancionPersonalCRUD.html', active_page='sancionPersonal', active_menu='mPersonal', sancion_personal = sancion_personal, tittle='Editar sanción a personal', btnId='btn_Editar')
+        return render_template('personal/sancionPersonalCRUD.html', active_page='sancionPersonal', active_menu='mPersonal', sancion_personal = {}, tittle='Editar sanción a personal', btnId='btn_Editar')
 
     except Exception as e:
         return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al editar sanción a personal: {repr(e)}'})

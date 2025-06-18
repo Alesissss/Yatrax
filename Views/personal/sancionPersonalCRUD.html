@@ -47,8 +47,8 @@
                             <label for="txt_Fecha">Fecha de culminación de la sanción</label>
                             <div class="input-group">
                                 <input type="date" id="txt_Fecha" class="form-control"
-                                    placeholder="Fecha de culminación..." {% if btnId=='btn_Aceptar' %}disabled{% endif
-                                    %} disabled>
+                                    placeholder="Fecha de culminación..." {% if btnId=='btn_Aceptar' %}disabled{% endif %}
+                                    value="{{ sancion_personal.fecha_fin}}">
                                 <div class="input-group-append">
                                     <div class="input-group-text"><i class="fas fa-user"></i></div>
                                 </div>
@@ -61,9 +61,9 @@
                                 <select id="cbx_Estado" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{%
                                     endif %}>
                                     <option disabled>--SELECCIONAR--</option>
-                                    <option {% if sancionPersonal.estado==1 %}selected{% endif %} value="1">Vigente
+                                    <option {% if sancion_personal.estado==1 %}selected{% endif %} value="1">Vigente
                                     </option>
-                                    <option {% if sancionPersonal.estado==0 %}selected{% endif %} value="0">No vigente
+                                    <option {% if sancion_personal.estado==0 %}selected{% endif %} value="0">No vigente
                                     </option>
                                 </select>
                             </div>
@@ -201,8 +201,8 @@
         });
 
         $("#btn_Editar").click(function () {
-            const personalid = Number("{{ sancionPersonal.personalid }}");
-            const sancionid = Number("{{ sancionPersonal.sancionid }}");
+            const personalid = Number("{{ sancion_personal.personalid }}");
+            const sancionid = Number("{{ sancion_personal.sancionid }}");
 
             let sancion = $('#cbx_Sancion').val();
             let personal = $('#cbx_Personal').val();
