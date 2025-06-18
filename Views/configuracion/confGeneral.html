@@ -1,0 +1,148 @@
+{% extends "index.html" %}
+
+{% block title %}YATRAX - {{ tittle }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="text-center mb-0">Configuración General</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- IGV -->
+                        <div class="col-md-12 mb-3">
+                            <label for="txt_IGV">IGV</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" min="0" id="txt_IGV" class="form-control" placeholder="IGV"
+                                    value="{{ conf_general.igv }}">
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><i class="fas fa-percent"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Tarifa Base -->
+                        <div class="col-md-12 mb-3">
+                            <label for="txt_TarifaBase">Tarifa base</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" min="0" id="txt_TarifaBase" class="form-control"
+                                    placeholder="Tarifa Base" value="{{ conf_general.tarifaBase }}">
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><i class="fas fa-money-bill-wave"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Máximo de Pasajes Venta -->
+                        <div class="col-md-12 mb-3">
+                            <label for="txt_MaxPasajesVenta">Máximo de pasajes venta</label>
+                            <div class="input-group">
+                                <input type="number" id="txt_MaxPasajesVenta" class="form-control" min="1"
+                                    placeholder="Máximo de Pasajes Venta" value="{{ conf_general.max_pasajes_venta }}">
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><i class="fas fa-ticket-alt"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Tiempo Máximo Venta Minutos -->
+                        <div class="col-md-12 mb-3">
+                            <label for="txt_TiempoMaximoVenta">Tiempo máximo venta (minutos)</label>
+                            <div class="input-group">
+                                <input type="number" id="txt_TiempoMaximoVenta" class="form-control"
+                                    placeholder="Tiempo Máximo Venta" min="0" step="0.01"
+                                    value="{{ conf_general.tiempo_maximo_venta_minutos }}">
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><i class="fas fa-clock"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Viajes Reprogramables -->
+                         <div class="col-md-12 mb-3">
+                            <label for="txt_ViajesReprogramables">Viajes reprogramables</label>
+                            <select id="cbx_ViajesReprogramables" class="form-control">
+                                <option value="1" {% if conf_general.viajesReprogramables== 1 %}selected{% endif %}>Sí</option>
+                                <option value="0" {% if conf_general.viajesReprogramables== 0 %}selected{% endif %}>No</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12 text-center">
+                            <button id="{{ btnId }}" type="button" class="btn btn-primary">Guardar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        $("#btn_Editar").click(function () {
+            let igv = $("#txt_IGV").val().trim();
+            let tarifaBase = $("#txt_TarifaBase").val().trim();
+            let maxPasajesVenta = $("#txt_MaxPasajesVenta").val().trim();
+            let tiempoMaximoVenta = $("#txt_TiempoMaximoVenta").val().trim();
+            let viajesReprogramables = $("#cbx_ViajesReprogramables").val();
+
+            if (!igv || !tarifaBase || !maxPasajesVenta || !tiempoMaximoVenta || !viajesReprogramables) {
+                toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                return;
+            }
+
+            if (igv <= 0 || tarifaBase <= 0 || maxPasajesVenta <= 0 || tiempoMaximoVenta <= 0){
+                toastr.warning("Todos los valores ingresados deben ser válidos", 'MENSAJE DE SISTEMA');
+                return;
+            }
+
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción modificará la configuración general. ¿Deseas continuar?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, modificar configuración",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    let formData = new FormData();
+                    formData.append("igv", igv);
+                    formData.append("tarifaBase", tarifaBase);
+                    formData.append("max_pasajes_venta", maxPasajesVenta);
+                    formData.append("tiempo_maximo_venta_minutos", tiempoMaximoVenta);
+                    formData.append("viajesReprogramables", viajesReprogramables);
+
+                    $.ajax({
+                        url: "/trabajadores/configuracion/EditarConfiguracionGeneral",
+                        type: "POST",
+                        processData: false,
+                        contentType: false,
+                        data: formData,
+                        success: function (response) {
+                            if (response.Status === "success") {
+                                if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                    return;
+                                } else {
+                                    toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                                    setTimeout(() => {
+                                        window.location.href = "/trabajadores/configuracion/EditarConfiguracionGeneral";
+                                    }, 500);
+                                }
+                            } else {
+                                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                            }
+                        },
+                        error: function (xhr, Status, error) {
+                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                        }
+                    });
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

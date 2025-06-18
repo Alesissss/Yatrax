@@ -10,6 +10,7 @@ from Models.tipoMetodoPago import TipoMetodoPago
 from Models.terminos_condiciones import TerminosCondiciones
 from Models.preguntas_frecuentes import PreguntasFrecuentes
 from Models.promocion import Promocion
+from Models.conf_general import ConfGeneral
 from werkzeug.utils import secure_filename
 
 configuracion_bp = Blueprint('configuracion', __name__, url_prefix='/trabajadores/configuracion')
@@ -1139,5 +1140,39 @@ def dar_baja_promocion(id):
             return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja la promoción'})
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f"Ocurrió un error inesperado: {repr(e)}"})
+
+# REGION CONF_GENERAL
+@configuracion_bp.route("/EditarConfiguracionGeneral", methods=["GET", "POST"])
+def editar_configuracion():
+    try:
+        conf_general = ConfGeneral.obtener()
+
+        if request.method == 'POST':
+
+            igv = request.form.get("igv").strip()
+            tarifa_base = request.form.get("tarifaBase").strip()
+            max_pasajes_venta = request.form.get("max_pasajes_venta").strip()
+            tiempo_maximo_venta_minutos = request.form.get("tiempo_maximo_venta_minutos").strip()
+            viajes_reprogramables = request.form.get("viajesReprogramables").strip()
+
+            mensajes = ConfGeneral.modificar(igv, tarifa_base, max_pasajes_venta, tiempo_maximo_venta_minutos, viajes_reprogramables)
+
+            msj1 = mensajes.get('@MSJ')
+            msj2 = mensajes.get('@MSJ2')
+
+            if msj1:
+                return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+            elif msj2:
+                return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+            else:
+                return jsonify({"Status": "error", 'Msj': 'Error desconocido al modificar la configuración general'})
+
+        if conf_general:
+            return render_template('configuracion/confGeneral.html', active_page="conf_general", active_menu='mConfiguracion', conf_general=conf_general, tittle = 'Editar Configuración General', btnId = 'btn_Editar')
+        return render_template('configuracion/confGeneral.html', active_page="conf_general", active_menu='mConfiguracion', conf_general={}, tittle = 'Editar Configuración General', btnId = 'btn_Editar')
+
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+# END REGION CONF_GENERAL
 
 # END FUNCIONES

@@ -406,6 +406,13 @@
                                 <i class="right fas fa-angle-left"></i>
                             </a>
                             <ul class="nav nav-treeview" style="display: block;">
+                                <li class="nav-item">
+                                    <a href="{{ url_for('configuracion.editar_configuracion') }}"
+                                        class="nav-link {% if active_page == 'conf_general' %}active{% endif %}">
+                                        <i class="fas fa-cogs nav-icon"></i>
+                                        <p>Configuración general</p>
+                                    </a>
+                                </li>
                                 {% if 20 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('configuracion.Menu_Permisos') }}"
