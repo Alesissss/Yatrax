@@ -653,8 +653,9 @@ def obtener_rutas_seguimiento():
 @homeClientes_bp.route("/obtenerDatosPasaje", methods=["GET"])
 def obtenerDatosPasaje():
     try:
-        numComprobante = request.args.get("numComprobante")
+        numComprobante = request.args.get("comprobante")
         pasaje = Pasaje.obtenerDatosPasaje(numComprobante)
+        print (pasaje)
         if pasaje:
             return jsonify({
                 "Status": "success",
