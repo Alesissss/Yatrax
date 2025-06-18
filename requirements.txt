@@ -4,4 +4,14 @@ requests
 Flask-Mail
 extensions
 config
+weasyprint==65.1
+cffi
+cssselect2
+fonttools
+Pillow
+pydyf
+PyPhen
+tinycss2
+tinyhtml5
+
 # $ pip install -r requirements.txt

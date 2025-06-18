@@ -1,44 +1,44 @@
 <style>
-  .step {
-    display: none;
-    padding: 2rem;
-    transition: opacity 0.3s ease;
-  }
+    .step {
+        display: none;
+        padding: 2rem;
+        transition: opacity 0.3s ease;
+    }
 
-  .step.active {
-    display: block;
-  }
+    .step.active {
+        display: block;
+    }
 
-  .tab-link {
-    position: relative;
-  }
+    .tab-link {
+        position: relative;
+    }
 
-  .tab-link.disabled {
-    pointer-events: none;
-    background-color: var(--primary-color);
-    color: rgb(255, 255, 255) !important;
-    cursor: default;
-  }
+    .tab-link.disabled {
+        pointer-events: none;
+        background-color: var(--primary-color);
+        color: rgb(255, 255, 255) !important;
+        cursor: default;
+    }
 
-  .tab-link.disabled::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.6);
-    border-radius: inherit;
-  }
+    .tab-link.disabled::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.6);
+        border-radius: inherit;
+    }
 
-  .tab-link.active {
-    background-color: var(--primary-color);
-    color: white;
-  }
+    .tab-link.active {
+        background-color: var(--primary-color);
+        color: white;
+    }
 
-  .hidden {
-    display: none !important;
-  }
+    .hidden {
+        display: none !important;
+    }
 </style>
 
 
@@ -50,34 +50,30 @@
         <button class="btn tab-link flex-fill" data-step="2" readonly>Itinerario regreso</button>
         <button class="btn tab-link flex-fill" data-step="3" readonly>Pago</button>
     </div>
-    <div class="row mx-0 p-0">
-        <form id="form-destino" class="p-4 bg-secondary-subtle">
-            <div class="row">
-                <div class="col-md-3">
-                    <label for="ciudad">Ruta</label>
-                    <select id="cbx_Ciudades" class="form-select"></select>
-                </div>
-                <div class="col-md-3">
-                    <label for="ida">Ida</label>
-                    <input type="date" name="fecha_ida" class="form-control" placeholder="-- Seleccionar fecha --"
-                        required>
-                </div>
-                <div class="col-md-3">
-                    <label for="vuelta">Vuelta</label>
-                    <input type="date" name="fecha_vuelta" class="form-control" placeholder="-- Seleccionar fecha --"
-                        disabled>
-                </div>
-                <div class="col-md-3 d-grid">
 
-                    <label style="color:#E2E3E5">...</label>
-                    <button style="background-color: var(--primary-color); border: 0px;" type="button"
-                        class="btn btn-primary fw-bold" onclick="buscarYMostrarItinerario()">
-                        Buscar
-                    </button>
-
-                </div>
+    <div id="form-destino" class="p-4 bg-secondary-subtle">
+        <div class="row mx-0 p-0">
+            <div class="col-md-3">
+                <label for="ciudad">Ruta</label>
+                <select id="cbx_Ciudades" class="form-select"></select>
             </div>
-        </form>
+            <div class="col-md-3">
+                <label for="ida">Ida</label>
+                <input type="date" name="fecha_ida" class="form-control" placeholder="-- Seleccionar fecha --" required>
+            </div>
+            <div class="col-md-3">
+                <label for="vuelta">Vuelta</label>
+                <input type="date" name="fecha_vuelta" class="form-control" placeholder="-- Seleccionar fecha --"
+                    disabled>
+            </div>
+            <div class="col-md-3 d-grid">
+                <button style="background-color: var(--primary-color); border: 0px;" type="button"
+                    class="btn btn-primary fw-bold w-100" onclick="buscarYMostrarItinerario()">
+                    Buscar
+                </button>
+
+            </div>
+        </div>
     </div>
 
     <div class="tab-content">
@@ -127,13 +123,26 @@
         </div>
     </div>
     <div class="step" id="step-2">
-        <div class="text-center">
-            <h3>Itinerario de regreso</h3>
-            <p>Seleccione su horario preferido para el viaje de regreso.</p>
-            <div class="mt-4">
-                <button class="btn btn-primary btn-siguiente" onclick="nextStep()">Siguiente <i
-                        class="fas fa-arrow-right"></i></button>
+        <div class="row rounded">
+            <div class="col-md-5 d-flex justify-content-center p-2 rounded-start"
+                style="background-color: var(--primary-color); color: #e8f5e9;">
+                <h6>Horario</h6>
             </div>
+            <div class="col-md-2 d-flex justify-content-center p-2"
+                style="background-color: var(--primary-color); color: #e8f5e9;">
+                <h6>Servicio</h6>
+            </div>
+            <div class="col-md-3 d-flex justify-content-center p-2"
+                style="background-color: var(--primary-color); color: #e8f5e9;">
+                <h6>Asiento</h6>
+            </div>
+            <div class="col-md-2 d-flex justify-content-center p-2 rounded-end"
+                style="background-color: var(--primary-color); color: #e8f5e9;">
+                <h6>Elegir</h6>
+            </div>
+        </div>
+        <div id="contenedor_viajes_vuelta" class="row">
+
         </div>
     </div>
 
@@ -212,9 +221,12 @@
                             </h2>
                             <div id="collapsePago" class="accordion-collapse collapse" data-bs-parent="#accordionPago">
                                 <div class="accordion-body">
-                                    <h5>Método de pago</h5>
-                                    <section class="form-check" id="tipo_transaccion">
-                                    </section>
+                                    <label for="selector_metodo_pago">Tipo de método de pago:</label>
+                                    <select id="selector_metodo_pago" class="form-select mb-3">
+                                        <option value="">Seleccione</option>
+                                    </select>
+
+                                    <div id="contenido_pago_dinamico"></div>
                                 </div>
                             </div>
                         </div>

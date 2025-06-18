@@ -199,7 +199,6 @@ class Viaje:
                 INNER JOIN escala e_destino ON dv.idSucursalDestino = e_destino.id
                 INNER JOIN sucursal s_destino ON s_destino.id = e_destino.id
                 INNER JOIN viaje v ON v.id = dv.idViaje
-                WHERE v.id = 1;
             """                 
             )
             return lista_origenes
@@ -252,5 +251,52 @@ class Viaje:
                 WHERE dv.id = %s
                                   """,(id_viaje,))
             return id[0]
+        finally:
+            conexion.cerrar()
+    
+    @classmethod
+    def obtener_asientos(cls,id_dv):
+        try:
+            conexion = bd.Conexion()
+            listado = conexion.obtener("""
+                SELECT 
+                    dva.id AS id_asiento,
+                    dva.esDisponible AS estado,
+                    h.id_tipo AS tipo_herramienta,
+                    a.nombre AS nombre,
+                    nh.x_dimension,
+                    nh.y_dimension,
+                    n.nroPiso,
+                    h.icono
+                FROM nivel_herramienta nh
+                JOIN nivel n ON nh.id_nivel = n.id
+                JOIN herramienta h ON nh.id_herramienta = h.id
+                INNER JOIN asiento a ON nh.id = a.id_nivel_herramienta
+                INNER JOIN detalle_viaje_asiento dva ON dva.idAsiento = a.id
+                WHERE dva.idDetalle_Viaje = %s
+
+                UNION
+
+                SELECT 
+                    NULL AS id_asiento,
+                    NULL AS estado,
+                    h.id_tipo,
+                    NULL AS nombre,
+                    nh.x_dimension,
+                    nh.y_dimension,
+                    n.nroPiso,
+                    h.icono
+                FROM nivel_herramienta nh
+                JOIN nivel n ON nh.id_nivel = n.id
+                JOIN herramienta h ON nh.id_herramienta = h.id
+                JOIN tipo_vehiculo tv ON tv.id = n.id_tipo_vehiculo
+                JOIN vehiculo v ON v.id_tipo_vehiculo = tv.id
+                JOIN viaje vi ON vi.idVehiculo = v.id
+                JOIN detalle_viaje dv ON dv.idViaje = vi.id
+                WHERE dv.id = %s AND h.id_tipo != 1;
+                
+           """, (id_dv,id_dv))
+
+            return listado
         finally:
             conexion.cerrar()

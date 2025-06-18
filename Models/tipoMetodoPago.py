@@ -69,4 +69,22 @@ class TipoMetodoPago:
             return resultado[0]
         finally:
             conexion.cerrar()
+
+    @classmethod
+    def obtener_tipos_y_metodos(cls):
+        try:
+            conexion = bd.Conexion()
+            lista = conexion.obtener("""
+                SELECT tm.idTipoMetodoPago as id_tipo_metodo, tm.nombre as tipo_metodo, mp.id as id_metodo, mp.nombre as metodo, mp.logo as logo, mp.qr as qr
+                FROM tipo_metodopago tm 
+                INNER JOIN metodo_pago mp ON tm.idTipoMetodoPago = mp.id_tipo_metodoPago
+                WHERE tm.estado = 1 AND mp.estado = 1             
+            """)
+            return lista
+        finally:
+            conexion.cerrar()
+    
             
+
+
+

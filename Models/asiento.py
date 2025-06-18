@@ -2,7 +2,7 @@ import bd
 
 class Asiento:
     def __init__(self, id=None, nro_asiento=None, id_nivel=None, tipo_asiento=None, estado=None,
-                 fecha_registro=None, usuario=None, estadoProceso=None, estadoRegistro=None):
+                 fecha_registro=None, usuario=None):
         self.id = id
         self.nro_asiento = nro_asiento
         self.id_nivel = id_nivel
@@ -10,9 +10,6 @@ class Asiento:
         self.estado = estado
         self.fecha_registro = fecha_registro
         self.usuario = usuario
-        # Auditoría
-        self.estadoProceso = estadoProceso
-        self.estadoRegistro = estadoRegistro
 
     @classmethod
     def obtener_todos(cls):
@@ -93,5 +90,28 @@ class Asiento:
             conexion.ejecutar("CALL SP_DARBAJA_ASIENTO(%s);", (id,))
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
             return resultado[0]
+        finally:
+            conexion.cerrar()
+    
+    @classmethod
+    def ocupar_asiento(cls, id):
+        conexion = bd.Conexion()
+        try:
+            conexion.ejecutar("UPDATE detalle_viaje_asiento SET esDisponible = 0 where id = %s;", (id,))
+        finally:
+            conexion.cerrar()
+    @classmethod
+    def liberar_asiento(cls, id):
+        conexion = bd.Conexion()
+        try:
+            conexion.ejecutar("UPDATE detalle_viaje_asiento SET esDisponible = 1 where id = %s;", (id,))
+        finally:
+            conexion.cerrar()
+    @classmethod
+    def obtener_estado(cls, id):
+        conexion = bd.Conexion()
+        try:
+            lista = conexion.obtener("SELECT esDisponible as estado FROM detalle_viaje_asiento where id = %s;", (id,))
+            return lista[0]
         finally:
             conexion.cerrar()

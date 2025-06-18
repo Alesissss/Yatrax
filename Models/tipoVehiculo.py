@@ -37,7 +37,7 @@ class TipoVehiculo:
             return listado
         finally:
             conexion.cerrar()
-
+    
     @classmethod
     def obtenerUno(cls,idTipoVehiculo):
         try:
@@ -205,4 +205,3 @@ class TipoVehiculo:
         finally:
             if conexion:
                 conexion.cerrar()
-

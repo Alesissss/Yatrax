@@ -24,6 +24,7 @@ viajes_bp = Blueprint('viajes', __name__, url_prefix='/trabajadores/viajes')
 
 # ERRORES 
 # Manejar errores 401 (Página no autorizada)
+
 @viajes_bp.errorhandler(401)
 def error_401(error):
     return render_template("error.html", error="Página no autorizada"), 401
@@ -67,6 +68,7 @@ def verificar_sesion():
 
     # if not any(menu['nombre'] == 'M_VIAJES' for menu in menus) and request.endpoint not in rutas_permitidas:
     #     abort(403)  # Autenticado, pero no tiene permiso para ese módulo
+
 
 # VIEWS
 @viajes_bp.route('/GestionarHorarios')
@@ -120,6 +122,8 @@ def Menu_ProgramarViajeNuevo():
 # END VIEWS
 
 # FUNCIONES
+
+
 
 # REGION NIVEL
 @viajes_bp.route("/GetData_Nivel", methods=["GET"])
@@ -1037,7 +1041,13 @@ def editar_marca(id):
 def eliminar_marca(id):
     try:
         mensajes = Marca.eliminar(id)
-        return jsonify(mensajes)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Error: {repr(e)}"})
 
@@ -1344,7 +1354,7 @@ def ver_asiento(id):
 @viajes_bp.route("/DarBajaAsiento/<int:id>", methods=['POST'])
 def dar_baja_asiento(id):
     try:
-        mensajes = Asiento.darBaja(id)
+        mensajes = Asiento.dar_baja(id)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 

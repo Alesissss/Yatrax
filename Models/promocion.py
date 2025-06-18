@@ -79,3 +79,14 @@ class Promocion:
             return resultado[0]
         finally:
             conexion.cerrar()
+
+    @classmethod
+    def obtener_por_codigo(cls, cod):
+        conexion = bd.Conexion()
+        try:
+            resultado = conexion.obtener("""
+                SELECT id FROM promocion WHERE codigo = %s
+            """, (cod,))
+            return resultado[0]["id"] if resultado else None
+        finally:
+            conexion.cerrar()

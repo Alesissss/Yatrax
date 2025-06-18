@@ -1,14 +1,12 @@
 import bd
 
 class TipoDocumento:
-    def __init__(self, id = None, nombre = None, abreviatura = None, estado = None, estadoProceso = None, estadoRegistro = None, fechaRegistro = None, usuario = None):
+    def __init__(self, id = None, nombre = None, abreviatura = None, estado = None, fechaRegistro = None, usuario = None):
         self.id = id
         self.nombre = nombre
         self.abreviatura = abreviatura
         self.estado = estado
         #Auditoría
-        self.estadoProceso = estadoProceso
-        self.estadoRegistro = estadoRegistro
         self.fechaRegistro = fechaRegistro
         self.usuario = usuario
         
@@ -16,7 +14,7 @@ class TipoDocumento:
     def obtener_todos(cls):
         try:
             conexion = bd.Conexion()
-            tipos_documento = conexion.obtener("Select id , nombre , abreviatura , estado from tipo_documento where estado_registro = 1")
+            tipos_documento = conexion.obtener("Select id , nombre , abreviatura , estado from tipo_documento ")
             return tipos_documento
         finally:
             conexion.cerrar()
@@ -25,7 +23,7 @@ class TipoDocumento:
     def obtener_por_id(cls, idTipoDocumento):
         try:
             conexion = bd.Conexion()
-            tipo_documento = conexion.obtener("Select id , nombre, abreviatura, estado from tipo_documento where estado_registro = 1 and id =  %s", (idTipoDocumento,))
+            tipo_documento = conexion.obtener("Select id , nombre, abreviatura, estado from tipo_documento where id =  %s", (idTipoDocumento,))
             return tipo_documento[0] if tipo_documento else None
         finally:
                 conexion.cerrar()
@@ -69,3 +67,12 @@ class TipoDocumento:
             return resultado[0]
         finally:
             conexion.cerrar()
+            
+    @classmethod
+    def obtener_por_nombre(cls, abrev):
+        try:
+            conexion = bd.Conexion()
+            tipo_documento = conexion.obtener("select id from tipo_documento where LOWER(abreviatura) =  LOWER(%s)", (abrev,))
+            return tipo_documento[0]["id"] if tipo_documento else None
+        finally:
+                conexion.cerrar()

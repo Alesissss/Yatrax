@@ -2,6 +2,8 @@ import hashlib
 import os
 import re
 import random
+#extra agregado para la transaccion
+import bd
 from correo import enviar_correo
 from flask import Blueprint, request, jsonify, render_template, session, redirect, url_for, abort,current_app
 from Models.pasaje import Pasaje
@@ -26,6 +28,9 @@ from Models.herramienta import Herramienta
 from Models.preguntas_frecuentes import PreguntasFrecuentes
 from Models.pasajero import Pasajero
 from Models.ruta import Ruta
+from Models.tipoMetodoPago import TipoMetodoPago
+from Models.asiento import Asiento
+from Models.venta import Venta
 homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/home')
 
 # # ERRORES 
@@ -55,25 +60,116 @@ homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/hom
 #    return render_template("Ecommerce/error.html", error="Ocurrió un error inesperado"), 500
 
 # FUNCIONES AUXILIARES
+#REGION PROTOTIPO DE PRUEBA 
+@homeClientes_bp.route('/registrar_venta', methods=['POST'])
+def registrar_venta():
+    data = request.json
+    try:
+        conn = bd.Conexion()
+        cursor = conn.cursor()
+        conn.autocommit = False
+
+        # 1. Datos del cliente
+        numero_documento = data['numero_documento']
+        nombre = data['nombre']
+        ape_paterno = data['ape_paterno']
+        ape_materno = data['ape_materno']
+        razon_social = data.get('razon_social')  # opcional
+        sexo = data['sexo']
+        f_nacimiento = data['f_nacimiento']
+        direccion = data['direccion']
+        telefono = data['telefono']
+        email = data['email']
+        password = data['password']
+        estado = True
+        id_pais =  1 #data['id_pais']
+        id_tipo_cliente = data['id_tipo_cliente']
+        id_tipo_doc = data['id_tipo_doc']
+        usuario = data.get('usuario', 'sistema')
+
+        # 2. Datos de la venta
+        sub_total = data['subTotal']
+        igv = 0.18 #data['igv']
+        id_promocion = 1 #data['idPromocion']
+        id_metodo_pago = data['idMetodoPago']
+        id_tipo_comprobante = data['idTipoComprobante']
+
+        # 3. Asiento y viaje
+        id_asiento = data['idAsiento']
+        id_detalle_viaje = data['idDetalleViaje']
+        id_detalle_viaje_asiento = data['id_detalle_viaje_asiento']
+
+        # Verificar que el asiento esté libre (estado = 0)
+        cursor.execute("SELECT estado FROM asiento WHERE id = ?", id_asiento)
+        estado = cursor.fetchone()
+        if not estado or estado[0] != 0:
+            return jsonify({'error': 'El asiento ya está ocupado o no existe'}), 400
+
+        # Insertar cliente
+        cursor.execute("INSERT INTO cliente (numero_documento, nombre, ape_paterno, ape_materno, razon_social, sexo, f_nacimiento, direccion, telefono, email, password, estado, id_pais, id_tipo_cliente, id_tipo_doc, usuario) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            numero_documento, nombre, ape_paterno, ape_materno, razon_social, sexo, f_nacimiento, direccion, telefono, email, password, estado, id_pais, id_tipo_cliente, id_tipo_doc, usuario)
+
+        cursor.execute("SELECT @@IDENTITY")
+        id_cliente = cursor.fetchone()[0]
+
+        # Insertar venta
+        cursor.execute("INSERT INTO venta (idCliente, subTotal, igv, idPromocion, idMetodoPago, idTipoComprobante) VALUES (?, ?, ?, ?, ?, ?)",
+            id_cliente, sub_total, igv, id_promocion, id_metodo_pago, id_tipo_comprobante)
+        cursor.execute("SELECT @@IDENTITY")
+        id_venta = cursor.fetchone()[0]
+
+        # Insertar pasaje
+        cursor.execute("""
+            INSERT INTO pasaje (
+                idDetalleViajeAsiento, numeroComprobante,
+                esPasajeNormal, esPasajeLibre, esTransferencia, esReserva, esCambioRuta,
+                idVenta, codigo, idPasaje
+            )
+            VALUES (?, NULL, ?, ?, ?, ?, ?, ?, ?, NULL)
+        """, id_detalle_viaje_asiento,
+              1,  # esPasajeNormal
+              0, 0, 0, 0,
+              id_venta,
+              "AA0001"  # código del pasaje, sugerido automatizar
+        )
+
+        # Insertar en detalle_viaje_asiento (marcar como no disponible)
+        cursor.execute("INSERT INTO detalle_viaje_asiento (idDetalle_Viaje, idAsiento, esDisponible, usuario) VALUES (?, ?, 0, ?)",
+            id_detalle_viaje, id_asiento, usuario)
+
+        # Actualizar estado del asiento
+        cursor.execute("UPDATE asiento SET estado = 1 WHERE id = ?", id_asiento)
+
+        conn.commit()
+        return jsonify({'mensaje': 'Venta registrada correctamente'}), 200
+
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+# END PROTOTIPO
 
 def renderizarCompra():
-    return render_template('Ecommerce/home/partials/ventaPasajes.html')
+    herramientas = Herramienta.obtener_todos()
+    return render_template('Ecommerce/home/partials/ventaPasajes.html', herramientas = herramientas)
 
 
 @homeClientes_bp.route('/renderizar_itinerario', methods=['POST'])
 def renderizar_itinerario():
     data = request.get_json()
     itinerarios = data.get('itinerarios', [])
-
+    sufijo = data.get('sufijo')
     # Renderiza el HTML del itinerario con Jinja
-    html_renderizado = render_template('Ecommerce/home/partials/itinerario.html', itinerarios=itinerarios)
+    html_renderizado = render_template('Ecommerce/home/partials/itinerario.html', itinerarios=itinerarios, sufijo = sufijo )
     return jsonify({'html': html_renderizado})
-
-
 
 # VIEWS
 @homeClientes_bp.route('/inicio')
 def index():
+    
     datos_recibidos = {
         "servicios":Servicio.obtener_todos(),
         "contenido_venta": renderizarCompra()
@@ -425,7 +521,7 @@ def buscarViajes():
         fecha_vuelta = request.form.get('fecha_vuelta')
         datos_viaje_ida = Viaje.buscarViajePorRutaYFecha(origen=origen, destino=destino, fecha= fecha_ida)
         if fecha_vuelta:
-            datos_viaje_vuelta = Viaje.buscarViajePorRutaYFecha(origen=origen, destino=destino, fecha= fecha_ida)
+            datos_viaje_vuelta = Viaje.buscarViajePorRutaYFecha(origen=destino, destino=origen, fecha= fecha_vuelta)
         return jsonify({
             "data_ida":datos_viaje_ida,
             "data_vuelta":datos_viaje_vuelta,
@@ -434,40 +530,92 @@ def buscarViajes():
         })
     except Exception as e:
         return jsonify({
-            "data_ida":datos_viaje_ida,
-            "data_vuelta":datos_viaje_vuelta,
+            "data_ida":[],
+            "data_vuelta":[],
             "Msg":"Hubo un error al buscar los viajes; " + repr(e),
             "Status": "error"
         })
 
 from flask import jsonify, render_template
 
-@homeClientes_bp.route("/ecommerce/home/obtener_diseno_vehiculo")
+@homeClientes_bp.route("/obtener_diseno_vehiculo", methods=['POST'])
 def obtener_diseno_vehiculo():
-    detalle_viaje_id = request.args.get("detalle_viaje_id")
-
-    datos = Viaje.obtener_tipo_vehiculo_por_dv(detalle_viaje_id)
-    tipo_vehiculo_id = datos["id_tipo_vehiculo"]
-
-    niveles = TipoVehiculo.obtener_niveles_por_tipoVehiculo(tipo_vehiculo_id)
-    botones = []
-    for nivel in niveles:
-        for herramienta in nivel["herramientas"]:
-            botones.append({
-                "x_dimension": herramienta["x_dimension"],
-                "y_dimension": herramienta["y_dimension"],
-                "id_herramienta": herramienta["id_herramienta"],
-                "piso": nivel["nroPiso"]
-            })
-
-    herramientas = Herramienta.obtener_todos()  
-
-    html = render_template("Ecommerce/home/partials/matriz_niveles.html", botones=botones, herramientas=herramientas)
-
+    detalle_viaje_id = request.json.get("id_dv")
+    datos = Viaje.obtener_asientos(detalle_viaje_id)
     return jsonify({
+        "data": datos,
         "Status": "success",
-        "html": html
+        "msg": "Retornado con éxito" 
     })
+
+@homeClientes_bp.route("/cargar_metodos",methods=["GET"])
+def cargar_metodos():
+    try:
+        lista = TipoMetodoPago.obtener_tipos_y_metodos()
+        por_tipo = dict()
+        for elemento in lista:
+            id_tipo_metodo = str(elemento["id_tipo_metodo"])  # convertimos a str para usar como clave
+            elemento_sin_id = elemento.copy()
+            elemento_sin_id.pop("id_tipo_metodo", None)
+
+            if id_tipo_metodo in por_tipo:
+                por_tipo[id_tipo_metodo].append(elemento_sin_id)
+            else:
+                por_tipo[id_tipo_metodo] = [elemento_sin_id]
+            
+        return {"data":por_tipo, "msg":"Listado correctamente de los métodos","status":1}
+    except Exception as e:
+        return {"data":[], "msg":f"Error al listar los métodos: {repr(e)}","status":-1}
+
+@homeClientes_bp.route("/ocuparAsiento", methods=["POST"])
+def ocupar_asiento():
+    try:
+        id_asiento = request.json.get("asiento_id")
+        
+        estado_actual = Asiento.obtener_estado(id_asiento)
+        if estado_actual['estado'] == 0:
+            return {"data": [], "msg": "El asiento ya está ocupado", "status": 0}
+        Asiento.ocupar_asiento(id_asiento)
+        return {"data": [], "msg": "Asiento ocupado correctamente", "status": 1}
+    except Exception as e:
+        return {"data": [], "msg": f"Error al ocupar el asiento: {repr(e)}", "status": -1}
+
+@homeClientes_bp.route("/liberarAsiento", methods=["POST"])
+def liberar_asiento():
+    try:
+        id_asiento = request.json.get("asiento_id")
+        
+        estado_actual = Asiento.obtener_estado(id_asiento)
+        if estado_actual['estado'] == 1:
+            return {"data": [], "msg": "El asiento ya está libre", "status": 0}
+        
+        Asiento.liberar_asiento(id_asiento)
+        return {"data": [], "msg": "Asiento liberado correctamente", "status": 1}
+    except Exception as e:
+        return {"data": [], "msg": f"Error al liberar el asiento: {repr(e)}", "status": -1}
+    
+@homeClientes_bp.route("/procesar_pago", methods=["POST"])
+def procesar_pago():
+    try:
+        data = request.get_json()
+
+        contacto = data.get("contacto", {})
+        pago = data.get("pago", {})
+        ventas = data.get("ventas", {})
+
+        resultado = Venta.registrar_operacion(contacto, pago, ventas)
+
+        if resultado["status"] == 1:
+            return jsonify({"Status": "success", "codigo_confirmacion": f"VENTA-{resultado['id_venta']}"})
+        else:
+            return jsonify({"Status": "error", "Msj": resultado["msg"]})
+
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Error inesperado: {repr(e)}"})
+
+
+
+
 
 
 # END REGION COMPRA PASAJE
@@ -499,7 +647,31 @@ def obtener_rutas_seguimiento():
 
 # END RUTAS SEGUIMIENTO
 
-#REGION RESERVA
+#REGION TRANSACCIONES PASAJE
+@homeClientes_bp.route("/obtenerDatosPasaje", methods=["GET"])
+def obtenerDatosPasaje():
+    try:
+        numComprobante = request.args.get("numComprobante")
+        pasaje = Pasaje.obtenerDatosPasaje(numComprobante)
+        if pasaje:
+            return jsonify({
+                "Status": "success",
+                "data": pasaje,
+                "Msj": "Datos del pasaje obtenidos correctamente"
+            })
+        else:
+            return jsonify({
+                "Status": "error",
+                "data": {},
+                "Msj": "No se encontró el pasaje con el número de comprobante proporcionado"
+            })
+    except Exception as e:
+        return jsonify({
+            "Status": "error",
+            "data": {},
+            "Msj": f"Error al obtener los datos del pasaje: {repr(e)}"
+        })
+
 @homeClientes_bp.route("/listarTiposComprobante")
 def listadoTiposComprobantes():
     try:
@@ -549,4 +721,5 @@ def reservarPasaje():
             "Msj": str(e),
             "Msj2": ""
         })
+        
 #END REGION
