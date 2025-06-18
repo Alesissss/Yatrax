@@ -1,8 +1,6 @@
 import bd
 
-class Reprote:
-    def __init__(self):
-        self
+class Reporte:
 
     @classmethod
     def cantidadUsuariosxTipo():
@@ -89,6 +87,91 @@ class Reprote:
         except Exception as e:
             print("Error al obtener la cantidad de rutas solicitadas: ", e)
 
+    @classmethod
+    def cantidadRutasProgramadasxMes():
+        conexion = None
+        try:
+            # mes, total_programaciones
+            conexion = bd.Conexion()
+            resultados = conexion.obtener("""
+                SELECT DATE_FORMAT(fechaHoraSalida, '%Y-%m') AS mes, COUNT(*) AS total_programaciones
+                FROM viaje
+                GROUP BY mes
+                ORDER BY mes;
+            """)
+            return resultados[0]
+        except Exception as e:
+            print("Error al obtener la cantidad de rutas programadas por mes: ", e)
+
+    @classmethod
+    def cantidadIngresosxServicio():
+        # servicio, cantidad
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            resultados = conexion.obtener("""
+                SELECT 
+                    s.nombre AS servicio,
+                    COALESCE(COUNT(p.id), 0) AS cantidad_ventas
+                FROM servicio s
+                LEFT JOIN tipo_vehiculo tv ON s.id = tv.id_servicio
+                LEFT JOIN vehiculo ve ON tv.id = ve.id_tipo_vehiculo
+                LEFT JOIN viaje vi ON ve.id = vi.idVehiculo
+                LEFT JOIN detalle_viaje dv ON vi.id = dv.idViaje
+                LEFT JOIN detalle_viaje_asiento dva ON dv.id = dva.idDetalle_Viaje
+                LEFT JOIN pasaje p ON dva.id = p.idDetalleViajeAsiento
+                GROUP BY s.id, s.nombre
+                ORDER BY cantidad_ventas DESC;
+            """)
+            return resultados[0]
+        except Exception as e:
+            print("Error al obtener la cantidad de ventas por servicio: ", e)
+
+    #aun falta
+    @classmethod
+    def cantidadIngresosxPeriodo():
+        pass
+
+    @classmethod
+    def cantidadClientesxPais():
+        conexion = None
+        try:
+            # pais, cantidad
+            conexion = bd.Conexion()
+            resultados = conexion.obtener("""
+                SELECT 
+                    p.nombre AS pais,
+                    COALESCE(COUNT(c.id), 0) AS cantidad
+                FROM pais p
+                LEFT JOIN cliente c ON p.id = c.id_pais
+                GROUP BY p.id, p.nombre
+                ORDER BY cantidad DESC;
+            """)
+
+            return resultados[0]
+        except Exception as e:
+            print("Error al obtener la cantidad de clientes por pais: ", e)
+
+
+    @classmethod
+    def cantidadClientesxTipo():
+        conexion = None
+        try:
+            # tipo_cliente, cantidad
+            conexion = bd.Conexion()
+            resultados = conexion.obtener("""
+                SELECT 
+                    tc.nombre AS tipo_cliente,
+                    COALESCE(COUNT(c.id), 0) AS cantidad
+                FROM tipo_cliente tc
+                LEFT JOIN cliente c ON tc.idTipoCliente = c.id_tipo_cliente
+                GROUP BY tc.idTipoCliente, tc.nombre
+                ORDER BY cantidad DESC;
+            """)
+            return resultados[0]
+        except Exception as e:
+            print("Error al obtener la cantidad de clientes por tipo: ", e)
+    
 
 
 
