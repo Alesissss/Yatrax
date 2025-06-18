@@ -153,7 +153,7 @@
             let ids = $('#cbx_Microservicios').val();
             let microservicios = ids.map(id => ({ id: parseInt(id, 10) }));
 
-            if (!nombre || !descripcion || !estado || microservicios.length <= 0) {
+            if (!nombre || !descripcion || !estado || microservicios.length <= 0 || !imagen) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
