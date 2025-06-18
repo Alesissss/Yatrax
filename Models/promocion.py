@@ -87,6 +87,6 @@ class Promocion:
             resultado = conexion.obtener("""
                 SELECT id FROM promocion WHERE codigo = %s
             """, (cod,))
-            return resultado[0] if resultado else None
+            return resultado[0]["id"] if resultado else None
         finally:
             conexion.cerrar()

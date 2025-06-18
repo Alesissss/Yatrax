@@ -73,6 +73,6 @@ class TipoDocumento:
         try:
             conexion = bd.Conexion()
             tipo_documento = conexion.obtener("select id from tipo_documento where LOWER(abreviatura) =  LOWER(%s)", (abrev,))
-            return tipo_documento[0] if tipo_documento else None
+            return tipo_documento[0]["id"] if tipo_documento else None
         finally:
                 conexion.cerrar()

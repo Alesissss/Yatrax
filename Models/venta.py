@@ -39,7 +39,7 @@ class Venta:
                 contacto.get("email"),
                 contacto.get("direccion")
                 ), auto_commit=False)
-            
+            print(1)
             id_cliente = conexion.cursor.lastrowid
             montoVenta = 100
             if pago.get("datos_especificos")["codigo_promocional"]:
@@ -71,7 +71,7 @@ class Venta:
                     contacto.get("tipo_comprobante")
                 ), auto_commit=False)
             # 2. Registrar VENTA
-            
+            print(2)
             id_venta = conexion.cursor.lastrowid
 
             # 3. Registrar PASAJEROS, PASAJE y DETALLE_PASAJE
@@ -82,24 +82,36 @@ class Venta:
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """
                 conexion.ejecutar(insert_pasajero, (
+                    # nombre
                     pasajero.get("nombres"),
+                    # ape_paterno
                     pasajero.get("apellidoPaterno"),
+                    # ape_materno
                     pasajero.get("apellidoMaterno"),
+                    # numero_doc
                     pasajero.get("numDoc"),
+                    # id_tipo_doc
                     TipoDocumento.obtener_por_nombre(pasajero.get("tipoDoc")),
+                    #sexo
                     pasajero.get("sexo"),
+                    # fecha_nac
                     pasajero.get("fechaNacimiento"),
+                    # telefono
                     pasajero.get("telefono"),
+                    # email
                     pasajero.get("correo")
                 ), auto_commit=False)
                 id_pasajero = conexion.cursor.lastrowid
-    
+                print(3)
                 insert_pasaje = """
                     INSERT INTO pasaje (idDetalleViajeAsiento, numeroComprobante, esPasajeNormal, esPasajeLibre, esTransferencia, esReserva, esCambioRuta, idVenta, codigo, enTransaccion)
                     VALUES (%s, %s, %s,%s, %s, %s,%s, %s, %s,%s)
                 """
+                print(4)
                 conexion.ejecutar(insert_pasaje, (
+                    # idDetalleViajeAsiento
                     key,
+                    # numroComprobante
                     Pasaje.generar_numComprobante(),
                     # esPasajeNormal
                     1,
@@ -113,15 +125,15 @@ class Venta:
                     0,
                     # idVenta
                     id_venta,
-
-
-                    pasajero.get("nombres"),
-                    id_venta
+                    # codigo
+                    Pasaje.generar_codigo_unico(),
+                    # enTransaccion
+                    0
                 ), auto_commit=False)
                 id_pasaje = conexion.cursor.lastrowid
-
+                print(4)
                 insert_detalle = """
-                    INSERT INTO detalle_pasaje (idPasajero, idPasaje, esMenorEdad, viajaEnBrazos, fecha_registro)
+                    INSERT INTO detalle_pasaje (idPasajero, idPasaje, esMenorEdad, viajeEnBrazos, fecha_registro)
                     VALUES (%s, %s, %s, %s, %s)
                 """
                 conexion.ejecutar(insert_detalle, (
@@ -131,7 +143,7 @@ class Venta:
                     int(pasajero.get("brazos", False)),
                     datetime.now()
                 ), auto_commit=False)
-
+            print(5)
             conexion.conn.commit()
             return {"status": 1, "msg": "Venta registrada correctamente", "id_venta": id_venta}
 

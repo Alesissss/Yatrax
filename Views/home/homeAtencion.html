@@ -67,20 +67,12 @@
         <div class="col-md-6">
             <div class="card h-100">
                 <div class="card-header bg-danger text-white">
-                    <h3 class="card-title">Cantidad de registros de clientes mensuales</h3>
+                    <h3 class="card-title">Cantidad de clientes por tipo</h3>
                 </div>
                 <div class="card-body">
-                    <div class="col-md-12 mb-3">
-                        <label for="cbx_Estado">Estado</label>
-                        <div class="input-group">
-                            <select id="cbx_Estado" class="form-control">
-                                <option disabled>--SELECCIONAR--</option>
-                                <option value="1">Vigente</option>
-                                <option value="0">No vigente</option>
-                            </select>
-                        </div>
+                    <div class="card-body">
+                        <div id="chartClientesMensuales" style="width: 100%; height: 350px;"></div>
                     </div>
-                    <div id="chartClientesMensuales" style="width: 100%; height: 300px;"></div>
                 </div>
             </div>
         </div>
@@ -133,30 +125,32 @@
         var chartRegistros = echarts.init(document.getElementById('chartClientesMensuales'), isDarkMode ? 'dark' : '');
         var optionRegistros = {
             tooltip: {
-                trigger: 'axis'
+                trigger: 'item'
             },
-            xAxis: {
-                type: 'category',
-                data: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic']
+            legend: {
+                top: '1%',
+                left: 'center'
             },
-            yAxis: {
-                type: 'value'
-            },
-            series: [{
-                data: [120, 200, 150, 80, 70, 110, 40, 20, 50, 150, 220, 100],
-                type: 'bar',
-                barWidth: '60%',
-                itemStyle: {
-                    color: '#00c0ef'
+            series: [
+                {
+                    name: 'Usuarios',
+                    type: 'pie',
+                    radius: '50%',
+                    data: [
+                        { value: 1048, name: 'Administradores' },
+                        { value: 735, name: 'Supervisores' },
+                    ],
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
                 }
-            }]
+            ]
         };
         chartRegistros.setOption(optionRegistros);
-
-        window.addEventListener('resize', function () {
-            chartUsuarios.resize();
-            chartRegistros.resize();
-        });
     });
 </script>
 {% endblock %}
