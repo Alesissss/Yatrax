@@ -245,10 +245,10 @@
                     render: function (data, type, row) {
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_RutaVer('${data.id}')" title="Ver ruta"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_RutaEditar('${data.id}')" title="Editar ruta"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_RutaDarBaja('${data.id}')" title="Dar de baja ruta"><i class="bi bi-arrow-down-circle"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_RutaEliminar('${data.id}')" title="Eliminar ruta"><i class="bi bi-trash"></i></button>
+                            <button class="btn btn-xs m-1 btn-info" onclick="fct_ViajeVer('${data.id}')" title="Ver viaje"><i class="bi bi-eye"></i></button>
+                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_ViajeEditar('${data.id}')" title="Editar viaje"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_ViajeDarBaja('${data.id}')" title="Dar de baja viaje"><i class="bi bi-arrow-down-circle"></i></button>
+                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_ViajeEliminar('${data.id}')" title="Eliminar viaje"><i class="bi bi-trash"></i></button>
                         </div>
                         `;
                     },
@@ -299,18 +299,18 @@
         window.location.href = '/trabajadores/viajes/ProgramarViajeNuevo';
     }
 
-    function fct_RutaEditar(Id) {
-        window.location.href = `/trabajadores/viajes/EditarRuta/${Id}`;
+    function fct_ViajeEditar(Id) {
+        window.location.href = `/trabajadores/viajes/EditarViaje/${Id}`;
     }
 
-    function fct_RutaVer(Id) {
-        window.location.href = `/trabajadores/viajes/VerRuta/${Id}`;
+    function fct_ViajeVer(Id) {
+        window.location.href = `/trabajadores/viajes/VerViaje/${Id}`;
     }
 
-    function fct_RutaEliminar(Id) {
+    function fct_ViajeEliminar(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción eliminará la ruta. ¿Deseas continuar?",
+            text: "Esta acción eliminará al viaje. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -321,7 +321,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/viajes/EliminarRuta/${Id}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/viajes/EliminarViaje/${Id}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
@@ -330,7 +330,7 @@
                                 toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
                                 return;
                             }
-                            fct_IniciarTablaRutas('#tbl_Rutas');
+                            fct_IniciarTablaViajes('#tbl_Viajes');
                             toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                         } else {
                             toastr.error(response.Msj, "MENSAJE DE SISTEMA");
@@ -346,10 +346,10 @@
         });
     }
 
-    function fct_RutaDarBaja(Id) {
+    function fct_ViajeDarBaja(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción le dará de baja a la ruta. ¿Deseas continuar?",
+            text: "Esta acción le dará de baja al viaje. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -360,7 +360,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/viajes/DarBajaRuta/${Id}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/viajes/DarBajaViaje/${Id}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
@@ -369,7 +369,7 @@
                                 toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
                                 return;
                             }
-                            fct_IniciarTablaRutas('#tbl_Rutas');
+                            fct_IniciarTablaViajes('#tbl_Viajes');
                             toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                         } else {
                             toastr.error(response.Msj, "MENSAJE DE SISTEMA");
