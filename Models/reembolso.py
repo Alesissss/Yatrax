@@ -40,6 +40,29 @@ class Reembolso:
             return reembolso[0] if reembolso else None
         finally:
             conexion.cerrar()
+            
+    @classmethod
+    def validar_pasaje_dadoBaja(cls, numeroComprobante):
+        conexion = bd.Conexion()
+        try:
+            reembolso = conexion.obtener("""
+                SELECT 
+                    v.id AS id_viaje,
+                    v.estado AS estado_viaje,
+                    CASE 
+                        WHEN v.estado = 0 THEN 'Dado de baja'
+                        WHEN v.estado = 1 THEN 'Activo'
+                        ELSE 'Desconocido'
+                    END AS estado_descripcion
+                FROM pasaje p
+                INNER JOIN detalle_viaje_asiento dva ON p.idDetalleViajeAsiento = dva.id
+                INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
+                INNER JOIN viaje v ON dv.idViaje = v.id
+                WHERE p.numeroComprobante = %s
+            """, (numeroComprobante,))
+            return reembolso[0] if reembolso else None
+        finally:
+            conexion.cerrar()
 
     # Registrar un nuevo reembolso
     @classmethod
