@@ -440,8 +440,7 @@ CREATE TABLE cliente (
     id_tipo_doc INT,
     fechaRegistro DATETIME DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NULL,
-    fechaInicioReprogramacion DATETIME NULL,
-    fechaFinReprogramacion DATETIME NULL
+
     -- Claves foráneas
     CONSTRAINT fk_pais FOREIGN KEY (id_pais) REFERENCES PAIS(id),
     CONSTRAINT fk_tipo_cliente FOREIGN KEY (id_tipo_cliente) REFERENCES TIPO_CLIENTE(idTipoCliente),
@@ -741,6 +740,8 @@ CREATE TABLE pasaje(
     codigo CHAR(8) NOT NULL, -- AA0202
     enTransaccion TINYINT NULL DEFAULT 0, -- 1: en transacción, 0: no en transacción
     idPasaje INT NULL, -- Para operaciones con pasajes
+    fechaInicioReprogramacion DATETIME NULL,
+    fechaFinReprogramacion DATETIME NULL
     FOREIGN KEY (idDetalleViajeAsiento) REFERENCES detalle_viaje_asiento(id),
     FOREIGN KEY (idVenta) REFERENCES venta(id)
 );
