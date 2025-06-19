@@ -1,4 +1,6 @@
 -- Primero eliminamos los procedimientos por si existen
+DROP PROCEDURE IF EXISTS SP_MODIFICAR_CONF_GENERAL;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_REEMBOLSO;
 DROP PROCEDURE IF EXISTS SP_REGISTRAR_CLIENTE;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_CLIENTE;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_CLIENTE;
@@ -169,6 +171,7 @@ DROP PROCEDURE IF EXISTS SP_ELIMINAR_RECLAMO;
 -- Eliminar tablas si existen
 DROP TABLE IF EXISTS conf_general;
 DROP TABLE IF EXISTS reclamo;
+DROP TABLE IF EXISTS reembolso;
 DROP TABLE IF EXISTS tipo_reclamo;
 DROP TABLE IF EXISTS detalle_personal;
 DROP TABLE IF EXISTS detalle_pasaje;
@@ -891,7 +894,7 @@ INSERT INTO terminos_condiciones(id, nombre, archivo, estado, fecha_registro, us
 guía','versionPreliminar.txt',0,'2025-05-29 01:51:30','ander@gmail.com');
 
 -- INSERTS estado_viaje
-INSERT INTO estado_viaje (id, nombre) VALUES (1, 'PENDIENTE');
+INSERT INTO estado_viaje (id, nombre) VALUES (1, 'PROGRAMADO');
 INSERT INTO estado_viaje (id, nombre) VALUES (2, 'EN CURSO');
 INSERT INTO estado_viaje (id, nombre) VALUES (3, 'FINALIZADO');
 

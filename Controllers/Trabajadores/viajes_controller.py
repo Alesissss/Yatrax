@@ -1393,6 +1393,21 @@ def obtener_herramientas():
 def get_viajesProgramados():
     try:
         viajes = Viaje.obtener_todos()
+        viajes = [{
+                'id': dv['id'], 
+                'idRuta': dv['idRuta'], 
+                'estado': dv['estado'], 
+                'idEstadoViaje': dv['idEstadoViaje'],
+                'estado_viaje': dv['estado_viaje'],
+                'ruta': dv['ruta'],
+                'tipo_ruta': dv['tipo_ruta'],
+                'id_servicio': dv['id_servicio'],
+                'servicio': dv['servicio'],
+                'vehiculo': dv['vehiculo'],
+                'esReprogramado': dv['esReprogramado'],
+                'fechaHoraSalida': dv['fechaHoraSalida'].strftime("%Y-%m-%d %H:%M:%S") if dv['fechaHoraSalida'] else None, 
+                'fechaHoraLlegada': dv['fechaHoraLlegada'].strftime("%Y-%m-%d %H:%M:%S") if dv['fechaHoraLlegada'] else None
+                } for dv in viajes]
         return jsonify({'data': viajes, 'Status': 'success', 'Msj': 'Listado de viajes retornado exitosamente'})
     except Exception as e:
         return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar viajes: + {repr(e)}'})
