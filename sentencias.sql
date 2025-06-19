@@ -218,6 +218,8 @@ DROP TABLE IF EXISTS tipo_personal;
 DROP TABLE IF EXISTS tipo_comprobante;
 DROP TABLE IF EXISTS tipo_documento;
 DROP TABLE IF EXISTS reembolso;
+
+
 -- Crear tabla preguntas_frecuentes
 CREATE TABLE preguntas_frecuentes (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -438,6 +440,8 @@ CREATE TABLE cliente (
     id_tipo_doc INT,
     fechaRegistro DATETIME DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NULL,
+    fechaInicioReprogramacion DATETIME NULL,
+    fechaFinReprogramacion DATETIME NULL
     -- Claves foráneas
     CONSTRAINT fk_pais FOREIGN KEY (id_pais) REFERENCES PAIS(id),
     CONSTRAINT fk_tipo_cliente FOREIGN KEY (id_tipo_cliente) REFERENCES TIPO_CLIENTE(idTipoCliente),
@@ -784,6 +788,7 @@ CREATE TABLE reembolso (
     FOREIGN KEY (idMetodoPago) REFERENCES metodo_pago (id),
     FOREIGN KEY (idPasaje) REFERENCES pasaje (id)
 );
+
 
 INSERT INTO preguntas_frecuentes (pregunta, respuesta, estado, fecha_registro, usuario) VALUES ('¿Qué medios de pago
 aceptan para comprar pasajes en línea?','Aceptamos tarjetas de crédito y débito Visa, así como billeteras digitales como
