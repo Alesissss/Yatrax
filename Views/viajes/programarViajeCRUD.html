@@ -15,7 +15,7 @@
                         <div class="col-md-12 pb-3">
                             <div class="card card-outline card-primary h-100">
                                 <div class="card-header">
-                                    <h3 class="card-title">Datos Generales</h3>
+                                    <h3 class="card-title">Datos generales</h3>
                                 </div>
                                 <div class="card-body">
                                     <div class="row">
@@ -221,8 +221,11 @@
                     $('#tbl_Escalas tbody').html(filas);
                 });
 
-                $('#cbx_Ruta').val('{{ viaje.idRuta }}');
+                let idRuta = '{{ viaje.idRuta }}';
 
+                if (idRuta) {
+                    $('#cbx_Ruta').val(idRuta);
+                }
             } else {
                 console.error('Error al obtener rutas:', response.Msj);
             }
@@ -264,12 +267,12 @@
 
             const salidaCell = fila.querySelector('.fecha-salida');
             if (salidaCell && salidaCell.tagName === 'SPAN') {
-                salidaCell.textContent = horaSalida.format('YYYY-MM-DD HH:mm:ss');
+                salidaCell.textContent = moment(horaSalida).format('DD/MM/YYYY HH:mm');
             }
 
             const llegadaCell = fila.querySelector('.fecha-llegada');
             if (llegadaCell) {
-                llegadaCell.textContent = horaLlegada.format('YYYY-MM-DD HH:mm:ss');
+                llegadaCell.textContent = moment(horaLlegada).format('DD/MM/YYYY HH:mm');
             }
 
             // Guardamos hora de llegada para posibles usos futuros
@@ -441,14 +444,34 @@
         filas.forEach(fila => {
             const celdas = fila.querySelectorAll('td');
 
+            // Recuperar salida
+            let fechaSalida = fila.querySelector('.input-salida')?.value || fila.querySelector('.fecha-salida')?.textContent.trim() || null;
+            let fechaLlegada = fila.querySelector('.fecha-llegada')?.textContent.trim() || null;
+
+            // Normalizar fechas al formato para BD
+            if (fechaSalida) {
+                // si tiene formato tipo ISO (input-datetime)
+                if (fechaSalida.includes('T')) {
+                    fechaSalida = moment(fechaSalida).format('YYYY-MM-DD HH:mm:ss');
+                } else {
+                    // si está como "DD/MM/YYYY HH:mm"
+                    fechaSalida = moment(fechaSalida, 'DD/MM/YYYY HH:mm').format('YYYY-MM-DD HH:mm:ss');
+                }
+            }
+
+            if (fechaLlegada) {
+                const llegada = moment(fechaLlegada, ['YYYY-MM-DD HH:mm:ss', 'DD/MM/YYYY HH:mm'], true);
+                fechaLlegada = llegada.isValid() ? llegada.format('YYYY-MM-DD HH:mm:ss') : null;
+            }
+
             const subruta = {
                 nro_subruta: celdas[0].innerText.trim(),
                 id_sucursal_origen: parseInt(celdas[1].innerText.trim()),
                 origen: celdas[2].innerText.trim(),
                 id_sucursal_destino: parseInt(celdas[3].innerText.trim()),
                 destino: celdas[4].innerText.trim(),
-                fecha_salida: fila.querySelector('.fecha-salida')?.textContent.trim() || fila.querySelector('.input-salida')?.value || null,
-                fecha_llegada: fila.querySelector('.fecha-llegada')?.textContent.trim() || null,
+                fecha_salida: fechaSalida,
+                fecha_llegada: fechaLlegada,
                 precio: parseFloat(fila.querySelector('.precio-input')?.value || '0')
             };
 
@@ -457,6 +480,7 @@
 
         return data;
     }
+
 
     $(document).ready(function () {
         fct_GetRutas();
@@ -483,7 +507,7 @@
 
             const salidaHTML = isPrimeraSubruta
                 ? `<input type="datetime-local" class="form-control input-salida" value="${fechaSalidaMoment.format('YYYY-MM-DDTHH:mm')}" onchange="calcularLlegadas()" {% if btnId=='btn_Aceptar' %}disabled{% endif %}>`
-                : `<span class="fecha-salida">${fechaSalidaMoment.format('YYYY-MM-DD HH:mm:ss')}</span>`;
+                : `<span class="fecha-salida">${fechaSalidaMoment.format('DD/MM/YYYY HH:mm')}</span>`;
 
             filas += `
                 <tr data-i="${nroOrdenOrigen}" data-j="${nroOrdenDestino}" data-tiempo="${detalle.tiempo ?? 0}">
@@ -493,7 +517,7 @@
                     <td class="d-none">${detalle.idSucursalDestino}</td>
                     <td class="text-center">${destino?.nombre || 'undefined'}</td>
                     <td class="text-center">${salidaHTML}</td>
-                    <td class="text-center"><span class="fecha-llegada">${fechaLlegadaMoment.format('YYYY-MM-DD HH:mm:ss')}</span></td>
+                    <td class="text-center"><span class="fecha-llegada">${fechaLlegadaMoment.format('DD/MM/YYYY HH:mm')}</span></td>
                     <td class="text-center">
                         <input type="number" step="0.01" min="0" class="form-control precio-input" value="${detalle.precio}" {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
                     </td>
@@ -519,7 +543,9 @@
 
             // Formatea si es válido
             if (fechaHoraSalida) fechaHoraSalida = moment(fechaHoraSalida).format('YYYY-MM-DD HH:mm:ss');
-            if (fechaHoraLlegada) fechaHoraLlegada = moment(fechaHoraLlegada).format('YYYY-MM-DD HH:mm:ss');
+            if (fechaHoraLlegada) {
+                fechaHoraLlegada = moment(fechaHoraLlegada, 'DD/MM/YYYY HH:mm').format('YYYY-MM-DD HH:mm:ss');
+            }
 
             let idRuta = $('#cbx_Ruta').val();
             let idVehiculo = $('#cbx_Vehiculo').val();
@@ -563,6 +589,7 @@
                     formData.append("tripulantes", JSON.stringify(tripulantesSeleccionados));
                     formData.append("detalles_viajes", JSON.stringify(subrutas));
                     formData.append("estado", estado);
+                    console.log(subrutas)
 
                     $.ajax({
                         url: "/trabajadores/viajes/RegistrarViaje",
@@ -598,14 +625,28 @@
         $("#btn_Editar").click(function () {
             const id = Number("{{ viaje.id }}");
 
+            // Encuentra el primer input-salida
             const inputSalida = document.querySelector('.input-salida');
             let fechaHoraSalida = inputSalida?.value || null;
 
+            // Encuentra el último .fecha-llegada
             const celdasLlegada = document.querySelectorAll('.fecha-llegada');
             let fechaHoraLlegada = null;
             if (celdasLlegada.length > 0) {
                 const ultima = celdasLlegada[celdasLlegada.length - 1];
                 fechaHoraLlegada = ultima.textContent.trim() || null;
+            }
+
+            // Formatea si es válido
+            if (fechaHoraSalida) fechaHoraSalida = moment(fechaHoraSalida).format('YYYY-MM-DD HH:mm:ss');
+            if (fechaHoraLlegada) {
+                const llegada = moment(fechaHoraLlegada, ['YYYY-MM-DD HH:mm:ss', 'DD/MM/YYYY HH:mm'], true);
+                if (llegada.isValid()) {
+                    fechaHoraLlegada = llegada.format('YYYY-MM-DD HH:mm:ss');
+                } else {
+                    toastr.warning("Fecha de llegada inválida", 'MENSAJE DE SISTEMA');
+                    return;
+                }
             }
 
             const estado = $('#cbx_Estado').val();
@@ -631,6 +672,8 @@
             formData.append("choferes", JSON.stringify(choferesSeleccionados));
             formData.append("tripulantes", JSON.stringify(tripulantesSeleccionados));
             formData.append("detalles_viajes", JSON.stringify(subrutas));
+
+            console.log(subrutas);
 
             Swal.fire({
                 title: "¿Estás seguro?",
@@ -668,7 +711,7 @@
                             } else {
                                 toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                                 setTimeout(() => {
-                                    window.location.href = "/trabajadores/viajes/ProgramarViaje";
+                                    // window.location.href = "/trabajadores/viajes/ProgramarViaje";
                                 }, 500);
                             }
                         },

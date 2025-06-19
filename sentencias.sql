@@ -885,7 +885,7 @@ INSERT INTO terminos_condiciones(id, nombre, archivo, estado, fecha_registro, us
 guía','versionPreliminar.txt',0,'2025-05-29 01:51:30','ander@gmail.com');
 
 -- INSERTS estado_viaje
-INSERT INTO estado_viaje (id, nombre) VALUES (1, 'PENDIENTE');
+INSERT INTO estado_viaje (id, nombre) VALUES (1, 'PROGRAMADO');
 INSERT INTO estado_viaje (id, nombre) VALUES (2, 'EN CURSO');
 INSERT INTO estado_viaje (id, nombre) VALUES (3, 'FINALIZADO');
 
