@@ -22,6 +22,7 @@ from Models.pais import Pais
 from Models.terminos_condiciones import TerminosCondiciones
 from Models.viaje import Viaje
 from Models.pasaje import Pasaje
+from Models.reembolso import Reembolso
 from Models.tipoComprobante import TipoComprobante
 from Models.metodo_pago import MetodoPago
 from Models.herramienta import Herramienta
@@ -168,6 +169,7 @@ def renderizar_itinerario():
     html_renderizado = render_template('Ecommerce/home/partials/itinerario.html', itinerarios=itinerarios, sufijo = sufijo )
     return jsonify({'html': html_renderizado})
 
+
 # VIEWS
 @homeClientes_bp.route('/inicio')
 def index():
@@ -188,9 +190,12 @@ def error():
 
 @homeClientes_bp.route('/login',methods=["GET","POST"])
 def login_cliente():
+    
     if request.method == "GET":
-        # return render_template('Ecommerce/home/modalLogin.html')
-        return render_template('Ecommerce/home/modalLoginNewVer.html')
+        if 'cliente' in session:
+            return redirect("/ecommerce/home/inicio")
+        else:
+            return render_template('Ecommerce/home/modalLoginNewVer.html')
     else:
         correo = request.form["correo"]
         contrasena = request.form["contrasena"]
@@ -281,7 +286,10 @@ def transferencia_pasaje():
 
 @homeClientes_bp.route('/miPasajeOperaciones')
 def mi_pasaje_operaciones():
-    return render_template('Ecommerce/home/miPasajeOp.html')
+    datos_recibidos = {
+        "contenido_venta": renderizarCompra()
+    }
+    return render_template('Ecommerce/home/miPasajeOp.html', datos=datos_recibidos)
 
 @homeClientes_bp.route('/seguimientoViaje')
 def seguimiento_viaje():
@@ -747,3 +755,38 @@ def get_conf_general():
         return jsonify({'data': {}, 'Status': 'error', 'Msj': f'Ocurrió un error al listar configuración general: {repr(e)}'})
 
 # END REGION CONF_GENERAL
+
+
+# REGION REEMBOLSO
+
+
+@homeClientes_bp.route("/validarPasajeDadoBaja", methods=["POST"])
+def validar_pasaje_dado_baja():
+    try:
+        numero_comprobante = request.json.get("numeroComprobante")
+        if not numero_comprobante:
+            return jsonify({"Status": "error", "Msj": "Número de comprobante es requerido"}), 400
+        reembolso = Reembolso.validar_pasaje_dadoBaja(numero_comprobante)
+        if reembolso:
+            if reembolso["estado_viaje"] == 0:
+                return jsonify({"Status": "success", "data": reembolso, "Msj": "Pasaje validado correctamente"})
+            else:
+                return jsonify({
+                    "Status": "error",
+                    "data": {},
+                    "Msj": "No se cumple con las políticas de reembolso: el pasaje no está dado de baja"
+                }), 400
+        else:
+            return jsonify({
+                "Status": "error",
+                "data": {},
+                "Msj": "Pasaje no encontrado"
+            }), 404
+    except Exception as e:
+        return jsonify({
+            "Status": "error",
+            "data": {},
+            "Msj": f"Error al validar el pasaje: {repr(e)}"
+        }), 500
+
+# END REEMBOLSO

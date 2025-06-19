@@ -6430,3 +6430,56 @@ BEGIN
 END $$
 
 DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE SP_REGISTRAR_REEMBOLSO(
+    IN P_NUMERO_COMPROBANTE CHAR(13),
+    IN P_MONTO DECIMAL(10,2),
+    IN P_ID_PASAJE INT,
+    IN P_ID_CLIENTE INT,
+    IN P_ID_TIPO_COMPROBANTE INT,
+    IN P_ID_METODO_PAGO INT
+)
+BEGIN
+    DECLARE cCliente INT;
+    DECLARE cTipoComprobante INT;
+    DECLARE cMetodoPago INT;
+    DECLARE cPasaje INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    -- Validaciones
+    SELECT COUNT(*) INTO cCliente FROM cliente WHERE id = P_ID_CLIENTE;
+    SELECT COUNT(*) INTO cTipoComprobante FROM tipo_comprobante WHERE idTipoComprobante = P_ID_TIPO_COMPROBANTE;
+    SELECT COUNT(*) INTO cMetodoPago FROM metodo_pago WHERE id = P_ID_METODO_PAGO;
+    SELECT COUNT(*) INTO cPasaje FROM pasaje WHERE id = P_ID_PASAJE;
+
+    IF cCliente = 0 THEN
+        SET @MSJ2 = 'El cliente no existe';
+    ELSEIF cTipoComprobante = 0 THEN
+        SET @MSJ2 = 'El tipo de comprobante no existe';
+    ELSEIF cMetodoPago = 0 THEN
+        SET @MSJ2 = 'El método de pago no existe';
+    ELSEIF cPasaje = 0 THEN
+        SET @MSJ2 = 'El pasaje no existe';
+    ELSE
+        INSERT INTO reembolso (
+            numeroComprobante, monto, fecha,
+            idPasaje, idCliente, idTipoComprobante, idMetodoPago
+        ) VALUES (
+            P_NUMERO_COMPROBANTE, P_MONTO, NOW(),
+            P_ID_PASAJE, P_ID_CLIENTE, P_ID_TIPO_COMPROBANTE, P_ID_METODO_PAGO
+        );
+
+        SET @MSJ = 'Se registró correctamente el reembolso';
+    END IF;
+END $$
+
+DELIMITER ;
