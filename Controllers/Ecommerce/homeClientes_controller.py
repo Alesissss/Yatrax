@@ -168,6 +168,7 @@ def renderizar_itinerario():
     html_renderizado = render_template('Ecommerce/home/partials/itinerario.html', itinerarios=itinerarios, sufijo = sufijo )
     return jsonify({'html': html_renderizado})
 
+
 # VIEWS
 @homeClientes_bp.route('/inicio')
 def index():
@@ -281,7 +282,10 @@ def transferencia_pasaje():
 
 @homeClientes_bp.route('/miPasajeOperaciones')
 def mi_pasaje_operaciones():
-    return render_template('Ecommerce/home/miPasajeOp.html')
+    datos_recibidos = {
+        "contenido_venta": renderizarCompra()
+    }
+    return render_template('Ecommerce/home/miPasajeOp.html', datos=datos_recibidos)
 
 @homeClientes_bp.route('/seguimientoViaje')
 def seguimiento_viaje():
