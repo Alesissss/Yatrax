@@ -85,6 +85,12 @@ class TipoVehiculo:
         conexion = bd.Conexion()
         try:
             conexion.conn.begin()
+            # Comprobamos la existencia de vehículos que ya tengan este modelo de asientos
+            result = conexion.obtener("SELECT 1 FROM vehiculo WHERE id_tipo_vehiculo = %s LIMIT 1", (id,))
+            
+            if result:
+                raise Exception('El tipo vehículo no se puede modificar porque otros registros ya existen con esta referencia.')
+
             # Actualizar datos del tipo de vehículo
             conexion.ejecutar("""
                 UPDATE tipo_vehiculo
@@ -150,11 +156,8 @@ class TipoVehiculo:
         except Exception as e:
             conexion.conn.rollback()
             return {"MSJ": "", "MSJ2": f"Error en la actualización: {str(e)}"}
-
         finally:
             conexion.cerrar()
-
-
 
     @classmethod
     def darBajaTipoVehiculo(cls, idTipoVehiculo):

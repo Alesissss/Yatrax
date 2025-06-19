@@ -4144,18 +4144,18 @@ BEGIN
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
-    UPDATE vehiculo
-    SET placa = p_placa,
-        anio = p_anio,
-        color = p_color,
-        id_tipo_vehiculo = p_idTipoVehiculo,
-        estado = p_estado
-    WHERE id = p_idVehiculo;
+    IF EXISTS (SELECT 1 FROM vehiculo WHERE id = p_idVehiculo) THEN
+        UPDATE vehiculo
+        SET placa = p_placa,
+            anio = p_anio,
+            color = p_color,
+            id_tipo_vehiculo = p_idTipoVehiculo,
+            estado = p_estado
+        WHERE id = p_idVehiculo;
 
-    IF ROW_COUNT() = 0 THEN
-        SET @MSJ2 = 'No se encontró el vehículo especificado';
-    ELSE
         SET @MSJ = 'Vehículo actualizado correctamente';
+    ELSE
+        SET @MSJ2 = 'No se encontró el vehículo especificado';
     END IF;
 END $$
 
