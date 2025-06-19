@@ -188,9 +188,12 @@ def error():
 
 @homeClientes_bp.route('/login',methods=["GET","POST"])
 def login_cliente():
+    
     if request.method == "GET":
-        # return render_template('Ecommerce/home/modalLogin.html')
-        return render_template('Ecommerce/home/modalLoginNewVer.html')
+        if 'cliente' in session:
+            return redirect("/ecommerce/home/inicio")
+        else:
+            return render_template('Ecommerce/home/modalLoginNewVer.html')
     else:
         correo = request.form["correo"]
         contrasena = request.form["contrasena"]
