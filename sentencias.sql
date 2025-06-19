@@ -217,7 +217,7 @@ DROP TABLE IF EXISTS promocion;
 DROP TABLE IF EXISTS tipo_personal;
 DROP TABLE IF EXISTS tipo_comprobante;
 DROP TABLE IF EXISTS tipo_documento;
-
+DROP TABLE IF EXISTS reembolso;
 -- Crear tabla preguntas_frecuentes
 CREATE TABLE preguntas_frecuentes (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -732,6 +732,7 @@ CREATE TABLE pasaje(
     esTransferencia TINYINT NULL DEFAULT 0, -- 1: es transferencia, 0: no es transferencia
     esReserva TINYINT NULL DEFAULT 0, -- 1: es pasaje reserva, 0: no es pasaje reserva
     esCambioRuta TINYINT NULL DEFAULT 0, -- 1: es cambio de ruta, 0: no es cambio de ruta
+    esReembolso TINYINT NULL DEFAULT 0, -- 1: es cambio de ruta, 0: no es cambio de ruta
     idVenta INT NOT NULL,
     codigo CHAR(8) NOT NULL, -- AA0202
     enTransaccion TINYINT NULL DEFAULT 0, -- 1: en transacción, 0: no en transacción
@@ -767,6 +768,21 @@ CREATE TABLE reclamo(
     estado TINYINT NOT NULL,
     FOREIGN KEY (idPasaje) REFERENCES pasaje (id),
     FOREIGN KEY (id_tipo_reclamo) REFERENCES tipo_reclamo (id)
+);
+
+CREATE TABLE reembolso (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    numeroComprobante CHAR(13) NOT NULL, -- Ej: A001-00000001
+    monto DECIMAL(10,2) NOT NULL,
+    fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
+    idPasaje INT NOT NULL,
+    idCliente INT NOT NULL,
+    idTipoComprobante INT NOT NULL,
+    idMetodoPago INT NOT NULL,
+    FOREIGN KEY (idCliente) REFERENCES cliente (id),
+    FOREIGN KEY (idTipoComprobante) REFERENCES tipo_comprobante (idTipoComprobante),
+    FOREIGN KEY (idMetodoPago) REFERENCES metodo_pago (id),
+    FOREIGN KEY (idPasaje) REFERENCES pasaje (id)
 );
 
 INSERT INTO preguntas_frecuentes (pregunta, respuesta, estado, fecha_registro, usuario) VALUES ('¿Qué medios de pago
