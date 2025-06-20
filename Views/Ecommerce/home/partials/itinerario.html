@@ -19,7 +19,7 @@
 </style>
 
 
-<div class="accordion accordion-flush p-0 m-0" id="accordionFlushExample">
+<div class="accordion accordion-flush p-0 m-0 w-100" id="accordionFlushExample">
   {% for it in itinerarios %}
   {% set collapse_id = "contenedor_viajes_ida-collapse-" ~ loop.index0 %}
   {% set color = "#FFE05C" if it.tipo == "Escala" else "#B8B8B8" %}
