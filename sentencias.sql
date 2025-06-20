@@ -1,4 +1,6 @@
 -- Primero eliminamos los procedimientos por si existen
+DROP PROCEDURE IF EXISTS SP_MODIFICAR_CONF_GENERAL;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_REEMBOLSO;
 DROP PROCEDURE IF EXISTS SP_REGISTRAR_CLIENTE;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_CLIENTE;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_CLIENTE;
@@ -170,6 +172,7 @@ DROP PROCEDURE IF EXISTS SP_ELIMINAR_RECLAMO;
 DROP TABLE IF EXISTS pais_sucursal;
 DROP TABLE IF EXISTS conf_general;
 DROP TABLE IF EXISTS reclamo;
+DROP TABLE IF EXISTS reembolso;
 DROP TABLE IF EXISTS tipo_reclamo;
 DROP TABLE IF EXISTS detalle_personal;
 DROP TABLE IF EXISTS detalle_pasaje;
@@ -219,6 +222,8 @@ DROP TABLE IF EXISTS tipo_personal;
 DROP TABLE IF EXISTS tipo_comprobante;
 DROP TABLE IF EXISTS tipo_documento;
 DROP TABLE IF EXISTS reembolso;
+
+
 -- Crear tabla preguntas_frecuentes
 CREATE TABLE preguntas_frecuentes (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -439,6 +444,7 @@ CREATE TABLE cliente (
     id_tipo_doc INT,
     fechaRegistro DATETIME DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NULL,
+
     -- Claves foráneas
     CONSTRAINT fk_pais FOREIGN KEY (id_pais) REFERENCES PAIS(id),
     CONSTRAINT fk_tipo_cliente FOREIGN KEY (id_tipo_cliente) REFERENCES TIPO_CLIENTE(idTipoCliente),
@@ -738,6 +744,8 @@ CREATE TABLE pasaje(
     codigo CHAR(8) NOT NULL, -- AA0202
     enTransaccion TINYINT NULL DEFAULT 0, -- 1: en transacción, 0: no en transacción
     idPasaje INT NULL, -- Para operaciones con pasajes
+    fechaInicioReprogramacion DATETIME NULL,
+    fechaFinReprogramacion DATETIME NULL
     FOREIGN KEY (idDetalleViajeAsiento) REFERENCES detalle_viaje_asiento(id),
     FOREIGN KEY (idVenta) REFERENCES venta(id)
 );
@@ -897,7 +905,7 @@ INSERT INTO terminos_condiciones(id, nombre, archivo, estado, fecha_registro, us
 guía','versionPreliminar.txt',0,'2025-05-29 01:51:30','ander@gmail.com');
 
 -- INSERTS estado_viaje
-INSERT INTO estado_viaje (id, nombre) VALUES (1, 'PENDIENTE');
+INSERT INTO estado_viaje (id, nombre) VALUES (1, 'PROGRAMADO');
 INSERT INTO estado_viaje (id, nombre) VALUES (2, 'EN CURSO');
 INSERT INTO estado_viaje (id, nombre) VALUES (3, 'FINALIZADO');
 
@@ -4185,14 +4193,13 @@ BEGIN
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
-    UPDATE vehiculo
-    SET estado = 0
-    WHERE id = p_idVehiculo;
-
-    IF ROW_COUNT() = 0 THEN
-        SET @MSJ2 = 'No se encontró el vehículo para dar de baja';
-    ELSE
+    IF EXISTS (SELECT 1 FROM vehiculo WHERE id = p_idVehiculo) THEN   
+        UPDATE vehiculo
+        SET estado = 0
+        WHERE id = p_idVehiculo;
         SET @MSJ = 'Vehículo dado de baja correctamente';
+    ELSE
+        SET @MSJ2 = 'No se encontró el vehículo para dar de baja';
     END IF;
 END $$
 
@@ -6439,6 +6446,59 @@ BEGIN
         SET @MSJ2 = 'No se encontró la configuración general';
     END IF;
 
+END $$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE SP_REGISTRAR_REEMBOLSO(
+    IN P_NUMERO_COMPROBANTE CHAR(13),
+    IN P_MONTO DECIMAL(10,2),
+    IN P_ID_PASAJE INT,
+    IN P_ID_CLIENTE INT,
+    IN P_ID_TIPO_COMPROBANTE INT,
+    IN P_ID_METODO_PAGO INT
+)
+BEGIN
+    DECLARE cCliente INT;
+    DECLARE cTipoComprobante INT;
+    DECLARE cMetodoPago INT;
+    DECLARE cPasaje INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    -- Validaciones
+    SELECT COUNT(*) INTO cCliente FROM cliente WHERE id = P_ID_CLIENTE;
+    SELECT COUNT(*) INTO cTipoComprobante FROM tipo_comprobante WHERE idTipoComprobante = P_ID_TIPO_COMPROBANTE;
+    SELECT COUNT(*) INTO cMetodoPago FROM metodo_pago WHERE id = P_ID_METODO_PAGO;
+    SELECT COUNT(*) INTO cPasaje FROM pasaje WHERE id = P_ID_PASAJE;
+
+    IF cCliente = 0 THEN
+        SET @MSJ2 = 'El cliente no existe';
+    ELSEIF cTipoComprobante = 0 THEN
+        SET @MSJ2 = 'El tipo de comprobante no existe';
+    ELSEIF cMetodoPago = 0 THEN
+        SET @MSJ2 = 'El método de pago no existe';
+    ELSEIF cPasaje = 0 THEN
+        SET @MSJ2 = 'El pasaje no existe';
+    ELSE
+        INSERT INTO reembolso (
+            numeroComprobante, monto, fecha,
+            idPasaje, idCliente, idTipoComprobante, idMetodoPago
+        ) VALUES (
+            P_NUMERO_COMPROBANTE, P_MONTO, NOW(),
+            P_ID_PASAJE, P_ID_CLIENTE, P_ID_TIPO_COMPROBANTE, P_ID_METODO_PAGO
+        );
+
+        SET @MSJ = 'Se registró correctamente el reembolso';
+    END IF;
 END $$
 
 DELIMITER ;

@@ -67,7 +67,7 @@ class Viaje:
             # Obtener escalas para la ruta
             escalas = []
             if viaje:
-                escalas = conexion.obtener("""SELECT e.id, e.nro_orden, e.idSucursal, e.idRuta, s.nombre FROM escala e INNER JOIN sucursal s ON e.idSucursal = s.id WHERE idRuta = %s ORDER BY nro_orden""", (viaje[0]['idRuta'],))
+                escalas = conexion.obtener("""SELECT es.id, es.nro_orden, es.idSucursal, es.distancia_estimada, es.tiempo_estimado, CONCAT(UPPER(suc.ciudad), '-', suc.nombre) AS nombre, es.idRuta from escala es INNER JOIN sucursal suc on es.idSucursal = suc.id WHERE idRuta = %s ORDER BY nro_orden""", (viaje[0]['idRuta'],))
 
             return {
                 "viaje": viaje[0] if viaje else None,
@@ -221,14 +221,14 @@ class Viaje:
             conexion = bd.Conexion()
 
             result_pasaje = conexion.obtener(""" SELECT 1 FROM pasaje p 
-                              INNER JOIN detalle_viaje_asiento dva ON p.idDetalleViajeAsiento = dva.id
-                              INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
-                              INNER JOIN viaje v ON dv.idViaje = v.id LIMIT 1""")
+                            INNER JOIN detalle_viaje_asiento dva ON p.idDetalleViajeAsiento = dva.id
+                            INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
+                            INNER JOIN viaje v ON dv.idViaje = v.id WHERE v.id = %s LIMIT 1""", (id,))
             
-            result_asiento = conexion.obtener(""" SELECT 1 FROM pasaje p 
-                              INNER JOIN detalle_viaje_asiento dva ON p.idDetalleViajeAsiento = dva.id
-                              INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
-                              WHERE dva.esDisponible = 0 LIMIT 1""")
+            result_asiento = conexion.obtener(""" SELECT 1 FROM detalle_viaje_asiento dva
+                            INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
+                            INNER JOIN viaje v ON dv.idViaje = v.id
+                            WHERE dva.esDisponible = 0 AND v.id = %s LIMIT 1""", (id,))
             
             if result_pasaje or result_asiento:
                 raise Exception('El viaje no se puede eliminar porque ya existen pasajes vendidos para los itinerarios.')
@@ -236,12 +236,13 @@ class Viaje:
             conexion.ejecutar("DELETE FROM detalle_viaje_asiento WHERE idDetalle_Viaje IN (SELECT idDetalle_Viaje FROM detalle_viaje WHERE idViaje = %s)", (id,), auto_commit=False)
             conexion.ejecutar("DELETE FROM detalle_viaje WHERE idViaje = %s", (id,), auto_commit=False)
             conexion.ejecutar("DELETE FROM detalle_personal WHERE idViaje = %s", (id,), auto_commit=False)
+            conexion.ejecutar("DELETE FROM viaje WHERE id = %s", (id,), auto_commit=False)
 
             conexion.conn.commit()
             return {'@MSJ': 'Viaje eliminado correctamente', '@MSJ2': ''}
         except Exception as e:
             conexion.conn.rollback()
-            return {'@MSJ': '', '@MSJ2': f'Error al eliminar el viaje: {repr(e)}'}
+            return {'@MSJ': '', '@MSJ2': f'Error al eliminar el viaje: {str(e)}'}
         finally:
             conexion.cerrar()
 
@@ -252,14 +253,14 @@ class Viaje:
             conexion = bd.Conexion()
 
             result_pasaje = conexion.obtener(""" SELECT 1 FROM pasaje p 
-                              INNER JOIN detalle_viaje_asiento dva ON p.idDetalleViajeAsiento = dva.id
-                              INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
-                              INNER JOIN viaje v ON dv.idViaje = v.id LIMIT 1""")
+                            INNER JOIN detalle_viaje_asiento dva ON p.idDetalleViajeAsiento = dva.id
+                            INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
+                            INNER JOIN viaje v ON dv.idViaje = v.id WHERE v.id = %s LIMIT 1""", (id,))
             
-            result_asiento = conexion.obtener(""" SELECT 1 FROM pasaje p 
-                              INNER JOIN detalle_viaje_asiento dva ON p.idDetalleViajeAsiento = dva.id
-                              INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
-                              WHERE dva.esDisponible = 0 LIMIT 1""")
+            result_asiento = conexion.obtener(""" SELECT 1 FROM detalle_viaje_asiento dva
+                            INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
+                            INNER JOIN viaje v ON dv.idViaje = v.id
+                            WHERE dva.esDisponible = 0 AND v.id = %s LIMIT 1""", (id,))
             
             if result_pasaje or result_asiento:
                 raise Exception('El viaje no se puede eliminar porque ya existen pasajes vendidos para los itinerarios.')
@@ -269,10 +270,24 @@ class Viaje:
             return {'@MSJ': 'Viaje dado de baja correctamente', '@MSJ2': ''}
         except Exception as e:
             conexion.conn.rollback()
-            return {'@MSJ': '', '@MSJ2': f'Error al dar de baja al viaje: {repr(e)}'}
+            return {'@MSJ': '', '@MSJ2': f'Error al dar de baja al viaje: {str(e)}'}
         finally:
             conexion.cerrar()
-    
+            
+    @classmethod
+    def cambiar_estado_viaje(cls, id, idEstadoViaje):
+        try:
+            conexion = bd.Conexion()
+
+            conexion.ejecutar(""" UPDATE viaje SET idEstadoViaje = %s WHERE id = %s""", (idEstadoViaje, id,), auto_commit=False)
+
+            conexion.conn.commit()
+            return {'@MSJ': 'Viaje cambiado de estado correctamente', '@MSJ2': ''}
+        except Exception as e:
+            conexion.conn.rollback()
+            return {'@MSJ': '', '@MSJ2': f'Error al cambiar estado al viaje: {str(e)}'}
+        finally:
+            conexion.cerrar()
 
     @classmethod
     def obtenerDestinos(cls):

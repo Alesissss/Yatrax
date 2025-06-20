@@ -22,6 +22,7 @@ from Models.pais import Pais
 from Models.terminos_condiciones import TerminosCondiciones
 from Models.viaje import Viaje
 from Models.pasaje import Pasaje
+from Models.reembolso import Reembolso
 from Models.tipoComprobante import TipoComprobante
 from Models.metodo_pago import MetodoPago
 from Models.herramienta import Herramienta
@@ -35,31 +36,31 @@ from Models.conf_general import ConfGeneral
 
 homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/home')
 
-# # ERRORES 
-# # Manejar errores 401 (Página no autorizada)
-# @homeClientes_bp.errorhandler(401)
-# def error_401(error):
-#     return render_template("Ecommerce/error.html", error="Página no autorizada"), 401
+# ERRORES 
+# Manejar errores 401 (Página no autorizada)
+@homeClientes_bp.errorhandler(401)
+def error_401(error):
+    return render_template("Ecommerce/error.html", error="Página no autorizada"), 401
 
-# # Manejar errores 403 (Página no autorizada para este usuario)
-# @homeClientes_bp.errorhandler(403)
-# def error_403(error):
-#     return render_template("Ecommerce/error.html", error="Página restringida"), 403
+# Manejar errores 403 (Página no autorizada para este usuario)
+@homeClientes_bp.errorhandler(403)
+def error_403(error):
+    return render_template("Ecommerce/error.html", error="Página restringida"), 403
 
-# # Manejar errores 404 (Página no encontrada)
-# @homeClientes_bp.errorhandler(404)
-# def error_404(error):
-#     return render_template("Ecommerce/error.html", error="Página no encontrada"), 404
+# Manejar errores 404 (Página no encontrada)
+@homeClientes_bp.errorhandler(404)
+def error_404(error):
+    return render_template("Ecommerce/error.html", error="Página no encontrada"), 404
 
-# # Manejar errores 500 (Error interno del servidor)
-# @homeClientes_bp.errorhandler(500)
-# def error_500(error):
-#     return render_template("Ecommerce/error.html", error="Error interno del servidor"), 500
+# Manejar errores 500 (Error interno del servidor)
+@homeClientes_bp.errorhandler(500)
+def error_500(error):
+    return render_template("Ecommerce/error.html", error="Error interno del servidor"), 500
 
-# # Manejar cualquier otro error genérico
-# @homeClientes_bp.errorhandler(Exception)
-# def error_general(error):
-#    return render_template("Ecommerce/error.html", error="Ocurrió un error inesperado"), 500
+# Manejar cualquier otro error genérico
+@homeClientes_bp.errorhandler(Exception)
+def error_general(error):
+   return render_template("Ecommerce/error.html", error="Ocurrió un error inesperado"), 500
 
 # FUNCIONES AUXILIARES
 #REGION PROTOTIPO DE PRUEBA 
@@ -168,6 +169,7 @@ def renderizar_itinerario():
     html_renderizado = render_template('Ecommerce/home/partials/itinerario.html', itinerarios=itinerarios, sufijo = sufijo )
     return jsonify({'html': html_renderizado})
 
+
 # VIEWS
 @homeClientes_bp.route('/inicio')
 def index():
@@ -188,9 +190,12 @@ def error():
 
 @homeClientes_bp.route('/login',methods=["GET","POST"])
 def login_cliente():
+    
     if request.method == "GET":
-        # return render_template('Ecommerce/home/modalLogin.html')
-        return render_template('Ecommerce/home/modalLoginNewVer.html')
+        if 'cliente' in session:
+            return redirect("/ecommerce/home/inicio")
+        else:
+            return render_template('Ecommerce/home/modalLoginNewVer.html')
     else:
         correo = request.form["correo"]
         contrasena = request.form["contrasena"]
@@ -281,7 +286,10 @@ def transferencia_pasaje():
 
 @homeClientes_bp.route('/miPasajeOperaciones')
 def mi_pasaje_operaciones():
-    return render_template('Ecommerce/home/miPasajeOp.html')
+    datos_recibidos = {
+        "contenido_venta": renderizarCompra()
+    }
+    return render_template('Ecommerce/home/miPasajeOp.html', datos=datos_recibidos)
 
 @homeClientes_bp.route('/seguimientoViaje')
 def seguimiento_viaje():
@@ -771,3 +779,38 @@ def get_conf_general():
         return jsonify({'data': {}, 'Status': 'error', 'Msj': f'Ocurrió un error al listar configuración general: {repr(e)}'})
 
 # END REGION CONF_GENERAL
+
+
+# REGION REEMBOLSO
+
+
+@homeClientes_bp.route("/validarPasajeDadoBaja", methods=["POST"])
+def validar_pasaje_dado_baja():
+    try:
+        numero_comprobante = request.json.get("numeroComprobante")
+        if not numero_comprobante:
+            return jsonify({"Status": "error", "Msj": "Número de comprobante es requerido"}), 400
+        reembolso = Reembolso.validar_pasaje_dadoBaja(numero_comprobante)
+        if reembolso:
+            if reembolso["estado_viaje"] == 0:
+                return jsonify({"Status": "success", "data": reembolso, "Msj": "Pasaje validado correctamente"})
+            else:
+                return jsonify({
+                    "Status": "error",
+                    "data": {},
+                    "Msj": "No se cumple con las políticas de reembolso: el pasaje no está dado de baja"
+                }), 400
+        else:
+            return jsonify({
+                "Status": "error",
+                "data": {},
+                "Msj": "Pasaje no encontrado"
+            }), 404
+    except Exception as e:
+        return jsonify({
+            "Status": "error",
+            "data": {},
+            "Msj": f"Error al validar el pasaje: {repr(e)}"
+        }), 500
+
+# END REEMBOLSO

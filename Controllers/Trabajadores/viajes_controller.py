@@ -19,6 +19,7 @@ from Models.herramienta import Herramienta
 from Models.servicio import Servicio
 from Models.viaje import Viaje
 from Models.personal import Personal
+from Models.estadoViaje import EstadoViaje
 from Models.api_enrutar import ApiEnrutar
 
 viajes_bp = Blueprint('viajes', __name__, url_prefix='/trabajadores/viajes')
@@ -1393,10 +1394,36 @@ def obtener_herramientas():
 def get_viajesProgramados():
     try:
         viajes = Viaje.obtener_todos()
+        viajes = [{
+                'id': dv['id'], 
+                'idRuta': dv['idRuta'], 
+                'estado': dv['estado'], 
+                'idEstadoViaje': dv['idEstadoViaje'],
+                'estado_viaje': dv['estado_viaje'],
+                'ruta': dv['ruta'],
+                'tipo_ruta': dv['tipo_ruta'],
+                'id_servicio': dv['id_servicio'],
+                'servicio': dv['servicio'],
+                'vehiculo': dv['vehiculo'],
+                'esReprogramado': dv['esReprogramado'],
+                'fechaHoraSalida': dv['fechaHoraSalida'].strftime("%Y-%m-%d %H:%M:%S") if dv['fechaHoraSalida'] else None, 
+                'fechaHoraLlegada': dv['fechaHoraLlegada'].strftime("%Y-%m-%d %H:%M:%S") if dv['fechaHoraLlegada'] else None
+                } for dv in viajes]
         return jsonify({'data': viajes, 'Status': 'success', 'Msj': 'Listado de viajes retornado exitosamente'})
     except Exception as e:
         return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar viajes: + {repr(e)}'})
-    
+
+@viajes_bp.route("/GetEstadosViaje", methods=["GET"])
+def get_estados_viaje():
+    try:
+        estadosViaje = EstadoViaje.obtener_todos()
+        result = [{'id': ev['id'], 'nombre': ev['nombre']} for ev in estadosViaje]
+
+        return jsonify({'data': result, 'Status': 'success', 'Msj': 'Listado de estados de viajes retornado exitosamente'})
+    except Exception as e:
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar estados de viajes: + {repr(e)}'})
+
+
 @viajes_bp.route("/GetData_PersonalViajes", methods=["GET"])
 def get_personal_viaje():
     try:
@@ -1628,6 +1655,25 @@ def darBaja_viaje(id):  # Recibe el ID de la URL
             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
         else:
             return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja al viaje'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+    
+@viajes_bp.route("/CambiarEstadoViaje", methods=['POST'])
+def cambiad_estado_viaje():  # Recibe el ID de la URL
+    try:
+        id = request.form.get('id')
+        idEstadoViaje = request.form.get('idEstadoViaje')
+
+        mensajes = Viaje.cambiar_estado_viaje(id, idEstadoViaje)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al cambiar estado al viaje'})
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
