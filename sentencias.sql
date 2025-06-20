@@ -4175,14 +4175,13 @@ BEGIN
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
-    UPDATE vehiculo
-    SET estado = 0
-    WHERE id = p_idVehiculo;
-
-    IF ROW_COUNT() = 0 THEN
-        SET @MSJ2 = 'No se encontró el vehículo para dar de baja';
-    ELSE
+    IF EXISTS (SELECT 1 FROM vehiculo WHERE id = p_idVehiculo) THEN   
+        UPDATE vehiculo
+        SET estado = 0
+        WHERE id = p_idVehiculo;
         SET @MSJ = 'Vehículo dado de baja correctamente';
+    ELSE
+        SET @MSJ2 = 'No se encontró el vehículo para dar de baja';
     END IF;
 END $$
 

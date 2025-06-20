@@ -273,7 +273,21 @@ class Viaje:
             return {'@MSJ': '', '@MSJ2': f'Error al dar de baja al viaje: {repr(e)}'}
         finally:
             conexion.cerrar()
-    
+            
+    @classmethod
+    def cambiar_estado_viaje(cls, id, idEstadoViaje):
+        try:
+            conexion = bd.Conexion()
+
+            conexion.ejecutar(""" UPDATE viaje SET idEstadoViaje = %s WHERE id = %s""", (idEstadoViaje, id,), auto_commit=False)
+
+            conexion.conn.commit()
+            return {'@MSJ': 'Viaje cambiado de estado correctamente', '@MSJ2': ''}
+        except Exception as e:
+            conexion.conn.rollback()
+            return {'@MSJ': '', '@MSJ2': f'Error al cambiar estado al viaje: {repr(e)}'}
+        finally:
+            conexion.cerrar()
 
     @classmethod
     def obtenerDestinos(cls):
