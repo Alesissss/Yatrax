@@ -2,6 +2,7 @@ import os
 import requests
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort, json
 from werkzeug.utils import secure_filename
+from datetime import datetime
 
 from Models.nivel import Nivel
 from Models.tipoVehiculo import TipoVehiculo
@@ -18,13 +19,13 @@ from Models.herramienta import Herramienta
 from Models.servicio import Servicio
 from Models.viaje import Viaje
 from Models.personal import Personal
+from Models.estadoViaje import EstadoViaje
 from Models.api_enrutar import ApiEnrutar
 
 viajes_bp = Blueprint('viajes', __name__, url_prefix='/trabajadores/viajes')
 
 # ERRORES 
 # Manejar errores 401 (Página no autorizada)
-
 @viajes_bp.errorhandler(401)
 def error_401(error):
     return render_template("error.html", error="Página no autorizada"), 401
@@ -69,7 +70,6 @@ def verificar_sesion():
     # if not any(menu['nombre'] == 'M_VIAJES' for menu in menus) and request.endpoint not in rutas_permitidas:
     #     abort(403)  # Autenticado, pero no tiene permiso para ese módulo
 
-
 # VIEWS
 @viajes_bp.route('/GestionarHorarios')
 def Menu_Horarios():
@@ -113,7 +113,7 @@ def Menu_ProgramarViaje():
 
 @viajes_bp.route('/ProgramarViajeNuevo')
 def Menu_ProgramarViajeNuevo():
-    return render_template('viajes/programarViajeCRUD.html', active_page="programarViaje", active_menu='mViajes', viaje={}, personal=[], tittle = 'Registrar viaje', btnId = 'btn_Registrar')
+    return render_template('viajes/programarViajeCRUD.html', active_page="programarViaje", active_menu='mViajes', viaje={}, detalles_viajes=[], personal=[], escalas=[],tittle='Registrar viaje', btnId = 'btn_Registrar')
 
 # @viajes_bp.route('/GestionarMarcas')
 # def Menu_Marcas():
@@ -122,8 +122,6 @@ def Menu_ProgramarViajeNuevo():
 # END VIEWS
 
 # FUNCIONES
-
-
 
 # REGION NIVEL
 @viajes_bp.route("/GetData_Nivel", methods=["GET"])
@@ -1396,10 +1394,36 @@ def obtener_herramientas():
 def get_viajesProgramados():
     try:
         viajes = Viaje.obtener_todos()
+        viajes = [{
+                'id': dv['id'], 
+                'idRuta': dv['idRuta'], 
+                'estado': dv['estado'], 
+                'idEstadoViaje': dv['idEstadoViaje'],
+                'estado_viaje': dv['estado_viaje'],
+                'ruta': dv['ruta'],
+                'tipo_ruta': dv['tipo_ruta'],
+                'id_servicio': dv['id_servicio'],
+                'servicio': dv['servicio'],
+                'vehiculo': dv['vehiculo'],
+                'esReprogramado': dv['esReprogramado'],
+                'fechaHoraSalida': dv['fechaHoraSalida'].strftime("%Y-%m-%d %H:%M:%S") if dv['fechaHoraSalida'] else None, 
+                'fechaHoraLlegada': dv['fechaHoraLlegada'].strftime("%Y-%m-%d %H:%M:%S") if dv['fechaHoraLlegada'] else None
+                } for dv in viajes]
         return jsonify({'data': viajes, 'Status': 'success', 'Msj': 'Listado de viajes retornado exitosamente'})
     except Exception as e:
         return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar viajes: + {repr(e)}'})
-    
+
+@viajes_bp.route("/GetEstadosViaje", methods=["GET"])
+def get_estados_viaje():
+    try:
+        estadosViaje = EstadoViaje.obtener_todos()
+        result = [{'id': ev['id'], 'nombre': ev['nombre']} for ev in estadosViaje]
+
+        return jsonify({'data': result, 'Status': 'success', 'Msj': 'Listado de estados de viajes retornado exitosamente'})
+    except Exception as e:
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar estados de viajes: + {repr(e)}'})
+
+
 @viajes_bp.route("/GetData_PersonalViajes", methods=["GET"])
 def get_personal_viaje():
     try:
@@ -1475,7 +1499,7 @@ def registrar_viaje():
         detalles_viajes_json = request.form.get("detalles_viajes")
         detalles_viajes = json.loads(detalles_viajes_json) if detalles_viajes_json else []
 
-        # Asientos de subiajes
+        # Asientos de subviajes
         asientos = [{'id': a['id'], 'nombre': a['nombre'], 'estado': a['estado']} for a in Asiento.obtener_por_id_vehiculo(idVehiculo) if a["estado"] == 1]
 
         # Choferes
@@ -1514,20 +1538,52 @@ def eliminar_viaje(id):  # Recibe el ID de la URL
         elif msj2:
             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
         else:
-            return jsonify({"Status": "error", 'Msj': 'Error desconocido al eliminar tipo de usuario'})
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al eliminar viaje'})
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
-@viajes_bp.route("/EditarViaje/<int:id>", methods=['GET', 'POST'])
-def editar_viaje(id):
+@viajes_bp.route("/EditarViaje/<int:idViaje>", methods=['GET', 'POST'])
+def editar_viaje(idViaje):
     try:
-        tipoUsuario = Viaje.obtener_por_id(id)
+        datos_viaje = Viaje.obtener_viaje(idViaje)
+
+        datos_viaje["detalles_viaje"] = [
+            {
+                'id': dv['id'], 
+                'idViaje': dv['idViaje'], 
+                'idSucursalOrigen': dv['idSucursalOrigen'], 
+                'idSucursalDestino': dv['idSucursalDestino'], 
+                'precio': float(dv['precio']), 
+                'fechaSalida': dv['fechaSalida'].strftime("%Y-%m-%d %H:%M:%S") if dv['fechaSalida'] else None, 
+                'fechaSalidaReal': dv['fechaSalidaReal'].strftime("%Y-%m-%d %H:%M:%S") if dv['fechaSalidaReal'] else None, 
+                'fechaLlegadaEstimada': dv['fechaLlegadaEstimada'].strftime("%Y-%m-%d %H:%M:%S") if dv['fechaLlegadaEstimada'] else None, 
+                'fechaLlegadaReal': dv['fechaLlegadaReal'].strftime("%Y-%m-%d %H:%M:%S") if dv['fechaLlegadaReal'] else None
+                } for dv in datos_viaje["detalles_viaje"]]
+
+        if not datos_viaje or not datos_viaje["viaje"]:
+            return jsonify({"Status": "error", "Msj": "Viaje no encontrado"})
 
         if request.method == 'POST':
-            nombre = request.form.get("nombre").strip()
+            fechaHoraSalida = request.form.get("fechaHoraSalida")
+            fechaHoraLlegada = request.form.get("fechaHoraLlegada")
+            idRuta = request.form.get("idRuta")
+            idVehiculo = request.form.get("idVehiculo")
             estado = request.form.get("estado")
-            
-            mensajes = Viaje.editar(id, nombre, estado)
+
+            detalles_viajes_json = request.form.get("detalles_viajes")
+            detalles_viajes = json.loads(detalles_viajes_json) if detalles_viajes_json else []
+
+            asientos = [{'id': a['id'], 'nombre': a['nombre'], 'estado': a['estado']} for a in Asiento.obtener_por_id_vehiculo(idVehiculo) if a["estado"] == 1]
+
+            choferes_json = request.form.get("choferes")
+            choferes = json.loads(choferes_json) if choferes_json else []
+
+            tripulantes_json = request.form.get("tripulantes")
+            tripulantes = json.loads(tripulantes_json) if tripulantes_json else []
+
+            usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
+
+            mensajes = Viaje.editar(idViaje, idRuta, idVehiculo, estado, fechaHoraSalida, fechaHoraLlegada, detalles_viajes, choferes, tripulantes, asientos, usuario_actual)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
@@ -1536,11 +1592,18 @@ def editar_viaje(id):
             elif msj2:
                 return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
             else:
-                return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar tipo de usuario'})
+                return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar viaje'})
 
-        if tipoUsuario:
-            return render_template('usuario/tipoUsuarioCRUD.html', active_page="tipoUsuario", active_menu='mUsuarios', tipoUsuario=tipoUsuario, tittle = 'Editar tipo usuario', btnId = 'btn_Editar')
-        return render_template('usuario/tipoUsuarioCRUD.html', active_page="tipoUsuario", active_menu='mUsuarios', tipoUsuario={}, tittle = 'Editar tipo usuario', btnId = 'btn_Editar')
+        # En caso de un GET, se pasa la data para prellenar el formulario
+        return render_template('viajes/programarViajeCRUD.html',
+                               active_page="programarViaje", 
+                               active_menu='mViajes', 
+                               viaje=datos_viaje["viaje"], 
+                               detalles_viajes=datos_viaje["detalles_viaje"], 
+                               personal=datos_viaje["personal"],
+                               escalas=datos_viaje["escalas"],
+                               tittle='Editar viaje', 
+                               btnId='btn_Editar')
 
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
@@ -1548,11 +1611,34 @@ def editar_viaje(id):
 @viajes_bp.route("/VerViaje/<int:id>", methods=['GET'])
 def ver_viaje(id):
     try:
-        tipoUsuario = Viaje.obtener_por_id(id)
-        if tipoUsuario:
-            return render_template('usuario/tipoUsuarioCRUD.html', active_page="tipoUsuario", active_menu='mUsuarios', tipoUsuario=tipoUsuario, tittle = 'Ver tipo usuario', btnId = 'btn_Aceptar')
-        return render_template('usuario/tipoUsuarioCRUD.html', active_page="tipoUsuario", active_menu='mUsuarios', tipoUsuario={}, tittle = 'Ver tipo usuario', btnId = 'btn_Aceptar')
-        
+        datos_viaje = Viaje.obtener_viaje(id)
+
+        datos_viaje["detalles_viaje"] = [
+            {
+                'id': dv['id'], 
+                'idViaje': dv['idViaje'], 
+                'idSucursalOrigen': dv['idSucursalOrigen'], 
+                'idSucursalDestino': dv['idSucursalDestino'], 
+                'precio': float(dv['precio']), 
+                'fechaSalida': dv['fechaSalida'].strftime("%Y-%m-%d %H:%M:%S") if dv['fechaSalida'] else None, 
+                'fechaSalidaReal': dv['fechaSalidaReal'].strftime("%Y-%m-%d %H:%M:%S") if dv['fechaSalidaReal'] else None, 
+                'fechaLlegadaEstimada': dv['fechaLlegadaEstimada'].strftime("%Y-%m-%d %H:%M:%S") if dv['fechaLlegadaEstimada'] else None, 
+                'fechaLlegadaReal': dv['fechaLlegadaReal'].strftime("%Y-%m-%d %H:%M:%S") if dv['fechaLlegadaReal'] else None
+                } for dv in datos_viaje["detalles_viaje"]]
+
+        if not datos_viaje or not datos_viaje["viaje"]:
+            return jsonify({"Status": "error", "Msj": "Viaje no encontrado"})
+
+        return render_template('viajes/programarViajeCRUD.html',
+                               active_page="programarViaje", 
+                               active_menu='mViajes', 
+                               viaje=datos_viaje["viaje"], 
+                               detalles_viajes=datos_viaje["detalles_viaje"], 
+                               personal=datos_viaje["personal"],
+                               escalas=datos_viaje["escalas"],
+                               tittle='Ver viaje', 
+                               btnId='btn_Aceptar')
+
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
     
@@ -1568,7 +1654,26 @@ def darBaja_viaje(id):  # Recibe el ID de la URL
         elif msj2:
             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
         else:
-            return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja al tipo de usuario'})
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja al viaje'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+    
+@viajes_bp.route("/CambiarEstadoViaje", methods=['POST'])
+def cambiad_estado_viaje():  # Recibe el ID de la URL
+    try:
+        id = request.form.get('id')
+        idEstadoViaje = request.form.get('idEstadoViaje')
+
+        mensajes = Viaje.cambiar_estado_viaje(id, idEstadoViaje)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al cambiar estado al viaje'})
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 

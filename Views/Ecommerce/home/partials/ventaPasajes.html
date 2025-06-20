@@ -47,7 +47,7 @@
     <div class="d-flex flex-wrap justify-content-between border-bottom bg-white">
         <button class="btn tab-link active flex-fill" data-step="0">Elegir destino</button>
         <button class="btn tab-link flex-fill" data-step="1" readonly>Itinerario ida</button>
-        <button class="btn tab-link flex-fill" data-step="2" readonly>Itinerario regreso</button>
+        <button class="btn tab-link flex-fill" data-step="2" readonly id="itinerario-regreso">Itinerario regreso</button>
         <button class="btn tab-link flex-fill" data-step="3" readonly>Pago</button>
     </div>
 
@@ -64,7 +64,7 @@
             <div class="col-md-3">
                 <label for="vuelta">Vuelta</label>
                 <input type="date" name="fecha_vuelta" class="form-control" placeholder="-- Seleccionar fecha --"
-                    disabled>
+                    disabled id="fecha_vuelta">
             </div>
             <div class="col-md-3 d-grid">
                 <button style="background-color: var(--primary-color); border: 0px;" type="button"

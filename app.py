@@ -28,10 +28,10 @@ mail = Mail(app)
 # def error_401(error):
 #     return render_template("error.html", error="Página no autorizada"), 401
 
-# # Manejar errores 404 (Página no encontrada)
-# @app.errorhandler(404)
-# def error_404(error):
-#     return render_template("error.html", error="Página no encontrada"), 404
+# Manejar errores 404 (Página no encontrada)
+@app.errorhandler(404)
+def error_404(error):
+    return render_template("Ecommerce/error.html", error="Página no encontrada"), 404
 
 # # Manejar errores 500 (Error interno del servidor)
 # @app.errorhandler(500)

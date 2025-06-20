@@ -19,89 +19,101 @@
     <!-- Toastr -->
     <link rel="stylesheet" href="/Static/plugins/toastr/toastr.min.css">
     <!-- CDN FontsAwesome -->
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="icon" href="{{url_for('static',filename='img/yatrax_icon.ico')}}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='/img/icono_yatrax.ico') }}">
     {% block estilos %}{% endblock %}
     <title>{% block titulo %}{% endblock %}</title>
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark"id="maestra_header">
+    <nav class="navbar navbar-expand-lg navbar-dark" id="maestra_header">
         <div class="container-fluid">
             <!-- Logo -->
             <a class="navbar-brand" href="/ecommerce/home/inicio">
-            <img src="" alt="logo_yatrax" id="maestra_logo" style="width: 70px; height: 70px;">
+                <img src="" alt="logo_yatrax" id="maestra_logo" style="width: 70px; height: 70px;">
             </a>
 
             <!-- Botón para menú responsive -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
             </button>
 
             <!-- Contenido del navbar -->
             <div class="collapse navbar-collapse" id="navbarNav">
-            <!-- Menú central -->
-            <ul class="navbar-nav gap-4 justify-content-center w-100">
-                <li class="nav-item active">
-                <a class="navbar-brand text-white" href="{{url_for('homeClientes.index')}}">Inicio</a>
-                </li>
-                <li class="nav-item">
-                <a class="navbar-brand text-white" href="{{url_for('homeClientes.index')}}#seccionServicio">Servicios</a>
-                </li>
-                <li class="nav-item">
-                <a class="navbar-brand text-white" href="#">Sucursales</a>
-                </li>
-                <!-- <li class="nav-item">
+                <!-- Menú central -->
+                <ul class="navbar-nav gap-4 justify-content-center w-100">
+                    <li class="nav-item active">
+                        <a class="navbar-brand text-white" href="{{url_for('homeClientes.index')}}">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="navbar-brand text-white"
+                            href="{{url_for('homeClientes.index')}}#seccionServicio">Servicios</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="navbar-brand text-white" href="#">Sucursales</a>
+                    </li>
+                    <!-- <li class="nav-item">
                 <a class="navbar-brand text-white" href="{{ url_for('homeClientes.mi_pasaje_operaciones') }}">Mi pasaje</a>
                 </li> -->
-                <li class="nav-item dropdown position-relative">
-                    <div style="position: relative; z-index: +2;">
-                        <a class="navbar-brand text-white" href="#" id="navbarDropdown" role="button"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        Viaje
-                        </a>
-                        <ul class="dropdown-menu mt-2">
-                            <li><a class="dropdown-item" href="{{ url_for('homeClientes.mi_pasaje_operaciones') }}">Mi pasaje</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('homeClientes.seguimiento_viaje') }}">Seguimiento viaje</a></li>
-                        </ul>
-                    </div>
-                </li>
-            </ul>
-            <br>
-            <!-- Cliente/Login a la derecha -->
-            <div class="dropdown ms-auto me-3">
-                {% if 'cliente' in session %}
+                    <li class="nav-item dropdown position-relative">
+                        <div style="position: relative; z-index: +2;">
+                            <a class="navbar-brand text-white" href="#" id="navbarDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                Viaje
+                            </a>
+                            <ul class="dropdown-menu mt-2">
+                                <li><a class="dropdown-item"
+                                        href="{{ url_for('homeClientes.mi_pasaje_operaciones') }}">Mi pasaje</a></li>
+                                <li><a class="dropdown-item"
+                                        href="{{ url_for('homeClientes.seguimiento_viaje') }}">Seguimiento viaje</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+                <br>
+                <!-- Cliente/Login a la derecha -->
+                <div class="dropdown ms-auto me-3">
+                    {% if 'cliente' in session %}
                     {% set cliente = session["cliente"] %}
                     <button class="btn text-white d-flex" type="button" data-bs-toggle="dropdown">
                         <!-- <i class="bi bi-person fs-3" style="color:white;"></i> -->
-                        <div style="width: 60px;height: 60px;background: #0d6efd;border-radius: 100%;border: #000 1px solid;" class="d-flex flex-column justify-content-center align-items-center mb-2 mt-3 text-white">{{ cliente['nombre'][0].upper() }}</div>
+                        <div style="width: 60px;height: 60px;background: #0d6efd;border-radius: 100%;border: #000 1px solid;"
+                            class="d-flex flex-column justify-content-center align-items-center mb-2 mt-3 text-white">{{
+                            cliente['nombre'][0].upper() }}</div>
 
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end px-3" style="width: auto;">
                         <li>
                             <section class="d-flex flex-column justify-content-center align-items-center">
-                                <div style="width: 60px;height: 60px;background: #0d6efd;border-radius: 100%;border: #000 1px solid;" class="d-flex flex-column justify-content-center align-items-center mb-2 mt-3 text-white">{{ cliente['nombre'][0].upper() }}</div>
+                                <div style="width: 60px;height: 60px;background: #0d6efd;border-radius: 100%;border: #000 1px solid;"
+                                    class="d-flex flex-column justify-content-center align-items-center mb-2 mt-3 text-white">
+                                    {{ cliente['nombre'][0].upper() }}</div>
                                 <p>Hola {{ cliente['nombre'] }}</p>
                                 <p>{{ cliente['email'] }}</p>
                                 <!-- <li><a class="dropdown-item rounded mb-3" href="{{ url_for('homeClientes.logoutCliente') }}" style="background: #42474938;border: #000 1px solid;">Cerrar Sesión</a></li> -->
                             </section>
                         </li>
-                        <li><a href="{{ url_for('homeClientes.perfilCliente') }}" class="dropdown-item border-bottom border-top">Mi Perfil</a></li>
+                        <li><a href="{{ url_for('homeClientes.perfilCliente') }}"
+                                class="dropdown-item border-bottom border-top">Mi Perfil</a></li>
                         <li><a class="dropdown-item mb-0 border-bottom" href="#">Mis viajes</a></li>
-                        <li><a class="dropdown-item rounded mb-3" href="{{ url_for('homeClientes.logoutCliente') }}">Cerrar Sesión</a></li>
+                        <li><a class="dropdown-item rounded mb-3"
+                                href="{{ url_for('homeClientes.logoutCliente') }}">Cerrar Sesión</a></li>
                     </ul>
-                {% else %}
+                    {% else %}
                     <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
                         aria-expanded="false">
                         <i class="bi bi-person fs-3" style="color:white;"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a id="abrirModalLogin" class="dropdown-item" style="cursor: pointer;">Iniciar sesión</a></li>
-                        <li><a class="dropdown-item" href="{{url_for('homeClientes.register_cliente')}}">Registrar</a></li>
+                        <li><a id="abrirModalLogin" class="dropdown-item" style="cursor: pointer;">Iniciar sesión</a>
+                        </li>
+                        <li><a class="dropdown-item" href="{{url_for('homeClientes.register_cliente')}}">Registrar</a>
+                        </li>
                     </ul>
-                {% endif %}
-            </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </nav>
@@ -164,7 +176,7 @@
     <main>
         {% block contenido %}{% endblock %}
     </main>
-    
+
     <footer>
         <div class="container-fluid bg-info py-3 py-md-6 py-xl-9 py-xxl-10" id="maestra_footer">
             <div class="row text-white">
@@ -187,7 +199,8 @@
                         <a class="text-decoration-none text-black text-white" href="">
                             <li>Preguntas frecuentes</li>
                         </a>
-                        <a class="text-decoration-none text-black text-white" href="{{ url_for('homeClientes.terminos_y_condiciones') }}">
+                        <a class="text-decoration-none text-black text-white"
+                            href="{{ url_for('homeClientes.terminos_y_condiciones') }}">
                             <li>Término y Condiciones</li>
                         </a>
                         <a class="text-decoration-none text-black text-white" href="/ecommerce/home/sobreNosotros">
@@ -424,7 +437,7 @@
     <!-- Select2 -->
     <script src="/Static/plugins/select2/js/select2.full.min.js"></script>
 
-     <!-- Moment.js (para formateo de fechas) -->
+    <!-- Moment.js (para formateo de fechas) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
 
     <script src="/Static/plugins/moment/moment.min.js"></script>

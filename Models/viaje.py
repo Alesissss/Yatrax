@@ -54,6 +54,35 @@ class Viaje:
             conexion.cerrar()
 
     @classmethod
+    def obtener_viaje(cls, idViaje):
+        try:
+            conexion = bd.Conexion()
+            
+            viaje = conexion.obtener("""SELECT * FROM viaje WHERE id = %s""", (idViaje,))
+            
+            detalles_viaje = conexion.obtener("""SELECT * FROM detalle_viaje WHERE idViaje = %s""", (idViaje,))
+            
+            personal = conexion.obtener("""SELECT * FROM detalle_personal WHERE idViaje = %s""", (idViaje,))
+            
+            # Obtener escalas para la ruta
+            escalas = []
+            if viaje:
+                escalas = conexion.obtener("""SELECT es.id, es.nro_orden, es.idSucursal, es.distancia_estimada, es.tiempo_estimado, CONCAT(UPPER(suc.ciudad), '-', suc.nombre) AS nombre, es.idRuta from escala es INNER JOIN sucursal suc on es.idSucursal = suc.id WHERE idRuta = %s ORDER BY nro_orden""", (viaje[0]['idRuta'],))
+
+            return {
+                "viaje": viaje[0] if viaje else None,
+                "detalles_viaje": detalles_viaje,
+                "personal": personal,
+                "escalas": escalas
+            }
+        except Exception as e:
+            print(f"Error al obtener datos del viaje: {repr(e)}")
+            return None
+        finally:
+            conexion.cerrar()
+
+
+    @classmethod
     def obtener_escalas_por_ruta(cls, ruta_id):
         conexion = bd.Conexion()
         try:
@@ -121,72 +150,144 @@ class Viaje:
 
     #EDITAR
     @classmethod
-    def editar(cls, id, nombre, tipo, estado, escalas, usuario):
+    def editar(cls, idViaje, idRuta, idVehiculo, estado, fechaHoraSalida, fechaHoraLlegada, detalles_viajes, choferes, tripulantes, asientos, usuario):
         try:
             conexion = bd.Conexion()
-            # Llamar al procedimiento almacenado
-            conexion.ejecutar("CALL SP_EDITAR_RUTA(%s, %s, %s, %s);", (id, nombre, tipo, estado), auto_commit=False)
 
-            # Obtener el mensaje de error y el último idRuta generado
-            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
-            msj2 = resultado[0]['@MSJ2']
+            result_pasaje = conexion.obtener(""" SELECT 1 FROM pasaje p 
+                              INNER JOIN detalle_viaje_asiento dva ON p.idDetalleViajeAsiento = dva.id
+                              INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
+                              INNER JOIN viaje v ON dv.idViaje = v.id LIMIT 1""")
+            
+            result_asiento = conexion.obtener(""" SELECT 1 FROM pasaje p 
+                              INNER JOIN detalle_viaje_asiento dva ON p.idDetalleViajeAsiento = dva.id
+                              INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
+                              WHERE dva.esDisponible = 0 LIMIT 1""")
+            
+            if result_pasaje or result_asiento:
+                raise Exception('El viaje no se puede modificar porque ya existen pasajes vendidos para los itinerarios.')
 
-            if msj2:  # Si hay un mensaje de error en msj2
-                raise Exception('Error al editar ruta: ' + msj2)
+            # 1. Actualizar el viaje
+            conexion.ejecutar("""
+                UPDATE viaje
+                SET idRuta = %s, idVehiculo = %s, estado = %s, fechaHoraSalida = %s, fechaHoraLlegada = %s
+                WHERE id = %s
+            """, (idRuta, idVehiculo, estado, fechaHoraSalida, fechaHoraLlegada, idViaje), auto_commit=False)
 
-            escalas_actuales = conexion.obtener(""" SELECT id, nro_orden, idSucursal, idRuta from escala WHERE idRuta = %s""", (id,))
+            conexion.ejecutar("DELETE FROM detalle_viaje_asiento WHERE idDetalle_Viaje IN (SELECT idDetalle_Viaje FROM detalle_viaje WHERE idViaje = %s)", (idViaje,), auto_commit=False)
+            conexion.ejecutar("DELETE FROM detalle_viaje WHERE idViaje = %s", (idViaje,), auto_commit=False)
 
-            # Borrar las escalas que existen actualmente
-            conexion.ejecutar("DELETE FROM escala WHERE idRuta = %s", (id), auto_commit=False)
+            for detalle in detalles_viajes:
+                conexion.ejecutar("""
+                    INSERT INTO detalle_viaje (idViaje, idSucursalOrigen, idSucursalDestino, precio, fechaSalida, fechaLlegadaEstimada, usuario)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """, (idViaje, detalle['id_sucursal_origen'], detalle['id_sucursal_destino'], detalle['precio'], detalle['fecha_salida'], detalle['fecha_llegada'], usuario), auto_commit=False)
 
-            # Insertar las escalas
-            for escala in escalas:
-                conexion.ejecutar("INSERT INTO escala (nro_orden, idSucursal, idRuta, usuario) VALUES (%s, %s, %s, %s)",
-                                (escala['nroOrden'], escala['id'], id, usuario), auto_commit=False)
+                idDetalle_Viaje = conexion.obtener("SELECT LAST_INSERT_ID() AS idDetalle_Viaje;")[0]['idDetalle_Viaje']
+                for asiento in asientos:
+                    conexion.ejecutar("""
+                        INSERT INTO detalle_viaje_asiento (idDetalle_Viaje, idAsiento, usuario)
+                        VALUES (%s, %s, %s)
+                    """, (idDetalle_Viaje, asiento['id'], usuario), auto_commit=False)
 
-            # Si todo es correcto, confirmamos la transacción
+            conexion.ejecutar("DELETE FROM detalle_personal WHERE idViaje = %s", (idViaje,), auto_commit=False)
+
+            for chofer in choferes:
+                conexion.ejecutar("""
+                    INSERT INTO detalle_personal (idPersonal, idTipoPersonal, idViaje, usuario)
+                    VALUES (%s, %s, %s, %s)
+                """, (chofer['id'], chofer['id_tipopersonal'], idViaje, usuario), auto_commit=False)
+
+            for tripulante in tripulantes:
+                conexion.ejecutar("""
+                    INSERT INTO detalle_personal (idPersonal, idTipoPersonal, idViaje, usuario)
+                    VALUES (%s, %s, %s, %s)
+                """, (tripulante['id'], tripulante['id_tipopersonal'], idViaje, usuario), auto_commit=False)
+
             conexion.conn.commit()
-            return resultado[0]  # Retorna un diccionario con los mensajes
+            return {'@MSJ': 'Viaje actualizado correctamente', '@MSJ2': ''}
 
         except Exception as e:
-            # Si algo falla, hacemos un rollback
             conexion.conn.rollback()
-            return {'@MSJ': '', '@MSJ2': f'Error al ejecutar la transacción de registro de ruta: {repr(e)}'}
+            return {'@MSJ': '', '@MSJ2': f'Error al actualizar el viaje: {repr(e)}'}
 
         finally:
-            # Cerramos la conexión
             conexion.cerrar()
 
     #ELIMINAR
     @classmethod
     def eliminar(cls, id):
-        conexion = bd.Conexion()
-
         try:
-            # Llamar al procedimiento almacenado
-            conexion.ejecutar("CALL SP_ELIMINAR_RUTA(%s);", (id, ))
+            conexion = bd.Conexion()
 
-            # Obtener mensajes de salida
-            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
-            return resultado[0]  # Retorna un diccionario con los mensajes
+            result_pasaje = conexion.obtener(""" SELECT 1 FROM pasaje p 
+                            INNER JOIN detalle_viaje_asiento dva ON p.idDetalleViajeAsiento = dva.id
+                            INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
+                            INNER JOIN viaje v ON dv.idViaje = v.id WHERE v.id = %s LIMIT 1""", (id,))
+            
+            result_asiento = conexion.obtener(""" SELECT 1 FROM detalle_viaje_asiento dva
+                            INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
+                            INNER JOIN viaje v ON dv.idViaje = v.id
+                            WHERE dva.esDisponible = 0 AND v.id = %s LIMIT 1""", (id,))
+            
+            if result_pasaje or result_asiento:
+                raise Exception('El viaje no se puede eliminar porque ya existen pasajes vendidos para los itinerarios.')
+
+            conexion.ejecutar("DELETE FROM detalle_viaje_asiento WHERE idDetalle_Viaje IN (SELECT idDetalle_Viaje FROM detalle_viaje WHERE idViaje = %s)", (id,), auto_commit=False)
+            conexion.ejecutar("DELETE FROM detalle_viaje WHERE idViaje = %s", (id,), auto_commit=False)
+            conexion.ejecutar("DELETE FROM detalle_personal WHERE idViaje = %s", (id,), auto_commit=False)
+            conexion.ejecutar("DELETE FROM viaje WHERE id = %s", (id,), auto_commit=False)
+
+            conexion.conn.commit()
+            return {'@MSJ': 'Viaje eliminado correctamente', '@MSJ2': ''}
+        except Exception as e:
+            conexion.conn.rollback()
+            return {'@MSJ': '', '@MSJ2': f'Error al eliminar el viaje: {str(e)}'}
         finally:
             conexion.cerrar()
 
     #DAR DE BAJA
     @classmethod
     def darBaja(cls, id):
-        conexion = bd.Conexion()
-
         try:
-            # Llamar al procedimiento almacenado
-            conexion.ejecutar("CALL SP_DARBAJA_RUTA(%s);", (id, ))
+            conexion = bd.Conexion()
 
-            # Obtener mensajes de salida
-            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
-            return resultado[0]  # Retorna un diccionario con los mensajes
+            result_pasaje = conexion.obtener(""" SELECT 1 FROM pasaje p 
+                            INNER JOIN detalle_viaje_asiento dva ON p.idDetalleViajeAsiento = dva.id
+                            INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
+                            INNER JOIN viaje v ON dv.idViaje = v.id WHERE v.id = %s LIMIT 1""", (id,))
+            
+            result_asiento = conexion.obtener(""" SELECT 1 FROM detalle_viaje_asiento dva
+                            INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
+                            INNER JOIN viaje v ON dv.idViaje = v.id
+                            WHERE dva.esDisponible = 0 AND v.id = %s LIMIT 1""", (id,))
+            
+            if result_pasaje or result_asiento:
+                raise Exception('El viaje no se puede eliminar porque ya existen pasajes vendidos para los itinerarios.')
+            
+            conexion.ejecutar("UPDATE viaje SET estado = 0 WHERE id = %s", (id,), auto_commit=False)
+            conexion.conn.commit()
+            return {'@MSJ': 'Viaje dado de baja correctamente', '@MSJ2': ''}
+        except Exception as e:
+            conexion.conn.rollback()
+            return {'@MSJ': '', '@MSJ2': f'Error al dar de baja al viaje: {str(e)}'}
         finally:
             conexion.cerrar()
-    
+            
+    @classmethod
+    def cambiar_estado_viaje(cls, id, idEstadoViaje):
+        try:
+            conexion = bd.Conexion()
+
+            conexion.ejecutar(""" UPDATE viaje SET idEstadoViaje = %s WHERE id = %s""", (idEstadoViaje, id,), auto_commit=False)
+
+            conexion.conn.commit()
+            return {'@MSJ': 'Viaje cambiado de estado correctamente', '@MSJ2': ''}
+        except Exception as e:
+            conexion.conn.rollback()
+            return {'@MSJ': '', '@MSJ2': f'Error al cambiar estado al viaje: {str(e)}'}
+        finally:
+            conexion.cerrar()
 
     @classmethod
     def obtenerDestinos(cls):

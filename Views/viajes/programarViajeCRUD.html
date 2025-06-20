@@ -8,21 +8,22 @@
         <div class="col-md-12">
             <div class="card h-100 w-100">
                 <div class="card-header bg-primary text-white">
-                    <h4 class="text-center mb-0">Programar un nuevo viaje</h4>
+                    <h4 class="text-center mb-0">{{ tittle }}</h4>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-12 pb-3">
                             <div class="card card-outline card-primary h-100">
                                 <div class="card-header">
-                                    <h3 class="card-title">Datos Generales</h3>
+                                    <h3 class="card-title">Datos generales</h3>
                                 </div>
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-md-12 mb-3">
                                             <label for="cbx_Ruta">Ruta</label>
                                             <div class="input-group">
-                                                <select id="cbx_Ruta" class="form-control">
+                                                <select id="cbx_Ruta" class="form-control" {% if btnId=='btn_Aceptar'
+                                                    %}disabled{% endif %}>
                                                     <option disabled>--SELECCIONAR--</option>
                                                 </select>
                                             </div>
@@ -55,9 +56,8 @@
                                                     <option disabled>--SELECCIONAR--</option>
                                                     <option {% if viaje.estado==1 %}selected{% endif %} value="1">
                                                         Vigente</option>
-                                                    <option {% if viaje.estado==0 %}selected{% endif %} value="0">
-                                                        No vigente
-                                                    </option>
+                                                    <option {% if viaje.estado==0 %}selected{% endif %} value="0">No
+                                                        vigente</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -75,7 +75,8 @@
                                         <div class="col-md-12 mb-3">
                                             <label for="cbx_Servicio">Servicio</label>
                                             <div class="input-group">
-                                                <select id="cbx_Servicio" class="form-control">
+                                                <select id="cbx_Servicio" class="form-control" {% if
+                                                    btnId=='btn_Aceptar' %}disabled{% endif %}>
                                                     <option disabled selected>--SELECCIONAR--</option>
                                                 </select>
                                             </div>
@@ -83,7 +84,8 @@
                                         <div class="col-md-12 mb-3">
                                             <label for="cbx_TipoVehiculo">Tipo vehículo</label>
                                             <div class="input-group">
-                                                <select id="cbx_TipoVehiculo" class="form-control">
+                                                <select id="cbx_TipoVehiculo" class="form-control" {% if
+                                                    btnId=='btn_Aceptar' %}disabled{% endif %}>
                                                     <option disabled selected>--SELECCIONAR--</option>
                                                 </select>
                                             </div>
@@ -91,7 +93,8 @@
                                         <div class="col-md-12 mb-3">
                                             <label for="cbx_Vehiculo">Vehículo</label>
                                             <div class="input-group">
-                                                <select id="cbx_Vehiculo" class="form-control">
+                                                <select id="cbx_Vehiculo" class="form-control" {% if
+                                                    btnId=='btn_Aceptar' %}disabled{% endif %}>
                                                     <option disabled selected>--SELECCIONAR--</option>
                                                 </select>
                                             </div>
@@ -101,7 +104,7 @@
                                             <div class="input-group">
                                                 <input type="text" id="txt_Niveles" class="form-control"
                                                     placeholder="Cantidad de niveles"
-                                                    oninput="this.value = this.value.toUpperCase();" disabled>
+                                                    oninput="this.value = this.value.toUpperCase();" readonly>
                                             </div>
                                         </div>
                                         <div class="col-md-12 mb-3">
@@ -110,7 +113,7 @@
                                             <div class="input-group">
                                                 <input type="text" id="txt_Asientos" class="form-control"
                                                     placeholder="Cantidad total de asientos"
-                                                    oninput="this.value = this.value.toUpperCase();" disabled>
+                                                    oninput="this.value = this.value.toUpperCase();" readonly>
                                             </div>
                                         </div>
                                     </div>
@@ -127,14 +130,16 @@
                                         <div class="col-md-12 mb-3">
                                             <label for="cbx_Chofer">Chofer</label>
                                             <div class="input-group">
-                                                <select id="cbx_Chofer" class="form-control" multiple="multiple">
+                                                <select id="cbx_Chofer" class="form-control" multiple="multiple" {% if
+                                                    btnId=='btn_Aceptar' %}disabled{% endif %}>
                                                 </select>
                                             </div>
                                         </div>
                                         <div class="col-md-12 mb-3">
                                             <label for="cbx_Tripulante">Tripulantes</label>
                                             <div class="input-group">
-                                                <select id="cbx_Tripulante" class="form-control" multiple="multiple">
+                                                <select id="cbx_Tripulante" class="form-control" multiple="multiple" {%
+                                                    if btnId=='btn_Aceptar' %}disabled{% endif %}>
                                                 </select>
                                             </div>
                                         </div>
@@ -191,7 +196,8 @@
 
                             const isPrimeraSubruta = (i === 0 && j === 1);
                             const inputSalida = isPrimeraSubruta
-                                ? `<input type="datetime-local" class="form-control input-salida" data-tiempo="${tiempoTotal}" onchange="calcularLlegadas()">`
+                                ? `<input type="datetime-local" class="form-control input-salida" data-tiempo="${tiempoTotal}" onchange="calcularLlegadas()" {% if btnId=='btn_Aceptar' %}disabled{%
+                                    endif %}>`
                                 : `<span class="fecha-salida"></span>`;
 
                             filas += `
@@ -204,7 +210,8 @@
                                     <td class="text-center">${inputSalida}</td>
                                     <td class="text-center"><span class="fecha-llegada"></span></td>
                                     <td class="text-center">
-                                        <input type="number" step="0.01" min="0" class="form-control precio-input">
+                                        <input type="number" step="0.01" min="0" class="form-control precio-input" {% if btnId=='btn_Aceptar' %}disabled{%
+                                    endif %}>
                                     </td>
                                 </tr>
                                 `;
@@ -213,6 +220,12 @@
 
                     $('#tbl_Escalas tbody').html(filas);
                 });
+
+                let idRuta = '{{ viaje.idRuta }}';
+
+                if (idRuta) {
+                    $('#cbx_Ruta').val(idRuta);
+                }
             } else {
                 console.error('Error al obtener rutas:', response.Msj);
             }
@@ -254,12 +267,12 @@
 
             const salidaCell = fila.querySelector('.fecha-salida');
             if (salidaCell && salidaCell.tagName === 'SPAN') {
-                salidaCell.textContent = horaSalida.format('YYYY-MM-DD HH:mm:ss');
+                salidaCell.textContent = moment(horaSalida).format('DD/MM/YYYY HH:mm');
             }
 
             const llegadaCell = fila.querySelector('.fecha-llegada');
             if (llegadaCell) {
-                llegadaCell.textContent = horaLlegada.format('YYYY-MM-DD HH:mm:ss');
+                llegadaCell.textContent = moment(horaLlegada).format('DD/MM/YYYY HH:mm');
             }
 
             // Guardamos hora de llegada para posibles usos futuros
@@ -293,6 +306,8 @@
                     data: dataChoferes,
                     placeholder: "Buscar chofer(es)...",
                     allowClear: true,
+                    dropdownCssClass: 'select2-dark-dropdown',
+                    containerCssClass: 'select2-dark-container',
                     language: {
                         noResults: function () {
                             return "No se encontraron resultados";
@@ -305,6 +320,8 @@
                     data: dataTripulantes,
                     placeholder: "Buscar tripulante(s)...",
                     allowClear: true,
+                    dropdownCssClass: 'select2-dark-dropdown',
+                    containerCssClass: 'select2-dark-container',
                     language: {
                         noResults: function () {
                             return "No se encontraron resultados";
@@ -312,11 +329,12 @@
                     }
                 });
 
-                // idsChoferes = [1];
-                // idsTripulantes = [4];
+                let listaPersonal = JSON.parse('{{ personal | tojson | safe }}');
+                let idsChoferes = listaPersonal.filter(p => p.idTipoPersonal == 1).map(p => p.idPersonal);
+                let idsTripulantes = listaPersonal.filter(p => p.idTipoPersonal == 2).map(p => p.idPersonal);
 
-                // $('#cbx_Chofer').val(idsChoferes.map(String)).trigger('change');
-                // $('#cbx_Tripulante').val(idsTripulantes.map(String)).trigger('change');
+                $('#cbx_Chofer').val(idsChoferes.map(String)).trigger('change');
+                $('#cbx_Tripulante').val(idsTripulantes.map(String)).trigger('change');
 
             } else {
                 console.error('Error al obtener al personal:', response.Msj);
@@ -325,8 +343,7 @@
     }
 
     function fct_LlenarCombos() {
-        let idVehiculo = null;
-
+        let idVehiculo = Number('{{ viaje.idVehiculo }}');
         $.getJSON('/trabajadores/viajes/GetData_ServiciosViajes', function (resServicios) {
             if (resServicios.Status === "success") {
                 const servicios = resServicios.data;
@@ -402,6 +419,10 @@
                                     });
                                 });
 
+                                if (idVehiculo) {
+                                    $('#cbx_Vehiculo').val(idVehiculo).trigger('change');
+                                }
+
                             } else {
                                 console.error('Error al obtener vehículos:', resVehiculos.Msj);
                             }
@@ -423,14 +444,34 @@
         filas.forEach(fila => {
             const celdas = fila.querySelectorAll('td');
 
+            // Recuperar salida
+            let fechaSalida = fila.querySelector('.input-salida')?.value || fila.querySelector('.fecha-salida')?.textContent.trim() || null;
+            let fechaLlegada = fila.querySelector('.fecha-llegada')?.textContent.trim() || null;
+
+            // Normalizar fechas al formato para BD
+            if (fechaSalida) {
+                // si tiene formato tipo ISO (input-datetime)
+                if (fechaSalida.includes('T')) {
+                    fechaSalida = moment(fechaSalida).format('YYYY-MM-DD HH:mm:ss');
+                } else {
+                    // si está como "DD/MM/YYYY HH:mm"
+                    fechaSalida = moment(fechaSalida, 'DD/MM/YYYY HH:mm').format('YYYY-MM-DD HH:mm:ss');
+                }
+            }
+
+            if (fechaLlegada) {
+                const llegada = moment(fechaLlegada, ['YYYY-MM-DD HH:mm:ss', 'DD/MM/YYYY HH:mm'], true);
+                fechaLlegada = llegada.isValid() ? llegada.format('YYYY-MM-DD HH:mm:ss') : null;
+            }
+
             const subruta = {
                 nro_subruta: celdas[0].innerText.trim(),
                 id_sucursal_origen: parseInt(celdas[1].innerText.trim()),
                 origen: celdas[2].innerText.trim(),
                 id_sucursal_destino: parseInt(celdas[3].innerText.trim()),
                 destino: celdas[4].innerText.trim(),
-                fecha_salida: fila.querySelector('.fecha-salida')?.textContent.trim() || fila.querySelector('.input-salida')?.value || null,
-                fecha_llegada: fila.querySelector('.fecha-llegada')?.textContent.trim() || null,
+                fecha_salida: fechaSalida,
+                fecha_llegada: fechaLlegada,
                 precio: parseFloat(fila.querySelector('.precio-input')?.value || '0')
             };
 
@@ -440,10 +481,52 @@
         return data;
     }
 
+
     $(document).ready(function () {
         fct_GetRutas();
         fct_GetPersonal();
         fct_LlenarCombos();
+
+        const escalas = JSON.parse('{{ escalas | tojson }}');
+        const detalles = JSON.parse('{{ detalles_viajes | tojson }}');
+
+        let filas = '';
+
+        detalles.forEach((detalle, idx) => {
+            const origen = escalas.find(e => e.idSucursal == detalle.idSucursalOrigen);
+            const destino = escalas.find(e => e.idSucursal == detalle.idSucursalDestino);
+
+            const nroOrdenOrigen = origen?.nro_orden ?? '?';
+            const nroOrdenDestino = destino?.nro_orden ?? '?';
+
+            const subrutaLabel = `Subruta ${nroOrdenOrigen} - ${nroOrdenDestino}`;
+            const isPrimeraSubruta = (nroOrdenOrigen === 1 && nroOrdenDestino === 2);
+
+            const fechaSalidaMoment = moment(detalle.fechaSalida);
+            const fechaLlegadaMoment = moment(detalle.fechaLlegadaEstimada);
+
+            const salidaHTML = isPrimeraSubruta
+                ? `<input type="datetime-local" class="form-control input-salida" value="${fechaSalidaMoment.format('YYYY-MM-DDTHH:mm')}" onchange="calcularLlegadas()" {% if btnId=='btn_Aceptar' %}disabled{% endif %}>`
+                : `<span class="fecha-salida">${fechaSalidaMoment.format('DD/MM/YYYY HH:mm')}</span>`;
+
+            filas += `
+                <tr data-i="${nroOrdenOrigen}" data-j="${nroOrdenDestino}" data-tiempo="${detalle.tiempo ?? 0}">
+                    <td class="text-center">${subrutaLabel}</td>
+                    <td class="d-none">${detalle.idSucursalOrigen}</td>
+                    <td class="text-center">${origen?.nombre || 'undefined'}</td>
+                    <td class="d-none">${detalle.idSucursalDestino}</td>
+                    <td class="text-center">${destino?.nombre || 'undefined'}</td>
+                    <td class="text-center">${salidaHTML}</td>
+                    <td class="text-center"><span class="fecha-llegada">${fechaLlegadaMoment.format('DD/MM/YYYY HH:mm')}</span></td>
+                    <td class="text-center">
+                        <input type="number" step="0.01" min="0" class="form-control precio-input" value="${detalle.precio}" {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
+                    </td>
+                </tr>
+            `;
+
+        });
+
+        $('#tbl_Escalas tbody').html(filas);
 
         $("#btn_Registrar").click(function () {
             // Encuentra el primer input-salida
@@ -460,7 +543,9 @@
 
             // Formatea si es válido
             if (fechaHoraSalida) fechaHoraSalida = moment(fechaHoraSalida).format('YYYY-MM-DD HH:mm:ss');
-            if (fechaHoraLlegada) fechaHoraLlegada = moment(fechaHoraLlegada).format('YYYY-MM-DD HH:mm:ss');
+            if (fechaHoraLlegada) {
+                fechaHoraLlegada = moment(fechaHoraLlegada, 'DD/MM/YYYY HH:mm').format('YYYY-MM-DD HH:mm:ss');
+            }
 
             let idRuta = $('#cbx_Ruta').val();
             let idVehiculo = $('#cbx_Vehiculo').val();
@@ -504,6 +589,7 @@
                     formData.append("tripulantes", JSON.stringify(tripulantesSeleccionados));
                     formData.append("detalles_viajes", JSON.stringify(subrutas));
                     formData.append("estado", estado);
+                    console.log(subrutas)
 
                     $.ajax({
                         url: "/trabajadores/viajes/RegistrarViaje",
@@ -534,6 +620,111 @@
                     });
                 }
             });
+        });
+
+        $("#btn_Editar").click(function () {
+            const id = Number("{{ viaje.id }}");
+
+            // Encuentra el primer input-salida
+            const inputSalida = document.querySelector('.input-salida');
+            let fechaHoraSalida = inputSalida?.value || null;
+
+            // Encuentra el último .fecha-llegada
+            const celdasLlegada = document.querySelectorAll('.fecha-llegada');
+            let fechaHoraLlegada = null;
+            if (celdasLlegada.length > 0) {
+                const ultima = celdasLlegada[celdasLlegada.length - 1];
+                fechaHoraLlegada = ultima.textContent.trim() || null;
+            }
+
+            // Formatea si es válido
+            if (fechaHoraSalida) fechaHoraSalida = moment(fechaHoraSalida).format('YYYY-MM-DD HH:mm:ss');
+            if (fechaHoraLlegada) {
+                const llegada = moment(fechaHoraLlegada, ['YYYY-MM-DD HH:mm:ss', 'DD/MM/YYYY HH:mm'], true);
+                if (llegada.isValid()) {
+                    fechaHoraLlegada = llegada.format('YYYY-MM-DD HH:mm:ss');
+                } else {
+                    toastr.warning("Fecha de llegada inválida", 'MENSAJE DE SISTEMA');
+                    return;
+                }
+            }
+
+            const estado = $('#cbx_Estado').val();
+            const idRuta = $('#cbx_Ruta').val();
+            const idVehiculo = $('#cbx_Vehiculo').val();
+
+            const choferesSeleccionados = $('#cbx_Chofer').select2('data').map(item => item.data);
+            const tripulantesSeleccionados = $('#cbx_Tripulante').select2('data').map(item => item.data);
+            const subrutas = obtenerDatosSubrutas();  // Función para obtener las subrutas
+
+            if (!fechaHoraSalida || !fechaHoraLlegada || !idRuta || !idVehiculo || !choferesSeleccionados.length || !tripulantesSeleccionados.length || !subrutas.length) {
+                toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("idViaje", id);
+            formData.append("fechaHoraSalida", fechaHoraSalida);
+            formData.append("fechaHoraLlegada", fechaHoraLlegada);
+            formData.append("estado", estado);
+            formData.append("idRuta", idRuta);
+            formData.append("idVehiculo", idVehiculo);
+            formData.append("choferes", JSON.stringify(choferesSeleccionados));
+            formData.append("tripulantes", JSON.stringify(tripulantesSeleccionados));
+            formData.append("detalles_viajes", JSON.stringify(subrutas));
+
+            console.log(subrutas);
+
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción editará al viaje. ¿Deseas continuar?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, editar viaje",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    let formData = new FormData();
+                    formData.append("fechaHoraSalida", fechaHoraSalida);
+                    formData.append("fechaHoraLlegada", fechaHoraLlegada);
+                    formData.append("idRuta", idRuta);
+                    formData.append("idVehiculo", idVehiculo);
+                    formData.append("choferes", JSON.stringify(choferesSeleccionados));
+                    formData.append("tripulantes", JSON.stringify(tripulantesSeleccionados));
+                    formData.append("detalles_viajes", JSON.stringify(subrutas));
+                    formData.append("estado", estado);
+
+                    $.ajax({
+                        url: "/trabajadores/viajes/EditarViaje/" + id,
+                        type: "POST",
+                        processData: false,
+                        contentType: false,
+                        data: formData,
+                        success: function (response) {
+                            if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                return;
+                            } else {
+                                toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                                setTimeout(() => {
+                                    // window.location.href = "/trabajadores/viajes/ProgramarViaje";
+                                }, 500);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                        }
+                    });
+                }
+            });
+        });
+
+        $("#btn_Aceptar").click(function () {
+            window.location.href = "/trabajadores/viajes/ProgramarViaje";
         });
 
         $("#btn_Volver").click(function () {
