@@ -202,6 +202,8 @@ def nuevaContrasena():
 
 @home_bp.route('/inicio')
 def index():
+    if (session.get('moduloSelected')):
+        session.pop('moduloSelected')
     return render_template('home/home.html', active_page="home")
 
 @home_bp.route('/error')

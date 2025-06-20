@@ -13,25 +13,40 @@
     </div>
     <div class="panel-body">
         <div class="row">
+            <div class="col-md-12 mb-3">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="cbx_EstadosViaje">Estado de viaje:</label>
+                        <div class="input-group">
+                            <select id="cbx_EstadosViaje" name="cbx_EstadosViaje" class="form-control">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6"></div>
+                </div>
+            </div>
             <div class="col-md-12">
-                <table id="tbl_Viajes" class="table table-bordered table-short-rows">
-                    <thead class="bg-gray">
-                        <tr>
-                            <th class="text-center">ID</th>
-                            <th class="text-center">TIPO RUTA</th>
-                            <th class="text-center">RUTA</th>
-                            <th class="text-center">VEHÍCULO</th>
-                            <th class="text-center">SERVICIO</th>
-                            <th class="text-center">FECHA SALIDA ESTIMADA</th>
-                            <th class="text-center">FECHA LLEGADA ESTIMADA</th>
-                            <th class="text-center">ESTADO DE VIAJE</th>
-                            <th class="text-center">ESTADO</th>
-                            <th class="text-center">ACCIÓN</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white table-short-rows">
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table id="tbl_Viajes" class="table table-bordered table-short-rows">
+                        <thead class="bg-gray">
+                            <tr>
+                                <th class="text-center">ID</th>
+                                <th class="text-center">TIPO RUTA</th>
+                                <th class="text-center">RUTA</th>
+                                <th class="text-center">VEHÍCULO</th>
+                                <th class="text-center">SERVICIO</th>
+                                <th class="text-center">FECHA SALIDA ESTIMADA</th>
+                                <th class="text-center">FECHA LLEGADA ESTIMADA</th>
+                                <th class="text-center">ID ESTADO VIAJE</th>
+                                <th class="text-center">ESTADO DE VIAJE</th>
+                                <th class="text-center">ESTADO</th>
+                                <th class="text-center">ACCIÓN</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white table-short-rows">
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -39,7 +54,8 @@
 {% endblock %}
 {% block scripts %}
 <script>
-    var dtRutas;
+    var dtViajes;
+    let estadosViaje = [];
 
     $(document).ready(function () {
         // $('body').addClass('sidebar-collapse');
@@ -105,12 +121,91 @@
             lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
         });
 
-        fct_IniciarTablaViajes('#tbl_Viajes');
+        $.getJSON('/trabajadores/viajes/GetEstadosViaje', function (response) {
+            if (response.Status === 'success') {
+                estadosViaje = response.data;
+
+                let items = '<option selected value="0">TODOS</option>';
+
+                $.each(response.data, function (index, item) {
+                    items += `<option value="${item.id}">${item.nombre}</option>`;
+                });
+
+                $('#cbx_EstadosViaje').html(items);
+                fct_IniciarTablaViajes('#tbl_Viajes');
+            } else {
+                console.error('Error al obtener los estados de viajes:', response.Msj);
+            }
+        });
+
+        $('#cbx_EstadosViaje').on('change', function () {
+            let estadoSeleccionado = $(this).val();
+
+            if (estadoSeleccionado === "0") {
+                dtViajes.column(7).search('').draw();
+            } else {
+                dtViajes.column(7).search('^' + estadoSeleccionado + '$', true, false).draw();
+            }
+        });
+
+    });
+
+    $(document).on('change', '.estado-select', function () {
+        const id = $(this).data('id');
+        const prevValue = $(this).data('prev');
+        const idEstadoViaje = $(this).val();
+
+        let formData = new FormData();
+        formData.append('id', id);
+        formData.append('idEstadoViaje', idEstadoViaje);
+
+        Swal.fire({
+            title: "¿Estás seguro?",
+            text: "Esta acción cambiará de estado al viaje. ¿Deseas continuar?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sí, cambiar estado",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/trabajadores/viajes/CambiarEstadoViaje',
+                    type: "POST",
+                    processData: false,
+                    contentType: false,
+                    data: formData,
+                    success: function (response) {
+                        if (response.Status === "success") {
+                            if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                return;
+                            }
+                            fct_IniciarTablaViajes('#tbl_Viajes');
+                            toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                        } else {
+                            toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                            console.error('Error: ' + response.Msj);
+                            $(this).val(prevValue);
+                        }
+                    },
+                    error: function (xhr, Status, error) {
+                        toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                        console.error('Error:' + error);
+                        $(this).val(prevValue);
+                    },
+                });
+            } else {
+                $(this).val(prevValue);
+            }
+        });
     });
 
     function fct_IniciarTablaViajes(IdTabla) {
         // Inicializar DataTables con botones
-        dtRutas = $(IdTabla).DataTable({
+        dtViajes = $(IdTabla).DataTable({
             buttons: [
                 {
                     extend: 'copy',
@@ -123,13 +218,29 @@
                     text: '<i class="bi bi-file-earmark-excel"></i>',
                     titleAttr: 'Exportar a Excel',
                     className: 'btn btn-success',
-                    filename: 'Viajes' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Viajes ' + moment().format('DD-MM-YYYY HH_mm'),
                     footer: true,
-                    exportOptions:
-                    {
+                    exportOptions: {
                         stripHtml: true,
-                        columns: ':not(:last-child)'
-                    },
+                        columns: ':not(:last-child):not(.d-none):not(.noVis)',
+                        format: {
+                            body: function (data, row, column, node) {
+                                const $content = $('<div>').html(data);
+                                const select = $content.find('select');
+
+                                if (select.length > 0) {
+                                    return select.find('option:selected').text().trim();
+                                }
+
+                                const badge = $content.find('.badge');
+                                if (badge.length > 0) {
+                                    return badge.text().trim();
+                                }
+
+                                return $content.text().trim();
+                            }
+                        }
+                    }
                 },
                 {
                     extend: 'pdf',
@@ -137,10 +248,26 @@
                     titleAttr: 'Exportar a PDF',
                     className: 'btn btn-danger',
                     filename: 'Viajes' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
-                    exportOptions:
-                    {
+                    exportOptions: {
                         stripHtml: true,
-                        columns: ':not(:last-child)'
+                        columns: ':not(:last-child):not(.d-none):not(.noVis)',
+                        format: {
+                            body: function (data, row, column, node) {
+                                const $content = $('<div>').html(data);
+                                const select = $content.find('select');
+
+                                if (select.length > 0) {
+                                    return select.find('option:selected').text().trim();
+                                }
+
+                                const badge = $content.find('.badge');
+                                if (badge.length > 0) {
+                                    return badge.text().trim();
+                                }
+
+                                return $content.text().trim();
+                            }
+                        }
                     },
                     orientation: 'landscape',
                     pageSize: 'LEGAL',
@@ -191,39 +318,69 @@
                     console.error('Error en la solicitud Ajax: ' + error + xhr.Msj + thrown);
                 },
             },
-            data: [],
             columns: [
                 { data: "id", name: "id" },
                 { data: "tipo_ruta", name: "tipo_ruta" },
                 { data: "ruta", name: "ruta" },
                 { data: "vehiculo", name: "vehiculo" },
                 { data: "servicio", name: "servicio" },
-                { 
-                    data: "fechaHoraSalida", 
+                {
+                    data: "fechaHoraSalida",
                     name: "fechaHoraSalida",
                     render: function (data, type, row) {
-                        return moment(data).format('YYYY-MM-DD HH:mm:ss');
-                    },
-                },
-                { 
-                    data: "fechaHoraLlegada", 
-                    name: "fechaHoraLlegada",
-                    render: function (data, type, row) {
-                        return moment(data).format('YYYY-MM-DD HH:mm:ss');
+                        return moment(data).format('DD/MM/YYYY HH:mm');
                     },
                 },
                 {
-                    data: "estado_viaje",
+                    data: "fechaHoraLlegada",
+                    name: "fechaHoraLlegada",
+                    render: function (data, type, row) {
+                        return moment(data).format('DD/MM/YYYY HH:mm');
+                    },
+                },
+                {
+                    data: 'idEstadoViaje',
+                    name: "idEstadoViaje",
+                    visible: false,
+                    searchable: true
+                },
+                {
+                    data: null,
                     name: "estado_viaje",
                     render: function (data, type, row) {
-                        if (data === "PENDIENTE") {
-                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-warning fs-5">${data}</span></h5>`;
-                        } else if (data === "No vigente") {
-                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-danger fs-5">${data}</span></h5>`;
-                        } else {
-                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge fs-5" style="background-color: #800080; color: white;">${data}</span></h5>`;
+                        if (!estadosViaje.length) return `<span>Cargando...</span>`;
+
+                        if (type === 'filter' || type === 'sort') {
+                            let estado = estadosViaje.find(est => est.id === row.idEstadoViaje);
+                            return estado ? estado.nombre : '';
                         }
-                    },
+
+                        if (false) {
+                            let options = estadosViaje
+                                .filter(est => est.id >= row.idEstadoViaje)
+                                .map(est => {
+                                    let selected = est.id === row.idEstadoViaje ? 'selected' : '';
+                                    return `<option value="${est.id}" ${selected}>${est.nombre}</option>`;
+                                }).join('');
+
+                            return `
+                                <select class="form-control estado-select" data-id="${row.id}" data-prev="${row.idEstadoViaje}">
+                                    ${options}
+                                </select>
+                            `;
+                        } else {
+                            let options = estadosViaje.map(est => {
+                                let selected = est.id === row.idEstadoViaje ? 'selected' : '';
+                                return `<option value="${est.id}" ${selected}>${est.nombre}</option>`;
+                            }).join('');
+
+                            return `
+                                <select class="form-control estado-select" data-id="${row.id}" data-prev="${row.idEstadoViaje}">
+                                    ${options}
+                                </select>
+                            `;
+                        }
+                    }
                 },
                 {
                     data: "estado",
@@ -261,11 +418,11 @@
                     className: "text-center align-middle",
                 },
                 {
-                    targets: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                    targets: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                     className: 'align-middle',
                 },
                 {
-                    targets: [9],
+                    targets: [10],
                     orderable: false,
                     width: '10%',
                 },

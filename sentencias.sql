@@ -1,4 +1,6 @@
 -- Primero eliminamos los procedimientos por si existen
+DROP PROCEDURE IF EXISTS SP_MODIFICAR_CONF_GENERAL;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_REEMBOLSO;
 DROP PROCEDURE IF EXISTS SP_REGISTRAR_CLIENTE;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_CLIENTE;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_CLIENTE;
@@ -169,6 +171,7 @@ DROP PROCEDURE IF EXISTS SP_ELIMINAR_RECLAMO;
 -- Eliminar tablas si existen
 DROP TABLE IF EXISTS conf_general;
 DROP TABLE IF EXISTS reclamo;
+DROP TABLE IF EXISTS reembolso;
 DROP TABLE IF EXISTS tipo_reclamo;
 DROP TABLE IF EXISTS detalle_personal;
 DROP TABLE IF EXISTS detalle_pasaje;
@@ -218,6 +221,8 @@ DROP TABLE IF EXISTS tipo_personal;
 DROP TABLE IF EXISTS tipo_comprobante;
 DROP TABLE IF EXISTS tipo_documento;
 DROP TABLE IF EXISTS reembolso;
+
+
 -- Crear tabla preguntas_frecuentes
 CREATE TABLE preguntas_frecuentes (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -438,6 +443,7 @@ CREATE TABLE cliente (
     id_tipo_doc INT,
     fechaRegistro DATETIME DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NULL,
+
     -- Claves foráneas
     CONSTRAINT fk_pais FOREIGN KEY (id_pais) REFERENCES PAIS(id),
     CONSTRAINT fk_tipo_cliente FOREIGN KEY (id_tipo_cliente) REFERENCES TIPO_CLIENTE(idTipoCliente),
@@ -737,6 +743,8 @@ CREATE TABLE pasaje(
     codigo CHAR(8) NOT NULL, -- AA0202
     enTransaccion TINYINT NULL DEFAULT 0, -- 1: en transacción, 0: no en transacción
     idPasaje INT NULL, -- Para operaciones con pasajes
+    fechaInicioReprogramacion DATETIME NULL,
+    fechaFinReprogramacion DATETIME NULL
     FOREIGN KEY (idDetalleViajeAsiento) REFERENCES detalle_viaje_asiento(id),
     FOREIGN KEY (idVenta) REFERENCES venta(id)
 );
@@ -784,6 +792,7 @@ CREATE TABLE reembolso (
     FOREIGN KEY (idMetodoPago) REFERENCES metodo_pago (id),
     FOREIGN KEY (idPasaje) REFERENCES pasaje (id)
 );
+
 
 INSERT INTO preguntas_frecuentes (pregunta, respuesta, estado, fecha_registro, usuario) VALUES ('¿Qué medios de pago
 aceptan para comprar pasajes en línea?','Aceptamos tarjetas de crédito y débito Visa, así como billeteras digitales como
@@ -885,7 +894,7 @@ INSERT INTO terminos_condiciones(id, nombre, archivo, estado, fecha_registro, us
 guía','versionPreliminar.txt',0,'2025-05-29 01:51:30','ander@gmail.com');
 
 -- INSERTS estado_viaje
-INSERT INTO estado_viaje (id, nombre) VALUES (1, 'PENDIENTE');
+INSERT INTO estado_viaje (id, nombre) VALUES (1, 'PROGRAMADO');
 INSERT INTO estado_viaje (id, nombre) VALUES (2, 'EN CURSO');
 INSERT INTO estado_viaje (id, nombre) VALUES (3, 'FINALIZADO');
 
@@ -4173,14 +4182,13 @@ BEGIN
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
-    UPDATE vehiculo
-    SET estado = 0
-    WHERE id = p_idVehiculo;
-
-    IF ROW_COUNT() = 0 THEN
-        SET @MSJ2 = 'No se encontró el vehículo para dar de baja';
-    ELSE
+    IF EXISTS (SELECT 1 FROM vehiculo WHERE id = p_idVehiculo) THEN   
+        UPDATE vehiculo
+        SET estado = 0
+        WHERE id = p_idVehiculo;
         SET @MSJ = 'Vehículo dado de baja correctamente';
+    ELSE
+        SET @MSJ2 = 'No se encontró el vehículo para dar de baja';
     END IF;
 END $$
 
