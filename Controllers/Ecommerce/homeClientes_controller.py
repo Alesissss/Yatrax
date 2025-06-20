@@ -675,6 +675,30 @@ def obtenerDatosPasaje():
             "Msj": f"Error al obtener los datos del pasaje: {repr(e)}"
         })
 
+@homeClientes_bp.route("/cambiarEnTransaccion", methods=["GET"])
+def cambiarEnTransaccion():
+    try:
+        numComprobante = request.args.get("comprobante")
+        pasaje = Pasaje.obtenerDatosPasaje(numComprobante)
+        if pasaje:
+            if pasaje['estado_transaccion'] == 1:
+                Pasaje.cambiar_a_transaccion_0(numComprobante)
+            else:
+                Pasaje.cambiar_a_transaccion_1(numComprobante)
+        else:
+            return jsonify({
+                "Status": "error",
+                "data": {},
+                "Msj": "No se encontró el pasaje con el número de comprobante proporcionado"
+            })
+    except Exception as e:
+        return jsonify({
+            "Status": "error",
+            "data": {},
+            "Msj": f"Error al cambiar el estado del pasaje: {repr(e)}"
+        })
+        
+
 @homeClientes_bp.route("/listarTiposComprobante")
 def listadoTiposComprobantes():
     try:

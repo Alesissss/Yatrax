@@ -167,6 +167,7 @@ DROP PROCEDURE IF EXISTS SP_MODIFICAR_RECLAMO;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_RECLAMO;
 
 -- Eliminar tablas si existen
+DROP TABLE IF EXISTS pais_sucursal;
 DROP TABLE IF EXISTS conf_general;
 DROP TABLE IF EXISTS reclamo;
 DROP TABLE IF EXISTS tipo_reclamo;
@@ -783,6 +784,17 @@ CREATE TABLE reembolso (
     FOREIGN KEY (idTipoComprobante) REFERENCES tipo_comprobante (idTipoComprobante),
     FOREIGN KEY (idMetodoPago) REFERENCES metodo_pago (id),
     FOREIGN KEY (idPasaje) REFERENCES pasaje (id)
+);
+
+-- crear tabla pais_sucursal
+CREATE TABLE pais_sucursal (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_pais INT NOT NULL,
+    id_conf_general INT NOT NULL,
+    nombre VARCHAR(255) NOT NULL,
+    abreviatura CHAR(3) NOT NULL,
+    FOREIGN KEY (id_pais) REFERENCES pais(id),
+    FOREIGN KEY (id_conf_general) REFERENCES conf_general(id)
 );
 
 INSERT INTO preguntas_frecuentes (pregunta, respuesta, estado, fecha_registro, usuario) VALUES ('¿Qué medios de pago

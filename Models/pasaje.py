@@ -153,17 +153,47 @@ class Pasaje:
     #     try:
     #         while True:
     #             codigo = f"RES-{''.join(random.choices(string.ascii_uppercase, k=5))}-{random.randint(1000, 9999)}"
-    #             conexion.ejecutar(
-    #                 "SELECT 1 FROM pasaje WHERE codigo = %s LIMIT 1",
+    #             fila = conexion.obtener(
+    #                 "SELECT codigo FROM pasaje WHERE codigo = %s LIMIT 1",
     #                 (codigo,)
     #             )
-    #             if not conexion.obtener():
+    #             if not fila:
     #                 return codigo
     #     finally:
     #         conexion.cerrar()
     #         # Genera un código de reserva único con el formato "RES-XXXXX-YYYY"
     #         # donde XXXXX es una cadena aleatoria de 5 letras y YYYY es un número entre 1000 y 9999.
     #         # lo que da un total de 11,881,376,000 combinaciones posibles.
+    
+    @classmethod
+    def cambiar_a_transaccion_1(cls, numComprobante):
+        conexion = bd.Conexion()
+        try:
+            # Cambia el estado de un pasaje a transacción
+            conexion.ejecutar(
+                "UPDATE pasaje SET enTransaccion = 1 WHERE numeroComprobante = %s;",
+                (numComprobante,)
+            )
+            return {"msj": "Estado de pasaje actualizado", "msj2": None}
+        except Exception as e:
+            return {"msj": None, "msj2": f"Error al cambiar estado de pasaje: {e}"}
+        finally:
+            conexion.cerrar()
+    
+    @classmethod
+    def cambiar_a_transaccion_0(cls, numComprobante):
+        conexion = bd.Conexion()
+        try:
+            # Cambia el estado de un pasaje a no transacción
+            conexion.ejecutar(
+                "UPDATE pasaje SET enTransaccion = 0 WHERE numeroComprobante = %s;",
+                (numComprobante,)
+            )
+            return {"msj": "Estado de pasaje actualizado", "msj2": None}
+        except Exception as e:
+            return {"msj": None, "msj2": f"Error al cambiar estado de pasaje: {e}"}
+        finally:
+            conexion.cerrar()
 
     @classmethod
     def generar_numComprobante(cls):
@@ -171,16 +201,12 @@ class Pasaje:
         try:
             row = conexion.obtener("SELECT MAX(numeroComprobante) as numero FROM pasaje")
             ultimo = row[0] if row and row[0] else None
-            print(5)
             if not ultimo['numero']:
                 return 'A000-00000001'
-            print(6)
-            print(ultimo)
             ultimo = ultimo['numero']
             letra = ultimo[0]
             serie = int(ultimo[1:4])
             corr  = int(ultimo[5:]) + 1
-            print(7)
             if corr > 99999999:
                 corr = 0
                 serie += 1
@@ -193,7 +219,6 @@ class Pasaje:
 
             s_txt = f"{serie:03d}"
             c_txt = f"{corr:08d}"
-            print(8)
             return f"{letra}{s_txt}-{c_txt}"
 
         finally:
