@@ -221,14 +221,14 @@ class Viaje:
             conexion = bd.Conexion()
 
             result_pasaje = conexion.obtener(""" SELECT 1 FROM pasaje p 
-                              INNER JOIN detalle_viaje_asiento dva ON p.idDetalleViajeAsiento = dva.id
-                              INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
-                              INNER JOIN viaje v ON dv.idViaje = v.id LIMIT 1""")
+                            INNER JOIN detalle_viaje_asiento dva ON p.idDetalleViajeAsiento = dva.id
+                            INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
+                            INNER JOIN viaje v ON dv.idViaje = v.id WHERE v.id = %s LIMIT 1""", (id,))
             
-            result_asiento = conexion.obtener(""" SELECT 1 FROM pasaje p 
-                              INNER JOIN detalle_viaje_asiento dva ON p.idDetalleViajeAsiento = dva.id
-                              INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
-                              WHERE dva.esDisponible = 0 LIMIT 1""")
+            result_asiento = conexion.obtener(""" SELECT 1 FROM detalle_viaje_asiento dva
+                            INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
+                            INNER JOIN viaje v ON dv.idViaje = v.id
+                            WHERE dva.esDisponible = 0 AND v.id = %s LIMIT 1""", (id,))
             
             if result_pasaje or result_asiento:
                 raise Exception('El viaje no se puede eliminar porque ya existen pasajes vendidos para los itinerarios.')
@@ -242,7 +242,7 @@ class Viaje:
             return {'@MSJ': 'Viaje eliminado correctamente', '@MSJ2': ''}
         except Exception as e:
             conexion.conn.rollback()
-            return {'@MSJ': '', '@MSJ2': f'Error al eliminar el viaje: {repr(e)}'}
+            return {'@MSJ': '', '@MSJ2': f'Error al eliminar el viaje: {str(e)}'}
         finally:
             conexion.cerrar()
 
@@ -253,14 +253,14 @@ class Viaje:
             conexion = bd.Conexion()
 
             result_pasaje = conexion.obtener(""" SELECT 1 FROM pasaje p 
-                              INNER JOIN detalle_viaje_asiento dva ON p.idDetalleViajeAsiento = dva.id
-                              INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
-                              INNER JOIN viaje v ON dv.idViaje = v.id LIMIT 1""")
+                            INNER JOIN detalle_viaje_asiento dva ON p.idDetalleViajeAsiento = dva.id
+                            INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
+                            INNER JOIN viaje v ON dv.idViaje = v.id WHERE v.id = %s LIMIT 1""", (id,))
             
-            result_asiento = conexion.obtener(""" SELECT 1 FROM pasaje p 
-                              INNER JOIN detalle_viaje_asiento dva ON p.idDetalleViajeAsiento = dva.id
-                              INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
-                              WHERE dva.esDisponible = 0 LIMIT 1""")
+            result_asiento = conexion.obtener(""" SELECT 1 FROM detalle_viaje_asiento dva
+                            INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
+                            INNER JOIN viaje v ON dv.idViaje = v.id
+                            WHERE dva.esDisponible = 0 AND v.id = %s LIMIT 1""", (id,))
             
             if result_pasaje or result_asiento:
                 raise Exception('El viaje no se puede eliminar porque ya existen pasajes vendidos para los itinerarios.')
@@ -270,7 +270,7 @@ class Viaje:
             return {'@MSJ': 'Viaje dado de baja correctamente', '@MSJ2': ''}
         except Exception as e:
             conexion.conn.rollback()
-            return {'@MSJ': '', '@MSJ2': f'Error al dar de baja al viaje: {repr(e)}'}
+            return {'@MSJ': '', '@MSJ2': f'Error al dar de baja al viaje: {str(e)}'}
         finally:
             conexion.cerrar()
             
@@ -285,7 +285,7 @@ class Viaje:
             return {'@MSJ': 'Viaje cambiado de estado correctamente', '@MSJ2': ''}
         except Exception as e:
             conexion.conn.rollback()
-            return {'@MSJ': '', '@MSJ2': f'Error al cambiar estado al viaje: {repr(e)}'}
+            return {'@MSJ': '', '@MSJ2': f'Error al cambiar estado al viaje: {str(e)}'}
         finally:
             conexion.cerrar()
 
