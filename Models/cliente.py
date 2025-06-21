@@ -57,6 +57,19 @@ class Cliente:
             return usuario[0] if usuario else None
         finally:
             conexion.cerrar()
+            
+    @classmethod
+    def obtener_id_por_numero_documento(cls, numero_documento):
+        conexion = bd.Conexion()
+        try:
+            query = """
+                select id from cliente cli
+                where cli.numero_documento = %s
+            """
+            usuario = conexion.obtener(query, (numero_documento,))
+            return usuario[0] if usuario else None
+        finally:
+            conexion.cerrar()
 
     @classmethod
     def logear_cliente(cls, email,contrasena):
