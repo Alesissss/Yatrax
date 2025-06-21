@@ -468,114 +468,122 @@
               <div id="datosReembolso" style="display: none;">
                 <div class="accordion" id="formularioCompra">
 
-  <!-- Sección Contacto -->
-  <div class="accordion-item">
-    <h2 class="accordion-header" id="headingContacto">
-      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseContacto" aria-expanded="true">
-        <i class="fas fa-id-card me-2"></i> Contacto
-      </button>
-    </h2>
-    <div id="collapseContacto" class="accordion-collapse collapse show" data-bs-parent="#formularioCompra">
-      <div class="accordion-body">
-              <div class="row gy-3">
-          <div class="col-md-4">
-            <label class="form-label">Tipo documento</label>
-            <select id="tipoDocNuevoRem" class="form-select">
-              {% for tipoDoc in TipoDocumento %}
-              <option value="{{ tipoDoc.id }}">{{ tipoDoc.abreviatura }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">Número de documento</label>
-            <input type="text" id="numeroDocNuevoRem" maxlength="11" class="form-control" placeholder="Número de documento" />
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">Correo</label>
-            <input type="email" id="correoRem" class="form-control" placeholder="Correo" />
-          </div>
-          <div class="col-md-4">
-            <label class="form-label" id="labelNombresRem">Nombres</label>
-            <input type="text" id="nombresRem" class="form-control" placeholder="Nombres" />
-          </div>
-          <div class="col-md-4" id="apellidoPaternoDivRem">
-            <label class="form-label">Apellido paterno</label>
-            <input type="text" id="apellidoPaternoRem" class="form-control" placeholder="Apellido paterno" />
-          </div>
-          <div class="col-md-4" id="apellidoMaternoDivRem">
-            <label class="form-label">Apellido materno</label>
-            <input type="text" id="apellidoMaternoRem" class="form-control" placeholder="Apellido materno" />
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">Teléfono</label>
-            <input type="tel" id="telefonoRem" class="form-control" placeholder="Teléfono" />
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">Fecha de nacimiento</label>
-            <input type="date" id="fechaNacimientoRem" class="form-control" />
-          </div>
-          <div class="col-md-4 align-content-center" id="sexoDivRem">
-            <div class="form-label">Sexo</div>
-            <div class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" name="sexoRem" id="sexoMasculinoRem" value="M" />
-              <label class="form-check-label" for="sexoMasculinoRem">Masculino</label>
-            </div>
-            <div class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" name="sexoRem" id="sexoFemeninoRem" value="F" />
-              <label class="form-check-label" for="sexoFemeninoRem">Femenino</label>
-            </div>
-          </div>
-        </div>
+                  <!-- Sección Contacto -->
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingContacto">
+                      <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapseContacto" aria-expanded="true">
+                        <i class="fas fa-id-card me-2"></i> Contacto
+                      </button>
+                    </h2>
+                    <div id="collapseContacto" class="accordion-collapse collapse show"
+                      data-bs-parent="#formularioCompra">
+                      <div class="accordion-body">
+                        <div class="row gy-3">
+                          <div class="col-md-4">
+                            <label class="form-label">Tipo documento</label>
+                            <select id="tipoDocNuevoRem" class="form-select">
+                              {% for tipoDoc in TipoDocumento %}
+                              <option value="{{ tipoDoc.id }}">{{ tipoDoc.abreviatura }}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                          <div class="col-md-4">
+                            <label class="form-label">Número de documento</label>
+                            <input type="text" id="numeroDocNuevoRem" maxlength="11" class="form-control"
+                              placeholder="Número de documento" />
+                          </div>
+                          <div class="col-md-4">
+                            <label class="form-label">Correo</label>
+                            <input type="email" id="correoRem" class="form-control" placeholder="Correo" />
+                          </div>
+                          <div class="col-md-4">
+                            <label class="form-label" id="labelNombresRem">Nombres</label>
+                            <input type="text" id="nombresRem" class="form-control" placeholder="Nombres" />
+                          </div>
+                          <div class="col-md-4" id="apellidoPaternoDivRem">
+                            <label class="form-label">Apellido paterno</label>
+                            <input type="text" id="apellidoPaternoRem" class="form-control"
+                              placeholder="Apellido paterno" />
+                          </div>
+                          <div class="col-md-4" id="apellidoMaternoDivRem">
+                            <label class="form-label">Apellido materno</label>
+                            <input type="text" id="apellidoMaternoRem" class="form-control"
+                              placeholder="Apellido materno" />
+                          </div>
+                          <div class="col-md-4">
+                            <label class="form-label">Teléfono</label>
+                            <input type="tel" id="telefonoRem" class="form-control" placeholder="Teléfono" />
+                          </div>
+                          <div class="col-md-4">
+                            <label class="form-label">Fecha de nacimiento</label>
+                            <input type="date" id="fechaNacimientoRem" class="form-control" />
+                          </div>
+                          <div class="col-md-4 align-content-center" id="sexoDivRem">
+                            <div class="form-label">Sexo</div>
+                            <div class="form-check form-check-inline">
+                              <input class="form-check-input" type="radio" name="sexoRem" id="sexoMasculinoRem"
+                                value="M" />
+                              <label class="form-check-label" for="sexoMasculinoRem">Masculino</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                              <input class="form-check-input" type="radio" name="sexoRem" id="sexoFemeninoRem"
+                                value="F" />
+                              <label class="form-check-label" for="sexoFemeninoRem">Femenino</label>
+                            </div>
+                          </div>
+                        </div>
 
-      </div>
-    </div>
-  </div>
+                      </div>
+                    </div>
+                  </div>
 
-  <!-- Sección Pago -->
-  <div class="accordion-item">
-    <h2 class="accordion-header" id="headingPago">
-      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePago">
-        <i class="fas fa-credit-card me-2"></i> Pago
-      </button>
-    </h2>
-    <div id="collapsePago" class="accordion-collapse collapse" data-bs-parent="#formularioCompra">
-      <div class="accordion-body">
-        <div class="row g-3">
-          <div class="col-md-6">
-            <label for="tipoMetodoPagoRem" class="form-label">Tipo de método de pago</label>
-            <select id="tipoMetodoPagoRem" class="form-select">
-              {% for tipoMetodoPago in TipoMetodosPago %}
-              <option value="{{ tipoMetodoPago.ID }}">{{ tipoMetodoPago.NOMBRE }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="col-md-6">
-            <label for="metodoPagoRem" class="form-label">Método de pago</label>
-            <select name="metodoPagoRem" id="metodoPagoRem" class="form-select">
-              {% for metodoPago in MetodosPagos %}
-              <option value="{{ metodoPago.id }}">{{ metodoPago.nombre }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="col-md-6">
-              <label for="tipoComprobante" class="form-label">Tipo de comprobante</label>
-              <select id="tipoComprobante" class="form-select">
-                {% for comprobante in TipoComprobantes %}
-                  <option value="{{ comprobante.ID }}">{{ comprobante.TIPO }}</option>
-                {% endfor %}
-              </select>
-            </div>
+                  <!-- Sección Pago -->
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingPago">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapsePago">
+                        <i class="fas fa-credit-card me-2"></i> Pago
+                      </button>
+                    </h2>
+                    <div id="collapsePago" class="accordion-collapse collapse" data-bs-parent="#formularioCompra">
+                      <div class="accordion-body">
+                        <div class="row g-3">
+                          <div class="col-md-6">
+                            <label for="tipoMetodoPagoRem" class="form-label">Tipo de método de pago</label>
+                            <select id="tipoMetodoPagoRem" class="form-select">
+                              {% for tipoMetodoPago in TipoMetodosPago %}
+                              <option value="{{ tipoMetodoPago.ID }}">{{ tipoMetodoPago.NOMBRE }}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                          <div class="col-md-6">
+                            <label for="metodoPagoRem" class="form-label">Método de pago</label>
+                            <select name="metodoPagoRem" id="metodoPagoRem" class="form-select">
+                              {% for metodoPago in MetodosPagos %}
+                              <option value="{{ metodoPago.id }}">{{ metodoPago.nombre }}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                          <div class="col-md-6">
+                            <label for="tipoComprobante" class="form-label">Tipo de comprobante</label>
+                            <select id="tipoComprobante" class="form-select">
+                              {% for comprobante in TipoComprobantes %}
+                              <option value="{{ comprobante.ID }}">{{ comprobante.TIPO }}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
 
-          <div class="col-12 text-end">
-            <button id="btnGuardarReembolso" type="submit" class="btn btn-success">
-              <i class="fas fa-credit-card me-1"></i> Finalizar Pago
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+                          <div class="col-12 text-end">
+                            <button id="btnGuardarReembolso" type="submit" class="btn btn-success">
+                              <i class="fas fa-credit-card me-1"></i> Finalizar Pago
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
               </div>
 
@@ -610,123 +618,124 @@
 
 
   <!-- MODAL MENSAJE REEMBOLSO -->
-<div class="modal fade" id="modalReembolsoExito" tabindex="-1" aria-labelledby="modalReembolsoExitoLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow rounded-4">
-      <div class="modal-header bg-success text-white border-0 rounded-top-4">
-        <h5 class="modal-title fw-bold" id="modalReembolsoExitoLabel">
-          <i class="fas fa-circle-check me-2"></i> ¡Solicitud Enviada!
-        </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body text-center fs-6 text-dark">
-        <p class="mb-0">Se ha registrado la <strong>solicitud de reembolso</strong>,<br>espere pronta respuesta.</p>
-      </div>
-      <div class="modal-footer border-0 justify-content-center pb-4">
-        <button type="button" class="btn btn-outline-success px-4 rounded-pill fw-semibold" data-bs-dismiss="modal">
-          Aceptar
-        </button>
+  <div class="modal fade" id="modalReembolsoExito" tabindex="-1" aria-labelledby="modalReembolsoExitoLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow rounded-4">
+        <div class="modal-header bg-success text-white border-0 rounded-top-4">
+          <h5 class="modal-title fw-bold" id="modalReembolsoExitoLabel">
+            <i class="fas fa-circle-check me-2"></i> ¡Solicitud Enviada!
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body text-center fs-6 text-dark">
+          <p class="mb-0">Se ha registrado la <strong>solicitud de reembolso</strong>,<br>espere pronta respuesta.</p>
+        </div>
+        <div class="modal-footer border-0 justify-content-center pb-4">
+          <button type="button" class="btn btn-outline-success px-4 rounded-pill fw-semibold" data-bs-dismiss="modal">
+            Aceptar
+          </button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const tipoDocumento = document.getElementById("tipoDocNuevoRem");
-    const labelNombres = document.getElementById("labelNombresRem");
-    const sexoDivRem = document.getElementById("sexoDivRem");
-    const apellidoPaternoDiv = document.getElementById("apellidoPaternoDivRem");
-    const apellidoMaternoDiv = document.getElementById("apellidoMaternoDivRem");
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const tipoDocumento = document.getElementById("tipoDocNuevoRem");
+      const labelNombres = document.getElementById("labelNombresRem");
+      const sexoDivRem = document.getElementById("sexoDivRem");
+      const apellidoPaternoDiv = document.getElementById("apellidoPaternoDivRem");
+      const apellidoMaternoDiv = document.getElementById("apellidoMaternoDivRem");
 
-    tipoDocumento.addEventListener("change", function () {
-      const abreviaturaSeleccionada = document.getElementById("tipoDocNuevoRem").selectedOptions[0].text;
-      if (abreviaturaSeleccionada === "RUC") {
-        labelNombres.textContent = "Razón Social *";
-        apellidoPaternoDiv.style.display = "none";
-        apellidoMaternoDiv.style.display = "none";
-        sexoDivRem.style.display = "none";
-      } else {
-        labelNombres.textContent = "Nombres *";
-        apellidoMaternoDiv.style.display = "block";
-        apellidoPaternoDiv.style.display = "block";
-        sexoDivRem.style.display = "block";
-      }
+      tipoDocumento.addEventListener("change", function () {
+        const abreviaturaSeleccionada = document.getElementById("tipoDocNuevoRem").selectedOptions[0].text;
+        if (abreviaturaSeleccionada === "RUC") {
+          labelNombres.textContent = "Razón Social *";
+          apellidoPaternoDiv.style.display = "none";
+          apellidoMaternoDiv.style.display = "none";
+          sexoDivRem.style.display = "none";
+        } else {
+          labelNombres.textContent = "Nombres *";
+          apellidoMaternoDiv.style.display = "block";
+          apellidoPaternoDiv.style.display = "block";
+          sexoDivRem.style.display = "block";
+        }
+      });
+
+      document.getElementById("btnGuardarReembolso").addEventListener("click", () => {
+        const numeroComprobante = document.getElementById("comprobante").value.trim();
+        const tipoDocId = document.getElementById("tipoDocNuevoRem").value;
+        const tipoDocTexto = document.getElementById("tipoDocNuevoRem").selectedOptions[0].text;
+        const numeroDoc = document.getElementById("numeroDocNuevoRem").value.trim();
+        const correo = document.getElementById("correoRem").value.trim();
+        const nombres = document.getElementById("nombresRem").value.trim();
+        const apellidoPaterno = document.getElementById("apellidoPaternoRem").value.trim();
+        const apellidoMaterno = document.getElementById("apellidoMaternoRem").value.trim();
+        const fechaNacimiento = document.getElementById("fechaNacimientoRem").value;
+        const telefono = document.getElementById("telefonoRem").value.trim();
+        const sexo = document.querySelector('input[name="sexoRem"]:checked')?.value || null;
+        const tipoComprobante = document.getElementById("tipoComprobante").value;
+        const metodoPago = document.getElementById("metodoPagoRem").value;
+        const tipoMetodoPago = document.getElementById("tipoMetodoPagoRem").value;
+        const idPasaje = document.getElementById("pasCod").value;
+
+        if (!numeroComprobante || !idPasaje) {
+          toastr.warning("Debe buscar un pasaje válido primero", "MENSAJE DEL SISTEMA");
+          return;
+        }
+
+        const payload = {
+          numeroComprobante,
+          tipoDocId,
+          tipoDocTexto,
+          numeroDoc,
+          correo,
+          nombres,
+          apellidoPaterno,
+          apellidoMaterno,
+          fechaNacimiento,
+          telefono,
+          sexo,
+          tipoComprobante,
+          metodoPago,
+          tipoMetodoPago,
+          motivo: "Reembolso solicitado por cliente",
+          idPasaje
+        };
+
+        fetch("/ecommerce/home/registrarReembolso", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        })
+          .then(r => r.json())
+          .then(json => {
+            if (json.Status === "success") {
+              const modalElement = document.getElementById("modalReembolsoExito");
+              const modalExito = new bootstrap.Modal(modalElement);
+              modalExito.show();
+
+              modalElement.addEventListener("hidden.bs.modal", function () {
+                location.reload();
+              }, { once: true });
+            } else {
+              if (json.Msj?.toLowerCase().includes("ya se ha realizado una solicitud")) {
+                toastr.info(json.Msj, "INFORMACIÓN");
+              } else {
+                toastr.error(json.Msj || "No se pudo registrar el reembolso", "ERROR");
+              }
+            }
+          })
+          .catch(err => {
+            toastr.error("Error al registrar el reembolso: " + err.message, "ERROR");
+          });
+      });
+
+
+
     });
-
-document.getElementById("btnGuardarReembolso").addEventListener("click", () => {
-  const numeroComprobante = document.getElementById("comprobante").value.trim();
-  const tipoDocId = document.getElementById("tipoDocNuevoRem").value;
-  const tipoDocTexto = document.getElementById("tipoDocNuevoRem").selectedOptions[0].text;
-  const numeroDoc = document.getElementById("numeroDocNuevoRem").value.trim();
-  const correo = document.getElementById("correoRem").value.trim();
-  const nombres = document.getElementById("nombresRem").value.trim();
-  const apellidoPaterno = document.getElementById("apellidoPaternoRem").value.trim();
-  const apellidoMaterno = document.getElementById("apellidoMaternoRem").value.trim();
-  const fechaNacimiento = document.getElementById("fechaNacimientoRem").value;
-  const telefono = document.getElementById("telefonoRem").value.trim();
-  const sexo = document.querySelector('input[name="sexoRem"]:checked')?.value || null;
-  const tipoComprobante = document.getElementById("tipoComprobante").value;
-  const metodoPago = document.getElementById("metodoPagoRem").value;
-  const tipoMetodoPago = document.getElementById("tipoMetodoPagoRem").value;
-  const idPasaje = document.getElementById("pasCod").value;
-
-  if (!numeroComprobante || !idPasaje) {
-    toastr.warning("Debe buscar un pasaje válido primero", "MENSAJE DEL SISTEMA");
-    return;
-  }
-
-  const payload = {
-    numeroComprobante,
-    tipoDocId,
-    tipoDocTexto,
-    numeroDoc,
-    correo,
-    nombres,
-    apellidoPaterno,
-    apellidoMaterno,
-    fechaNacimiento,
-    telefono,
-    sexo,
-    tipoComprobante,
-    metodoPago,
-    tipoMetodoPago,
-    motivo: "Reembolso solicitado por cliente",
-    idPasaje
-  };
-
-  fetch("/ecommerce/home/registrarReembolso", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  })
-    .then(r => r.json())
-    .then(json => {
-      if (json.Status === "success") {
-    const modalElement = document.getElementById("modalReembolsoExito");
-    const modalExito = new bootstrap.Modal(modalElement);
-    modalExito.show();
-
-    modalElement.addEventListener("hidden.bs.modal", function () {
-      location.reload();
-    }, { once: true });
-  } else {
-    if (json.Msj?.toLowerCase().includes("ya se ha realizado una solicitud")) {
-      toastr.info(json.Msj, "INFORMACIÓN");
-    } else {
-      toastr.error(json.Msj || "No se pudo registrar el reembolso", "ERROR");
-    }
-  }
-    })
-    .catch(err => {
-      toastr.error("Error al registrar el reembolso: " + err.message, "ERROR");
-    });
-});
-
-
-
-  });
-</script>
+  </script>
   <script>
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -742,7 +751,7 @@ document.getElementById("btnGuardarReembolso").addEventListener("click", () => {
     });
     document.addEventListener("DOMContentLoaded", () => {
 
-    const enTransaccion = document.getElementById("enTransaccion");
+      const enTransaccion = document.getElementById("pasEstTran");
 
       // Variables para el modal
       let operacionSeleccionada = null;
@@ -804,7 +813,7 @@ document.getElementById("btnGuardarReembolso").addEventListener("click", () => {
 
       // Función para abrir modal con la operación seleccionada
       function abrirModalValidacion(operacion, boton) {
-        if (enTransaccion.value == 1){
+        if (enTransaccion == 1) {
           toastr.warning("Ya se encuentra en una transacción el pasaje", "MENSAJE DEL SISTEMA");
           return;
         }
@@ -857,8 +866,8 @@ document.getElementById("btnGuardarReembolso").addEventListener("click", () => {
           if (intentosRestantes <= 0) {
             // Se acabaron los intentos - cerrar modal automáticamente
             setTimeout(() => {
+              toastr.warning('Se ha alcanzado el máximo de intentos. Por favor, verifique su código de pasaje.', 'MENSAJE DEL SISTEMA');
               modalValidacion.hide();
-              alert('Se ha alcanzado el máximo de intentos. Por favor, verifique su código de pasaje.');
             }, 2000);
           } else {
             // Aún hay intentos - enfocar input
@@ -1428,60 +1437,60 @@ document.getElementById("btnGuardarReembolso").addEventListener("click", () => {
       }
 
       // Funcion para buscar persona Reembolso
-    function buscarPersonaRem() {
-  const tipoDoc =document.getElementById("tipoDocNuevoRem").selectedOptions[0].text;
-;
-  const numDoc = document.getElementById("numeroDocNuevoRem").value.trim();
+      function buscarPersonaRem() {
+        const tipoDoc = document.getElementById("tipoDocNuevoRem").selectedOptions[0].text;
+        ;
+        const numDoc = document.getElementById("numeroDocNuevoRem").value.trim();
 
-  if (!tipoDoc) {
-    toastr.warning("El tipo de documento es obligatorio", "MENSAJE DEL SISTEMA");
-    return;
-  }
-
-  if (tipoDoc && (numDoc.length == 8 || numDoc.length == 12)) {
-    fetch(`/ecommerce/home/api/get_persona_data?tipoDoc=${encodeURIComponent(tipoDoc)}&numDoc=${encodeURIComponent(numDoc)}`)
-      .then((r) => r.json())
-      .then((json) => {
-        if (json.Status === "success") {
-          const d = json.data;
-          document.getElementById("nombresRem").value = d.nombre || d.nombres || "";
-          document.getElementById("apellidoPaternoRem").value = d.apellidoPaterno || d.ape_paterno || "";
-          document.getElementById("apellidoMaternoRem").value = d.apellidoMaterno || d.ape_materno || "";
-          document.getElementById("correoRem").value = d.email || "";
-          document.getElementById("telefonoRem").value = d.telefono || "";
-          document.getElementById("fechaNacimientoRem").value = d.f_nacimiento
-            ? moment(d.f_nacimiento).format("YYYY-MM-DD")
-            : "";
-
-          if (d.f_nacimiento) validarEdadNuevoPasajero(); // si aplica
-
-          if (d.sexo != null) {
-            document.getElementById("sexoMasculinoRem").checked = d.sexo === 1;
-            document.getElementById("sexoFemeninoRem").checked = d.sexo !== 1;
-          } else {
-            document.getElementById("sexoMasculinoRem").checked = false;
-            document.getElementById("sexoFemeninoRem").checked = false;
-          }
-        } else {
-          document.getElementById("nombresRem").value = "";
-          document.getElementById("apellidoPaternoRem").value = "";
-          document.getElementById("apellidoMaternoRem").value = "";
-          document.getElementById("correoRem").value = "";
-          document.getElementById("telefonoRem").value = "";
-          document.getElementById("fechaNacimientoRem").value = "";
-          document.getElementById("sexoMasculinoRem").checked = false;
-          document.getElementById("sexoFemeninoRem").checked = false;
+        if (!tipoDoc) {
+          toastr.warning("El tipo de documento es obligatorio", "MENSAJE DEL SISTEMA");
+          return;
         }
-      })
-      .catch(() =>
-        toastr.error("No se ha podido conectar con el servidor", "ERROR")
-      );
-  }
-}
+
+        if (tipoDoc && (numDoc.length == 8 || numDoc.length == 12)) {
+          fetch(`/ecommerce/home/api/get_persona_data?tipoDoc=${encodeURIComponent(tipoDoc)}&numDoc=${encodeURIComponent(numDoc)}`)
+            .then((r) => r.json())
+            .then((json) => {
+              if (json.Status === "success") {
+                const d = json.data;
+                document.getElementById("nombresRem").value = d.nombre || d.nombres || "";
+                document.getElementById("apellidoPaternoRem").value = d.apellidoPaterno || d.ape_paterno || "";
+                document.getElementById("apellidoMaternoRem").value = d.apellidoMaterno || d.ape_materno || "";
+                document.getElementById("correoRem").value = d.email || "";
+                document.getElementById("telefonoRem").value = d.telefono || "";
+                document.getElementById("fechaNacimientoRem").value = d.f_nacimiento
+                  ? moment(d.f_nacimiento).format("YYYY-MM-DD")
+                  : "";
+
+                if (d.f_nacimiento) validarEdadNuevoPasajero(); // si aplica
+
+                if (d.sexo != null) {
+                  document.getElementById("sexoMasculinoRem").checked = d.sexo === 1;
+                  document.getElementById("sexoFemeninoRem").checked = d.sexo !== 1;
+                } else {
+                  document.getElementById("sexoMasculinoRem").checked = false;
+                  document.getElementById("sexoFemeninoRem").checked = false;
+                }
+              } else {
+                document.getElementById("nombresRem").value = "";
+                document.getElementById("apellidoPaternoRem").value = "";
+                document.getElementById("apellidoMaternoRem").value = "";
+                document.getElementById("correoRem").value = "";
+                document.getElementById("telefonoRem").value = "";
+                document.getElementById("fechaNacimientoRem").value = "";
+                document.getElementById("sexoMasculinoRem").checked = false;
+                document.getElementById("sexoFemeninoRem").checked = false;
+              }
+            })
+            .catch(() =>
+              toastr.error("No se ha podido conectar con el servidor", "ERROR")
+            );
+        }
+      }
 
 
 
-      
+
     });
   </script>
   <script src="{{ url_for('static', filename='js/jquery.min.js')}}"></script>
