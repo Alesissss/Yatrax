@@ -168,6 +168,8 @@ DROP PROCEDURE IF EXISTS SP_INSERTAR_RECLAMO;
 DROP PROCEDURE IF EXISTS SP_MODIFICAR_RECLAMO;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_RECLAMO;
 
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_REEMBOLSO;
+
 -- Eliminar tablas si existen
 DROP TABLE IF EXISTS pais_sucursal;
 DROP TABLE IF EXISTS conf_general;
@@ -1856,6 +1858,10 @@ VALUES ('factura', 1, 'alexis@gmail.com');
 
 INSERT INTO `tipo_metodopago` (`nombre`, `estado`, `usuario`)
 VALUES ('Efectivo', 1, 'alexis@gmail.com');
+INSERT INTO `tipo_metodopago` (`nombre`, `estado`, `usuario`)
+VALUES ('Tarjeta', 1, 'alexis@gmail.com');
+INSERT INTO `tipo_metodopago` (`nombre`, `estado`, `usuario`)
+VALUES ('Billetera virtual', 1, 'alexis@gmail.com');
 
 INSERT INTO `metodo_pago`
 (`nombre`, `logo`, `estado`, `id_tipo_metodoPago`, `qr`, `usuario`)
@@ -1865,10 +1871,21 @@ VALUES
 '/static/img/efectivo.png',
 1,
 1,
-'/static/img/efectivo.png',
+null,
 'alexis@gmail.com'
 );
 
+INSERT INTO `metodo_pago`
+(`nombre`, `logo`, `estado`, `id_tipo_metodoPago`, `qr`, `usuario`)
+VALUES
+(
+'Tarjeta de Credito',
+'/static/img/efectivo.png',
+1,
+1,
+null,
+'alexis@gmail.com'
+);
 -- Crear procedimiento SP_REGISTRAR_PERSONAL_INCIDENCIA
 DELIMITER $$
 
@@ -6465,6 +6482,7 @@ BEGIN
     DECLARE cTipoComprobante INT;
     DECLARE cMetodoPago INT;
     DECLARE cPasaje INT;
+    DECLARE cReembolso INT;
 
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -6474,11 +6492,14 @@ BEGIN
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
-    -- Validaciones
+    -- Validaciones de existencia
     SELECT COUNT(*) INTO cCliente FROM cliente WHERE id = P_ID_CLIENTE;
     SELECT COUNT(*) INTO cTipoComprobante FROM tipo_comprobante WHERE idTipoComprobante = P_ID_TIPO_COMPROBANTE;
     SELECT COUNT(*) INTO cMetodoPago FROM metodo_pago WHERE id = P_ID_METODO_PAGO;
     SELECT COUNT(*) INTO cPasaje FROM pasaje WHERE id = P_ID_PASAJE;
+
+    -- Validación de reembolso duplicado
+    SELECT COUNT(*) INTO cReembolso FROM reembolso WHERE idPasaje = P_ID_PASAJE;
 
     IF cCliente = 0 THEN
         SET @MSJ2 = 'El cliente no existe';
@@ -6488,6 +6509,8 @@ BEGIN
         SET @MSJ2 = 'El método de pago no existe';
     ELSEIF cPasaje = 0 THEN
         SET @MSJ2 = 'El pasaje no existe';
+    ELSEIF cReembolso > 0 THEN
+        SET @MSJ2 = 'Ya se ha realizado una solicitud de reembolso para este pasaje';
     ELSE
         INSERT INTO reembolso (
             numeroComprobante, monto, fecha,
@@ -6502,3 +6525,4 @@ BEGIN
 END $$
 
 DELIMITER ;
+

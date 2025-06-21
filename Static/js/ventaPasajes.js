@@ -9,7 +9,7 @@ const CONFIG = {
     RUTAS: {
         BUSCAR_VIAJES: '/ecommerce/home/buscarViajes',
         OBTENER_RUTAS: '/ecommerce/home/GetRutasConcatenadas',
-        RENDERIZAR_ITINERARIO: '/ecommerce/home/renderizar_itinerario',
+        RENDERIZAR_ITINERARIO: '/ecommerce/home/renderizar_itinerario', 
         OBTENER_DISENO_VEHICULO: '/ecommerce/home/obtener_diseno_vehiculo',
         API_PERSONA: '/ecommerce/home/api/get_persona_data',
         API_SUNAT: '/ecommerce/home/api/get_persona_data',
