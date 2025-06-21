@@ -526,7 +526,7 @@
     });
     document.addEventListener("DOMContentLoaded", () => {
 
-
+    const enTransaccion = document.getElementById("enTransaccion");
 
       // Variables para el modal
       let operacionSeleccionada = null;
@@ -588,6 +588,10 @@
 
       // Función para abrir modal con la operación seleccionada
       function abrirModalValidacion(operacion, boton) {
+        if (enTransaccion.value == 1){
+          toastr.warning("Ya se encuentra en una transacción el pasaje", "MENSAJE DEL SISTEMA");
+          return;
+        }
         operacionSeleccionada = operacion;
         botonSeleccionado = boton;
 
