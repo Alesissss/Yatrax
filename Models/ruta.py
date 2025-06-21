@@ -67,7 +67,7 @@ class Ruta:
         except Exception as e:
             # Si algo falla, hacemos un rollback
             conexion.conn.rollback()
-            return {'@MSJ': '', '@MSJ2': f'Error al ejecutar la transacción de registro de ruta: {repr(e)}'}
+            return {'@MSJ': '', '@MSJ2': f'Error al ejecutar la transacción de registro de ruta: {str(e)}'}
 
         finally:
             # Cerramos la conexión
@@ -105,7 +105,7 @@ class Ruta:
         except Exception as e:
             # Si algo falla, hacemos un rollback
             conexion.conn.rollback()
-            return {'@MSJ': '', '@MSJ2': f'Error al ejecutar la transacción de registro de ruta: {repr(e)}'}
+            return {'@MSJ': '', '@MSJ2': f'Error al ejecutar la transacción de registro de ruta: {str(e)}'}
 
         finally:
             # Cerramos la conexión

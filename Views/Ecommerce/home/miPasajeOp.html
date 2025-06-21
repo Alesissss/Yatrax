@@ -457,8 +457,8 @@
 
             <div id="datosCambioRuta" style="display: none;">
               {{ datos.contenido_venta | safe }}
+              itinerario-regreso
             </div>
-
 
 
             <!-- Contenido para otras operaciones -->
@@ -728,7 +728,21 @@ document.getElementById("btnGuardarReembolso").addEventListener("click", () => {
   });
 </script>
   <script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+      // Siempre deshabilitar los campos itinerario-regreso y fecha_vuelta si existen
+      const itinerarioRegreso = document.getElementById('itinerario-regreso');
+      if (itinerarioRegreso) {
+        itinerarioRegreso.disabled = true;
+      }
+      const fecha_vuelta = document.getElementById('fecha_vuelta');
+      if (fecha_vuelta) {
+        fecha_vuelta.disabled = false;
+      }
+    });
     document.addEventListener("DOMContentLoaded", () => {
+
+
 
       // Variables para el modal
       let operacionSeleccionada = null;
@@ -878,15 +892,15 @@ document.getElementById("btnGuardarReembolso").addEventListener("click", () => {
 
           // Actualizar contenido según operación
           switch (operacion) {
-        case 'reembolso':
-          tituloOperacion.innerHTML = '<strong>Reembolso</strong>';
-          descripcionOperacion.textContent = 'Contenido específico para solicitar reembolso del pasaje.';
-          document.getElementById("datosReembolso").style.display = 'block';
-          break;
-        case 'convertir-libre':
-          tituloOperacion.innerHTML = '<strong>Convertir pasaje libre</strong>';
-          descripcionOperacion.textContent = 'Contenido específico para convertir a pasaje libre.';
-          break;
+            case 'reembolso':
+              tituloOperacion.innerHTML = '<strong>Reembolso</strong>';
+              descripcionOperacion.textContent = 'Contenido específico para solicitar reembolso del pasaje.';
+              document.getElementById("datosReembolso").style.display = 'block';
+              break;
+            case 'convertir-libre':
+              tituloOperacion.innerHTML = '<strong>Convertir pasaje libre</strong>';
+              descripcionOperacion.textContent = 'Contenido específico para convertir a pasaje libre.';
+              break;
           }
         }
       }
@@ -1088,68 +1102,68 @@ document.getElementById("btnGuardarReembolso").addEventListener("click", () => {
         });
       // ...dentro de tu script en miPasajeOp.html...
 
-function validarCodigo() {
-  const codigoIngresado = codigoPasajeInput.value.trim();
-  const codigoCorrecto = document.getElementById('pasCod').value;
+      function validarCodigo() {
+        const codigoIngresado = codigoPasajeInput.value.trim();
+        const codigoCorrecto = document.getElementById('pasCod').value;
 
-  if (codigoIngresado === '') {
-    codigoPasajeInput.classList.add('is-invalid');
-    return;
-  }
+        if (codigoIngresado === '') {
+          codigoPasajeInput.classList.add('is-invalid');
+          return;
+        }
 
-  if (codigoIngresado === codigoCorrecto) {
-    // Si la operación es reembolso, validar si el pasaje está dado de baja
-    if (operacionSeleccionada === 'reembolso') {
-      // Llama al backend para validar el estado del pasaje
-      fetch('/ecommerce/home/validarPasajeDadoBaja', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ numeroComprobante: document.getElementById("comprobante").value.trim() })
-      })
-      .then(r => r.json())
-      .then(json => {
-        if (json.Status === "success") {
-          // El pasaje está dado de baja, permitir continuar
-          modalValidacion.hide();
-          mostrarContenidoOperacion(operacionSeleccionada, botonSeleccionado);
+        if (codigoIngresado === codigoCorrecto) {
+          // Si la operación es reembolso, validar si el pasaje está dado de baja
+          if (operacionSeleccionada === 'reembolso') {
+            // Llama al backend para validar el estado del pasaje
+            fetch('/ecommerce/home/validarPasajeDadoBaja', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ numeroComprobante: document.getElementById("comprobante").value.trim() })
+            })
+              .then(r => r.json())
+              .then(json => {
+                if (json.Status === "success") {
+                  // El pasaje está dado de baja, permitir continuar
+                  modalValidacion.hide();
+                  mostrarContenidoOperacion(operacionSeleccionada, botonSeleccionado);
+                } else {
+                  // No cumple con las políticas de reembolso
+                  alertError.textContent = json.Msj || "No se cumple con las políticas de reembolso";
+                  alertError.classList.remove('d-none');
+                  codigoPasajeInput.classList.add('is-invalid');
+                }
+              })
+              .catch(() => {
+                alertError.textContent = "Error al validar el estado del pasaje";
+                alertError.classList.remove('d-none');
+                codigoPasajeInput.classList.add('is-invalid');
+              });
+          } else {
+            // Para otras operaciones, solo cerrar el modal y mostrar el contenido
+            modalValidacion.hide();
+            mostrarContenidoOperacion(operacionSeleccionada, botonSeleccionado);
+          }
         } else {
-          // No cumple con las políticas de reembolso
-          alertError.textContent = json.Msj || "No se cumple con las políticas de reembolso";
+          // Código incorrecto
+          intentosRestantes--;
+          intentosRestantesSpan.textContent = intentosRestantes;
+
           alertError.classList.remove('d-none');
           codigoPasajeInput.classList.add('is-invalid');
+          codigoPasajeInput.value = '';
+
+          if (intentosRestantes <= 0) {
+            setTimeout(() => {
+              modalValidacion.hide();
+              alert('Se ha alcanzado el máximo de intentos. Por favor, verifique su código de pasaje.');
+            }, 2000);
+          } else {
+            setTimeout(() => {
+              codigoPasajeInput.focus();
+            }, 100);
+          }
         }
-      })
-      .catch(() => {
-        alertError.textContent = "Error al validar el estado del pasaje";
-        alertError.classList.remove('d-none');
-        codigoPasajeInput.classList.add('is-invalid');
-      });
-    } else {
-      // Para otras operaciones, solo cerrar el modal y mostrar el contenido
-      modalValidacion.hide();
-      mostrarContenidoOperacion(operacionSeleccionada, botonSeleccionado);
-    }
-  } else {
-    // Código incorrecto
-    intentosRestantes--;
-    intentosRestantesSpan.textContent = intentosRestantes;
-
-    alertError.classList.remove('d-none');
-    codigoPasajeInput.classList.add('is-invalid');
-    codigoPasajeInput.value = '';
-
-    if (intentosRestantes <= 0) {
-      setTimeout(() => {
-        modalValidacion.hide();
-        alert('Se ha alcanzado el máximo de intentos. Por favor, verifique su código de pasaje.');
-      }, 2000);
-    } else {
-      setTimeout(() => {
-        codigoPasajeInput.focus();
-      }, 100);
-    }
-  }
-}
+      }
       // Función para validad edad del menor
       function validarEdadMenor() {
         const fechaNacimiento = document.getElementById(

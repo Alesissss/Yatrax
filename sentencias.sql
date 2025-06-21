@@ -171,6 +171,7 @@ DROP PROCEDURE IF EXISTS SP_ELIMINAR_RECLAMO;
 DROP PROCEDURE IF EXISTS SP_REGISTRAR_REEMBOLSO;
 
 -- Eliminar tablas si existen
+DROP TABLE IF EXISTS pais_sucursal;
 DROP TABLE IF EXISTS conf_general;
 DROP TABLE IF EXISTS reclamo;
 DROP TABLE IF EXISTS reembolso;
@@ -795,6 +796,16 @@ CREATE TABLE reembolso (
     FOREIGN KEY (idPasaje) REFERENCES pasaje (id)
 );
 
+-- crear tabla pais_sucursal
+CREATE TABLE pais_sucursal (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_pais INT NOT NULL,
+    id_conf_general INT NOT NULL,
+    nombre VARCHAR(255) NOT NULL,
+    abreviatura CHAR(3) NOT NULL,
+    FOREIGN KEY (id_pais) REFERENCES pais(id),
+    FOREIGN KEY (id_conf_general) REFERENCES conf_general(id)
+);
 
 INSERT INTO preguntas_frecuentes (pregunta, respuesta, estado, fecha_registro, usuario) VALUES ('¿Qué medios de pago
 aceptan para comprar pasajes en línea?','Aceptamos tarjetas de crédito y débito Visa, así como billeteras digitales como
@@ -4199,14 +4210,13 @@ BEGIN
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
-    UPDATE vehiculo
-    SET estado = 0
-    WHERE id = p_idVehiculo;
-
-    IF ROW_COUNT() = 0 THEN
-        SET @MSJ2 = 'No se encontró el vehículo para dar de baja';
-    ELSE
+    IF EXISTS (SELECT 1 FROM vehiculo WHERE id = p_idVehiculo) THEN   
+        UPDATE vehiculo
+        SET estado = 0
+        WHERE id = p_idVehiculo;
         SET @MSJ = 'Vehículo dado de baja correctamente';
+    ELSE
+        SET @MSJ2 = 'No se encontró el vehículo para dar de baja';
     END IF;
 END $$
 
