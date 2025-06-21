@@ -289,7 +289,11 @@ def mi_pasaje_operaciones():
     datos_recibidos = {
         "contenido_venta": renderizarCompra()
     }
-    return render_template('Ecommerce/home/miPasajeOp.html', datos=datos_recibidos)
+    TipoDocumentos=TipoDocumento.obtener_todos()
+    TipoMetodosPago = TipoMetodoPago.obtener_todos()
+    MetodoPagos = MetodoPago.obtener_todos()
+    TipoComprobantes = TipoComprobante.obtener_todos()
+    return render_template('Ecommerce/home/miPasajeOp.html', datos=datos_recibidos, TipoDocumento=TipoDocumentos, TipoMetodosPago=TipoMetodosPago, MetodosPagos=MetodoPagos, TipoComprobantes=TipoComprobantes)
 
 @homeClientes_bp.route('/seguimientoViaje')
 def seguimiento_viaje():
@@ -812,5 +816,44 @@ def validar_pasaje_dado_baja():
             "data": {},
             "Msj": f"Error al validar el pasaje: {repr(e)}"
         }), 500
+
+@homeClientes_bp.route("/registrarReembolso", methods=["POST"])
+def registrar_reembolso():
+    try:
+        # # Validar sesión activa
+        # if "cliente" not in session:
+        #     return jsonify({"Status": "error", "Msj": "Debe iniciar sesión para solicitar un reembolso"}), 401
+
+        data = request.get_json()
+        numero_comprobante = data.get("numeroComprobante")
+        motivo = data.get("motivo") or "Reembolso solicitado"
+        id_cliente = Cliente.obtener_id_por_numero_documento(data.get("numeroDoc"))
+        
+        id_metodo_pago = data.get("metodoPago")
+        id_tipo_comprobante = data.get("tipoComprobante")
+        id_pasaje = data.get("idPasaje")
+
+        # Validar campos requeridos
+        if not all([numero_comprobante, id_cliente, id_metodo_pago, id_tipo_comprobante, id_pasaje]):
+            return jsonify({"Status": "error", "Msj": "Faltan datos requeridos"}), 400
+
+        # Aquí puedes calcular el monto dinámicamente si es necesario
+        monto = 25.00  # ← cambiar si se requiere consultar de otra tabla
+
+        resultado = Reembolso.registrar(
+            numeroComprobante=numero_comprobante,
+            monto=monto,
+            idPasaje=id_pasaje,
+            idCliente=id_cliente["id"],
+            idTipoComprobante=id_tipo_comprobante,
+            idMetodoPago=id_metodo_pago
+        )
+
+        if resultado and resultado.get("@MSJ"):
+            return jsonify({"Status": "success", "Msj": resultado["@MSJ"]})
+        else:
+            return jsonify({"Status": "error", "Msj": resultado.get("@MSJ2", "Error desconocido al registrar")})
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Error interno: {str(e)}"}), 500
 
 # END REEMBOLSO
