@@ -7,32 +7,6 @@ from Models.personal_sancion import Personal_Sancion
 
 personal_bp = Blueprint('personal', __name__, url_prefix='/trabajadores/personal')
 
-# ERRORES 
-# Manejar errores 401 (Página no autorizada)
-@personal_bp.errorhandler(401)
-def error_401(error):
-    return render_template("error.html", error="Página no autorizada",error_code = 401), 401
-
-# Manejar errores 403 (Página no autorizada para este usuario)
-@personal_bp.errorhandler(403)
-def error_403(error):
-    return render_template("error.html", error="Página restringida",error_code = 403), 403
-
-# Manejar errores 404 (Página no encontrada)
-@personal_bp.errorhandler(404)
-def error_404(error):
-    return render_template("error.html", error="Página no encontrada",error_code = 404), 404
-
-# Manejar errores 500 (Error interno del servidor)
-@personal_bp.errorhandler(500)
-def error_500(error):
-    return render_template("error.html", error="Error interno del servidor",error_code = 500), 500
-
-# Manejar cualquier otro error genérico
-@personal_bp.errorhandler(Exception)
-def error_general(error):
-    return render_template("error.html", error="Ocurrió un error inesperado",error_code = 500), 500
-
 # RESTRICCIONES
 @personal_bp.before_request
 def verificar_sesion():
