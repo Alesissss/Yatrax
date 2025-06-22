@@ -252,6 +252,8 @@
               <input type="hidden" id="pasCod" value="" />
               <input type="hidden" id="pasEstTran" value="" />
               <input type="hidden" id="pasEstViaje" value="" />
+              <input type="hidden" id="detViajeAsiento" value="" />
+              <input type="hidden" id="pasId" value="" />
             </div>
           </div>
 
@@ -439,18 +441,20 @@
                       <input class="form-check-input" type="radio" name="sexoMenor" id="sexoMenorF" value="F" />
                       <label class="form-check-label" for="sexoMenorF">Femenino</label>
                     </div>
+
                   </div>
                 </div>
               </div>
-
-
-
 
               <!-- Checkbox de menor de edad - Solo para transferencia -->
               <div class="form-check mt-3">
                 <input class="form-check-input" type="checkbox" id="esMenor" disabled />
                 <label class="form-check-label disabled" for="esMenor" style="color: rgb(0, 0, 0)">Es menor de
                   edad</label>
+              </div>
+
+              <div class="d-flex justify-content-center">
+                <button class="btn btn-primary mt-3" id="btnPagarTransferencia">Pagar</button>
               </div>
 
             </div>
@@ -532,7 +536,6 @@
                             </div>
                           </div>
                         </div>
-
                       </div>
                     </div>
                   </div>
@@ -601,10 +604,6 @@
                   Estoy de acuerdo con el cargo extra por la transferencia de pasaje
                 </label>
               </div>
-            </div>
-
-            <div class="d-flex justify-content-center">
-              <button class="btn btn-primary mt-3" id="btnPagar">Pagar</button>
             </div>
           </div>
         </div>
@@ -727,12 +726,8 @@
             toastr.error("Error al registrar el reembolso: " + err.message, "ERROR");
           });
       });
-
-
-
     });
-  </script>
-  <script>
+
     document.addEventListener("DOMContentLoaded", function () {
       const hoy = new Date().toISOString().split('T')[0];
       document.getElementById("fechaNacimientoMenor").setAttribute("max", hoy);
@@ -838,44 +833,6 @@
           codigoPasajeInput.focus();
         }, 500);
       }
-
-      // Función para validar código
-      // function validarCodigo() {
-      //   const codigoIngresado = codigoPasajeInput.value.trim();
-      //   const codigoCorrecto = document.getElementById('pasCod').value;
-
-      //   if (codigoIngresado === '') {
-      //     codigoPasajeInput.classList.add('is-invalid');
-      //     return;
-      //   }
-
-      //   if (codigoIngresado === codigoCorrecto) {
-      //     // Código correcto - cerrar modal y mostrar contenido
-      //     modalValidacion.hide();
-      //     mostrarContenidoOperacion(operacionSeleccionada, botonSeleccionado);
-      //   } else {
-      //     // Código incorrecto
-      //     intentosRestantes--;
-      //     intentosRestantesSpan.textContent = intentosRestantes;
-
-      //     alertError.classList.remove('d-none');
-      //     codigoPasajeInput.classList.add('is-invalid');
-      //     codigoPasajeInput.value = '';
-
-      //     if (intentosRestantes <= 0) {
-      //       // Se acabaron los intentos - cerrar modal automáticamente
-      //       setTimeout(() => {
-      //         toastr.warning('Se ha alcanzado el máximo de intentos. Por favor, verifique su código de pasaje.', 'MENSAJE DEL SISTEMA');
-      //         modalValidacion.hide();
-      //       }, 2000);
-      //     } else {
-      //       // Aún hay intentos - enfocar input
-      //       setTimeout(() => {
-      //         codigoPasajeInput.focus();
-      //       }, 100);
-      //     }
-      //   }
-      // }
 
       // Función para mostrar contenido según operación
       function mostrarContenidoOperacion(operacion, botonActivo) {
@@ -1021,7 +978,8 @@
               document.getElementById("pasCod").value = data.codigo_pasaje;
               document.getElementById("pasEstTran").value = data.estado_transaccion;
               document.getElementById("pasEstViaje").value = data.estado_viaje;
-
+              document.getElementById("detViajeAsiento").value = data.idDetalleViajeAsiento;
+              document.getElementById("pasId").value = data.id;
               // Mostrar el contenido de la operación
               contenidoOperacion.style.display = "block";
             } else
@@ -1511,8 +1469,81 @@
         }
       }
 
+      // Función para realizar la transferencia de pasaje
+      function realizarTransferencia() {
+        const esMenorEdad = document.getElementById("esMenor").checked;
+        const conMenor = document.getElementById("conMenor").checked;
 
+        if (esMenorEdad) {
+          viajeBrazo = 0,
+            esMenor = 1
+        }
 
+        if (conMenor) {
+          viajeBrazo = 1,
+            esMenor = 0
+        }
+
+        // 1) Obtener valores del DOM
+        const pasaje = {
+          id: document.getElementById("pasId").value,
+          idDetalleViajeAsiento: document.getElementById("detViajeAsiento").value
+        }
+
+        const persona1 = {
+          nombre: document.getElementById("nombres")?.value || "",
+          ape_paterno: document.getElementById("apellidoPaterno")?.value || "",
+          ape_materno: document.getElementById("apellidoMaterno")?.value || "",
+          telefono: document.getElementById("telefono")?.value || "",
+          email: document.getElementById("correo")?.value || "",
+          f_nacimiento: document.getElementById("fechaNacimientoNuevo")?.value || "",
+          sexo: document.querySelector('input[name="sexoNuevo"]:checked')?.value || null,
+          nombreDocumento: document.getElementById("tipoDocNuevo")?.value || "",
+          numero_documento: document.getElementById("numeroDocNuevo")?.value || "",
+          esMenorEdad: esMenor,
+          viajeEnBrazos: viajeBrazo
+        };
+
+        const persona2 = {
+          nombre: document.getElementById("nombresMenor")?.value || "",
+          ape_paterno: document.getElementById("apellidoPaternoMenor")?.value || "",
+          ape_materno: document.getElementById("apellidoMaternoMenor")?.value || "",
+          telefono: "",  // si no aplica, mantener cadena vacía
+          email: "",
+          f_nacimiento: document.getElementById("fechaNacimientoMenor")?.value || "",
+          sexo: document.querySelector('input[name="sexoMenor"]:checked')?.value || null,
+          nombreDocumento: document.getElementById("tipoDocMenor")?.value || "",
+          numero_documento: document.getElementById("numeroDocMenor")?.value || "",
+          esMenorEdad: esMenor,
+          viajeEnBrazos: viajeBrazo
+        };
+
+        // 2) Envío via Fetch con las claves que espera Flask
+        fetch("/ecommerce/home/realizarTransferencia", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pasaje, persona1, persona2 })
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.Status === "success") {
+              toastr.success(data.Msj, "ÉXITO");
+            } else {
+              toastr.error(data.Msj, "ERROR");
+            }
+          })
+          .catch(() => {
+            toastr.error("No se ha podido conectar con el servidor", "ERROR");
+          });
+      }
+
+      // 3) Listener defensivo
+      const btn = document.getElementById("btnPagarTransferencia");
+      if (btn) {
+        btn.addEventListener("click", realizarTransferencia);
+      } else {
+        console.warn("Botón btnPagarTransferencia no encontrado");
+      }
 
     });
   </script>

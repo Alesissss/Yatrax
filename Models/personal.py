@@ -40,12 +40,12 @@ class Personal:
 
     # Registrar un nuevo personal
     @classmethod
-    def registrar(cls, nombre, imagen, estado, idTipoPersonal, usuario):
+    def registrar(cls, nombre, apePat, apeMat, imagen, estado, idTipoPersonal, usuario):
         conexion = bd.Conexion()
         try:
 
             # Llamar al procedimiento almacenado para registrar el personal
-            conexion.ejecutar("CALL SP_REGISTRAR_PERSONAL(%s, %s, %s, %s, %s);", (nombre, imagen, estado, idTipoPersonal, usuario))
+            conexion.ejecutar("CALL SP_REGISTRAR_PERSONAL(%s, %s, %s, %s, %s, %s, %s);", (nombre, apePat, apeMat, imagen, estado, idTipoPersonal, usuario))
 
             # Obtener mensajes de salida
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
@@ -55,11 +55,11 @@ class Personal:
 
     # Editar un registro de personal
     @classmethod
-    def editar(cls, id, nombre, imagen, estado, idTipoPersonal):
+    def editar(cls, id, nombre, apePat, apeMat, imagen, estado, idTipoPersonal):
         conexion = bd.Conexion()
         try:
             # Llamar al procedimiento almacenado para editar el personal
-            conexion.ejecutar("CALL SP_EDITAR_PERSONAL(%s, %s, %s, %s, %s);", (id, nombre, imagen, estado, idTipoPersonal))
+            conexion.ejecutar("CALL SP_EDITAR_PERSONAL(%s, %s, %s, %s, %s, %s, %s);", (id, nombre, apePat, apeMat, imagen, estado, idTipoPersonal))
 
             # Obtener mensajes de salida
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")

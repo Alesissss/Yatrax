@@ -409,6 +409,8 @@ def get_Personal():
 def registrar_personal():
     try:
         nombre = request.form.get("nombre").strip()
+        apePat = request.form.get("apePat").strip()
+        apeMat = request.form.get("apeMat").strip()
         estado = request.form.get("estado")
         idTipoPersonal = request.form.get("idTipoPersonal")
         imagen = request.files.get("imagen")  # Recibir la imagen (archivo)
@@ -417,12 +419,13 @@ def registrar_personal():
         if imagen:
             imagen_path = os.path.join("Static/img/personal", imagen.filename)
             imagen.save(imagen_path)
+            imagen_path = '/' + imagen_path
         else:
             imagen_path = ""
 
         usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
 
-        mensajes = Personal.registrar(nombre, imagen_path, estado, idTipoPersonal, usuario_actual)
+        mensajes = Personal.registrar(nombre, apePat, apeMat, imagen_path, estado, idTipoPersonal, usuario_actual)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 
@@ -443,6 +446,8 @@ def editar_personal(id):
         personal = Personal.obtener_por_id(id)
         if request.method == 'POST':
             nombre = request.form.get("nombre").strip()
+            apePat = request.form.get("apePat").strip()
+            apeMat = request.form.get("apeMat").strip()
             estado = request.form.get("estado")
             idTipoPersonal = request.form.get("idTipoPersonal")
             imagen = request.files.get("imagen")  # Recibir la imagen (archivo)
@@ -451,12 +456,13 @@ def editar_personal(id):
             if imagen:
                 imagen_path = os.path.join("Static/img/personal", imagen.filename)
                 imagen.save(imagen_path)
+                imagen_path = '/' + imagen_path
             else:
                 imagen_path = personal['imagen']  # Mantener la imagen actual si no se sube una nueva
 
             usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
 
-            mensajes = Personal.editar(id, nombre, imagen_path, estado, idTipoPersonal)
+            mensajes = Personal.editar(id, nombre, apePat, apeMat, imagen_path, estado, idTipoPersonal)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
