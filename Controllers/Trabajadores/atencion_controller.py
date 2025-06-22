@@ -51,7 +51,7 @@ def Menu_Reembolso():
 @atencion_bp.route('/GetData_Reservas')
 def listarReservas():
     try:
-        reservas = Pasaje.obtener_todos()
+        reservas = Pasaje.obtener_todas_reservas()
 
         return jsonify({"Status": "success","data": reservas})
     except Exception as e:
