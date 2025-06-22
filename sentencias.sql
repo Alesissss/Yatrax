@@ -747,7 +747,7 @@ CREATE TABLE pasaje(
     enTransaccion TINYINT NULL DEFAULT 0, -- 1: en transacción, 0: no en transacción
     idPasaje INT NULL, -- Para operaciones con pasajes
     fechaInicioReprogramacion DATETIME NULL,
-    fechaFinReprogramacion DATETIME NULL
+    fechaFinReprogramacion DATETIME NULL,
     FOREIGN KEY (idDetalleViajeAsiento) REFERENCES detalle_viaje_asiento(id),
     FOREIGN KEY (idVenta) REFERENCES venta(id)
 );
