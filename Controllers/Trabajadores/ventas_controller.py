@@ -509,6 +509,7 @@ def nuevo_servicio():
             nombre = request.form.get('nombre').strip()
             descripcion = request.form.get('descripcion').strip()
             estado = request.form.get('estado')
+            color = request.form.get("color")
             microservicios_json = request.form.get("microservicios")
             microservicios = json.loads(microservicios_json) if microservicios_json else []
             usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
@@ -526,7 +527,7 @@ def nuevo_servicio():
                 imagen_file.save(ruta_guardado)
                 imagen_path = ruta_guardado
 
-            mensajes = Servicio.registrar(nombre, descripcion, estado, usuario_actual, ruta_imagen, microservicios)
+            mensajes = Servicio.registrar(nombre, descripcion, estado, usuario_actual, ruta_imagen, microservicios,color)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
@@ -573,6 +574,7 @@ def editar_servicio(idServicio):
             nombre = request.form.get('nombre').strip()
             descripcion = request.form.get('descripcion').strip()
             estado = request.form.get('estado')
+            color = request.form.get("color")
             microservicios_json = request.form.get("microservicios")
             microservicios = json.loads(microservicios_json) if microservicios_json else []
             usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
@@ -593,7 +595,7 @@ def editar_servicio(idServicio):
                 servicio = Servicio.obtener_uno(idServicio)
                 ruta_imagen = servicio.get("imagen", "")
 
-            mensajes = Servicio.editar(idServicio, nombre, descripcion, estado, ruta_imagen, usuario_actual, microservicios)
+            mensajes = Servicio.editar(idServicio, nombre, descripcion, estado, ruta_imagen, usuario_actual, microservicios,color)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 

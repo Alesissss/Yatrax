@@ -209,7 +209,9 @@
                     name: "color",
                     render: function (data, type, row) {
                         if (data && data !== "") {
-                            return `<div class = "col-md-12 m-1" style ="background-color:${data}";></div>`;
+                            return `<div class = "m-1 w-100 h-100" style ="background-color:${data}; color:${data}">
+                                    .
+                                </div>`;
                         } else {
                             return `<span class="badge bg-secondary">Sin color</span>`;
                         }
