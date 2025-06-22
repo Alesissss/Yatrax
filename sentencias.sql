@@ -6527,3 +6527,26 @@ END $$
 
 DELIMITER ;
 
+DELIMITER $$
+
+CREATE PROCEDURE SP_CAMBIAR_ESTADO_REEMBOLSO(
+    IN p_id_reembolso INT,
+    IN p_estado VARCHAR(20),
+    OUT MSJ VARCHAR(255),
+    OUT MSJ2 VARCHAR(255)
+)
+BEGIN
+    IF EXISTS (SELECT 1 FROM reembolso WHERE id = p_id_reembolso) THEN
+        UPDATE reembolso
+        SET estado = p_estado
+        WHERE id = p_id_reembolso;
+
+        SET MSJ = 'Estado actualizado correctamente';
+        SET MSJ2 = NULL;
+    ELSE
+        SET MSJ = NULL;
+        SET MSJ2 = 'El reembolso no existe';
+    END IF;
+END $$
+
+DELIMITER ;

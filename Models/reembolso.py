@@ -32,6 +32,7 @@ class Reembolso:
         try:
             reembolsos = conexion.obtener("""
                SELECT 
+r.id,
 pa.numeroComprobante,
 CONCAT(pas.ape_paterno,' ', pas.ape_materno,' ', pas.nombre) as nombreCompleto,
 a.nombre as asiento,
@@ -103,16 +104,14 @@ INNER JOIN asiento a on dva.idAsiento=a.id
             conexion.cerrar()
 
     @classmethod
-    def actualizar_estado(cls, id_reembolso, estado):
+    def cambiar_estado(cls, id_reembolso, nuevo_estado):
         conexion = bd.Conexion()
         try:
             conexion.ejecutar(
-                "UPDATE reembolso SET estado ='%s' WHERE id = %s",
-                (estado, id_reembolso)
+                "CALL SP_CAMBIAR_ESTADO_REEMBOLSO(%s, %s, @MSJ, @MSJ2);",
+                (id_reembolso, nuevo_estado)
             )
-            return True
-        except Exception as e:
-            print(f"Error al actualizar el estado del reembolso: {e}")
-            return False
+            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
+            return resultado[0]  
         finally:
             conexion.cerrar()
