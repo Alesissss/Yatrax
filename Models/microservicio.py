@@ -75,3 +75,19 @@ class MicroServicio:
             print("Ha ocurrido un error al eliminar un servicio: " + repr(e))
         finally:
             conexion.cerrar()
+    @classmethod
+    def obtenerPorServicio(cls,id):
+        conexion = bd.Conexion()
+        try:
+            datos_microServicio = conexion.obtener("""
+            SELECT 
+                m.id as ms_id,
+                m.nombre as ms_nombre
+            FROM servicio s
+            INNER JOIN servicio_microservicio sm ON s.id = sm.idServicio
+            INNER JOIN microservicio m ON m.id = sm.idMicroservicio
+            WHERE s.id = %s AND m.estado = 1;
+                             """,(id,))
+            return datos_microServicio
+        finally:
+            conexion.cerrar()

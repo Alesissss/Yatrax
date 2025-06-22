@@ -169,6 +169,7 @@ DROP PROCEDURE IF EXISTS SP_MODIFICAR_RECLAMO;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_RECLAMO;
 
 DROP PROCEDURE IF EXISTS SP_REGISTRAR_REEMBOLSO;
+DROP PROCEDURE IF EXISTS SP_CAMBIAR_ESTADO_REEMBOLSO;
 
 -- Eliminar tablas si existen
 DROP TABLE IF EXISTS pais_sucursal;
@@ -284,6 +285,7 @@ CREATE TABLE servicio (
     nombre VARCHAR(50) NOT NULL,
     descripcion VARCHAR(255) NOT NULL,
     estado BOOLEAN NOT NULL,
+    color varchar(255) NOT NULL,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NOT NULL,
     imagen TEXT
@@ -941,11 +943,11 @@ INSERT INTO tipo_documento (nombre, abreviatura, estado, usuario) VALUES ('CARNE
 -- INSERT SERVICIO
 insert into servicio values (1,'Premium','Los autobuses más modernos y lujosos del mercado. Asientos cama,
 entretenimiento a bordo, snacks incluidos, aire acondicionado y cargadores USB. Ideal para viajes de largo
-trayecto.',1,'2025-05-25 19:30:00','Alexis','/Static/img/servicios/busPremium.png');
+trayecto.',1,'2025-05-25 19:30:00','#BD2130','Alexis','/Static/img/servicios/busPremium.png');
 insert into servicio values (2,'Económico','Autobuses cómodos y seguros a precios accesibles. Pensado para usuarios que
-priorizan economía sin perder calidad.',1,'2025-05-25 19:32:00','Alexis','/Static/img/servicios/busEconomico.png');
+priorizan economía sin perder calidad.',1,'2025-05-25 19:32:00','#BD2130','Alexis','/Static/img/servicios/busEconomico.png');
 insert into servicio values (3,'Exprés','Servicios rápidos con pocas paradas. Unidades modernas y seguras para viajeros
-que buscan llegar en el menor tiempo posible.',1,'2025-05-25 19:40:00','Alexis','/Static/img/servicios/busExpress.png');
+que buscan llegar en el menor tiempo posible.',1,'2025-05-25 19:40:00','#BD2130','Alexis','/Static/img/servicios/busExpress.png');
 
 -- INSERT MARCA
 INSERT INTO `marca` (`id`,`nombre`, `logo`, `estado`, `fecha_registro`, `usuario`)
@@ -5170,7 +5172,8 @@ CREATE PROCEDURE SP_INSERTAR_SERVICIO(
     IN P_DESCRIPCION VARCHAR(255),
     IN P_ESTADO BOOLEAN,
     IN P_USUARIO VARCHAR(100),
-    IN P_IMAGEN TEXT
+    IN P_IMAGEN TEXT,
+    IN P_COLOR VARCHAR(255)
 )
 BEGIN
     DECLARE existe_nombre INT;
@@ -5189,9 +5192,9 @@ BEGIN
 
     IF existe_nombre = 0 THEN
         INSERT INTO servicio (
-            nombre, descripcion, estado, usuario, imagen
+            nombre, descripcion, estado, usuario, imagen, color
         ) VALUES (
-            P_NOMBRE, P_DESCRIPCION, P_ESTADO, P_USUARIO, P_IMAGEN
+            P_NOMBRE, P_DESCRIPCION, P_ESTADO, P_USUARIO, P_IMAGEN, P_COLOR
         );
 
         SET @MSJ = 'Se registró correctamente el servicio';
@@ -5206,7 +5209,8 @@ CREATE PROCEDURE SP_ACTUALIZAR_SERVICIO(
     IN P_NOMBRE VARCHAR(50),
     IN P_DESCRIPCION VARCHAR(255),
     IN P_ESTADO BOOLEAN,
-    IN P_IMAGEN TEXT
+    IN P_IMAGEN TEXT,
+    IN P_COLOR VARCHAR(255)
 )
 BEGIN
     DECLARE existe_nombre INT;
@@ -5228,7 +5232,8 @@ BEGIN
         SET nombre = P_NOMBRE,
             descripcion = P_DESCRIPCION,
             estado = P_ESTADO,
-            imagen = P_IMAGEN
+            imagen = P_IMAGEN,
+            color = P_COLOR
         WHERE id = P_ID;
 
         SET @MSJ = 'Se modificó correctamente el servicio';
@@ -6532,3 +6537,26 @@ END $$
 
 DELIMITER ;
 
+DELIMITER $$
+
+CREATE PROCEDURE SP_CAMBIAR_ESTADO_REEMBOLSO(
+    IN p_id_reembolso INT,
+    IN p_estado VARCHAR(20),
+    OUT MSJ VARCHAR(255),
+    OUT MSJ2 VARCHAR(255)
+)
+BEGIN
+    IF EXISTS (SELECT 1 FROM reembolso WHERE id = p_id_reembolso) THEN
+        UPDATE reembolso
+        SET estado = p_estado
+        WHERE id = p_id_reembolso;
+
+        SET MSJ = 'Estado actualizado correctamente';
+        SET MSJ2 = NULL;
+    ELSE
+        SET MSJ = NULL;
+        SET MSJ2 = 'El reembolso no existe';
+    END IF;
+END $$
+
+DELIMITER ;
