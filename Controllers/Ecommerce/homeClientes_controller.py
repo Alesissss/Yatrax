@@ -33,7 +33,10 @@ from Models.ruta import Ruta
 from Models.tipoMetodoPago import TipoMetodoPago
 from Models.asiento import Asiento
 from Models.venta import Venta
+from Models.reserva import Reserva
 from Models.conf_general import ConfGeneral
+from Models.metodo_pago import MetodoPago
+from Models.tipoMetodoPago import TipoMetodoPago
 
 homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/home')
 
@@ -129,6 +132,44 @@ def registrar_venta():
         conn.close()
 
 # END PROTOTIPO
+# REGION RESERVA
+
+@homeClientes_bp.route("/obtenerMetodoPagoxID/<int:idMetodo>")
+def obtenerMetodoPagoxID(idMetodo):
+    try:
+        resultado = MetodoPago.obtener_por_id(idMetodo)
+        return resultado["nombre"].lower()
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": "Error inesperado:"+repr(e)})
+    
+@homeClientes_bp.route("/obtenerTipoMetodoxID/<int:idTipoMetodo>")
+def obtenerTipoMetodoPagoxID(idTipoMetodo):
+    try:
+        resultado = TipoMetodoPago.obtener_por_id(idTipoMetodo)
+        return resultado["nombre"].lower()
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": "Error inesperado:"+repr(e)})
+
+@homeClientes_bp.route("/procesar_reserva", methods=["POST"])
+def procesar_reserva():
+    try:
+        data = request.get_json()
+
+        contacto = data.get("contacto", {})
+        pago = data.get("pago", {})
+        ventas = data.get("ventas", {})
+
+        resultado = Reserva.registrar_operacion(contacto, pago, ventas)
+
+        if resultado["status"] == 1:
+            return jsonify({"Status": "success", "codigo_confirmacion": f"VENTA-{resultado['id_venta']}"})
+        else:
+            return jsonify({"Status": "error", "Msj": resultado["msg"]})
+
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Error inesperado: {repr(e)}"})
+
+# END REGION
 
 def renderizarCompra():
     herramientas = Herramienta.obtener_todos()
@@ -363,12 +404,12 @@ def get_persona_data():
                 lambda: api.get_person(num_doc)
             ],
             'CE': [
+                lambda: api_pasajero.obtener_por_numero_documento(num_doc),
                 lambda: api.get_person(num_doc),
-                lambda: api_pasajero.obtener_por_numero_documento(num_doc)
             ],
             'RUC': [
-                lambda: api.get_company(num_doc),
-                lambda: api_clientes.obtener_por_numero_documento(num_doc)
+                lambda: api_clientes.obtener_por_numero_documento(num_doc),
+                lambda: api.get_company(num_doc)
             ]
         }
 
@@ -626,11 +667,28 @@ def procesar_pago():
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Error inesperado: {repr(e)}"})
 
+@homeClientes_bp.route("/realizarTransferencia", methods=["POST"])
+def realizar_transferencia():
+    try:
+        payload    = request.get_json() or {}
+        id_pasaje  = payload.get("pasaje", {})
+        persona1   = payload.get("persona1", {})
+        persona2   = payload.get("persona2", {})
 
+        if not id_pasaje:
+            return jsonify({"Status":"error", "Msj":"Falta el ID del pasaje"})
 
+        resultado = Pasaje.realizarTransferencia(id_pasaje, persona1, persona2)
 
+        # Tu método devuelve {"msj": ..., "msj2": ...}
+        if resultado.get("msj"):
+            return jsonify({"Status":"success", "Msj": resultado["msj"]})
+        else:
+            return jsonify({"Status":"error",   "Msj": resultado.get("msj2", "Error desconocido")})
 
-
+    except Exception as e:
+        return jsonify({"Status":"error", "Msj": f"Error inesperado: {e}"})
+    
 # END REGION COMPRA PASAJE
 
 # REGION RUTAS SEGUIMIENTO

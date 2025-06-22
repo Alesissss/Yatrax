@@ -12,23 +12,29 @@
 
     .btn-success:hover {
         background-color: #1e7e34 !important;
-        transform: scale(1.1);
+        transform: scale(1.05);
         transition: all 0.2s;
     }
 
     .btn-danger:hover {
         background-color: #bd2130 !important;
-        transform: scale(1.1);
+        transform: scale(1.05);
         transition: all 0.2s;
     }
 
     .control.selected {
         background-color: #fff59d;
-        /* Amarillo claro */
         padding: 5px 10px;
         border-radius: 6px;
         display: inline-block;
         font-weight: 600;
+    }
+
+    .control-selected {
+        background-color: #ffc107 !important;
+        color: #000 !important;
+        border: 2px solid #856404 !important;
+        border-radius: 4px !important;
     }
 
     #matrizContainer_1,
@@ -37,11 +43,132 @@
         max-width: 100%;
         overflow-x: auto;
     }
+
+    /* Estilos para la toolbar */
+    .design-toolbar {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: 1px solid #dee2e6;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 15px;
+    }
+
+    .design-toolbar .btn-group .btn {
+        margin-right: 2px;
+    }
+
+    .design-toolbar .btn-group .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transition: all 0.2s ease;
+    }
+
+    /* Checkboxes */
+    .fila-check,
+    .columna-check {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+        transform: scale(1.2);
+    }
+
+    .fila-check:checked,
+    .columna-check:checked {
+        accent-color: #007bff;
+    }
+
+    /* Selecciones */
+    .columna-seleccionada {
+        background-color: #e3f2fd !important;
+        border: 2px solid #2196f3 !important;
+        box-shadow: inset 0 0 8px rgba(33, 150, 243, 0.3);
+    }
+
+    .fila-seleccionada {
+        background-color: #fff3e0 !important;
+        border: 2px solid #ff9800 !important;
+        box-shadow: inset 0 0 8px rgba(255, 152, 0, 0.3);
+    }
+
+    /* Primer piso */
+    #matrizContainer_1 {
+        margin-top: 50px;
+        position: relative;
+    }
+
+    #matrizContainer_1 button {
+        width: 35px !important;
+        height: 35px !important;
+        font-size: 11px;
+    }
+
+    /* Animaciones */
+    .design-toolbar .btn {
+        transition: all 0.2s ease;
+    }
+
+    .fila-check,
+    .columna-check {
+        transition: transform 0.2s ease;
+    }
+
+    .fila-check:hover,
+    .columna-check:hover {
+        transform: scale(1.4);
+    }
+
+    /* Responsivo */
+    @media (max-width: 768px) {
+        .design-toolbar {
+            padding: 10px !important;
+        }
+
+        .design-toolbar .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .design-toolbar .btn {
+            flex: 1;
+            min-width: 80px;
+        }
+
+        #matrizContainer_1,
+        #matrizContainer_2,
+        #matrizContainer_3 {
+            overflow-x: auto;
+            padding: 10px;
+        }
+
+        .cabina-conductor {
+            width: 180px;
+            font-size: 12px;
+        }
+    }
+
+    @media (max-width: 576px) {
+
+        .col-md-5,
+        .col-md-7 {
+            margin-bottom: 20px;
+        }
+
+        .design-toolbar .row {
+            flex-direction: column;
+        }
+
+        .design-toolbar .col-md-8,
+        .design-toolbar .col-md-4 {
+            flex: 1;
+            max-width: 100%;
+            margin-bottom: 10px;
+        }
+    }
 </style>
 
 <div class="container-fluid p-4">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-12 col-xl-10">
             <div class="card card-primary card-tabs">
                 <div class="card-header p-0 pt-1">
                     <ul class="nav nav-tabs flex-wrap text-center" id="tipoVehiculoTabs" role="tablist">
@@ -59,13 +186,13 @@
                             aria-labelledby="tab-vehiculo-tab">
                             <div class="card-body">
                                 <div class="row">
-                                    <div class="col-md-12 mb-3">
+                                    <div class="col-12 col-md-6 mb-3">
                                         <label for="txt_Nombre">Nombre del tipo de vehículo</label>
                                         <input type="text" name="txt_Nombre" id="txt_Nombre" class="form-control"
                                             placeholder="Nombre del tipo de vehículo" value="{{ tipoVehiculo.nombre }}"
                                             {% if btnId=="btn_Regresar" %} disabled {% endif %}>
                                     </div>
-                                    <div class="col-md-12 mb-3">
+                                    <div class="col-12 col-md-6 mb-3">
                                         <label for="txt_marca">Marca</label>
                                         <div class="input-group">
                                             <select id="cbx_Marca" name="txt_marca" class="form-control" {% if
@@ -73,7 +200,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-12 mb-3">
+                                    <div class="col-12 col-md-6 mb-3">
                                         <label for="cbx_Servicio">Servicio</label>
                                         <div class="input-group">
                                             <select id="cbx_Servicio" name="cbx_Servicio" class="form-control" {% if
@@ -81,7 +208,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-12 mb-3">
+                                    <div class="col-12 col-md-6 mb-3">
                                         <label for="cbx_Estado">Estado</label>
                                         <select id="cbx_Estado" name="cbx_Estado" class="form-control" {% if
                                             btnId=="btn_Regresar" %} disabled {% endif %}>
@@ -92,17 +219,16 @@
                                             </option>
                                         </select>
                                     </div>
-                                    <div class="col-md-12 mb-3">
+                                    <div class="col-12 mb-3">
                                         <label for="cantidadPisos">Cantidad de pisos</label>
                                         <input type="number" min="1" max="2" id="cantidadPisos"
                                             placeholder="Cantidad de pisos del tipo de vehículo" name="cantidadPisos"
                                             class="form-control" required value="{{ niveles|length }}" {% if
                                             btnId=="btn_Regresar" %} disabled {% endif %}>
                                     </div>
-                                    <div class="col-md-12 text-center">
+                                    <div class="col-12 text-center">
                                         <button id="btn_Listado" type="button" class="btn btn-danger">Volver al listado
-                                            de
-                                            tipos de vehículos</button>
+                                            de tipos de vehículos</button>
                                         <button type="button" class="btn btn-primary"
                                             id="btn_Siguiente_tab_01">Siguiente</button>
                                     </div>
@@ -117,99 +243,120 @@
 </div>
 {% endblock %}
 
-
 {% block scripts %}
-<!-- Script para usar botones -->
-
-<!-- Script para cargar datos -->
-<!-- Funciones auxiliares -->
-
 <script>
     // =============================================
-    // MÓDULO PRINCIPAL - GESTIÓN DE TIPOS DE VEHÍCULO
+    // CONFIGURACIÓN Y CONSTANTES
     // =============================================
+    const CONFIG = {
+        MAX_PISOS: 2,
+        DEFAULT_HERRAMIENTA: 1,
+        MATRIZ: {
+            // Dimensiones por defecto
+            FILAS_PISO_1: 4,
+            COLUMNAS_PISO_1: 5,
+            FILAS_OTROS: 15,
+            COLUMNAS_OTROS: 6,
 
-    /**
-     * Controlador principal que organiza todas las funcionalidades
-     */
-    const TipoVehiculoController = (function () {
-        // Constantes y configuraciones
-        const MAX_PISOS = 2;
-        const DEFAULT_HERRAMIENTA = 1;
+            // ⭐ NUEVOS LÍMITES
+            MIN_FILAS: 4,        // Mínimo 4 filas
+            MAX_FILAS: 15,       // Máximo 15 filas
+            MIN_COLUMNAS: 5,     // Mínimo 5 columnas  
+            MAX_COLUMNAS: 6      // Máximo 6 columnas
+        },
+        TOOLBAR_ACTIONS: {
+            LLENAR: 'llenar',
+            VACIAR: 'vaciar',
+            ELIMINAR: 'eliminar',
+            AGREGAR_FILA: 'agregar_fila',
+            AGREGAR_COLUMNA: 'agregar_columna'
+        }
+    };
 
-        // Variables de estado
-        let herramientaSeleccionada = null;
-        let ultimoTipoAsientoSeleccionado = DEFAULT_HERRAMIENTA;
+    // Datos del servidor
+    const SERVER_DATA = {
+        herramientas: JSON.parse('{{ herramientas | tojson }}'),
+        botones: JSON.parse('{{ botones | tojson }}'),
+        btnId: "{{ btnId }}",
+        tipoVehiculo: {
+            id: Number("{{ tipoVehiculo.id }}"),
+            idMarca: Number("{{ tipoVehiculo.id_marca }}"),
+            idServicio: Number("{{ tipoVehiculo.id_servicio }}"),
+            nombre: "{{ tipoVehiculo.nombre }}",
+            estado: Number("{{ tipoVehiculo.estado }}")
+        },
+        niveles: "{{ niveles|length }}"
+    };
 
-        // Datos iniciales
-        const list_herramientas = JSON.parse('{{ herramientas | tojson }}');
-        const botones_guardados = JSON.parse('{{ botones | tojson }}');
-        const btnId = "{{ btnId }}";
-        const isModoEdicion = btnId === "btn_Actualizar";
-        const isModoRegresar = btnId === "btn_Regresar";
+    // Estados de la aplicación
+    const APP_STATE = {
+        herramientaSeleccionada: null,
+        ultimoTipoAsientoSeleccionado: CONFIG.DEFAULT_HERRAMIENTA,
+        isModoEdicion: SERVER_DATA.btnId === "btn_Actualizar",
+        isModoRegresar: SERVER_DATA.btnId === "btn_Regresar",
+        filasSeleccionadas: new Set(),
+        columnasSeleccionadas: new Set(),
+        tipoSeleccion: null,
+        pisoActual: 1
+    };
 
-        // ======================
-        // Funciones de utilidad
-        // ======================
-
-        /**
-         * Muestra un toast de error
-         * @param {string} mensaje 
-         * @param {string} [titulo] 
-         */
-        function mostrarError(mensaje, titulo = 'Error') {
+    // =============================================
+    // MÓDULO DE UTILIDADES
+    // =============================================
+    const Utils = {
+        mostrarError(mensaje, titulo = 'Error') {
             toastr.error(mensaje, titulo);
             console.error(titulo + ':', mensaje);
-        }
+        },
 
-        /**
-         * Obtiene el HTML del ícono desde la lista de herramientas
-         * @param {number|string} idHerramienta 
-         * @returns {string}
-         */
-        function obtenerIcono(idHerramienta) {
-            const herramienta = list_herramientas.find(h => h.id === parseInt(idHerramienta));
+        obtenerIcono(idHerramienta) {
+            const herramienta = SERVER_DATA.herramientas.find(h => h.id === parseInt(idHerramienta));
             return herramienta
                 ? `<img src="/Static/${herramienta.icono}" width="32" height="32" style="display: block; margin: auto;" alt="icono">`
                 : '';
-        }
+        },
 
-        /**
-         * Crea un botón con las propiedades especificadas
-         * @param {string} texto 
-         * @param {string} claseColor 
-         * @param {string} tooltip 
-         * @param {Function} accion 
-         * @returns {HTMLButtonElement}
-         */
-        function crearBoton(texto, claseColor, tooltip, accion) {
+        crearBoton(texto, claseColor, tooltip, accion) {
             const btn = document.createElement('button');
             btn.className = `btn btn-sm rounded-circle ${claseColor}`;
-            btn.style.width = '30px';
-            btn.style.height = '30px';
-            btn.style.fontSize = '12px';
-            btn.style.padding = '0';
+            btn.style.cssText = `
+                width: 30px; 
+                height: 30px; 
+                font-size: 12px; 
+                padding: 0;
+            `;
             btn.innerHTML = texto;
             btn.title = tooltip;
 
-            if (!isModoRegresar) {
+            if (!APP_STATE.isModoRegresar) {
                 btn.addEventListener('click', accion);
             } else {
                 btn.disabled = true;
             }
 
             return btn;
+        },
+
+        async confirmar(titulo, texto, textoConfirmar) {
+            return await Swal.fire({
+                title: titulo,
+                text: texto,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: textoConfirmar,
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            });
         }
+    };
 
-        // ======================
-        // Funciones de API
-        // ======================
-
-        /**
-         * Obtiene las marcas de vehículos desde el servidor
-         * @returns {Promise<void>}
-         */
-        async function obtenerMarcas() {
+    // =============================================
+    // MÓDULO DE API
+    // =============================================
+    const ApiService = {
+        async obtenerMarcas() {
             try {
                 const response = await $.getJSON('/trabajadores/viajes/GetMarcasTipoVehiculo');
 
@@ -217,24 +364,20 @@
                     let items = '<option disabled>--SELECCIONAR--</option>';
 
                     $.each(response.data, function (index, item) {
-                        const selected = item.id === Number("{{ tipoVehiculo.id_marca }}") ? 'selected' : '';
+                        const selected = item.id === SERVER_DATA.tipoVehiculo.idMarca ? 'selected' : '';
                         items += `<option ${selected} value="${item.id}">${item.nombre}</option>`;
                     });
 
                     $('#cbx_Marca').html(items);
                 } else {
-                    mostrarError('Error al obtener las marcas:', response.Msj);
+                    Utils.mostrarError('Error al obtener las marcas:', response.Msj);
                 }
             } catch (error) {
-                mostrarError('Error en la solicitud de marcas', error);
+                Utils.mostrarError('Error en la solicitud de marcas', error);
             }
-        }
+        },
 
-        /**
-         * Obtiene los servicios de vehículos desde el servidor
-         * @returns {Promise<void>}
-         */
-        async function obtenerServicios() {
+        async obtenerServicios() {
             try {
                 const response = await $.getJSON('/trabajadores/viajes/GetServiciosTipoVehiculo');
 
@@ -242,28 +385,839 @@
                     let items = '<option disabled>--SELECCIONAR--</option>';
 
                     $.each(response.data, function (index, item) {
-                        const selected = item.id === Number("{{ tipoVehiculo.id_servicio }}") ? 'selected' : '';
+                        const selected = item.id === SERVER_DATA.tipoVehiculo.idServicio ? 'selected' : '';
                         items += `<option ${selected} value="${item.id}">${item.nombre}</option>`;
                     });
 
                     $('#cbx_Servicio').html(items);
                 } else {
-                    mostrarError('Error al obtener los servicios:', response.Msj);
+                    Utils.mostrarError('Error al obtener los servicios:', response.Msj);
                 }
             } catch (error) {
-                mostrarError('Error en la solicitud de servicios', error);
+                Utils.mostrarError('Error en la solicitud de servicios', error);
             }
+        },
+
+        async registrarTipoVehiculo(datos) {
+            const formData = new FormData();
+            Object.entries(datos).forEach(([key, value]) => {
+                formData.append(key, typeof value === 'object' ? JSON.stringify(value) : value);
+            });
+
+            return await $.ajax({
+                url: '/trabajadores/viajes/registrarTipoVehiculo',
+                type: "POST",
+                processData: false,
+                contentType: false,
+                data: formData
+            });
+        },
+
+        async actualizarTipoVehiculo(id, datos) {
+            const formData = new FormData();
+            Object.entries(datos).forEach(([key, value]) => {
+                formData.append(key, typeof value === 'object' ? JSON.stringify(value) : value);
+            });
+
+            return await $.ajax({
+                url: `/trabajadores/viajes/editarTipoVehiculo/${id}`,
+                type: "POST",
+                processData: false,
+                contentType: false,
+                data: formData
+            });
         }
+    };
 
-        // ======================
-        // Funciones de UI - Tabs
-        // ======================
+    // =============================================
+    // TOOLBAR MANAGER
+    // =============================================
+    const ToolbarManager = {
+        crearToolbar(piso) {
+            const tabPane = document.getElementById(`nivel-${piso}`);
+            if (!tabPane) return;
 
-        /**
-         * Navega al siguiente tab disponible
-         * @returns {number} Índice del nuevo tab activo
-         */
-        function irAlSiguienteTab() {
+            const disenoCard = tabPane.querySelector('.diseno-card');
+            if (!disenoCard) return;
+
+            if (disenoCard.querySelector('.design-toolbar')) return;
+
+            const toolbar = document.createElement('div');
+            toolbar.className = 'design-toolbar p-2 border rounded bg-light';
+            toolbar.innerHTML = this._generarHTMLToolbar(piso);
+
+            const cardBody = disenoCard.querySelector('.card-body');
+            cardBody.insertBefore(toolbar, cardBody.firstChild);
+
+            this._configurarEventosToolbar(piso);
+        },
+
+        _generarHTMLToolbar(piso) {
+            const isDisabled = APP_STATE.isModoRegresar ? 'disabled' : '';
+
+            return `
+        <div class="row">
+            <div class="col-12 col-md-8 col-lg-9">
+                <div class="btn-toolbar" role="toolbar">
+                    <div class="btn-group mr-2 mb-2" role="group">
+                        <button type="button" class="btn btn-success btn-sm" id="btn_llenar_${piso}" 
+                                title="Llenar selección con herramienta activa" ${isDisabled}>
+                            <i class="fas fa-fill"></i> Llenar
+                        </button>
+                        <button type="button" class="btn btn-warning btn-sm" id="btn_vaciar_${piso}"
+                                title="Vaciar selección" ${isDisabled}>
+                            <i class="fas fa-eraser"></i> Vaciar
+                        </button>
+                        <button type="button" class="btn btn-danger btn-sm" id="btn_eliminar_${piso}"
+                                title="Eliminar filas/columnas seleccionadas" ${isDisabled}>
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </div>
+                    <div class="btn-group mb-2" role="group">
+                        <button type="button" class="btn btn-info btn-sm" id="btn_agregar_fila_${piso}"
+                                title="Agregar fila" ${isDisabled}>
+                            <i class="fas fa-plus"></i> + Fila
+                        </button>
+                        <button type="button" class="btn btn-info btn-sm" id="btn_agregar_columna_${piso}"
+                                title="Agregar columna" ${isDisabled}>
+                            <i class="fas fa-plus"></i> + Columna
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4 col-lg-3">
+                <div class="text-center text-md-right">
+                    <small class="text-muted d-block">
+                        <strong>Seleccionadas:</strong> 
+                        <span id="seleccion_info_${piso}" class="badge badge-primary">Ninguna</span>
+                    </small>
+                </div>
+            </div>
+        </div>
+    `;
+        },
+        _configurarEventosToolbar(piso) {
+            if (APP_STATE.isModoRegresar) return;
+
+            const btnLlenar = document.getElementById(`btn_llenar_${piso}`);
+            const btnVaciar = document.getElementById(`btn_vaciar_${piso}`);
+            const btnEliminar = document.getElementById(`btn_eliminar_${piso}`);
+            const btnAgregarFila = document.getElementById(`btn_agregar_fila_${piso}`);
+            const btnAgregarColumna = document.getElementById(`btn_agregar_columna_${piso}`);
+
+            if (btnLlenar) btnLlenar.addEventListener('click', () => this._ejecutarAccion('llenar', piso));
+            if (btnVaciar) btnVaciar.addEventListener('click', () => this._ejecutarAccion('vaciar', piso));
+            if (btnEliminar) btnEliminar.addEventListener('click', () => this._ejecutarAccion('eliminar', piso));
+            if (btnAgregarFila) btnAgregarFila.addEventListener('click', () => this._agregarFila(piso));
+            if (btnAgregarColumna) btnAgregarColumna.addEventListener('click', () => this._agregarColumna(piso));
+        },
+
+        _ejecutarAccion(accion, piso) {
+            if (APP_STATE.tipoSeleccion === 'fila') {
+                APP_STATE.filasSeleccionadas.forEach(fila => {
+                    MatrizManager.ejecutarAccionEnFila(piso, fila, accion);
+                });
+            } else if (APP_STATE.tipoSeleccion === 'columna') {
+                APP_STATE.columnasSeleccionadas.forEach(columna => {
+                    MatrizManager.ejecutarAccionEnColumna(piso, columna, accion);
+                });
+            } else {
+                toastr.warning('Seleccione filas o columnas primero', 'Acción requerida');
+            }
+        },
+
+        async _agregarFila(piso) {
+            const confirmacion = await Swal.fire({
+                title: 'Agregar fila',
+                text: '¿Desea agregar una fila al final?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, agregar',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (confirmacion.isConfirmed) {
+                MatrizManager.agregarFila(piso);
+            }
+        },
+
+        async _agregarColumna(piso) {
+            const { value: posicion } = await Swal.fire({
+                title: 'Agregar columna',
+                text: '¿Dónde desea agregar la columna?',
+                icon: 'question',
+                showCancelButton: true,
+                showDenyButton: true,
+                confirmButtonText: 'Derecha',
+                denyButtonText: 'Izquierda',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (posicion !== undefined) {
+                const lado = posicion ? 'derecha' : 'izquierda';
+                MatrizManager.agregarColumna(piso, lado);
+            }
+        },
+
+        actualizarInfoSeleccion(piso) {
+            const infoElement = document.getElementById(`seleccion_info_${piso}`);
+            if (!infoElement) return;
+
+            let texto = 'Ninguna';
+            if (APP_STATE.tipoSeleccion === 'fila' && APP_STATE.filasSeleccionadas.size > 0) {
+                texto = `${APP_STATE.filasSeleccionadas.size} fila(s)`;
+            } else if (APP_STATE.tipoSeleccion === 'columna' && APP_STATE.columnasSeleccionadas.size > 0) {
+                texto = `${APP_STATE.columnasSeleccionadas.size} columna(s)`;
+            }
+
+            infoElement.textContent = texto;
+        }
+    };
+
+    // =============================================
+    // MATRIZ MANAGER
+    // =============================================
+    const MatrizManager = {
+        generarMatriz(piso) {
+            const contenedor = document.getElementById(`matrizContainer_${piso}`);
+            if (!contenedor) return;
+
+            if (contenedor.children.length > 0) return;
+
+            contenedor.innerHTML = '';
+            APP_STATE.pisoActual = piso;
+
+            ToolbarManager.crearToolbar(piso);
+
+            this._configurarGridContenedor(contenedor, piso);
+            this._crearElementosMatriz(contenedor, piso);
+        },
+        _configurarGridContenedor(contenedor, piso) {
+            const filas = piso === 1 ? CONFIG.MATRIZ.FILAS_PISO_1 : CONFIG.MATRIZ.FILAS_OTROS;
+            const columnas = piso === 1 ? CONFIG.MATRIZ.COLUMNAS_PISO_1 : CONFIG.MATRIZ.COLUMNAS_OTROS;
+
+            // Para el primer piso, agregar 1 fila extra para la cabina
+            const filasGrid = piso === 1 ? filas + 1 : filas;
+
+            contenedor.style.cssText = `
+                display: grid;
+                grid-template-columns: 40px repeat(${columnas}, ${piso === 1 ? '35px' : '40px'});
+                grid-template-rows: 40px repeat(${filasGrid}, ${piso === 1 ? '35px' : '40px'});
+                gap: 2px;
+                justify-content: center;
+                margin-top: 20px;
+                position: relative;
+            `;
+
+            contenedor.dataset.filas = filas;
+            contenedor.dataset.columnas = columnas;
+        },
+        _crearElementosMatriz(contenedor, piso) {
+            const filas = parseInt(contenedor.dataset.filas);
+            const columnas = parseInt(contenedor.dataset.columnas);
+
+            // Celda vacía en esquina superior izquierda
+            const esquina = document.createElement('div');
+            esquina.style.cssText = 'width: 40px; height: 40px;';
+            contenedor.appendChild(esquina);
+
+            // Checkboxes de columna
+            for (let j = 1; j <= columnas; j++) {
+                const checkColumna = this._crearCheckboxColumna(piso, j);
+                contenedor.appendChild(checkColumna);
+            }
+
+            // Para el primer piso, agregar la cabina después de los checkboxes
+            if (piso === 1) {
+                this._agregarCabinaEnGrid(contenedor, columnas);
+            }
+
+            // Filas con checkboxes y celdas
+            for (let i = 1; i <= filas; i++) {
+                const checkFila = this._crearCheckboxFila(piso, i);
+                contenedor.appendChild(checkFila);
+
+                for (let j = 1; j <= columnas; j++) {
+                    this._crearCeldaMatriz(piso, i, j, contenedor);
+                }
+            }
+        },
+
+        // NUEVO MÉTODO: Cabina integrada al grid
+        _agregarCabinaEnGrid(contenedor, columnas) {
+            // Celda vacía para alinear con el checkbox de la primera fila
+            const espacioFila = document.createElement('div');
+            espacioFila.style.cssText = 'width: 40px; height: 35px;';
+            contenedor.appendChild(espacioFila);
+
+            // La cabina ocupa todas las columnas de esa fila
+            const cabina = document.createElement('div');
+            cabina.className = 'cabina-conductor-grid';
+            cabina.style.cssText = `
+        grid-column: span ${columnas};
+        background: linear-gradient(135deg, #343a40 0%, #212529 100%);
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        border: 2px solid #6c757d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 11px;
+        height: 35px;
+        position: relative;
+    `;
+
+            cabina.innerHTML = `
+        <i class="fas fa-steering-wheel mr-1"></i>
+        CABINA DEL CONDUCTOR
+    `;
+
+            contenedor.appendChild(cabina);
+        },
+        _crearCheckboxColumna(piso, columna) {
+            const container = document.createElement('div');
+            container.className = 'text-center';
+            container.style.cssText = 'width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'columna-check';
+            checkbox.dataset.columna = columna;
+            checkbox.dataset.piso = piso;
+            checkbox.disabled = APP_STATE.isModoRegresar;
+
+            if (!APP_STATE.isModoRegresar) {
+                checkbox.addEventListener('change', (e) => {
+                    this._manejarSeleccionColumna(piso, columna, e.target.checked);
+                });
+            }
+
+            container.appendChild(checkbox);
+            return container;
+        },
+
+        _crearCheckboxFila(piso, fila) {
+            const container = document.createElement('div');
+            container.className = 'text-center';
+            container.style.cssText = 'width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'fila-check';
+            checkbox.dataset.fila = fila;
+            checkbox.dataset.piso = piso;
+            checkbox.disabled = APP_STATE.isModoRegresar;
+
+            if (!APP_STATE.isModoRegresar) {
+                checkbox.addEventListener('change', (e) => {
+                    this._manejarSeleccionFila(piso, fila, e.target.checked);
+                });
+            }
+
+            container.appendChild(checkbox);
+            return container;
+        },
+
+        _manejarSeleccionColumna(piso, columna, seleccionado) {
+            if (APP_STATE.tipoSeleccion === 'fila') {
+                this._limpiarSelecciones(piso);
+            }
+
+            APP_STATE.tipoSeleccion = 'columna';
+
+            if (seleccionado) {
+                APP_STATE.columnasSeleccionadas.add(columna);
+                this._sombrearColumna(piso, columna, true);
+            } else {
+                APP_STATE.columnasSeleccionadas.delete(columna);
+                this._sombrearColumna(piso, columna, false);
+
+                if (APP_STATE.columnasSeleccionadas.size === 0) {
+                    APP_STATE.tipoSeleccion = null;
+                }
+            }
+
+            ToolbarManager.actualizarInfoSeleccion(piso);
+        },
+
+        _manejarSeleccionFila(piso, fila, seleccionado) {
+            if (APP_STATE.tipoSeleccion === 'columna') {
+                this._limpiarSelecciones(piso);
+            }
+
+            APP_STATE.tipoSeleccion = 'fila';
+
+            if (seleccionado) {
+                APP_STATE.filasSeleccionadas.add(fila);
+                this._sombrearFila(piso, fila, true);
+            } else {
+                APP_STATE.filasSeleccionadas.delete(fila);
+                this._sombrearFila(piso, fila, false);
+
+                if (APP_STATE.filasSeleccionadas.size === 0) {
+                    APP_STATE.tipoSeleccion = null;
+                }
+            }
+
+            ToolbarManager.actualizarInfoSeleccion(piso);
+        },
+
+        _sombrearColumna(piso, columna, sombrar) {
+            const contenedor = document.getElementById(`matrizContainer_${piso}`);
+            const celdas = contenedor.querySelectorAll(`button[data-x="${columna}"]`);
+
+            celdas.forEach(celda => {
+                if (sombrar) {
+                    celda.classList.add('columna-seleccionada');
+                } else {
+                    celda.classList.remove('columna-seleccionada');
+                }
+            });
+        },
+
+        _sombrearFila(piso, fila, sombrar) {
+            const contenedor = document.getElementById(`matrizContainer_${piso}`);
+            const celdas = contenedor.querySelectorAll(`button[data-y="${fila}"]`);
+
+            celdas.forEach(celda => {
+                if (sombrar) {
+                    celda.classList.add('fila-seleccionada');
+                } else {
+                    celda.classList.remove('fila-seleccionada');
+                }
+            });
+        },
+
+        _limpiarSelecciones(piso) {
+            document.querySelectorAll(`input[data-piso="${piso}"]`).forEach(check => {
+                check.checked = false;
+            });
+
+            const contenedor = document.getElementById(`matrizContainer_${piso}`);
+            contenedor.querySelectorAll('button[data-x]').forEach(celda => {
+                celda.classList.remove('columna-seleccionada', 'fila-seleccionada');
+            });
+
+            APP_STATE.filasSeleccionadas.clear();
+            APP_STATE.columnasSeleccionadas.clear();
+            APP_STATE.tipoSeleccion = null;
+
+            ToolbarManager.actualizarInfoSeleccion(piso);
+        },
+
+        ejecutarAccionEnFila(piso, fila, accion) {
+            const contenedor = document.getElementById(`matrizContainer_${piso}`);
+            const celdas = contenedor.querySelectorAll(`button[data-y="${fila}"][data-x]`);
+
+            switch (accion) {
+                case 'llenar':
+                    const tipoLlenar = APP_STATE.ultimoTipoAsientoSeleccionado || CONFIG.DEFAULT_HERRAMIENTA;
+                    celdas.forEach(celda => {
+                        celda.setAttribute('data-tipo', tipoLlenar);
+                        celda.innerHTML = Utils.obtenerIcono(tipoLlenar);
+                    });
+                    toastr.success(`Fila ${fila} llenada`, 'Acción completada');
+                    break;
+
+                case 'vaciar':
+                    celdas.forEach(celda => {
+                        celda.setAttribute('data-tipo', '');
+                        celda.innerHTML = '';
+                    });
+                    toastr.info(`Fila ${fila} vaciada`, 'Acción completada');
+                    break;
+
+                case 'eliminar':
+                    this._eliminarFila(piso, fila);
+                    break;
+            }
+        },
+
+        ejecutarAccionEnColumna(piso, columna, accion) {
+            const contenedor = document.getElementById(`matrizContainer_${piso}`);
+            const celdas = contenedor.querySelectorAll(`button[data-x="${columna}"][data-y]`);
+
+            switch (accion) {
+                case 'llenar':
+                    const tipoLlenar = APP_STATE.ultimoTipoAsientoSeleccionado || CONFIG.DEFAULT_HERRAMIENTA;
+                    celdas.forEach(celda => {
+                        celda.setAttribute('data-tipo', tipoLlenar);
+                        celda.innerHTML = Utils.obtenerIcono(tipoLlenar);
+                    });
+                    toastr.success(`Columna ${columna} llenada`, 'Acción completada');
+                    break;
+
+                case 'vaciar':
+                    celdas.forEach(celda => {
+                        celda.setAttribute('data-tipo', '');
+                        celda.innerHTML = '';
+                    });
+                    toastr.info(`Columna ${columna} vaciada`, 'Acción completada');
+                    break;
+
+                case 'eliminar':
+                    this._eliminarColumna(piso, columna);
+                    break;
+            }
+        },
+
+        _crearCeldaMatriz(piso, fila, columna, contenedor) {
+            const cellSize = piso === 1 ? '35px' : '40px';
+            const btn = document.createElement('button');
+            btn.className = 'btn btn-light border-dark';
+            btn.style.cssText = `
+                width: ${cellSize}; 
+                height: ${cellSize}; 
+                display: flex; 
+                align-items: center; 
+                justify-content: center; 
+                padding: 0;
+                font-size: ${piso === 1 ? '11px' : '12px'};
+            `;
+
+            btn.setAttribute('data-x', columna);
+            btn.setAttribute('data-y', fila);
+            btn.setAttribute('data-tipo', '');
+
+            this._cargarHerramientaExistente(btn, columna, fila, piso);
+            this._configurarEventosCelda(btn);
+
+            contenedor.appendChild(btn);
+        },
+
+        _cargarHerramientaExistente(btn, columna, fila, piso) {
+            const existente = SERVER_DATA.botones.find(b =>
+                parseInt(b.x_dimension) === columna &&
+                parseInt(b.y_dimension) === fila &&
+                parseInt(b.piso) === piso
+            );
+
+            if (existente) {
+                btn.setAttribute('data-tipo', existente.id_herramienta);
+                btn.innerHTML = Utils.obtenerIcono(existente.id_herramienta);
+            }
+        },
+
+        _configurarEventosCelda(btn) {
+            btn.addEventListener('dragover', e => e.preventDefault());
+            btn.addEventListener('drop', function (e) {
+                e.preventDefault();
+                if (APP_STATE.herramientaSeleccionada && !APP_STATE.isModoRegresar) {
+                    this.setAttribute('data-tipo', APP_STATE.herramientaSeleccionada);
+                    this.innerHTML = Utils.obtenerIcono(APP_STATE.herramientaSeleccionada);
+                }
+            });
+
+            if (!APP_STATE.isModoRegresar) {
+                btn.addEventListener('click', function () {
+                    const tipoActual = this.getAttribute('data-tipo');
+                    if (tipoActual === '') {
+                        const tipoAUsar = APP_STATE.ultimoTipoAsientoSeleccionado || CONFIG.DEFAULT_HERRAMIENTA;
+                        this.setAttribute('data-tipo', tipoAUsar);
+                        this.innerHTML = Utils.obtenerIcono(tipoAUsar);
+                    } else {
+                        this.setAttribute('data-tipo', '');
+                        this.innerHTML = '';
+                    }
+                });
+            }
+        },
+        agregarFila(piso) {
+            const contenedor = document.getElementById(`matrizContainer_${piso}`);
+            const filasActuales = parseInt(contenedor.dataset.filas);
+            const columnas = parseInt(contenedor.dataset.columnas);
+
+            // ⭐ VALIDACIÓN MÁXIMO
+            if (filasActuales >= CONFIG.MATRIZ.MAX_FILAS) {
+                toastr.warning(`No se pueden agregar más filas. Máximo permitido: ${CONFIG.MATRIZ.MAX_FILAS}`, 'Límite alcanzado');
+                return;
+            }
+
+            const nuevaFila = filasActuales + 1;
+
+            // Actualizar dataset
+            contenedor.dataset.filas = nuevaFila;
+
+            // Reconfigurar grid
+            const cellSize = piso === 1 ? '35px' : '40px';
+            const filasGrid = piso === 1 ? nuevaFila + 1 : nuevaFila; // +1 para cabina en piso 1
+
+            contenedor.style.gridTemplateRows = `40px repeat(${filasGrid}, ${cellSize})`;
+
+            // Agregar checkbox de fila
+            const checkFila = this._crearCheckboxFila(piso, nuevaFila);
+            contenedor.appendChild(checkFila);
+
+            // Agregar celdas de la nueva fila
+            for (let j = 1; j <= columnas; j++) {
+                this._crearCeldaMatriz(piso, nuevaFila, j, contenedor);
+            }
+
+            toastr.success(`Fila ${nuevaFila} agregada (${nuevaFila}/${CONFIG.MATRIZ.MAX_FILAS})`, 'Fila agregada');
+        },
+        agregarColumna(piso, lado) {
+            if (lado === 'derecha') {
+                this._agregarColumnaDerechaMejorado(piso);
+            } else {
+                this._agregarColumnaIzquierda(piso);
+            }
+        },
+
+        _agregarColumnaDerechaMejorado(piso) {
+            const contenedor = document.getElementById(`matrizContainer_${piso}`);
+            const columnasActuales = parseInt(contenedor.dataset.columnas);
+
+            // ⭐ VALIDACIÓN MÁXIMO
+            if (columnasActuales >= CONFIG.MATRIZ.MAX_COLUMNAS) {
+                toastr.warning(`No se pueden agregar más columnas. Máximo permitido: ${CONFIG.MATRIZ.MAX_COLUMNAS}`, 'Límite alcanzado');
+                return;
+            }
+
+            const filas = parseInt(contenedor.dataset.filas);
+            const nuevaColumna = columnasActuales + 1;
+
+            // Guardar todos los datos existentes
+            const datosExistentes = [];
+            contenedor.querySelectorAll('button[data-x][data-y]').forEach(btn => {
+                datosExistentes.push({
+                    x: parseInt(btn.dataset.x),
+                    y: parseInt(btn.dataset.y),
+                    tipo: btn.dataset.tipo,
+                    html: btn.innerHTML
+                });
+            });
+
+            // Limpiar y regenerar completamente
+            contenedor.innerHTML = '';
+            contenedor.dataset.columnas = nuevaColumna;
+
+            // Reconfigurar grid
+            const cellSize = piso === 1 ? '35px' : '40px';
+            const filasGrid = piso === 1 ? filas + 1 : filas;
+
+            contenedor.style.cssText = `
+        display: grid;
+        grid-template-columns: 40px repeat(${nuevaColumna}, ${cellSize});
+        grid-template-rows: 40px repeat(${filasGrid}, ${cellSize});
+        gap: 2px;
+        justify-content: center;
+        margin-top: 20px;
+        position: relative;
+    `;
+
+            // Regenerar estructura completa usando el método existente
+            this._crearElementosMatriz(contenedor, piso);
+
+            // Restaurar datos
+            contenedor.querySelectorAll('button[data-x][data-y]').forEach(btn => {
+                const x = parseInt(btn.dataset.x);
+                const y = parseInt(btn.dataset.y);
+
+                if (x <= columnasActuales) {
+                    const datoOriginal = datosExistentes.find(d => d.x === x && d.y === y);
+                    if (datoOriginal) {
+                        btn.setAttribute('data-tipo', datoOriginal.tipo);
+                        btn.innerHTML = datoOriginal.html;
+                    }
+                }
+            });
+
+            // Limpiar selecciones
+            this._limpiarSelecciones(piso);
+
+            toastr.success(`Columna ${nuevaColumna} agregada (${nuevaColumna}/${CONFIG.MATRIZ.MAX_COLUMNAS})`, 'Columna agregada');
+        },
+
+        _agregarColumnaIzquierda(piso) {
+            const contenedor = document.getElementById(`matrizContainer_${piso}`);
+            const columnasActuales = parseInt(contenedor.dataset.columnas);
+
+            // ⭐ VALIDACIÓN MÁXIMO
+            if (columnasActuales >= CONFIG.MATRIZ.MAX_COLUMNAS) {
+                toastr.warning(`No se pueden agregar más columnas. Máximo permitido: ${CONFIG.MATRIZ.MAX_COLUMNAS}`, 'Límite alcanzado');
+                return;
+            }
+
+            const filas = parseInt(contenedor.dataset.filas);
+            const nuevaColumna = columnasActuales + 1;
+
+            // Guardar todos los datos existentes
+            const datosExistentes = [];
+            contenedor.querySelectorAll('button[data-x][data-y]').forEach(btn => {
+                datosExistentes.push({
+                    x: parseInt(btn.dataset.x),
+                    y: parseInt(btn.dataset.y),
+                    tipo: btn.dataset.tipo,
+                    html: btn.innerHTML
+                });
+            });
+
+            // Limpiar y regenerar
+            contenedor.innerHTML = '';
+            contenedor.dataset.columnas = nuevaColumna;
+
+            const cellSize = piso === 1 ? '35px' : '40px';
+            const filasGrid = piso === 1 ? filas + 1 : filas;
+
+            contenedor.style.cssText = `
+        display: grid;
+        grid-template-columns: 40px repeat(${nuevaColumna}, ${cellSize});
+        grid-template-rows: 40px repeat(${filasGrid}, ${cellSize});
+        gap: 2px;
+        justify-content: center;
+        margin-top: 20px;
+        position: relative;
+    `;
+
+            // Regenerar estructura completa
+            this._crearElementosMatriz(contenedor, piso);
+
+            // Restaurar datos recorridos
+            contenedor.querySelectorAll('button[data-x][data-y]').forEach(btn => {
+                const x = parseInt(btn.dataset.x);
+                const y = parseInt(btn.dataset.y);
+
+                // Recuperar datos (x > 1 porque agregamos al principio)
+                if (x > 1) {
+                    const datoOriginal = datosExistentes.find(d => d.x === (x - 1) && d.y === y);
+                    if (datoOriginal) {
+                        btn.setAttribute('data-tipo', datoOriginal.tipo);
+                        btn.innerHTML = datoOriginal.html;
+                    }
+                }
+            });
+
+            // Limpiar selecciones
+            this._limpiarSelecciones(piso);
+
+            toastr.success(`Columna agregada a la izquierda (${nuevaColumna}/${CONFIG.MATRIZ.MAX_COLUMNAS})`, 'Columna agregada');
+        },
+
+        _eliminarFila(piso, fila) {
+            const contenedor = document.getElementById(`matrizContainer_${piso}`);
+            const filasActuales = parseInt(contenedor.dataset.filas);
+
+            // ⭐ VALIDACIÓN MÍNIMO
+            if (filasActuales <= CONFIG.MATRIZ.MIN_FILAS) {
+                toastr.warning(`No se pueden eliminar más filas. Mínimo requerido: ${CONFIG.MATRIZ.MIN_FILAS}`, 'Límite mínimo');
+                return;
+            }
+
+            // Eliminar elementos de la fila
+            contenedor.querySelectorAll(`input[data-fila="${fila}"], button[data-y="${fila}"]`).forEach(el => {
+                el.remove();
+            });
+
+            // Reorganizar filas posteriores
+            for (let i = fila + 1; i <= filasActuales; i++) {
+                const elementos = contenedor.querySelectorAll(`[data-fila="${i}"], [data-y="${i}"]`);
+                elementos.forEach(el => {
+                    if (el.hasAttribute('data-fila')) {
+                        el.setAttribute('data-fila', i - 1);
+                        el.dataset.fila = i - 1;
+                    }
+                    if (el.hasAttribute('data-y')) {
+                        el.setAttribute('data-y', i - 1);
+                        el.dataset.y = i - 1;
+                    }
+                });
+            }
+
+            // Actualizar dataset y grid
+            const nuevasFilas = filasActuales - 1;
+            contenedor.dataset.filas = nuevasFilas;
+            const cellSize = piso === 1 ? '35px' : '40px';
+            const filasGrid = piso === 1 ? nuevasFilas + 1 : nuevasFilas;
+            contenedor.style.gridTemplateRows = `40px repeat(${filasGrid}, ${cellSize})`;
+
+            // Limpiar selecciones
+            APP_STATE.filasSeleccionadas.delete(fila);
+            this._limpiarSelecciones(piso);
+
+            toastr.success(`Fila ${fila} eliminada (${nuevasFilas}/${CONFIG.MATRIZ.MIN_FILAS} mín.)`, 'Fila eliminada');
+        },
+
+        _eliminarColumna(piso, columna) {
+            const contenedor = document.getElementById(`matrizContainer_${piso}`);
+            const columnasActuales = parseInt(contenedor.dataset.columnas);
+
+            // ⭐ VALIDACIÓN MÍNIMO
+            if (columnasActuales <= CONFIG.MATRIZ.MIN_COLUMNAS) {
+                toastr.warning(`No se pueden eliminar más columnas. Mínimo requerido: ${CONFIG.MATRIZ.MIN_COLUMNAS}`, 'Límite mínimo');
+                return;
+            }
+
+            const filas = parseInt(contenedor.dataset.filas);
+
+            // Guardar todos los datos existentes EXCEPTO la columna a eliminar
+            const datosExistentes = [];
+            contenedor.querySelectorAll('button[data-x][data-y]').forEach(btn => {
+                const x = parseInt(btn.dataset.x);
+                const y = parseInt(btn.dataset.y);
+
+                if (x !== columna) {
+                    const nuevaX = x > columna ? x - 1 : x;
+
+                    datosExistentes.push({
+                        x: nuevaX,
+                        y: y,
+                        tipo: btn.dataset.tipo,
+                        html: btn.innerHTML
+                    });
+                }
+            });
+
+            // Calcular nuevas dimensiones
+            const nuevasColumnas = columnasActuales - 1;
+
+            // Limpiar completamente el contenedor
+            contenedor.innerHTML = '';
+            contenedor.dataset.columnas = nuevasColumnas;
+
+            // Reconfigurar grid con nuevas dimensiones
+            const cellSize = piso === 1 ? '35px' : '40px';
+            const filasGrid = piso === 1 ? filas + 1 : filas;
+
+            contenedor.style.cssText = `
+        display: grid;
+        grid-template-columns: 40px repeat(${nuevasColumnas}, ${cellSize});
+        grid-template-rows: 40px repeat(${filasGrid}, ${cellSize});
+        gap: 2px;
+        justify-content: center;
+        margin-top: 20px;
+        position: relative;
+    `;
+
+            // Regenerar estructura completa
+            this._crearElementosMatriz(contenedor, piso);
+
+            // Restaurar datos
+            contenedor.querySelectorAll('button[data-x][data-y]').forEach(btn => {
+                const x = parseInt(btn.dataset.x);
+                const y = parseInt(btn.dataset.y);
+
+                const datoOriginal = datosExistentes.find(d => d.x === x && d.y === y);
+                if (datoOriginal) {
+                    btn.setAttribute('data-tipo', datoOriginal.tipo);
+                    btn.innerHTML = datoOriginal.html;
+                }
+            });
+
+            // Limpiar selecciones
+            APP_STATE.columnasSeleccionadas.delete(columna);
+            this._limpiarSelecciones(piso);
+
+            toastr.success(`Columna ${columna} eliminada (${nuevasColumnas}/${CONFIG.MATRIZ.MIN_COLUMNAS} mín.)`, 'Columna eliminada');
+        }
+    };
+
+    // =============================================
+    // TAB MANAGER
+    // =============================================
+    const TabManager = {
+        irAlSiguienteTab() {
             const tabs = Array.from(document.querySelectorAll('#tipoVehiculoTabs .nav-link'));
             const activeTab = tabs.find(tab => tab.classList.contains('active'));
 
@@ -274,77 +1228,67 @@
 
             if (nextTab) {
                 $(nextTab).tab('show');
+
+                setTimeout(() => {
+                    const tabId = nextTab.getAttribute('href').substring(1);
+                    const piso = tabId.replace('nivel-', '');
+
+                    if (piso && !isNaN(piso)) {
+                        MatrizManager.generarMatriz(parseInt(piso));
+                        DragDropManager.activarEventosDrag();
+                    }
+                }, 100);
+
+                return currentIndex + 1;
             } else {
                 toastr.info("Ya estás en el último tab.");
             }
+        },
 
-            return currentIndex + 1;
-        }
-
-        /**
-         * Genera los tabs de nivel basados en la cantidad de pisos especificada
-         */
-        function generarTabsNivel() {
+        generarTabsNivel() {
             const cantidad = parseInt(document.getElementById("cantidadPisos").value);
 
             if (!cantidad || cantidad < 1) {
                 toastr.warning("Ingrese una cantidad válida de pisos.");
-                return;
+                return false;
             }
 
             const tabs = document.getElementById("tipoVehiculoTabs");
             const content = document.getElementById("tipoVehiculoTabsContent");
 
-            // Obtener tabs existentes (excluyendo el primero que es de datos)
             const existingTabs = Array.from(tabs.querySelectorAll('li'))
                 .filter(tab => tab.querySelector('a')?.id?.startsWith('nivel-'));
 
             const existingCount = existingTabs.length;
 
-            // Ajustar cantidad de tabs
             if (existingCount < cantidad) {
-                agregarTabsFaltantes(existingCount, cantidad, tabs, content);
+                this._agregarTabsFaltantes(existingCount, cantidad, tabs, content);
             } else if (existingCount > cantidad) {
-                eliminarTabsSobrantes(existingCount, cantidad);
+                this._eliminarTabsSobrantes(existingCount, cantidad);
             }
 
-            actualizarBotonesTabs(cantidad);
-        }
+            this._actualizarBotonesTabs(cantidad);
+            return true;
+        },
 
-        /**
-         * Agrega los tabs que faltan
-         * @param {number} existingCount 
-         * @param {number} cantidad 
-         * @param {HTMLElement} tabs 
-         * @param {HTMLElement} content 
-         */
-        function agregarTabsFaltantes(existingCount, cantidad, tabs, content) {
+        _agregarTabsFaltantes(existingCount, cantidad, tabs, content) {
             for (let i = existingCount + 1; i <= cantidad; i++) {
                 const tabId = `nivel-${i}`;
 
-                // Crear nuevo tab
                 const newTab = document.createElement('li');
                 newTab.className = 'nav-item';
                 newTab.innerHTML = `
-                <a class="nav-link" id="${tabId}-tab" data-toggle="pill" href="#${tabId}" role="tab"
-                   aria-controls="${tabId}" aria-selected="false">Piso ${i}</a>
-            `;
+                    <a class="nav-link" id="${tabId}-tab" data-toggle="pill" href="#${tabId}" role="tab"
+                       aria-controls="${tabId}" aria-selected="false">Piso ${i}</a>
+                `;
                 tabs.appendChild(newTab);
 
-                // Crear contenido del tab
-                const newContent = crearContenidoTab(tabId, i, cantidad);
+                const newContent = this._crearContenidoTab(tabId, i, cantidad);
                 content.appendChild(newContent);
-
-                activarEventosDrag();
             }
-        }
+        },
 
-        /**
-         * Elimina los tabs que sobran
-         * @param {number} existingCount 
-         * @param {number} cantidad 
-         */
-        function eliminarTabsSobrantes(existingCount, cantidad) {
+        _eliminarTabsSobrantes(existingCount, cantidad) {
             for (let i = existingCount; i > cantidad; i--) {
                 const tabId = `nivel-${i}`;
                 const tabElement = document.getElementById(`${tabId}-tab`);
@@ -353,28 +1297,23 @@
                 if (tabElement) tabElement.closest('li').remove();
                 if (paneElement) paneElement.remove();
             }
-        }
+        },
 
-        /**
-         * Actualiza los botones de los tabs
-         * @param {number} cantidad 
-         */
-        function actualizarBotonesTabs(cantidad) {
+        _actualizarBotonesTabs(cantidad) {
             document.querySelectorAll('.tab-pane').forEach((pane, index) => {
                 const footer = pane.querySelector('.card-footer');
                 if (!footer) return;
 
-                // Eliminar botones anteriores
-                footer.querySelector(`#${btnId}`)?.remove();
+                footer.querySelector(`#${SERVER_DATA.btnId}`)?.remove();
                 footer.querySelector('#btn_Siguiente')?.remove();
 
-                const isLast = (index === cantidad); // índice 0 es el tab de "Datos"
+                const isLast = (index === cantidad);
                 const newBtn = document.createElement('button');
                 newBtn.className = 'btn btn-primary mb-2';
 
-                if (isLast && !isModoRegresar) {
+                if (isLast && !APP_STATE.isModoRegresar) {
                     newBtn.textContent = "Aceptar";
-                    newBtn.id = btnId;
+                    newBtn.id = SERVER_DATA.btnId;
                 } else {
                     newBtn.textContent = "Siguiente";
                     newBtn.id = "btn_Siguiente";
@@ -382,313 +1321,162 @@
 
                 footer.appendChild(newBtn);
             });
-        }
+        },
 
-        /**
-         * Crea el contenido HTML para un tab de nivel
-         * @param {string} tabId 
-         * @param {number} matrizId 
-         * @param {number} cantidad 
-         * @returns {HTMLElement}
-         */
-        function crearContenidoTab(tabId, matrizId, cantidad) {
+        _crearContenidoTab(tabId, matrizId, cantidad) {
             const newContent = document.createElement('div');
             newContent.className = 'tab-pane fade';
             newContent.id = tabId;
             newContent.setAttribute('role', 'tabpanel');
             newContent.setAttribute('aria-labelledby', `${tabId}-tab`);
 
-            const botonTexto = matrizId === cantidad && !isModoRegresar
-                ? `<button type="button" class="btn btn-primary mb-2" id="${btnId}">Aceptar</button>`
+            const botonTexto = matrizId === cantidad && !APP_STATE.isModoRegresar
+                ? `<button type="button" class="btn btn-primary mb-2" id="${SERVER_DATA.btnId}">Aceptar</button>`
                 : `<button id="btn_Siguiente" type="button" class="btn btn-primary mb-2">Siguiente</button>`;
 
             newContent.innerHTML = `
-            <div class="row justify-content-center">
-                <div class="col-md-5">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Controles</h3>
-                        </div>
-                        <div class="card-body">
-                            <div id="accordion">
-                                {% for tipo_herramienta in tipo_herramientas %}
-                                <div class="card card-{{ loop.cycle('info','primary') }}">
-                                    <div class="card-header">
-                                        <h4 class="card-title w-100">
-                                            <a class="d-block w-100 collapsed" data-toggle="collapse"
-                                                href="#collapse{{ loop.index }}"
-                                                aria-expanded="false">{{ tipo_herramienta.nombre }}</a>
-                                        </h4>
-                                    </div>
-                                    <div id="collapse{{ loop.index }}" class="collapse"
-                                        data-parent="#accordion">
-                                        <div class="card-body bg-white">
-                                            {% for herramienta in herramientas %}
-                                            {% if herramienta.id_tipo==tipo_herramienta.id %}
-                                            <div class="row">
-                                                <div class="col-12">
-                                                    <div class="align-items-center mb-2">
-                                                        <img src="{{ url_for('static', filename= herramienta.icono) }}"
-                                                            width="32" height="32" alt="icono"
-                                                            draggable="true" data-tipo="{{ herramienta.id }}"
-                                                            title="{{ herramienta.nombre }}"
-                                                            class="control mr-2">
-                                                        <span>{{ herramienta.nombre }}</span>
+                <div class="row">
+                    <div class="col-12 col-lg-5 mb-3">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Controles</h3>
+                            </div>
+                            <div class="card-body" id="controles-${matrizId}">
+                                <div id="accordion-${matrizId}">
+                                    {% for tipo_herramienta in tipo_herramientas %}
+                                    <div class="card card-{{ loop.cycle('info','primary') }}">
+                                        <div class="card-header">
+                                            <h4 class="card-title w-100">
+                                                <a class="d-block w-100 collapsed" data-toggle="collapse"
+                                                    href="#collapse{{ loop.index }}-${matrizId}"
+                                                    aria-expanded="false">{{ tipo_herramienta.nombre }}</a>
+                                            </h4>
+                                        </div>
+                                        <div id="collapse{{ loop.index }}-${matrizId}" class="collapse"
+                                            data-parent="#accordion-${matrizId}">
+                                            <div class="card-body bg-white">
+                                                {% for herramienta in herramientas %}
+                                                {% if herramienta.id_tipo==tipo_herramienta.id %}
+                                                <div class="row">
+                                                    <div class="col-12">
+                                                        <div class="d-flex align-items-center mb-2">
+                                                            <img src="{{ url_for('static', filename= herramienta.icono) }}"
+                                                                width="32" height="32" alt="icono"
+                                                                draggable="true" data-tipo="{{ herramienta.id }}"
+                                                                title="{{ herramienta.nombre }}"
+                                                                class="control mr-2">
+                                                            <span>{{ herramienta.nombre }}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
+                                                {% endif %}
+                                                {% endfor %}
                                             </div>
-                                            {% endif %}
-                                            {% endfor %}
                                         </div>
                                     </div>
+                                    {% endfor %}
                                 </div>
-                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-7">
+                        <div class="card diseno-card">
+                            <div class="card-header">
+                                <h3 class="card-title">Diseño - Piso ${matrizId}</h3>
+                            </div>
+                            <div class="card-body" id="diseno-${matrizId}">
+                                <div class="row justify-content-center">
+                                    <div class="col-12">
+                                        <div id="matrizContainer_${matrizId}"></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-7">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Diseño</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="row justify-content-center" id="matrizContainer_${matrizId}"></div>
-                        </div>
-                    </div>
-                </div>
                 <div class="card-footer text-center">
-                    <button id="btn_Listado" type="button" class="btn btn-danger mb-2">Volver al listado</button>
+                    <button id="btn_Listado" type="button" class="btn btn-danger mb-2 mr-2">Volver al listado</button>
                     ${botonTexto}
                 </div>
-            </div>
-        `;
+            `;
 
             return newContent;
         }
+    };
 
-        // ======================
-        // Funciones de Matriz
-        // ======================
+    // =============================================
+    // DRAG DROP MANAGER
+    // =============================================
+    const DragDropManager = {
+        activarEventosDrag() {
+            setTimeout(() => {
+                document.querySelectorAll('.control').forEach(icono => {
+                    icono.removeEventListener('dragstart', this._handleDragStart);
+                    icono.removeEventListener('click', this._handleClick);
 
-        /**
-         * Genera una matriz de diseño para un piso específico
-         * @param {number} piso 
-         */
-        function generarMatriz(piso) {
-            const filas = 15;
-            const columnas = 6;
-            const contenedor = document.getElementById(`matrizContainer_${piso}`);
-
-            if (contenedor.children.length > 0) return;
-            contenedor.innerHTML = '';
-
-            // Configurar grid
-            contenedor.style.display = 'grid';
-            contenedor.style.gridTemplateColumns = `40px repeat(${columnas}, 40px)`;
-            contenedor.style.gridTemplateRows = `40px repeat(${filas}, 40px)`;
-            contenedor.style.gap = '2px';
-            contenedor.style.justifyContent = 'center';
-
-            // Celda vacía en esquina superior izquierda
-            const esquina = document.createElement('div');
-            esquina.style.width = '40px';
-            esquina.style.height = '40px';
-            contenedor.appendChild(esquina);
-
-            // Botones de columna (+)
-            for (let j = 1; j <= columnas; j++) {
-                const btnColumna = crearBoton('+', 'btn-success', `Llenar columna ${j}`, () => llenarColumna(piso, j));
-                contenedor.appendChild(btnColumna);
-            }
-
-            // Filas
-            for (let i = 1; i <= filas; i++) {
-                // Botón de fila (-)
-                const btnFila = crearBoton('−', 'btn-danger', `Vaciar fila ${i}`, () => vaciarFila(piso, i));
-                contenedor.appendChild(btnFila);
-
-                // Celdas de la fila
-                for (let j = 1; j <= columnas; j++) {
-                    crearCeldaMatriz(piso, i, j, contenedor);
-                }
-            }
-        }
-
-        /**
-         * Crea una celda de la matriz
-         * @param {number} piso 
-         * @param {number} fila 
-         * @param {number} columna 
-         * @param {HTMLElement} contenedor 
-         */
-        function crearCeldaMatriz(piso, fila, columna, contenedor) {
-            const btn = document.createElement('button');
-            btn.className = 'btn btn-light border-dark';
-            btn.style.width = '40px';
-            btn.style.height = '40px';
-            btn.style.display = 'flex';
-            btn.style.alignItems = 'center';
-            btn.style.justifyContent = 'center';
-            btn.style.padding = '0';
-
-            btn.setAttribute('data-x', columna);
-            btn.setAttribute('data-y', fila);
-            btn.setAttribute('data-tipo', '');
-
-            // Si hay herramienta preexistente
-            const existente = botones_guardados.find(b =>
-                parseInt(b.x_dimension) === columna &&
-                parseInt(b.y_dimension) === fila &&
-                parseInt(b.piso) === piso
-            );
-
-            if (existente) {
-                btn.setAttribute('data-tipo', existente.id_herramienta);
-                btn.innerHTML = obtenerIcono(existente.id_herramienta);
-            }
-
-            // Drag & drop
-            btn.addEventListener('dragover', e => e.preventDefault());
-            btn.addEventListener('drop', function (e) {
-                e.preventDefault();
-                if (herramientaSeleccionada && !isModoRegresar) {
-                    this.setAttribute('data-tipo', herramientaSeleccionada);
-                    this.innerHTML = obtenerIcono(herramientaSeleccionada);
-                }
-            });
-
-            // Click para alternar herramienta
-            if (!isModoRegresar) {
-                btn.addEventListener('click', function () {
-                    const tipoActual = this.getAttribute('data-tipo');
-                    if (tipoActual === '') {
-                        const tipoAUsar = ultimoTipoAsientoSeleccionado || DEFAULT_HERRAMIENTA;
-                        this.setAttribute('data-tipo', tipoAUsar);
-                        this.innerHTML = obtenerIcono(tipoAUsar);
-                    } else {
-                        this.setAttribute('data-tipo', '');
-                        this.innerHTML = '';
-                    }
+                    this._configurarEventosDrag(icono);
+                    this._configurarEventosClick(icono);
                 });
+            }, 50);
+        },
+
+        _configurarEventosDrag(icono) {
+            if (APP_STATE.isModoRegresar) {
+                icono.setAttribute('draggable', 'false');
+                return;
             }
 
-            contenedor.appendChild(btn);
-        }
+            icono.addEventListener('dragstart', this._handleDragStart.bind(this));
+        },
 
-        /**
-         * Llena toda una columna con la herramienta seleccionada
-         * @param {number} piso 
-         * @param {number} columna 
-         */
-        function llenarColumna(piso, columna) {
-            // Determinar qué tipo de asiento usar
-            let tipoAsiento = herramientaSeleccionada
-                ? parseInt(herramientaSeleccionada)
-                : ultimoTipoAsientoSeleccionado;
+        _configurarEventosClick(icono) {
+            if (APP_STATE.isModoRegresar) return;
+            icono.addEventListener('click', this._handleClick.bind(this));
+        },
 
-            ultimoTipoAsientoSeleccionado = tipoAsiento;
+        _handleDragStart(e) {
+            APP_STATE.herramientaSeleccionada = e.target.getAttribute('data-tipo');
+            APP_STATE.ultimoTipoAsientoSeleccionado = parseInt(APP_STATE.herramientaSeleccionada);
+        },
 
-            const contenedor = document.getElementById(`matrizContainer_${piso}`);
-            const botones = contenedor.querySelectorAll(`button[data-x="${columna}"]`);
+        _handleClick(e) {
+            e.preventDefault();
 
-            botones.forEach(btn => {
-                if (btn.hasAttribute('data-y')) { // Solo los botones de asientos, no los de control
-                    btn.setAttribute('data-tipo', tipoAsiento);
-                    btn.innerHTML = obtenerIcono(tipoAsiento);
+            const tipoSeleccionado = parseInt(e.target.getAttribute('data-tipo'));
+            APP_STATE.ultimoTipoAsientoSeleccionado = tipoSeleccionado;
+            APP_STATE.herramientaSeleccionada = e.target.getAttribute('data-tipo');
+
+            document.querySelectorAll('.control').forEach(c => {
+                c.classList.remove('control-selected');
+                c.style.backgroundColor = '';
+                c.style.color = '';
+            });
+
+            e.target.classList.add('control-selected');
+
+            const herramienta = SERVER_DATA.herramientas.find(h => h.id === tipoSeleccionado);
+            toastr.info(`Tipo seleccionado: ${herramienta?.nombre || 'Herramienta'}`, 'Herramienta Seleccionada');
+        },
+
+        inicializarSistemaSeleccion() {
+            if (!APP_STATE.ultimoTipoAsientoSeleccionado) {
+                APP_STATE.ultimoTipoAsientoSeleccionado = CONFIG.DEFAULT_HERRAMIENTA;
+            }
+
+            setTimeout(() => {
+                const primerAsiento = document.querySelector('.control[data-tipo="1"]');
+                if (primerAsiento && SERVER_DATA.btnId === "btn_Registrar") {
+                    primerAsiento.click();
                 }
-            });
-
-            // Mostrar mensaje informativo
-            const herramienta = list_herramientas.find(h => h.id === tipoAsiento);
-            toastr.info(`Columna ${columna} llenada con: ${herramienta?.nombre || 'Asiento'}`, 'Columna Completada');
+            }, 100);
         }
+    };
 
-        /**
-         * Vacía toda una fila
-         * @param {number} piso 
-         * @param {number} fila 
-         */
-        function vaciarFila(piso, fila) {
-            const contenedor = document.getElementById(`matrizContainer_${piso}`);
-            const botones = contenedor.querySelectorAll(`button[data-y="${fila}"]`);
-
-            botones.forEach(btn => {
-                if (btn.hasAttribute('data-x')) { // Solo los botones de asientos, no los de control
-                    btn.setAttribute('data-tipo', '');
-                    btn.innerHTML = '';
-                }
-            });
-
-            toastr.info(`Fila ${fila} vaciada completamente`, 'Fila Limpiada');
-        }
-
-        // ======================
-        // Funciones de Drag & Drop
-        // ======================
-
-        /**
-         * Activa los eventos de drag and drop para los controles
-         */
-        function activarEventosDrag() {
-            document.querySelectorAll('.control').forEach(icono => {
-                // Evento drag para arrastrar y soltar
-                icono.addEventListener('dragstart', function (e) {
-                    herramientaSeleccionada = this.getAttribute('data-tipo');
-                    ultimoTipoAsientoSeleccionado = parseInt(herramientaSeleccionada);
-                });
-
-                // Evento click para seleccionar tipo de herramienta
-                icono.addEventListener('click', function (e) {
-                    e.preventDefault();
-
-                    const tipoSeleccionado = parseInt(this.getAttribute('data-tipo'));
-                    ultimoTipoAsientoSeleccionado = tipoSeleccionado;
-                    herramientaSeleccionada = this.getAttribute('data-tipo');
-
-                    // Remover selección visual anterior
-                    document.querySelectorAll('.control').forEach(c => {
-                        c.classList.remove('bg-warning', 'control-selected');
-                        c.style.backgroundColor = '';
-                        c.style.color = '';
-                    });
-
-                    // Agregar selección visual al control actual
-                    this.classList.add('control-selected');
-                    this.style.backgroundColor = '#ffc107';
-                    this.style.color = '#000';
-
-                    const herramienta = list_herramientas.find(h => h.id === tipoSeleccionado);
-                    toastr.info(`Tipo seleccionado: ${herramienta?.nombre || 'Herramienta'}`, 'Herramienta Seleccionada');
-                });
-            });
-        }
-
-        /**
-         * Inicializa el sistema de selección de herramientas
-         */
-        function inicializarSistemaSeleccion() {
-            if (!ultimoTipoAsientoSeleccionado) {
-                ultimoTipoAsientoSeleccionado = DEFAULT_HERRAMIENTA;
-            }
-
-            // Seleccionar visualmente el primer asiento por defecto
-            const primerAsiento = document.querySelector('.control[data-tipo="1"]');
-            if (primerAsiento && btnId === "btn_Registrar") {
-                primerAsiento.click();
-            }
-
-        }
-
-        // ======================
-        // Funciones de Datos
-        // ======================
-
-        /**
-         * Obtiene un diccionario con las herramientas por piso
-         * @returns {Object} {piso: [{x, y, tipo}]}
-         */
-        function obtenerHerramientasPorPiso() {
+    // =============================================
+    // DATA MANAGER
+    // =============================================
+    const DataManager = {
+        obtenerHerramientasPorPiso() {
             const resultados = {};
 
             document.querySelectorAll('[id^="matrizContainer_"]').forEach(matriz => {
@@ -708,13 +1496,9 @@
             });
 
             return resultados;
-        }
+        },
 
-        /**
-         * Valida los datos del formulario antes de enviar
-         * @returns {boolean}
-         */
-        function validarFormulario() {
+        validarFormulario() {
             const nombre = $("#txt_Nombre").val().trim();
             const marca = $("#cbx_Marca").val().trim();
             const estado = $('#cbx_Estado').val();
@@ -726,7 +1510,7 @@
                 return false;
             }
 
-            const herramientasPorPiso = obtenerHerramientasPorPiso();
+            const herramientasPorPiso = this.obtenerHerramientasPorPiso();
             const hayDatos = Object.values(herramientasPorPiso).some(arr => arr.length > 0);
 
             if (!hayDatos) {
@@ -735,19 +1519,15 @@
             }
 
             return true;
-        }
+        },
 
-        /**
-         * Prepara los datos para enviar al servidor
-         * @returns {Object}
-         */
-        function prepararDatosEnvio() {
+        prepararDatosEnvio() {
             const nombre = $("#txt_Nombre").val().trim();
             const marca = $("#cbx_Marca").val().trim();
             const estado = $('#cbx_Estado').val();
             const servicio = $('#cbx_Servicio').val();
             const cantidadPisos = parseInt($('#cantidadPisos').val());
-            const herramientasPorPiso = obtenerHerramientasPorPiso();
+            const herramientasPorPiso = this.obtenerHerramientasPorPiso();
 
             const niveles = [];
             for (let i = 1; i <= cantidadPisos; i++) {
@@ -778,215 +1558,175 @@
                 niveles
             };
         }
+    };
 
-        // ======================
-        // Funciones de Eventos
-        // ======================
-
-        /**
-         * Maneja el evento de registrar un tipo de vehículo
-         * @param {Event} e 
-         */
-        async function manejarRegistro(e) {
+    // =============================================
+    // EVENT MANAGER
+    // =============================================
+    const EventManager = {
+        async manejarRegistro(e) {
             e.preventDefault();
 
-            if (!validarFormulario()) return;
+            if (!DataManager.validarFormulario()) return;
 
-            const confirmacion = await Swal.fire({
-                title: "¿Estás seguro?",
-                text: "Esta acción registrará al tipo de vehículo y sus niveles. ¿Deseas continuar?",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Sí, registrar tipo vehículo",
-                cancelButtonText: "Cancelar",
-                reverseButtons: true
-            });
+            const confirmacion = await Utils.confirmar(
+                "¿Estás seguro?",
+                "Esta acción registrará al tipo de vehículo y sus niveles. ¿Deseas continuar?",
+                "Sí, registrar tipo vehículo"
+            );
 
             if (!confirmacion.isConfirmed) return;
 
-            const datos = prepararDatosEnvio();
-            let formData = new FormData();
-
-            formData.append("nombre", datos.nombre);
-            formData.append("estado", datos.estado);
-            formData.append("marca", datos.marca);
-            formData.append("servicio", datos.servicio);
-            formData.append("cantidadPisos", datos.cantidadPisos);
-            formData.append("niveles", JSON.stringify(datos.niveles));
-
             try {
-                const response = await $.ajax({
-                    url: '/trabajadores/viajes/registrarTipoVehiculo',
-                    type: "POST",
-                    processData: false,
-                    contentType: false,
-                    data: formData
-                });
+                const datos = DataManager.prepararDatosEnvio();
+                const response = await ApiService.registrarTipoVehiculo(datos);
 
-                if (response.Status === "success") {
-                    if (response.Msj2) {
-                        toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                    } else {
-                        toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                        setTimeout(() => {
-                            window.location.href = '/trabajadores/viajes/GestionarTipoVehiculo';
-                        }, 500);
-                    }
-                } else {
-                    mostrarError(response.Msj, "MENSAJE DE SISTEMA");
-                }
+                this._procesarRespuestaServidor(response);
             } catch (error) {
-                mostrarError("Error en el servidor", "MENSAJE DE SISTEMA");
+                Utils.mostrarError("Error en el servidor", "MENSAJE DE SISTEMA");
             }
-        }
+        },
 
-        /**
-         * Maneja el evento de actualizar un tipo de vehículo
-         * @param {Event} e 
-         */
-        async function manejarActualizacion(e) {
+        async manejarActualizacion(e) {
             e.preventDefault();
 
-            if (!validarFormulario()) return;
+            if (!DataManager.validarFormulario()) return;
 
-            const confirmacion = await Swal.fire({
-                title: "¿Estás seguro?",
-                text: "Esta acción modificará el tipo vehículo y sus niveles. ¿Deseas continuar?",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Sí, editar tipo vehículo",
-                cancelButtonText: "Cancelar",
-                reverseButtons: true
-            });
+            const confirmacion = await Utils.confirmar(
+                "¿Estás seguro?",
+                "Esta acción modificará el tipo vehículo y sus niveles. ¿Deseas continuar?",
+                "Sí, editar tipo vehículo"
+            );
 
             if (!confirmacion.isConfirmed) return;
 
-            const id = Number("{{ tipoVehiculo.id }}");
-            const datos = prepararDatosEnvio();
-            let formData = new FormData();
-
-            formData.append("nombre", datos.nombre);
-            formData.append("estado", datos.estado);
-            formData.append("marca", datos.marca);
-            formData.append("servicio", datos.servicio);
-            formData.append("cantidadPisos", datos.cantidadPisos);
-            formData.append("niveles", JSON.stringify(datos.niveles));
-
             try {
-                const response = await $.ajax({
-                    url: `/trabajadores/viajes/editarTipoVehiculo/${id}`,
-                    type: "POST",
-                    processData: false,
-                    contentType: false,
-                    data: formData
-                });
+                const datos = DataManager.prepararDatosEnvio();
+                const response = await ApiService.actualizarTipoVehiculo(SERVER_DATA.tipoVehiculo.id, datos);
 
-                if (response.Status === "success") {
-                    if (response.Msj2) {
-                        toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                    } else {
-                        toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                        setTimeout(() => {
-                            window.location.href = '/trabajadores/viajes/GestionarTipoVehiculo';
-                        }, 500);
-                    }
-                } else {
-                    mostrarError(response.Msj, "MENSAJE DE SISTEMA");
-                }
+                this._procesarRespuestaServidor(response);
             } catch (error) {
-                mostrarError("Error en el servidor", "MENSAJE DE SISTEMA");
+                Utils.mostrarError("Error en el servidor", "MENSAJE DE SISTEMA");
             }
-        }
+        },
 
-        /**
-         * Maneja el evento de ir al siguiente tab
-         */
-        function manejarSiguienteTab() {
-            generarTabsNivel();
+        _procesarRespuestaServidor(response) {
+            if (response.Status === "success") {
+                if (response.Msj2) {
+                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                } else {
+                    toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                    setTimeout(() => {
+                        window.location.href = '/trabajadores/viajes/GestionarTipoVehiculo';
+                    }, 500);
+                }
+            } else {
+                Utils.mostrarError(response.Msj, "MENSAJE DE SISTEMA");
+            }
+        },
+
+        manejarSiguienteTab() {
+            const tabsGenerados = TabManager.generarTabsNivel();
+
+            if (!tabsGenerados) {
+                return;
+            }
 
             setTimeout(() => {
                 const cantidad = parseInt(document.getElementById("cantidadPisos").value);
+
                 for (let i = 1; i <= cantidad; i++) {
-                    generarMatriz(i);
+                    MatrizManager.generarMatriz(i);
                 }
 
-                activarEventosDrag();
-                inicializarSistemaSeleccion();
-                irAlSiguienteTab();
-            }, 100);
+                DragDropManager.activarEventosDrag();
+                DragDropManager.inicializarSistemaSeleccion();
+
+                TabManager.irAlSiguienteTab();
+
+                toastr.success(`Se generaron ${cantidad} piso(s) correctamente`, 'Pisos creados');
+            }, 150);
+        },
+
+        irAlListado() {
+            window.location.href = "/trabajadores/viajes/GestionarTipoVehiculo";
         }
+    };
 
-        /**
-         * Inicializa el controlador
-         */
-        function init() {
-            // Cargar datos iniciales
-            obtenerMarcas();
-            obtenerServicios();
+    // =============================================
+    // CONTROLADOR PRINCIPAL
+    // =============================================
+    const TipoVehiculoController = {
+        async init() {
+            try {
+                await this._cargarDatosIniciales();
+                this._configurarEventos();
+                this._configurarValidaciones();
+                this._configurarModoEdicion();
 
-            // Configurar eventos
-            $(document).on('click', '#btn_Siguiente', irAlSiguienteTab);
-            $(document).on('click', '#btn_Siguiente_tab_01', manejarSiguienteTab);
-            $(document).on('click', '#btn_Registrar', manejarRegistro);
-            $(document).on('click', '#btn_Actualizar', manejarActualizacion);
-            $(document).on('click', '#btn_Listado', () => {
-                window.location.href = "/trabajadores/viajes/GestionarTipoVehiculo";
-            });
-            $(document).on('click', '#btn_Regresar', () => {
-                window.location.href = "/trabajadores/viajes/GestionarTipoVehiculo";
-            });
+                setTimeout(() => {
+                    DragDropManager.inicializarSistemaSeleccion();
+                }, 200);
 
-            // Validar input de cantidad de pisos
+                console.log('TipoVehiculoController inicializado correctamente');
+            } catch (error) {
+                Utils.mostrarError('Error al inicializar la aplicación', error);
+            }
+        },
+
+        async _cargarDatosIniciales() {
+            await Promise.all([
+                ApiService.obtenerMarcas(),
+                ApiService.obtenerServicios()
+            ]);
+        },
+
+        _configurarEventos() {
+            $(document).on('click', '#btn_Siguiente', TabManager.irAlSiguienteTab.bind(TabManager));
+            $(document).on('click', '#btn_Siguiente_tab_01', EventManager.manejarSiguienteTab.bind(EventManager));
+            $(document).on('click', '#btn_Registrar', EventManager.manejarRegistro.bind(EventManager));
+            $(document).on('click', '#btn_Actualizar', EventManager.manejarActualizacion.bind(EventManager));
+            $(document).on('click', '#btn_Listado', EventManager.irAlListado);
+            $(document).on('click', '#btn_Regresar', EventManager.irAlListado);
+        },
+
+        _configurarValidaciones() {
             document.getElementById('cantidadPisos').addEventListener('input', (e) => {
                 let val = parseInt(e.target.value);
                 if (isNaN(val) || val < 1) e.target.value = 1;
-                else if (val > MAX_PISOS) e.target.value = MAX_PISOS;
+                else if (val > CONFIG.MAX_PISOS) e.target.value = CONFIG.MAX_PISOS;
             });
+        },
 
-            // Configuración inicial para modo edición/ver
-            if (isModoEdicion || isModoRegresar) {
+        _configurarModoEdicion() {
+            if (APP_STATE.isModoEdicion || APP_STATE.isModoRegresar) {
                 setTimeout(() => {
-                    $('#cantidadPisos').val("{{ niveles|length }}");
-                    generarTabsNivel();
+                    $('#cantidadPisos').val(SERVER_DATA.niveles);
+                    TabManager.generarTabsNivel();
 
                     setTimeout(() => {
                         const cantidad = parseInt(document.getElementById("cantidadPisos").value);
                         for (let i = 1; i <= cantidad; i++) {
-                            generarMatriz(i);
+                            MatrizManager.generarMatriz(i);
                         }
-                        activarEventosDrag();
+                        DragDropManager.activarEventosDrag();
                     }, 100);
                 }, 100);
             }
 
-            // Deshabilitar drag en modo ver
-            if (isModoRegresar) {
+            if (APP_STATE.isModoRegresar) {
                 document.querySelectorAll('.control').forEach(icono => {
                     icono.setAttribute('draggable', 'false');
                 });
             }
-
-            // Inicializar selección
-            setTimeout(() => {
-                inicializarSistemaSeleccion();
-            }, 200);
         }
+    };
 
-        // Retornar métodos públicos
-        return {
-            init
-        };
-    })();
-
-    // Inicializar el controlador cuando el documento esté listo
+    // =============================================
+    // INICIALIZACIÓN
+    // =============================================
     $(document).ready(function () {
         TipoVehiculoController.init();
     });
 </script>
-
-
 {% endblock %}

@@ -139,15 +139,111 @@ def cambio_ruta_nuevo():
 @ventas_bp.route('/GetDataCambioRuta', methods=['GET'])
 def get_data_cambio_ruta():
     try:
-        cambioRuta =  Pasaje.obtener_todos_cambiados_ruta()
+        cambioRuta = Pasaje.obtener_todos_cambiados_ruta()
         if cambioRuta:
             return jsonify({'data': cambioRuta, 'Status': 'success', 'Msj': 'Datos obtenidos correctamente.'})
+        else:
+            return jsonify({'data': [], 'Status': 'success', 'Msj': 'No se encontraron datos de cambio de ruta.'})
     except Exception as e:
-        return jsonify({'data': {}, 'Status': 'error', 'Msj': 'Ocurrió un error al obtener los datos de cambio de ruta.'})
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al obtener los datos de cambio de ruta: {repr(e)}'})
     
-##@ventas_bp.route('/RegistrarCambioRuta', methods=['POST'])
-##def registrar_cambio_ruta():
+    
 
+@ventas_bp.route('/DarBajaCambioRuta', methods=['POST'])
+def dar_baja_cambio_ruta():
+    try:
+        id_pasaje = request.form.get("id")
+        if not id_pasaje:
+            return jsonify({"Status": "error", "Msj": "ID es requerido"})
+
+        mensajes = Pasaje.dar_baja_cambio_ruta(id_pasaje)
+        msj1 = mensajes.get("msj1")
+        msj2 = mensajes.get("msj2")
+
+        if msj1:
+            return jsonify({"Status": "success", "Msj": msj1, "Msj2": ""})
+        else:
+            # si msj1 es None, devolvemos msj2 como mensaje de error/aviso
+            return jsonify({"Status": "success", "Msj": "", "Msj2": msj2})
+
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
+    
+
+@ventas_bp.route('/EliminarCambioRuta', methods=['POST'])
+def eliminar_cambio_ruta():
+    try:
+        id_pasaje = request.form.get("id")
+        if not id_pasaje:
+            return jsonify({"Status": "error", "Msj": "ID es requerido"})
+
+        mensajes = Pasaje.eliminar_cambio_ruta(id_pasaje)
+        msj1 = mensajes.get("msj1")
+        msj2 = mensajes.get("msj2")
+
+        if msj1:
+            return jsonify({"Status": "success", "Msj": msj1, "Msj2": ""})
+        else:
+            return jsonify({"Status": "success", "Msj": "", "Msj2": msj2})
+
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
+    
+@ventas_bp.route('/RegistrarCambioRuta', methods=['POST'])
+def registrar_cambio_ruta():
+    try:
+        numero_comprobante = request.form.get("numero_comprobante", "").strip()
+        cliente            = request.form.get("cliente", "").strip()
+        destino            = request.form.get("destino", "").strip()
+        origen             = request.form.get("origen", "").strip()
+        fecha_viaje        = request.form.get("fecha_viaje", "").strip()
+        estado             = request.form.get("estado", "").strip()
+        codigo             = request.form.get("codigo", "").strip()
+        usuario_actual     = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
+
+        if not all([numero_comprobante, cliente, destino, origen, fecha_viaje, estado, codigo]):
+            return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
+
+        mensajes = Pasaje.registrar_cambio_ruta(
+            numero_comprobante, cliente, destino, origen,
+            fecha_viaje, estado, codigo, usuario_actual
+        )
+
+        msj1 = mensajes.get("msj1")
+        msj2 = mensajes.get("msj2")
+
+        if msj1:
+            return jsonify({"Status": "success", "Msj": msj1, "Msj2": ""})
+        else:
+            return jsonify({"Status": "success", "Msj": "", "Msj2": msj2})
+
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
+    
+@ventas_bp.route('/EditarCambioRuta', methods=['POST'])
+def editar_cambio_ruta():
+    try:
+        numero_comprobante = request.form.get("numero_comprobante", "").strip()
+        fecha_viaje        = request.form.get("fecha_viaje", "").strip()
+        codigo             = request.form.get("codigo", "").strip()
+        usuario_actual     = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
+
+        if not numero_comprobante or not fecha_viaje or not codigo:
+            return jsonify({"Status": "error", "Msj": "Número de comprobante, fecha y código son obligatorios"})
+
+        mensajes = Pasaje.editar_cambio_ruta(
+            numero_comprobante, fecha_viaje, codigo, usuario_actual
+        )
+        msj1 = mensajes.get("msj1")
+        msj2 = mensajes.get("msj2")
+
+        if msj1:
+            return jsonify({"Status": "success", "Msj": msj1, "Msj2": ""})
+        else:
+            return jsonify({"Status": "success", "Msj": "", "Msj2": msj2})
+
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
 
 ## END REGIÓN CAMBIO DE RUTA ##
 
