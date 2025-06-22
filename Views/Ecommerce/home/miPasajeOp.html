@@ -406,8 +406,7 @@
                   </div>
                   <div class="col-md-4">
                     <label class="form-label">Fecha de nacimiento</label>
-                    <input type="date" id="fechaNacimientoMenor" class="form-control" min="1900-01-01"
-                      max="{{ 'now' | date: '%Y-%m-%d' }}" />
+                    <input type="date" id="fechaNacimientoMenor" class="form-control" min="1900-01-01" />
                   </div>
                   <div class="col-md-4">
                     <label class="form-label">Nombres</label>
@@ -584,9 +583,7 @@
                     </div>
                   </div>
                 </div>
-
               </div>
-
             </div>
 
             <!-- Checkboxes generales (aparecen para todas las operaciones) -->
@@ -737,7 +734,10 @@
     });
   </script>
   <script>
-
+    document.addEventListener("DOMContentLoaded", function () {
+      const hoy = new Date().toISOString().split('T')[0];
+      document.getElementById("fechaNacimientoMenor").setAttribute("max", hoy);
+    });
     document.addEventListener("DOMContentLoaded", function () {
       // Siempre deshabilitar los campos itinerario-regreso y fecha_vuelta si existen
       const itinerarioRegreso = document.getElementById('itinerario-regreso');
