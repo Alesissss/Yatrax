@@ -493,44 +493,62 @@
         const escalas = JSON.parse('{{ escalas | tojson }}');
         const detalles = JSON.parse('{{ detalles_viajes | tojson }}');
 
+        const escalasOrdenadas = escalas
+            .slice()
+            .sort((a, b) => a.nro_orden - b.nro_orden);
+
         let filas = '';
+        let btnId = '{{ btnId }}';
 
-        detalles.forEach((detalle, idx) => {
-            const origen = escalas.find(e => e.idSucursal == detalle.idSucursalOrigen);
-            const destino = escalas.find(e => e.idSucursal == detalle.idSucursalDestino);
+        detalles.forEach(detalle => {
+            // 1) Localizar índices base-0
+            const idxOrigen = escalasOrdenadas.findIndex(e => e.idSucursal == detalle.idSucursalOrigen);
+            const idxDestino = escalasOrdenadas.findIndex(e => e.idSucursal == detalle.idSucursalDestino);
 
-            const nroOrdenOrigen = origen?.nro_orden ?? '?';
-            const nroOrdenDestino = destino?.nro_orden ?? '?';
+            // 2) Sumar todos los tiempos entre origen y destino
+            let tiempoTotal = 0;
+            for (let k = idxOrigen + 1; k <= idxDestino; k++) {
+                tiempoTotal += parseFloat(escalasOrdenadas[k].tiempo_estimado || 0);
+            }
 
-            const subrutaLabel = `Subruta ${nroOrdenOrigen} - ${nroOrdenDestino}`;
-            const isPrimeraSubruta = (nroOrdenOrigen === 1 && nroOrdenDestino === 2);
+            // 3) Detectar primera subruta (0→1)
+            const isPrimera = (idxOrigen === 0 && idxDestino === 1);
 
             const fechaSalidaMoment = moment(detalle.fechaSalida);
             const fechaLlegadaMoment = moment(detalle.fechaLlegadaEstimada);
+            const localISOTime = moment().format('YYYY-MM-DDTHH:mm');
 
-            const now = new Date();
-            const offset = now.getTimezoneOffset() * 60000;
-            const localISOTime = new Date(now - offset).toISOString().slice(0, 16);
-
-            const salidaHTML = isPrimeraSubruta
-                ? `<input type="datetime-local" class="form-control input-salida" value="${fechaSalidaMoment.format('YYYY-MM-DDTHH:mm')}"  min="${localISOTime}" onchange="calcularLlegadas()" {% if btnId=='btn_Aceptar' %}disabled{% endif %}>`
-                : `<span class="fecha-salida">${fechaSalidaMoment.format('DD/MM/YYYY HH:mm')}</span>`;
-
+            // 4) Generar el HTML usando i=idxOrigen, j=idxDestino y data-tiempo=tiempoTotal
             filas += `
-                <tr data-i="${nroOrdenOrigen}" data-j="${nroOrdenDestino}" data-tiempo="${detalle.tiempo ?? 0}">
-                    <td class="text-center">${subrutaLabel}</td>
-                    <td class="d-none">${detalle.idSucursalOrigen}</td>
-                    <td class="text-center">${origen?.nombre || 'undefined'}</td>
-                    <td class="d-none">${detalle.idSucursalDestino}</td>
-                    <td class="text-center">${destino?.nombre || 'undefined'}</td>
-                    <td class="text-center">${salidaHTML}</td>
-                    <td class="text-center"><span class="fecha-llegada">${fechaLlegadaMoment.format('DD/MM/YYYY HH:mm')}</span></td>
-                    <td class="text-center">
-                        <input type="number" step="0.01" min="0" class="form-control precio-input" value="${detalle.precio}" {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
-                    </td>
-                </tr>
-            `;
-
+                <tr data-i="${idxOrigen}" data-j="${idxDestino}" data-tiempo="${tiempoTotal}">
+                <td class="text-center">Subruta ${escalasOrdenadas[idxOrigen].nro_orden} - ${escalasOrdenadas[idxDestino].nro_orden}</td>
+                <td class="d-none">${detalle.idSucursalOrigen}</td>
+                <td class="text-center">${escalasOrdenadas[idxOrigen].nombre}</td>
+                <td class="d-none">${detalle.idSucursalDestino}</td>
+                <td class="text-center">${escalasOrdenadas[idxDestino].nombre}</td>
+                <td class="text-center">
+                    ${isPrimera
+                                ? `<input type="datetime-local"
+                                class="form-control input-salida"
+                                value="${fechaSalidaMoment.format('YYYY-MM-DDTHH:mm')}"
+                                min="${localISOTime}"
+                                onchange="calcularLlegadas()"
+                                ${btnId === 'btn_Aceptar' ? 'disabled' : ''}>`
+                                : `<span class="fecha-salida">${fechaSalidaMoment.format('DD/MM/YYYY HH:mm')}</span>`
+                            }
+                </td>
+                <td class="text-center">
+                    <span class="fecha-llegada">${fechaLlegadaMoment.format('DD/MM/YYYY HH:mm')}</span>
+                </td>
+                <td class="text-center">
+                    <input type="number"
+                        step="0.01"
+                        min="0"
+                        class="form-control precio-input"
+                        value="${detalle.precio}"
+                        ${btnId === 'btn_Aceptar' ? 'disabled' : ''}>
+                </td>
+                </tr>`;
         });
 
         $('#tbl_Escalas tbody').html(filas);
@@ -718,7 +736,7 @@
                             } else {
                                 toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                                 setTimeout(() => {
-                                    // window.location.href = "/trabajadores/viajes/ProgramarViaje";
+                                    window.location.href = "/trabajadores/viajes/ProgramarViaje";
                                 }, 500);
                             }
                         },
