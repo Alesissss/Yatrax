@@ -461,8 +461,6 @@ def listarReembolsos():
 def cambiar_estado_reembolso():
     try:
         data = request.get_json()
-        print('-----------------------------------------------------')
-        print(data)  # Para depuración, puedes eliminarlo después
         id_reembolso = data.get("Id")
         nuevo_estado = data.get("estado")
 

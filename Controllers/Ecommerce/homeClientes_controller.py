@@ -802,10 +802,11 @@ def registrar_reembolso():
         numero_comprobante = data.get("numeroComprobante")
         motivo = data.get("motivo") or "Reembolso solicitado"
         id_cliente = Cliente.obtener_id_por_numero_documento(data.get("numeroDoc"))
-        
+        id_pasaje = Pasaje.obtener_id_por_numComprobante(data.get("numeroComprobante"))
+        id_pasaje = id_pasaje["id"]
+        id_cliente= id_cliente["id"]
         id_metodo_pago = data.get("metodoPago")
         id_tipo_comprobante = data.get("tipoComprobante")
-        id_pasaje = data.get("idPasaje")
 
         # Validar campos requeridos
         if not all([numero_comprobante, id_cliente, id_metodo_pago, id_tipo_comprobante, id_pasaje]):
@@ -819,7 +820,7 @@ def registrar_reembolso():
             numeroComprobante=numero_comprobante,
             monto=monto,
             idPasaje=id_pasaje,
-            idCliente=id_cliente["id"],
+            idCliente=id_cliente,
             idTipoComprobante=id_tipo_comprobante,
             idMetodoPago=id_metodo_pago
         )
