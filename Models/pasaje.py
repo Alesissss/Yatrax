@@ -243,7 +243,7 @@ class Pasaje:
                     ser.nombre AS servicio,
                     pas.codigo AS codigo_pasaje,
                     pas.enTransaccion AS estado_transaccion,
-                    v.idEstadoViaje AS estado_viaje,
+                    v.idEstadoViaje AS estado_viaje,    
                     pas.numeroComprobante
                 FROM pasaje pas 
                 INNER JOIN detalle_viaje_asiento dva ON dva.id = pas.idDetalleViajeAsiento
@@ -261,6 +261,7 @@ class Pasaje:
                 WHERE dp.viajeEnBrazos != 1 AND pas.numeroComprobante = %s;
             """
             filas = conexion.obtener(query, (numComprobante,))
+            print (filas)
             return filas[0] if filas else None
         finally:
             if conexion:

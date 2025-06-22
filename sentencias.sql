@@ -460,7 +460,9 @@ CREATE TABLE conf_general (
     igv DECIMAL(9,2) NOT NULL,
     max_pasajes_venta INT NOT NULL,
     tiempo_maximo_venta_minutos DECIMAL(9,2),
-    viajesReprogramables BOOLEAN NOT NULL
+    viajesReprogramables BOOLEAN NOT NULL,
+    precioCambioRuta DECIMAL(9,2) NOT NULL,
+    precioTransferencia DECIMAL(9,2) NOT NULL
 );
 
 -- Crear tabla menus
