@@ -182,7 +182,12 @@
             },
             columns: [
                 { data: "id", name: "id" },
-                { data: "nombre", name: "nombre" },
+                { 
+                    data: null,
+                    render: function (data, type, row) {
+                        return `${data.ape_paterno} ${data.ape_materno}, ${data.nombre}`;
+                    },
+                },
                 { data: "tipopersonal", name: "tipopersonal" },
                 {
                     data: "estado",

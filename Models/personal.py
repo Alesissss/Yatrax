@@ -2,9 +2,11 @@ import hashlib
 import bd
 
 class Personal:
-    def __init__(self, id=None, nombre=None, email=None, password=None, imagen=None, estado=None, id_tipoPersonal=None, estadoProceso=None, estadoRegistro=None, fechaRegistro=None, usuario=None):
+    def __init__(self, id=None, nombre=None, ape_paterno=None, ape_materno=None, email=None, password=None, imagen=None, estado=None, id_tipoPersonal=None, estadoProceso=None, estadoRegistro=None, fechaRegistro=None, usuario=None):
         self.id = id
         self.nombre = nombre
+        self.ape_paterno = ape_paterno
+        self.ape_materno = ape_materno
         self.email = email
         self.password = password
         self.imagen = imagen
@@ -19,7 +21,7 @@ class Personal:
     def obtener_todos(cls):
         conexion = bd.Conexion()
         try:
-            personal = conexion.obtener("SELECT per.id, per.nombre, per.imagen, per.estado, per.id_tipopersonal, tp.nombre as tipopersonal"
+            personal = conexion.obtener("SELECT per.id, per.nombre, per.ape_paterno, per.ape_materno, per.imagen, per.estado, per.id_tipopersonal, tp.nombre as tipopersonal"
                                         " FROM personal per INNER JOIN tipo_personal tp on per.id_tipopersonal = tp.id")
             return personal
         finally:
@@ -30,7 +32,7 @@ class Personal:
     def obtener_por_id(cls, personal_id):
         conexion = bd.Conexion()
         try:
-            personal = conexion.obtener("SELECT per.id, per.nombre, per.imagen, per.estado, per.id_tipopersonal, tp.nombre as tipopersonal"
+            personal = conexion.obtener("SELECT per.id, per.nombre, per.ape_paterno, per.ape_materno, per.imagen, per.estado, per.id_tipopersonal, tp.nombre as tipopersonal"
                                         " FROM personal per INNER JOIN tipo_personal tp on per.id_tipopersonal = tp.id WHERE per.id = %s", (personal_id,))
             return personal[0] if personal else None
         finally:
