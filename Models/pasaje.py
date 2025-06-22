@@ -68,56 +68,184 @@ class Pasaje:
 
 
     @classmethod
-    def obtener_todos_cambiados_ruta():
+    def dar_baja_cambio_ruta(cls, id_pasaje):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            conexion.autocommit(False)
+            # 1) Verificamos que el pasaje exista y que tenga un cambio de ruta activo
+            fila = conexion.obtener(
+                "SELECT esCambioRuta FROM pasaje WHERE id = %s FOR UPDATE",
+                (id_pasaje,)
+            )
+            if not fila:
+                conexion.rollback()
+                return {"msj1": None, "msj2": "Pasaje no encontrado"}
+            if fila[0]["esCambioRuta"] != 1:
+                conexion.rollback()
+                return {"msj1": None, "msj2": "El pasaje no está marcado como cambio de ruta"}
+
+            # 2) Damos de baja el cambio de ruta
+            conexion.ejecutar(
+                "UPDATE pasaje SET esCambioRuta = 0 WHERE id = %s",
+                (id_pasaje,)
+            )
+            conexion.commit()
+            return {"msj1": "Cambio de ruta dado de baja correctamente", "msj2": None}
+
+        except Exception as e:
+            if conexion:
+                conexion.rollback()
+            return {"msj1": None, "msj2": f"Error al dar de baja el cambio de ruta: {e}"}
+        finally:
+            if conexion:
+                conexion.cerrar()
+
+
+    @classmethod
+    def eliminar_cambio_ruta(cls, id_pasaje):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            conexion.autocommit(False)
+            # 1) Verificamos que el pasaje exista y que tenga un cambio de ruta activo
+            fila = conexion.obtener(
+                "SELECT esCambioRuta FROM pasaje WHERE id = %s FOR UPDATE",
+                (id_pasaje,)
+            )
+            if not fila:
+                conexion.rollback()
+                return {"msj1": None, "msj2": "Pasaje no encontrado"}
+            if fila[0]["esCambioRuta"] != 1:
+                conexion.rollback()
+                return {"msj1": None, "msj2": "El pasaje no está marcado como cambio de ruta"}
+
+            # 2) Eliminamos físicamente el registro de cambio de ruta
+            #    (suponiendo que el pasaje de cambio de ruta es un registro aparte
+            #     y se puede eliminar; si no, ajusta la lógica según tu modelo)
+            conexion.ejecutar(
+                "DELETE FROM pasaje WHERE id = %s AND esCambioRuta = 1",
+                (id_pasaje,)
+            )
+            conexion.commit()
+            return {"msj1": "Cambio de ruta eliminado correctamente", "msj2": None}
+
+        except Exception as e:
+            if conexion:
+                conexion.rollback()
+            return {"msj1": None, "msj2": f"Error al eliminar el cambio de ruta: {e}"}
+        finally:
+            if conexion:
+                conexion.cerrar()
+
+    @classmethod
+    def obtener_todos_cambiados_ruta(cls):
         conexion = None
         try:
             conexion = bd.Conexion()
             sql = """SELECT
-                        p.id                                             AS `ID`,
-                        p.numeroComprobante                              AS `NUM.COMPROBANTE`,
-                        CONCAT(cli.nombre, ' ', cli.ape_paterno, ' ', cli.ape_materno) AS `CLIENTE`,
-                        so.nombre                                        AS `ORIGEN`,
-                        sd.nombre                                        AS `DESTINO`,
-                        v.fecha                                          AS `FECHA`,
-                        CASE
-                            WHEN p.esReserva       = 1 THEN 'Reserva'
-                            WHEN p.esPasajeLibre   = 1 THEN 'Libre'
-                            WHEN p.esPasajeNormal  = 1 THEN 'Normal'
-                            WHEN p.esTransferencia = 1 THEN 'Transferencia'
-                            WHEN p.esCambioRuta    = 1 THEN 'Cambio de Ruta'
-                            WHEN p.esReembolso     = 1 THEN 'Reembolso'
-                            ELSE 'Desconocido'
-                        END                                              AS `ESTADO`,
-                        p.codigo                                         AS `CÓDIGO`
+                        p.id                                             AS ID,
+                        p.numeroComprobante                              AS NUM_COMPROBANTE,
+                        CONCAT(cli.nombre, ' ', cli.ape_paterno, ' ', cli.ape_materno) AS CLIENTE,
+                        so.nombre                                        AS ORIGEN,
+                        sd.nombre                                        AS DESTINO,
+                        v.fecha                                          AS FECHA,
+                        p.codigo                                         AS CODIGO,
+                        p.precio as PRECIO
                         FROM pasaje p
                         JOIN venta v                    ON v.id = p.idVenta
                         JOIN cliente cli                ON cli.id = v.idCliente
                         JOIN detalle_viaje_asiento dva  ON dva.id = p.idDetalleViajeAsiento
                         JOIN detalle_viaje dv           ON dv.id = dva.idDetalle_Viaje
                         JOIN sucursal so                ON so.id = dv.idSucursalOrigen
-                        JOIN sucursal sd                ON sd.id = dv.idSucursalDestino where p.esCambioRuta = 1;"""
+                        JOIN sucursal sd                ON sd.id = dv.idSucursalDestino WHERE p.esCambioRuta = 1;"""
             return conexion.obtener(sql)
         finally:
             if conexion:
                 conexion.cerrar()
+
+    
     
     @classmethod
-    def registrarCambioRuta(cls, id, id_detalle_asiento, es_pasaje_normal,
-                 id_venta, codigo, id_pasaje):
+    def registrar_cambio_ruta(cls, numero_comprobante, cliente, destino, origen, fecha_viaje, estado, codigo, usuario):
         conexion = None
         try:
             conexion = bd.Conexion()
             conexion.autocommit(False)
-            sql = """INSERT INTO pasaje (id, idDetalleViajeAsiento, esPasajeNormal, idVenta, codigo, idPasaje)
-                       VALUES (%s, %s, %s, %s, %s, %s);"""
-            params = (id, id_detalle_asiento, es_pasaje_normal, id_venta, codigo, id_pasaje)
-            conexion.ejecutar(sql, params)
+            # 1) Buscamos el pasaje por su número de comprobante
+            fila = conexion.obtener(
+                "SELECT id FROM pasaje WHERE numeroComprobante = %s FOR UPDATE",
+                (numero_comprobante,)
+            )
+            if not fila:
+                conexion.rollback()
+                return {"msj1": None, "msj2": "Pasaje no encontrado"}
+
+            id_pasaje = fila[0]["id"]
+
+            # 2) Marcamos como cambio de ruta e insertamos los datos relevantes
+            conexion.ejecutar(
+                """
+                UPDATE pasaje
+                SET
+                  esCambioRuta = 1,
+                  codigo = %s,
+                  fechaInicioReprogramacion = %s,
+                  usuario = %s
+                WHERE id = %s
+                """,
+                (codigo, fecha_viaje, usuario, id_pasaje)
+            )
+
             conexion.commit()
-            return {"msj": "Cambio de ruta registrado correctamente."}
+            return {"msj1": "Cambio de ruta registrado correctamente", "msj2": None}
+
         except Exception as e:
             if conexion:
                 conexion.rollback()
-            return {"msj": None, "msj2": f"Error al registrar cambio de ruta: {e}"}
+            return {"msj1": None, "msj2": f"Error al registrar el cambio de ruta: {e}"}
+        finally:
+            if conexion:
+                conexion.cerrar()
+
+    @classmethod
+    def editar_cambio_ruta(cls, numero_comprobante, fecha_viaje, codigo, usuario):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            conexion.autocommit(False)
+            # 1) Bloqueamos el pasaje y verificamos que exista y esté en cambio de ruta
+            fila = conexion.obtener(
+                "SELECT id, esCambioRuta FROM pasaje WHERE numeroComprobante = %s FOR UPDATE",
+                (numero_comprobante,)
+            )
+            if not fila:
+                conexion.rollback()
+                return {"msj1": None, "msj2": "Pasaje no encontrado"}
+            if fila[0]["esCambioRuta"] != 1:
+                conexion.rollback()
+                return {"msj1": None, "msj2": "El pasaje no está marcado como cambio de ruta"}
+
+            id_pasaje = fila[0]["id"]
+
+            # 2) Actualizamos los datos del cambio de ruta
+            conexion.ejecutar(
+                """
+                UPDATE pasaje
+                   SET fechaInicioReprogramacion = %s,
+                       codigo                   = %s,
+                       usuario                  = %s
+                 WHERE id = %s
+                """,
+                (fecha_viaje, codigo, usuario, id_pasaje)
+            )
+            conexion.commit()
+            return {"msj1": "Cambio de ruta actualizado correctamente", "msj2": None}
+
+        except Exception as e:
+            if conexion:
+                conexion.rollback()
+            return {"msj1": None, "msj2": f"Error al editar el cambio de ruta: {e}"}
         finally:
             if conexion:
                 conexion.cerrar()

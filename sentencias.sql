@@ -752,6 +752,7 @@ CREATE TABLE pasaje(
     codigo CHAR(8) NOT NULL, -- AA0202
     enTransaccion TINYINT NULL DEFAULT 0, -- 1: en transacción, 0: no en transacción
     idPasaje INT NULL, -- Para operaciones con pasajes
+    precio DECIMAL(10,2) NOT NULL,
     fechaInicioReprogramacion DATETIME NULL,
     fechaFinReprogramacion DATETIME NULL,
     FOREIGN KEY (idDetalleViajeAsiento) REFERENCES detalle_viaje_asiento(id),
