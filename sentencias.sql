@@ -285,6 +285,7 @@ CREATE TABLE servicio (
     nombre VARCHAR(50) NOT NULL,
     descripcion VARCHAR(255) NOT NULL,
     estado BOOLEAN NOT NULL,
+    color varchar(255) NOT NULL,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NOT NULL,
     imagen TEXT
@@ -5171,7 +5172,8 @@ CREATE PROCEDURE SP_INSERTAR_SERVICIO(
     IN P_DESCRIPCION VARCHAR(255),
     IN P_ESTADO BOOLEAN,
     IN P_USUARIO VARCHAR(100),
-    IN P_IMAGEN TEXT
+    IN P_IMAGEN TEXT,
+    IN P_COLOR VARCHAR(255)
 )
 BEGIN
     DECLARE existe_nombre INT;
@@ -5190,9 +5192,9 @@ BEGIN
 
     IF existe_nombre = 0 THEN
         INSERT INTO servicio (
-            nombre, descripcion, estado, usuario, imagen
+            nombre, descripcion, estado, usuario, imagen, color
         ) VALUES (
-            P_NOMBRE, P_DESCRIPCION, P_ESTADO, P_USUARIO, P_IMAGEN
+            P_NOMBRE, P_DESCRIPCION, P_ESTADO, P_USUARIO, P_IMAGEN, P_COLOR
         );
 
         SET @MSJ = 'Se registró correctamente el servicio';
@@ -5207,7 +5209,8 @@ CREATE PROCEDURE SP_ACTUALIZAR_SERVICIO(
     IN P_NOMBRE VARCHAR(50),
     IN P_DESCRIPCION VARCHAR(255),
     IN P_ESTADO BOOLEAN,
-    IN P_IMAGEN TEXT
+    IN P_IMAGEN TEXT,
+    IN P_COLOR VARCHAR(255)
 )
 BEGIN
     DECLARE existe_nombre INT;
@@ -5229,7 +5232,8 @@ BEGIN
         SET nombre = P_NOMBRE,
             descripcion = P_DESCRIPCION,
             estado = P_ESTADO,
-            imagen = P_IMAGEN
+            imagen = P_IMAGEN,
+            color = P_COLOR
         WHERE id = P_ID;
 
         SET @MSJ = 'Se modificó correctamente el servicio';

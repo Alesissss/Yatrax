@@ -19,6 +19,14 @@
                                 btnId=="btn_Regresar" %} disabled {% endif %}>
                         </div>
                         <div class="col-md-12 mb-3">
+                            <label for="colorHeader" class="form-label">Color del servicio</label>
+                            <div class="input-group">
+                                <input type="color" id="txt_color" class="form-control form-control-color"
+                                    value="{{ servicio.color }}" {% if btnId=='btn_Aceptar' %}disabled{% endif
+                                    %}>
+                            </div>
+                        </div>
+                        <div class="col-md-12 mb-3">
                             <label for="txt_descripcion">Descripción del servicio</label>
                             <input type="text" name="txt_descripcion" id="txt_descripcion" class="form-control"
                                 placeholder="Descripción del servicio" value="{{ servicio.descripcion }}" {% if
@@ -52,6 +60,25 @@
                                 </label>
                                 <input type="file" class="d-none" id="file_Imagen" name="logo"
                                     accept=".jpg, .jpeg, .png" {% if btnId=='btn_Regresar' %}disabled{% endif %}>
+                                <span id="checkIcon" class="d-none text-success ml-2">
+                                    <i class="bi bi-check-circle-fill"></i> Archivo subido
+                                </span>
+                            </div>
+                            <!-- Vista previa de la imagen seleccionada -->
+                            <div id="logoPreview" class="mt-3" style="display: none;">
+                                <label>Vista previa:</label>
+                                <img id="logoPreviewImage" class="img-thumbnail" style="width: 100px;">
+                            </div>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label for="file_Imagen">Imagenes promocionales</label>
+                            <div class="col-12 text-left">
+                                <label class="btn btn-warning {% if btnId=='btn_Regresar' %}disabled{%
+                                    endif %} " for="file_Imagen">
+                                    <i class="bi bi-file-earmark-arrow-up-fill"></i> Subir archivo comprimido
+                                </label>
+                                <input type="file" class="d-none" id="file_zip" name="logo"
+                                    accept=".zip, .rar, .tar, .gz, .7z, .bz2, .xz, .iso, .lzh, .arj, .ace" {% if btnId=='btn_Regresar' %}disabled{% endif %}>
                                 <span id="checkIcon" class="d-none text-success ml-2">
                                     <i class="bi bi-check-circle-fill"></i> Archivo subido
                                 </span>
@@ -149,11 +176,12 @@
             let nombre = $("#txt_nombre").val().trim();
             let descripcion = $('#txt_descripcion').val();
             let estado = $('#cbx_Estado').val();
+            let color = $('#txt_color').val();
             let imagen = $('#file_Imagen')[0].files[0];
             let ids = $('#cbx_Microservicios').val();
             let microservicios = ids.map(id => ({ id: parseInt(id, 10) }));
 
-            if (!nombre || !descripcion || !estado || microservicios.length <= 0 || !imagen) {
+            if (!nombre || !descripcion || !color || !estado || microservicios.length <= 0 || !imagen) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
@@ -175,6 +203,7 @@
                     formData.append("nombre", nombre);
                     formData.append("descripcion", descripcion);
                     formData.append("estado", estado);
+                    formData.append("color",color);
                     formData.append("microservicios", JSON.stringify(microservicios));
                     if (imagen) formData.append("imagen", imagen);
 
