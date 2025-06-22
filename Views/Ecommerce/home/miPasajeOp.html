@@ -1014,7 +1014,7 @@
               document.getElementById("origenViaje").value = data.origen;
               document.getElementById("destinoViaje").value = data.destino;
               document.querySelector("#fechaSalida").value = moment(data.fecha_salida).format("YYYY-MM-DD");
-              document.querySelector("#horaSalida").value = moment(data.hora_salida).format("HH:mm");
+              document.querySelector("#horaSalida").value = data.hora_salida
               document.getElementById("asientoViaje").value = data.asiento;
               document.getElementById("servicioViaje").value = data.servicio;
 
@@ -1517,6 +1517,6 @@
     });
   </script>
   <script src="{{ url_for('static', filename='js/jquery.min.js')}}"></script>
-  <script src="{{ url_for('static', filename='js/ventaPasajes.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/cambioRuta.js') }}"></script>
 
   {% endblock %}
