@@ -495,6 +495,8 @@ def dar_baja_metodo_pago(id):
             return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja al metodo de pago'})
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
+    
+
 
 # ENG REGION METODOS DE PAGO
 

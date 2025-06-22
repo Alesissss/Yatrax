@@ -952,4 +952,28 @@ def validar_codigo_reprogramacion():
     except Exception as e:
         return jsonify({"Status": "error", "data": {}, "Msj": f"Error al validar el código: {repr(e)}"}), 500
 
+@homeClientes_bp.route("/getTiposMetodoPago")
+def get_tipos_metodo_pago():
+    conexion = bd.Conexion()
+    try:
+        tipos = conexion.obtener("SELECT idTipoMetodoPago AS id, nombre FROM tipo_metodopago")
+        return jsonify({"Status": "success", "data": tipos})
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": str(e)})
+    finally:
+        conexion.cerrar()
+
+
+@homeClientes_bp.route("/get_metodos_pago_por_tipo/<int:id_tipo>", methods=["GET"])
+def get_metodos_pago_por_tipo(id_tipo):
+    try:
+        metodos = bd.Conexion().obtener("""
+            SELECT id, nombre FROM metodo_pago 
+            WHERE id_tipo_metodoPago = %s AND LOWER(nombre) NOT LIKE '%%efectivo%%' AND estado = 1
+        """, (id_tipo,))
+        return jsonify({"Status": "success", "data": metodos})
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": str(e)})
+
+
 # END REPROGRAMACION
