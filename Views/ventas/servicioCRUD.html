@@ -19,6 +19,14 @@
                                 btnId=="btn_Regresar" %} disabled {% endif %}>
                         </div>
                         <div class="col-md-12 mb-3">
+                            <label for="colorHeader" class="form-label">Color del servicio</label>
+                            <div class="input-group">
+                                <input type="color" id="txt_color" class="form-control form-control-color"
+                                    value="{{ servicio.color }}" {% if btnId=='btn_Regresar' %}disabled{% endif
+                                    %}>
+                            </div>
+                        </div>
+                        <div class="col-md-12 mb-3">
                             <label for="txt_descripcion">Descripción del servicio</label>
                             <input type="text" name="txt_descripcion" id="txt_descripcion" class="form-control"
                                 placeholder="Descripción del servicio" value="{{ servicio.descripcion }}" {% if
@@ -149,11 +157,12 @@
             let nombre = $("#txt_nombre").val().trim();
             let descripcion = $('#txt_descripcion').val();
             let estado = $('#cbx_Estado').val();
+            let color = $('#txt_color').val();
             let imagen = $('#file_Imagen')[0].files[0];
             let ids = $('#cbx_Microservicios').val();
             let microservicios = ids.map(id => ({ id: parseInt(id, 10) }));
 
-            if (!nombre || !descripcion || !estado || microservicios.length <= 0 || !imagen) {
+            if (!nombre || !descripcion || !color || !estado || microservicios.length <= 0 || !imagen) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
@@ -175,6 +184,7 @@
                     formData.append("nombre", nombre);
                     formData.append("descripcion", descripcion);
                     formData.append("estado", estado);
+                    formData.append("color",color);
                     formData.append("microservicios", JSON.stringify(microservicios));
                     if (imagen) formData.append("imagen", imagen);
 
@@ -212,11 +222,12 @@
             let nombre = $("#txt_nombre").val().trim();
             let descripcion = $('#txt_descripcion').val();
             let estado = $('#cbx_Estado').val();
+            let color = $('#txt_color').val();
             let imagen = $('#file_Imagen')[0].files[0];
             let ids = $('#cbx_Microservicios').val();
             let microservicios = ids.map(id => ({ id: parseInt(id, 10) }));
 
-            if (!nombre || !descripcion || !estado || microservicios.length <= 0) {
+            if (!nombre || !descripcion || !color || !estado || microservicios.length <= 0) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
@@ -238,6 +249,7 @@
                     formData.append("nombre", nombre);
                     formData.append("descripcion", descripcion);
                     formData.append("estado", estado);
+                    formData.append("color",color)
                     formData.append("microservicios", JSON.stringify(microservicios));
                     if (imagen) formData.append("imagen", imagen);
 

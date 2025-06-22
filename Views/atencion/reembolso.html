@@ -11,6 +11,18 @@
             </div>
         </div>
     </div>
+    <div class="row mb-2">
+    <div class="col-md-3">
+        <label for="filtroEstado" class="form-label">Filtrar por estado:</label>
+        <select id="filtroEstado" class="form-select form-select-sm">
+            <option value="">Todos</option>
+            <option value="ACEPTADO">Aceptado</option>
+            <option value="PENDIENTE">Pendiente</option>
+            <option value="RECHAZADO">Rechazado</option>
+        </select>
+    </div>
+</div>
+
     <div class="panel-body">
         <div class="row">
             <div class="col-12">
@@ -215,32 +227,6 @@
                     className: 'btn btn-warning',
                     columns: ':not(.noVis)',
                 },
-                {
-                    // AGREGAR COMBO BOX QUE FILTRE POR ESTADO
-                    text: '<i class="bi bi-funnel"></i> Filtrar por estado',
-                    className: 'btn btn-secondary',
-                    action: function (e, dt, node, config) {
-                        Swal.fire({
-                            title: 'Filtrar por estado',
-                            input: 'select',
-                            inputOptions: {
-                                '': 'Seleccione un estado',
-                                'ACEPTADO': 'Aceptado',
-                                'PENDIENTE': 'Pendiente',
-                                'RECHAZADO': 'Rechazado'
-                            },
-                            inputPlaceholder: 'Seleccione un estado',
-                            showCancelButton: true,
-                            confirmButtonText: 'Filtrar',
-                            cancelButtonText: 'Cancelar',
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                var estado = result.value;
-                                dt.column(4).search(estado).draw();
-                            }
-                        });
-                    }
-                },
             ],
             ajax: {
                 url: "/trabajadores/atencion/GetData_Reembolsos",
@@ -272,7 +258,7 @@
                     render: function (data, type, row) {
                         
                         if (data === 'ACEPTADO') {
-                            return `<span class="badge bg-success">Aceptado</span>`;
+                            return `<span class="badge bg-success">ACEPTADO</span>`;
                         } else if (data === 'PENDIENTE') {
                             return `<span class="badge bg-secondary">PENDIENTE</span>`;
                         }else{
@@ -287,9 +273,8 @@
                     render: function (data, type, row) {
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_PlantillaVer('${data.id}')" title="Ver plantilla"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_PlantillaEditar('${data.id}')" title="Editar plantilla"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_PlantillaEliminar('${data.id}')" title="Eliminar plantilla"><i class="bi bi-trash"></i></button>
+                            <button class="btn btn-xs m-1 bg-green" onclick="fct_PlantillaEditar('${data.id}')" title="Editar plantilla"><i class="bi bi-check"></i></button>
+                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_PlantillaEliminar('${data.id}')" title="Eliminar plantilla"><i class="	bi bi-x"></i></button>
                         </div>
                         `;
                     },
@@ -336,16 +321,53 @@
         });
     }
 
+     $('#filtroEstado').on('change', function () {
+        const estado = $(this).val();
+        dtUsuarios.column(4).search(estado).draw();
+    });
+
     function fct_PlantillaNuevo() {
         window.location.href = '/trabajadores/configuracion/PlantillaNuevo';
     }
 
     function fct_PlantillaEditar(Id) {
-        window.location.href = `/trabajadores/configuracion/EditarPlantilla/${Id}`;
+         Swal.fire({
+            title: "¿Estás seguro?",
+            text: "Esta acción eliminará a la plantilla. ¿Deseas continuar?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sí, eliminar",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true // Invertir el orden de los botones
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                url: `/trabajadores/atencion/cambiarEstadoReembolso`,
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ Id: Id, estado: 'ACEPTADO' }), // ✅ Usa "Id" con mayúscula
+                success: function (response) {
+                    if (response.Status === "success") {
+                        fct_IniciarTablaPlantillas('#tbl_Plantillas');
+                        $('#filtroEstado').trigger('change');
+                        toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                    } else {
+                        toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                        console.error('Error: ' + response.Msj);
+                    }
+                },
+                error: function () {
+                    toastr.error("Error al conectar con el servidor", "MENSAJE DE SISTEMA");
+                }
+            });
+            }
+        });
     }
 
     function fct_PlantillaVer(Id) {
-        window.location.href = `/trabajadores/configuracion/VerPlantilla/${Id}`;
+        
     }
 
     function fct_PlantillaEliminar(Id) {
@@ -362,20 +384,24 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/atencion/cambiarEstadoReembolso`,  // Pasamos el ID en la URL
-                    type: "POST",
-                    contentType: "application/json",
-                    data: JSON.stringify({ id: Id, estado: 'RECHAZADO' }), // Enviamos el ID y el nuevo estado
-                    success: function (response) {
-                        if (response.Status === "success") {
-                            fct_IniciarTablaPlantillas('#tbl_Plantillas');
-                            toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                        } else {
-                            toastr.error(response.Msj, "MENSAJE DE SISTEMA");
-                            console.error('Error: ' + response.Msj);
-                        }
-                    },
-                });
+                url: `/trabajadores/atencion/cambiarEstadoReembolso`,
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ Id: Id, estado: 'RECHAZADO' }), // ✅ Usa "Id" con mayúscula
+                success: function (response) {
+                    if (response.Status === "success") {
+                        fct_IniciarTablaPlantillas('#tbl_Plantillas');
+                        $('#filtroEstado').trigger('change');
+                        toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                    } else {
+                        toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                        console.error('Error: ' + response.Msj);
+                    }
+                },
+                error: function () {
+                    toastr.error("Error al conectar con el servidor", "MENSAJE DE SISTEMA");
+                }
+            });
             }
         });
     }
@@ -432,6 +458,7 @@
         });
         // Requery the server with the new one-time export settings
         dt.ajax.reload();
+        
     };
 </script>
 {% endblock %}

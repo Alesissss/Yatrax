@@ -16,7 +16,7 @@ class Servicio:
         try:
             conexion = bd.Conexion()
             servicios = conexion.obtener("""
-                SELECT s.id AS id, s.nombre AS nombre, s.descripcion AS descripcion,
+                SELECT s.id AS id, s.nombre AS nombre, s.descripcion AS descripcion, s.color AS color,
                        s.estado AS estado, s.imagen AS imagen
                 FROM servicio s
             """)
@@ -29,7 +29,7 @@ class Servicio:
         try:
             conexion = bd.Conexion()
             servicio = conexion.obtener("""
-                SELECT s.id AS id, s.nombre AS nombre, s.descripcion AS descripcion,
+                SELECT s.id AS id, s.nombre AS nombre, s.descripcion AS descripcion, s.color as color,
                        s.estado, s.fecha_registro AS fechaRegistro, s.usuario, s.imagen
                 FROM servicio s
                 WHERE s.id = %s
@@ -54,12 +54,12 @@ class Servicio:
             conexion.cerrar()
 
     @classmethod
-    def registrar(cls, nombre, descripcion, estado, usuario, imagen, microservicios):
+    def registrar(cls, nombre, descripcion, estado, usuario, imagen, microservicios, color):
         try:
             conexion = bd.Conexion()
             conexion.ejecutar(
-                "CALL SP_INSERTAR_SERVICIO(%s, %s, %s, %s, %s)",
-                (nombre, descripcion, estado, usuario, imagen),
+                "CALL SP_INSERTAR_SERVICIO(%s, %s, %s, %s, %s, %s)",
+                (nombre, descripcion, estado, usuario, imagen, color),
                 auto_commit=False
             )
 
@@ -87,12 +87,12 @@ class Servicio:
             conexion.cerrar()
 
     @classmethod
-    def editar(cls, id, nombre, descripcion, estado, imagen, usuario, microservicios):
+    def editar(cls, id, nombre, descripcion, estado, imagen, usuario, microservicios, color):
         try:
             conexion = bd.Conexion()
             conexion.ejecutar(
-                "CALL SP_ACTUALIZAR_SERVICIO(%s, %s, %s, %s, %s)",
-                (id, nombre, descripcion, estado, imagen),
+                "CALL SP_ACTUALIZAR_SERVICIO(%s, %s, %s, %s, %s, %s)",
+                (id, nombre, descripcion, estado, imagen, color),
                 auto_commit=False
             )
 

@@ -461,8 +461,6 @@ def listarReembolsos():
 def cambiar_estado_reembolso():
     try:
         data = request.get_json()
-        print('-----------------------------------------------------')
-        print(data)  # Para depuración, puedes eliminarlo después
         id_reembolso = data.get("Id")
         nuevo_estado = data.get("estado")
 
@@ -471,12 +469,13 @@ def cambiar_estado_reembolso():
 
         resultado = Reembolso.cambiar_estado(id_reembolso, nuevo_estado)
 
-        if resultado:
-            return jsonify({"Status": "success", "Msj": "Estado de reembolso actualizado correctamente"})
+        if resultado.get("@MSJ"):
+            return jsonify({"Status": "success", "Msj": resultado["@MSJ"]})
         else:
-            return jsonify({"Status": "error", "Msj": "Error al actualizar el estado del reembolso"})
+            return jsonify({"Status": "error", "Msj": resultado.get("@MSJ2", "Ocurrió un error desconocido")})
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Error interno: {str(e)}"}), 500
+
     
 
 # END REGION REEMBOLSO

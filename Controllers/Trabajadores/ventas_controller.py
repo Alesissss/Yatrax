@@ -118,9 +118,40 @@ def Menu_TransaccionesPasajes():
 def TransaccionesPasajes_Nuevo():
     return render_template('ventas/pasajesTransaccionesCRUD.html', active_page="transaccionesPasajes", active_menu='mVentas', transaccion = {}, tittle = 'Registrar transacción de pasajes', btnId = 'btn_Registrar')
 
+@ventas_bp.route('/cambioRuta')
+def cambio_ruta():
+    return render_template('ventas/cambioRuta.html', active_page="cambioRuta", active_menu="home")
+
+@ventas_bp.route('/cambioRutaNuevo')
+def cambio_ruta_nuevo():
+    return render_template('ventas/cambioRutaCRUD.html', active_page="cambioRutaNuevo", active_menu="home", cambioRuta = {}, tittle = 'Registrar cambio de ruta', btnId = 'btn_Registrar')
+
+
+
 # END VIEWS
 
 # FUNCIONES
+
+
+
+## REGIÓN CAMBIO DE RUTA ##
+
+@ventas_bp.route('/GetDataCambioRuta', methods=['GET'])
+def get_data_cambio_ruta():
+    try:
+        cambioRuta =  Pasaje.obtener_todos_cambiados_ruta()
+        if cambioRuta:
+            return jsonify({'data': cambioRuta, 'Status': 'success', 'Msj': 'Datos obtenidos correctamente.'})
+    except Exception as e:
+        return jsonify({'data': {}, 'Status': 'error', 'Msj': 'Ocurrió un error al obtener los datos de cambio de ruta.'})
+    
+##@ventas_bp.route('/RegistrarCambioRuta', methods=['POST'])
+##def registrar_cambio_ruta():
+
+
+## END REGIÓN CAMBIO DE RUTA ##
+
+
 
 # REGION TIPO CLIENTE #
 
@@ -509,6 +540,7 @@ def nuevo_servicio():
             nombre = request.form.get('nombre').strip()
             descripcion = request.form.get('descripcion').strip()
             estado = request.form.get('estado')
+            color = request.form.get("color")
             microservicios_json = request.form.get("microservicios")
             microservicios = json.loads(microservicios_json) if microservicios_json else []
             usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
@@ -526,7 +558,7 @@ def nuevo_servicio():
                 imagen_file.save(ruta_guardado)
                 imagen_path = ruta_guardado
 
-            mensajes = Servicio.registrar(nombre, descripcion, estado, usuario_actual, ruta_imagen, microservicios)
+            mensajes = Servicio.registrar(nombre, descripcion, estado, usuario_actual, ruta_imagen, microservicios,color)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
@@ -573,6 +605,7 @@ def editar_servicio(idServicio):
             nombre = request.form.get('nombre').strip()
             descripcion = request.form.get('descripcion').strip()
             estado = request.form.get('estado')
+            color = request.form.get("color")
             microservicios_json = request.form.get("microservicios")
             microservicios = json.loads(microservicios_json) if microservicios_json else []
             usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
@@ -593,7 +626,7 @@ def editar_servicio(idServicio):
                 servicio = Servicio.obtener_uno(idServicio)
                 ruta_imagen = servicio.get("imagen", "")
 
-            mensajes = Servicio.editar(idServicio, nombre, descripcion, estado, ruta_imagen, usuario_actual, microservicios)
+            mensajes = Servicio.editar(idServicio, nombre, descripcion, estado, ruta_imagen, usuario_actual, microservicios,color)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 

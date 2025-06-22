@@ -179,7 +179,7 @@
                 {% for j in range(3) %}
                   {% set idx = (i + j) % n %}
                   {% set servicio = activos[idx] %}
-                  <a href="#" style="text-decoration: none;">
+                  <a href="{{ url_for('homeClientes.ver_microservicios', id= servicio.id ) }}" style="text-decoration: none;">
                     <div class="card" style="width: 18rem; height: 420px;">
                       <img src="{{ servicio.imagen }}" class="card-img-top" alt="Imagen de servicio"
                         style="border: 3px solid black; border-radius: 5%; display: block; margin: 5%; width: auto; height: auto;">

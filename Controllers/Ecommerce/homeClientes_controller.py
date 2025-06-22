@@ -14,6 +14,7 @@ from Models.api_net import ApiNetPe
 from Models.servicio import Servicio
 from Models.cliente import Cliente
 from Models.tipo_herramienta import TipoHerramienta
+from Models.microservicio import MicroServicio
 
 from Models.tipoDocumento import TipoDocumento
 from Models.tipoCliente import TipoCliente
@@ -32,7 +33,10 @@ from Models.ruta import Ruta
 from Models.tipoMetodoPago import TipoMetodoPago
 from Models.asiento import Asiento
 from Models.venta import Venta
+from Models.reserva import Reserva
 from Models.conf_general import ConfGeneral
+from Models.metodo_pago import MetodoPago
+from Models.tipoMetodoPago import TipoMetodoPago
 
 homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/home')
 
@@ -128,6 +132,44 @@ def registrar_venta():
         conn.close()
 
 # END PROTOTIPO
+# REGION RESERVA
+
+@homeClientes_bp.route("/obtenerMetodoPagoxID/<int:idMetodo>")
+def obtenerMetodoPagoxID(idMetodo):
+    try:
+        resultado = MetodoPago.obtener_por_id(idMetodo)
+        return resultado["nombre"].lower()
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": "Error inesperado:"+repr(e)})
+    
+@homeClientes_bp.route("/obtenerTipoMetodoxID/<int:idTipoMetodo>")
+def obtenerTipoMetodoPagoxID(idTipoMetodo):
+    try:
+        resultado = TipoMetodoPago.obtener_por_id(idTipoMetodo)
+        return resultado["nombre"].lower()
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": "Error inesperado:"+repr(e)})
+
+@homeClientes_bp.route("/procesar_reserva", methods=["POST"])
+def procesar_reserva():
+    try:
+        data = request.get_json()
+
+        contacto = data.get("contacto", {})
+        pago = data.get("pago", {})
+        ventas = data.get("ventas", {})
+
+        resultado = Reserva.registrar_operacion(contacto, pago, ventas)
+
+        if resultado["status"] == 1:
+            return jsonify({"Status": "success", "codigo_confirmacion": f"VENTA-{resultado['id_venta']}"})
+        else:
+            return jsonify({"Status": "error", "Msj": resultado["msg"]})
+
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Error inesperado: {repr(e)}"})
+
+# END REGION
 
 def renderizarCompra():
     herramientas = Herramienta.obtener_todos()
@@ -153,6 +195,26 @@ def index():
         "contenido_venta": renderizarCompra()
     }
     return render_template('Ecommerce/home/home.html', active_page="home",datos=datos_recibidos)
+
+@homeClientes_bp.route('/cambioRuta')
+def cambioRuta():
+
+    return render_template('Ecommerce/home/cambioRuta.html')
+
+@homeClientes_bp.route("/obtenerDatosPasajero", methods=["POST"])
+def obtenerDatosPasajero():
+    payload = request.get_json(force=True) or {}
+    numero_doc = payload.get("numero_documento")
+    if not numero_doc:
+        return jsonify(status="error", msg="Falta número de documento"), 400
+
+    # Suponemos que Pasajero.obtener_por_numero_documento devuelve un dict o un objeto serializable
+    datos_pasajero = Pasajero.obtener_por_numero_documento(numero_doc)
+    print(f"Datos del pasajero: {datos_pasajero}")
+    if not datos_pasajero:
+        return jsonify(status="error", msg="Pasajero no encontrado"), 404
+
+    return jsonify(status="success", datos=datos_pasajero), 200
 
 @homeClientes_bp.route("/sobreNosotros")
 def sobreNosotros():
@@ -258,6 +320,13 @@ def register_cliente():
 def transferencia_pasaje():
     return render_template('Ecommerce/home/transferenciaPasaje.html')
 
+
+@homeClientes_bp.route("/microservicios/<int:id>", methods = ["GET"])
+def ver_microservicios(id):
+    datos_servicio = Servicio.obtener_uno(id)
+    datos_microservicio = MicroServicio.obtenerPorServicio(id)
+    return render_template('Ecommerce/home/microservicios.html', servicio = datos_servicio, microservicios = datos_microservicio)
+
 @homeClientes_bp.route('/miPasajeOperaciones')
 def mi_pasaje_operaciones():
     datos_recibidos = {
@@ -281,12 +350,10 @@ def pago_pasajes():
 def terminos_y_condiciones():
     return render_template('Ecommerce/home/terminosCondiciones.html')
 
-@homeClientes_bp.route('/cambioRuta')
-def cambio_ruta():
-    return render_template('Ecommerce/home/cambioRutamod.html')
 # END VIEWS
 
 # FUNCIONES
+
 @homeClientes_bp.route('/GetConfApariencia')
 def get_ConfApariencia():
     try:
@@ -524,7 +591,6 @@ def buscarViajes():
             "Status": "error"
         })
 
-from flask import jsonify, render_template
 
 @homeClientes_bp.route("/obtener_diseno_vehiculo", methods=['POST'])
 def obtener_diseno_vehiculo():
@@ -767,6 +833,8 @@ def get_conf_general():
             result['max_pasajes_venta'] = float(result['max_pasajes_venta'])
             result['tarifaBase'] = float(result['tarifaBase'])
             result['tiempo_maximo_venta_minutos'] = float(result['tiempo_maximo_venta_minutos'])
+            result['precioCambioRuta'] = float(result['precioCambioRuta'])
+            result['precioTransferencia'] = float(result['precioTransferencia'])
             result['viajesReprogramables'] = int(result['viajesReprogramables'])  # Puedes usar int si es un valor booleano 0/1
         
         return jsonify({'data': result, 'Status': 'success', 'Msj': 'Configuración general recuperada exitosamente'})
@@ -787,13 +855,13 @@ def validar_pasaje_dado_baja():
             return jsonify({"Status": "error", "Msj": "Número de comprobante es requerido"}), 400
         reembolso = Reembolso.validar_pasaje_dadoBaja(numero_comprobante)
         if reembolso:
-            if reembolso["estado_viaje"] == 0:
+            if reembolso["estado_viaje"] == 0 or reembolso["fechaInicioReprogramacion"] is not None or reembolso["fechaFinReprogramacion"] is not None:
                 return jsonify({"Status": "success", "data": reembolso, "Msj": "Pasaje validado correctamente"})
             else:
                 return jsonify({
                     "Status": "error",
                     "data": {},
-                    "Msj": "No se cumple con las políticas de reembolso: el pasaje no está dado de baja"
+                    "Msj": "No se cumple con las políticas de reembolso"
                 }), 400
         else:
             return jsonify({
@@ -811,18 +879,15 @@ def validar_pasaje_dado_baja():
 @homeClientes_bp.route("/registrarReembolso", methods=["POST"])
 def registrar_reembolso():
     try:
-        # # Validar sesión activa
-        # if "cliente" not in session:
-        #     return jsonify({"Status": "error", "Msj": "Debe iniciar sesión para solicitar un reembolso"}), 401
-
         data = request.get_json()
         numero_comprobante = data.get("numeroComprobante")
         motivo = data.get("motivo") or "Reembolso solicitado"
         id_cliente = Cliente.obtener_id_por_numero_documento(data.get("numeroDoc"))
-        
+        id_pasaje = Pasaje.obtener_id_por_numComprobante(data.get("numeroComprobante"))
+        id_pasaje = id_pasaje["id"]
+        id_cliente= id_cliente["id"]
         id_metodo_pago = data.get("metodoPago")
         id_tipo_comprobante = data.get("tipoComprobante")
-        id_pasaje = data.get("idPasaje")
 
         # Validar campos requeridos
         if not all([numero_comprobante, id_cliente, id_metodo_pago, id_tipo_comprobante, id_pasaje]):
@@ -836,7 +901,7 @@ def registrar_reembolso():
             numeroComprobante=numero_comprobante,
             monto=monto,
             idPasaje=id_pasaje,
-            idCliente=id_cliente["id"],
+            idCliente=id_cliente,
             idTipoComprobante=id_tipo_comprobante,
             idMetodoPago=id_metodo_pago
         )
@@ -848,5 +913,43 @@ def registrar_reembolso():
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Error interno: {str(e)}"}), 500
 
+@homeClientes_bp.route("/validarSolicitudReembolso", methods=["POST"])
+def validar_solicitud_reembolso():
+    try:
+        numero_comprobante = request.json.get("numeroComprobante")
+        solicitud=Pasaje.validar_solicitud_reembolso(numero_comprobante)
+        if solicitud:
+            return jsonify({"Status": "success", "Msj": "El pasaje tiene una solicitud de reembolso pendiente", "data": solicitud})
+        else:
+            return jsonify({
+                "Status": "error",
+                "data": {},
+                "Msj": "Ya existe una solicitud de reembolso para este pasaje"
+            })
+    except Exception as e:
+        return jsonify({
+            "Status": "error",
+            "data": {},
+            "Msj": f"Error al validar el pasaje: {repr(e)}"
+        }), 500
 
 # END REEMBOLSO
+
+# REGION REPROGRAMACION
+
+@homeClientes_bp.route("/validarCodigoReprogramacion", methods=["POST"])
+def validar_codigo_reprogramacion():
+    try:
+        numero_comprobante = request.json.get("numeroComprobante")
+        codigo = request.json.get("codigoReprogramacion")
+        if not numero_comprobante or not codigo:
+            return jsonify({"Status": "error", "Msj": "Número de comprobante y código son requeridos"}), 400
+        reprogramacion = Pasaje.validar_codigo_reprogramacion(numero_comprobante, codigo)
+        if reprogramacion:
+            return jsonify({"Status": "success", "data": reprogramacion, "Msj": "Código de reprogramación validado correctamente"})
+        else:
+            return jsonify({"Status": "error", "data": {}, "Msj": "Código de reprogramación inválido"}), 400
+    except Exception as e:
+        return jsonify({"Status": "error", "data": {}, "Msj": f"Error al validar el código: {repr(e)}"}), 500
+
+# END REPROGRAMACION
