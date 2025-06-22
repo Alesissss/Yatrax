@@ -14,6 +14,7 @@ from Models.api_net import ApiNetPe
 from Models.servicio import Servicio
 from Models.cliente import Cliente
 from Models.tipo_herramienta import TipoHerramienta
+from Models.microservicio import MicroServicio
 
 from Models.tipoDocumento import TipoDocumento
 from Models.tipoCliente import TipoCliente
@@ -38,6 +39,7 @@ homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/hom
 
 # ERRORES 
 # Manejar errores 401 (Página no autorizada)
+
 @homeClientes_bp.errorhandler(401)
 def error_401(error):
     return render_template("Ecommerce/error.html", error="Página no autorizada",error_code = 401), 401
@@ -61,6 +63,7 @@ def error_500(error):
 @homeClientes_bp.errorhandler(Exception)
 def error_general(error):
    return render_template("Ecommerce/error.html", error="Ocurrió un error inesperado",error_code = 500), 500
+
 
 # FUNCIONES AUXILIARES
 #REGION PROTOTIPO DE PRUEBA 
@@ -283,6 +286,13 @@ def register_cliente():
 @homeClientes_bp.route('transferenciaPasaje')
 def transferencia_pasaje():
     return render_template('Ecommerce/home/transferenciaPasaje.html')
+
+
+@homeClientes_bp.route("/microservicios/<int:id>", methods = ["GET"])
+def ver_microservicios(id):
+    datos_servicio = Servicio.obtener_uno(id)
+    datos_microservicio = MicroServicio.obtenerPorServicio(id)
+    return render_template('Ecommerce/home/microservicios.html', servicio = datos_servicio, microservicios = datos_microservicio)
 
 @homeClientes_bp.route('/miPasajeOperaciones')
 def mi_pasaje_operaciones():
@@ -550,7 +560,6 @@ def buscarViajes():
             "Status": "error"
         })
 
-from flask import jsonify, render_template
 
 @homeClientes_bp.route("/obtener_diseno_vehiculo", methods=['POST'])
 def obtener_diseno_vehiculo():

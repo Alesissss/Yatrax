@@ -21,6 +21,7 @@
                             <th class="text-center">NOMBRE</th>
                             <th class="text-center">DESCRIPCION</th>
                             <th class="text-center">IMAGEN</th>
+                            <th class="text-center">COLOR</th>
                             <th class="text-center">ESTADO</th>
                             <th class="text-center">ACCIÓN</th>
                         </tr>
@@ -203,6 +204,18 @@
                     },
                     className: "text-center align-middle"
                 },
+                {
+                    data: "color",
+                    name: "color",
+                    render: function (data, type, row) {
+                        if (data && data !== "") {
+                            return `<div class = "col-md-12 m-1" style ="background-color:${data}";></div>`;
+                        } else {
+                            return `<span class="badge bg-secondary">Sin color</span>`;
+                        }
+                    },
+                    className: "text-center align-middle"
+                },
                 { 
                     data: "estado", 
                     name: "estado",
@@ -239,11 +252,11 @@
                     className: "text-center align-middle",
                 },
                 {
-                    targets: [1, 2, 3, 4],
+                    targets: [1, 2, 3, 4,5],
                     className: 'align-middle',
                 },
                 {
-                    targets: [5],
+                    targets: [6],
                     orderable: false,
                     width: '10%',
                 },
