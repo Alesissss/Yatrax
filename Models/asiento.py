@@ -1,12 +1,12 @@
 import bd
 
 class Asiento:
-    def __init__(self, id=None, nro_asiento=None, id_nivel=None, tipo_asiento=None, estado=None,
+    def __init__(self, id=None, nombre=None, id_vehiculo=None, estado=None, id_nivel_herramienta=None,
                  fecha_registro=None, usuario=None):
         self.id = id
-        self.nro_asiento = nro_asiento
-        self.id_nivel = id_nivel
-        self.tipo_asiento = tipo_asiento
+        self.nombre = nombre
+        self.id_vehiculo = id_vehiculo
+        self.id_nivel_herramienta = id_nivel_herramienta
         self.estado = estado
         self.fecha_registro = fecha_registro
         self.usuario = usuario
