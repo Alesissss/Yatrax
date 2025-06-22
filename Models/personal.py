@@ -94,3 +94,15 @@ class Personal:
             return resultado[0]  # Retorna un diccionario con los mensajes
         finally:
             conexion.cerrar()
+
+    @classmethod
+    def verificarViaje(cls, id):
+        conexion = bd.Conexion()
+        try:
+            result = conexion.obtener(""" SELECT v.id FROM viaje v
+                            INNER JOIN detalle_personal dp ON v.id = dp.idViaje 
+                            WHERE dp.idPersonal = %s AND v.estado = 1 AND v.idEstadoViaje = 2 LIMIT 1 """, (id,))
+            
+            return result[0] if result else None
+        finally:
+            conexion.cerrar()
