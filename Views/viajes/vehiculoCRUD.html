@@ -25,10 +25,18 @@
                                 btnId=="btn_Regresar" %} disabled {% endif %}>
                         </div>
                         <div class="col-md-12 mb-3">
-                            <label for="txt_color">Color</label>
-                            <input type="text" name="txt_color" id="txt_color" class="form-control"
-                                placeholder="Ingrese el color del vehículo" value="{{ vehiculo.color }}" {% if
-                                btnId=="btn_Regresar" %} disabled {% endif %}>
+                            <label for="txt_color">Color:</label>
+                            <select id="txt_color" class="form-control" name="txt_color" {% if btnId=="btn_Regresar" %}
+                                disabled {% endif %}>
+                                <option value="NEGRO" {% if vehiculo.color == 'NEGRO' %} selected {% endif %}>⚫ NEGRO</option>
+                                <option value="GRIS" {% if vehiculo.color == 'GRIS' %} selected {% endif %}>⚪ GRIS</option>
+                                <option value="ROJO" {% if vehiculo.color == 'ROJO' %} selected {% endif %}>🔴 ROJO</option>
+                                <option value="VERDE" {% if vehiculo.color == 'VERDE' %} selected {% endif %}>🟢 VERDE</option>
+                                <option value="AZUL" {% if vehiculo.color == 'AZUL' %} selected {% endif %}>🔵 AZUL</option>
+                                <option value="AMARILLO" {% if vehiculo.color == 'AMARILLO' %} selected {% endif %}>🟡 AMARILLO</option>
+                                <option value="MORADO" {% if vehiculo.color == 'MORADO' %} selected {% endif %}>🟣 MORADO</option>
+                                <option value="CELESTE" {% if vehiculo.color == 'CELESTE' %} selected {% endif %}>🔷 CELESTE</option>
+                            </select>
                         </div>
                         <div class="col-md-12 mb-3">
                             <label for="txt_idTipoVehiculo">Tipo Vehículo</label>
@@ -95,7 +103,7 @@
         $("#btn_Registrar").click(function () {
             let placa = $("#txt_placa").val().trim();
             let anio = $("#txt_anio").val();
-            let color = $("#txt_color").val().trim();
+            let color = $("#txt_color").val().toUpperCase();
             let idTipoVehiculo = $("#cbx_Tipo").val();
             let estado = $('#cbx_Estado').val();
 
@@ -160,7 +168,7 @@
 
             let placa = $("#txt_placa").val().trim();
             let anio = $("#txt_anio").val();
-            let color = $("#txt_color").val().trim();
+            let color = $("#txt_color").val().toUpperCase();
             let idTipoVehiculo = $("#cbx_Tipo").val();
             let estado = $('#cbx_Estado').val();
 

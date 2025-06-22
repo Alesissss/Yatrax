@@ -56,6 +56,73 @@ class Pasaje:
                 conexion.cerrar()
 
     @classmethod
+    def obtener_precio_ruta(cls, num_comprobante, codigo_prom):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            sql = """SELECT numeroComprobante, codigo FROM pasaje ps WHERE ps.numeroComprobante = %s AND ps.codigo = %s;"""
+            return conexion.obtener(sql, (num_comprobante, codigo_prom))
+        finally:
+            if conexion:
+                conexion.cerrar()
+
+
+    @classmethod
+    def obtener_todos_cambiados_ruta():
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            sql = """SELECT
+                        p.id                                             AS `ID`,
+                        p.numeroComprobante                              AS `NUM.COMPROBANTE`,
+                        CONCAT(cli.nombre, ' ', cli.ape_paterno, ' ', cli.ape_materno) AS `CLIENTE`,
+                        so.nombre                                        AS `ORIGEN`,
+                        sd.nombre                                        AS `DESTINO`,
+                        v.fecha                                          AS `FECHA`,
+                        CASE
+                            WHEN p.esReserva       = 1 THEN 'Reserva'
+                            WHEN p.esPasajeLibre   = 1 THEN 'Libre'
+                            WHEN p.esPasajeNormal  = 1 THEN 'Normal'
+                            WHEN p.esTransferencia = 1 THEN 'Transferencia'
+                            WHEN p.esCambioRuta    = 1 THEN 'Cambio de Ruta'
+                            WHEN p.esReembolso     = 1 THEN 'Reembolso'
+                            ELSE 'Desconocido'
+                        END                                              AS `ESTADO`,
+                        p.codigo                                         AS `CÓDIGO`
+                        FROM pasaje p
+                        JOIN venta v                    ON v.id = p.idVenta
+                        JOIN cliente cli                ON cli.id = v.idCliente
+                        JOIN detalle_viaje_asiento dva  ON dva.id = p.idDetalleViajeAsiento
+                        JOIN detalle_viaje dv           ON dv.id = dva.idDetalle_Viaje
+                        JOIN sucursal so                ON so.id = dv.idSucursalOrigen
+                        JOIN sucursal sd                ON sd.id = dv.idSucursalDestino where p.esCambioRuta = 1;"""
+            return conexion.obtener(sql)
+        finally:
+            if conexion:
+                conexion.cerrar()
+    
+    @classmethod
+    def registrarCambioRuta(cls, id, id_detalle_asiento, es_pasaje_normal,
+                 id_venta, codigo, id_pasaje):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            conexion.autocommit(False)
+            sql = """INSERT INTO pasaje (id, idDetalleViajeAsiento, esPasajeNormal, idVenta, codigo, idPasaje)
+                       VALUES (%s, %s, %s, %s, %s, %s);"""
+            params = (id, id_detalle_asiento, es_pasaje_normal, id_venta, codigo, id_pasaje)
+            conexion.ejecutar(sql, params)
+            conexion.commit()
+            return {"msj": "Cambio de ruta registrado correctamente."}
+        except Exception as e:
+            if conexion:
+                conexion.rollback()
+            return {"msj": None, "msj2": f"Error al registrar cambio de ruta: {e}"}
+        finally:
+            if conexion:
+                conexion.cerrar()
+
+    @classmethod
     def obtener_por_id(cls, id_pasaje):
         conexion = None
         try:
@@ -243,7 +310,7 @@ class Pasaje:
                     ser.nombre AS servicio,
                     pas.codigo AS codigo_pasaje,
                     pas.enTransaccion AS estado_transaccion,
-                    v.idEstadoViaje AS estado_viaje,
+                    v.idEstadoViaje AS estado_viaje,    
                     pas.numeroComprobante
                 FROM pasaje pas 
                 INNER JOIN detalle_viaje_asiento dva ON dva.id = pas.idDetalleViajeAsiento
@@ -261,6 +328,7 @@ class Pasaje:
                 WHERE dp.viajeEnBrazos != 1 AND pas.numeroComprobante = %s;
             """
             filas = conexion.obtener(query, (numComprobante,))
+            print (filas)
             return filas[0] if filas else None
         finally:
             if conexion:
@@ -380,3 +448,30 @@ class Pasaje:
 
         HTML(string=html_renderizado).write_pdf(ruta_pdf)
         return ruta_pdf
+    
+    
+    @classmethod
+    def obtener_id_por_numComprobante(cls, numcomprobante):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            filas = conexion.obtener(
+                "SELECT id FROM pasaje where numeroComprobante= %s;", (numcomprobante,)
+            )
+            return filas[0] if filas else None
+        finally:
+            if conexion:
+                conexion.cerrar()
+    
+    @classmethod
+    def validar_solicitud_reembolso(cls, numcomprobante):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            filas = conexion.obtener(
+                "SELECT * FROM pasaje pa inner join reembolso re on re.idPasaje=pa.id where pa.numeroComprobante= %s;", (numcomprobante,)
+            )
+            return filas[0] if filas else None
+        finally:
+            if conexion:
+                conexion.cerrar()

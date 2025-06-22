@@ -169,6 +169,7 @@ DROP PROCEDURE IF EXISTS SP_MODIFICAR_RECLAMO;
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_RECLAMO;
 
 DROP PROCEDURE IF EXISTS SP_REGISTRAR_REEMBOLSO;
+DROP PROCEDURE IF EXISTS SP_CAMBIAR_ESTADO_REEMBOLSO;
 
 -- Eliminar tablas si existen
 DROP TABLE IF EXISTS pais_sucursal;
@@ -284,6 +285,7 @@ CREATE TABLE servicio (
     nombre VARCHAR(50) NOT NULL,
     descripcion VARCHAR(255) NOT NULL,
     estado BOOLEAN NOT NULL,
+    color varchar(255) NOT NULL,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NOT NULL,
     imagen TEXT
@@ -331,6 +333,20 @@ CREATE TABLE tipo_personal (
     usuario VARCHAR(100) not null
 );
 
+-- Crear tabla personal
+CREATE TABLE personal (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    ape_paterno VARCHAR(100) NOT NULL,
+    ape_materno VARCHAR(100) NOT NULL,
+    imagen VARCHAR(255) NOT NULL,
+    estado BOOLEAN NOT NULL,
+    id_tipopersonal INT NOT NULL,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL,
+    FOREIGN KEY (id_tipopersonal) REFERENCES tipo_personal(id) -- Relación con tipo_personal
+);
+
 CREATE TABLE tipo_documento(
     id int AUTO_INCREMENT PRIMARY KEY,
     nombre varchar(50) NOT NULL,
@@ -361,15 +377,16 @@ CREATE TABLE tipo_usuario (
 -- Crear tabla usuarios
 CREATE TABLE usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL,
     password VARCHAR(255) NOT NULL,
     imagen VARCHAR(255) NOT NULL,
     estado BOOLEAN NOT NULL,
     id_tipousuario INT NOT NULL,
+    id_personal INT NOT NULL,
     fecha_registro DATETIME not null DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) not null,
-    FOREIGN KEY (id_tipousuario) REFERENCES tipo_usuario(id)
+    FOREIGN KEY (id_tipousuario) REFERENCES tipo_usuario(id),
+    FOREIGN KEY (id_personal) REFERENCES personal(id)
 );
 
 CREATE TABLE ciudad(
@@ -448,9 +465,9 @@ CREATE TABLE cliente (
     usuario VARCHAR(100) NULL,
 
     -- Claves foráneas
-    CONSTRAINT fk_pais FOREIGN KEY (id_pais) REFERENCES PAIS(id),
-    CONSTRAINT fk_tipo_cliente FOREIGN KEY (id_tipo_cliente) REFERENCES TIPO_CLIENTE(idTipoCliente),
-    CONSTRAINT fk_tipo_doc FOREIGN KEY (id_tipo_doc) REFERENCES TIPO_DOCUMENTO(id)
+    CONSTRAINT fk_pais FOREIGN KEY (id_pais) REFERENCES pais(id),
+    CONSTRAINT fk_tipo_cliente FOREIGN KEY (id_tipo_cliente) REFERENCES tipo_cliente(idTipoCliente),
+    CONSTRAINT fk_tipo_doc FOREIGN KEY (id_tipo_doc) REFERENCES tipo_documento(id)
 );
 
 -- Crear tabla conf_general
@@ -460,7 +477,9 @@ CREATE TABLE conf_general (
     igv DECIMAL(9,2) NOT NULL,
     max_pasajes_venta INT NOT NULL,
     tiempo_maximo_venta_minutos DECIMAL(9,2),
-    viajesReprogramables BOOLEAN NOT NULL
+    viajesReprogramables BOOLEAN NOT NULL,
+    precioCambioRuta DECIMAL(9,2) NOT NULL,
+    precioTransferencia DECIMAL(9,2) NOT NULL
 );
 
 -- Crear tabla menus
@@ -558,7 +577,7 @@ CREATE TABLE nivel(
     foreign key (id_tipo_vehiculo) references tipo_vehiculo(id)
 );
 -- Crear tabla tipo metodo pago
-CREATE TABLE tipo_metodoPago (
+CREATE TABLE tipo_metodopago (
     idTipoMetodoPago INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL,
     estado BOOLEAN NOT NULL,
@@ -576,20 +595,7 @@ CREATE TABLE metodo_pago (
     qr VARCHAR(255) NULL,
     fecha_registro DATETIME not null DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) not null,
-    foreign key (id_tipo_metodoPago) references tipo_metodoPago(idTipoMetodoPago) -- Relación con tipo_metodoPago
-);
-
--- Crear tabla personal
-
-CREATE TABLE personal (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    imagen VARCHAR(255) NOT NULL,
-    estado BOOLEAN NOT NULL,
-    id_tipopersonal INT NOT NULL,
-    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    usuario VARCHAR(100) NOT NULL,
-    FOREIGN KEY (id_tipopersonal) REFERENCES tipo_personal(id) -- Relación con tipo_personal
+    foreign key (id_tipo_metodoPago) references tipo_metodopago(idTipoMetodoPago) -- Relación con tipo_metodoPago
 );
 
 -- Crear tabla personal_incidencia
@@ -790,6 +796,7 @@ CREATE TABLE reembolso (
     idCliente INT NOT NULL,
     idTipoComprobante INT NOT NULL,
     idMetodoPago INT NOT NULL,
+    estado varchar(20) NULL DEFAULT 'PENDIENTE', -- Ej: "Pendiente", "Aprobado", "Rechazado"
     FOREIGN KEY (idCliente) REFERENCES cliente (id),
     FOREIGN KEY (idTipoComprobante) REFERENCES tipo_comprobante (idTipoComprobante),
     FOREIGN KEY (idMetodoPago) REFERENCES metodo_pago (id),
@@ -916,14 +923,11 @@ INSERT INTO tipo_personal (id, nombre, estado, usuario) VALUES (1, 'CHOFER', 1, 
 INSERT INTO tipo_personal (id, nombre, estado, usuario) VALUES (2, 'TRIPULANTE', 1, 'SYSTEM');
 
 -- INSERTS personal
-INSERT INTO personal (id, nombre, imagen, estado, id_tipopersonal) VALUES (1, 'Louis Requejo Chirinos',
-"/Static/img/trabajadores/default-user.png", 1, 1);
-INSERT INTO personal (id, nombre, imagen, estado, id_tipopersonal) VALUES (2, 'Anderson Baca Chuquimanco',
-"/Static/img/trabajadores/default-user.png", 1, 1);
-INSERT INTO personal (id, nombre, imagen, estado, id_tipopersonal) VALUES (3, 'Edgar Alarcón Chapoñan',
-"/Static/img/trabajadores/default-user.png", 1, 2);
-INSERT INTO personal (id, nombre, imagen, estado, id_tipopersonal) VALUES (4, 'Luis Cruz Chinchay',
-"/Static/img/trabajadores/default-user.png", 1, 2);
+INSERT INTO personal (id, nombre, ape_paterno, ape_materno, imagen, estado, id_tipopersonal) VALUES (1, 'Louis', 'Requejo', 'Chirinos', "/Static/img/trabajadores/default-user.png", 1, 1);
+INSERT INTO personal (id, nombre, ape_paterno, ape_materno, imagen, estado, id_tipopersonal) VALUES (2, 'Anderson', 'Baca', 'Chuquimanco', "/Static/img/trabajadores/default-user.png", 1, 1);
+INSERT INTO personal (id, nombre, ape_paterno, ape_materno, imagen, estado, id_tipopersonal) VALUES (3, 'Edgar', 'Alarcón', 'Chapoñan', "/Static/img/trabajadores/default-user.png", 1, 2);
+INSERT INTO personal (id, nombre, ape_paterno, ape_materno, imagen, estado, id_tipopersonal) VALUES (4, 'Luis', 'Cruz', 'Chinchay', "/Static/img/trabajadores/default-user.png", 1, 2);
+INSERT INTO personal (id, nombre, ape_paterno, ape_materno, imagen, estado, id_tipopersonal) VALUES (5, 'Alexis', 'Torres', 'Cabrejos', "/Static/img/trabajadores/default-user.png", 1, 2);
 
 -- INSERT TIPO CLIENTE
 INSERT INTO tipo_cliente (nombre, estado, usuario)
@@ -934,24 +938,20 @@ VALUES
 ('Empresa', TRUE, 'admin');
 
 -- INSERT TIPO DOCUMENTO
-INSERT INTO tipo_documento (nombre, abreviatura, estado, usuario)
-VALUES ('DOCUMENTO NACIONAL DE IDENTIFICACION', 'DNI', TRUE, 'admin');
-INSERT INTO tipo_documento (nombre, abreviatura, estado, usuario)
-VALUES ('REGISTRO UNICO DE CONTRIBUYENTE', 'RUC', TRUE, 'admin');
-INSERT INTO tipo_documento (nombre, abreviatura, estado, usuario)
-VALUES ('CARNET DE EXTRANJERIA', 'CE', TRUE, 'admin');
+INSERT INTO tipo_documento (nombre, abreviatura, estado, usuario) VALUES ('DOCUMENTO NACIONAL DE IDENTIFICACION', 'DNI', TRUE, 'admin');
+INSERT INTO tipo_documento (nombre, abreviatura, estado, usuario) VALUES ('REGISTRO UNICO DE CONTRIBUYENTE', 'RUC', TRUE, 'admin');
+INSERT INTO tipo_documento (nombre, abreviatura, estado, usuario) VALUES ('CARNET DE EXTRANJERIA', 'CE', TRUE, 'admin');
 
 -- INSERT SERVICIO
 insert into servicio values (1,'Premium','Los autobuses más modernos y lujosos del mercado. Asientos cama,
 entretenimiento a bordo, snacks incluidos, aire acondicionado y cargadores USB. Ideal para viajes de largo
-trayecto.',1,'2025-05-25 19:30:00','Alexis','/Static/img/servicios/busPremium.png');
+trayecto.',1,'#BD2130','2025-05-25 19:30:00','Alexis','/Static/img/servicios/busPremium.png');
 insert into servicio values (2,'Económico','Autobuses cómodos y seguros a precios accesibles. Pensado para usuarios que
-priorizan economía sin perder calidad.',1,'2025-05-25 19:32:00','Alexis','/Static/img/servicios/busEconomico.png');
+priorizan economía sin perder calidad.',1,'#BD2130','2025-05-25 19:32:00','Alexis','/Static/img/servicios/busEconomico.png');
 insert into servicio values (3,'Exprés','Servicios rápidos con pocas paradas. Unidades modernas y seguras para viajeros
-que buscan llegar en el menor tiempo posible.',1,'2025-05-25 19:40:00','Alexis','/Static/img/servicios/busExpress.png');
+que buscan llegar en el menor tiempo posible.',1,'#BD2130','2025-05-25 19:40:00','Alexis','/Static/img/servicios/busExpress.png');
 
 -- INSERT MARCA
-
 INSERT INTO `marca` (`id`,`nombre`, `logo`, `estado`, `fecha_registro`, `usuario`)
 VALUES (1,'Mercedes-Benz', '/Static/img/marca/MercedesBenz.png', '1', '2025-05-26 11:40:29', 'edgar@gmail.com'),
 (2,'Dodge', '/Static/img/marca/Dodge.png', '1', '2025-05-26 11:40:50', 'edgar@gmail.com'),
@@ -1524,17 +1524,17 @@ INSERT INTO tipo_usuario (id,nombre, estado, fecha_registro, usuario) VALUES (1,
 20:02:56','SYSTEM');
 
 -- Tabla Usuario
-INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,fecha_registro,usuario) VALUES
-(1,'Alexis','alexis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
+INSERT INTO usuarios (id, id_personal, email, password, imagen, estado, id_tipousuario,fecha_registro,usuario) VALUES
+(1, 5,'alexis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
 '/Static/img/trabajadores/alexis.jpeg', 1, 1,'2025-03-06 20:06:14','SYSTEM');
-INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,fecha_registro,usuario) VALUES
-(2,'Edgar','edgar@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
+INSERT INTO usuarios (id, id_personal, email, password, imagen, estado, id_tipousuario,fecha_registro,usuario) VALUES
+(2, 3,'edgar@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
 '/Static/img/trabajadores/edgar.png', 1, 1,'2025-03-06 20:06:14','SYSTEM');
-INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,fecha_registro,usuario) VALUES
-(3,'Ander','ander@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
+INSERT INTO usuarios (id, id_personal, email, password, imagen, estado, id_tipousuario,fecha_registro,usuario) VALUES
+(3, 2,'ander@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
 '/Static/img/trabajadores/ander.jpg', 1, 1,'2025-03-06 20:06:14','SYSTEM');
-INSERT INTO usuarios (id, nombre, email, password, imagen, estado, id_tipousuario,fecha_registro,usuario) VALUES
-(4,'Luis','luis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
+INSERT INTO usuarios (id, id_personal, email, password, imagen, estado, id_tipousuario,fecha_registro,usuario) VALUES
+(4, 4,'luis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
 '/Static/img/trabajadores/luis.jpg', 1, 1,'2025-03-06 20:06:14','SYSTEM');
 
 -- Tabla de configuración general
@@ -2353,7 +2353,7 @@ DELIMITER ;
 DELIMITER $$
 
 CREATE PROCEDURE SP_REGISTRAR_USUARIO(
-    IN P_NOMBRE VARCHAR(255),
+    IN P_IDPERSONAL INT,
     IN P_EMAIL VARCHAR(255),
     IN P_PASS VARCHAR(255),
     IN P_IMAGEN VARCHAR(255),
@@ -2376,13 +2376,15 @@ BEGIN
     FROM usuarios 
     WHERE EMAIL = P_EMAIL;
 
-    IF cEmail > 0 THEN
+    IF EXISTS (SELECT 1 FROM usuarios WHERE id_personal = P_IDPERSONAL AND estado = 1 LIMIT 1) THEN
+        SET @MSJ2 = 'El personal seleccionado ya tiene un usuario vigente asignado';
+    ELSEIF cEmail > 0 THEN
         SET @MSJ2 = 'El correo que intenta registrar ya está registrado';
     ELSE
         INSERT INTO usuarios (
-            NOMBRE, EMAIL, PASSWORD, IMAGEN, ESTADO, ID_TIPOUSUARIO, USUARIO
+            ID_PERSONAL, EMAIL, PASSWORD, IMAGEN, ESTADO, ID_TIPOUSUARIO, USUARIO
         ) VALUES (
-            P_NOMBRE, P_EMAIL, P_PASS, P_IMAGEN, P_ESTADO, P_IDTIPOUSUARIO, P_USUARIO
+            P_IDPERSONAL, P_EMAIL, P_PASS, P_IMAGEN, P_ESTADO, P_IDTIPOUSUARIO, P_USUARIO
         );
 
         SET @MSJ = 'Se registró correctamente al usuario';
@@ -2396,7 +2398,7 @@ DELIMITER $$
 
 CREATE PROCEDURE SP_EDITAR_USUARIO(
     IN P_ID INT,
-    IN P_NOMBRE VARCHAR(255),
+    IN P_IDPERSONAL INT,
     IN P_EMAIL VARCHAR(255),
     IN P_IMAGEN VARCHAR(255),
     IN P_ESTADO BOOLEAN,
@@ -2422,13 +2424,15 @@ BEGIN
     FROM usuarios 
     WHERE EMAIL = P_EMAIL AND ID != P_ID;
 
-    IF cUsuario <= 0 THEN
+    IF EXISTS (SELECT 1 FROM usuarios WHERE id_personal = P_IDPERSONAL AND estado = 1 AND id != P_ID LIMIT 1) THEN
+        SET @MSJ2 = 'El personal seleccionado ya tiene un usuario vigente asignado';
+    ELSEIF cUsuario <= 0 THEN
         SET @MSJ2 = 'El usuario que intenta editar no existe';
     ELSEIF cEmail != 0 THEN
         SET @MSJ2 = 'El correo ingresado ya existe';
     ELSE
         UPDATE usuarios 
-        SET NOMBRE = P_NOMBRE, 
+        SET ID_PERSONAL = P_IDPERSONAL, 
             EMAIL = P_EMAIL,
             IMAGEN = P_IMAGEN,
             ESTADO = P_ESTADO,
@@ -5170,7 +5174,8 @@ CREATE PROCEDURE SP_INSERTAR_SERVICIO(
     IN P_DESCRIPCION VARCHAR(255),
     IN P_ESTADO BOOLEAN,
     IN P_USUARIO VARCHAR(100),
-    IN P_IMAGEN TEXT
+    IN P_IMAGEN TEXT,
+    IN P_COLOR VARCHAR(255)
 )
 BEGIN
     DECLARE existe_nombre INT;
@@ -5189,9 +5194,9 @@ BEGIN
 
     IF existe_nombre = 0 THEN
         INSERT INTO servicio (
-            nombre, descripcion, estado, usuario, imagen
+            nombre, descripcion, estado, usuario, imagen, color
         ) VALUES (
-            P_NOMBRE, P_DESCRIPCION, P_ESTADO, P_USUARIO, P_IMAGEN
+            P_NOMBRE, P_DESCRIPCION, P_ESTADO, P_USUARIO, P_IMAGEN, P_COLOR
         );
 
         SET @MSJ = 'Se registró correctamente el servicio';
@@ -5206,7 +5211,8 @@ CREATE PROCEDURE SP_ACTUALIZAR_SERVICIO(
     IN P_NOMBRE VARCHAR(50),
     IN P_DESCRIPCION VARCHAR(255),
     IN P_ESTADO BOOLEAN,
-    IN P_IMAGEN TEXT
+    IN P_IMAGEN TEXT,
+    IN P_COLOR VARCHAR(255)
 )
 BEGIN
     DECLARE existe_nombre INT;
@@ -5228,7 +5234,8 @@ BEGIN
         SET nombre = P_NOMBRE,
             descripcion = P_DESCRIPCION,
             estado = P_ESTADO,
-            imagen = P_IMAGEN
+            imagen = P_IMAGEN,
+            color = P_COLOR
         WHERE id = P_ID;
 
         SET @MSJ = 'Se modificó correctamente el servicio';
@@ -5577,6 +5584,8 @@ DELIMITER ;
 DELIMITER $$
 CREATE PROCEDURE SP_REGISTRAR_PERSONAL(
     IN P_NOMBRE VARCHAR(255),
+    IN P_APE_PATERNO VARCHAR(255),
+    IN P_APE_MATERNO VARCHAR(255),
     IN P_IMAGEN VARCHAR(255),
     IN P_ESTADO BOOLEAN,
     IN P_IDTIPOPERSONAL INT,
@@ -5591,8 +5600,8 @@ BEGIN
     SET @MSJ = NULL;
     SET @MSJ2 = NULL;
 
-        INSERT INTO personal (NOMBRE, IMAGEN, ESTADO, ID_TIPOPERSONAL, USUARIO) 
-        VALUES (P_NOMBRE, P_IMAGEN, P_ESTADO, P_IDTIPOPERSONAL, P_USUARIO);
+        INSERT INTO personal (NOMBRE, APE_PATERNO, APE_MATERNO, IMAGEN, ESTADO, ID_TIPOPERSONAL, USUARIO) 
+        VALUES (P_NOMBRE, P_APE_PATERNO, P_APE_MATERNO, P_IMAGEN, P_ESTADO, P_IDTIPOPERSONAL, P_USUARIO);
         SET @MSJ = 'Se registró correctamente al personal';
 END $$
 DELIMITER ;
@@ -5602,6 +5611,8 @@ DELIMITER $$
 CREATE PROCEDURE SP_EDITAR_PERSONAL(
     IN P_ID INT,
     IN P_NOMBRE VARCHAR(255),
+    IN P_APE_PATERNO VARCHAR(255),
+    IN P_APE_MATERNO VARCHAR(255),
     IN P_IMAGEN VARCHAR(255),
     IN P_ESTADO BOOLEAN,
     IN P_IDTIPOPERSONAL INT
@@ -5623,6 +5634,8 @@ BEGIN
     ELSE
         UPDATE personal 
         SET NOMBRE = P_NOMBRE,
+            APE_PATERNO = P_APE_PATERNO,
+            APE_MATERNO = P_APE_MATERNO,
             IMAGEN = P_IMAGEN,
             ESTADO = P_ESTADO,
             ID_TIPOPERSONAL = P_IDTIPOPERSONAL
@@ -5702,13 +5715,13 @@ BEGIN
     SET @MSJ2 = NULL;
 
     SELECT COUNT(*) INTO cExiste 
-    FROM tipo_metodoPago
+    FROM tipo_metodopago
     WHERE nombre = P_NOMBRE AND estado = 1;
 
     IF cExiste > 0 THEN
         SET @MSJ2 = 'Ya existe un tipo de método de pago con ese nombre';
     ELSE
-        INSERT INTO tipo_metodoPago (nombre, estado, usuario)
+        INSERT INTO tipo_metodopago (nombre, estado, usuario)
         VALUES (P_NOMBRE, P_ESTADO, P_USUARIO);
         SET @MSJ = 'Se registró correctamente el tipo de método de pago';
     END IF;
@@ -5735,11 +5748,11 @@ BEGIN
     SET @MSJ2 = NULL;
 
     SELECT COUNT(*) INTO cExiste 
-    FROM tipo_metodoPago 
+    FROM tipo_metodopago 
     WHERE idTipoMetodoPago = P_ID;
 
     SELECT COUNT(*) INTO cNombre 
-    FROM tipo_metodoPago 
+    FROM tipo_metodopago 
     WHERE nombre = P_NOMBRE AND idTipoMetodoPago != P_ID;
 
     IF cExiste = 0 THEN
@@ -5747,7 +5760,7 @@ BEGIN
     ELSEIF cNombre != 0 THEN
         SET @MSJ2 = 'El nombre ingresado ya existe';
     ELSE
-        UPDATE tipo_metodoPago 
+        UPDATE tipo_metodopago 
         SET nombre = P_NOMBRE,
             estado = P_ESTADO,
             usuario = P_USUARIO
@@ -5773,13 +5786,13 @@ BEGIN
     SET @MSJ2 = NULL;
 
     SELECT COUNT(*) INTO cExiste 
-    FROM tipo_metodoPago 
+    FROM tipo_metodopago 
     WHERE idTipoMetodoPago = P_ID AND estado = 1;
 
     IF cExiste = 0 THEN
         SET @MSJ2 = 'El tipo de método de pago no existe o ya fue dado de baja';
     ELSE
-        UPDATE tipo_metodoPago 
+        UPDATE tipo_metodopago 
         SET estado = 0,
             usuario = P_USUARIO
         WHERE idTipoMetodoPago = P_ID;
@@ -5803,7 +5816,7 @@ BEGIN
     SET @MSJ2 = NULL;
 
     SELECT COUNT(*) INTO cExiste 
-    FROM tipo_metodoPago 
+    FROM tipo_metodopago 
     WHERE idTipoMetodoPago = P_ID;
 
     IF EXISTS (SELECT 1 FROM metodo_pago WHERE id_tipo_metodoPago = P_ID) THEN
@@ -5811,7 +5824,7 @@ BEGIN
     ELSEIF cExiste <= 0 THEN
         SET @MSJ2 = 'El tipo de método de pago que intenta eliminar no existe';
     ELSE
-        DELETE FROM tipo_metodoPago 
+        DELETE FROM tipo_metodopago 
         WHERE idTipoMetodoPago = P_ID;
         SET @MSJ = 'Se eliminó correctamente el tipo de método de pago';
     END IF;
@@ -6526,3 +6539,26 @@ END $$
 
 DELIMITER ;
 
+DELIMITER $$
+
+CREATE PROCEDURE SP_CAMBIAR_ESTADO_REEMBOLSO(
+    IN p_id_reembolso INT,
+    IN p_estado VARCHAR(20),
+    OUT MSJ VARCHAR(255),
+    OUT MSJ2 VARCHAR(255)
+)
+BEGIN
+    IF EXISTS (SELECT 1 FROM reembolso WHERE id = p_id_reembolso) THEN
+        UPDATE reembolso
+        SET estado = p_estado
+        WHERE id = p_id_reembolso;
+
+        SET MSJ = 'Estado actualizado correctamente';
+        SET MSJ2 = NULL;
+    ELSE
+        SET MSJ = NULL;
+        SET MSJ2 = 'El reembolso no existe';
+    END IF;
+END $$
+
+DELIMITER ;

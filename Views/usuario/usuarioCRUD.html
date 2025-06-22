@@ -13,10 +13,18 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-12 mb-3">
+                            <label for="cbx_Personal">Personal asignado</label>
+                            <div class="input-group">
+                                <select id="cbx_Personal" class="form-control" {% if btnId=='btn_Aceptar' %}disabled{%
+                                    endif %}>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-12 mb-3">
                             <label for="txt_Nombre">Nombre completo</label>
                             <div class="input-group">
                                 <input type="text" id="txt_Nombre" class="form-control" placeholder="Nombre completo" {%
-                                    if btnId=='btn_Aceptar' %}disabled{% endif %} value="{{ usuario.nombre }}">
+                                    if btnId=='btn_Aceptar' %}disabled{% endif %} value="{{ usuario.nombre }}" readonly>
                                 <div class="input-group-append">
                                     <div class="input-group-text"><i class="fas fa-user"></i></div>
                                 </div>
@@ -123,8 +131,35 @@
         });
     }
 
+    function fct_GetPersonal() {
+        $.getJSON('/trabajadores/usuarios/GetPersonal', function (response) {
+            if (response.Status === 'success') {
+                let items = '<option disabled selected>--SELECCIONAR--</option>';
+
+                $.each(response.data, function (index, item) {
+                    if (item.id === Number("{{ usuario.id_personal }}")) {
+                        items += `<option selected value="${item.id}">${item.ape_paterno} ${item.ape_materno}, ${item.nombre} - ${item.tipoPersonal}</option>`;
+                    } else {
+                        items += `<option value="${item.id}">${item.ape_paterno} ${item.ape_materno}, ${item.nombre} - ${item.tipoPersonal}</option>`;
+                    }
+                });
+
+                $('#cbx_Personal').html(items);
+
+                $('#cbx_Personal').on('change', function () {
+                    const texto = $(this).find('option:selected').text().split('-')[0].trim();
+                    $('#txt_Nombre').val(texto);
+                });
+
+            } else {
+                console.error('Error al obtener los tipos de usuario:', response.Msj);
+            }
+        });
+    }
+
     $(document).ready(function () {
         fct_GetTiposUsuarios();
+        fct_GetPersonal();
 
         $('#file_Imagen').on('change', function () {
             if (this.files.length > 0) {
@@ -153,14 +188,14 @@
         });
 
         $("#btn_Registrar").click(function () {
-            let nombre = $("#txt_Nombre").val().trim();
             let email = $("#txt_Email").val().trim();
             let password = $("#txt_Password").val().trim();
             let estado = $('#cbx_Estado').val();
             let tipoUsuario = $('#cbx_TipoUsuario').val();
+            let idPersonal = $('#cbx_Personal').val();
             let imagen = $("#file_Imagen")[0].files[0];
 
-            if (!nombre || !email || !password || !estado || !tipoUsuario || !imagen) {
+            if (!email || !password || !estado || !tipoUsuario || !idPersonal || !imagen) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
@@ -178,11 +213,11 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     let formData = new FormData();
-                    formData.append("nombre", nombre);
                     formData.append("email", email);
                     formData.append("password", password);
                     formData.append("estado", estado);
                     formData.append("idTipoUsuario", tipoUsuario);
+                    formData.append("idPersonal", idPersonal);
                     formData.append("imagen", imagen);
                     $.ajax({
                         url: "/trabajadores/usuarios/RegistrarUsuario",
@@ -218,13 +253,13 @@
         $("#btn_Editar").click(function () {
             const id = Number("{{ usuario.id }}");
 
-            let nombre = $("#txt_Nombre").val().trim();
             let email = $("#txt_Email").val().trim();
             let estado = $('#cbx_Estado').val();
             let tipoUsuario = $('#cbx_TipoUsuario').val();
+            let idPersonal = $('#cbx_Personal').val();
             let imagen = $("#file_Imagen")[0].files[0];
 
-            if (!nombre || !email || !estado || !tipoUsuario) {
+            if (!email || !estado || !tipoUsuario || !idPersonal) {
                 toastr.warning("Todos los campos son obligatorios, excepto la imagen.", "MENSAJE DE SISTEMA");
                 return;
             }
@@ -242,10 +277,10 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     let formData = new FormData();
-                    formData.append("nombre", nombre);
                     formData.append("email", email);
                     formData.append("estado", estado);
                     formData.append("idTipoUsuario", tipoUsuario);
+                    formData.append("idPersonal", idPersonal);
 
                     if (imagen) {
                         formData.append("imagen", imagen);

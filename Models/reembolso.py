@@ -25,6 +25,31 @@ class Reembolso:
             return reembolsos
         finally:
             conexion.cerrar()
+            
+    @classmethod
+    def obtener_todos_completo(cls):
+        conexion = bd.Conexion()
+        try:
+            reembolsos = conexion.obtener("""
+               SELECT 
+r.id,
+pa.numeroComprobante,
+CONCAT(pas.ape_paterno,' ', pas.ape_materno,' ', pas.nombre) as nombreCompleto,
+a.nombre as asiento,
+CONCAT((select ciudad from sucursal sucu where sucu.id=dv.idSucursalOrigen) , '-',
+(select ciudad from sucursal sucu where sucu.id=dv.idSucursalDestino)) AS origen_destino,
+r.estado
+FROM reembolso r 
+INNER JOIN pasaje pa on pa.id=r.idPasaje
+INNER JOIN detalle_pasaje dp on dp.idPasaje= pa.id
+INNER JOIN pasajero pas on pas.id=dp.idPasajero
+INNER JOIN detalle_viaje_asiento dva on pa.idDetalleViajeAsiento=dva.id
+INNER JOIN detalle_viaje dv on dva.idDetalle_Viaje=dv.id
+INNER JOIN asiento a on dva.idAsiento=a.id
+            """)
+            return reembolsos
+        finally:
+            conexion.cerrar()
 
     # Obtener un reembolso por ID
     @classmethod
@@ -53,7 +78,9 @@ class Reembolso:
                         WHEN v.estado = 0 THEN 'Dado de baja'
                         WHEN v.estado = 1 THEN 'Activo'
                         ELSE 'Desconocido'
-                    END AS estado_descripcion
+                    END AS estado_descripcion,
+                    p.fechaInicioReprogramacion,
+                    p.fechaFinReprogramacion
                 FROM pasaje p
                 INNER JOIN detalle_viaje_asiento dva ON p.idDetalleViajeAsiento = dva.id
                 INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
@@ -63,6 +90,7 @@ class Reembolso:
             return reembolso[0] if reembolso else None
         finally:
             conexion.cerrar()
+            
 
     # Registrar un nuevo reembolso
     @classmethod
@@ -75,5 +103,34 @@ class Reembolso:
             )
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
             return resultado[0]  # {'@MSJ': '...', '@MSJ2': '...'}
+        finally:
+            conexion.cerrar()
+
+    @classmethod
+    def cambiar_estado(cls, id_reembolso, nuevo_estado):
+        conexion = bd.Conexion()
+        try:
+            if(nuevo_estado =='ACEPTADO'):
+                conexion.ejecutar(
+                    "UPDATE pasaje set esReembolso= 1 WHERE id = (SELECT idPasaje FROM reembolso WHERE id = %s);",
+                    (id_reembolso,)
+                )
+                conexion.ejecutar(
+                    "CALL SP_CAMBIAR_ESTADO_REEMBOLSO(%s, %s, @MSJ, @MSJ2);",
+                    (id_reembolso, nuevo_estado)
+                )
+                resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
+                return resultado[0]
+            else:
+                conexion.ejecutar(
+                    "UPDATE pasaje set esReembolso= 0 WHERE id = (SELECT idPasaje FROM reembolso WHERE id = %s);",
+                    (id_reembolso,)
+                )
+                conexion.ejecutar(
+                    "CALL SP_CAMBIAR_ESTADO_REEMBOLSO(%s, %s, @MSJ, @MSJ2);",
+                    (id_reembolso, nuevo_estado)
+                )
+                resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
+                return resultado[0]
         finally:
             conexion.cerrar()

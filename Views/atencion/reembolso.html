@@ -1,27 +1,38 @@
 {% extends "index.html" %}
 
-{% block title %}YATRAX - Gestión de servicios{% endblock %}
+{% block title %}YATRAX - Gestión de reembolsos{% endblock %}
 
 {% block content %}
 <div class="container-fluid p-4">
     <div class="panel-heading">
         <div class="row">
             <div class="col-md-12">
-                <h1>Gestionar servicios</h1>
+                <h1>Gestionar reembolsos</h1>
             </div>
         </div>
     </div>
+    <div class="row mb-2">
+    <div class="col-md-3">
+        <label for="filtroEstado" class="form-label">Filtrar por estado:</label>
+        <select id="filtroEstado" class="form-select form-select-sm">
+            <option value="">Todos</option>
+            <option value="ACEPTADO">Aceptado</option>
+            <option value="PENDIENTE">Pendiente</option>
+            <option value="RECHAZADO">Rechazado</option>
+        </select>
+    </div>
+</div>
+
     <div class="panel-body">
         <div class="row">
             <div class="col-12">
-                <table id="tbl_Servicio" class="table table-bordered table-short-rows">
+                <table id="tbl_Plantillas" class="table table-bordered table-short-rows">
                     <thead class="bg-gray">
                         <tr>
-                            <th class="text-center">ID</th>
-                            <th class="text-center">NOMBRE</th>
-                            <th class="text-center">DESCRIPCION</th>
-                            <th class="text-center">IMAGEN</th>
-                            <th class="text-center">COLOR</th>
+                            <th class="text-center">N° COMPROBANTE</th>
+                            <th class="text-center">CLIENTE</th>
+                            <th class="text-center">ASIENTO</th>
+                            <th class="text-center">ORIGEN-DESTINO</th>
                             <th class="text-center">ESTADO</th>
                             <th class="text-center">ACCIÓN</th>
                         </tr>
@@ -37,7 +48,6 @@
 {% block scripts %}
 <script>
     var dtUsuarios;
-
     $(document).ready(function () {
         // $('body').addClass('sidebar-collapse');
         var windowHeight = $('body > div.wrapper > div.content-wrapper').height() / 2;
@@ -102,10 +112,67 @@
             lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
         });
 
-        fct_IniciarTablaServicios('#tbl_Servicio');
+        fct_IniciarTablaPlantillas('#tbl_Plantillas');
+
+        $('#tbl_Plantillas').on('click', '.activar-plantilla', function (e) {
+            const checkbox = $(this);
+            const id = checkbox.data('id');
+            const isChecked = checkbox.is(':checked');
+            const accion = isChecked ? 1 : 0;
+            let texto = accion === 1 ? 'asignar' : 'eliminar';
+
+            e.preventDefault();
+
+            if (accion === 0) {
+                toastr.warning('No se puede desactivar una plantilla; por favor, active la que desea activar para que las demás se desactiven', 'MENSAJE DE SISTEMA');
+                return;
+            }
+
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción activará a la plantilla y desactivará a las demás. ¿Deseas continuar?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, activar plantilla",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Si el usuario confirma, hacemos la petición AJAX
+                    $.ajax({
+                        url: `/trabajadores/configuracion/ActivarPlantilla/${id}`,  // Pasamos el ID en la URL
+                        type: "POST",
+                        contentType: "application/json",
+                        success: function (response) {
+                            if (response.Status === "success") {
+                                if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                    return;
+                                }
+
+                                fct_IniciarTablaPlantillas('#tbl_Plantillas');
+                                toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                            } else {
+                                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                                console.error('Error: ' + response.Msj);
+                            }
+                        },
+                        error: function (xhr, Status, error) {
+                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                            console.error('Error:' + error);
+                        }
+                    });
+
+                } else {
+                    checkbox.prop('checked', !isChecked);
+                }
+            });
+        });
     });
 
-    function fct_IniciarTablaServicios(IdTabla) {
+    function fct_IniciarTablaPlantillas(IdTabla) {
         // Inicializar DataTables con botones
         dtUsuarios = $(IdTabla).DataTable({
             buttons: [
@@ -120,7 +187,7 @@
                     text: '<i class="bi bi-file-earmark-excel"></i>',
                     titleAttr: 'Exportar a Excel',
                     className: 'btn btn-success',
-                    filename: 'Servicios' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Usuarios' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     footer: true,
                     exportOptions:
                     {
@@ -133,7 +200,7 @@
                     text: '<i class="bi bi-file-earmark-pdf"></i>',
                     titleAttr: 'Exportar a PDF',
                     className: 'btn btn-danger',
-                    filename: 'Servicios' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Usuarios' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     exportOptions:
                     {
                         stripHtml: true,
@@ -160,17 +227,9 @@
                     className: 'btn btn-warning',
                     columns: ':not(.noVis)',
                 },
-                {
-                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo servicio',
-                    className: 'btn bg-success m-1',
-                    titleAttr: 'Nuevo',
-                    action: function (e, dt, node, config) {
-                        fct_NuevoServicio();
-                    },
-                },
             ],
             ajax: {
-                url: "/trabajadores/ventas/GetData_Servicio",
+                url: "/trabajadores/atencion/GetData_Reembolsos",
                 type: "GET",
                 datatype: "json",
                 data: function (d) {
@@ -189,48 +248,24 @@
                 },
             },
             columns: [
-                { data: "id", name: "id" },
-                { data: "nombre", name: "nombre" },
-                { data: "descripcion", name: "descripcion" },
+                { data: "numeroComprobante", name: "numeroComprobante" },
+                { data: "nombreCompleto", name: "nombreCompleto" },
+                { data: "asiento", name: "asiento"},
+                { data: "origen_destino", name: "origen_destino"},
                 {
-                    data: "imagen",
-                    name: "imagen",
-                    render: function (data, type, row) {
-                        if (data && data !== "") {
-                            return `<img src="${data}" alt="Imagen" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">`;
-                        } else {
-                            return `<span class="badge bg-secondary">Sin imagen</span>`;
-                        }
-                    },
-                    className: "text-center align-middle"
-                },
-                {
-                    data: "color",
-                    name: "color",
-                    render: function (data, type, row) {
-                        if (data && data !== "") {
-                            return `<div class = "m-1 w-100 h-100" style ="background-color:${data}; color:${data}">
-                                    .
-                                </div>`;
-                        } else {
-                            return `<span class="badge bg-secondary">Sin color</span>`;
-                        }
-                    },
-                    className: "text-center align-middle"
-                },
-                { 
-                    data: "estado", 
+                    data: "estado",
                     name: "estado",
                     render: function (data, type, row) {
-                        let estado = data === 1 ? 'Vigente' : 'No vigente';
-                        if (estado === "Vigente") {
-                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-success fs-5">${estado}</span></h5>`;
-                        } else if (estado === "No vigente") {
-                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-danger fs-5">${estado}</span></h5>`;
-                        } else {
-                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge fs-5" style="background-color: #800080; color: white;">${estado}</span></h5>`;
+                        
+                        if (data === 'ACEPTADO') {
+                            return `<span class="badge bg-success">ACEPTADO</span>`;
+                        } else if (data === 'PENDIENTE') {
+                            return `<span class="badge bg-secondary">PENDIENTE</span>`;
+                        }else{
+                            return `<span class="badge bg-danger">RECHAZADO</span>`;
                         }
                     },
+                    className: 'text-center align-middle',
                 },
                 {
                     data: null,
@@ -238,10 +273,8 @@
                     render: function (data, type, row) {
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_VerServicio('${data.id}')" title="Ver servicio"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_ServicioEditar('${data.id}')" title="Editar servicio"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_ServicioDarBaja('${data.id}')" title="Dar de baja servicio"><i class="bi bi-arrow-down-circle"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_ServicioEliminar('${data.id}')" title="Eliminar servicio"><i class="bi bi-trash"></i></button>
+                            <button class="btn btn-xs m-1 bg-green" onclick="fct_PlantillaEditar('${data.id}')" title="Editar plantilla"><i class="bi bi-check"></i></button>
+                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_PlantillaEliminar('${data.id}')" title="Eliminar plantilla"><i class="	bi bi-x"></i></button>
                         </div>
                         `;
                     },
@@ -254,11 +287,11 @@
                     className: "text-center align-middle",
                 },
                 {
-                    targets: [1, 2, 3, 4,5],
+                    targets: [1, 2, 3,4],
                     className: 'align-middle',
                 },
                 {
-                    targets: [6],
+                    targets: [3],
                     orderable: false,
                     width: '10%',
                 },
@@ -288,93 +321,87 @@
         });
     }
 
-    function fct_NuevoServicio() {
-        window.location.href = '/trabajadores/ventas/registrarServicio';
+     $('#filtroEstado').on('change', function () {
+        const estado = $(this).val();
+        dtUsuarios.column(4).search(estado).draw();
+    });
+
+    function fct_PlantillaNuevo() {
+        window.location.href = '/trabajadores/configuracion/PlantillaNuevo';
     }
 
-    function fct_ServicioEditar(Id) {
-        window.location.href = `/trabajadores/ventas/editarServicio/${Id}`;
-    }
-
-    function fct_VerServicio(Id) {
-        window.location.href = `/trabajadores/ventas/verServicio/${Id}`;
-    }
-
-    function fct_ServicioEliminar(Id) {
-        Swal.fire({
+    function fct_PlantillaEditar(Id) {
+         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción eliminará el servicio. ¿Deseas continuar?",
+            text: "Esta acción eliminará a la plantilla. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             cancelButtonColor: "#d33",
-            confirmButtonText: "Sí, eliminar servicio",
+            confirmButtonText: "Sí, eliminar",
             cancelButtonText: "Cancelar",
             reverseButtons: true // Invertir el orden de los botones
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/ventas/eliminarServicio/${Id}`,  // Pasamos el ID en la URL
-                    type: "POST",
-                    contentType: "application/json",
-                    success: function (response) {
-                        if (response.Status === "success") {
-                            if (response.Msj2 !== '' && response.Msj2 !== null) {
-                                toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                                return;
-                            }
-                            fct_IniciarTablaServicios('#tbl_Servicio');
-                            toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                        } else {
-                            toastr.error(response.Msj, "MENSAJE DE SISTEMA");
-                            console.error('Error: ' + response.Msj);
-                        }
-                    },
-                    error: function (xhr, Status, error) {
-                        toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
-                        console.error('Error:' + error);
+                url: `/trabajadores/atencion/cambiarEstadoReembolso`,
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ Id: Id, estado: 'ACEPTADO' }), // ✅ Usa "Id" con mayúscula
+                success: function (response) {
+                    if (response.Status === "success") {
+                        fct_IniciarTablaPlantillas('#tbl_Plantillas');
+                        $('#filtroEstado').trigger('change');
+                        toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                    } else {
+                        toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                        console.error('Error: ' + response.Msj);
                     }
-                });
+                },
+                error: function () {
+                    toastr.error("Error al conectar con el servidor", "MENSAJE DE SISTEMA");
+                }
+            });
             }
         });
     }
 
-    function fct_ServicioDarBaja(Id) {
+    function fct_PlantillaVer(Id) {
+        
+    }
+
+    function fct_PlantillaEliminar(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción le dará de baja al servicio. ¿Deseas continuar?",
+            text: "Esta acción eliminará a la plantilla. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             cancelButtonColor: "#d33",
-            confirmButtonText: "Sí, dar de baja al servicio",
+            confirmButtonText: "Sí, eliminar",
             cancelButtonText: "Cancelar",
             reverseButtons: true // Invertir el orden de los botones
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/ventas/DarBajaServicio/${Id}`,  // Pasamos el ID en la URL
-                    type: "POST",
-                    contentType: "application/json",
-                    success: function (response) {
-                        if (response.Status === "success") {
-                            if (response.Msj2 !== '' && response.Msj2 !== null) {
-                                toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                                return;
-                            }
-                            fct_IniciarTablaServicios('#tbl_Servicio');
-                            toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                        } else {
-                            toastr.error(response.Msj, "MENSAJE DE SISTEMA");
-                            console.error('Error: ' + response.Msj);
-                        }
-                    },
-
-                    error: function (xhr, Status, error) {
-                        toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
-                        console.error('Error:' + error);
+                url: `/trabajadores/atencion/cambiarEstadoReembolso`,
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ Id: Id, estado: 'RECHAZADO' }), // ✅ Usa "Id" con mayúscula
+                success: function (response) {
+                    if (response.Status === "success") {
+                        fct_IniciarTablaPlantillas('#tbl_Plantillas');
+                        $('#filtroEstado').trigger('change');
+                        toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                    } else {
+                        toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                        console.error('Error: ' + response.Msj);
                     }
-                });
+                },
+                error: function () {
+                    toastr.error("Error al conectar con el servidor", "MENSAJE DE SISTEMA");
+                }
+            });
             }
         });
     }
@@ -431,6 +458,7 @@
         });
         // Requery the server with the new one-time export settings
         dt.ajax.reload();
+        
     };
 </script>
 {% endblock %}

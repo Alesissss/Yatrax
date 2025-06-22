@@ -3,6 +3,7 @@ from flask import Blueprint, request, jsonify, render_template, session, flash, 
 from Models.pasaje import Pasaje
 from Models.tipoReclamo import Tipo_Reclamo
 from Models.reclamo import Reclamo
+from Models.reembolso import Reembolso
 
 atencion_bp = Blueprint('atencion', __name__, url_prefix='/trabajadores/atencion')
 
@@ -38,6 +39,10 @@ def Menu_TipoReclamo():
 @atencion_bp.route('/GestionarReclamo')
 def Menu_Reclamo():
     return render_template('atencion/reclamo.html', active_page="ejemplo", active_menu='mAtencion')
+
+@atencion_bp.route('/GestionarReembolso')
+def Menu_Reembolso():
+    return render_template('atencion/reembolso.html', active_page="ejemplo", active_menu='mAtencion')
 
 # END VIEWS
 
@@ -440,3 +445,37 @@ def darBajaReclamo(idReclamo):
         })
 
 #END REGION
+
+# REGION REEMBOLSO
+
+@atencion_bp.route('/GetData_Reembolsos')
+def listarReembolsos():
+    try:
+        reembolso = Reembolso.obtener_todos_completo()
+        return jsonify({"Status": "success","data": reembolso})
+    except Exception as e:
+        return jsonify({"Status": "error","Msg": str(e)}), 500
+    
+
+@atencion_bp.route("/cambiarEstadoReembolso", methods=["POST"])
+def cambiar_estado_reembolso():
+    try:
+        data = request.get_json()
+        id_reembolso = data.get("Id")
+        nuevo_estado = data.get("estado")
+
+        if not id_reembolso or nuevo_estado is None:
+            return jsonify({"Status": "error", "Msj": "Faltan datos requeridos"}), 400
+
+        resultado = Reembolso.cambiar_estado(id_reembolso, nuevo_estado)
+
+        if resultado.get("@MSJ"):
+            return jsonify({"Status": "success", "Msj": resultado["@MSJ"]})
+        else:
+            return jsonify({"Status": "error", "Msj": resultado.get("@MSJ2", "Ocurrió un error desconocido")})
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Error interno: {str(e)}"}), 500
+
+    
+
+# END REGION REEMBOLSO
