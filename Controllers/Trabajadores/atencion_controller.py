@@ -99,63 +99,6 @@ def registrarReserva():
         })
 
 
-@atencion_bp.route('/EditarReserva/<int:id>', methods=["GET", "POST"])
-def editarReserva(id):
-    if request.method == "GET":
-        reserva = Pasaje.obtener_por_id(id)
-        return render_template(
-            "atencion/reservaCRUD.html",
-            reserva=reserva,
-            tittle="Editar reserva",
-            btnId="btn_Editar"
-        )
-    # POST
-    try:
-        id_detalle_asiento = int(request.form["id_detalle_asiento"])
-        numero_comprobante   = request.form["numero_comprobante"]
-        es_pasaje_normal     = int(request.form.get("es_pasaje_normal", 0))
-        es_pasaje_libre      = int(request.form.get("es_pasaje_libre", 0))
-        es_transferencia     = int(request.form.get("es_transferencia", 0))
-        es_reserva           = int(request.form.get("es_reserva", 0))
-        es_cambio_ruta       = int(request.form.get("es_cambio_ruta", 0))
-        id_venta             = int(request.form["id_venta"])
-        codigo               = request.form["codigo"]
-        id_pasaje_padre      = int(request.form.get("id_pasaje_padre", 0))
-
-        resultado = Pasaje.modificarReserva(
-            id,
-            id_detalle_asiento,
-            numero_comprobante,
-            es_pasaje_normal,
-            es_pasaje_libre,
-            es_transferencia,
-            es_reserva,
-            es_cambio_ruta,
-            id_venta,
-            codigo,
-            id_pasaje_padre
-        )
-
-        if resultado.get("msj"):
-            return jsonify({
-                "Status": "success",
-                "Msj": resultado["msj"],
-                "Msj2": resultado["msj2"]
-            })
-        else:
-            return jsonify({
-                "Status": "error",
-                "Msj": "",
-                "Msj2": resultado["msj2"]
-            })
-    except Exception as e:
-        return jsonify({
-            "Status": "error",
-            "Msj": str(e),
-            "Msj2": ""
-        })
-
-
 @atencion_bp.route('/EliminarReserva/<int:id>', methods=["POST"])
 def eliminarReserva(id):
     try:
