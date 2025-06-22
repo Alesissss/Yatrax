@@ -747,7 +747,7 @@ CREATE TABLE pasaje(
     enTransaccion TINYINT NULL DEFAULT 0, -- 1: en transacción, 0: no en transacción
     idPasaje INT NULL, -- Para operaciones con pasajes
     fechaInicioReprogramacion DATETIME NULL,
-    fechaFinReprogramacion DATETIME NULL
+    fechaFinReprogramacion DATETIME NULL,
     FOREIGN KEY (idDetalleViajeAsiento) REFERENCES detalle_viaje_asiento(id),
     FOREIGN KEY (idVenta) REFERENCES venta(id)
 );
@@ -790,6 +790,7 @@ CREATE TABLE reembolso (
     idCliente INT NOT NULL,
     idTipoComprobante INT NOT NULL,
     idMetodoPago INT NOT NULL,
+    estado varchar(20) NULL DEFAULT 'PENDIENTE', -- Ej: "Pendiente", "Aprobado", "Rechazado"
     FOREIGN KEY (idCliente) REFERENCES cliente (id),
     FOREIGN KEY (idTipoComprobante) REFERENCES tipo_comprobante (idTipoComprobante),
     FOREIGN KEY (idMetodoPago) REFERENCES metodo_pago (id),
