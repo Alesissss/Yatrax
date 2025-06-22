@@ -481,24 +481,24 @@
                         <div class="row gy-3">
                           <div class="col-md-4">
                             <label class="form-label">Tipo documento</label>
-                            <select id="tipoDocNuevoRem" class="form-select">
+                            <select required id="tipoDocNuevoRem" class="form-select">
                               {% for tipoDoc in TipoDocumento %}
-                              <option value="{{ tipoDoc.id }}">{{ tipoDoc.abreviatura }}</option>
+                              <option  value="{{ tipoDoc.id }}">{{ tipoDoc.abreviatura }}</option>
                               {% endfor %}
                             </select>
                           </div>
                           <div class="col-md-4">
                             <label class="form-label">Número de documento</label>
-                            <input type="text" id="numeroDocNuevoRem" maxlength="11" class="form-control"
+                            <input required type="text" id="numeroDocNuevoRem" maxlength="11" class="form-control"
                               placeholder="Número de documento" />
                           </div>
                           <div class="col-md-4">
-                            <label class="form-label">Correo</label>
+                            <label required class="form-label">Correo</label>
                             <input type="email" id="correoRem" class="form-control" placeholder="Correo" />
                           </div>
                           <div class="col-md-4">
                             <label class="form-label" id="labelNombresRem">Nombres</label>
-                            <input type="text" id="nombresRem" class="form-control" placeholder="Nombres" />
+                            <input required type="text" id="nombresRem" class="form-control" placeholder="Nombres" />
                           </div>
                           <div class="col-md-4" id="apellidoPaternoDivRem">
                             <label class="form-label">Apellido paterno</label>
@@ -512,7 +512,7 @@
                           </div>
                           <div class="col-md-4">
                             <label class="form-label">Teléfono</label>
-                            <input type="tel" id="telefonoRem" class="form-control" placeholder="Teléfono" />
+                            <input required type="tel" id="telefonoRem" class="form-control" placeholder="Teléfono" />
                           </div>
                           <div class="col-md-4">
                             <label class="form-label">Fecha de nacimiento</label>
@@ -1122,59 +1122,83 @@
           codigoPasajeInput.classList.add('is-invalid');
           return;
         }
-
         if (codigoIngresado === codigoCorrecto) {
-          // Si la operación es reembolso, validar si el pasaje está dado de baja
-          if (operacionSeleccionada === 'reembolso') {
-            // Llama al backend para validar el estado del pasaje
-            fetch('/ecommerce/home/validarPasajeDadoBaja', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ numeroComprobante: document.getElementById("comprobante").value.trim() })
-            })
+        if (operacionSeleccionada === 'reembolso') {
+          fetch('/ecommerce/home/validarPasajeDadoBaja', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ numeroComprobante: document.getElementById("comprobante").value.trim() })
+          })
+          .then(r => r.json())
+          .then(json => {
+            if (json.Status === "success") {
+              fetch('/ecommerce/home/validarSolicitudReembolso', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ numeroComprobante: document.getElementById("comprobante").value.trim() })
+              })
               .then(r => r.json())
               .then(json => {
+                const alertError = document.getElementById("alertError");
                 if (json.Status === "success") {
-                  // El pasaje está dado de baja, permitir continuar
-                  modalValidacion.hide();
-                  mostrarContenidoOperacion(operacionSeleccionada, botonSeleccionado);
+                  alertError.textContent = "Ya se ha solicitado un reembolso para este pasaje.";
+                  alertError.classList.remove("d-none", "alert-danger");
+                  alertError.classList.add("alert-secondary");
+                  codigoPasajeInput.classList.remove("is-invalid");
                 } else {
-                  // No cumple con las políticas de reembolso
-                  alertError.textContent = json.Msj || "No se cumple con las políticas de reembolso";
-                  alertError.classList.remove('d-none');
-                  codigoPasajeInput.classList.add('is-invalid');
+                  modalValidacion.hide();
+                  // Mostrar formulario de reembols
+                  mostrarContenidoOperacion(operacionSeleccionada, botonSeleccionado);
                 }
               })
               .catch(() => {
-                alertError.textContent = "Error al validar el estado del pasaje";
-                alertError.classList.remove('d-none');
-                codigoPasajeInput.classList.add('is-invalid');
+                toastr.error("Error al registrar la solicitud de reembolso", "ERROR");
               });
-          } else {
-            // Para otras operaciones, solo cerrar el modal y mostrar el contenido
-            modalValidacion.hide();
-            mostrarContenidoOperacion(operacionSeleccionada, botonSeleccionado);
-          }
+            } else {
+              // No cumple con las políticas de reembolso
+              const alertError = document.getElementById("alertError");
+              alertError.textContent = json.Msj || "No se cumple con las políticas de reembolso";
+              alertError.classList.remove("d-none", "alert-secondary");
+              alertError.classList.add("alert-danger");
+              codigoPasajeInput.classList.add("is-invalid");
+            }
+          })
+          .catch(() => {
+            const alertError = document.getElementById("alertError");
+            alertError.textContent = "Error al validar el estado del pasaje";
+            alertError.classList.remove("d-none", "alert-secondary");
+            alertError.classList.add("alert-danger");
+            codigoPasajeInput.classList.add("is-invalid");
+          });
         } else {
-          // Código incorrecto
-          intentosRestantes--;
-          intentosRestantesSpan.textContent = intentosRestantes;
-
-          alertError.classList.remove('d-none');
-          codigoPasajeInput.classList.add('is-invalid');
-          codigoPasajeInput.value = '';
-
-          if (intentosRestantes <= 0) {
-            setTimeout(() => {
-              modalValidacion.hide();
-              toastr.warning('Se ha alcanzado el máximo de intentos. Por favor, verifique su código de pasaje.', 'MENSAJE DEL SISTEMA');
-            }, 500);
-          } else {
-            setTimeout(() => {
-              codigoPasajeInput.focus();
-            }, 100);
-          }
+          modalValidacion.hide();
+          mostrarContenidoOperacion(operacionSeleccionada, botonSeleccionado);
         }
+      } else {
+        // Código incorrecto
+        intentosRestantes--;
+        intentosRestantesSpan.textContent = intentosRestantes;
+
+        const alertError = document.getElementById("alertError");
+        alertError.textContent = "El código ingresado no es correcto. Por favor, inténtelo nuevamente.";
+        alertError.classList.remove("d-none", "alert-secondary");
+        alertError.classList.add("alert-danger");
+
+        codigoPasajeInput.classList.add("is-invalid");
+        codigoPasajeInput.value = "";
+
+        if (intentosRestantes <= 0) {
+          setTimeout(() => {
+            modalValidacion.hide();
+            toastr.warning('Se ha alcanzado el máximo de intentos. Por favor, verifique su código de pasaje.', 'MENSAJE DEL SISTEMA');
+          }, 500);
+        } else {
+          setTimeout(() => {
+            codigoPasajeInput.focus();
+          }, 100);
+        }
+      }
+
       }
       // Función para validad edad del menor
       function validarEdadMenor() {

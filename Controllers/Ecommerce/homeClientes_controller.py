@@ -794,10 +794,6 @@ def validar_pasaje_dado_baja():
 @homeClientes_bp.route("/registrarReembolso", methods=["POST"])
 def registrar_reembolso():
     try:
-        # # Validar sesión activa
-        # if "cliente" not in session:
-        #     return jsonify({"Status": "error", "Msj": "Debe iniciar sesión para solicitar un reembolso"}), 401
-
         data = request.get_json()
         numero_comprobante = data.get("numeroComprobante")
         motivo = data.get("motivo") or "Reembolso solicitado"
@@ -832,5 +828,24 @@ def registrar_reembolso():
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Error interno: {str(e)}"}), 500
 
+@homeClientes_bp.route("/validarSolicitudReembolso", methods=["POST"])
+def validar_solicitud_reembolso():
+    try:
+        numero_comprobante = request.json.get("numeroComprobante")
+        solicitud=Pasaje.validar_solicitud_reembolso(numero_comprobante)
+        if solicitud:
+            return jsonify({"Status": "success", "Msj": "El pasaje tiene una solicitud de reembolso pendiente", "data": solicitud})
+        else:
+            return jsonify({
+                "Status": "error",
+                "data": {},
+                "Msj": "Ya existe una solicitud de reembolso para este pasaje"
+            })
+    except Exception as e:
+        return jsonify({
+            "Status": "error",
+            "data": {},
+            "Msj": f"Error al validar el pasaje: {repr(e)}"
+        }), 500
 
 # END REEMBOLSO
