@@ -1622,7 +1622,7 @@ def darBaja_viaje(id):  # Recibe el ID de la URL
         mensajes = Viaje.darBaja(id)  # Se usa el ID directamente
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
-
+        modal= mensajes.get('@MODAL')
         if msj1:
             return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
         elif msj2:
@@ -1631,6 +1631,18 @@ def darBaja_viaje(id):  # Recibe el ID de la URL
             return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja al viaje'})
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@viajes_bp.route("/PrevisualizarDarBaja/<int:id>", methods=['GET'])
+def previsualizar_darBaja(id):
+    try:
+        mensajes = Viaje.darBaja(id, solo_consulta=True)  # nuevo parámetro opcional
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+        modal= mensajes.get('@MODAL')
+        return jsonify({"Status": "success", "Msj": modal or "", "Msj2": msj2 or ""})
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Error al obtener información: {str(e)}"})
+
     
 @viajes_bp.route("/CambiarEstadoViaje", methods=['POST'])
 def cambiad_estado_viaje():  # Recibe el ID de la URL

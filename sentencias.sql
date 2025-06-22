@@ -661,8 +661,8 @@ CREATE TABLE pasajero(
     numero_documento VARCHAR(12) NOT NULL, -- Se recomienda especificar una longitud
     sexo TINYINT NOT NULL, -- 1: masculino, 0: femenino
     f_nacimiento DATE NOT NULL,
-    telefono VARCHAR(15) NOT NULL,
-    email VARCHAR(255) NOT NULL,
+    telefono VARCHAR(15) NULL,
+    email VARCHAR(255) NULL,
     usuario VARCHAR(100) NOT NULL,
     FOREIGN KEY (idTipoDocumento) REFERENCES tipo_documento(id)
 );
@@ -755,6 +755,8 @@ CREATE TABLE pasaje(
     precio DECIMAL(10,2) NOT NULL,
     fechaInicioReprogramacion DATETIME NULL,
     fechaFinReprogramacion DATETIME NULL,
+    codigoReserva CHAR(14) NULL, -- Código de reserva, si es un pasaje de reserva
+    fecha_reserva DATETIME NULL, -- Fecha de reserva, si es un pasaje de reserva
     FOREIGN KEY (idDetalleViajeAsiento) REFERENCES detalle_viaje_asiento(id),
     FOREIGN KEY (idVenta) REFERENCES venta(id)
 );

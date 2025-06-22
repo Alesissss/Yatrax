@@ -16,9 +16,7 @@
                             <label for="ape_pat">Apellido paterno</label>
                             <div class="input-group">
                                 <input type="text" id="ape_pat" class="form-control" placeholder="Apellido paterno"
-                                    value="{{ personal.ape_paterno }}" {% if
-                                    btnId=='btn_Aceptar' %}disabled{% endif %}
-                                    oninput="this.value = this.value.toUpperCase();">
+                                    value="{{ personal.ape_paterno }}" {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
                                 <div class="input-group-append">
                                     <div class="input-group-text"><i class="fas fa-user"></i></div>
                                 </div>
@@ -28,9 +26,7 @@
                             <label for="ape_mat">Apellido materno</label>
                             <div class="input-group">
                                 <input type="text" id="ape_mat" class="form-control" placeholder="Apellido materno"
-                                    value="{{ personal.ape_materno }}" {% if
-                                    btnId=='btn_Aceptar' %}disabled{% endif %}
-                                    oninput="this.value = this.value.toUpperCase();">
+                                    value="{{ personal.ape_materno }}" {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
                                 <div class="input-group-append">
                                     <div class="input-group-text"><i class="fas fa-user"></i></div>
                                 </div>
@@ -146,12 +142,14 @@
         });
 
         $("#btn_Registrar").click(function () {
-            let nombre = $("#txt_Nombre").val().trim();
+            let nombre = $("#nombre").val().trim();
+            let apePat = $("#ape_pat").val().trim();
+            let apeMat = $("#ape_mat").val().trim();
             let estado = $('#cbx_Estado').val();
             let tipoPersonal = $('#cbx_TipoPersonal').val();
             let imagen = $("#file_Imagen")[0].files[0];
 
-            if (!nombre || !estado || !tipoPersonal || !imagen) {
+            if (!nombre || !apePat || !apeMat || !estado || !tipoPersonal || !imagen) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
@@ -170,6 +168,8 @@
                 if (result.isConfirmed) {
                     let formData = new FormData();
                     formData.append("nombre", nombre);
+                    formData.append("apePat", apePat);
+                    formData.append("apeMat", apeMat);
                     formData.append("estado", estado);
                     formData.append("idTipoPersonal", tipoPersonal);
                     formData.append("imagen", imagen);
@@ -207,12 +207,14 @@
         $("#btn_Editar").click(function () {
             const id = Number("{{ personal.id }}");
 
-            let nombre = $("#txt_Nombre").val().trim();
+            let nombre = $("#nombre").val().trim();
+            let apePat = $("#ape_pat").val().trim();
+            let apeMat = $("#ape_mat").val().trim();
             let estado = $('#cbx_Estado').val();
             let tipoPersonal = $('#cbx_TipoPersonal').val();
             let imagen = $("#file_Imagen")[0].files[0];
 
-            if (!nombre || !estado || !tipoPersonal) {
+            if (!nombre || !apePat || !apeMat || !estado || !tipoPersonal) {
                 toastr.warning("Todos los campos son obligatorios, excepto la imagen.", "MENSAJE DE SISTEMA");
                 return;
             }
@@ -231,6 +233,8 @@
                 if (result.isConfirmed) {
                     let formData = new FormData();
                     formData.append("nombre", nombre);
+                    formData.append("apePat", apePat);
+                    formData.append("apeMat", apeMat);
                     formData.append("estado", estado);
                     formData.append("idTipoPersonal", tipoPersonal);
 
