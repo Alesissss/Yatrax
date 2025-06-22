@@ -838,8 +838,9 @@ def registrar_reembolso():
             return jsonify({"Status": "error", "Msj": "Faltan datos requeridos"}), 400
 
         # Aquí puedes calcular el monto dinámicamente si es necesario
+        pasaje=Pasaje.obtener_por_id(id_pasaje)
+        print(pasaje)
         monto = 25.00  # ← cambiar si se requiere consultar de otra tabla
-
         resultado = Reembolso.registrar(
             numeroComprobante=numero_comprobante,
             monto=monto,
@@ -855,5 +856,6 @@ def registrar_reembolso():
             return jsonify({"Status": "error", "Msj": resultado.get("@MSJ2", "Error desconocido al registrar")})
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Error interno: {str(e)}"}), 500
+
 
 # END REEMBOLSO
