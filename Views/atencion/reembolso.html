@@ -273,8 +273,7 @@
                     render: function (data, type, row) {
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_PlantillaVer('${data.id}')" title="Ver plantilla"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_PlantillaEditar('${data.id}')" title="Editar plantilla"><i class="bi bi-check"></i></button>
+                            <button class="btn btn-xs m-1 bg-green" onclick="fct_PlantillaEditar('${data.id}')" title="Editar plantilla"><i class="bi bi-check"></i></button>
                             <button class="btn btn-xs m-1 btn-danger" onclick = "fct_PlantillaEliminar('${data.id}')" title="Eliminar plantilla"><i class="	bi bi-x"></i></button>
                         </div>
                         `;
@@ -352,6 +351,7 @@
                 success: function (response) {
                     if (response.Status === "success") {
                         fct_IniciarTablaPlantillas('#tbl_Plantillas');
+                        $('#filtroEstado').trigger('change');
                         toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                     } else {
                         toastr.error(response.Msj, "MENSAJE DE SISTEMA");
@@ -391,6 +391,7 @@
                 success: function (response) {
                     if (response.Status === "success") {
                         fct_IniciarTablaPlantillas('#tbl_Plantillas');
+                        $('#filtroEstado').trigger('change');
                         toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                     } else {
                         toastr.error(response.Msj, "MENSAJE DE SISTEMA");

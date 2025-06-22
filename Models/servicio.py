@@ -16,8 +16,8 @@ class Servicio:
         try:
             conexion = bd.Conexion()
             servicios = conexion.obtener("""
-                SELECT s.id AS id, s.nombre AS nombre, s.descripcion AS descripcion,
-                       s.estado AS estado, s.imagen AS imagen, s.color AS color
+                SELECT s.id AS id, s.nombre AS nombre, s.descripcion AS descripcion, s.color AS color,
+                       s.estado AS estado, s.imagen AS imagen
                 FROM servicio s
             """)
             return servicios
@@ -29,8 +29,8 @@ class Servicio:
         try:
             conexion = bd.Conexion()
             servicio = conexion.obtener("""
-                SELECT s.id AS id, s.nombre AS nombre, s.descripcion AS descripcion,
-                       s.estado, s.fecha_registro AS fechaRegistro, s.usuario, s.imagen, s.color
+                SELECT s.id AS id, s.nombre AS nombre, s.descripcion AS descripcion, s.color as color,
+                       s.estado, s.fecha_registro AS fechaRegistro, s.usuario, s.imagen
                 FROM servicio s
                 WHERE s.id = %s
             """, (id,))

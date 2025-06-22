@@ -945,11 +945,11 @@ INSERT INTO tipo_documento (nombre, abreviatura, estado, usuario) VALUES ('CARNE
 -- INSERT SERVICIO
 insert into servicio values (1,'Premium','Los autobuses más modernos y lujosos del mercado. Asientos cama,
 entretenimiento a bordo, snacks incluidos, aire acondicionado y cargadores USB. Ideal para viajes de largo
-trayecto.',1,'2025-05-25 19:30:00','#BD2130','Alexis','/Static/img/servicios/busPremium.png');
+trayecto.',1,'#BD2130','2025-05-25 19:30:00','Alexis','/Static/img/servicios/busPremium.png');
 insert into servicio values (2,'Económico','Autobuses cómodos y seguros a precios accesibles. Pensado para usuarios que
-priorizan economía sin perder calidad.',1,'2025-05-25 19:32:00','#BD2130','Alexis','/Static/img/servicios/busEconomico.png');
+priorizan economía sin perder calidad.',1,'#BD2130','2025-05-25 19:32:00','Alexis','/Static/img/servicios/busEconomico.png');
 insert into servicio values (3,'Exprés','Servicios rápidos con pocas paradas. Unidades modernas y seguras para viajeros
-que buscan llegar en el menor tiempo posible.',1,'2025-05-25 19:40:00','#BD2130','Alexis','/Static/img/servicios/busExpress.png');
+que buscan llegar en el menor tiempo posible.',1,'#BD2130','2025-05-25 19:40:00','Alexis','/Static/img/servicios/busExpress.png');
 
 -- INSERT MARCA
 INSERT INTO `marca` (`id`,`nombre`, `logo`, `estado`, `fecha_registro`, `usuario`)
