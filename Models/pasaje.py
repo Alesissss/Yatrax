@@ -36,7 +36,7 @@ class Pasaje:
                     cli.numero_documento AS num_doc,
                     suc_origen.nombre    AS origen,
                     suc_destino.nombre   AS destino,
-                    pas.codigo,
+                    pas.codigoReserva    AS codigo,
                     pas.esReserva        AS reserva,
                     pas.esPasajeNormal   AS pagado
                 FROM pasaje pas
