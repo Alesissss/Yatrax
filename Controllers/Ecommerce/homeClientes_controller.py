@@ -337,12 +337,12 @@ def get_persona_data():
                 lambda: api.get_person(num_doc)
             ],
             'CE': [
+                lambda: api_pasajero.obtener_por_numero_documento(num_doc),
                 lambda: api.get_person(num_doc),
-                lambda: api_pasajero.obtener_por_numero_documento(num_doc)
             ],
             'RUC': [
-                lambda: api.get_company(num_doc),
-                lambda: api_clientes.obtener_por_numero_documento(num_doc)
+                lambda: api_clientes.obtener_por_numero_documento(num_doc),
+                lambda: api.get_company(num_doc)
             ]
         }
 
@@ -601,11 +601,28 @@ def procesar_pago():
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Error inesperado: {repr(e)}"})
 
+@homeClientes_bp.route("/realizarTransferencia", methods=["POST"])
+def realizar_transferencia():
+    try:
+        payload    = request.get_json() or {}
+        id_pasaje  = payload.get("pasaje", {})
+        persona1   = payload.get("persona1", {})
+        persona2   = payload.get("persona2", {})
 
+        if not id_pasaje:
+            return jsonify({"Status":"error", "Msj":"Falta el ID del pasaje"})
 
+        resultado = Pasaje.realizarTransferencia(id_pasaje, persona1, persona2)
 
+        # Tu método devuelve {"msj": ..., "msj2": ...}
+        if resultado.get("msj"):
+            return jsonify({"Status":"success", "Msj": resultado["msj"]})
+        else:
+            return jsonify({"Status":"error",   "Msj": resultado.get("msj2", "Error desconocido")})
 
-
+    except Exception as e:
+        return jsonify({"Status":"error", "Msj": f"Error inesperado: {e}"})
+    
 # END REGION COMPRA PASAJE
 
 # REGION RUTAS SEGUIMIENTO
