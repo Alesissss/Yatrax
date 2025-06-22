@@ -155,6 +155,21 @@ def index():
     }
     return render_template('Ecommerce/home/home.html', active_page="home",datos=datos_recibidos)
 
+@homeClientes_bp.route("/obtenerDatosPasajero", methods=["POST"])
+def obtenerDatosPasajero():
+    payload = request.get_json(force=True) or {}
+    numero_doc = payload.get("numero_documento")
+    if not numero_doc:
+        return jsonify(status="error", msg="Falta número de documento"), 400
+
+    # Suponemos que Pasajero.obtener_por_numero_documento devuelve un dict o un objeto serializable
+    datos_pasajero = Pasajero.obtener_por_numero_documento(numero_doc)
+    print(f"Datos del pasajero: {datos_pasajero}")
+    if not datos_pasajero:
+        return jsonify(status="error", msg="Pasajero no encontrado"), 404
+
+    return jsonify(status="success", datos=datos_pasajero), 200
+
 @homeClientes_bp.route("/sobreNosotros")
 def sobreNosotros():
     return render_template('Ecommerce/home/sobreNosotros.html')
@@ -757,6 +772,8 @@ def get_conf_general():
             result['max_pasajes_venta'] = float(result['max_pasajes_venta'])
             result['tarifaBase'] = float(result['tarifaBase'])
             result['tiempo_maximo_venta_minutos'] = float(result['tiempo_maximo_venta_minutos'])
+            result['precioCambioRuta'] = float(result['precioCambioRuta'])
+            result['precioTransferencia'] = float(result['precioTransferencia'])
             result['viajesReprogramables'] = int(result['viajesReprogramables'])  # Puedes usar int si es un valor booleano 0/1
         
         return jsonify({'data': result, 'Status': 'success', 'Msj': 'Configuración general recuperada exitosamente'})

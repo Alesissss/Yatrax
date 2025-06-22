@@ -6,17 +6,19 @@ const CONFIG = {
     MAX_ASIENTOS: 4, // Valor por defecto
     IGV: 0.18, // En decimal, en porcentaje 18%
     TIEMPO_MAXIMO_COMPRA: 5, // En minutos
+    PRECIORUTA: 10, // Valor por defecto, se actualizará desde la API
     RUTAS: {
         BUSCAR_VIAJES: '/ecommerce/home/buscarViajes',
         OBTENER_RUTAS: '/ecommerce/home/GetRutasConcatenadas',
-        RENDERIZAR_ITINERARIO: '/ecommerce/home/renderizar_itinerario', 
+        RENDERIZAR_ITINERARIO: '/ecommerce/home/renderizar_itinerario',
         OBTENER_DISENO_VEHICULO: '/ecommerce/home/obtener_diseno_vehiculo',
         API_PERSONA: '/ecommerce/home/api/get_persona_data',
         API_SUNAT: '/ecommerce/home/api/get_persona_data',
         METODOS: '/ecommerce/home/cargar_metodos',
         PROCESAR_PAGO: '/ecommerce/home/procesar_pago',
         MARCAR_ASIENTO_OCUPADO: '/ecommerce/home/ocuparAsiento',
-        MARCAR_ASIENTO_DISPONIBLE: '/ecommerce/home/liberarAsiento'
+        MARCAR_ASIENTO_DISPONIBLE: '/ecommerce/home/liberarAsiento',
+        DATOS_CAMBIORUTA: '/ecommerce/home/obtenerDatosPasajero',
     },
     GRILLA: {
         FILAS: 15,
@@ -27,18 +29,20 @@ const CONFIG = {
 $.ajax({
     url: '/ecommerce/home/GetConfGeneral',  // Ruta de la API
     method: 'GET',  // Método GET
-    success: function(data) {
+    success: function (data) {
         // Verificamos si la respuesta es exitosa
         if (data.Status === 'success' && data.data) {
             CONFIG.MAX_ASIENTOS = data.data.max_pasajes_venta;
             CONFIG.TIEMPO_MAXIMO_COMPRA = data.data.tiempo_maximo_venta_minutos;
             CONFIG.IGV = data.data.igv;
+            CONFIG.PRECIORUTA = data.data.precioCambioRuta;
+
             console.log("MAX_ASIENTOS actualizado:", CONFIG.MAX_ASIENTOS);
         } else {
             console.error("Error al recuperar la configuración general");
         }
     },
-    error: function(xhr, status, error) {
+    error: function (xhr, status, error) {
         console.error("Error en la llamada AJAX:", error);
     }
 });
@@ -1175,42 +1179,42 @@ const FormManager = {
     generarFormularioHTML(asientoNombre, asientoId) {
         return `
             <div class="mb-2 fw-bold text-primary">Asiento: ${asientoNombre} (<span>S/0.00</span>)</div>
-            <select class="form-select mb-2" id="tipo_doc_${asientoId}">
+            <select class="form-select mb-2" id="tipo_doc_${asientoId}" disabled readonly>
             <option value="DNI">DNI</option>
             <option value="CE">CE</option>
             </select>
             <input class="form-control mb-2" id="numeroDocNuevo_${asientoId}" placeholder="N° Documento">
-            <input class="form-control mb-2" id="nombres_${asientoId}" placeholder="Nombres">
-            <input class="form-control mb-2" id="apellidoPaterno_${asientoId}" placeholder="Apellido paterno">
-            <input class="form-control mb-2" id="apellidoMaterno_${asientoId}" placeholder="Apellido materno">
-            <input class="form-control mb-2" id="fechaNacimientoNuevo_${asientoId}" type="date" placeholder="Fecha nacimiento">
-            <input class="form-control mb-2" id="telefono_${asientoId}" placeholder="Teléfono">
+            <input class="form-control mb-2" id="nombres_${asientoId}" placeholder="Nombres" readonly disabled>
+            <input class="form-control mb-2" id="apellidoPaterno_${asientoId}" placeholder="Apellido paterno" readonly disabled>
+            <input class="form-control mb-2" id="apellidoMaterno_${asientoId}" placeholder="Apellido materno" readonly disabled>
+            <input class="form-control mb-2" id="fechaNacimientoNuevo_${asientoId}" type="date" placeholder="Fecha nacimiento" readonly disabled>
+            <input class="form-control mb-2" id="telefono_${asientoId}" placeholder="Teléfono" readonly disabled>
             <div class="mb-2">
             <label class="me-2">Sexo:</label>
-            <input type="radio" class="form-check-input" name="sexo-${asientoId}" id="sexoMasculino_${asientoId}" value="M"> 
+            <input type="radio" class="form-check-input" name="sexo-${asientoId}" id="sexoMasculino_${asientoId}" value="M" disabled readonly>
             <label for="sexoMasculino_${asientoId}">Masculino</label>
-            <input type="radio" class="form-check-input" name="sexo-${asientoId}" id="sexoFemenino_${asientoId}" value="F"> 
+            <input type="radio" class="form-check-input" name="sexo-${asientoId}" id="sexoFemenino_${asientoId}" value="F" disabled readonly>
             <label for="sexoFemenino_${asientoId}">Femenino</label>
             </div>
-            <input class="form-control mb-2" id="correo_${asientoId}" placeholder="Correo electrónico" type="email">
+            <input class="form-control mb-2" id="correo_${asientoId}" placeholder="Correo electrónico" type="email" readonly disabled>
             <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="brazos_${asientoId}">
+            <input class="form-check-input" type="checkbox" id="brazos_${asientoId}" disabled readonly>
             <label class="form-check-label" for="brazos_${asientoId}">Con menor en brazos</label>
             </div>
             <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" id="esMenor_${asientoId}">
+            <input class="form-check-input" type="checkbox" id="esMenor_${asientoId}" disabled readonly>
             <label class="form-check-label" for="esMenor_${asientoId}">Es menor de edad</label>
             </div>
             <button class="btn btn-secondary w-100" disabled
-                onclick='FormManager.enviarDatosPasajero("${asientoNombre}", ${asientoId}); 
-                try {
-                    const collapse = document.getElementById("collapse-${asientoId}-ida") || document.getElementById("collapse-${asientoId}-vuelta");
-                    if (collapse) {
-                    const bsCollapse = bootstrap.Collapse.getOrCreateInstance(collapse);
-                    bsCollapse.hide();
-                    }
-                } catch(e) {}
-                '>
+            onclick='FormManager.enviarDatosPasajero("${asientoNombre}", ${asientoId}); 
+            try {
+                const collapse = document.getElementById("collapse-${asientoId}-ida") || document.getElementById("collapse-${asientoId}-vuelta");
+                if (collapse) {
+                const bsCollapse = bootstrap.Collapse.getOrCreateInstance(collapse);
+                bsCollapse.hide();
+                }
+            } catch(e) {}
+            '>
             Complete todos los campos
             </button>
         `;
@@ -1653,10 +1657,6 @@ const PaymentManager = {
         if (tipoComprobante == '1') {
             contenedor.innerHTML = `
                 <div class="row g-3">
-                    <div class="col-md-12">
-                        <label for="email_contacto" class="form-label">Correo electrónico *</label>
-                        <input type="email" id="email_contacto" class="form-control" required>
-                    </div>
                     <div class="col-md-6">
                         <label for="tipo_documento_contacto" class="form-label">Tipo de documento *</label>
                         <select id="tipo_documento_contacto" class="form-select">
@@ -1681,9 +1681,14 @@ const PaymentManager = {
                         <input type="text" id="apellido_materno_contacto" class="form-control" required>
                     </div>
                     <div class="col-md-12">
+                        <label for="email_contacto" class="form-label">Correo electrónico *</label>
+                        <input type="email" id="email_contacto" class="form-control" required>
+                    </div>
+                    <div class="col-md-12">
                         <label for="telefono_contacto" class="form-label">Teléfono/móvil *</label>
                         <input type="tel" id="telefono_contacto" class="form-control" required>
                     </div>
+
                 </div>
             `;
         } else if (tipoComprobante == '2') {
