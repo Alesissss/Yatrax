@@ -790,6 +790,7 @@ CREATE TABLE reembolso (
     idCliente INT NOT NULL,
     idTipoComprobante INT NOT NULL,
     idMetodoPago INT NOT NULL,
+    estado varchar(20) NULL DEFAULT 'PENDIENTE', -- Ej: "Pendiente", "Aprobado", "Rechazado"
     FOREIGN KEY (idCliente) REFERENCES cliente (id),
     FOREIGN KEY (idTipoComprobante) REFERENCES tipo_comprobante (idTipoComprobante),
     FOREIGN KEY (idMetodoPago) REFERENCES metodo_pago (id),
