@@ -7,32 +7,6 @@ from Models.reembolso import Reembolso
 
 atencion_bp = Blueprint('atencion', __name__, url_prefix='/trabajadores/atencion')
 
-# ERRORES 
-# Manejar errores 401 (Página no autorizada)
-@atencion_bp.errorhandler(401)
-def error_401(error):
-    return render_template("error.html", error="Página no autorizada"), 401
-
-# Manejar errores 403 (Página no autorizada para este usuario)
-@atencion_bp.errorhandler(403)
-def error_403(error):
-    return render_template("error.html", error="Página restringida"), 403
-
-# Manejar errores 404 (Página no encontrada)
-@atencion_bp.errorhandler(404)
-def error_404(error):
-    return render_template("error.html", error="Página no encontrada"), 404
-
-# Manejar errores 500 (Error interno del servidor)
-@atencion_bp.errorhandler(500)
-def error_500(error):
-    return render_template("error.html", error="Error interno del servidor"), 500
-
-# Manejar cualquier otro error genérico
-@atencion_bp.errorhandler(Exception)
-def error_general(error):
-    return render_template("error.html", error="Ocurrió un error inesperado"), 500
-
 # RESTRICCIONES
 @atencion_bp.before_request
 def verificar_sesion():
