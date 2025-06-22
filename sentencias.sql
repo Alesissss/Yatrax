@@ -466,8 +466,8 @@ CREATE TABLE cliente (
 
     -- Claves foráneas
     CONSTRAINT fk_pais FOREIGN KEY (id_pais) REFERENCES pais(id),
-    CONSTRAINT fk_tipo_cliente FOREIGN KEY (id_tipo_cliente) REFERENCES TIPO_CLIENTE(idTipoCliente),
-    CONSTRAINT fk_tipo_doc FOREIGN KEY (id_tipo_doc) REFERENCES TIPO_DOCUMENTO(id)
+    CONSTRAINT fk_tipo_cliente FOREIGN KEY (id_tipo_cliente) REFERENCES tipo_cliente(idTipoCliente),
+    CONSTRAINT fk_tipo_doc FOREIGN KEY (id_tipo_doc) REFERENCES tipo_documento(id)
 );
 
 -- Crear tabla conf_general
