@@ -5,6 +5,8 @@ import os
 import xml.etree.ElementTree as ET
 from jinja2 import Environment, FileSystemLoader
 from weasyprint import HTML
+
+from Models.tipoDocumento import TipoDocumento
 class Pasaje:
     def __init__(self, id, id_detalle_asiento, numero_comprobante, es_pasaje_normal,
                  es_pasaje_libre, es_transferencia, es_reserva, es_cambio_ruta,
@@ -51,6 +53,73 @@ class Pasaje:
                 LEFT JOIN sucursal suc_destino 
                     ON dv.idSucursalDestino = suc_destino.id;
             """)
+        finally:
+            if conexion:
+                conexion.cerrar()
+
+    @classmethod
+    def obtener_precio_ruta(cls, num_comprobante, codigo_prom):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            sql = """SELECT numeroComprobante, codigo FROM pasaje ps WHERE ps.numeroComprobante = %s AND ps.codigo = %s;"""
+            return conexion.obtener(sql, (num_comprobante, codigo_prom))
+        finally:
+            if conexion:
+                conexion.cerrar()
+
+
+    @classmethod
+    def obtener_todos_cambiados_ruta():
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            sql = """SELECT
+                        p.id                                             AS `ID`,
+                        p.numeroComprobante                              AS `NUM.COMPROBANTE`,
+                        CONCAT(cli.nombre, ' ', cli.ape_paterno, ' ', cli.ape_materno) AS `CLIENTE`,
+                        so.nombre                                        AS `ORIGEN`,
+                        sd.nombre                                        AS `DESTINO`,
+                        v.fecha                                          AS `FECHA`,
+                        CASE
+                            WHEN p.esReserva       = 1 THEN 'Reserva'
+                            WHEN p.esPasajeLibre   = 1 THEN 'Libre'
+                            WHEN p.esPasajeNormal  = 1 THEN 'Normal'
+                            WHEN p.esTransferencia = 1 THEN 'Transferencia'
+                            WHEN p.esCambioRuta    = 1 THEN 'Cambio de Ruta'
+                            WHEN p.esReembolso     = 1 THEN 'Reembolso'
+                            ELSE 'Desconocido'
+                        END                                              AS `ESTADO`,
+                        p.codigo                                         AS `CÓDIGO`
+                        FROM pasaje p
+                        JOIN venta v                    ON v.id = p.idVenta
+                        JOIN cliente cli                ON cli.id = v.idCliente
+                        JOIN detalle_viaje_asiento dva  ON dva.id = p.idDetalleViajeAsiento
+                        JOIN detalle_viaje dv           ON dv.id = dva.idDetalle_Viaje
+                        JOIN sucursal so                ON so.id = dv.idSucursalOrigen
+                        JOIN sucursal sd                ON sd.id = dv.idSucursalDestino where p.esCambioRuta = 1;"""
+            return conexion.obtener(sql)
+        finally:
+            if conexion:
+                conexion.cerrar()
+    
+    @classmethod
+    def registrarCambioRuta(cls, id, id_detalle_asiento, es_pasaje_normal,
+                 id_venta, codigo, id_pasaje):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            conexion.autocommit(False)
+            sql = """INSERT INTO pasaje (id, idDetalleViajeAsiento, esPasajeNormal, idVenta, codigo, idPasaje)
+                       VALUES (%s, %s, %s, %s, %s, %s);"""
+            params = (id, id_detalle_asiento, es_pasaje_normal, id_venta, codigo, id_pasaje)
+            conexion.ejecutar(sql, params)
+            conexion.commit()
+            return {"msj": "Cambio de ruta registrado correctamente."}
+        except Exception as e:
+            if conexion:
+                conexion.rollback()
+            return {"msj": None, "msj2": f"Error al registrar cambio de ruta: {e}"}
         finally:
             if conexion:
                 conexion.cerrar()
@@ -147,23 +216,23 @@ class Pasaje:
             # Se esta considerando 26 caracteres alfabéticos y 10 dígitos, lo que da un total de 36 caracteres por 8 posiciones,
             # lo que da un total de 2,821,109,907,456 combinaciones posibles.
     
-    # @classmethod
-    # def generar_codigo_reserva(cls):
-    #     conexion = bd.Conexion()
-    #     try:
-    #         while True:
-    #             codigo = f"RES-{''.join(random.choices(string.ascii_uppercase, k=5))}-{random.randint(1000, 9999)}"
-    #             fila = conexion.obtener(
-    #                 "SELECT codigo FROM pasaje WHERE codigo = %s LIMIT 1",
-    #                 (codigo,)
-    #             )
-    #             if not fila:
-    #                 return codigo
-    #     finally:
-    #         conexion.cerrar()
-    #         # Genera un código de reserva único con el formato "RES-XXXXX-YYYY"
-    #         # donde XXXXX es una cadena aleatoria de 5 letras y YYYY es un número entre 1000 y 9999.
-    #         # lo que da un total de 11,881,376,000 combinaciones posibles.
+    @classmethod
+    def generar_codigo_reserva(cls):
+        conexion = bd.Conexion()
+        try:
+            while True:
+                codigo = f"RES-{''.join(random.choices(string.ascii_uppercase, k=5))}-{random.randint(1000, 9999)}"
+                fila = conexion.obtener(
+                    "SELECT codigo FROM pasaje WHERE codigo = %s LIMIT 1",
+                    (codigo,)
+                )
+                if not fila:
+                    return codigo
+        finally:
+            conexion.cerrar()
+            # Genera un código de reserva único con el formato "RES-XXXXX-YYYY"
+            # donde XXXXX es una cadena aleatoria de 5 letras y YYYY es un número entre 1000 y 9999.
+            # lo que da un total de 11,881,376,000 combinaciones posibles.
     
     @classmethod
     def cambiar_a_transaccion_1(cls, numComprobante):
@@ -244,7 +313,9 @@ class Pasaje:
                     pas.codigo AS codigo_pasaje,
                     pas.enTransaccion AS estado_transaccion,
                     v.idEstadoViaje AS estado_viaje,    
-                    pas.numeroComprobante
+                    pas.numeroComprobante,
+                    pas.idDetalleViajeAsiento,
+                    pas.id
                 FROM pasaje pas 
                 INNER JOIN detalle_viaje_asiento dva ON dva.id = pas.idDetalleViajeAsiento
                 INNER JOIN detalle_viaje dv ON dv.id = dva.idDetalle_Viaje
@@ -280,7 +351,108 @@ class Pasaje:
         finally:
             if conexion:
                 conexion.cerrar()
+    
+    @classmethod
+    def realizarTransferencia(cls, pasaje: dict, persona1: dict, persona2: dict = None):
+        conexion = bd.Conexion()
+        try:
+            # 1) Marcar el pasaje original como transferencia
+            sql_update = """
+                UPDATE pasaje
+                SET esTransferencia = 1,
+                    enTransaccion   = 1
+                WHERE id = %s;
+            """
+            conexion.ejecutar(sql_update, (pasaje['id'],), auto_commit=False)
 
+            # 2) Generar comprobante y código
+            num_comp  = cls.generar_numComprobante()
+            cod_unico = cls.generar_codigo_unico()
+
+            # 4) Insertar nuevo pasaje (transferencia)
+            sql_insert = """
+                INSERT INTO pasaje (
+                    idDetalleViajeAsiento,
+                    numeroComprobante,
+                    esPasajeNormal,
+                    idVenta,
+                    codigo,
+                    idPasaje
+                ) VALUES (%s, %s, %s, %s, %s, %s);
+            """
+            params_insert = (
+                pasaje['idDetalleViajeAsiento'],
+                num_comp,
+                1,          # esPasajeNormal
+                1,          # idVenta (ajustar según tu lógica)
+                cod_unico,
+                pasaje['id']   # referencia al pasaje original
+            )
+            conexion.ejecutar(sql_insert, params_insert, auto_commit=False)
+
+            # 5) Capturar el nuevo ID generado
+            id_nuevo_pasaje = conexion.obtener(
+                "SELECT LAST_INSERT_ID() AS id;"
+            )[0]['id']
+
+            # 6) Helpers para pasajero y detalle_pasaje
+            def insertar_pasajero(p):
+                sql = """
+                    INSERT INTO pasajero (
+                        nombre, ape_paterno, ape_materno,
+                        idTipoDocumento, numero_documento,
+                        sexo, f_nacimiento, telefono, email
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
+                """
+                
+                params = (
+                    p.get('nombre', ''),
+                    p.get('ape_paterno', ''),
+                    p.get('ape_materno', ''),
+                    TipoDocumento.obtener_por_nombre(p.get('nombreDocumento')),
+                    p.get('numero_documento', ''),
+                    p.get('sexo'),
+                    p.get('f_nacimiento'),
+                    p.get('telefono', ''),
+                    p.get('email', '')
+                )
+                conexion.ejecutar(sql, params, auto_commit=False)
+                return conexion.obtener("SELECT LAST_INSERT_ID() AS id;")[0]['id']
+
+            def insertar_detalle(id_pas, p):
+                sql = """
+                    INSERT INTO detalle_pasaje (
+                        idPasajero, idPasaje, esMenorEdad, viajeEnBrazos, fecha_registro
+                    ) VALUES (%s, %s, %s, %s, NOW());
+                """
+                params = (
+                    id_pas,
+                    id_nuevo_pasaje,
+                    p.get('esMenorEdad'),
+                    p.get('viajeEnBrazos')
+                )
+                conexion.ejecutar(sql, params, auto_commit=False)
+
+            # 7) Ejecutar inserciones para persona1 y persona2
+            id_p1 = insertar_pasajero(persona1)
+            insertar_detalle(id_p1, persona1)
+
+            if persona2 and persona2.get('nombre'):
+                id_p2 = insertar_pasajero(persona2)
+                insertar_detalle(id_p2, persona2)
+
+            # 8) Commit y retorno
+            conexion.conn.commit()
+            return {"msj": "Transferencia realizada con éxito", "msj2": None}
+
+        except Exception as e:
+            conexion.conn.rollback()
+            return {"msj": None, "msj2": f"Error al realizar transferencia: {e}"}
+
+        finally:
+            conexion.cerrar()
+
+        
     @classmethod
     def pagarReserva(cls, id_pasaje):
         conexion = None

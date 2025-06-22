@@ -1177,13 +1177,29 @@ const SeatManager = {
 
 const FormManager = {
     generarFormularioHTML(asientoNombre, asientoId) {
+        // Recuperar el valor del DNI antes de renderizar el input
+        const dniValue = document.getElementById("numDocAnt")?.value || "";
+
+        // Después de renderizar el input, si hay un valor de DNI, lanzar la consulta RENIEC automáticamente
+        setTimeout(() => {
+            if (dniValue) {
+                // Llenar el input si no está ya seteado
+                const inputDni = document.getElementById(`numeroDocNuevo_${asientoId}`);
+                if (inputDni && inputDni.value !== dniValue) {
+                    inputDni.value = dniValue;
+                }
+                // Lanzar la consulta RENIEC automáticamente
+                ReniecAPI.buscarPersona(asientoId);
+            }
+        }, 0);
+
         return `
             <div class="mb-2 fw-bold text-primary">Asiento: ${asientoNombre} (<span>S/0.00</span>)</div>
             <select class="form-select mb-2" id="tipo_doc_${asientoId}" disabled readonly>
             <option value="DNI">DNI</option>
             <option value="CE">CE</option>
             </select>
-            <input class="form-control mb-2" id="numeroDocNuevo_${asientoId}" placeholder="N° Documento">
+            <input class="form-control mb-2" id="numeroDocNuevo_${asientoId}" placeholder="N° Documento" value="${dniValue}" readonly disabled>
             <input class="form-control mb-2" id="nombres_${asientoId}" placeholder="Nombres" readonly disabled>
             <input class="form-control mb-2" id="apellidoPaterno_${asientoId}" placeholder="Apellido paterno" readonly disabled>
             <input class="form-control mb-2" id="apellidoMaterno_${asientoId}" placeholder="Apellido materno" readonly disabled>

@@ -78,7 +78,9 @@ INNER JOIN asiento a on dva.idAsiento=a.id
                         WHEN v.estado = 0 THEN 'Dado de baja'
                         WHEN v.estado = 1 THEN 'Activo'
                         ELSE 'Desconocido'
-                    END AS estado_descripcion
+                    END AS estado_descripcion,
+                    p.fechaInicioReprogramacion,
+                    p.fechaFinReprogramacion
                 FROM pasaje p
                 INNER JOIN detalle_viaje_asiento dva ON p.idDetalleViajeAsiento = dva.id
                 INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
@@ -88,6 +90,7 @@ INNER JOIN asiento a on dva.idAsiento=a.id
             return reembolso[0] if reembolso else None
         finally:
             conexion.cerrar()
+            
 
     # Registrar un nuevo reembolso
     @classmethod
@@ -107,11 +110,27 @@ INNER JOIN asiento a on dva.idAsiento=a.id
     def cambiar_estado(cls, id_reembolso, nuevo_estado):
         conexion = bd.Conexion()
         try:
-            conexion.ejecutar(
-                "CALL SP_CAMBIAR_ESTADO_REEMBOLSO(%s, %s, @MSJ, @MSJ2);",
-                (id_reembolso, nuevo_estado)
-            )
-            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
-            return resultado[0]  
+            if(nuevo_estado =='ACEPTADO'):
+                conexion.ejecutar(
+                    "UPDATE pasaje set esReembolso= 1 WHERE id = (SELECT idPasaje FROM reembolso WHERE id = %s);",
+                    (id_reembolso,)
+                )
+                conexion.ejecutar(
+                    "CALL SP_CAMBIAR_ESTADO_REEMBOLSO(%s, %s, @MSJ, @MSJ2);",
+                    (id_reembolso, nuevo_estado)
+                )
+                resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
+                return resultado[0]
+            else:
+                conexion.ejecutar(
+                    "UPDATE pasaje set esReembolso= 0 WHERE id = (SELECT idPasaje FROM reembolso WHERE id = %s);",
+                    (id_reembolso,)
+                )
+                conexion.ejecutar(
+                    "CALL SP_CAMBIAR_ESTADO_REEMBOLSO(%s, %s, @MSJ, @MSJ2);",
+                    (id_reembolso, nuevo_estado)
+                )
+                resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
+                return resultado[0]
         finally:
             conexion.cerrar()

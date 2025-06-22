@@ -15,6 +15,7 @@ const CONFIG = {
         API_SUNAT: '/ecommerce/home/api/get_persona_data',
         METODOS: '/ecommerce/home/cargar_metodos',
         PROCESAR_PAGO: '/ecommerce/home/procesar_pago',
+        PROCESAR_RESERVA:'/ecommerce/home/procesar_reserva',
         MARCAR_ASIENTO_OCUPADO: '/ecommerce/home/ocuparAsiento',
         MARCAR_ASIENTO_DISPONIBLE: '/ecommerce/home/liberarAsiento'
     },
@@ -23,6 +24,18 @@ const CONFIG = {
         COLUMNAS: 6
     }
 };
+
+async function obtenerNombreMetodo(idMetodo) {
+    const response = await fetch(`/ecommerce/home/obtenerMetodoPagoxID/${idMetodo}`)
+    const data = await response.text()
+    return data; 
+}
+
+async function obtenerNombreTipoMetodo(idTipo) {
+    const response = await fetch(`/ecommerce/home/obtenerTipoMetodoxID/${idTipo}`)
+    const data = await response.text()
+    return data; 
+}
 
 $.ajax({
     url: '/ecommerce/home/GetConfGeneral',  // Ruta de la API
@@ -2128,8 +2141,29 @@ const PaymentManager = {
         contenedor.appendChild(divBoton);
 
         // Configurar evento del botón
-        document.getElementById("btn_finalizar_pago").addEventListener("click", () => {
-            this.procesarPago();
+        document.getElementById("btn_finalizar_pago").addEventListener("click", async () => {
+            const tipoMetodo = document.getElementById("selector_metodo_pago").value;
+            const metodoPago = document.getElementById("metodo_pago_especifico").value; //document.getElementById("selector_metodo_pago").value;
+            let nombreTipoMetodo = await obtenerNombreTipoMetodo(tipoMetodo)
+            let nombreMetodo = await obtenerNombreMetodo(metodoPago)
+
+            alert(tipoMetodo)
+            alert(metodoPago)
+            alert(nombreTipoMetodo)
+            alert(nombreMetodo)
+
+            if (nombreMetodo == "tarjeta de credito" || nombreMetodo == "tarjeta") {
+                alert("dentro 1")
+                this.procesarPago();
+            }else if(nombreTipoMetodo == "efectivo" && nombreMetodo == "efectivo"){
+                alert("dentro 2")
+                this.procesarReserva();
+            }else{
+                alert("dentro 3")
+                console.log(nombreTipoMetodo)
+                console.log(nombreMetodo)
+                console.error("Espacio para pasaje libre en un futuro");
+            }
         });
     },
 
@@ -2147,6 +2181,45 @@ const PaymentManager = {
         try {
             // Llamada al servidor
             const response = await fetch(CONFIG.RUTAS.PROCESAR_PAGO, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(datosCompletos)
+            });
+
+            const resultado = await response.json();
+
+            // Ocultar loader
+            this.ocultarLoader();
+
+            if (resultado.Status === 'success') {
+                this.mostrarPagoExitoso(resultado);
+            } else {
+                throw new Error(resultado.Msj || 'Error en el procesamiento del pago');
+            }
+
+        } catch (error) {
+            this.ocultarLoader();
+            toastr.error("Error al procesar el pago: " + error.message);
+            console.error('Error procesando pago:', error);
+        }
+    },
+
+    async procesarReserva() {
+        if (!this.validarFormularioCompleto()) {
+            toastr.error("Por favor complete todos los campos requeridos");
+            return;
+        }
+
+        const datosCompletos = this.capturarDatosPago();
+
+        // Mostrar loader
+        this.mostrarLoader();
+
+        try {
+            // Llamada al servidor
+            const response = await fetch(CONFIG.RUTAS.PROCESAR_RESERVA, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
