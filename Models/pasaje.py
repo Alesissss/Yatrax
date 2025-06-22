@@ -394,3 +394,16 @@ class Pasaje:
         finally:
             if conexion:
                 conexion.cerrar()
+    
+    @classmethod
+    def validar_solicitud_reembolso(cls, numcomprobante):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            filas = conexion.obtener(
+                "SELECT * FROM pasaje pa inner join reembolso re on re.idPasaje=pa.id where pa.numeroComprobante= %s;", (numcomprobante,)
+            )
+            return filas[0] if filas else None
+        finally:
+            if conexion:
+                conexion.cerrar()
