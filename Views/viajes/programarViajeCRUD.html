@@ -195,9 +195,12 @@
                             }
 
                             const isPrimeraSubruta = (i === 0 && j === 1);
+                            const now = new Date();
+                            const offset = now.getTimezoneOffset() * 60000;
+                            const localISOTime = new Date(now - offset).toISOString().slice(0, 16);
+
                             const inputSalida = isPrimeraSubruta
-                                ? `<input type="datetime-local" class="form-control input-salida" data-tiempo="${tiempoTotal}" onchange="calcularLlegadas()" {% if btnId=='btn_Aceptar' %}disabled{%
-                                    endif %}>`
+                                ? `<input type="datetime-local" class="form-control input-salida" data-tiempo="${tiempoTotal}" min="${localISOTime}" onchange="calcularLlegadas()" {% if btnId=='btn_Aceptar' %}disabled{% endif %}>`
                                 : `<span class="fecha-salida"></span>`;
 
                             filas += `
@@ -505,8 +508,12 @@
             const fechaSalidaMoment = moment(detalle.fechaSalida);
             const fechaLlegadaMoment = moment(detalle.fechaLlegadaEstimada);
 
+            const now = new Date();
+            const offset = now.getTimezoneOffset() * 60000;
+            const localISOTime = new Date(now - offset).toISOString().slice(0, 16);
+
             const salidaHTML = isPrimeraSubruta
-                ? `<input type="datetime-local" class="form-control input-salida" value="${fechaSalidaMoment.format('YYYY-MM-DDTHH:mm')}" onchange="calcularLlegadas()" {% if btnId=='btn_Aceptar' %}disabled{% endif %}>`
+                ? `<input type="datetime-local" class="form-control input-salida" value="${fechaSalidaMoment.format('YYYY-MM-DDTHH:mm')}"  min="${localISOTime}" onchange="calcularLlegadas()" {% if btnId=='btn_Aceptar' %}disabled{% endif %}>`
                 : `<span class="fecha-salida">${fechaSalidaMoment.format('DD/MM/YYYY HH:mm')}</span>`;
 
             filas += `

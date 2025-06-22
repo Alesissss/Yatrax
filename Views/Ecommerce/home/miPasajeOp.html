@@ -406,7 +406,7 @@
                   </div>
                   <div class="col-md-4">
                     <label class="form-label">Fecha de nacimiento</label>
-                    <input type="date" id="fechaNacimientoMenor" class="form-control" />
+                    <input type="date" id="fechaNacimientoMenor" class="form-control" min="1900-01-01" />
                   </div>
                   <div class="col-md-4">
                     <label class="form-label">Nombres</label>
@@ -457,7 +457,6 @@
 
             <div id="datosCambioRuta" style="display: none;">
               {{ datos.contenido_venta | safe }}
-              itinerario-regreso
             </div>
 
 
@@ -584,9 +583,7 @@
                     </div>
                   </div>
                 </div>
-
               </div>
-
             </div>
 
             <!-- Checkboxes generales (aparecen para todas las operaciones) -->
@@ -736,7 +733,10 @@
     });
   </script>
   <script>
-
+    document.addEventListener("DOMContentLoaded", function () {
+      const hoy = new Date().toISOString().split('T')[0];
+      document.getElementById("fechaNacimientoMenor").setAttribute("max", hoy);
+    });
     document.addEventListener("DOMContentLoaded", function () {
       // Siempre deshabilitar los campos itinerario-regreso y fecha_vuelta si existen
       const itinerarioRegreso = document.getElementById('itinerario-regreso');
@@ -812,7 +812,7 @@
 
       // Función para abrir modal con la operación seleccionada
       function abrirModalValidacion(operacion, boton) {
-        if (enTransaccion == 1) {
+        if (enTransaccion && enTransaccion.value === '1') {
           toastr.warning("Ya se encuentra en una transacción el pasaje", "MENSAJE DEL SISTEMA");
           return;
         }
@@ -840,42 +840,42 @@
       }
 
       // Función para validar código
-      function validarCodigo() {
-        const codigoIngresado = codigoPasajeInput.value.trim();
-        const codigoCorrecto = document.getElementById('pasCod').value;
+      // function validarCodigo() {
+      //   const codigoIngresado = codigoPasajeInput.value.trim();
+      //   const codigoCorrecto = document.getElementById('pasCod').value;
 
-        if (codigoIngresado === '') {
-          codigoPasajeInput.classList.add('is-invalid');
-          return;
-        }
+      //   if (codigoIngresado === '') {
+      //     codigoPasajeInput.classList.add('is-invalid');
+      //     return;
+      //   }
 
-        if (codigoIngresado === codigoCorrecto) {
-          // Código correcto - cerrar modal y mostrar contenido
-          modalValidacion.hide();
-          mostrarContenidoOperacion(operacionSeleccionada, botonSeleccionado);
-        } else {
-          // Código incorrecto
-          intentosRestantes--;
-          intentosRestantesSpan.textContent = intentosRestantes;
+      //   if (codigoIngresado === codigoCorrecto) {
+      //     // Código correcto - cerrar modal y mostrar contenido
+      //     modalValidacion.hide();
+      //     mostrarContenidoOperacion(operacionSeleccionada, botonSeleccionado);
+      //   } else {
+      //     // Código incorrecto
+      //     intentosRestantes--;
+      //     intentosRestantesSpan.textContent = intentosRestantes;
 
-          alertError.classList.remove('d-none');
-          codigoPasajeInput.classList.add('is-invalid');
-          codigoPasajeInput.value = '';
+      //     alertError.classList.remove('d-none');
+      //     codigoPasajeInput.classList.add('is-invalid');
+      //     codigoPasajeInput.value = '';
 
-          if (intentosRestantes <= 0) {
-            // Se acabaron los intentos - cerrar modal automáticamente
-            setTimeout(() => {
-              toastr.warning('Se ha alcanzado el máximo de intentos. Por favor, verifique su código de pasaje.', 'MENSAJE DEL SISTEMA');
-              modalValidacion.hide();
-            }, 2000);
-          } else {
-            // Aún hay intentos - enfocar input
-            setTimeout(() => {
-              codigoPasajeInput.focus();
-            }, 100);
-          }
-        }
-      }
+      //     if (intentosRestantes <= 0) {
+      //       // Se acabaron los intentos - cerrar modal automáticamente
+      //       setTimeout(() => {
+      //         toastr.warning('Se ha alcanzado el máximo de intentos. Por favor, verifique su código de pasaje.', 'MENSAJE DEL SISTEMA');
+      //         modalValidacion.hide();
+      //       }, 2000);
+      //     } else {
+      //       // Aún hay intentos - enfocar input
+      //       setTimeout(() => {
+      //         codigoPasajeInput.focus();
+      //       }, 100);
+      //     }
+      //   }
+      // }
 
       // Función para mostrar contenido según operación
       function mostrarContenidoOperacion(operacion, botonActivo) {
@@ -1167,8 +1167,8 @@
           if (intentosRestantes <= 0) {
             setTimeout(() => {
               modalValidacion.hide();
-              alert('Se ha alcanzado el máximo de intentos. Por favor, verifique su código de pasaje.');
-            }, 2000);
+              toastr.warning('Se ha alcanzado el máximo de intentos. Por favor, verifique su código de pasaje.', 'MENSAJE DEL SISTEMA');
+            }, 500);
           } else {
             setTimeout(() => {
               codigoPasajeInput.focus();
