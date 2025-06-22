@@ -155,6 +155,11 @@ def index():
     }
     return render_template('Ecommerce/home/home.html', active_page="home",datos=datos_recibidos)
 
+@homeClientes_bp.route('/cambioRuta')
+def cambioRuta():
+
+    return render_template('Ecommerce/home/cambioRuta.html')
+
 @homeClientes_bp.route("/obtenerDatosPasajero", methods=["POST"])
 def obtenerDatosPasajero():
     payload = request.get_json(force=True) or {}
@@ -304,12 +309,10 @@ def pago_pasajes():
 def terminos_y_condiciones():
     return render_template('Ecommerce/home/terminosCondiciones.html')
 
-@homeClientes_bp.route('/cambioRuta')
-def cambio_ruta():
-    return render_template('Ecommerce/home/cambioRutamod.html')
 # END VIEWS
 
 # FUNCIONES
+
 @homeClientes_bp.route('/GetConfApariencia')
 def get_ConfApariencia():
     try:

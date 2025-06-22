@@ -118,9 +118,40 @@ def Menu_TransaccionesPasajes():
 def TransaccionesPasajes_Nuevo():
     return render_template('ventas/pasajesTransaccionesCRUD.html', active_page="transaccionesPasajes", active_menu='mVentas', transaccion = {}, tittle = 'Registrar transacción de pasajes', btnId = 'btn_Registrar')
 
+@ventas_bp.route('/cambioRuta')
+def cambio_ruta():
+    return render_template('ventas/cambioRuta.html', active_page="cambioRuta", active_menu="home")
+
+@ventas_bp.route('/cambioRutaNuevo')
+def cambio_ruta_nuevo():
+    return render_template('ventas/cambioRutaCRUD.html', active_page="cambioRutaNuevo", active_menu="home", cambioRuta = {}, tittle = 'Registrar cambio de ruta', btnId = 'btn_Registrar')
+
+
+
 # END VIEWS
 
 # FUNCIONES
+
+
+
+## REGIÓN CAMBIO DE RUTA ##
+
+@ventas_bp.route('/GetDataCambioRuta', methods=['GET'])
+def get_data_cambio_ruta():
+    try:
+        cambioRuta =  Pasaje.obtener_todos_cambiados_ruta()
+        if cambioRuta:
+            return jsonify({'data': cambioRuta, 'Status': 'success', 'Msj': 'Datos obtenidos correctamente.'})
+    except Exception as e:
+        return jsonify({'data': {}, 'Status': 'error', 'Msj': 'Ocurrió un error al obtener los datos de cambio de ruta.'})
+    
+##@ventas_bp.route('/RegistrarCambioRuta', methods=['POST'])
+##def registrar_cambio_ruta():
+
+
+## END REGIÓN CAMBIO DE RUTA ##
+
+
 
 # REGION TIPO CLIENTE #
 
