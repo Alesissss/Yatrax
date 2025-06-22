@@ -174,7 +174,7 @@ class Viaje:
                 WHERE id = %s
             """, (idRuta, idVehiculo, estado, fechaHoraSalida, fechaHoraLlegada, idViaje), auto_commit=False)
 
-            conexion.ejecutar("DELETE FROM detalle_viaje_asiento WHERE idDetalle_Viaje IN (SELECT idDetalle_Viaje FROM detalle_viaje WHERE idViaje = %s)", (idViaje,), auto_commit=False)
+            conexion.ejecutar("DELETE FROM detalle_viaje_asiento WHERE idDetalle_Viaje IN (SELECT id FROM detalle_viaje WHERE idViaje = %s)", (idViaje,), auto_commit=False)
             conexion.ejecutar("DELETE FROM detalle_viaje WHERE idViaje = %s", (idViaje,), auto_commit=False)
 
             for detalle in detalles_viajes:

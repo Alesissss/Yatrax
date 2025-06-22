@@ -37,34 +37,6 @@ from Models.conf_general import ConfGeneral
 
 homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/home')
 
-# ERRORES 
-# Manejar errores 401 (Página no autorizada)
-
-@homeClientes_bp.errorhandler(401)
-def error_401(error):
-    return render_template("Ecommerce/error.html", error="Página no autorizada",error_code = 401), 401
-
-# Manejar errores 403 (Página no autorizada para este usuario)
-@homeClientes_bp.errorhandler(403)
-def error_403(error):
-    return render_template("Ecommerce/error.html", error="Página restringida",error_code = 403), 403
-
-# Manejar errores 404 (Página no encontrada)
-@homeClientes_bp.errorhandler(404)
-def error_404(error):
-    return render_template("Ecommerce/error.html", error="Página no encontrada",error_code = 404), 404
-
-# Manejar errores 500 (Error interno del servidor)
-@homeClientes_bp.errorhandler(500)
-def error_500(error):
-    return render_template("Ecommerce/error.html", error="Error interno del servidor",error_code = 500), 500
-
-# Manejar cualquier otro error genérico
-@homeClientes_bp.errorhandler(Exception)
-def error_general(error):
-   return render_template("Ecommerce/error.html", error="Ocurrió un error inesperado",error_code = 500), 500
-
-
 # FUNCIONES AUXILIARES
 #REGION PROTOTIPO DE PRUEBA 
 @homeClientes_bp.route('/registrar_venta', methods=['POST'])
@@ -829,31 +801,29 @@ def validar_pasaje_dado_baja():
 @homeClientes_bp.route("/registrarReembolso", methods=["POST"])
 def registrar_reembolso():
     try:
-        # # Validar sesión activa
-        # if "cliente" not in session:
-        #     return jsonify({"Status": "error", "Msj": "Debe iniciar sesión para solicitar un reembolso"}), 401
-
         data = request.get_json()
         numero_comprobante = data.get("numeroComprobante")
         motivo = data.get("motivo") or "Reembolso solicitado"
         id_cliente = Cliente.obtener_id_por_numero_documento(data.get("numeroDoc"))
-        
+        id_pasaje = Pasaje.obtener_id_por_numComprobante(data.get("numeroComprobante"))
+        id_pasaje = id_pasaje["id"]
+        id_cliente= id_cliente["id"]
         id_metodo_pago = data.get("metodoPago")
         id_tipo_comprobante = data.get("tipoComprobante")
-        id_pasaje = data.get("idPasaje")
 
         # Validar campos requeridos
         if not all([numero_comprobante, id_cliente, id_metodo_pago, id_tipo_comprobante, id_pasaje]):
             return jsonify({"Status": "error", "Msj": "Faltan datos requeridos"}), 400
 
         # Aquí puedes calcular el monto dinámicamente si es necesario
+        pasaje=Pasaje.obtener_por_id(id_pasaje)
+        print(pasaje)
         monto = 25.00  # ← cambiar si se requiere consultar de otra tabla
-
         resultado = Reembolso.registrar(
             numeroComprobante=numero_comprobante,
             monto=monto,
             idPasaje=id_pasaje,
-            idCliente=id_cliente["id"],
+            idCliente=id_cliente,
             idTipoComprobante=id_tipo_comprobante,
             idMetodoPago=id_metodo_pago
         )
@@ -864,5 +834,25 @@ def registrar_reembolso():
             return jsonify({"Status": "error", "Msj": resultado.get("@MSJ2", "Error desconocido al registrar")})
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Error interno: {str(e)}"}), 500
+
+@homeClientes_bp.route("/validarSolicitudReembolso", methods=["POST"])
+def validar_solicitud_reembolso():
+    try:
+        numero_comprobante = request.json.get("numeroComprobante")
+        solicitud=Pasaje.validar_solicitud_reembolso(numero_comprobante)
+        if solicitud:
+            return jsonify({"Status": "success", "Msj": "El pasaje tiene una solicitud de reembolso pendiente", "data": solicitud})
+        else:
+            return jsonify({
+                "Status": "error",
+                "data": {},
+                "Msj": "Ya existe una solicitud de reembolso para este pasaje"
+            })
+    except Exception as e:
+        return jsonify({
+            "Status": "error",
+            "data": {},
+            "Msj": f"Error al validar el pasaje: {repr(e)}"
+        }), 500
 
 # END REEMBOLSO
