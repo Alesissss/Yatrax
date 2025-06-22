@@ -381,3 +381,30 @@ class Pasaje:
 
         HTML(string=html_renderizado).write_pdf(ruta_pdf)
         return ruta_pdf
+    
+    
+    @classmethod
+    def obtener_id_por_numComprobante(cls, numcomprobante):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            filas = conexion.obtener(
+                "SELECT id FROM pasaje where numeroComprobante= %s;", (numcomprobante,)
+            )
+            return filas[0] if filas else None
+        finally:
+            if conexion:
+                conexion.cerrar()
+    
+    @classmethod
+    def validar_solicitud_reembolso(cls, numcomprobante):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            filas = conexion.obtener(
+                "SELECT * FROM pasaje pa inner join reembolso re on re.idPasaje=pa.id where pa.numeroComprobante= %s;", (numcomprobante,)
+            )
+            return filas[0] if filas else None
+        finally:
+            if conexion:
+                conexion.cerrar()

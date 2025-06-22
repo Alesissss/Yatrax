@@ -14,6 +14,7 @@ from Models.api_net import ApiNetPe
 from Models.servicio import Servicio
 from Models.cliente import Cliente
 from Models.tipo_herramienta import TipoHerramienta
+from Models.microservicio import MicroServicio
 
 from Models.tipoDocumento import TipoDocumento
 from Models.tipoCliente import TipoCliente
@@ -272,6 +273,13 @@ def register_cliente():
 @homeClientes_bp.route('transferenciaPasaje')
 def transferencia_pasaje():
     return render_template('Ecommerce/home/transferenciaPasaje.html')
+
+
+@homeClientes_bp.route("/microservicios/<int:id>", methods = ["GET"])
+def ver_microservicios(id):
+    datos_servicio = Servicio.obtener_uno(id)
+    datos_microservicio = MicroServicio.obtenerPorServicio(id)
+    return render_template('Ecommerce/home/microservicios.html', servicio = datos_servicio, microservicios = datos_microservicio)
 
 @homeClientes_bp.route('/miPasajeOperaciones')
 def mi_pasaje_operaciones():
@@ -539,7 +547,6 @@ def buscarViajes():
             "Status": "error"
         })
 
-from flask import jsonify, render_template
 
 @homeClientes_bp.route("/obtener_diseno_vehiculo", methods=['POST'])
 def obtener_diseno_vehiculo():
@@ -811,31 +818,29 @@ def validar_pasaje_dado_baja():
 @homeClientes_bp.route("/registrarReembolso", methods=["POST"])
 def registrar_reembolso():
     try:
-        # # Validar sesión activa
-        # if "cliente" not in session:
-        #     return jsonify({"Status": "error", "Msj": "Debe iniciar sesión para solicitar un reembolso"}), 401
-
         data = request.get_json()
         numero_comprobante = data.get("numeroComprobante")
         motivo = data.get("motivo") or "Reembolso solicitado"
         id_cliente = Cliente.obtener_id_por_numero_documento(data.get("numeroDoc"))
-        
+        id_pasaje = Pasaje.obtener_id_por_numComprobante(data.get("numeroComprobante"))
+        id_pasaje = id_pasaje["id"]
+        id_cliente= id_cliente["id"]
         id_metodo_pago = data.get("metodoPago")
         id_tipo_comprobante = data.get("tipoComprobante")
-        id_pasaje = data.get("idPasaje")
 
         # Validar campos requeridos
         if not all([numero_comprobante, id_cliente, id_metodo_pago, id_tipo_comprobante, id_pasaje]):
             return jsonify({"Status": "error", "Msj": "Faltan datos requeridos"}), 400
 
         # Aquí puedes calcular el monto dinámicamente si es necesario
+        pasaje=Pasaje.obtener_por_id(id_pasaje)
+        print(pasaje)
         monto = 25.00  # ← cambiar si se requiere consultar de otra tabla
-
         resultado = Reembolso.registrar(
             numeroComprobante=numero_comprobante,
             monto=monto,
             idPasaje=id_pasaje,
-            idCliente=id_cliente["id"],
+            idCliente=id_cliente,
             idTipoComprobante=id_tipo_comprobante,
             idMetodoPago=id_metodo_pago
         )
@@ -846,5 +851,25 @@ def registrar_reembolso():
             return jsonify({"Status": "error", "Msj": resultado.get("@MSJ2", "Error desconocido al registrar")})
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Error interno: {str(e)}"}), 500
+
+@homeClientes_bp.route("/validarSolicitudReembolso", methods=["POST"])
+def validar_solicitud_reembolso():
+    try:
+        numero_comprobante = request.json.get("numeroComprobante")
+        solicitud=Pasaje.validar_solicitud_reembolso(numero_comprobante)
+        if solicitud:
+            return jsonify({"Status": "success", "Msj": "El pasaje tiene una solicitud de reembolso pendiente", "data": solicitud})
+        else:
+            return jsonify({
+                "Status": "error",
+                "data": {},
+                "Msj": "Ya existe una solicitud de reembolso para este pasaje"
+            })
+    except Exception as e:
+        return jsonify({
+            "Status": "error",
+            "data": {},
+            "Msj": f"Error al validar el pasaje: {repr(e)}"
+        }), 500
 
 # END REEMBOLSO

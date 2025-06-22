@@ -1,0 +1,203 @@
+{% extends "maestra.html" %}
+{% block titulo %} Microservicios {% endblock %}
+{% block contenido %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, var(--light-blue) 0%, var(--secondary-color) 100%);
+        border-radius: var(--border-radius);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .service-icon {
+        font-size: 2.5rem;
+        color: var(--light-blue);
+        margin-bottom: 1rem;
+    }
+
+    .service-card {
+        transition: var(--transition);
+        border: none;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        border-radius: var(--border-radius);
+    }
+
+    .service-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-travel {
+        background: linear-gradient(45deg, #e91e63, #9c27b0);
+        border: none;
+        padding: 12px 30px;
+        border-radius: 25px;
+        color: white;
+        font-weight: 600;
+        transition: var(--transition);
+    }
+
+    .btn-travel:hover {
+        transform: scale(1.05);
+        color: white;
+    }
+
+    .gallery-img {
+        border-radius: var(--border-radius);
+        height: 200px;
+        object-fit: cover;
+        transition: var(--transition);
+    }
+
+    .gallery-img:hover {
+        transform: scale(1.05);
+    }
+
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+    }
+
+    .breadcrumb-item a {
+        color: var(--secondary-color);
+        text-decoration: none;
+    }
+
+    .text-superciva {
+        background: linear-gradient(45deg, #e91e63, var(--light-blue));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: bold;
+        font-size: 3rem;
+    }
+</style>
+</head>
+
+<body>
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Services Header -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <h1 class="text-center mb-4" style="color: var(--primary-color); font-size: 2.5rem;">SERVICIOS</h1>
+            </div>
+        </div>
+
+        <!-- Hero Section -->
+        <div class="row hero-section">
+            <div class="col-lg-6 d-flex flex-column justify-content-center text-white"
+                style="background-color: #9c27b0;">
+                <h2 class="text-superciva mb-4">{{ servicio.nombre }}</h2>
+                <p class="lead mb-4">
+                    {{ servicio.descripcion }}
+                </p>
+            </div>
+            <div class="col-lg-6 text-center">
+                <img src="{{ servicio.imagen }}" alt="Bus {{ servicio.nombre }}" class="img-fluid"
+                    style="max-height: 300px;">
+            </div>
+        </div>
+
+        <!-- Services Icons -->
+        {% for microservicio in microservicios %}
+        <div class="row mb-5">
+            <div class="col-lg-3 col-md-4 col-6 mb-4">
+                <div class="service-card card h-100 text-center p-3">
+                    <i class="fas fa-bed service-icon"></i>
+                    <h6 class="fw-bold">Bus de dos Niveles</h6>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-4 col-6 mb-4">
+                <div class="service-card card h-100 text-center p-3">
+                    <i class="fas fa-chair service-icon"></i>
+                    <h6 class="fw-bold">Asiento 1er Nivel</h6>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-4 col-6 mb-4">
+                <div class="service-card card h-100 text-center p-3">
+                    <i class="fas fa-chair service-icon"></i>
+                    <h6 class="fw-bold">Asiento 2do Nivel</h6>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-4 col-6 mb-4">
+                <div class="service-card card h-100 text-center p-3">
+                    <i class="fas fa-play service-icon"></i>
+                    <h6 class="fw-bold">Entretenimiento a Bordo</h6>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-4 col-6 mb-4">
+                <div class="service-card card h-100 text-center p-3">
+                    <i class="fas fa-satellite service-icon"></i>
+                    <h6 class="fw-bold">GPS Monitoreo 24 hrs</h6>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-4 col-6 mb-4">
+                <div class="service-card card h-100 text-center p-3">
+                    <i class="fas fa-users service-icon"></i>
+                    <h6 class="fw-bold">Dos SS.HH</h6>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-4 col-6 mb-4">
+                <div class="service-card card h-100 text-center p-3">
+                    <i class="fas fa-snowflake service-icon"></i>
+                    <h6 class="fw-bold">Climatización</h6>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-4 col-6 mb-4">
+                <div class="service-card card h-100 text-center p-3">
+                    <i class="fas fa-tachometer-alt service-icon"></i>
+                    <h6 class="fw-bold">Velocidad Controlada</h6>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-4 col-6 mb-4">
+                <div class="service-card card h-100 text-center p-3">
+                    <i class="fas fa-charging-station service-icon"></i>
+                    <h6 class="fw-bold">Cargador USB</h6>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-4 col-6 mb-4">
+                <div class="service-card card h-100 text-center p-3">
+                    <i class="fas fa-paw service-icon"></i>
+                    <h6 class="fw-bold">Se admiten mascotas</h6>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        <!-- Gallery Section -->
+        <div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <div class="d-flex justify-content-between">
+                        <div class="col-4">
+                            <img src="{{ servicio.imagen }}" class="d-block w-100" alt="...">
+                        </div>
+                        <div class="col-4">
+                            <img src="{{ servicio.imagen }}" class="d-block w-100" alt="...">
+                        </div>
+                        <div class="col-4">
+                            <img src="{{ servicio.imagen }}" class="d-block w-100" alt="...">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="sr-only">Previous</span>
+            </a>
+            <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="sr-only">Next</span>
+            </a>
+        </div>
+        <!-- CTA Button -->
+        <div class="row">
+            <div class="col-12 text-center">
+                <button class="btn btn-travel btn-lg">
+                    <i class="fas fa-bus me-2"></i>
+                    VIAJAR AHORA
+                </button>
+            </div>
+        </div>
+    </main>
+    {% endblock %}

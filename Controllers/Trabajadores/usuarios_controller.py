@@ -3,6 +3,7 @@ from flask import Blueprint, request, jsonify, render_template, session, flash, 
 from werkzeug.utils import secure_filename
 from Models.usuario import Usuario
 from Models.tipoUsuario import TipoUsuario
+from Models.personal import Personal
 
 usuario_bp = Blueprint('usuario', __name__, url_prefix='/trabajadores/usuarios')
 
@@ -70,19 +71,37 @@ def GetTiposUsuarios():
         return jsonify({'data': result, 'Status': 'success', 'Msj': 'Listado de tipos de usuarios retornado exitosamente'})
     except Exception as e:
         return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar tipos de usuarios: {repr(e)}'})
+    
+@usuario_bp.route("/GetPersonal", methods=["GET"])
+def get_personal():
+    try:
+        personal = Personal.obtener_todos()
+        result = [
+            {
+                'id': pe['id'], 
+                'nombre': pe['nombre'],
+                'ape_paterno': pe['ape_paterno'],
+                'ape_materno': pe['ape_materno'], 
+                'id_tipopersonal': pe['id_tipopersonal'], 
+                'tipoPersonal': pe['tipopersonal']
+             } for pe in personal if pe['estado'] == 1]
+
+        return jsonify({'data': result, 'Status': 'success', 'Msj': 'Listado de personal retornado exitosamente'})
+    except Exception as e:
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar personal: + {repr(e)}'})
 
 @usuario_bp.route("/RegistrarUsuario", methods=["POST"])
 def registrar_usuario():
     try:
         UPLOAD_FOLDER = "Static/img/trabajadores/"
-        nombre = request.form.get("nombre").strip()
+        idPersonal = request.form.get("idPersonal").strip()
         email = request.form.get("email").strip()
         password = request.form.get("password")
         estado = request.form.get("estado")
         idTipoUsuario = request.form.get("idTipoUsuario")
         usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
 
-        if not nombre or not email or not password or not idTipoUsuario:
+        if not idPersonal or not email or not password or not idTipoUsuario:
             return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
 
         ruta_imagen = "/Static/img/trabajadores/default-user.png"
@@ -95,7 +114,7 @@ def registrar_usuario():
                 filename = f"{email}.{extension}"
                 ruta_imagen = f"/{UPLOAD_FOLDER}{filename}"
 
-        mensajes = Usuario.registrar(nombre, email, password, ruta_imagen, estado, idTipoUsuario, usuario_actual)
+        mensajes = Usuario.registrar(idPersonal, email, password, ruta_imagen, estado, idTipoUsuario, usuario_actual)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
 
@@ -135,12 +154,12 @@ def editar_usuario(id):
         usuario = Usuario.obtener_por_id(id)
 
         if request.method == 'POST':
-            nombre = request.form.get("nombre").strip()
+            idPersonal = request.form.get("idPersonal")
             email = request.form.get("email").strip()
             estado = request.form.get("estado")
             idTipoUsuario = request.form.get("idTipoUsuario")
 
-            if not nombre or not email or not idTipoUsuario:
+            if not idPersonal or not email or not idTipoUsuario:
                 return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
 
             ruta_imagen = usuario['imagen'] if usuario and 'imagen' in usuario else "/Static/img/trabajadores/default-user.png"
@@ -153,7 +172,7 @@ def editar_usuario(id):
                     filename = f"{email}.{extension}"
                     ruta_imagen = f"/{UPLOAD_FOLDER}{filename}"
             
-            mensajes = Usuario.editar(id, nombre, email, ruta_imagen, estado, idTipoUsuario)
+            mensajes = Usuario.editar(id, idPersonal, email, ruta_imagen, estado, idTipoUsuario)
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
 
