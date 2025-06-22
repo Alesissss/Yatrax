@@ -575,7 +575,7 @@ CREATE TABLE nivel(
     foreign key (id_tipo_vehiculo) references tipo_vehiculo(id)
 );
 -- Crear tabla tipo metodo pago
-CREATE TABLE tipo_metodoPago (
+CREATE TABLE tipo_metodopago (
     idTipoMetodoPago INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL,
     estado BOOLEAN NOT NULL,
@@ -593,7 +593,7 @@ CREATE TABLE metodo_pago (
     qr VARCHAR(255) NULL,
     fecha_registro DATETIME not null DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) not null,
-    foreign key (id_tipo_metodoPago) references tipo_metodoPago(idTipoMetodoPago) -- Relación con tipo_metodoPago
+    foreign key (id_tipo_metodoPago) references tipo_metodopago(idTipoMetodoPago) -- Relación con tipo_metodoPago
 );
 
 -- Crear tabla personal_incidencia
@@ -5713,13 +5713,13 @@ BEGIN
     SET @MSJ2 = NULL;
 
     SELECT COUNT(*) INTO cExiste 
-    FROM tipo_metodoPago
+    FROM tipo_metodopago
     WHERE nombre = P_NOMBRE AND estado = 1;
 
     IF cExiste > 0 THEN
         SET @MSJ2 = 'Ya existe un tipo de método de pago con ese nombre';
     ELSE
-        INSERT INTO tipo_metodoPago (nombre, estado, usuario)
+        INSERT INTO tipo_metodopago (nombre, estado, usuario)
         VALUES (P_NOMBRE, P_ESTADO, P_USUARIO);
         SET @MSJ = 'Se registró correctamente el tipo de método de pago';
     END IF;
@@ -5746,11 +5746,11 @@ BEGIN
     SET @MSJ2 = NULL;
 
     SELECT COUNT(*) INTO cExiste 
-    FROM tipo_metodoPago 
+    FROM tipo_metodopago 
     WHERE idTipoMetodoPago = P_ID;
 
     SELECT COUNT(*) INTO cNombre 
-    FROM tipo_metodoPago 
+    FROM tipo_metodopago 
     WHERE nombre = P_NOMBRE AND idTipoMetodoPago != P_ID;
 
     IF cExiste = 0 THEN
@@ -5758,7 +5758,7 @@ BEGIN
     ELSEIF cNombre != 0 THEN
         SET @MSJ2 = 'El nombre ingresado ya existe';
     ELSE
-        UPDATE tipo_metodoPago 
+        UPDATE tipo_metodopago 
         SET nombre = P_NOMBRE,
             estado = P_ESTADO,
             usuario = P_USUARIO
@@ -5784,13 +5784,13 @@ BEGIN
     SET @MSJ2 = NULL;
 
     SELECT COUNT(*) INTO cExiste 
-    FROM tipo_metodoPago 
+    FROM tipo_metodopago 
     WHERE idTipoMetodoPago = P_ID AND estado = 1;
 
     IF cExiste = 0 THEN
         SET @MSJ2 = 'El tipo de método de pago no existe o ya fue dado de baja';
     ELSE
-        UPDATE tipo_metodoPago 
+        UPDATE tipo_metodopago 
         SET estado = 0,
             usuario = P_USUARIO
         WHERE idTipoMetodoPago = P_ID;
@@ -5814,7 +5814,7 @@ BEGIN
     SET @MSJ2 = NULL;
 
     SELECT COUNT(*) INTO cExiste 
-    FROM tipo_metodoPago 
+    FROM tipo_metodopago 
     WHERE idTipoMetodoPago = P_ID;
 
     IF EXISTS (SELECT 1 FROM metodo_pago WHERE id_tipo_metodoPago = P_ID) THEN
@@ -5822,7 +5822,7 @@ BEGIN
     ELSEIF cExiste <= 0 THEN
         SET @MSJ2 = 'El tipo de método de pago que intenta eliminar no existe';
     ELSE
-        DELETE FROM tipo_metodoPago 
+        DELETE FROM tipo_metodopago 
         WHERE idTipoMetodoPago = P_ID;
         SET @MSJ = 'Se eliminó correctamente el tipo de método de pago';
     END IF;
