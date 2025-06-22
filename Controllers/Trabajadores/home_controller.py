@@ -4,6 +4,7 @@ from flask import Blueprint, request, jsonify, render_template, session, redirec
 from Models.usuario import Usuario
 from Models.tipoUsuario import TipoUsuario
 from Models.conf_menus import Conf_Menus
+from Models.personal import Personal
 import random
 from correo import enviar_correo
 
@@ -178,6 +179,16 @@ def nuevaContrasena():
         return jsonify({"Status": "error", "Msj": str(e)})
 
 # END REGION
+
+@home_bp.route('/VerificarViaje')
+def verificarViaje():
+    try:
+        if (session['usuario']['tipoPersonal'] == 'CHOFER'):
+            id = session['usuario']['id_personal']
+            result = Personal.verificarViaje(id)
+            return jsonify({"data": result, "Status": "success", "Msj": "Viaje encontrado exitosamente"})
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": repr(e)})
 
 @home_bp.route('/inicio')
 def index():
