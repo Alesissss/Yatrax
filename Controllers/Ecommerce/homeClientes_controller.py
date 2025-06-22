@@ -777,13 +777,13 @@ def validar_pasaje_dado_baja():
             return jsonify({"Status": "error", "Msj": "Número de comprobante es requerido"}), 400
         reembolso = Reembolso.validar_pasaje_dadoBaja(numero_comprobante)
         if reembolso:
-            if reembolso["estado_viaje"] == 0:
+            if reembolso["estado_viaje"] == 0 or reembolso["fechaInicioReprogramacion"] is not None or reembolso["fechaFinReprogramacion"] is not None:
                 return jsonify({"Status": "success", "data": reembolso, "Msj": "Pasaje validado correctamente"})
             else:
                 return jsonify({
                     "Status": "error",
                     "data": {},
-                    "Msj": "No se cumple con las políticas de reembolso: el pasaje no está dado de baja"
+                    "Msj": "No se cumple con las políticas de reembolso"
                 }), 400
         else:
             return jsonify({
@@ -856,3 +856,22 @@ def validar_solicitud_reembolso():
         }), 500
 
 # END REEMBOLSO
+
+# REGION REPROGRAMACION
+
+@homeClientes_bp.route("/validarCodigoReprogramacion", methods=["POST"])
+def validar_codigo_reprogramacion():
+    try:
+        numero_comprobante = request.json.get("numeroComprobante")
+        codigo = request.json.get("codigoReprogramacion")
+        if not numero_comprobante or not codigo:
+            return jsonify({"Status": "error", "Msj": "Número de comprobante y código son requeridos"}), 400
+        reprogramacion = Pasaje.validar_codigo_reprogramacion(numero_comprobante, codigo)
+        if reprogramacion:
+            return jsonify({"Status": "success", "data": reprogramacion, "Msj": "Código de reprogramación validado correctamente"})
+        else:
+            return jsonify({"Status": "error", "data": {}, "Msj": "Código de reprogramación inválido"}), 400
+    except Exception as e:
+        return jsonify({"Status": "error", "data": {}, "Msj": f"Error al validar el código: {repr(e)}"}), 500
+
+# END REPROGRAMACION
