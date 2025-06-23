@@ -1105,32 +1105,62 @@
                 return;
             }
 
-            // Eliminar elementos de la fila
-            contenedor.querySelectorAll(`input[data-fila="${fila}"], button[data-y="${fila}"]`).forEach(el => {
-                el.remove();
+            const columnas = parseInt(contenedor.dataset.columnas);
+
+            // Guardar todos los datos existentes EXCEPTO la fila a eliminar
+            const datosExistentes = [];
+            contenedor.querySelectorAll('button[data-x][data-y]').forEach(btn => {
+                const x = parseInt(btn.dataset.x);
+                const y = parseInt(btn.dataset.y);
+
+                if (y !== fila) {
+                    // Ajustar posición Y si está después de la fila eliminada
+                    const nuevaY = y > fila ? y - 1 : y;
+
+                    datosExistentes.push({
+                        x: x,
+                        y: nuevaY,
+                        tipo: btn.dataset.tipo,
+                        html: btn.innerHTML
+                    });
+                }
             });
 
-            // Reorganizar filas posteriores
-            for (let i = fila + 1; i <= filasActuales; i++) {
-                const elementos = contenedor.querySelectorAll(`[data-fila="${i}"], [data-y="${i}"]`);
-                elementos.forEach(el => {
-                    if (el.hasAttribute('data-fila')) {
-                        el.setAttribute('data-fila', i - 1);
-                        el.dataset.fila = i - 1;
-                    }
-                    if (el.hasAttribute('data-y')) {
-                        el.setAttribute('data-y', i - 1);
-                        el.dataset.y = i - 1;
-                    }
-                });
-            }
-
-            // Actualizar dataset y grid
+            // Calcular nuevas dimensiones
             const nuevasFilas = filasActuales - 1;
+
+            // Limpiar completamente el contenedor
+            contenedor.innerHTML = '';
             contenedor.dataset.filas = nuevasFilas;
+
+            // Reconfigurar grid con nuevas dimensiones
             const cellSize = piso === 1 ? '35px' : '40px';
-            const filasGrid = piso === 1 ? nuevasFilas + 1 : nuevasFilas;
-            contenedor.style.gridTemplateRows = `40px repeat(${filasGrid}, ${cellSize})`;
+            const filasGrid = piso === 1 ? nuevasFilas + 1 : nuevasFilas; // +1 para cabina en piso 1
+
+            contenedor.style.cssText = `
+        display: grid;
+        grid-template-columns: 40px repeat(${columnas}, ${cellSize});
+        grid-template-rows: 40px repeat(${filasGrid}, ${cellSize});
+        gap: 2px;
+        justify-content: center;
+        margin-top: 20px;
+        position: relative;
+    `;
+
+            // ⭐ REGENERAR ESTRUCTURA COMPLETA (igual que eliminar columna)
+            this._crearElementosMatriz(contenedor, piso);
+
+            // Restaurar datos en las posiciones correctas
+            contenedor.querySelectorAll('button[data-x][data-y]').forEach(btn => {
+                const x = parseInt(btn.dataset.x);
+                const y = parseInt(btn.dataset.y);
+
+                const datoOriginal = datosExistentes.find(d => d.x === x && d.y === y);
+                if (datoOriginal) {
+                    btn.setAttribute('data-tipo', datoOriginal.tipo);
+                    btn.innerHTML = datoOriginal.html;
+                }
+            });
 
             // Limpiar selecciones
             APP_STATE.filasSeleccionadas.delete(fila);
@@ -1138,7 +1168,6 @@
 
             toastr.success(`Fila ${fila} eliminada (${nuevasFilas}/${CONFIG.MATRIZ.MIN_FILAS} mín.)`, 'Fila eliminada');
         },
-
         _eliminarColumna(piso, columna) {
             const contenedor = document.getElementById(`matrizContainer_${piso}`);
             const columnasActuales = parseInt(contenedor.dataset.columnas);
