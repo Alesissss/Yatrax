@@ -21,6 +21,7 @@
                             <th class="text-center">APELLIDOS Y NOMBRES</th>
                             <th class="text-center">TIPO PERSONAL</th>
                             <th class="text-center">ESTADO</th>
+                            <th class="text-center">IMAGEN</th>
                             <th class="text-center">ACCIÓN</th>
                         </tr>
                     </thead>
@@ -207,6 +208,16 @@
                     data: null,
                     name: null,
                     render: function (data, type, row) {
+                        return `<div>
+                            <img src="${data.imagen}" class="img-thumbnail" style="max-width: 100px;">
+                        </div>`;
+                    },
+                    className: 'text-center align-middle',
+                },
+                {
+                    data: null,
+                    name: null,
+                    render: function (data, type, row) {
                         return `
                         <div class="flex-wrap btn-group">
                             <button class="btn btn-xs m-1 btn-info" onclick="fct_PersonalVer('${data.id}')" title="Ver personal"><i class="bi bi-eye"></i></button>
@@ -225,13 +236,13 @@
                     className: "text-center align-middle",
                 },
                 {
-                    targets: [1, 2, 3, 4],
+                    targets: [1, 2, 3, 4, 5],
                     className: 'align-middle',
                 },
                 {
-                    targets: [4],
+                    targets: [5],
                     orderable: false,
-                    width: '20%',
+                    width: '10%',
                 },
             ],
             lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
