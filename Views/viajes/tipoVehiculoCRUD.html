@@ -532,8 +532,11 @@
                 text: '¿Desea agregar una fila al final?',
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonText: 'Sí, agregar',
-                cancelButtonText: 'Cancelar'
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, agregar",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
             });
 
             if (confirmacion.isConfirmed) {
@@ -549,8 +552,10 @@
                 showCancelButton: true,
                 showDenyButton: true,
                 confirmButtonText: 'Derecha',
+                confirmButtonColor: "#3085d6",
                 denyButtonText: 'Izquierda',
-                cancelButtonText: 'Cancelar'
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true    
             });
 
             if (posicion !== undefined) {
@@ -1484,7 +1489,7 @@
             e.target.classList.add('control-selected');
 
             const herramienta = SERVER_DATA.herramientas.find(h => h.id === tipoSeleccionado);
-            toastr.info(`Tipo seleccionado: ${herramienta?.nombre || 'Herramienta'}`, 'Herramienta Seleccionada');
+            // toastr.info(`Tipo seleccionado: ${herramienta?.nombre || 'Herramienta'}`, 'Herramienta seleccionada');
         },
 
         inicializarSistemaSeleccion() {
