@@ -96,8 +96,6 @@
     border-radius: 0 0 var(--border-radius) var(--border-radius);
   } */
 
-
-
   .azul {
     background: var(--primary-color);
     color: white;
@@ -146,8 +144,6 @@
   .progreso-contacto-pago {
     position: relative;
   }
-
-
 
   /* .accordion-button.collapsed {
     background-color: #f8f9fa;
@@ -807,10 +803,6 @@
 
       // Función para abrir modal con la operación seleccionada
       function abrirModalValidacion(operacion, boton) {
-        if (enTransaccion && enTransaccion.value === '1') {
-          toastr.warning("Ya se encuentra en una transacción el pasaje", "MENSAJE DEL SISTEMA");
-          return;
-        }
         operacionSeleccionada = operacion;
         botonSeleccionado = boton;
 
@@ -853,9 +845,11 @@
         if (operacion === 'transferir') {
           datosNuevoPasajero.style.display = 'block';
           checkboxCargo.style.display = 'block';
+          toastr.info("Recuerde que la transferencia de pasaje tiene un cargo extra", "INFORMACIÓN");
         } else if (operacion === 'cambio-ruta') {
           datosCambioRuta.style.display = 'block';
           checkboxCargo.style.display = 'block';
+          toastr.info("Recuerde que el cambio de ruta tiene un cargo extra", "INFORMACIÓN");
         } else {
           contenidoOtrasOperaciones.style.display = 'block';
 
@@ -874,28 +868,15 @@
         }
       }
 
-      // // Event listeners para botones de operaciones
-      // btnTransferir.addEventListener('click', () => {
-      //   mostrarContenidoOperacion('transferir', btnTransferir);
-      // });
-
-      // btnCambioRuta.addEventListener('click', () => {
-      //   mostrarContenidoOperacion('cambio-ruta', btnCambioRuta);
-      // });
-
-      // btnReembolso.addEventListener('click', () => {
-      //   mostrarContenidoOperacion('reembolso', btnReembolso);
-      // });
-
-      // btnConvertirLibre.addEventListener('click', () => {
-      //   mostrarContenidoOperacion('convertir-libre', btnConvertirLibre);
-      // });
-
       // Event listeners para botones de operaciones - ahora abren modal
       btnTransferir.addEventListener('click', () => {
         const pasCod = document.getElementById('pasCod').value;
         if (!pasCod) {
           toastr.warning("Debe buscar un pasaje primero", "MENSAJE DEL SISTEMA");
+          return;
+        }
+        if (enTransaccion.value !== "0") {
+          verificarEstadoPasaje();
           return;
         }
         abrirModalValidacion('transferir', btnTransferir);
@@ -907,6 +888,10 @@
           toastr.warning("Debe buscar un pasaje primero", "MENSAJE DEL SISTEMA");
           return;
         }
+        if (enTransaccion.value !== "0") {
+          verificarEstadoPasaje();
+          return;
+        }
         abrirModalValidacion('cambio-ruta', btnCambioRuta);
       });
 
@@ -916,6 +901,10 @@
           toastr.warning("Debe buscar un pasaje primero", "MENSAJE DEL SISTEMA");
           return;
         }
+        if (enTransaccion.value !== "0") {
+          verificarEstadoPasaje();
+          return;
+        }
         abrirModalValidacion('reembolso', btnReembolso);
       });
 
@@ -923,6 +912,10 @@
         const pasCod = document.getElementById('pasCod').value;
         if (!pasCod) {
           toastr.warning("Debe buscar un pasaje primero", "MENSAJE DEL SISTEMA");
+          return;
+        }
+        if (enTransaccion.value !== "0") {
+          verificarEstadoPasaje();
           return;
         }
         abrirModalValidacion('convertir-libre', btnConvertirLibre);
@@ -989,6 +982,69 @@
             toastr.error("Error al obtener los datos del pasajero: " + error.message, "ERROR");
           });
       })
+
+      // Funcion para saber es estado de una pasaje
+      function verificarEstadoPasaje() {
+        const idPasaje = document.getElementById("pasId").value;
+        fetch(`/ecommerce/home/verificarEstadoPasaje?idPasaje=${idPasaje}`)
+          .then((r) => r.json())
+          .then((json) => {
+            if (json.Status === "success") {
+              const d = json.data;
+              toastr.warning(`${d.estado}`, "MENSAJE DEL SISTEMA");
+            } else {
+              toastr.error("Error al verificar el estado del pasaje", "ERROR");
+            }
+          })
+          .catch((error) => {
+            toastr.error("Error al verificar el estado del pasaje: " + error.message, "ERROR");
+          });
+      }
+
+      // validad que los DNI ingresados sean diferentes
+      function validarDNI() {
+        const dniPasaje = document.getElementById("numDocAnt").value;
+        const dniPasajeroTr = document.getElementById("numeroDocNuevo").value;
+        const dniPasajeroMen = document.getElementById("numeroDocMenor").value;
+
+        if (dniPasaje === dniPasajeroTr) {
+          toastr.error("El DNI de pasajero a transferir debe ser diferente", "ERROR");
+          document.getElementById("numeroDocNuevo").value = "";
+          return false;
+        }
+        if (dniPasajeroTr === dniPasajeroMen) {
+          toastr.error("Los DNI del pasajero y del menor deben ser diferentes", "ERROR");
+          document.getElementById("numeroDocMenor").value = "";
+          return false;
+        }
+        if (dniPasajeroMen === dniPasaje) {
+          toastr.error("Los DNI del pasajero y del menor deben ser diferentes", "ERROR");
+          document.getElementById("numeroDocMenor").value = "";
+          return false;
+        }
+        return true;
+      }
+
+      document.getElementById("numeroDocNuevo").addEventListener("input", validarDNI);
+      document.getElementById("numeroDocMenor").addEventListener("input", validarDNI);
+
+      // funcion para cambiar el estado de transacción de un pasaje al cambiar de operacion internamente
+      function cambiarEstadoTransaccion(){
+        const idPasaje = document.getElementById("pasId").value;
+        const estadoTransaccion = document.getElementById("pasEstTran").value;
+        fetch(`/ecommerce/home/cambiarEnTransaccion?idPasaje=${idPasaje}&estadoTransaccion=${estadoTransaccion}`)
+          .then((r) => r.json())
+          .then((json) => {
+            if (json.Status === "success") {
+              toastr.success("Estado de transacción actualizado correctamente", "ÉXITO");
+            } else {
+              toastr.error("Error al actualizar el estado de transacción", "ERROR");
+            }
+          })
+          .catch((error) => {
+            toastr.error("Error al actualizar el estado de transacción: " + error.message, "ERROR");
+          });
+      }
 
       // Resto del código existente para el manejo del menor
       function showMenor() {
@@ -1070,7 +1126,6 @@
         .addEventListener("input", function (e) {
           this.value = this.value.replace(/[^0-9]/g, "");
         });
-      // ...dentro de tu script en miPasajeOp.html...
 
       function validarCodigo() {
         const codigoIngresado = codigoPasajeInput.value.trim();
@@ -1472,17 +1527,6 @@
       // Función para realizar la transferencia de pasaje
       function realizarTransferencia() {
         const esMenorEdad = document.getElementById("esMenor").checked;
-        const conMenor = document.getElementById("conMenor").checked;
-
-        if (esMenorEdad) {
-          viajeBrazo = 0,
-            esMenor = 1
-        }
-
-        if (conMenor) {
-          viajeBrazo = 1,
-            esMenor = 0
-        }
 
         // 1) Obtener valores del DOM
         const pasaje = {
@@ -1500,8 +1544,8 @@
           sexo: document.querySelector('input[name="sexoNuevo"]:checked')?.value || null,
           nombreDocumento: document.getElementById("tipoDocNuevo")?.value || "",
           numero_documento: document.getElementById("numeroDocNuevo")?.value || "",
-          esMenorEdad: esMenor,
-          viajeEnBrazos: viajeBrazo
+          esMenorEdad: esMenorEdad ? 1 : 0,
+          viajeEnBrazos: 0
         };
 
         const persona2 = {
@@ -1514,8 +1558,8 @@
           sexo: document.querySelector('input[name="sexoMenor"]:checked')?.value || null,
           nombreDocumento: document.getElementById("tipoDocMenor")?.value || "",
           numero_documento: document.getElementById("numeroDocMenor")?.value || "",
-          esMenorEdad: esMenor,
-          viajeEnBrazos: viajeBrazo
+          esMenorEdad: 0,
+          viajeEnBrazos: 1
         };
 
         // 2) Envío via Fetch con las claves que espera Flask

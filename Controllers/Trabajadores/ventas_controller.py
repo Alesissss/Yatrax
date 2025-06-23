@@ -2,7 +2,6 @@ import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort, json
 from xml.etree import ElementTree as ET
 from jinja2 import Environment, FileSystemLoader
-from weasyprint import HTML
 from werkzeug.utils import secure_filename
 from Models.tipoCliente import TipoCliente
 from Models.microservicio import MicroServicio

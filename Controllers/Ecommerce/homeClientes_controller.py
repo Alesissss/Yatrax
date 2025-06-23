@@ -680,7 +680,6 @@ def realizar_transferencia():
 
         resultado = Pasaje.realizarTransferencia(id_pasaje, persona1, persona2)
 
-        # Tu método devuelve {"msj": ..., "msj2": ...}
         if resultado.get("msj"):
             return jsonify({"Status":"success", "Msj": resultado["msj"]})
         else:
@@ -688,7 +687,24 @@ def realizar_transferencia():
 
     except Exception as e:
         return jsonify({"Status":"error", "Msj": f"Error inesperado: {e}"})
-    
+
+@homeClientes_bp.route("/mostrarPasarelaPago", methods=["POST"])
+def mostrar_pasarela_pago():
+    metodo_pago = MetodoPago.obtener_todos()
+    return render_template("Ecommerce/home/pasarelaPagos.html", metodo_pago=metodo_pago)
+
+@homeClientes_bp.route("/verificarEstadoPasaje", methods=["GET"])
+def verificar_estado_pasaje():
+    try:
+        id_pasaje = request.args.get("idPasaje", type=int)
+        estado = Pasaje.obtener_estados_pasaje(id_pasaje)
+        if estado:
+            return jsonify({"Status": "success", "data": estado})
+        else:
+            return jsonify({"Status": "error", "Msj": "No se encontró el pasaje proporcionado"})
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Error inesperado: {e}"})
+
 # END REGION COMPRA PASAJE
 
 # REGION RUTAS SEGUIMIENTO
@@ -747,13 +763,13 @@ def obtenerDatosPasaje():
 @homeClientes_bp.route("/cambiarEnTransaccion", methods=["GET"])
 def cambiarEnTransaccion():
     try:
-        numComprobante = request.args.get("comprobante")
-        pasaje = Pasaje.obtenerDatosPasaje(numComprobante)
+        idPasaje = request.args.get("pasId")
+        pasaje = Pasaje.obtenerDatosPasaje(idPasaje)
         if pasaje:
             if pasaje['estado_transaccion'] == 1:
-                Pasaje.cambiar_a_transaccion_0(numComprobante)
+                Pasaje.cambiar_a_transaccion_0(idPasaje)
             else:
-                Pasaje.cambiar_a_transaccion_1(numComprobante)
+                Pasaje.cambiar_a_transaccion_1(idPasaje)
         else:
             return jsonify({
                 "Status": "error",

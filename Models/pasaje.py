@@ -4,7 +4,6 @@ import random
 import os
 import xml.etree.ElementTree as ET
 from jinja2 import Environment, FileSystemLoader
-from weasyprint import HTML
 
 from Models.tipoDocumento import TipoDocumento
 class Pasaje:
@@ -235,13 +234,13 @@ class Pasaje:
             # lo que da un total de 11,881,376,000 combinaciones posibles.
     
     @classmethod
-    def cambiar_a_transaccion_1(cls, numComprobante):
+    def cambiar_a_transaccion_1(cls, id_pasaje):
         conexion = bd.Conexion()
         try:
             # Cambia el estado de un pasaje a transacción
             conexion.ejecutar(
-                "UPDATE pasaje SET enTransaccion = 1 WHERE numeroComprobante = %s;",
-                (numComprobante,)
+                "UPDATE pasaje SET enTransaccion = 1 WHERE id = %s;",
+                (id_pasaje,)
             )
             return {"msj": "Estado de pasaje actualizado", "msj2": None}
         except Exception as e:
@@ -250,13 +249,13 @@ class Pasaje:
             conexion.cerrar()
     
     @classmethod
-    def cambiar_a_transaccion_0(cls, numComprobante):
+    def cambiar_a_transaccion_0(cls, id_pasaje):
         conexion = bd.Conexion()
         try:
             # Cambia el estado de un pasaje a no transacción
             conexion.ejecutar(
-                "UPDATE pasaje SET enTransaccion = 0 WHERE numeroComprobante = %s;",
-                (numComprobante,)
+                "UPDATE pasaje SET enTransaccion = 0 WHERE id = %s;",
+                (id_pasaje,)
             )
             return {"msj": "Estado de pasaje actualizado", "msj2": None}
         except Exception as e:
@@ -332,7 +331,6 @@ class Pasaje:
                 WHERE dp.viajeEnBrazos != 1 AND pas.numeroComprobante = %s;
             """
             filas = conexion.obtener(query, (numComprobante,))
-            print (filas)
             return filas[0] if filas else None
         finally:
             if conexion:
@@ -348,6 +346,35 @@ class Pasaje:
             return resultado[0] if resultado else {"msj": None, "msj2": "Error al recuperar mensaje"}
         except Exception as e:
             return {"msj": None, "msj2": f"Error al eliminar pasaje: {e}"}
+        finally:
+            if conexion:
+                conexion.cerrar()
+                
+    @classmethod
+    def obtener_estados_pasaje(cls, id_pasaje):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            sql = """
+                SELECT 
+                    esTransferencia AS esTransferencia,
+                    esReembolso AS esReembolso,
+                    esCambioRuta AS esCambioRuta,
+                    esPasajeLibre AS esPasajeLibre
+                FROM pasaje
+                WHERE id = %s AND enTransaccion = 1;
+            """
+            resultado = conexion.obtener(sql, (id_pasaje,))[0]
+            if resultado['esTransferencia'] == 1:
+                resultado['estado'] = 'Ya se ha realizado una transferencia de este pasaje.'
+            elif resultado['esReembolso'] == 1:
+                resultado['estado'] = 'Ya se ha realizado un reembolso de este pasaje.'
+            elif resultado['esCambioRuta'] == 1:
+                resultado['estado'] = 'Ya se ha realizado un cambio de ruta de este pasaje.'
+            elif resultado['esPasajeLibre'] == 1:
+                resultado['estado'] = 'Ya se ha convertido a pasaje libre de este pasaje.'
+            return resultado
+        
         finally:
             if conexion:
                 conexion.cerrar()
