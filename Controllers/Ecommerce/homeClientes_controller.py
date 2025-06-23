@@ -8,6 +8,7 @@ from correo import enviar_correo
 from flask import Blueprint, request, jsonify, render_template, session, redirect, url_for, abort,current_app
 from Models.pasaje import Pasaje
 from flask_mail import Mail
+import datetime
 
 from Models.conf_plantillas import Conf_Plantillas
 from Models.api_net import ApiNetPe
@@ -158,10 +159,23 @@ def procesar_reserva():
         contacto = data.get("contacto", {})
         pago = data.get("pago", {})
         ventas = data.get("ventas", {})
+        codigoReserva = Pasaje.generar_codigo_reserva(),
+        fecha = datetime.datetime.now()
 
-        resultado = Reserva.registrar_operacion(contacto, pago, ventas)
+        resultado = Reserva.registrar_operacion(contacto, pago, ventas,codigoReserva,fecha)
 
         if resultado["status"] == 1:
+            email = contacto.get("email", None)
+            print(email)
+
+            datosEnvio = {
+                'asunto':'Envio codigo de reservacion Yatrax',
+                'remitente': 'yatraxyatusa@gmail.com',
+                'destinatario': email,
+                'mensaje': 'Estimado(a), recordarle que el lapso de tiempo para efectuar el pago de su reserva es de 2h máximo. A continuacion, se le hace entrega del codigo de reserva que debera presentar en agencia: '+str(codigoReserva)
+            }
+
+            enviar_correo(current_app.extensions['mail'],datosEnvio)
             return jsonify({"Status": "success", "codigo_confirmacion": f"VENTA-{resultado['id_venta']}"})
         else:
             return jsonify({"Status": "error", "Msj": resultado["msg"]})
@@ -951,5 +965,29 @@ def validar_codigo_reprogramacion():
             return jsonify({"Status": "error", "data": {}, "Msj": "Código de reprogramación inválido"}), 400
     except Exception as e:
         return jsonify({"Status": "error", "data": {}, "Msj": f"Error al validar el código: {repr(e)}"}), 500
+
+@homeClientes_bp.route("/getTiposMetodoPago")
+def get_tipos_metodo_pago():
+    conexion = bd.Conexion()
+    try:
+        tipos = conexion.obtener("SELECT idTipoMetodoPago AS id, nombre FROM tipo_metodopago")
+        return jsonify({"Status": "success", "data": tipos})
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": str(e)})
+    finally:
+        conexion.cerrar()
+
+
+@homeClientes_bp.route("/get_metodos_pago_por_tipo/<int:id_tipo>", methods=["GET"])
+def get_metodos_pago_por_tipo(id_tipo):
+    try:
+        metodos = bd.Conexion().obtener("""
+            SELECT id, nombre FROM metodo_pago 
+            WHERE id_tipo_metodoPago = %s AND LOWER(nombre) NOT LIKE '%%efectivo%%' AND estado = 1
+        """, (id_tipo,))
+        return jsonify({"Status": "success", "data": metodos})
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": str(e)})
+
 
 # END REPROGRAMACION

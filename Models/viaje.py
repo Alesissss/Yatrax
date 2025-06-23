@@ -39,15 +39,15 @@ class Viaje:
     def obtener_por_id(cls, viaje_id):
         conexion = bd.Conexion()
         try:
-            viaje = conexion.obtener(""" SELECT v.id, v.idRuta, v.estado, v.estadoViaje AS idEstadoViaje, ev.nombre AS estado_viaje, r.nombre AS ruta, 
+            viaje = conexion.obtener(""" SELECT v.id, v.idRuta, v.estado, v.idEstadoViaje, ev.nombre AS estado_viaje, r.nombre AS ruta, 
                 r.tipo AS tipo_ruta, tv.id_servicio, s.nombre AS servicio, CONCAT(tv.nombre, ' - ', ve.placa) AS vehiculo, 
-                v.esReprogramado, v.esPostergado, v.fecha_salida_estimada, v.fecha_llegada_estimada
+                v.esReprogramado, v.fechaHoraSalida, v.fechaHoraLlegada
                 FROM viaje v
                 INNER JOIN ruta r on v.idRuta = r.id
                 INNER JOIN vehiculo ve on ve.id = v.idVehiculo
-                INNER JOIN estado_viaje ev on v.estadoViaje = ev.id
+                INNER JOIN estado_viaje ev on v.idEstadoViaje = ev.id
                 INNER JOIN tipo_vehiculo tv on tv.id = ve.id_tipo_vehiculo
-                INNER JOIN servicio s on s.id = tv.id_servicio;
+                INNER JOIN servicio s on s.id = tv.id_servicio
                 WHERE r.id = %s""", (viaje_id,))
             return viaje[0] if viaje else None
         finally:
@@ -81,6 +81,40 @@ class Viaje:
         finally:
             conexion.cerrar()
 
+    @classmethod
+    def obtener_datos_viaje_tracking(cls, idViaje):
+        try:
+            conexion = bd.Conexion()
+            
+            viaje = conexion.obtener("""SELECT v.id, v.idRuta, v.estado, v.idEstadoViaje, ev.nombre AS estado_viaje, r.nombre AS ruta, 
+                r.tipo AS tipo_ruta, tv.id_servicio, s.nombre AS servicio, v.idVehiculo, CONCAT(tv.nombre, ' - ', ve.placa) AS vehiculo, 
+                v.esReprogramado, v.fechaHoraSalida, v.fechaHoraLlegada
+                FROM viaje v
+                INNER JOIN ruta r on v.idRuta = r.id
+                INNER JOIN vehiculo ve on ve.id = v.idVehiculo
+                INNER JOIN estado_viaje ev on v.idEstadoViaje = ev.id
+                INNER JOIN tipo_vehiculo tv on tv.id = ve.id_tipo_vehiculo
+                INNER JOIN servicio s on s.id = tv.id_servicio
+                WHERE r.id = %s""", (idViaje,))
+            
+            # Obtener escalas para la ruta
+            escalas = []
+            if viaje:
+                escalas = conexion.obtener("""SELECT es.id, es.nro_orden, es.idSucursal, es.distancia_estimada, suc.latitud, suc.longitud,
+                                           es.tiempo_estimado, CONCAT(UPPER(suc.ciudad), '-', suc.nombre) AS nombre, es.idRuta 
+                                           FROM escala es 
+                                           INNER JOIN sucursal suc on es.idSucursal = suc.id WHERE idRuta = %s 
+                                           ORDER BY nro_orden""", (viaje[0]['idRuta'],))
+
+            return {
+                "viaje": viaje[0] if viaje else None,
+                "escalas": escalas
+            }
+        except Exception as e:
+            print(f"Error al obtener datos del viaje: {repr(e)}")
+            return None
+        finally:
+            conexion.cerrar()
 
     @classmethod
     def obtener_escalas_por_ruta(cls, ruta_id):

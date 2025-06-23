@@ -68,7 +68,7 @@
         <!-- Sidebar -->
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
             <!-- Brand Logo -->
-            <a href="#" class="brand-link">
+            <a href="{{ url_for('home.index') }}" class="brand-link">
                 <img src="/Static/img/icono_yatrax.ico" alt="YATRAX Logo" class="brand-image img-circle elevation-3"
                     style="opacity: .8">
                 <span class="brand-text font-weight-light">YATRAX</span>
@@ -89,9 +89,10 @@
                     </div>
                     <div class="info">
                         {% if session.get('usuario') and 'nombre' in session.get('usuario') %}
-                        <a href="#" class="d-block">{{ session['usuario']['nombre'] }}</a>
+                        <a href="{{ url_for('home.index') }}" class="d-block">{{ session['usuario']['nombre'] }}</a>
                         {% else %}
-                        <a href="#" class="d-block">Usuario desconocido</a> <!-- Texto por defecto -->
+                        <a href="{{ url_for('home.index') }}" class="d-block">Usuario desconocido</a>
+                        <!-- Texto por defecto -->
                         {% endif %}
                     </div>
                 </div>
@@ -123,21 +124,21 @@
                                 </p>
                             </a>
                             <ul class="nav nav-treeview" style="display: block;">
-                                {% if 10 in session['menus'] %}
-                                <li class="nav-item">
-                                    <a href="{{ url_for('usuario.Menu_Usuarios') }}"
-                                        class="nav-link {% if active_page == 'usuarios' %}active{% endif %}">
-                                        <i class="bi bi-person-fill nav-icon"></i>
-                                        <p>Gestionar usuarios</p>
-                                    </a>
-                                </li>
-                                {% endif %}
                                 {% if 11 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('usuario.Menu_TipoUsuario') }}"
                                         class="nav-link {% if active_page == 'tipoUsuario' %}active{% endif %}">
                                         <i class="bi bi-person-lines-fill nav-icon"></i>
                                         <p>Gestionar tipos de usuario</p>
+                                    </a>
+                                </li>
+                                {% endif %}
+                                {% if 10 in session['menus'] %}
+                                <li class="nav-item">
+                                    <a href="{{ url_for('usuario.Menu_Usuarios') }}"
+                                        class="nav-link {% if active_page == 'usuarios' %}active{% endif %}">
+                                        <i class="bi bi-person-fill nav-icon"></i>
+                                        <p>Gestionar usuarios</p>
                                     </a>
                                 </li>
                                 {% endif %}
@@ -155,15 +156,7 @@
                                 </p>
                             </a>
                             <ul class="nav nav-treeview" style="display: block;">
-                                {% if 30 in session['menus'] %}
-                                <li class="nav-item">
-                                    <a href="{{ url_for('ventas.Menu_TipoComprobante') }}"
-                                        class="nav-link {% if active_page == 'tipoComprobante' %}active{% endif %}">
-                                        <i class="bi bi-file-earmark-text"></i>
-                                        <p>Gestionar tipo comprobante</p>
-                                    </a>
-                                </li>
-                                {% endif %}
+                                <li class="nav-header">Clientes</li>
                                 {% if 31 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('ventas.Menu_TipoClientes') }}"
@@ -182,6 +175,7 @@
                                     </a>
                                 </li>
                                 {% endif %}
+                                <li class="nav-header">Servicios</li>
                                 {% if 33 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('ventas.Menu_Servicio') }}"
@@ -190,6 +184,7 @@
                                         <p>Gestionar servicio</p>
                                     </a>
                                 </li>
+                                {% endif %}
                                 {% if 34 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('ventas.Menu_Microservicio') }}"
@@ -199,7 +194,7 @@
                                     </a>
                                 </li>
                                 {% endif %}
-                                {% endif %}
+                                <li class="nav-header">Documentos</li>
                                 {% if 35 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('ventas.Menu_TipoDocumento') }}"
@@ -208,8 +203,17 @@
                                         <p>Gestionar tipos de documentos</p>
                                     </a>
                                 </li>
-
-                                
+                                {% endif %}
+                                {% if 30 in session['menus'] %}
+                                <li class="nav-item">
+                                    <a href="{{ url_for('ventas.Menu_TipoComprobante') }}"
+                                        class="nav-link {% if active_page == 'tipoComprobante' %}active{% endif %}">
+                                        <i class="bi bi-file-earmark-text"></i>
+                                        <p>Gestionar tipo comprobante</p>
+                                    </a>
+                                </li>
+                                {% endif %}
+                                <li class="nav-header">Pasajes</li>
                                 <!-- -- vender pasaje y transacciones -->
                                 <li class="nav-item align-items-center">
                                     <a href="{{ url_for('ventas.Menu_VenderPasajes') }}"
@@ -226,7 +230,6 @@
                                     </a>
                                 </li>
                                 <!-- -- fin vender pasaje -->
-                                {% endif %}
                             </ul>
                         </li>
                         {% endif %}
@@ -247,6 +250,16 @@
                                         class="nav-link {% if active_page == 'horarios' %}active{% endif %}">
                                         <i class="bi bi-calendar-week nav-icon"></i>
                                         <p>Gestionar horarios</p>
+                                    </a>
+                                </li>
+                                {% endif %}
+                                <li class="nav-header">Vehículos</li>
+                                {% if 46 in session['menus'] %}
+                                <li class="nav-item">
+                                    <a href="{{ url_for('viajes.Menu_Marcas') }}"
+                                        class="nav-link {% if active_page == 'marcas' %}active{% endif %}">
+                                        <i class="bi bi-tag nav-icon"></i>
+                                        <p>Gestionar marcas</p>
                                     </a>
                                 </li>
                                 {% endif %}
@@ -286,21 +299,13 @@
                                     </a>
                                 </li>
                                 {% endif %}
+                                <li class="nav-header">Viajes</li>
                                 {% if 45 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('viajes.Menu_Sucursal') }}"
                                         class="nav-link {% if active_page == 'sucursal' %}active{% endif %}">
                                         <i class="bi bi-building nav-icon"></i>
                                         <p>Gestionar sucursales</p>
-                                    </a>
-                                </li>
-                                {% endif %}
-                                {% if 46 in session['menus'] %}
-                                <li class="nav-item">
-                                    <a href="{{ url_for('viajes.Menu_Marcas') }}"
-                                        class="nav-link {% if active_page == 'marcas' %}active{% endif %}">
-                                        <i class="bi bi-tag nav-icon"></i>
-                                        <p>Gestionar marcas</p>
                                     </a>
                                 </li>
                                 {% endif %}
@@ -456,7 +461,7 @@
                                     </a>
                                 </li>
 
-                                 <li class="nav-item">
+                                <li class="nav-item">
                                     <a href="{{ url_for('configuracion.Menu_Promociones')}}"
                                         class="nav-link {% if active_page == 'promociones' %}active{% endif %}">
                                         <i class="bi bi-file-earmark-text nav-icon"></i>
@@ -706,6 +711,46 @@
                 }
             });
         }
+
+        {% if session['usuario']['tipoPersonal'] == 'CHOFER' %}
+            $.getJSON('/trabajadores/home/VerificarViaje', function (response) {
+                if (response && response.Status === "success") {
+                    if (response.data.id) {
+                        const viajeId = response.data.id;  // el id del viaje activo
+
+                        if (navigator.geolocation) {
+                            navigator.geolocation.watchPosition(function (pos) {
+                                const data = {
+                                    lat: pos.coords.latitude,
+                                    lng: pos.coords.longitude,
+                                    id_viaje: viajeId
+                                };
+
+                                console.log(data);
+
+                                fetch('/trabajadores/viajes/api/registrar_posicion', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify(data)
+                                });
+                            }, function (error) {
+                                console.error("No se pudo obtener la ubicación:", error);
+                            }, {
+                                enableHighAccuracy: true,
+                                maximumAge: 0,
+                                timeout: 5000
+                            });
+                        } else {
+                            alert("Este navegador no soporta geolocalización.");
+                        }
+                    }
+                } else {
+                    toastr.error("Ocurrió un error al verificar el viaje", 'MENSAJE DE SISTEMA');
+                }
+            });
+        {% endif %}
 
         function newexportactionServerSideOff(e, dt, button, config) {
             // Guardar el contenido original del botón

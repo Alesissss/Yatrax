@@ -12,13 +12,13 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-12 pb-3">
+                        <div class="col-md-12">
                             <div class="card card-outline card-primary h-100">
                                 <div class="card-header">
                                     <h3 class="card-title">Datos generales</h3>
                                 </div>
                                 <div class="card-body">
-                                    <div class="row">
+                                    <div class="row mb-3">
                                         <div class="col-md-12 mb-3">
                                             <label for="cbx_Ruta">Ruta</label>
                                             <div class="input-group">
@@ -62,85 +62,147 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 pb-3">
-                            <div class="card card-outline card-primary h-100">
-                                <div class="card-header">
-                                    <h3 class="card-title">Asignar vehículo</h3>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-12 mb-3">
-                                            <label for="cbx_Servicio">Servicio</label>
-                                            <div class="input-group">
-                                                <select id="cbx_Servicio" class="form-control" {% if
-                                                    btnId=='btn_Aceptar' %}disabled{% endif %}>
-                                                    <option disabled selected>--SELECCIONAR--</option>
-                                                </select>
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <div class="row">
+                                                <div class="col-md-12 pb-3">
+                                                    <div class="card card-outline card-primary h-100">
+                                                        <div class="card-header">
+                                                            <h3 class="card-title">Asignar vehículo</h3>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <div class="row">
+                                                                <div class="col-md-12 mb-3">
+                                                                    <label for="cbx_Servicio">Servicio</label>
+                                                                    <div class="input-group">
+                                                                        <select id="cbx_Servicio" class="form-control"
+                                                                            {% if btnId=='btn_Aceptar' %}disabled{%
+                                                                            endif %}>
+                                                                            <option disabled selected>--SELECCIONAR--
+                                                                            </option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-12 mb-3">
+                                                                    <label for="cbx_TipoVehiculo">Tipo vehículo</label>
+                                                                    <div class="input-group">
+                                                                        <select id="cbx_TipoVehiculo"
+                                                                            class="form-control" {% if
+                                                                            btnId=='btn_Aceptar' %}disabled{% endif %}>
+                                                                            <option disabled selected>--SELECCIONAR--
+                                                                            </option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-12 mb-3">
+                                                                    <label for="cbx_Vehiculo">Vehículo</label>
+                                                                    <div class="input-group">
+                                                                        <select id="cbx_Vehiculo" class="form-control"
+                                                                            {% if btnId=='btn_Aceptar' %}disabled{%
+                                                                            endif %}>
+                                                                            <option disabled selected>--SELECCIONAR--
+                                                                            </option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-12 mb-3">
+                                                                    <label for="txt_Niveles">Cantidad de niveles</label>
+                                                                    <div class="input-group">
+                                                                        <input type="text" id="txt_Niveles"
+                                                                            class="form-control"
+                                                                            placeholder="Cantidad de niveles"
+                                                                            oninput="this.value = this.value.toUpperCase();"
+                                                                            readonly>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-12 mb-3">
+                                                                    <label for="txt_Asientos">Cantidad total de
+                                                                        asientos</label>
+                                                                    <div class="input-group">
+                                                                        <input type="text" id="txt_Asientos"
+                                                                            class="form-control"
+                                                                            placeholder="Cantidad total de asientos"
+                                                                            oninput="this.value = this.value.toUpperCase();"
+                                                                            readonly>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <div class="card card-outline card-primary h-100">
+                                                        <div class="card-header">
+                                                            <h3 class="card-title">Asignar personal</h3>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <div class="row">
+                                                                <div class="col-md-12 mb-3">
+                                                                    <label for="cbx_Chofer">Chofer</label>
+                                                                    <div class="input-group">
+                                                                        <select id="cbx_Chofer" class="form-control"
+                                                                            multiple="multiple" {% if
+                                                                            btnId=='btn_Aceptar' %}disabled{% endif %}>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-12 mb-3">
+                                                                    <label for="cbx_Tripulante">Tripulantes</label>
+                                                                    <div class="input-group">
+                                                                        <select id="cbx_Tripulante" class="form-control"
+                                                                            multiple="multiple" {% if
+                                                                            btnId=='btn_Aceptar' %}disabled{% endif %}>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="col-md-12 mb-3">
-                                            <label for="cbx_TipoVehiculo">Tipo vehículo</label>
-                                            <div class="input-group">
-                                                <select id="cbx_TipoVehiculo" class="form-control" {% if
-                                                    btnId=='btn_Aceptar' %}disabled{% endif %}>
-                                                    <option disabled selected>--SELECCIONAR--</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12 mb-3">
-                                            <label for="cbx_Vehiculo">Vehículo</label>
-                                            <div class="input-group">
-                                                <select id="cbx_Vehiculo" class="form-control" {% if
-                                                    btnId=='btn_Aceptar' %}disabled{% endif %}>
-                                                    <option disabled selected>--SELECCIONAR--</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12 mb-3">
-                                            <label for="txt_Niveles">Cantidad de niveles</label>
-                                            <div class="input-group">
-                                                <input type="text" id="txt_Niveles" class="form-control"
-                                                    placeholder="Cantidad de niveles"
-                                                    oninput="this.value = this.value.toUpperCase();" readonly>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12 mb-3">
-                                            <label for="txt_Asientos">Cantidad total de
-                                                asientos</label>
-                                            <div class="input-group">
-                                                <input type="text" id="txt_Asientos" class="form-control"
-                                                    placeholder="Cantidad total de asientos"
-                                                    oninput="this.value = this.value.toUpperCase();" readonly>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 pb-3">
-                            <div class="card card-outline card-primary h-100">
-                                <div class="card-header">
-                                    <h3 class="card-title">Asignar personal</h3>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-12 mb-3">
-                                            <label for="cbx_Chofer">Chofer</label>
-                                            <div class="input-group">
-                                                <select id="cbx_Chofer" class="form-control" multiple="multiple" {% if
-                                                    btnId=='btn_Aceptar' %}disabled{% endif %}>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12 mb-3">
-                                            <label for="cbx_Tripulante">Tripulantes</label>
-                                            <div class="input-group">
-                                                <select id="cbx_Tripulante" class="form-control" multiple="multiple" {%
-                                                    if btnId=='btn_Aceptar' %}disabled{% endif %}>
-                                                </select>
+                                        <div class="col-md-8">
+                                            <div class="card card-outline card-primary h-100">
+                                                <div class="card-header">
+                                                    <h3 class="mb-0 text-center">
+                                                        <i class="fas fa-route me-2"></i>
+                                                        Tracking del viaje
+                                                    </h3>
+                                                    <p class="mb-0 text-center mt-2">Seguimiento en tiempo real del
+                                                        viaje programado</p>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <!-- Mapa -->
+                                                            <div class="position-relative">
+                                                                <div class="status-badge">
+                                                                    <span id="statusBadge"
+                                                                        class="badge bg-secondary">Sin ruta
+                                                                        seleccionada</span>
+                                                                </div>
+                                                                <div id="map"></div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-12 mt-4">
+                                                            <!-- Registro del Viaje -->
+                                                            <div class="travel-log">
+                                                                <h5 class="mb-3">
+                                                                    <i class="fas fa-clipboard-list me-2"></i>
+                                                                    Registro del viaje
+                                                                </h5>
+                                                                <div id="travelLogContent">
+                                                                    <div class="text-center text-muted py-4">
+                                                                        <i class="fas fa-info-circle fa-2x mb-2"></i>
+                                                                        <p>Seleccione una ruta para ver el
+                                                                            registro del viaje</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -160,8 +222,136 @@
         </div>
     </div>
 </div>
+<!-- Modal de Viaje No Iniciado -->
+<div class="modal fade" id="modalViajeNoIniciado" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 id="modal-title" class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Viaje No Iniciado</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span>×</span>
+                </button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <i class="fas fa-clock fa-3x text-warning mb-3"></i>
+                <h4>El viaje aún no ha iniciado</h4>
+                <p class="text-muted">La ruta seleccionada tiene un viaje programado pero aún no ha comenzado. El
+                    tracking estará disponible una vez que el viaje inicie.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" aria-label="Close">Entendido</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+</div>
+
+<!-- Loading Spinner -->
+<div class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center d-none"
+    id="loadingSpinner" style="background-color: rgba(0,0,0,0.5); z-index: 9999;">
+    <div class="text-center">
+        <i class="fas fa-3x fa-sync-alt fa-spin text-white"></i>
+        <p class="text-white mt-2">Cargando ruta...</p>
+    </div>
+</div>
+{% endblock %}
+{% block styles %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+<style>
+    #map {
+        height: 400px;
+        width: 100%;
+        border-radius: 8px;
+        border: 2px solid #dee2e6;
+    }
+
+    .route-selector {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 1px solid #e9ecef;
+    }
+
+    .travel-log {
+        background-color: white;
+        border-radius: 8px;
+        padding: 20px;
+        max-height: 500px;
+        overflow-y: auto;
+        border: 1px solid #e9ecef;
+    }
+
+    .travel-log-item {
+        display: flex;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #f1f3f4;
+    }
+
+    .travel-log-item:last-child {
+        border-bottom: none;
+    }
+
+    .log-time {
+        font-weight: bold;
+        color: #007bff;
+        margin-right: 15px;
+        min-width: 80px;
+    }
+
+    .log-icon {
+        margin-right: 10px;
+        color: #28a745;
+    }
+
+    .tooltip-ruta {
+        background-color: #1d3557;
+        color: white;
+        font-weight: bold;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        border: 1px solid #a8dadc;
+    }
+
+    .status-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+    }
+
+    .vehicle-marker {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.1);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .alert-info-custom {
+        background-color: #fff3cd;
+        border-color: #ffeaa7;
+        color: #856404;
+    }
+</style>
 {% endblock %}
 {% block scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
     function fct_GetRutas() {
         $.getJSON('/trabajadores/viajes/GetData_RutasViajes', function (response) {
@@ -294,13 +484,13 @@
                 // Formatear para Select2
                 const dataChoferes = choferes.map(c => ({
                     id: c.id,
-                    text: c.nombre,
+                    text: c.ape_paterno + " " + c.ape_materno + ", " + c.nombre,
                     data: c  // guardamos toda la info del objeto
                 }));
 
                 const dataTripulantes = tripulantes.map(t => ({
                     id: t.id,
-                    text: t.nombre,
+                    text: t.ape_paterno + " " + t.ape_materno + ", " + t.nombre,
                     data: t
                 }));
 
@@ -528,14 +718,14 @@
                 <td class="text-center">${escalasOrdenadas[idxDestino].nombre}</td>
                 <td class="text-center">
                     ${isPrimera
-                                ? `<input type="datetime-local"
+                    ? `<input type="datetime-local"
                                 class="form-control input-salida"
                                 value="${fechaSalidaMoment.format('YYYY-MM-DDTHH:mm')}"
                                 min="${localISOTime}"
                                 onchange="calcularLlegadas()"
                                 ${btnId === 'btn_Aceptar' ? 'disabled' : ''}>`
-                                : `<span class="fecha-salida">${fechaSalidaMoment.format('DD/MM/YYYY HH:mm')}</span>`
-                            }
+                    : `<span class="fecha-salida">${fechaSalidaMoment.format('DD/MM/YYYY HH:mm')}</span>`
+                }
                 </td>
                 <td class="text-center">
                     <span class="fecha-llegada">${fechaLlegadaMoment.format('DD/MM/YYYY HH:mm')}</span>
@@ -756,5 +946,174 @@
             window.location.href = "/trabajadores/viajes/ProgramarViaje";
         });
     });
+</script>
+<!-- Tracking -->
+<script>
+    let map;
+    let currentRoute;
+    let routeMarkers = [];
+    let vehicleMarkerLive;
+
+    const iconoSucursal = L.icon({
+        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+
+    const iconoVehiculo = L.divIcon({
+        html: '<i class="fas fa-bus fa-2x text-primary vehicle-marker"></i>',
+        iconSize: [30, 30],
+        iconAnchor: [15, 15],
+        className: 'vehicle-icon'
+    });
+
+    function initMap() {
+        map = L.map('map').setView([-9.19, -75.0152], 6);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            minZoom: 5,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        drawRouteFromBackend(Number('{{ viaje.id }}'));
+        setInterval(() => actualizarPosicionVehiculo(Number('{{ viaje.id }}')), 3000);
+    }
+
+    function clearMap() {
+        if (currentRoute) map.removeControl(currentRoute);
+        if (vehicleMarkerLive) {
+            map.removeLayer(vehicleMarkerLive);
+            vehicleMarkerLive = null;
+        }
+        routeMarkers.forEach(marker => map.removeLayer(marker));
+        routeMarkers = [];
+    }
+
+    function drawRouteFromBackend(viajeId) {
+        showSpinner();
+        $.getJSON('/trabajadores/viajes/GetData_TrackingViaje', { id: viajeId }, function (response) {
+            if (response.Status === "success") {
+                const data = response.data;
+                const escalas = data.escalas;
+                const viaje = data.viaje;
+
+                updateStatusBadge(viaje.estado_viaje);
+
+                if (viaje.estado_viaje === 'PROGRAMADO') {
+                    showSpinner(false);
+                    new bootstrap.Modal(document.getElementById('modalViajeNoIniciado')).show();
+                    // return;
+                }
+
+                clearMap();
+
+                const waypoints = escalas.map(escala => {
+                    const lat = parseFloat(escala.latitud);
+                    const lng = parseFloat(escala.longitud);
+
+                    const marker = L.marker([lat, lng], { icon: iconoSucursal })
+                        .addTo(map)
+                        .bindPopup(`<b>${escala.nombre}</b><br>Orden: ${escala.nro_orden}`);
+
+                    console.log(marker);
+                    routeMarkers.push(marker);
+
+                    return L.latLng(lat, lng);
+                });
+
+
+                currentRoute = L.Routing.control({
+                    waypoints: waypoints,
+                    routeWhileDragging: false,
+                    createMarker: () => null,
+                    lineOptions: {
+                        styles: [{ color: '#007bff', weight: 4, opacity: 0.8 }]
+                    }
+                }).addTo(map);
+
+                const group = new L.featureGroup(routeMarkers);
+                map.fitBounds(group.getBounds().pad(0.1));
+
+                updateTravelLog([]);
+                setTimeout(() => showSpinner(false), 1000);
+            } else {
+                showSpinner(false);
+                console.error("Error al obtener datos:", response.Msj);
+            }
+        });
+    }
+
+    function actualizarPosicionVehiculo(viajeId) {
+        fetch(`/trabajadores/viajes/api/obtener_posicion?id_viaje=${viajeId}`)
+            .then(res => res.json())
+            .then(response => {
+                if (response.Status === "success") {
+                    const { lat, lng } = response.data;
+
+                    const latlng = L.latLng(lat, lng);
+
+                    if (vehicleMarkerLive) {
+                        vehicleMarkerLive.setLatLng(latlng);
+                    } else {
+                        vehicleMarkerLive = L.marker(latlng, { icon: iconoVehiculo })
+                            .addTo(map)
+                            .bindPopup("Vehículo en tiempo real");
+                    }
+
+                    // 👇 Esta línea hace que el mapa se mueva al vehículo
+                    map.panTo(latlng);
+                }
+            })
+            .catch(err => console.error("Error al obtener posición:", err));
+    }
+
+    function updateStatusBadge(estado) {
+        const badge = document.getElementById('statusBadge');
+        badge.className = 'badge ';
+        switch (estado) {
+            case 'PROGRAMADO':
+                badge.className += 'bg-warning text-dark';
+                badge.textContent = 'Viaje no iniciado';
+                break;
+            case 'EN CURSO':
+                badge.className += 'bg-success';
+                badge.textContent = 'Viaje en curso';
+                break;
+            case 'FINALIZADO':
+                badge.className += 'bg-secondary';
+                badge.textContent = 'Viaje finalizado';
+                break;
+            default:
+                badge.className += 'bg-secondary';
+                badge.textContent = 'Sin viaje seleccionada';
+        }
+    }
+
+    function updateTravelLog(registros) {
+        const container = document.getElementById('travelLogContent');
+        if (!registros.length) {
+            container.innerHTML = `
+                <div class="text-center text-muted py-4">
+                    <i class="fas fa-info-circle fa-2x mb-2"></i>
+                    <p>No hay registros de viaje disponibles</p>
+                </div>`;
+            return;
+        }
+        container.innerHTML = registros.map(registro => `
+            <div class="travel-log-item">
+                <div class="log-time">${registro.tiempo}</div>
+                <i class="fas ${registro.icono} log-icon"></i>
+                <div class="flex-grow-1">${registro.descripcion}</div>
+            </div>`).join('');
+    }
+
+    function showSpinner(show = true) {
+        const spinner = document.getElementById('loadingSpinner');
+        show ? spinner.classList.remove('d-none') : spinner.classList.add('d-none');
+    }
+
+    document.addEventListener('DOMContentLoaded', initMap);
 </script>
 {% endblock %}

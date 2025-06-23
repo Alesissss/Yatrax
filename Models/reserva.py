@@ -7,7 +7,7 @@ import bd  # Utilizamos tu clase Conexion personalizada
 class Reserva:
 
     @classmethod
-    def registrar_operacion(cls, contacto: dict, pago: dict, ventas: dict):
+    def registrar_operacion(cls, contacto: dict, pago: dict, ventas: dict,codigoReserva,fecha):
         conexion = bd.Conexion()
         try:
             # 1. Registrar CLIENTE
@@ -105,9 +105,11 @@ class Reserva:
                         esCambioRuta,
                         idVenta,
                         codigo,
-                        enTransaccion
+                        enTransaccion,
+                        codigoReserva,
+                        fecha_reserva
                     )
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s)
                 """
                 conexion.ejecutar(insert_pasaje, (
                     key,
@@ -119,7 +121,9 @@ class Reserva:
                     0,  # esCambioRuta
                     id_venta,
                     Pasaje.generar_codigo_unico(),
-                    0  # enTransaccion
+                    0,  # enTransaccion
+                    codigoReserva,
+                    fecha
                 ), auto_commit=False)
 
                 id_pasaje = conexion.cursor.lastrowid

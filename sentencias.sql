@@ -752,6 +752,7 @@ CREATE TABLE pasaje(
     codigo CHAR(8) NOT NULL, -- AA0202
     enTransaccion TINYINT NULL DEFAULT 0, -- 1: en transacción, 0: no en transacción
     idPasaje INT NULL, -- Para operaciones con pasajes
+    precio DECIMAL(10,2) NOT NULL,
     fechaInicioReprogramacion DATETIME NULL,
     fechaFinReprogramacion DATETIME NULL,
     codigoReserva CHAR(14) NULL, -- Código de reserva, si es un pasaje de reserva
@@ -5939,25 +5940,45 @@ DELIMITER ;
 
 -- Crear procedimiento SP_ELIMINAR_PASAJE
 DELIMITER $$
+
 CREATE PROCEDURE SP_ELIMINAR_PASAJE(
     IN P_id INT
 )
 BEGIN
     DECLARE cExist INT DEFAULT 0;
+
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
+        ROLLBACK;
+        SET @MSJ = NULL;
         SET @MSJ2 = 'Error inesperado al eliminar el pasaje';
     END;
-    SET @MSJ = NULL; SET @MSJ2 = NULL;
 
+    START TRANSACTION;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    -- Verificar existencia del pasaje
     SELECT COUNT(*) INTO cExist FROM pasaje WHERE id = P_id;
+
     IF cExist = 0 THEN
         SET @MSJ2 = 'El pasaje que intenta eliminar no existe';
+        ROLLBACK;
     ELSE
+        -- Eliminar registros relacionados
+        DELETE FROM detalle_pasaje WHERE idPasaje = P_id;
+        DELETE FROM reclamo WHERE idPasaje = P_id;
+        DELETE FROM reembolso WHERE idPasaje = P_id;
+
+        -- Eliminar el pasaje principal
         DELETE FROM pasaje WHERE id = P_id;
+
         SET @MSJ = 'Pasaje eliminado correctamente';
+        COMMIT;
     END IF;
 END $$
+
 DELIMITER ;
 
 DELIMITER $$
