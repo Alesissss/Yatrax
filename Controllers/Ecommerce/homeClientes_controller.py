@@ -681,6 +681,21 @@ def procesar_pago():
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Error inesperado: {repr(e)}"})
 
+@homeClientes_bp.route("/convertirPasajeLibre", methods=["POST"])
+def convertir_pasaje_libre():
+    try:
+        id_pasaje = request.json.get("pasaje_id")
+        id_detalle_viaje_asiento = request.json.get("detViaje")
+        resultado = Pasaje.convertirPasajeLibre(id_pasaje, id_detalle_viaje_asiento)
+
+        if resultado.get("msj"):
+            return jsonify({"Status": "success", "Msj": resultado["msj"]})
+        else:
+            return jsonify({"Status": "error", "Msj": resultado.get("msj2", "Error desconocido")})  
+        
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Error inesperado: {e}"})
+
 @homeClientes_bp.route("/realizarTransferencia", methods=["POST"])
 def realizar_transferencia():
     try:
