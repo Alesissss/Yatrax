@@ -571,10 +571,13 @@
                               {% endfor %}
                             </select>
                           </div>
+                          <div class="col-md-6" id="contenedorInputExtraRem"></div>
+                          
+
 
                           <div class="col-12 text-end">
                             <button id="btnGuardarReembolso" type="submit" class="btn btn-success">
-                              <i class="fas fa-credit-card me-1"></i> Finalizar Pago
+                              <i class="fas fa-paper-plane me-1"></i> Enviar solicitud de reembolso
                             </button>
                           </div>
                         </div>
@@ -584,7 +587,7 @@
                 </div>
               </div>
             </div>
-
+                
             <!-- Checkboxes generales (aparecen para todas las operaciones) -->
             <div id="checkboxesGenerales">
               <div class="form-check mt-3">
@@ -634,6 +637,112 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", function () {
+const contenedorInputExtra = document.getElementById("contenedorInputExtraRem");
+
+document.getElementById("tipoMetodoPagoRem").addEventListener("change", function () {
+  const tipoTexto = this.selectedOptions[0].text.trim().toLowerCase();
+
+  contenedorInputExtra.innerHTML = ""; // Limpiar contenido anterior
+
+  if (tipoTexto.includes("tarjeta")) {
+    contenedorInputExtra.innerHTML = `
+      <label for="cciRem" class="form-label">CCI</label>
+      <input type="text" id="cciRem" class="form-control" placeholder="Número de CCI (20 dígitos)" maxlength="20" />
+    `;
+  } else if (tipoTexto.includes("billetera")) {
+    contenedorInputExtra.innerHTML = `
+      <label for="celularRem" class="form-label">Número de celular</label>
+      <input type="tel" id="celularRem" class="form-control" placeholder="Número asociado a billetera" maxlength="9" />
+    `;
+  }
+});
+
+// Ejecutar al cargar la página si ya hay un valor seleccionado
+setTimeout(() => {
+  const tipoMetodoPagoSelect = document.getElementById("tipoMetodoPagoRem");
+  const contenedorInputExtra = document.getElementById("contenedorInputExtraRem");
+
+  if (tipoMetodoPagoSelect && tipoMetodoPagoSelect.selectedOptions.length > 0) {
+    const tipoTexto = tipoMetodoPagoSelect.selectedOptions[0].text.trim().toLowerCase();
+
+    if (tipoTexto.includes("tarjeta")) {
+      contenedorInputExtra.innerHTML = `
+        <label for="cciRem" class="form-label">CCI</label>
+        <input type="text" id="cciRem" class="form-control" placeholder="Número de CCI (20 dígitos)" maxlength="20" />
+      `;
+    } else if (tipoTexto.includes("billetera")) {
+      contenedorInputExtra.innerHTML = `
+        <label for="celularRem" class="form-label">Número de celular</label>
+        <input type="tel" id="celularRem" class="form-control" placeholder="Número asociado a billetera" maxlength="9" />
+      `;
+    } else {
+      contenedorInputExtra.innerHTML = "";
+    }
+  }
+}, 300);
+
+
+
+
+function cargarMetodosPorTipo(tipoId) {
+  const metodoPagoSelect = document.getElementById("metodoPagoRem");
+  metodoPagoSelect.innerHTML = "<option disabled selected>-- Cargando --</option>";
+
+  fetch(`/ecommerce/home/get_metodos_pago_por_tipo/${tipoId}`)
+    .then(response => response.json())
+    .then(json => {
+      metodoPagoSelect.innerHTML = ""; // Limpiar para agregar nuevas
+
+      if (json.Status === "success") {
+        if (json.data.length === 0) {
+          metodoPagoSelect.innerHTML = `<option disabled selected>No hay métodos disponibles</option>`;
+          return;
+        }
+
+        json.data.forEach(item => {
+          const option = document.createElement("option");
+          option.value = item.id;
+          option.textContent = item.nombre;
+          metodoPagoSelect.appendChild(option);
+        });
+      } else {
+        metodoPagoSelect.innerHTML = `<option disabled selected>Error al cargar</option>`;
+        toastr.error(json.Msj || "Error desconocido", "ERROR");
+      }
+    })
+    .catch(error => {
+      metodoPagoSelect.innerHTML = `<option disabled selected>Error al cargar</option>`;
+      toastr.error("Error al consultar métodos de pago", "ERROR");
+    });
+}
+
+document.getElementById("tipoMetodoPagoRem").addEventListener("change", function () {
+  const tipoId = this.value;
+  cargarMetodosPorTipo(tipoId);
+});
+
+ setTimeout(() => {
+    const selectTipo = document.getElementById("tipoMetodoPagoRem");
+    if (selectTipo) {
+      const tipoInicial = selectTipo.value;
+      if (tipoInicial) {
+        cargarMetodosPorTipo(tipoInicial);
+      }
+    }
+  }, 500); // Puedes ajustar este delay si es necesario
+      
+ const selectTipoMetodoPago = document.getElementById("tipoMetodoPagoRem");
+
+  // Esperar un poco en caso se renderice al final
+  setTimeout(() => {
+    [...selectTipoMetodoPago.options].forEach(opt => {
+      if (opt.text.trim().toLowerCase().includes("efectivo")) {
+        opt.remove(); // Elimina del DOM
+      }
+    });
+  }, 100); // Delay corto para asegurar que el DOM está listo
+
+
       const tipoDocumento = document.getElementById("tipoDocNuevoRem");
       const labelNombres = document.getElementById("labelNombresRem");
       const sexoDivRem = document.getElementById("sexoDivRem");
@@ -656,72 +765,93 @@
       });
 
       document.getElementById("btnGuardarReembolso").addEventListener("click", () => {
-        const numeroComprobante = document.getElementById("comprobante").value.trim();
-        const tipoDocId = document.getElementById("tipoDocNuevoRem").value;
-        const tipoDocTexto = document.getElementById("tipoDocNuevoRem").selectedOptions[0].text;
-        const numeroDoc = document.getElementById("numeroDocNuevoRem").value.trim();
-        const correo = document.getElementById("correoRem").value.trim();
-        const nombres = document.getElementById("nombresRem").value.trim();
-        const apellidoPaterno = document.getElementById("apellidoPaternoRem").value.trim();
-        const apellidoMaterno = document.getElementById("apellidoMaternoRem").value.trim();
-        const fechaNacimiento = document.getElementById("fechaNacimientoRem").value;
-        const telefono = document.getElementById("telefonoRem").value.trim();
-        const sexo = document.querySelector('input[name="sexoRem"]:checked')?.value || null;
-        const tipoComprobante = document.getElementById("tipoComprobante").value;
-        const metodoPago = document.getElementById("metodoPagoRem").value;
-        const tipoMetodoPago = document.getElementById("tipoMetodoPagoRem").value;
-        const idPasaje = document.getElementById("pasCod").value;
+  const numeroComprobante = document.getElementById("comprobante").value.trim();
+  const tipoDocId = document.getElementById("tipoDocNuevoRem").value;
+  const tipoDocTexto = document.getElementById("tipoDocNuevoRem").selectedOptions[0]?.text || "";
+  const numeroDoc = document.getElementById("numeroDocNuevoRem").value.trim();
+  const correo = document.getElementById("correoRem").value.trim();
+  const nombres = document.getElementById("nombresRem").value.trim();
+  const apellidoPaterno = document.getElementById("apellidoPaternoRem").value.trim();
+  const apellidoMaterno = document.getElementById("apellidoMaternoRem").value.trim();
+  const fechaNacimiento = document.getElementById("fechaNacimientoRem").value;
+  const telefono = document.getElementById("telefonoRem").value.trim();
+  const sexo = document.querySelector('input[name="sexoRem"]:checked')?.value || null;
+  const tipoComprobante = document.getElementById("tipoComprobante").value;
+  const metodoPago = document.getElementById("metodoPagoRem").value;
+  const tipoMetodoPago = document.getElementById("tipoMetodoPagoRem").value;
+  const idPasaje = document.getElementById("pasCod").value;
 
-        if (!numeroComprobante || !idPasaje) {
-          toastr.warning("Debe buscar un pasaje válido primero", "MENSAJE DEL SISTEMA");
-          return;
+  // VALIDACIONES BÁSICAS
+  if (!numeroComprobante || !idPasaje) {
+    toastr.warning("Debe buscar un pasaje válido primero", "MENSAJE DEL SISTEMA");
+    return;
+  }
+  if (!tipoDocId || !numeroDoc || !correo || !nombres || !telefono || !tipoComprobante || !metodoPago || !tipoMetodoPago) {
+    toastr.warning("Complete todos los campos requeridos", "MENSAJE DEL SISTEMA");
+    return;
+  }
+
+  // Validar email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(correo)) {
+    toastr.warning("Ingrese un correo electrónico válido", "MENSAJE DEL SISTEMA");
+    return;
+  }
+
+  // Validar teléfono
+  if (telefono.length !== 9 || isNaN(telefono)) {
+    toastr.warning("Ingrese un número de teléfono válido (9 dígitos)", "MENSAJE DEL SISTEMA");
+    return;
+  }
+
+  const payload = {
+    numeroComprobante,
+    tipoDocId,
+    tipoDocTexto,
+    numeroDoc,
+    correo,
+    nombres,
+    apellidoPaterno,
+    apellidoMaterno,
+    fechaNacimiento,
+    telefono,
+    sexo,
+    tipoComprobante,
+    metodoPago,
+    tipoMetodoPago,
+    motivo: "Reembolso solicitado por cliente"
+  };
+
+  fetch("/ecommerce/home/registrarReembolso", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  })
+    .then(r => r.json())
+    .then(json => {
+      if (json.Status === "success") {
+        const modalElement = document.getElementById("modalReembolsoExito");
+        const modalExito = new bootstrap.Modal(modalElement);
+        modalExito.show();
+        modalElement.addEventListener("hidden.bs.modal", function () {
+          location.reload();
+        }, { once: true });
+      } else {
+        if (json.Msj?.toLowerCase().includes("ya se ha realizado una solicitud")) {
+          toastr.info(json.Msj, "INFORMACIÓN");
+        } else {
+          toastr.error(json.Msj || "No se pudo registrar el reembolso", "ERROR");
         }
+      }
+    })
+    .catch(err => {
+      toastr.error("Error al registrar el reembolso: " + err.message, "ERROR");
+    });
+});
 
-        const payload = {
-          numeroComprobante,
-          tipoDocId,
-          tipoDocTexto,
-          numeroDoc,
-          correo,
-          nombres,
-          apellidoPaterno,
-          apellidoMaterno,
-          fechaNacimiento,
-          telefono,
-          sexo,
-          tipoComprobante,
-          metodoPago,
-          tipoMetodoPago,
-          motivo: "Reembolso solicitado por cliente"
-        };
 
-        fetch("/ecommerce/home/registrarReembolso", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        })
-          .then(r => r.json())
-          .then(json => {
-            if (json.Status === "success") {
-              const modalElement = document.getElementById("modalReembolsoExito");
-              const modalExito = new bootstrap.Modal(modalElement);
-              modalExito.show();
 
-              modalElement.addEventListener("hidden.bs.modal", function () {
-                location.reload();
-              }, { once: true });
-            } else {
-              if (json.Msj?.toLowerCase().includes("ya se ha realizado una solicitud")) {
-                toastr.info(json.Msj, "INFORMACIÓN");
-              } else {
-                toastr.error(json.Msj || "No se pudo registrar el reembolso", "ERROR");
-              }
-            }
-          })
-          .catch(err => {
-            toastr.error("Error al registrar el reembolso: " + err.message, "ERROR");
-          });
-      });
+     
     });
 
     document.addEventListener("DOMContentLoaded", function () {

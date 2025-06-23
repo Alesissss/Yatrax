@@ -1402,7 +1402,7 @@ def get_estados_viaje():
 def get_personal_viaje():
     try:
         personal = Personal.obtener_todos()
-        result = [{'id': pe['id'], 'nombre': pe['nombre'], 'id_tipopersonal': pe['id_tipopersonal'], 'tipoPersonal': pe['tipopersonal']} for pe in personal if pe['estado'] == 1]
+        result = [{'id': pe['id'], 'nombre': pe['nombre'], 'ape_paterno': pe['ape_paterno'], 'ape_materno': pe['ape_materno'], 'id_tipopersonal': pe['id_tipopersonal'], 'tipoPersonal': pe['tipopersonal']} for pe in personal if pe['estado'] == 1]
 
         return jsonify({'data': result, 'Status': 'success', 'Msj': 'Listado de personal retornado exitosamente'})
     except Exception as e:
@@ -1622,7 +1622,7 @@ def darBaja_viaje(id):  # Recibe el ID de la URL
         mensajes = Viaje.darBaja(id)  # Se usa el ID directamente
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
-
+        modal= mensajes.get('@MODAL')
         if msj1:
             return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
         elif msj2:
@@ -1631,9 +1631,21 @@ def darBaja_viaje(id):  # Recibe el ID de la URL
             return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja al viaje'})
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@viajes_bp.route("/PrevisualizarDarBaja/<int:id>", methods=['GET'])
+def previsualizar_darBaja(id):
+    try:
+        mensajes = Viaje.darBaja(id, solo_consulta=True)  # nuevo parámetro opcional
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+        modal= mensajes.get('@MODAL')
+        return jsonify({"Status": "success", "Msj": modal or "", "Msj2": msj2 or ""})
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Error al obtener información: {str(e)}"})
+
     
 @viajes_bp.route("/CambiarEstadoViaje", methods=['POST'])
-def cambiad_estado_viaje():  # Recibe el ID de la URL
+def cambiar_estado_viaje():
     try:
         id = request.form.get('id')
         idEstadoViaje = request.form.get('idEstadoViaje')
@@ -1650,6 +1662,49 @@ def cambiad_estado_viaje():  # Recibe el ID de la URL
             return jsonify({"Status": "error", 'Msj': 'Error desconocido al cambiar estado al viaje'})
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+    
+@viajes_bp.route("/GetData_TrackingViaje", methods=['GET'])
+def get_viaje_tracking():
+    try:
+        id = request.args.get('id')
+
+        datos_viaje = Viaje.obtener_datos_viaje_tracking(id)
+
+        return jsonify({"data": datos_viaje, "Status": "success", 'Msj': 'Datos del viaje recuperados correctamente'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+    
+# Diccionario temporal (puedes usar Redis o BD en producción)
+posiciones_vehiculos = {}
+
+@viajes_bp.route('/api/registrar_posicion', methods=['POST'])
+def registrar_posicion():
+    data = request.get_json()
+    id_viaje = data.get('id_viaje')
+    lat = data.get('lat')
+    lng = data.get('lng')
+
+    if not id_viaje or not lat or not lng:
+        return jsonify({'Status': 'error', 'Msj': 'Datos incompletos'})
+
+    posiciones_vehiculos[id_viaje] = {
+        'lat': lat,
+        'lng': lng,
+        'timestamp': datetime.utcnow().isoformat()
+    }
+
+    return jsonify({'Status': 'success'})
+
+# Obtener posición actual
+@viajes_bp.route('/api/obtener_posicion', methods=['GET'])
+def obtener_posicion():
+    id_viaje = request.args.get('id_viaje')
+    pos = posiciones_vehiculos.get(int(id_viaje))
+
+    if not pos:
+        return jsonify({'Status': 'error', 'Msj': 'Sin posición registrada'})
+
+    return jsonify({'Status': 'success', 'data': pos})
 
 # END REGION VIAJE
 

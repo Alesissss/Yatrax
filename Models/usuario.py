@@ -41,10 +41,12 @@ class Usuario:
     def autenticar(cls, email, password):
         conexion = bd.Conexion()
         try:
-            usuario = conexion.obtener(""" SELECT usu.id, CONCAT(pe.ape_paterno, ' ', pe.ape_materno, ', ', pe.nombre) AS nombre, usu.email, usu.imagen, usu.estado, usu.id_tipousuario, tu.nombre as tipousuario, pe.id as id_personal
+            usuario = conexion.obtener(""" SELECT usu.id, CONCAT(pe.ape_paterno, ' ', pe.ape_materno, ', ', pe.nombre) AS nombre, usu.email, usu.imagen, usu.estado, 
+            usu.id_tipousuario, tu.nombre as tipousuario, pe.id as id_personal, tp.id as id_tipopersonal, tp.nombre as tipoPersonal
             FROM usuarios usu
             INNER JOIN tipo_usuario tu ON usu.id_tipousuario = tu.id
-            INNER JOIN personal pe ON pe.id = usu.id_personal WHERE usu.estado = 1 AND usu.email = %s AND usu.password = %s""", (email, password))
+            INNER JOIN personal pe ON pe.id = usu.id_personal 
+            INNER JOIN tipo_personal tp ON tp.id = pe.id_tipopersonal WHERE usu.estado = 1 AND usu.email = %s AND usu.password = %s""", (email, password))
             return usuario[0] if usuario else None
         finally:
             conexion.cerrar()

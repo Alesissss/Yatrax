@@ -39,15 +39,15 @@ class Viaje:
     def obtener_por_id(cls, viaje_id):
         conexion = bd.Conexion()
         try:
-            viaje = conexion.obtener(""" SELECT v.id, v.idRuta, v.estado, v.estadoViaje AS idEstadoViaje, ev.nombre AS estado_viaje, r.nombre AS ruta, 
+            viaje = conexion.obtener(""" SELECT v.id, v.idRuta, v.estado, v.idEstadoViaje, ev.nombre AS estado_viaje, r.nombre AS ruta, 
                 r.tipo AS tipo_ruta, tv.id_servicio, s.nombre AS servicio, CONCAT(tv.nombre, ' - ', ve.placa) AS vehiculo, 
-                v.esReprogramado, v.esPostergado, v.fecha_salida_estimada, v.fecha_llegada_estimada
+                v.esReprogramado, v.fechaHoraSalida, v.fechaHoraLlegada
                 FROM viaje v
                 INNER JOIN ruta r on v.idRuta = r.id
                 INNER JOIN vehiculo ve on ve.id = v.idVehiculo
-                INNER JOIN estado_viaje ev on v.estadoViaje = ev.id
+                INNER JOIN estado_viaje ev on v.idEstadoViaje = ev.id
                 INNER JOIN tipo_vehiculo tv on tv.id = ve.id_tipo_vehiculo
-                INNER JOIN servicio s on s.id = tv.id_servicio;
+                INNER JOIN servicio s on s.id = tv.id_servicio
                 WHERE r.id = %s""", (viaje_id,))
             return viaje[0] if viaje else None
         finally:
@@ -81,6 +81,40 @@ class Viaje:
         finally:
             conexion.cerrar()
 
+    @classmethod
+    def obtener_datos_viaje_tracking(cls, idViaje):
+        try:
+            conexion = bd.Conexion()
+            
+            viaje = conexion.obtener("""SELECT v.id, v.idRuta, v.estado, v.idEstadoViaje, ev.nombre AS estado_viaje, r.nombre AS ruta, 
+                r.tipo AS tipo_ruta, tv.id_servicio, s.nombre AS servicio, v.idVehiculo, CONCAT(tv.nombre, ' - ', ve.placa) AS vehiculo, 
+                v.esReprogramado, v.fechaHoraSalida, v.fechaHoraLlegada
+                FROM viaje v
+                INNER JOIN ruta r on v.idRuta = r.id
+                INNER JOIN vehiculo ve on ve.id = v.idVehiculo
+                INNER JOIN estado_viaje ev on v.idEstadoViaje = ev.id
+                INNER JOIN tipo_vehiculo tv on tv.id = ve.id_tipo_vehiculo
+                INNER JOIN servicio s on s.id = tv.id_servicio
+                WHERE r.id = %s""", (idViaje,))
+            
+            # Obtener escalas para la ruta
+            escalas = []
+            if viaje:
+                escalas = conexion.obtener("""SELECT es.id, es.nro_orden, es.idSucursal, es.distancia_estimada, suc.latitud, suc.longitud,
+                                           es.tiempo_estimado, CONCAT(UPPER(suc.ciudad), '-', suc.nombre) AS nombre, es.idRuta 
+                                           FROM escala es 
+                                           INNER JOIN sucursal suc on es.idSucursal = suc.id WHERE idRuta = %s 
+                                           ORDER BY nro_orden""", (viaje[0]['idRuta'],))
+
+            return {
+                "viaje": viaje[0] if viaje else None,
+                "escalas": escalas
+            }
+        except Exception as e:
+            print(f"Error al obtener datos del viaje: {repr(e)}")
+            return None
+        finally:
+            conexion.cerrar()
 
     @classmethod
     def obtener_escalas_por_ruta(cls, ruta_id):
@@ -248,31 +282,84 @@ class Viaje:
 
     #DAR DE BAJA
     @classmethod
-    def darBaja(cls, id):
+    def darBaja(cls, id, solo_consulta=False):
         try:
             conexion = bd.Conexion()
 
-            result_pasaje = conexion.obtener(""" SELECT 1 FROM pasaje p 
-                            INNER JOIN detalle_viaje_asiento dva ON p.idDetalleViajeAsiento = dva.id
-                            INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
-                            INNER JOIN viaje v ON dv.idViaje = v.id WHERE v.id = %s LIMIT 1""", (id,))
-            
-            result_asiento = conexion.obtener(""" SELECT 1 FROM detalle_viaje_asiento dva
-                            INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
-                            INNER JOIN viaje v ON dv.idViaje = v.id
-                            WHERE dva.esDisponible = 0 AND v.id = %s LIMIT 1""", (id,))
-            
-            if result_pasaje or result_asiento:
-                raise Exception('El viaje no se puede eliminar porque ya existen pasajes vendidos para los itinerarios.')
-            
+            # Verificar si tiene pasajes vendidos
+            tiene_pasajes = conexion.obtener("""
+                SELECT 1 FROM pasaje p
+                INNER JOIN detalle_viaje_asiento dva ON p.idDetalleViajeAsiento = dva.id
+                INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
+                INNER JOIN viaje v ON dv.idViaje = v.id
+                WHERE v.id = %s
+                LIMIT 1
+            """, (id,))
+
+            # Verificar si hay al menos un asiento ya no disponible
+            asiento_ocupado = conexion.obtener("""
+                SELECT 1 FROM detalle_viaje_asiento dva
+                INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
+                INNER JOIN viaje v ON dv.idViaje = v.id
+                WHERE dva.esDisponible = 0 AND v.id = %s
+                LIMIT 1
+            """, (id,))
+
+            # Lógica codificada:
+            if tiene_pasajes or asiento_ocupado:
+                mensaje = 'Viaje dado de baja correctamente, se tendrá que realizar reembolso a clientes que lo soliciten'
+                modal='¿Estas seguro de dar de baja este viaje? Este viaje tiene pasajes vendidos, se habilitara la opción de reembolso para los clientes afectados.'
+            else:
+                mensaje = 'Viaje dado de baja correctamente'
+                modal='¿Estas seguro de dar de baja este viaje?'
+
+
+            # Si es solo consulta (previsualización), solo devolvemos el mensaje
+            if solo_consulta:
+                return {'@MSJ': mensaje, '@MSJ2': '','@MODAL': modal}
+
+            # Ejecutar baja real
             conexion.ejecutar("UPDATE viaje SET estado = 0 WHERE id = %s", (id,), auto_commit=False)
             conexion.conn.commit()
-            return {'@MSJ': 'Viaje dado de baja correctamente', '@MSJ2': ''}
+
+            return {'@MSJ': mensaje, '@MSJ2': '', '@MODAL': modal}
+
         except Exception as e:
-            conexion.conn.rollback()
+            if not solo_consulta:
+                conexion.conn.rollback()
             return {'@MSJ': '', '@MSJ2': f'Error al dar de baja al viaje: {str(e)}'}
         finally:
             conexion.cerrar()
+
+
+    # @classmethod
+    # def darBaja(cls, id):
+    #     try:
+    #         conexion = bd.Conexion()
+
+    #         result_pasaje = conexion.obtener(""" SELECT 1 FROM pasaje p 
+    #                         INNER JOIN detalle_viaje_asiento dva ON p.idDetalleViajeAsiento = dva.id
+    #                         INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
+    #                         INNER JOIN viaje v ON dv.idViaje = v.id WHERE v.id = %s LIMIT 1""", (id,))
+            
+    #         result_asiento = conexion.obtener(""" SELECT 1 FROM detalle_viaje_asiento dva
+    #                         INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
+    #                         INNER JOIN viaje v ON dv.idViaje = v.id
+    #                         WHERE dva.esDisponible = 0 AND v.id = %s LIMIT 1""", (id,))
+            
+    #         if result_pasaje or result_asiento:
+    #             conexion.ejecutar("UPDATE viaje SET estado = 0 WHERE id = %s", (id,), auto_commit=False)
+    #             conexion.conn.commit()
+    #             return {'@MSJ': 'Viaje dado de baja correctamente, se tendra que realizar reembolso a clientes que lo soliciten', '@MSJ2': ''}
+            
+    #         conexion.ejecutar("UPDATE viaje SET estado = 0 WHERE id = %s", (id,), auto_commit=False)
+    #         conexion.conn.commit()
+    #         return {'@MSJ': 'Viaje dado de baja correctamente', '@MSJ2': ''}
+    #     except Exception as e:
+    #         conexion.conn.rollback()
+    #         return {'@MSJ': '', '@MSJ2': f'Error al dar de baja al viaje: {str(e)}'}
+    #     finally:
+    #         conexion.cerrar()
             
     @classmethod
     def cambiar_estado_viaje(cls, id, idEstadoViaje):

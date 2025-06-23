@@ -63,3 +63,16 @@ class MetodoPago:
             return resultado[0]  # Retorna un diccionario con los mensajes
         finally:
             conexion.cerrar()
+            
+    @classmethod
+    def obtener_por_tipo(cls, id_tipo_metodo_pago):
+        conexion = bd.Conexion()
+        try:
+            consulta = """
+                SELECT mp.id, mp.nombre, mp.logo, mp.estado, mp.qr, mp.id_tipo_metodoPago
+                FROM metodo_pago mp
+                WHERE mp.estado = 1 AND mp.id_tipo_metodoPago = %s
+            """
+            return conexion.obtener(consulta, (id_tipo_metodo_pago,))
+        finally:
+            conexion.cerrar()

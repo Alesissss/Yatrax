@@ -13,5 +13,6 @@ pydyf
 PyPhen
 tinycss2
 tinyhtml5
-
+fpdf2
+qrcode[pil]
 # $ pip install -r requirements.txt
