@@ -36,7 +36,7 @@ class Pasaje:
                     cli.numero_documento AS num_doc,
                     suc_origen.nombre    AS origen,
                     suc_destino.nombre   AS destino,
-                    pas.codigo,
+                    pas.codigoReserva    AS codigo,
                     pas.esReserva        AS reserva,
                     pas.esPasajeNormal   AS pagado
                 FROM pasaje pas
@@ -52,6 +52,42 @@ class Pasaje:
                     ON dv.idSucursalOrigen = suc_origen.id
                 LEFT JOIN sucursal suc_destino 
                     ON dv.idSucursalDestino = suc_destino.id;
+            """)
+        finally:
+            if conexion:
+                conexion.cerrar()
+
+    @classmethod
+    def obtener_todas_reservas(cls):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            return conexion.obtener("""
+                SELECT
+                    pas.id,
+                    pas.idVenta          AS id_venta,
+                    cli.nombre           AS cliente,
+                    cli.numero_documento AS num_doc,
+                    suc_origen.nombre    AS origen,
+                    suc_destino.nombre   AS destino,
+                    pas.codigoReserva    AS codigo,
+                    pas.esReserva        AS reserva,
+                    pas.esPasajeNormal   AS pagado
+                FROM pasaje pas
+                LEFT JOIN venta v 
+                    ON pas.idVenta = v.id
+                LEFT JOIN cliente cli 
+                    ON v.idCliente = cli.id
+                LEFT JOIN detalle_viaje_asiento dvas
+                    ON pas.idDetalleViajeAsiento = dvas.id
+                LEFT JOIN detalle_viaje dv
+                    ON dvas.idDetalle_Viaje = dv.id
+                LEFT JOIN sucursal suc_origen 
+                    ON dv.idSucursalOrigen = suc_origen.id
+                LEFT JOIN sucursal suc_destino 
+                    ON dv.idSucursalDestino = suc_destino.id 
+                WHERE pas.esReserva = 1
+                AND pas.fecha_reserva >= NOW() - INTERVAL 2 HOUR;
             """)
         finally:
             if conexion:
