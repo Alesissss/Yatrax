@@ -754,7 +754,6 @@ def obtenerDatosPasaje():
     try:
         numComprobante = request.args.get("comprobante")
         pasaje = Pasaje.obtenerDatosPasaje(numComprobante)
-        print (pasaje)
         if pasaje:
             return jsonify({
                 "Status": "success",
@@ -776,28 +775,20 @@ def obtenerDatosPasaje():
 
 @homeClientes_bp.route("/cambiarEnTransaccion", methods=["GET"])
 def cambiarEnTransaccion():
-    try:
-        idPasaje = request.args.get("pasId")
-        pasaje = Pasaje.obtenerDatosPasaje(idPasaje)
-        if pasaje:
-            if pasaje['estado_transaccion'] == 1:
-                Pasaje.cambiar_a_transaccion_0(idPasaje)
-            else:
-                Pasaje.cambiar_a_transaccion_1(idPasaje)
-        else:
-            return jsonify({
-                "Status": "error",
-                "data": {},
-                "Msj": "No se encontró el pasaje con el número de comprobante proporcionado"
-            })
-    except Exception as e:
-        return jsonify({
-            "Status": "error",
-            "data": {},
-            "Msj": f"Error al cambiar el estado del pasaje: {repr(e)}"
-        })
-        
+    id_pasaje = request.args.get("pasId")
+    if not id_pasaje:
+        return jsonify(status="error", message="Falta parámetro pasId"), 400
 
+    try:
+        resultado = Pasaje.cambiar_estado_transaccion(id_pasaje)
+        if "error" in resultado:
+            return jsonify(status="error", message=resultado["error"]), 404
+
+        return jsonify(status="success", nuevoEstado=resultado["nuevoEstado"]), 200
+
+    except Exception as e:
+        return jsonify(status="error", message=str(e)), 500
+        
 @homeClientes_bp.route("/listarTiposComprobante")
 def listadoTiposComprobantes():
     try:

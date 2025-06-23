@@ -398,32 +398,23 @@ class Pasaje:
             # lo que da un total de 11,881,376,000 combinaciones posibles.
     
     @classmethod
-    def cambiar_a_transaccion_1(cls, id_pasaje):
+    def cambiar_estado_transaccion(cls, id_pasaje):
         conexion = bd.Conexion()
         try:
-            # Cambia el estado de un pasaje a transacción
-            conexion.ejecutar(
-                "UPDATE pasaje SET enTransaccion = 1 WHERE id = %s;",
-                (id_pasaje,)
-            )
-            return {"msj": "Estado de pasaje actualizado", "msj2": None}
+            sql_select = "SELECT enTransaccion FROM pasaje WHERE id = %s;"
+            filas = conexion.obtener(sql_select, (id_pasaje,))
+            if not filas:
+                return {"error": "Pasaje no encontrado"}
+
+            estado_actual = filas[0]['enTransaccion']
+            nuevo_estado = 0 if estado_actual else 1
+
+            sql_update = "UPDATE pasaje SET enTransaccion = %s WHERE id = %s;"
+            conexion.ejecutar(sql_update, (nuevo_estado, id_pasaje))
+
+            return {"nuevoEstado": nuevo_estado}
         except Exception as e:
-            return {"msj": None, "msj2": f"Error al cambiar estado de pasaje: {e}"}
-        finally:
-            conexion.cerrar()
-    
-    @classmethod
-    def cambiar_a_transaccion_0(cls, id_pasaje):
-        conexion = bd.Conexion()
-        try:
-            # Cambia el estado de un pasaje a no transacción
-            conexion.ejecutar(
-                "UPDATE pasaje SET enTransaccion = 0 WHERE id = %s;",
-                (id_pasaje,)
-            )
-            return {"msj": "Estado de pasaje actualizado", "msj2": None}
-        except Exception as e:
-            return {"msj": None, "msj2": f"Error al cambiar estado de pasaje: {e}"}
+            raise
         finally:
             conexion.cerrar()
 
@@ -537,6 +528,8 @@ class Pasaje:
                 resultado['estado'] = 'Ya se ha realizado un cambio de ruta de este pasaje.'
             elif resultado['esPasajeLibre'] == 1:
                 resultado['estado'] = 'Ya se ha convertido a pasaje libre de este pasaje.'
+            else:
+                resultado['estado'] = 'El pasaje se encuentra en un proceso de transacción.'
             return resultado
         
         finally:
