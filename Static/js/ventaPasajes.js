@@ -25,6 +25,17 @@ const CONFIG = {
     }
 };
 
+const SetearConfig = {   
+    init(){
+
+    },
+
+    setMaxAsientos(){
+
+    }
+
+}
+
 async function obtenerNombreMetodo(idMetodo) {
     const response = await fetch(`/ecommerce/home/obtenerMetodoPagoxID/${idMetodo}`)
     const data = await response.text()
