@@ -97,8 +97,26 @@ class Pasaje:
         conexion = None
         try:
             conexion = bd.Conexion()
-            sql = """SELECT numeroComprobante, codigo FROM pasaje ps WHERE ps.numeroComprobante = %s AND ps.codigo = %s;"""
+            sql = """SELECT precio FROM pasaje ps WHERE ps.numeroComprobante = %s AND ps.codigo = %s;"""
             return conexion.obtener(sql, (num_comprobante, codigo_prom))
+        finally:
+            if conexion:
+                conexion.cerrar()
+
+    @classmethod
+    def detalle_viaje(cls, id_detalle_asiento):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            sql = """SELECT dv.id AS id_detalle_viaje, dv.fechaSalida, dv.fechaLlegadaEstimada, 
+                            so.nombre AS origen, sd.nombre AS destino, so.ciudad AS ciudad_origen, 
+                            sd.ciudad AS ciudad_destino
+                     FROM detalle_viaje_asiento dva
+                     JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
+                     JOIN sucursal so ON dv.idSucursalOrigen = so.id
+                     JOIN sucursal sd ON dv.idSucursalDestino = sd.id
+                     WHERE dva.id = %s;"""
+            return conexion.obtener(sql, (id_detalle_asiento,))
         finally:
             if conexion:
                 conexion.cerrar()
@@ -324,6 +342,23 @@ class Pasaje:
             return resultado[0] if resultado else {"msj": None, "msj2": "Error al recuperar mensaje"}
         except Exception as e:
             return {"msj": None, "msj2": f"Error en la reserva: {e}"}
+        finally:
+            if conexion:
+                conexion.cerrar()
+
+    @classmethod
+    def esCambioRuta(cls, numero_comprobante):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            sql = "UPDATE pasaje SET esCambioRuta = 1, esReserva = 0, esPasajeNormal = 0, esPasajeLibre = 0, esTransferencia = 0 WHERE numeroComprobante = %s;"
+            conexion.ejecutar(sql, (numero_comprobante,))
+            # Un UPDATE no retorna filas, así que no puedes acceder a filas[0]['esCambioRuta']
+            # Si quieres verificar el cambio, haz un SELECT después:
+            resultado = conexion.obtener("SELECT esCambioRuta FROM pasaje WHERE numeroComprobante = %s;", (numero_comprobante,))
+            if resultado:
+                return resultado[0]['esCambioRuta'] == 1
+            return False
         finally:
             if conexion:
                 conexion.cerrar()

@@ -116,8 +116,7 @@
                             <label for="contraseña">Contraseña</label>
                             <div class="input-group">
                                 <input type="password" id="contraseña" class="form-control" placeholder="Contraseña"
-                                    value="{{ cliente.password }}" {% if btnId=='btn_Aceptar' %}disabled{% endif %}
-                                    oninput="this.value = this.value.toUpperCase();">
+                                    value="{{ cliente.password }}" {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
                                 <div class="input-group-append">
                                     <div class="input-group-text"><i class="fas fa-lock"></i></div>
                                 </div>
