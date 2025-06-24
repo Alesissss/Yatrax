@@ -793,10 +793,11 @@ def realizar_transferencia():
     except Exception as e:
         return jsonify({"Status":"error", "Msj": f"Error inesperado: {e}"})
 
-@homeClientes_bp.route("/mostrarPasarelaPago", methods=["POST"])
-def mostrar_pasarela_pago():
+@homeClientes_bp.route("/modalPasarelaPago", methods=["POST"])
+def modal_pasarela_pago():
+    tipo_comprobante = TipoComprobante.obtener_todos()
     metodo_pago = MetodoPago.obtener_todos()
-    return render_template("Ecommerce/home/pasarelaPagos.html", metodo_pago=metodo_pago)
+    return render_template('Ecommerce/home/pasarelaPagos.html', metodo_pago=metodo_pago, tipo_comprobante=tipo_comprobante)
 
 @homeClientes_bp.route("/verificarEstadoPasaje", methods=["GET"])
 def verificar_estado_pasaje():
@@ -1079,6 +1080,45 @@ def enviar_correos_reprogramacio():
                     f"Si no lo realiza en este tiempo, se perderá el pasaje. "
                     f"Para más información visite nuestra página web.\n"
                     f"Su código de canje de pasaje gratis o reembolso para el asiento {asiento} es: {codigo}"
+                )
+            }
+            resultado = enviar_correo(current_app.extensions['mail'], datosEnvio)
+            print(f"[INFO] Resultado del envío a {correo}: {resultado}")
+        return jsonify({'status': 'ok'})
+    except Exception as e:
+        print("[ERROR] Excepción capturada en el controlador:")
+        traceback.print_exc()
+        return jsonify({'status': 'error', 'message': 'Ocurrió un error interno.'}), 500
+    
+@homeClientes_bp.route('/enviar_correos_darBaja_Viaje', methods=['POST'])
+def enviar_correos_DarBajaViaje():
+    try:
+        data = request.get_json()
+        email = Viaje.obtener_clientes_por_viaje(data.get("idViaje"))
+        # email = Viaje.obtener_clientes_por_viaje(1)
+        if not email:
+            return jsonify({
+                'status': 'error',
+                'message': 'No se encontraron correos electrónicos para enviar la notificación.'
+            }), 404
+        for datos in email:
+            correo = datos.get("email")
+            codigo = datos.get("codigo")
+            asiento = datos.get("asiento")
+
+            if not correo or not codigo:
+                print(f"[WARN] Datos incompletos: {datos}")
+                continue
+
+            datosEnvio = {
+                'asunto': 'Viaje cancelado',
+                'remitente': 'yatraxyatusa@gmail.com',
+                'destinatario': correo,
+                'mensaje': (
+                    f"Estimado cliente, su viaje ha sido cancelado. "
+                    f"Por favor solicite su reembolso en nuestro apartado de mi pasaje. \n"
+                    f"Para más información visite nuestra página web.\n"
+                    f"Su código de reembolso para el asiento {asiento} es: {codigo}"
                 )
             }
             resultado = enviar_correo(current_app.extensions['mail'], datosEnvio)

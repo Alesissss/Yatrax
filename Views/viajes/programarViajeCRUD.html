@@ -206,6 +206,12 @@
                                                 </div>
                                             </div>
                                             {% else %}
+                                            <!-- <div class="row justify-content-center align-items-center align-middle">
+                                                <div class="col-md-12">
+                                                    <img class="img- h-100"
+                                                        src="/Static/img/fondo_banner.webp">
+                                                </div>
+                                            </div> -->
                                             <div class="card card-outline card-primary h-100">
                                                 <div class="card-header">
                                                     <h3 class="mb-0 text-center">
@@ -218,7 +224,6 @@
                                                 <div class="card-body">
                                                     <div class="row">
                                                         <div class="col-md-12">
-                                                            <!-- Mapa -->
                                                             <div class="position-relative">
                                                                 <div class="status-badge">
                                                                     <span id="statusBadge"
@@ -230,7 +235,6 @@
                                                         </div>
 
                                                         <div class="col-md-12 mt-4">
-                                                            <!-- Registro del Viaje -->
                                                             <div class="travel-log">
                                                                 <h5 class="mb-3">
                                                                     <i class="fas fa-clipboard-list me-2"></i>
@@ -272,8 +276,8 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-warning text-dark">
-                <h5 id="modal-title" class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Viaje No
-                    Iniciado</h5>
+                <h5 id="modal-title" class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Viaje no
+                    iniciado</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span>×</span>
                 </button>
@@ -281,7 +285,7 @@
             <div class="modal-body text-center py-4">
                 <i class="fas fa-clock fa-3x text-warning mb-3"></i>
                 <h4>El viaje aún no ha iniciado</h4>
-                <p class="text-muted">La ruta seleccionada tiene un viaje programado pero aún no ha comenzado. El
+                <p class="text-muted">El viaje seleccionado se encuentra programado pero aún no ha comenzado. El
                     tracking estará disponible una vez que el viaje inicie.</p>
             </div>
             <div class="modal-footer">
@@ -723,7 +727,7 @@
 
 
     $(document).ready(function () {
-          
+
         fct_GetRutas();
         fct_GetPersonal();
         fct_LlenarCombos();
@@ -852,7 +856,6 @@
                     formData.append("tripulantes", JSON.stringify(tripulantesSeleccionados));
                     formData.append("detalles_viajes", JSON.stringify(subrutas));
                     formData.append("estado", estado);
-                    console.log(subrutas)
 
                     $.ajax({
                         url: "/trabajadores/viajes/RegistrarViaje",
@@ -936,14 +939,12 @@
             formData.append("tripulantes", JSON.stringify(tripulantesSeleccionados));
             formData.append("detalles_viajes", JSON.stringify(subrutas));
 
-            console.log(subrutas);
+            const inputSalidaVerificar = document.querySelector('.input-salida');
+            const valorOriginal = inputSalidaVerificar?.dataset.original;
+            const valorActual = inputSalidaVerificar?.value;
 
- const inputSalidaVerificar = document.querySelector('.input-salida');
-    const valorOriginal = inputSalidaVerificar?.dataset.original;
-    const valorActual = inputSalidaVerificar?.value;
 
-   
-               
+
             Swal.fire({
                 title: "¿Estás seguro?",
                 text: "Esta acción editará al viaje. ¿Deseas continuar?",
@@ -966,7 +967,7 @@
                     formData.append("tripulantes", JSON.stringify(tripulantesSeleccionados));
                     formData.append("detalles_viajes", JSON.stringify(subrutas));
                     formData.append("estado", estado);
-                    
+
                     $.ajax({
                         url: "/trabajadores/viajes/EditarViaje/" + id,
                         type: "POST",
@@ -979,13 +980,13 @@
                                 return;
                             } else {
                                 toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                               
-                                 if (valorOriginal && valorActual) {
-                                        if (valorOriginal !== valorActual) {
-                                            const dato_id = {
-                                                idViaje : id
-                                            }
-                                           $.ajax({
+
+                                if (valorOriginal && valorActual) {
+                                    if (valorOriginal !== valorActual) {
+                                        const dato_id = {
+                                            idViaje: id
+                                        }
+                                        $.ajax({
                                             url: "/ecommerce/home/enviar_correos_reprogramacion",
                                             type: "POST",
                                             contentType: "application/json",
@@ -1002,13 +1003,13 @@
                                                 toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
                                             }
                                         });
-                                        toastr.success("Se ha enviado correo informaivo a todos los clientes","MENSAJE DE SISTEMA")
-                                        } else {
-                                            alert("No se ha modificado la hora de salida del viaje.");
-                                        }
+                                        toastr.success("Se ha enviado correo informaivo a todos los clientes", "MENSAJE DE SISTEMA")
                                     } else {
-                                        alert("No se pudo verificar la hora de salida original.");
+                                        alert("No se ha modificado la hora de salida del viaje.");
                                     }
+                                } else {
+                                    alert("No se pudo verificar la hora de salida original.");
+                                }
                                 setTimeout(() => {
                                     window.location.href = "/trabajadores/viajes/ProgramarViaje";
                                 }, 500);
@@ -1104,7 +1105,6 @@
                             .addTo(map)
                             .bindPopup(`<b>${escala.nombre}</b><br>Orden: ${escala.nro_orden}`);
 
-                        console.log(marker);
                         routeMarkers.push(marker);
 
                         return L.latLng(lat, lng);
@@ -1205,11 +1205,10 @@
     }
 </script>
 <script>
-  $(document).ready(function () {
-      $('.input-salida').each(function () {
-          $(this).attr('data-original', $(this).val());
-          console.log("Asignado:", $(this).attr('data-original'));
-      });
-  });
+    $(document).ready(function () {
+        $('.input-salida').each(function () {
+            $(this).attr('data-original', $(this).val());
+        });
+    });
 </script>
 {% endblock %}

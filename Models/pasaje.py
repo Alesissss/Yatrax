@@ -121,6 +121,16 @@ class Pasaje:
             if conexion:
                 conexion.cerrar()
 
+    @classmethod
+    def cambiarEstadoAsiento(cls, ):
+        conexion = None
+        try:
+            conexion =  bd.Conexion()
+            sql = ""
+        finally:
+            if conexion:
+                conexion.cerrar()
+
 
     @classmethod
     def dar_baja_cambio_ruta(cls, id_pasaje):
@@ -206,7 +216,8 @@ class Pasaje:
                         sd.nombre                                        AS DESTINO,
                         v.fecha                                          AS FECHA,
                         p.codigo                                         AS CODIGO,
-                        p.precio as PRECIO
+                        p.precio as PRECIO,
+                        dva.idAsiento                                      AS ASIENTO,
                         FROM pasaje p
                         JOIN venta v                    ON v.id = p.idVenta
                         JOIN cliente cli                ON cli.id = v.idCliente
@@ -353,8 +364,13 @@ class Pasaje:
             conexion = bd.Conexion()
             sql = "UPDATE pasaje SET esCambioRuta = 1, esReserva = 0, esPasajeNormal = 0, esPasajeLibre = 0, esTransferencia = 0 WHERE numeroComprobante = %s;"
             conexion.ejecutar(sql, (numero_comprobante,))
-            # Un UPDATE no retorna filas, así que no puedes acceder a filas[0]['esCambioRuta']
-            # Si quieres verificar el cambio, haz un SELECT después:
+            sql = """UPDATE detalle_viaje_asiento dva
+                        INNER JOIN pasaje p
+                        ON p.idDetalleViajeAsiento = dva.id
+                        SET dva.esDisponible = 1
+                        WHERE p.numeroComprobante = %s; 
+                """
+            conexion.ejecutar(sql, (numero_comprobante,))
             resultado = conexion.obtener("SELECT esCambioRuta FROM pasaje WHERE numeroComprobante = %s;", (numero_comprobante,))
             if resultado:
                 return resultado[0]['esCambioRuta'] == 1
@@ -580,15 +596,16 @@ class Pasaje:
             sql_update = """
                 UPDATE pasaje
                 SET esPasajeLibre = 1,
-                    enTransaccion = 1
+                    enTransaccion = 1,
+                    esPasajeNormal = 0,
+                    esReserva = 0
                 WHERE id = %s;
             """
             conexion.ejecutar(sql_update, (id_pasaje,), auto_commit=False)
             
             sql_update2 = """
                 UPDATE detalle_viaje_asiento
-                SET idAsiento = NULL,
-                    esDisponible = 0
+                SET esDisponible = 1
                 WHERE id = %s;
             """
             conexion.ejecutar(sql_update2, (idDetViajeAs,), auto_commit=False)
@@ -612,6 +629,7 @@ class Pasaje:
             sql_update = """
                 UPDATE pasaje
                 SET esTransferencia = 1,
+                    esReserva = 0,
                     enTransaccion   = 1
                 WHERE id = %s;
             """

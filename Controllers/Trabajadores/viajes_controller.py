@@ -13,6 +13,7 @@ from Models.horario import Horario
 from Models.ubigeo import Ubigeo
 from Models.marca import Marca
 from Models.ruta import Ruta
+from Models.tipoAsiento import TipoAsiento
 from Models.asiento import Asiento
 from Models.tipo_herramienta import TipoHerramienta
 from Models.herramienta import Herramienta
@@ -88,6 +89,15 @@ def Menu_ProgramarViaje():
 @viajes_bp.route('/ProgramarViajeNuevo')
 def Menu_ProgramarViajeNuevo():
     return render_template('viajes/programarViajeCRUD.html', active_page="programarViaje", active_menu='mViajes', viaje={}, detalles_viajes=[], personal=[], escalas=[],tittle='Registrar viaje', btnId = 'btn_Registrar')
+
+@viajes_bp.route('/GestionarTipoAsiento')
+def Menu_TipoAsiento():
+    return render_template('viajes/tipoAsiento.html', active_page="tipoAsiento", active_menu='mViajes')
+
+@viajes_bp.route('/TipoAsientoNuevo')
+def TipoAsiento_Nuevo():
+    return render_template('viajes/tipoAsientoCRUD.html', active_page="tipoAsiento", active_menu='mViajes', tipoAsiento={}, tittle = 'Registrar tipo asiento', btnId = 'btn_Registrar')
+
 
 # @viajes_bp.route('/GestionarMarcas')
 # def Menu_Marcas():
@@ -1211,6 +1221,124 @@ def darBaja_ruta(id):  # Recibe el ID de la URL
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
 # END REGION RUTA
+
+# REGION TIPO ASIENTO
+# Obtener todos los asientos
+@viajes_bp.route("/GetData_TipoAsiento", methods=["GET"])
+def get_tipoAsiento():
+    try:
+        tipoAsientos = TipoAsiento.obtener_todos()
+        return jsonify({'data': tipoAsientos, 'Status': 'success', 'Msj': 'Listado de tipos de asientos retornado exitosamente'})
+    except Exception as e:
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar tipos de asientos: {repr(e)}'})
+
+# Registrar asiento
+# @viajes_bp.route("/RegistrarAsiento", methods=["POST"])
+# def registrar_asiento():
+#     try:
+#         nro_asiento = request.form.get("nro_asiento").strip()
+#         nivel = request.form.get("nivel")
+#         tipo_asiento = request.form.get("tipo")
+#         estado = request.form.get("estado")
+#         usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
+
+#         if not nro_asiento or not nivel or not tipo_asiento or not estado:
+#             return jsonify({"Status": "error", "Msj": f"Todos los campos son obligatorios {nro_asiento},{nivel},{tipo_asiento},{estado}"})
+
+#         mensajes = Asiento.registrar(nro_asiento, nivel, tipo_asiento, estado, usuario_actual)
+#         msj1 = mensajes.get('@MSJ')
+#         msj2 = mensajes.get('@MSJ2')
+
+#         if msj1:
+#             return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+#         elif msj2:
+#             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+#         else:
+#             return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar asiento'})
+
+#     except Exception as e:
+#         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+# # Eliminar asiento
+# @viajes_bp.route("/EliminarAsiento/<int:id>", methods=['POST'])
+# def eliminar_asiento(id):
+#     try:
+#         mensajes = Asiento.eliminar(id)
+#         msj1 = mensajes.get('@MSJ')
+#         msj2 = mensajes.get('@MSJ2')
+
+#         if msj1:
+#             return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+#         elif msj2:
+#             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+#         else:
+#             return jsonify({"Status": "error", 'Msj': 'Error desconocido al eliminar asiento'})
+#     except Exception as e:
+#         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+# # Editar asiento
+# @viajes_bp.route("/EditarAsiento/<int:id>", methods=['GET', 'POST'])
+# def editar_asiento(id):
+#     try:
+#         asiento = Asiento.obtener_por_id(id)
+
+#         if request.method == 'POST':
+#             nro_asiento = request.form.get("nro_asiento").strip()
+#             nivel = request.form.get("nivel")
+#             tipo_asiento = request.form.get("tipo")
+#             estado = request.form.get("estado")
+#             usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
+
+#             if not nro_asiento or not nivel or not tipo_asiento or not estado:
+#                 return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
+            
+
+#             mensajes = Asiento.editar(id, nro_asiento, nivel, tipo_asiento, estado,usuario_actual)
+#             msj1 = mensajes.get('@MSJ')
+#             msj2 = mensajes.get('@MSJ2')
+
+#             if msj1:
+#                 return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+#             elif msj2:
+#                 return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+#             else:
+#                 return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar asiento'})
+
+#         if asiento:
+#             return render_template('viajes/asientoCRUD.html', active_page="asientos", active_menu='mAsientos', asiento=asiento, tittle='Editar asiento', btnId='btn_Editar')
+#         return render_template('viajes/asientoCRUD.html', active_page="asientos", active_menu='mAsientos', asiento={}, tittle='Editar asiento', btnId='btn_Editar')
+
+#     except Exception as e:
+#         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+# # Ver asiento
+# @viajes_bp.route("/VerAsiento/<int:id>", methods=['GET'])
+# def ver_asiento(id):
+#     try:
+#         asiento = Asiento.obtener_por_id(id)
+#         if asiento:
+#             return render_template('viajes/asientoCRUD.html', active_page="asientos", active_menu='mAsientos', asiento=asiento, tittle='Ver asiento', btnId='btn_Aceptar')
+#         return render_template('viajes/asientoCRUD.html', active_page="asientos", active_menu='mAsientos', asiento={}, tittle='Ver asiento', btnId='btn_Aceptar')
+#     except Exception as e:
+#         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+# # Dar de baja asiento
+# @viajes_bp.route("/DarBajaAsiento/<int:id>", methods=['POST'])
+# def dar_baja_asiento(id):
+#     try:
+#         mensajes = Asiento.dar_baja(id)
+#         msj1 = mensajes.get('@MSJ')
+#         msj2 = mensajes.get('@MSJ2')
+
+#         if msj1:
+#             return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+#         elif msj2:
+#             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+#         else:
+#             return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja el asiento'})
+#     except Exception as e:
+#         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+# END REGION TIPO ASIENTO
 
 # REGION DE ASIENTO
 @viajes_bp.route('/AsientoNuevo')
