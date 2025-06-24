@@ -1804,7 +1804,6 @@
     //Región cambio de ruta //
 
     function renderResumen(data) {
-      moment.locale('es');
       const viaje = data.detalle_viaje;
       const pasajeros = data.pasajeros;
       const total = data.precio_total || 0;
@@ -1813,8 +1812,8 @@
       const descuento = descuentoAplicado;
       const cambioRuta = precioCambioRuta;
 
-      const fechaSalida = moment(viaje.fechaSalida).format('dddd D [de] MMMM [del] YYYY, HH:mm');
-      const fechaLlegada = moment(viaje.fechaLlegadaEstimada).format('dddd D [de] MMMM [del] YYYY, HH:mm');
+      const fechaSalida = moment(viaje.fechaSalida).locale('es').format('dddd D [de] MMMM [de] YYYY, HH:mm');
+      const fechaLlegada = moment(viaje.fechaLlegadaEstimada).locale('es').format('dddd D [de] MMMM [de] YYYY, HH:mm');
 
       let html = `
         <div class="card mb-3">
