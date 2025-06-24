@@ -1,6 +1,9 @@
 {% extends "maestra.html" %}
 {% block titulo %}YATRAX - Tranferencia de pasaje{%endblock %}
 {% block contenido %}
+<script src="{{ url_for('static', filename='js/jquery.min.js')}}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/locale/es.min.js"></script>
 
 <style>
   #editMenor {
@@ -637,6 +640,7 @@
   </div>
 
   <script>
+
     document.addEventListener("DOMContentLoaded", function () {
       const contenedorInputExtra = document.getElementById("contenedorInputExtraRem");
 
@@ -649,12 +653,12 @@
           contenedorInputExtra.innerHTML = `
       <label for="cciRem" class="form-label">CCI</label>
       <input type="text" id="cciRem" class="form-control" placeholder="Número de CCI (20 dígitos)" maxlength="20" />
-    `;
-        } else if (tipoTexto.includes("billetera")) {
-          contenedorInputExtra.innerHTML = `
-      <label for="celularRem" class="form-label">Número de celular</label>
-      <input type="tel" id="celularRem" class="form-control" placeholder="Número asociado a billetera" maxlength="9" />
-    `;
+      `;
+          } else if (tipoTexto.includes("billetera")) {
+            contenedorInputExtra.innerHTML = `
+        <label for="celularRem" class="form-label">Número de celular</label>
+        <input type="tel" id="celularRem" class="form-control" placeholder="Número asociado a billetera" maxlength="9" />
+      `;
         }
       });
 
@@ -1526,7 +1530,6 @@
         }
       }
 
-
       // Función de búsqueda tranferencia de pasaje
       function buscarPersona() {
         const tipoDoc = document.getElementById("tipoDocNuevo").value;
@@ -1795,10 +1798,160 @@
         cambiarEstadoTransaccion();
         ocultarContenido();
       });
-    
+
     });
+    
+    //Región cambio de ruta //
+
+    function renderResumen(data) {
+      moment.locale('es');
+      const viaje = data.detalle_viaje;
+      const pasajeros = data.pasajeros;
+      const total = data.precio_total || 0;
+
+      // Usar el descuento directamente desde la variable global:
+      const descuento = descuentoAplicado;
+      const cambioRuta = precioCambioRuta;
+
+      const fechaSalida = moment(viaje.fechaSalida).format('dddd D [de] MMMM [del] YYYY, HH:mm');
+      const fechaLlegada = moment(viaje.fechaLlegadaEstimada).format('dddd D [de] MMMM [del] YYYY, HH:mm');
+
+      let html = `
+        <div class="card mb-3">
+          <div class="card-header bg-dark text-white">Detalle del viaje</div>
+          <div class="card-body">
+            <p><strong>${fechaSalida}</strong> ${viaje.ciudad_origen} (${viaje.origen})</p>
+            <p><strong>${fechaLlegada}</strong> ${viaje.ciudad_destino} (${viaje.destino})</p>
+            <p><i class="fas fa-user"></i> ${pasajeros.length} pasajero</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header bg-dark text-white">Resumen de compra</div>
+          <div class="card-body">
+            <p>${viaje.ciudad_origen} → ${viaje.ciudad_destino}</p>
+            `;
+
+            pasajeros.forEach(p => {
+        html += `<p>Pasajero ${p.numero} (Asiento ${p.asiento}) - S/ ${p.precio.toFixed(2)}</p>`;
+            });
+
+            html += `
+            <hr>
+            <p><strong>Precio cambio de ruta:</strong> S/ ${cambioRuta.toFixed(2)}</p>
+            <p><strong>Descuento aplicado:</strong> S/ ${descuento.toFixed(2)}</p>
+            <p><strong>Total a pagar:</strong> S/ ${
+              (descuento >= (total + cambioRuta)) ? '0.00' : ((total - descuento) + cambioRuta).toFixed(2)
+            }</p>
+          </div>
+        </div>
+            `;
+
+      $('#contenedorResumen').html(html);
+    }
+
+
+    // Obtener el precio de cambio de ruta al cargar la página
+
+    $(document).on('click', '#confirmarDatos', function() {
+      let id_asiento = $('#asiento_id').text();
+      console.log("Valor de #asiento_id:", $('#asiento_id').text());
+      $.ajax({
+        url: '/ecommerce/home/resumenViaje',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ asiento_id: id_asiento, descuento: descuentoAplicado }),
+        success: function(response){
+          if (response.Status === 'success') {
+            response.data.descuento = descuentoAplicado
+            renderResumen(response.data);
+            console.log('Resumen del viaje:', response.data);
+          }
+        }
+      })
+
+    });
+
+
+    // Declarar la variable en el ámbito global antes de usarla
+    let precioCambioRuta = 0;
+
+    $(document).ready(function() {
+      $.ajax({
+        url: '/ecommerce/home/ObtenerPrecioCambioRuta',
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+          if (response.Status === 'success') {
+            precioCambioRuta = parseFloat(response.precio) || 0;
+            console.log("Precio de cambio de ruta:", precioCambioRuta);
+          } else {
+            toastr.warning(response.Msj || "No se pudo obtener el precio de cambio de ruta", "MENSAJE DEL SISTEMA");
+          }
+        },
+        error: function() {
+          toastr.error("Error al consultar el precio de cambio de ruta", "ERROR");
+        }
+      });
+    });
+
+    function procesarPagossss() {
+      const comprobante = document.getElementById('comprobante')?.value;
+      if (!comprobante) {
+        toastr.warning("Falta el número de comprobante");
+        return;
+      }
+
+      $.ajax({
+        url: '/ecommerce/home/cambiarEstadoPasaje',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ comprobante }),
+        success: function (response) {
+          if (response.Status === 'success') {
+            toastr.success("El estado del pasaje ha sido actualizado correctamente");
+          } else {
+            toastr.error(response.Msj || "No se pudo actualizar el estado del pasaje");
+          }
+        },
+        error: function () {
+          toastr.error("Error al cambiar el estado del pasaje");
+        }
+      });
+    }
+
+    let descuentoAplicado = 0;
+
+    $('#btnCambioRuta').on('click', function () {
+      let comprobante = $('#comprobante').val();
+      let codigo = $('#pasCod').val();
+      if (!comprobante || !codigo) {
+        return;
+      }
+      $.ajax({
+        url: '/ecommerce/home/obtenerPrecioPasaje',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ comprobante: comprobante, codigo: codigo }),
+        success: function (response) {
+          if (response.Status === 'success') {
+            const precio = parseFloat(response.precio[0].precio) || 0;
+            descuentoAplicado = precio;
+            console.log("Descuento aplicado:", descuentoAplicado);
+            toastr.success(`Descuento calculado: S/ ${descuentoAplicado.toFixed(2)}`);
+          } else {
+            toastr.error(response.Msj || "No se pudo obtener el descuento", "ERROR");
+          }
+        },
+        error: function () {
+          toastr.error("Error al consultar el precio del pasaje", "ERROR");
+        }
+      });
+    });
+    //End región cambio de ruta //
+
+
   </script>
-  <script src="{{ url_for('static', filename='js/jquery.min.js')}}"></script>
   <script src="{{ url_for('static', filename='js/cambioRuta.js') }}"></script>
 
   {% endblock %}

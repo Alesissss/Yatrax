@@ -166,7 +166,6 @@ class TicketTransporteSimple:
         self.pdf.cell(col2, 4, "S/", ln=False, align='C')
         self.pdf.cell(col3, 4, f"{monto:.2f}", ln=True, align='R')
 
-
 def ejemplo_ticket():
     print("\U0001f68c Generando ticket de transporte...")
 
