@@ -723,6 +723,7 @@
 
 
     $(document).ready(function () {
+          
         fct_GetRutas();
         fct_GetPersonal();
         fct_LlenarCombos();
@@ -937,6 +938,12 @@
 
             console.log(subrutas);
 
+ const inputSalidaVerificar = document.querySelector('.input-salida');
+    const valorOriginal = inputSalidaVerificar?.dataset.original;
+    const valorActual = inputSalidaVerificar?.value;
+
+   
+               
             Swal.fire({
                 title: "¿Estás seguro?",
                 text: "Esta acción editará al viaje. ¿Deseas continuar?",
@@ -959,7 +966,7 @@
                     formData.append("tripulantes", JSON.stringify(tripulantesSeleccionados));
                     formData.append("detalles_viajes", JSON.stringify(subrutas));
                     formData.append("estado", estado);
-
+                    
                     $.ajax({
                         url: "/trabajadores/viajes/EditarViaje/" + id,
                         type: "POST",
@@ -972,6 +979,36 @@
                                 return;
                             } else {
                                 toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                               
+                                 if (valorOriginal && valorActual) {
+                                        if (valorOriginal !== valorActual) {
+                                            const dato_id = {
+                                                idViaje : id
+                                            }
+                                           $.ajax({
+                                            url: "/ecommerce/home/enviar_correos_reprogramacion",
+                                            type: "POST",
+                                            contentType: "application/json",
+                                            data: JSON.stringify(dato_id),
+                                            success: function (response) {
+                                                if (response.status == 'ok') {
+                                                    toastr.success("Correos enviados correctamente", 'MENSAJE DE SISTEMA');
+                                                    return;
+                                                } else {
+                                                    toastr.error("OCurrio algo inesperado al intentar enviar los correos", "MENSAJE DE SISTEMA");
+                                                }
+                                            },
+                                            error: function (xhr, status, error) {
+                                                toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                                            }
+                                        });
+                                        toastr.success("Se ha enviado correo informaivo a todos los clientes","MENSAJE DE SISTEMA")
+                                        } else {
+                                            alert("No se ha modificado la hora de salida del viaje.");
+                                        }
+                                    } else {
+                                        alert("No se pudo verificar la hora de salida original.");
+                                    }
                                 setTimeout(() => {
                                     window.location.href = "/trabajadores/viajes/ProgramarViaje";
                                 }, 500);
@@ -1166,5 +1203,13 @@
 
         document.addEventListener('DOMContentLoaded', initMap);
     }
+</script>
+<script>
+  $(document).ready(function () {
+      $('.input-salida').each(function () {
+          $(this).attr('data-original', $(this).val());
+          console.log("Asignado:", $(this).attr('data-original'));
+      });
+  });
 </script>
 {% endblock %}

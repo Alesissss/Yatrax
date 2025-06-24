@@ -33,3 +33,12 @@ class ConfGeneral:
             return resultado[0]  # Retorna un diccionario con los mensajes
         finally:
             conexion.cerrar()
+
+    @classmethod
+    def obtener_precio_cambio_ruta(cls):
+        conexion = bd.Conexion()
+        try:
+            resultado = conexion.obtener("SELECT precioCambioRuta FROM conf_general LIMIT 1")
+            return resultado[0]['precioCambioRuta'] if resultado else None
+        finally:
+            conexion.cerrar()
