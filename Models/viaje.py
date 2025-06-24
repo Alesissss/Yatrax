@@ -98,7 +98,7 @@ class Viaje:
                 INNER JOIN estado_viaje ev on v.idEstadoViaje = ev.id
                 INNER JOIN tipo_vehiculo tv on tv.id = ve.id_tipo_vehiculo
                 INNER JOIN servicio s on s.id = tv.id_servicio
-                WHERE r.id = %s""", (idViaje,))
+                WHERE v.id = %s""", (idViaje,))
             
             # Obtener escalas para la ruta
             escalas = []
