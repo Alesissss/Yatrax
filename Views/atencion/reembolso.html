@@ -113,63 +113,6 @@
         });
 
         fct_IniciarTablaPlantillas('#tbl_Plantillas');
-
-        $('#tbl_Plantillas').on('click', '.activar-plantilla', function (e) {
-            const checkbox = $(this);
-            const id = checkbox.data('id');
-            const isChecked = checkbox.is(':checked');
-            const accion = isChecked ? 1 : 0;
-            let texto = accion === 1 ? 'asignar' : 'eliminar';
-
-            e.preventDefault();
-
-            if (accion === 0) {
-                toastr.warning('No se puede desactivar una plantilla; por favor, active la que desea activar para que las demás se desactiven', 'MENSAJE DE SISTEMA');
-                return;
-            }
-
-            Swal.fire({
-                title: "¿Estás seguro?",
-                text: "Esta acción activará a la plantilla y desactivará a las demás. ¿Deseas continuar?",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Sí, activar plantilla",
-                cancelButtonText: "Cancelar",
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Si el usuario confirma, hacemos la petición AJAX
-                    $.ajax({
-                        url: `/trabajadores/configuracion/ActivarPlantilla/${id}`,  // Pasamos el ID en la URL
-                        type: "POST",
-                        contentType: "application/json",
-                        success: function (response) {
-                            if (response.Status === "success") {
-                                if (response.Msj2 !== '' && response.Msj2 !== null) {
-                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
-                                    return;
-                                }
-
-                                fct_IniciarTablaPlantillas('#tbl_Plantillas');
-                                toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                            } else {
-                                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
-                                console.error('Error: ' + response.Msj);
-                            }
-                        },
-                        error: function (xhr, Status, error) {
-                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
-                            console.error('Error:' + error);
-                        }
-                    });
-
-                } else {
-                    checkbox.prop('checked', !isChecked);
-                }
-            });
-        });
     });
 
     function fct_IniciarTablaPlantillas(IdTabla) {
@@ -187,7 +130,7 @@
                     text: '<i class="bi bi-file-earmark-excel"></i>',
                     titleAttr: 'Exportar a Excel',
                     className: 'btn btn-success',
-                    filename: 'Usuarios' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Reembolsos' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     footer: true,
                     exportOptions:
                     {
@@ -200,7 +143,7 @@
                     text: '<i class="bi bi-file-earmark-pdf"></i>',
                     titleAttr: 'Exportar a PDF',
                     className: 'btn btn-danger',
-                    filename: 'Usuarios' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Reembolsos' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     exportOptions:
                     {
                         stripHtml: true,
@@ -273,8 +216,8 @@
                     render: function (data, type, row) {
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 bg-green" onclick="fct_PlantillaEditar('${data.id}')" title="Editar plantilla"><i class="bi bi-check"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_PlantillaEliminar('${data.id}')" title="Eliminar plantilla"><i class="	bi bi-x"></i></button>
+                            <button class="btn btn-xs m-1 bg-green" onclick="fctAceptarReembolso('${data.id}')" title="Aceptar Reembolso"><i class="bi bi-check"></i></button>
+                            <button class="btn btn-xs m-1 btn-danger" onclick = "fctRechazarReembolso('${data.id}')" title="Rechazar Reembolso"><i class="	bi bi-x"></i></button>
                         </div>
                         `;
                     },
@@ -330,15 +273,15 @@
         window.location.href = '/trabajadores/configuracion/PlantillaNuevo';
     }
 
-    function fct_PlantillaEditar(Id) {
+    function fctAceptarReembolso(Id) {
          Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción eliminará a la plantilla. ¿Deseas continuar?",
+            text: "Esta acción aceptará la solicitud de reembolso. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             cancelButtonColor: "#d33",
-            confirmButtonText: "Sí, eliminar",
+            confirmButtonText: "Sí, aceptar",
             cancelButtonText: "Cancelar",
             reverseButtons: true // Invertir el orden de los botones
         }).then((result) => {
@@ -347,7 +290,7 @@
                 url: `/trabajadores/atencion/cambiarEstadoReembolso`,
                 type: "POST",
                 contentType: "application/json",
-                data: JSON.stringify({ Id: Id, estado: 'ACEPTADO' }), // ✅ Usa "Id" con mayúscula
+                data: JSON.stringify({ Id: Id, estado: 'ACEPTADO' }), 
                 success: function (response) {
                     if (response.Status === "success") {
                         fct_IniciarTablaPlantillas('#tbl_Plantillas');
@@ -370,15 +313,15 @@
         
     }
 
-    function fct_PlantillaEliminar(Id) {
+    function fctRechazarReembolso(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción eliminará a la plantilla. ¿Deseas continuar?",
+            text: "Esta acción rechazará la solicitud de reembolso. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             cancelButtonColor: "#d33",
-            confirmButtonText: "Sí, eliminar",
+            confirmButtonText: "Sí, rechazar",
             cancelButtonText: "Cancelar",
             reverseButtons: true // Invertir el orden de los botones
         }).then((result) => {
@@ -387,7 +330,7 @@
                 url: `/trabajadores/atencion/cambiarEstadoReembolso`,
                 type: "POST",
                 contentType: "application/json",
-                data: JSON.stringify({ Id: Id, estado: 'RECHAZADO' }), // ✅ Usa "Id" con mayúscula
+                data: JSON.stringify({ Id: Id, estado: 'RECHAZADO' }), 
                 success: function (response) {
                     if (response.Status === "success") {
                         fct_IniciarTablaPlantillas('#tbl_Plantillas');

@@ -969,6 +969,54 @@ def validar_solicitud_reembolso():
             "Msj": f"Error al validar el pasaje: {repr(e)}"
         }), 500
 
+import traceback
+
+@homeClientes_bp.route('/enviar_correos_reprogramacion', methods=['POST'])
+def enviar_correos_reprogramacio():
+    try:
+        # data = request.get_json()
+        # email = Viaje.obtener_clientes_por_viaje(data.get("id_viaje"))
+        email = Viaje.obtener_clientes_por_viaje(1)
+        dias_reprogramacion = ConfGeneral.obtener()
+        if not email:
+            return jsonify({
+                'status': 'error',
+                'message': 'No se encontraron correos electrónicos para enviar la notificación.'
+            }), 404
+        dias_vigencia = str(dias_reprogramacion.get("max_dias_vigencia_reprogramacion", "X"))
+        for datos in email:
+            correo = datos.get("email")
+            codigo = datos.get("codigo")
+            asiento = datos.get("asiento")
+
+            if not correo or not codigo:
+                print(f"[WARN] Datos incompletos: {datos}")
+                continue
+
+            datosEnvio = {
+                'asunto': 'Viaje reprogramado',
+                'remitente': 'yatraxyatusa@gmail.com',
+                'destinatario': correo,
+                'mensaje': (
+                    f"Estimado cliente, su viaje ha sido reprogramado. "
+                    f"Tiene {dias_vigencia} días para realizar el canje de su código. "
+                    f"Si no lo realiza en este tiempo, se perderá el pasaje. "
+                    f"Para más información visite nuestra página web.\n"
+                    f"Su código de canje de pasaje gratis o reembolso para el asiento {asiento} es: {codigo}"
+                )
+            }
+
+            resultado = enviar_correo(current_app.extensions['mail'], datosEnvio)
+            print(f"[INFO] Resultado del envío a {correo}: {resultado}")
+
+        return jsonify({'status': 'ok'})
+
+    except Exception as e:
+        print("[ERROR] Excepción capturada en el controlador:")
+        traceback.print_exc()
+        return jsonify({'status': 'error', 'message': 'Ocurrió un error interno.'}), 500
+
+
 # END REEMBOLSO
 
 # REGION REPROGRAMACION

@@ -781,7 +781,8 @@
         const metodoPago = document.getElementById("metodoPagoRem").value;
         const tipoMetodoPago = document.getElementById("tipoMetodoPagoRem").value;
         const idPasaje = document.getElementById("pasCod").value;
-
+        const celPag = document.getElementById("celularRem")?.value.trim() || "";
+        const cciPag = document.getElementById("cciRem")?.value.trim() || "";
         // VALIDACIONES BÁSICAS
         if (!numeroComprobante || !idPasaje) {
           toastr.warning("Debe buscar un pasaje válido primero", "MENSAJE DEL SISTEMA");
