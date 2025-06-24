@@ -402,7 +402,7 @@
                                     <a href="{{ url_for('atencion.Menu_Reembolso') }}"
                                         class="nav-link {% if active_page == 'ejemplo' %}active{% endif %}">
                                         <i class="bi bi-calendar-week nav-icon"></i>
-                                        <p>Gestionar Reembolso</p>
+                                        <p>Gestionar reembolso</p>
                                     </a>
                                 </li>
                                 <!--End Rutas-->
@@ -419,6 +419,7 @@
                                 <i class="right fas fa-angle-left"></i>
                             </a>
                             <ul class="nav nav-treeview" style="display: block;">
+                                <li class="nav-header">General</li>
                                 <li class="nav-item">
                                     <a href="{{ url_for('configuracion.editar_configuracion') }}"
                                         class="nav-link {% if active_page == 'conf_general' %}active{% endif %}">
@@ -444,7 +445,7 @@
                                     </a>
                                 </li>
                                 {% endif %}
-
+                                <li class="nav-header">Pagos y promociones</li>
                                 <li class="nav-item">
                                     <a href="{{ url_for('configuracion.Menu_TipoMetodoPago') }}"
                                         class="nav-link {% if active_page == 'TipometodosPago' %}active{% endif %}">
@@ -461,7 +462,7 @@
                                         <p>Gestionar métodos de pago</p>
                                     </a>
                                 </li>
-
+                                {% endif %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('configuracion.Menu_Promociones')}}"
                                         class="nav-link {% if active_page == 'promociones' %}active{% endif %}">
@@ -469,7 +470,7 @@
                                         <p>Gestionar promociones</p>
                                     </a>
                                 </li>
-
+                                <li class="nav-header">Políticas</li>
                                 <li class="nav-item">
                                     <a href="{{ url_for('configuracion.Menu_TerminosCondiciones')}}"
                                         class="nav-link {% if active_page == 'terminosCondiciones' %}active{% endif %}">
@@ -486,7 +487,6 @@
                                     </a>
                                 </li>
 
-                                {% endif %}
                             </ul>
                         </li>
                         {% endif %}

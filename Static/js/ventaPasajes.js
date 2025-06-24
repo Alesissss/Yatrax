@@ -9,13 +9,13 @@ const CONFIG = {
     RUTAS: {
         BUSCAR_VIAJES: '/ecommerce/home/buscarViajes',
         OBTENER_RUTAS: '/ecommerce/home/GetRutasConcatenadas',
-        RENDERIZAR_ITINERARIO: '/ecommerce/home/renderizar_itinerario', 
+        RENDERIZAR_ITINERARIO: '/ecommerce/home/renderizar_itinerario',
         OBTENER_DISENO_VEHICULO: '/ecommerce/home/obtener_diseno_vehiculo',
         API_PERSONA: '/ecommerce/home/api/get_persona_data',
         API_SUNAT: '/ecommerce/home/api/get_persona_data',
         METODOS: '/ecommerce/home/cargar_metodos',
         PROCESAR_PAGO: '/ecommerce/home/procesar_pago',
-        PROCESAR_RESERVA:'/ecommerce/home/procesar_reserva',
+        PROCESAR_RESERVA: '/ecommerce/home/procesar_reserva',
         MARCAR_ASIENTO_OCUPADO: '/ecommerce/home/ocuparAsiento',
         MARCAR_ASIENTO_DISPONIBLE: '/ecommerce/home/liberarAsiento'
     },
@@ -28,19 +28,19 @@ const CONFIG = {
 async function obtenerNombreMetodo(idMetodo) {
     const response = await fetch(`/ecommerce/home/obtenerMetodoPagoxID/${idMetodo}`)
     const data = await response.text()
-    return data; 
+    return data;
 }
 
 async function obtenerNombreTipoMetodo(idTipo) {
     const response = await fetch(`/ecommerce/home/obtenerTipoMetodoxID/${idTipo}`)
     const data = await response.text()
-    return data; 
+    return data;
 }
 
 $.ajax({
     url: '/ecommerce/home/GetConfGeneral',  // Ruta de la API
     method: 'GET',  // Método GET
-    success: function(data) {
+    success: function (data) {
         // Verificamos si la respuesta es exitosa
         if (data.Status === 'success' && data.data) {
             CONFIG.MAX_ASIENTOS = data.data.max_pasajes_venta;
@@ -51,7 +51,7 @@ $.ajax({
             console.error("Error al recuperar la configuración general");
         }
     },
-    error: function(xhr, status, error) {
+    error: function (xhr, status, error) {
         console.error("Error en la llamada AJAX:", error);
     }
 });
@@ -115,7 +115,7 @@ class Venta {
 }
 
 // =============================================================================
-// GESTIÓN DE NAVEGACIÓN Y PESTAÑAS
+// GESTIÓN DE NAVEGACIÓN Y PESTAÑAS - VERSIÓN MEJORADA
 // =============================================================================
 
 const NavigationManager = {
@@ -124,7 +124,7 @@ const NavigationManager = {
         const steps = document.querySelectorAll('.step');
         const tabs = document.querySelectorAll('.tab-link');
 
-        // Ocultar/mostrar formulario principal
+        // ✅ CORRECCIÓN: Solo ocultar formulario en tab 3 (pago)
         if (form) {
             form.classList.toggle('hidden', AppState.currentStep === 3);
         }
@@ -140,48 +140,309 @@ const NavigationManager = {
             tabs[AppState.currentStep].classList.add('active');
         }
 
-        // Controlar acceso a pestañas
+        // ✅ NUEVA LÓGICA: Control estricto de acceso a pestañas
+        this.controlarAccesoTabs();
+    },
+
+    // ✅ NUEVA FUNCIÓN: Control estricto de acceso a tabs
+    controlarAccesoTabs() {
+        const tabs = document.querySelectorAll('.tab-link');
+        
         tabs.forEach((tab, index) => {
-            if (index > AppState.maxStep) {
-                tab.classList.add('disabled');
-                tab.setAttribute('disabled', 'true');
-            } else {
+            const stepIndex = parseInt(tab.getAttribute('data-step'));
+            
+            // Por defecto, deshabilitar todos los tabs
+            tab.classList.add('disabled');
+            tab.setAttribute('disabled', 'true');
+            tab.style.pointerEvents = 'none';
+            
+            // Habilitar tabs según el estado actual
+            if (this.puedeAccederATab(stepIndex)) {
+                tab.classList.remove('disabled');
                 tab.removeAttribute('disabled');
+                tab.style.pointerEvents = 'auto';
             }
         });
     },
 
-    goToNextStep() {
-        if (AppState.currentStep < 3) {
-            AppState.setCurrentStep(AppState.currentStep + 1);
-            this.updateFormVisibility();
+    // ✅ NUEVA FUNCIÓN: Determinar si se puede acceder a un tab específico
+    puedeAccederATab(tabIndex) {
+        switch (tabIndex) {
+            case 0: // Tab "Elegir destino"
+                // Solo se puede acceder si no hemos avanzado
+                return AppState.currentStep === 0;
+                
+            case 1: // Tab "Itinerario ida"
+                // Se puede acceder si estamos en él o si podemos volver desde tab 2
+                return AppState.currentStep === 1 || 
+                       (AppState.currentStep === 2 && this.tieneItinerarioRegreso());
+                
+            case 2: // Tab "Itinerario regreso"
+                // Solo si estamos en él y hay itinerario de regreso
+                return AppState.currentStep === 2 && this.tieneItinerarioRegreso();
+                
+            case 3: // Tab "Pago"
+                // Solo si estamos en él
+                return AppState.currentStep === 3;
+                
+            default:
+                return false;
         }
     },
 
-    goToStep(stepIndex) {
-        if (stepIndex <= AppState.maxStep) {
-            AppState.currentStep = stepIndex;
+    // ✅ NUEVA FUNCIÓN: Verificar si hay itinerario de regreso
+    tieneItinerarioRegreso() {
+        const fechaVuelta = $("input[name='fecha_vuelta']").val();
+        return fechaVuelta && fechaVuelta.trim() !== '' && AppState.itinerarioRegreso;
+    },
+
+    // ✅ FUNCIÓN MODIFICADA: Mostrar loader en cambios de tab
+    async mostrarLoader(mensaje = "Cargando...") {
+        const overlay = document.createElement('div');
+        overlay.id = 'navigation-loader';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        `;
+
+        overlay.innerHTML = `
+            <div style="text-align: center; color: white;">
+                <div class="spinner-border text-light" style="width: 3rem; height: 3rem;" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <h5 class="mt-3">${mensaje}</h5>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        // Simular carga mínima para mejor UX
+        await new Promise(resolve => setTimeout(resolve, 800));
+    },
+
+    ocultarLoader() {
+        const loader = document.getElementById('navigation-loader');
+        if (loader) loader.remove();
+    },
+
+    // ✅ FUNCIÓN MODIFICADA: Ir al siguiente paso con loader
+    async goToNextStep(mensaje = "Cargando...") {
+        if (AppState.currentStep < 3) {
+            await this.mostrarLoader(mensaje);
+            AppState.setCurrentStep(AppState.currentStep + 1);
             this.updateFormVisibility();
-        } else {
-            toastr.warning("Debes completar los pasos anteriores para continuar.");
+            this.ocultarLoader();
         }
+    },
+
+    // ✅ FUNCIÓN MODIFICADA: Ir a paso específico con validaciones
+    async goToStep(stepIndex, mensaje = "Cargando...") {
+        if (this.puedeAccederATab(stepIndex)) {
+            if (stepIndex !== AppState.currentStep) {
+                await this.mostrarLoader(mensaje);
+                AppState.currentStep = stepIndex;
+                this.updateFormVisibility();
+                this.ocultarLoader();
+            }
+        } else {
+            toastr.warning("No puedes acceder a esta sección en este momento.");
+        }
+    },
+
+    // ✅ NUEVA FUNCIÓN: Procesar búsqueda desde tab 0 a tab 1
+    async procesarBusqueda() {
+        await this.mostrarLoader("Buscando viajes disponibles...");
+        
+        // Avanzar a tab 1
+        AppState.setCurrentStep(1);
+        AppState.maxStep = Math.max(AppState.maxStep, 1);
+        this.updateFormVisibility();
+        
+        this.ocultarLoader();
+    },
+
+    // ✅ NUEVA FUNCIÓN: Confirmar datos desde itinerario ida
+    async confirmarDatosIda() {
+        // Validar que se hayan completado todos los datos de pasajeros
+        if (!this.validarDatosPasajerosCompletos()) {
+            toastr.error("Por favor complete los datos de todos los pasajeros antes de continuar");
+            return;
+        }
+
+        // Mostrar confirmación
+        const confirmacion = await Swal.fire({
+            title: '¿Todos los datos son correctos?',
+            text: 'Verifica que toda la información de los pasajeros esté completa y sea correcta.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, continuar',
+            cancelButtonText: 'Revisar datos',
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d'
+        });
+
+        if (!confirmacion.isConfirmed) return;
+
+        // Verificar si hay fecha de vuelta
+        const fechaVuelta = $("input[name='fecha_vuelta']").val();
+        
+        if (!fechaVuelta || fechaVuelta.trim() === '') {
+            // No hay fecha de vuelta, ir directo al pago
+            await this.irAPago();
+            return;
+        }
+
+        // Verificar si hay itinerarios de regreso
+        if (!AppState.itinerarioRegreso || AppState.itinerarioRegreso.length === 0) {
+            toastr.warning("No existen itinerarios de regreso para la fecha seleccionada");
+            await this.irAPago();
+            return;
+        }
+
+        // Hay fecha de vuelta e itinerarios, ir a tab 2
+        await this.irAItinerarioRegreso();
+    },
+
+    // ✅ NUEVA FUNCIÓN: Confirmar datos desde itinerario regreso
+    async confirmarDatosRegreso() {
+        // Validar que se hayan completado todos los datos de pasajeros
+        if (!this.validarDatosPasajerosCompletos()) {
+            toastr.error("Por favor complete los datos de todos los pasajeros antes de continuar");
+            return;
+        }
+
+        // Mostrar confirmación
+        const confirmacion = await Swal.fire({
+            title: '¿Todos los datos son correctos?',
+            text: 'Verifica que toda la información de los pasajeros esté completa y sea correcta.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, ir al pago',
+            cancelButtonText: 'Revisar datos',
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d'
+        });
+
+        if (!confirmacion.isConfirmed) return;
+
+        // Ir al pago
+        await this.irAPago();
+    },
+
+    // ✅ NUEVA FUNCIÓN: Ir al itinerario de regreso
+    async irAItinerarioRegreso() {
+        await this.mostrarLoader("Cargando itinerario de regreso...");
+        
+        AppState.setCurrentStep(2);
+        AppState.maxStep = Math.max(AppState.maxStep, 2);
+        
+        // Cargar itinerario de regreso
+        setTimeout(() => {
+            ItineraryManager.cargarItinerario(AppState.itinerarioRegreso, 'contenedor_viajes_vuelta', 'vuelta');
+        }, 100);
+        
+        this.updateFormVisibility();
+        this.ocultarLoader();
+    },
+
+    // ✅ NUEVA FUNCIÓN: Ir al pago
+    async irAPago() {
+        await this.mostrarLoader("Preparando información de pago...");
+        
+        AppState.setCurrentStep(3);
+        AppState.maxStep = Math.max(AppState.maxStep, 3);
+        
+        // Inicializar sistema de pago
+        setTimeout(() => {
+            if (typeof PaymentManager !== 'undefined') {
+                PaymentManager.initialize();
+            }
+        }, 100);
+        
+        this.updateFormVisibility();
+        this.ocultarLoader();
+    },
+
+    // ✅ NUEVA FUNCIÓN: Validar datos de pasajeros completos
+    validarDatosPasajerosCompletos() {
+        const ventas = JSON.parse(sessionStorage.getItem("ventas") || "{}");
+
+        if (Object.keys(ventas).length === 0) {
+            toastr.warning("No hay asientos seleccionados");
+            return false;
+        }
+
+        for (const asientoId in ventas) {
+            const venta = ventas[asientoId];
+
+            // Validar campos obligatorios
+            const camposObligatorios = ['numDoc', 'nombres', 'apellidoPaterno', 'apellidoMaterno', 'telefono', 'correo'];
+
+            for (const campo of camposObligatorios) {
+                if (!venta[campo] || venta[campo].trim() === '') {
+                    toastr.warning(`Complete los datos del pasajero en el asiento ${asientoId}`);
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    },
+
+    // ✅ NUEVA FUNCIÓN: Volver al itinerario de ida desde regreso
+    async volverAItinerarioIda() {
+        const confirmacion = await Swal.fire({
+            title: '¿Volver al itinerario de ida?',
+            text: 'Podrás modificar tu selección de asientos y datos de pasajeros.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, volver',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#17a2b8',
+            cancelButtonColor: '#6c757d'
+        });
+
+        if (!confirmacion.isConfirmed) return;
+
+        await this.goToStep(1, "Cargando itinerario de ida...");
     },
 
     initializeTabEvents() {
         document.querySelectorAll('.tab-link').forEach(tab => {
             tab.addEventListener('click', (event) => {
                 const stepIndex = parseInt(tab.getAttribute('data-step'));
-                this.goToStep(stepIndex);
-                if (stepIndex > AppState.maxStep) {
+                
+                // Prevenir comportamiento por defecto si no se puede acceder
+                if (!this.puedeAccederATab(stepIndex)) {
                     event.preventDefault();
+                    toastr.warning("No puedes acceder a esta sección en este momento.");
+                    return;
                 }
+                
+                this.goToStep(stepIndex);
             });
         });
+    },
+
+    // ✅ NUEVA FUNCIÓN: Inicializar estado por defecto
+    inicializarEstadoPorDefecto() {
+        AppState.currentStep = 0;
+        AppState.maxStep = 0;
+        AppState.itinerarioRegreso = null;
+        this.updateFormVisibility();
+        console.log('📍 Estado inicial: Tab 0 activo, otros deshabilitados');
     }
 };
-
 // =============================================================================
-// GESTIÓN DE BÚSQUEDA Y DATOS
+// GESTIÓN DE BÚSQUEDA Y DATOS - VERSIÓN MEJORADA
 // =============================================================================
 
 const SearchManager = {
@@ -205,44 +466,57 @@ const SearchManager = {
         }
         return true;
     },
-    // ✅ FUNCIÓN MODIFICADA: Búsqueda con verificación automática
+
+    // ✅ FUNCIÓN MODIFICADA: Búsqueda con validación de progreso
     async buscarYMostrarItinerario() {
         if (!this.validarDatos()) return;
 
-        // ✅ VERIFICAR: Si hay datos previos, limpiar automáticamente
-        const hayDatosPrevios = this.verificarDatosPrevios();
+        // ✅ NUEVO: Verificar si hay progreso y confirmar
+        const hayProgreso = this.verificarProgreso();
 
-        if (hayDatosPrevios) {
-            console.log('🔍 Datos previos detectados - Iniciando limpieza automática...');
+        if (hayProgreso) {
+            const confirmacion = await Swal.fire({
+                title: "¿Realizar nueva búsqueda?",
+                text: "Esta acción eliminará tu progreso actual, ¿estás seguro de hacerlo?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Sí, buscar",
+                cancelButtonText: "Cancelar",
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d'
+            });
+
+            if (!confirmacion.isConfirmed) return;
+
+            // Limpiar progreso antes de nueva búsqueda
+            console.log('🔍 Progreso detectado - Iniciando limpieza automática...');
             await this.limpiarDatosPreviosCompleto();
         }
 
-        // Ejecutar búsqueda normal
-        this.ejecutarBusqueda();
+        // Ejecutar búsqueda
+        await this.ejecutarBusqueda();
     },
 
-    // ✅ NUEVA FUNCIÓN: Verificar si hay datos previos
-    verificarDatosPrevios() {
-        // Verificar sessionStorage
+    // ✅ NUEVA FUNCIÓN: Verificar si hay progreso actual (CRITERIO CORREGIDO)
+    verificarProgreso() {
+        // 1. Verificar asientos seleccionados en memoria (PRINCIPAL)
+        const hayAsientosSeleccionados = SeatManager && SeatManager.asientosSeleccionados && SeatManager.asientosSeleccionados.size > 0;
+
+        // 2. Verificar sessionStorage (datos confirmados)
         const ventasStorage = sessionStorage.getItem('ventas');
         const hayVentas = ventasStorage && Object.keys(JSON.parse(ventasStorage)).length > 0;
 
-        // Verificar asientos seleccionados en memoria
-        const hayAsientosSeleccionados = SeatManager.asientosSeleccionados.size > 0;
-
-        // Verificar si hay progreso en la aplicación
-        const hayProgreso = AppState.currentStep > 0;
-
-        console.log(`📊 Verificación de datos previos:`, {
-            ventasStorage: !!hayVentas,
+        console.log(`📊 Verificación de progreso:`, {
             asientosSeleccionados: hayAsientosSeleccionados,
-            progreso: hayProgreso
+            cantidadAsientos: SeatManager?.asientosSeleccionados?.size || 0,
+            ventasStorage: !!hayVentas
         });
 
-        return hayVentas || hayAsientosSeleccionados || hayProgreso;
+        // ✅ CRITERIO CORRECTO: Asientos seleccionados O datos en sessionStorage
+        return hayAsientosSeleccionados || hayVentas;
     },
 
-    // ✅ NUEVA FUNCIÓN: Limpieza automática completa
+    // ✅ FUNCIÓN EXISTENTE: Limpieza automática completa
     async limpiarDatosPreviosCompleto() {
         console.log('🧹 Iniciando limpieza automática completa...');
 
@@ -268,7 +542,7 @@ const SearchManager = {
         }
     },
 
-    // ✅ NUEVA FUNCIÓN: Liberar asientos desde sessionStorage
+    // ✅ FUNCIÓN EXISTENTE: Liberar asientos desde sessionStorage
     async liberarAsientosDesdeStorage() {
         const ventasStorage = sessionStorage.getItem('ventas');
         if (!ventasStorage) return;
@@ -292,36 +566,34 @@ const SearchManager = {
         }
     },
 
-    async confirmarNuevaBusqueda() {
-        const result = await Swal.fire({
-            title: "¿Realizar nueva búsqueda?",
-            text: "Realizar una nueva búsqueda eliminará tu progreso actual, ¿estás seguro?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Sí, buscar",
-            cancelButtonText: "Cancelar"
-        });
-        return result.isConfirmed;
-    },
-
-    ejecutarBusqueda() {
-        // Limpiar progreso anterior si existe
-        if (AppState.currentStep > 0) {
-            App.resetearSistemaCompleto();
-        }
-
+    // ✅ FUNCIÓN MODIFICADA: Ejecutar búsqueda con navegación mejorada
+    async ejecutarBusqueda() {
         const datos = this.capturarDatos();
 
-        $.ajax({
-            url: CONFIG.RUTAS.BUSCAR_VIAJES,
-            data: datos,
-            method: 'POST',
-            success: (resp) => this.procesarRespuestaBusqueda(resp),
-            error: () => toastr.error("Error en la conexión al servidor.")
+        // ✅ CORRECCIÓN: Resetear sistema SIN limpiar el combo de rutas
+        App.resetearSistemaCompletoSinRutas();
+
+        // ✅ CORRECCIÓN: Convertir jQuery AJAX a Promise para mejor control
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url: CONFIG.RUTAS.BUSCAR_VIAJES,
+                data: datos,
+                method: 'POST',
+                success: (resp) => {
+                    this.procesarRespuestaBusqueda(resp);
+                    resolve(resp);
+                },
+                error: (xhr, status, error) => {
+                    console.error('Error en búsqueda:', error);
+                    toastr.error("Error en la conexión al servidor.");
+                    reject(error);
+                }
+            });
         });
     },
 
-    procesarRespuestaBusqueda(resp) {
+    // ✅ FUNCIÓN MODIFICADA: Procesar respuesta con navegación
+    async procesarRespuestaBusqueda(resp) {
         if (resp.Status !== 'success') {
             toastr.warning('ERROR AL BUSCAR EL VIAJE: ' + resp.Msj);
             return;
@@ -332,20 +604,22 @@ const SearchManager = {
             return;
         }
 
+        // Cargar itinerario de ida
         ItineraryManager.cargarItinerario(resp.data_ida, 'contenedor_viajes_ida', 'ida');
-        AppState.setCurrentStep(1);
-        AppState.maxStep = 1; // Reinicia el máximo al tab 1
-        NavigationManager.updateFormVisibility();
 
+        // Guardar itinerario de regreso si existe
         if (resp.data_vuelta) {
             AppState.itinerarioRegreso = resp.data_vuelta;
+        } else {
+            AppState.itinerarioRegreso = null;
         }
 
-        toastr.success('VIAJES RETORNADOS CORRECTAMENTE');
+        // ✅ NUEVO: Usar NavigationManager para cambiar a tab 1
+        await NavigationManager.procesarBusqueda();
+
+        toastr.success('VIAJES ENCONTRADOS CORRECTAMENTE');
     }
 };
-
-
 // =============================================================================
 // GESTIÓN DE RUTAS Y FECHAS
 // =============================================================================
@@ -1503,7 +1777,112 @@ const TimerManager = {
         this.intervals.clear();
     }
 };
+// =============================================================================
+// GESTOR DE RECARGA/CIERRE DE PÁGINA
+// =============================================================================
 
+const PageUnloadManager = {
+    init() {
+        // Detectar recarga/cierre de página
+        window.addEventListener('beforeunload', (event) => {
+            this.handlePageUnload(event);
+        });
+
+        // También detectar cuando se va de la página (por si acaso)
+        window.addEventListener('unload', () => {
+            this.cleanupOnExit();
+        });
+
+        console.log('📄 PageUnloadManager inicializado (listeners limpiados)');
+    },
+
+    handlePageUnload(event) {
+        const hayProgreso = this.verificarProgreso();
+
+        if (hayProgreso) {
+            // Mostrar mensaje de confirmación del navegador
+            event.preventDefault();
+            event.returnValue = '¿Estás seguro de que quieres salir? Perderás tu progreso de reserva.';
+
+            // Ejecutar limpieza en segundo plano
+            this.cleanupOnExit();
+
+            return '¿Estás seguro de que quieres salir? Perderás tu progreso de reserva.';
+        }
+    },
+
+    verificarProgreso() {
+        // ✅ CRITERIO CORREGIDO: Priorizar asientos seleccionados en memoria
+        const hayAsientosSeleccionados = SeatManager && SeatManager.asientosSeleccionados && SeatManager.asientosSeleccionados.size > 0;
+
+        const ventasStorage = sessionStorage.getItem('ventas');
+        const hayVentas = ventasStorage && Object.keys(JSON.parse(ventasStorage)).length > 0;
+
+        console.log(`📊 Verificación de progreso (PageUnload):`, {
+            asientosSeleccionados: hayAsientosSeleccionados,
+            cantidadAsientos: SeatManager?.asientosSeleccionados?.size || 0,
+            ventasStorage: !!hayVentas
+        });
+
+        return hayAsientosSeleccionados || hayVentas;
+    },
+
+    cleanupOnExit() {
+        try {
+            // ✅ PRIORIDAD 1: Obtener asientos desde memoria (PRINCIPAL)
+            const hayAsientosSeleccionados = SeatManager && SeatManager.asientosSeleccionados && SeatManager.asientosSeleccionados.size > 0;
+
+            // ✅ PRIORIDAD 2: Obtener asientos desde sessionStorage 
+            const ventasStorage = sessionStorage.getItem('ventas');
+            const hayVentas = ventasStorage && Object.keys(JSON.parse(ventasStorage)).length > 0;
+
+            if (hayAsientosSeleccionados || hayVentas) {
+                console.log('🔓 Liberando asientos al salir...');
+
+                // Recopilar todos los asientos para liberar
+                const asientosParaLiberar = new Set();
+
+                // ✅ PRIORIDAD: Asientos desde memoria primero
+                if (hayAsientosSeleccionados) {
+                    console.log(`📍 Agregando ${SeatManager.asientosSeleccionados.size} asientos desde memoria`);
+                    SeatManager.asientosSeleccionados.forEach(id => asientosParaLiberar.add(id));
+                }
+
+                // Asientos desde sessionStorage (adicionales)
+                if (hayVentas) {
+                    const ventas = JSON.parse(ventasStorage);
+                    const asientosStorage = Object.keys(ventas);
+                    console.log(`📍 Agregando ${asientosStorage.length} asientos desde storage`);
+                    asientosStorage.forEach(id => asientosParaLiberar.add(id));
+                }
+
+                // Usar sendBeacon para asegurar que llegue al servidor
+                const asientosArray = Array.from(asientosParaLiberar);
+                console.log(`🔓 Total de asientos para liberar: ${asientosArray.length}`, asientosArray);
+
+                asientosArray.forEach(asientoId => {
+                    const formData = new FormData();
+                    formData.append('asiento_id', asientoId);
+                    formData.append('accion', 'liberar');
+                    formData.append('motivo', 'cierre_pagina');
+                    formData.append('timestamp', new Date().toISOString());
+
+                    // sendBeacon es más confiable que fetch en unload
+                    navigator.sendBeacon(CONFIG.RUTAS.MARCAR_ASIENTO_DISPONIBLE, formData);
+                });
+
+                console.log(`✅ ${asientosArray.length} asientos enviados para liberación`);
+            }
+
+            // Limpiar sessionStorage al final
+            sessionStorage.removeItem('ventas');
+            console.log('🧹 SessionStorage limpiado');
+
+        } catch (error) {
+            console.error('❌ Error en limpieza al salir:', error);
+        }
+    }
+};
 // =============================================================================
 // GESTIÓN DE PAGO CON FORMULARIO DINÁMICO (PARTE 1)
 // =============================================================================
@@ -2155,10 +2534,10 @@ const PaymentManager = {
             if (nombreMetodo == "tarjeta de credito" || nombreMetodo == "tarjeta") {
                 alert("dentro 1")
                 this.procesarPago();
-            }else if(nombreTipoMetodo == "efectivo" && nombreMetodo == "efectivo"){
+            } else if (nombreTipoMetodo == "efectivo" && nombreMetodo == "efectivo") {
                 alert("dentro 2")
                 this.procesarReserva();
-            }else{
+            } else {
                 alert("dentro 3")
                 console.log(nombreTipoMetodo)
                 console.log(nombreMetodo)
@@ -2594,191 +2973,363 @@ const PaymentManager = {
     }
 
 };
-
 // =============================================================================
-// INICIALIZACIÓN DE LA APLICACIÓN
+// FORM VALIDATION MANAGER - VALIDACIÓN EN TIEMPO REAL
 // =============================================================================
 
-const App = {
+const FormValidationManager = {
     init() {
-        this.limpiarProgresoAlRecargar();
-        this.configurarEventosGlobales();
-        this.inicializarComponentes();
+        this.setupRealTimeValidation();
+        console.log('📝 FormValidationManager inicializado');
     },
 
-    // =============================================================================
-    // INICIALIZACIÓN - LIMPIEZA AUTOMÁTICA EN RECARGA
-    // =============================================================================
-
-    // ✅ FUNCIÓN MODIFICADA: Limpieza automática al recargar
-    limpiarProgresoAlRecargar() {
-        // 🔓 INTERCEPTAR ANTES DE LA RECARGA/CIERRE PARA LIBERAR ASIENTOS VÍA API
-        window.addEventListener('beforeunload', async (event) => {
-            // Solo mostrar advertencia y limpiar si hay datos
-            const hayDatos = this.verificarDatosParaLimpiar();
-
-            if (hayDatos) {
-                // Mostrar advertencia al usuario
-                event.preventDefault();
-                event.returnValue = '¿Estás seguro de que quieres salir? Se perderá todo tu progreso.';
-
-                // 🔓 LIBERAR ASIENTOS VÍA API ANTES DE SALIR
-                try {
-                    await this.liberarAsientosAntesDeSalir();
-                } catch (error) {
-                    console.error('❌ Error liberando asientos antes de salir:', error);
-                }
-
-                return event.returnValue;
+    // ✅ CONFIGURAR VALIDACIÓN EN TIEMPO REAL
+    setupRealTimeValidation() {
+        // ✅ CORRECCIÓN: Solo 'input' para validación mientras escribe, 'change' para selects
+        $(document).on('input', '[id^="accordionPasajeros_"] input', (e) => {
+            const $element = $(e.target);
+            const sufijo = this.getSufijoFromElement(e.target);
+            
+            if (sufijo) {
+                // Validar inmediatamente mientras escribe
+                this.validarCampoIndividual($element);
+                
+                // Validar el formulario completo sin delay
+                this.validarFormularioCompleto(sufijo);
             }
         });
 
-        // ✅ DETECTAR RECARGA Y LIMPIAR AUTOMÁTICAMENTE
-        if (performance.navigation.type === 1 || performance.getEntriesByType('navigation')[0]?.type === 'reload') {
-            this.procesarRecargaPagina();
+        // Para selects usar 'change'
+        $(document).on('change', '[id^="accordionPasajeros_"] select', (e) => {
+            const $element = $(e.target);
+            const sufijo = this.getSufijoFromElement(e.target);
+            
+            if (sufijo) {
+                this.validarCampoIndividual($element);
+                this.validarFormularioCompleto(sufijo);
+            }
+        });
+
+        // Observer para detectar cuando se carga dinámicamente el formulario
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                    if (node.nodeType === 1 && node.matches && node.matches('[id^="accordionPasajeros_"]')) {
+                        const sufijo = node.id.replace('accordionPasajeros_', '');
+                        setTimeout(() => {
+                            this.setupFormValidation(sufijo);
+                        }, 100);
+                    }
+                });
+            });
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true });
+    },
+
+    // ✅ OBTENER SUFIJO DESDE ELEMENTO
+    getSufijoFromElement(element) {
+        const closest = $(element).closest('[id^="accordionPasajeros_"]');
+        if (closest.length) {
+            const id = closest.attr('id');
+            return id.replace('accordionPasajeros_', '');
         }
+        return null;
     },
 
-    // ✅ NUEVA FUNCIÓN: Verificar si hay datos para limpiar
-    verificarDatosParaLimpiar() {
-        const ventasStorage = sessionStorage.getItem('ventas');
-        const hayVentas = ventasStorage && Object.keys(JSON.parse(ventasStorage)).length > 0;
-        const hayAsientosSeleccionados = SeatManager && SeatManager.asientosSeleccionados && SeatManager.asientosSeleccionados.size > 0;
-        const hayProgreso = AppState.currentStep > 0;
+    // ✅ CONFIGURAR VALIDACIÓN PARA UN FORMULARIO ESPECÍFICO
+    setupFormValidation(sufijo) {
+        const accordion = $(`#accordionPasajeros_${sufijo}`);
+        if (!accordion.length) return;
 
-        return hayVentas || hayAsientosSeleccionados || hayProgreso;
+        console.log(`🔧 Configurando validación para: ${sufijo}`);
+
+        // Encontrar y configurar el botón de guardar datos
+        const botonGuardar = accordion.closest('.col-md-12').find('button[onclick*="acabar"]');
+        if (botonGuardar.length) {
+            // Siempre mostrar "Guardar datos"
+            botonGuardar.html('<i class="fas fa-save"></i> Guardar datos');
+            
+            // Agregar clases Bootstrap para mejor UX
+            botonGuardar.removeClass('btn-outline-primary').addClass('btn-outline-secondary');
+            botonGuardar.prop('disabled', true);
+        }
+
+        // Validar estado inicial después de un pequeño delay
+        setTimeout(() => {
+            this.validarFormularioCompleto(sufijo);
+        }, 200);
     },
 
-    // ✅ NUEVA FUNCIÓN: Procesar recarga de página
-    async procesarRecargaPagina() {
-        console.log('🔄 Recarga detectada - Verificando datos para limpiar...');
-
-        const hayDatos = this.verificarDatosParaLimpiar();
-
-        if (hayDatos) {
-            console.log('📊 Datos detectados tras recarga - Iniciando limpieza automática...');
-            await this.ejecutarLimpiezaTrasRecarga();
+    // ✅ VALIDAR CAMPO INDIVIDUAL EN TIEMPO REAL
+    validarCampoIndividual($element) {
+        const valor = $element.val()?.trim();
+        const tipo = $element.attr('type') || ($element.is('select') ? 'select' : 'text');
+        const nombre = $element.attr('name') || $element.attr('placeholder') || 'Campo';
+        
+        console.log(`⌨️ Validando en tiempo real: ${nombre} = "${valor}"`);
+        
+        const validacion = this.validarCampo($element, valor, tipo);
+        
+        if (!validacion.valido) {
+            this.marcarCampoInvalido($element, validacion.mensaje);
+            console.log(`❌ ${nombre}: ${validacion.mensaje}`);
         } else {
-            console.log('✅ No hay datos que limpiar tras recarga');
-            // Solo limpiar frontend básico por si acaso
-            this.limpiarSoloFrontend();
+            this.marcarCampoValido($element);
+            console.log(`✅ ${nombre}: Válido`);
+        }
+
+        return validacion.valido;
+    },
+
+    // ✅ VALIDAR FORMULARIO COMPLETO PARA UN SUFIJO
+    validarFormularioCompleto(sufijo) {
+        const accordion = $(`#accordionPasajeros_${sufijo}`);
+        if (!accordion.length) return false;
+
+        let todoValido = true;
+        let camposRequeridos = 0;
+        let camposValidos = 0;
+
+        // Obtener todos los inputs/selects REQUERIDOS del acordeón
+        const camposRequeridos_elementos = accordion.find('input[required], select[required]');
+        camposRequeridos = camposRequeridos_elementos.length;
+
+        console.log(`🔍 Validando ${sufijo}: ${camposRequeridos} campos requeridos`);
+
+        camposRequeridos_elementos.each((index, element) => {
+            const $element = $(element);
+            const valor = $element.val()?.trim();
+            const tipo = $element.attr('type') || ($element.is('select') ? 'select' : 'text');
+
+            // Validar cada campo
+            const validacion = this.validarCampo($element, valor, tipo);
+            
+            if (validacion.valido) {
+                camposValidos++;
+                this.marcarCampoValido($element);
+            } else {
+                todoValido = false;
+                this.marcarCampoInvalido($element, validacion.mensaje);
+            }
+        });
+
+        console.log(`📊 ${sufijo}: ${camposValidos}/${camposRequeridos} campos válidos`);
+
+        // Actualizar estado del botón
+        this.actualizarBotonGuardar(sufijo, todoValido);
+
+        return todoValido;
+    },
+
+    // ✅ VALIDAR CAMPO INDIVIDUAL CON REGLAS ESPECÍFICAS
+    validarCampo($element, valor, tipo) {
+        const nombre = $element.attr('name') || $element.attr('id') || 'Campo';
+        const placeholder = $element.attr('placeholder') || '';
+
+        // Campo requerido vacío
+        if (!valor) {
+            return { valido: false, mensaje: 'Este campo es obligatorio' };
+        }
+
+        // Validaciones específicas por tipo y nombre
+        switch (tipo) {
+            case 'email':
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(valor)) {
+                    return { valido: false, mensaje: 'Email inválido (ej: usuario@dominio.com)' };
+                }
+                break;
+
+            case 'text':
+                // Validación por nombre/placeholder
+                if (nombre.toLowerCase().includes('nombre') || placeholder.toLowerCase().includes('nombre')) {
+                    if (valor.length < 2) {
+                        return { valido: false, mensaje: 'Mínimo 2 caracteres' };
+                    }
+                    if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(valor)) {
+                        return { valido: false, mensaje: 'Solo letras y espacios' };
+                    }
+                }
+                
+                if (nombre.toLowerCase().includes('dni') || placeholder.toLowerCase().includes('dni')) {
+                    if (!/^\d{8}$/.test(valor)) {
+                        return { valido: false, mensaje: 'DNI debe tener exactamente 8 dígitos' };
+                    }
+                }
+                
+                if (nombre.toLowerCase().includes('telefono') || placeholder.toLowerCase().includes('telefono')) {
+                    if (!/^\d{9}$/.test(valor)) {
+                        return { valido: false, mensaje: 'Teléfono debe tener 9 dígitos' };
+                    }
+                }
+                break;
+
+            case 'date':
+                const fecha = new Date(valor);
+                if (isNaN(fecha.getTime())) {
+                    return { valido: false, mensaje: 'Fecha inválida' };
+                }
+                
+                // Validar que no sea fecha futura para fecha de nacimiento
+                if (nombre.toLowerCase().includes('nacimiento')) {
+                    const hoy = new Date();
+                    if (fecha > hoy) {
+                        return { valido: false, mensaje: 'Fecha no puede ser futura' };
+                    }
+                }
+                break;
+
+            case 'select':
+                if (!valor || valor === '' || valor === '0' || valor === 'Seleccionar') {
+                    return { valido: false, mensaje: 'Debe seleccionar una opción' };
+                }
+                break;
+        }
+
+        return { valido: true, mensaje: '' };
+    },
+
+    // ✅ MARCAR CAMPO COMO INVÁLIDO
+    marcarCampoInvalido($element, mensaje) {
+        $element.removeClass('is-valid').addClass('is-invalid');
+        
+        // Buscar o crear feedback
+        let feedback = $element.siblings('.invalid-feedback');
+        if (!feedback.length) {
+            feedback = $('<div class="invalid-feedback"></div>');
+            $element.after(feedback);
+        }
+        feedback.text(mensaje);
+    },
+
+    // ✅ MARCAR CAMPO COMO VÁLIDO
+    marcarCampoValido($element) {
+        $element.removeClass('is-invalid').addClass('is-valid');
+        $element.siblings('.invalid-feedback').remove();
+    },
+
+    // ✅ ACTUALIZAR BOTÓN GUARDAR
+    actualizarBotonGuardar(sufijo, todoValido) {
+        const accordion = $(`#accordionPasajeros_${sufijo}`);
+        const boton = accordion.closest('.col-md-12').find('button[onclick*="acabar"]');
+        
+        if (boton.length) {
+            // Texto siempre igual
+            boton.html('<i class="fas fa-save"></i> Guardar datos');
+            
+            if (todoValido) {
+                boton.prop('disabled', false)
+                     .removeClass('btn-outline-secondary')
+                     .addClass('btn-outline-primary');
+            } else {
+                boton.prop('disabled', true)
+                     .removeClass('btn-outline-primary')
+                     .addClass('btn-outline-secondary');
+            }
         }
     },
 
-    // ✅ NUEVA FUNCIÓN: Ejecutar limpieza tras recarga
-    async ejecutarLimpiezaTrasRecarga() {
-        try {
-            // 1. Intentar liberar asientos en backend desde sessionStorage
-            const ventasStorage = sessionStorage.getItem('ventas');
-            if (ventasStorage) {
-                const ventas = JSON.parse(ventasStorage);
-                const asientosIds = Object.keys(ventas);
+    // ✅ VERIFICAR SI UN FORMULARIO ESTÁ COMPLETAMENTE VÁLIDO
+    estanDatosValidados(sufijo) {
+        // Validar en tiempo real el estado actual del formulario
+        return this.validarFormularioCompleto(sufijo);
+    },
 
-                if (asientosIds.length > 0) {
-                    console.log(`🔓 Liberando ${asientosIds.length} asientos en backend tras recarga...`);
-                    await this.liberarAsientosEspecificos(asientosIds);
-                }
+    // ✅ VALIDAR ANTES DE NAVEGAR (VALIDACIÓN REAL)
+    puedeNavegar(sufijo) {
+        const datosValidados = this.estanDatosValidados(sufijo);
+        
+        if (!datosValidados) {
+            Swal.fire({
+                title: "Datos incompletos o incorrectos",
+                text: "Debes completar correctamente todos los campos requeridos antes de continuar.",
+                icon: "warning",
+                confirmButtonText: "Entendido",
+                confirmButtonColor: '#3085d6'
+            });
+            return false;
+        }
+        
+        return true;
+    },
+
+    // ✅ LIMPIAR VALIDACIONES
+    limpiarValidaciones(sufijo) {
+        const accordion = $(`#accordionPasajeros_${sufijo}`);
+        accordion.find('.is-valid, .is-invalid').removeClass('is-valid is-invalid');
+        accordion.find('.invalid-feedback').remove();
+    }
+};
+
+const App = {
+    init() {
+        this.configurarEventosGlobales();
+        this.inicializarComponentes();
+        NavigationManager.inicializarEstadoPorDefecto();
+        PageUnloadManager.init();
+        FormValidationManager.init()
+    },
+
+    // =============================================================================
+    // FUNCIONES DE RESETEO
+    // =============================================================================
+    
+    resetearSistemaCompletoSinRutas() {
+        console.log('🔄 Reseteando sistema completo (preservando rutas)...');
+
+        try {
+            // 1. Limpiar sessionStorage
+            sessionStorage.removeItem('ventas');
+
+            // 2. Resetear asientos seleccionados
+            if (typeof SeatManager !== 'undefined') {
+                SeatManager.asientosSeleccionados.clear();
             }
 
-            // 2. Limpiar frontend
-            this.limpiarSoloFrontend();
+            // 3. Limpiar contenedores de itinerarios
+            const contenedorIda = document.getElementById('contenedor_viajes_ida');
+            const contenedorVuelta = document.getElementById('contenedor_viajes_vuelta');
 
-            console.log('✅ Limpieza tras recarga completada');
+            if (contenedorIda) contenedorIda.innerHTML = '';
+            if (contenedorVuelta) contenedorVuelta.innerHTML = '';
 
-        } catch (error) {
-            console.warn('⚠️ Error en limpieza tras recarga:', error);
-            // Limpiar frontend aunque falle el backend
-            this.limpiarSoloFrontend();
-        }
-    },
+            // 4. Resetear estado de la aplicación
+            AppState.currentStep = 0;
+            AppState.maxStep = 0;
+            AppState.itinerarioRegreso = null;
+            
+            // ✅ NUEVO: Limpiar validaciones de formularios
+            if (typeof FormValidationManager !== 'undefined') {
+                AppState.validacionFormularios = {};
+                FormValidationManager.limpiarValidaciones('ida');
+                FormValidationManager.limpiarValidaciones('vuelta');
+            }
 
-    // ✅ NUEVA FUNCIÓN: Liberar asientos específicos
-    async liberarAsientosEspecificos(asientosIds) {
-        const promesasLiberacion = asientosIds.map(asientoId =>
-            fetch(CONFIG.RUTAS.MARCAR_ASIENTO_DISPONIBLE, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    asiento_id: asientoId,
-                    motivo: 'recarga_pagina',
-                    timestamp: new Date().toISOString()
-                }),
-                keepalive: true // Importante para que funcione al cerrar página
-            }).catch(error => {
-                console.warn(`⚠️ Error liberando asiento ${asientoId}:`, error);
-                return null; // No fallar todo el proceso por un asiento
-            })
-        );
+            // 5. Limpiar temporizadores activos
+            if (typeof TimerManager !== 'undefined') {
+                TimerManager.clearAllTimers();
+            }
 
-        const resultados = await Promise.allSettled(promesasLiberacion);
-        const exitosos = resultados.filter(r => r.status === 'fulfilled' && r.value !== null).length;
-
-        console.log(`✅ ${exitosos}/${asientosIds.length} asientos liberados en backend`);
-    },
-
-    async liberarAsientosAntesDeSalir() {
-        console.log('🔓 Liberando asientos antes de salir/recargar...');
-
-        const promesasLiberacion = [];
-
-        // Obtener asientos del sessionStorage (más confiable antes de salir)
-        const ventas = JSON.parse(sessionStorage.getItem("ventas") || "{}");
-        for (const asientoId in ventas) {
-            const sufijo = AppState.currentStep <= 1 ? 'ida' : 'vuelta';
-
-            // Llamada directa a la API sin Promise.allSettled para mayor velocidad
-            const promesa = fetch(CONFIG.RUTAS.MARCAR_ASIENTO_DISPONIBLE, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    asiento_id: asientoId,
-                    sufijo: sufijo,
-                    accion: 'liberar',
-                    timestamp: new Date().toISOString(),
-                    motivo: 'recarga_pagina'
-                }),
-                keepalive: true // IMPORTANTE: mantiene la petición aunque se cierre la página
+            // 6. Resetear formularios de pasajeros
+            document.querySelectorAll('[id^="accordionPasajeros_"]').forEach(accordion => {
+                accordion.innerHTML = '';
             });
 
-            promesasLiberacion.push(promesa);
+            // 7. Ocultar contenedores de datos de pasajeros
+            document.querySelectorAll('[id^="contenido_datos_"]').forEach(contenedor => {
+                contenedor.classList.add('d-none');
+            });
+
+            console.log('✅ Sistema reseteado correctamente (rutas preservadas)');
+
+        } catch (error) {
+            console.error('❌ Error al resetear sistema:', error);
         }
-
-        // Ejecutar todas las liberaciones
-        if (promesasLiberacion.length > 0) {
-            try {
-                await Promise.allSettled(promesasLiberacion);
-                console.log(`✅ ${promesasLiberacion.length} asientos liberados antes de salir`);
-            } catch (error) {
-                console.error('❌ Error en liberación antes de salir:', error);
-            }
-        }
-    },
-
-    // 🧹 NUEVA FUNCIÓN: Solo limpiar frontend (después de recarga)
-    limpiarSoloFrontend() {
-        console.log('🧹 Limpiando solo frontend después de recarga...');
-
-        // Solo limpiar estado local y UI
-        AppState.resetProgress();
-        sessionStorage.clear();
-        this.limpiarFormularios();
-        this.limpiarContenedoresDinamicos();
-        this.limpiarAsientosSeleccionados();
-        TimerManager.detenerTodos();
-
-        if (typeof PaymentManager !== 'undefined') {
-            PaymentManager.limpiarFormularioPago();
-        }
-
-        if (typeof SeatManager !== 'undefined') {
-            SeatManager.asientosSeleccionados.clear();
-        }
-
-        console.log('✅ Frontend limpiado tras recarga');
     },
 
     resetearSistemaCompleto() {
-        console.log('🔄 Recarga detectada - Limpiando progreso...');
+        console.log('🔄 Reseteando sistema completo...');
 
         // 1. Limpiar estado de la aplicación
         AppState.resetProgress();
@@ -2794,7 +3345,7 @@ const App = {
         // 4. Limpiar contenedores dinámicos
         this.limpiarContenedoresDinamicos();
 
-        // 5.    Detener todos los temporizadores activos
+        // 5. Detener todos los temporizadores activos
         TimerManager.detenerTodos();
 
         // 6. Resetear asientos seleccionados
@@ -2854,7 +3405,6 @@ const App = {
             const matrices = document.querySelectorAll(`[id^="matrizContainer_"][id$="_${sufijo}"]`);
             matrices.forEach(m => m.innerHTML = '');
         });
-
     },
 
     limpiarAsientosSeleccionados() {
@@ -2872,14 +3422,12 @@ const App = {
             NavigationManager.goToNextStep();
         });
 
-        // Evento para búsqueda de viajes
-        window.buscarYMostrarItinerario = () => {
-            SearchManager.buscarYMostrarItinerario();
-        };
-
         // Hacer funciones globales accesibles
+        window.buscarYMostrarItinerario = SearchManager.buscarYMostrarItinerario.bind(SearchManager);
+        window.acabarPrimerItinerario = NavigationManager.confirmarDatosIda.bind(NavigationManager);
+        window.acabarSegundoItinerario = NavigationManager.confirmarDatosRegreso.bind(NavigationManager);
+        window.volverAItinerarioIda = NavigationManager.volverAItinerarioIda.bind(NavigationManager);
         window.enviarDatosPasajero = FormManager.enviarDatosPasajero.bind(FormManager);
-        window.acabarPrimerItinerario = ItineraryManager.finalizarPrimerItinerario.bind(ItineraryManager);
 
         // Función global para limpiar manualmente (útil para testing)
         window.limpiarSistema = async () => {
@@ -2894,6 +3442,7 @@ const App = {
         NavigationManager.updateFormVisibility();
         NavigationManager.initializeTabEvents();
         RouteManager.formatearFechas();
+        FormValidationManager.init(); // ✅ NUEVO: Inicializar validación en tiempo real
 
         // Inicializar sistema de pago cuando llegue al paso 3
         this.inicializarPagoCondicional();
@@ -2918,7 +3467,6 @@ const App = {
         };
     }
 };
-
 // =============================================================================
 // INICIALIZACIÓN AL CARGAR EL DOM
 // =============================================================================

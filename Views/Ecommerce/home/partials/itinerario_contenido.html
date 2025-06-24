@@ -38,7 +38,6 @@
   }
 </style>
 
-
 <div class="row">
   <!-- Leyenda -->
   <div class="col-md-2">
@@ -65,26 +64,33 @@
   </div>
 
   <!-- Formulario -->
-
   <div class="col-md-4">
     <div class="row">
       <div class="col-md-12">
         <div id="temporizador_{{ sufijo }}">Tiempo restante: 10</div>
       </div>
     </div>
+    
     <div class="row">
       <div class="col-md-12 d-none" id="contenido_datos_{{ sufijo }}">
         <div class="accordion" id="accordionPasajeros_{{ sufijo }}"></div>
-        <button class="btn btn-outline-primary w-100 mt-5" onclick='ItineraryManager.finalizarPrimerItinerario()' id="confirmarDatos">
-          Confirmar datos
-        </button>
+        
+        <!-- ✅ CORREGIDO: Botones dinámicos según el sufijo -->
+        {% if sufijo == 'ida' %}
+          <button class="btn btn-outline-primary w-100 mt-5" onclick='acabarPrimerItinerario()'>
+            Confirmar datos
+          </button>
+        {% elif sufijo == 'vuelta' %}
+          <div class="d-grid gap-2 mt-3">
+            <button class="btn btn-outline-secondary" onclick="volverAItinerarioIda()">
+              <i class="fas fa-arrow-left"></i> Volver a ida
+            </button>
+            <button class="btn btn-outline-primary" onclick='acabarSegundoItinerario()'>
+              <i class="fas fa-credit-card"></i> Ir al pago
+            </button>
+          </div>
+        {% endif %}
       </div>
-
-      <div>
-
-      </div>
-
     </div>
-
   </div>
 </div>

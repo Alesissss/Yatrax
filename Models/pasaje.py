@@ -562,7 +562,7 @@ class Pasaje:
             elif resultado['esCambioRuta'] == 1:
                 resultado['estado'] = 'Ya se ha realizado un cambio de ruta de este pasaje.'
             elif resultado['esPasajeLibre'] == 1:
-                resultado['estado'] = 'Ya se ha convertido a pasaje libre de este pasaje.'
+                resultado['estado'] = 'Ya se ha convertido a pasaje libre este pasaje.'
             else:
                 resultado['estado'] = 'El pasaje se encuentra en un proceso de transacción.'
             return resultado
@@ -572,9 +572,42 @@ class Pasaje:
                 conexion.cerrar()
     
     @classmethod
-    def realizarTransferencia(cls, pasaje: dict, persona1: dict, persona2: dict = None):
-        conexion = bd.Conexion()
+    def convertirPasajeLibre(cls, id_pasaje, idDetViajeAs):
+        conexion = None
         try:
+            conexion = bd.Conexion()
+            
+            sql_update = """
+                UPDATE pasaje
+                SET esPasajeLibre = 1,
+                    enTransaccion = 1
+                WHERE id = %s;
+            """
+            conexion.ejecutar(sql_update, (id_pasaje,), auto_commit=False)
+            
+            sql_update2 = """
+                UPDATE detalle_viaje_asiento
+                SET idAsiento = NULL,
+                    esDisponible = 0
+                WHERE id = %s;
+            """
+            conexion.ejecutar(sql_update2, (idDetViajeAs,), auto_commit=False)
+
+            conexion.conn.commit()
+            
+            return {"msj": "Pasaje convertido a libre exitosamente", "msj2": None}
+        except Exception as e:
+            conexion.conn.rollback()
+            return {"msj": None, "msj2": f"Error al convertir pasaje a libre: {e}"}
+        finally:
+            if conexion:
+                conexion.cerrar()
+
+    @classmethod
+    def realizarTransferencia(cls, pasaje: dict, persona1: dict, persona2: dict = None):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
             # 1) Marcar el pasaje original como transferencia
             sql_update = """
                 UPDATE pasaje
@@ -667,9 +700,9 @@ class Pasaje:
         except Exception as e:
             conexion.conn.rollback()
             return {"msj": None, "msj2": f"Error al realizar transferencia: {e}"}
-
         finally:
-            conexion.cerrar()
+            if conexion:
+                conexion.cerrar()
 
         
     @classmethod
@@ -799,3 +832,5 @@ class Pasaje:
         finally:
             if conexion:
                 conexion.cerrar()
+                
+    

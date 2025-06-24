@@ -1,3 +1,6 @@
+from datetime import datetime
+from decimal import Decimal
+
 import bd
 
 class Viaje:
@@ -188,18 +191,196 @@ class Viaje:
         try:
             conexion = bd.Conexion()
 
-            result_pasaje = conexion.obtener(""" SELECT 1 FROM pasaje p 
-                              INNER JOIN detalle_viaje_asiento dva ON p.idDetalleViajeAsiento = dva.id
-                              INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
-                              INNER JOIN viaje v ON dv.idViaje = v.id LIMIT 1""")
-            
-            result_asiento = conexion.obtener(""" SELECT 1 FROM pasaje p 
-                              INNER JOIN detalle_viaje_asiento dva ON p.idDetalleViajeAsiento = dva.id
-                              INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
-                              WHERE dva.esDisponible = 0 LIMIT 1""")
-            
-            if result_pasaje or result_asiento:
-                raise Exception('El viaje no se puede modificar porque ya existen pasajes vendidos para los itinerarios.')
+            # --- obtener flag de reprogramación y datos de itinerarios actuales y recibidos
+            sePuedeReprogramar = bool(conexion.obtener(
+                "SELECT 1 FROM conf_general WHERE viajesReprogramables = 1"
+            ))
+
+            # detectar si hay pasajes/asientos ocupados
+            hay_pasajes = conexion.obtener(
+                """ SELECT 1 FROM pasaje p
+                    INNER JOIN detalle_viaje_asiento dva ON p.idDetalleViajeAsiento = dva.id
+                    INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
+                    WHERE dv.idViaje = %s LIMIT 1
+                """,
+                (idViaje,)
+            )
+            hay_asientos = conexion.obtener(
+                """ SELECT 1 FROM detalle_viaje_asiento dva
+                    WHERE dva.idDetalle_Viaje IN (
+                        SELECT id FROM detalle_viaje WHERE idViaje = %s
+                    )
+                    AND dva.esDisponible = 0
+                    LIMIT 1
+                """,
+                (idViaje,)
+            )
+
+            # --- rama de reprogramación
+            if sePuedeReprogramar and (hay_pasajes or hay_asientos):
+                # 0. Helpers
+                def parse_front_fecha(fecha_str: str) -> datetime:
+                    # ajusta el formato si es necesario
+                    return datetime.strptime(fecha_str, "%Y-%m-%d %H:%M:%S")
+
+                def to_map_act(lista):
+                    # claves: (origen, destino, precio:Decimal)
+                    return {
+                        (d['idSucursalOrigen'],
+                        d['idSucursalDestino'],
+                        d['precio']): d
+                        for d in lista
+                    }
+
+                def to_map_rec(lista):
+                    # convierto precio a Decimal para que hashes+== cuadren
+                    return {
+                        (d['id_sucursal_origen'],
+                        d['id_sucursal_destino'],
+                        Decimal(d['precio'])): d
+                        for d in lista
+                    }
+
+                # 1) cargo datos
+                actuales = conexion.obtener(
+                    """
+                    SELECT idSucursalOrigen, idSucursalDestino, precio,
+                        fechaSalida, fechaLlegadaEstimada
+                    FROM detalle_viaje
+                    WHERE idViaje = %s
+                    """,
+                    (idViaje,)
+                )
+                recibidos = detalles_viajes
+
+                # 2) validaciones de número y rutas/precios
+                if len(recibidos) != len(actuales):
+                    raise Exception("No se puede reprogramar: cambió número de itinerarios.")
+
+                map_act = to_map_act(actuales)
+                map_rec = to_map_rec(recibidos)
+
+                if set(map_act) != set(map_rec):
+                    raise Exception("No se puede reprogramar: sólo cambian horarios, no rutas ni precios.")
+
+                # 3) detectar cambio real de horario
+                hubo_cambio = any(
+                    parse_front_fecha(map_rec[key]['fecha_salida'])  != map_act[key]['fechaSalida']
+                    or
+                    parse_front_fecha(map_rec[key]['fecha_llegada']) != map_act[key]['fechaLlegadaEstimada']
+                    for key in map_act
+                )
+
+                if not hubo_cambio:
+                    # no hay nada que reprogramar: 
+                    # salta esta rama y sigue con personal/bloqueo/edición completa
+                    pass
+                else:
+                    # 4) actualizo horarios en detalle_viaje
+                    for key, rec in map_rec.items():
+                        orig, dest, precio = key
+                        conexion.ejecutar(
+                            """
+                            UPDATE detalle_viaje
+                            SET fechaSalida          = %s,
+                                fechaLlegadaEstimada = %s,
+                                usuario              = %s
+                            WHERE idViaje            = %s
+                            AND idSucursalOrigen    = %s
+                            AND idSucursalDestino   = %s
+                            AND precio              = %s
+                            """,
+                            (
+                                parse_front_fecha(rec['fecha_salida']),
+                                parse_front_fecha(rec['fecha_llegada']),
+                                usuario,
+                                idViaje,
+                                orig,
+                                dest,
+                                precio,
+                            ),
+                            auto_commit=False
+                        )
+
+                    # 5. marcar viaje y fechas generales
+                    conexion.ejecutar(
+                        """
+                        UPDATE viaje
+                        SET idRuta          = %s,
+                            idVehiculo      = %s,
+                            estado          = %s,
+                            fechaHoraSalida  = %s,
+                            fechaHoraLlegada = %s,
+                            esReprogramado   = 1
+                        WHERE id = %s
+                        """,
+                        (idRuta, idVehiculo, estado, fechaHoraSalida, fechaHoraLlegada, idViaje),
+                        auto_commit=False
+                    )
+
+                    # 6.1 Obtener los días adicionales a la reprogramación
+                    dias_reprogramacion = conexion.obtener("SELECT max_dias_vigencia_reprogramacion FROM conf_general LIMIT 1")[0]['max_dias_vigencia_reprogramacion']
+
+                    # 6.2. ejecutar el UPDATE en cadena
+                    conexion.ejecutar("""
+                        UPDATE pasaje p
+                        JOIN detalle_viaje_asiento dva 
+                        ON p.idDetalleViajeAsiento = dva.id
+                        JOIN detalle_viaje dv 
+                        ON dva.idDetalle_Viaje = dv.id
+                        AND dv.idViaje = %s
+                        SET
+                        p.fechaInicioReprogramacion = NOW(),
+                        p.fechaFinReprogramacion    = DATE_ADD(NOW(), INTERVAL %s DAY)
+                    """, (idViaje, dias_reprogramacion), auto_commit=False)
+
+                    conexion.conn.commit()
+                    return {'@MSJ': 'Viaje reprogramado correctamente', '@MSJ2': ''}
+
+            # --- si no entra en reprogramación y tiene pasajes/u asientos, bloqueo normal
+            if hay_pasajes or hay_asientos:
+                # 1) obtener el personal actual
+                personal_actual = conexion.obtener(
+                    """
+                    SELECT idPersonal, idTipoPersonal
+                    FROM detalle_personal
+                    WHERE idViaje = %s
+                    """,
+                    (idViaje,)
+                )
+                set_personal_actual = {(p['idPersonal'], p['idTipoPersonal']) for p in personal_actual}
+
+                # 2) armar el set de lo que llegó (choferes + tripulantes)
+                recibidos = choferes + tripulantes
+                set_recibido = {(p['id'], p['id_tipopersonal']) for p in recibidos}
+
+                # 3) comparar
+                if set_personal_actual != set_recibido:
+                    # hay cambios: actualizar sólo el personal
+                    conexion.ejecutar(
+                        "DELETE FROM detalle_personal WHERE idViaje = %s",
+                        (idViaje,),
+                        auto_commit=False
+                    )
+                    for p in recibidos:
+                        conexion.ejecutar(
+                            """
+                            INSERT INTO detalle_personal
+                                (idPersonal, idTipoPersonal, idViaje, usuario)
+                            VALUES (%s, %s, %s, %s)
+                            """,
+                            (p['id'], p['id_tipopersonal'], idViaje, usuario),
+                            auto_commit=False
+                        )
+                    conexion.conn.commit()
+                    return {
+                        '@MSJ': 'Personal del viaje actualizado correctamente',
+                        '@MSJ2': ''
+                    }
+                # 4) si no hay cambios en personal, bloqueo normal
+                raise Exception(
+                    'El viaje no se puede modificar porque ya existen pasajes vendidos u ocupados, (Solo puede modificar el personal).'
+                )
 
             # 1. Actualizar el viaje
             conexion.ejecutar("""
@@ -243,7 +424,7 @@ class Viaje:
 
         except Exception as e:
             conexion.conn.rollback()
-            return {'@MSJ': '', '@MSJ2': f'Error al actualizar el viaje: {repr(e)}'}
+            return {'@MSJ': '', '@MSJ2': f'Error al actualizar el viaje: {str(e)}'}
 
         finally:
             conexion.cerrar()
@@ -488,3 +669,32 @@ class Viaje:
             return listado
         finally:
             conexion.cerrar()
+
+    @classmethod
+    def obtener_clientes_por_viaje(cls, id_viaje):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            return conexion.obtener("""
+                 SELECT 
+                   cli.email,
+                   pas.codigo,
+                   asi.nombre as asiento
+                FROM pasaje pas
+                INNER JOIN venta v 
+                    ON pas.idVenta = v.id
+                INNER JOIN cliente cli 
+                    ON v.idCliente = cli.id
+                INNER JOIN detalle_viaje_asiento dvas
+                    ON pas.idDetalleViajeAsiento = dvas.id
+                INNER JOIN asiento asi 
+                	ON asi.id=dvas.idAsiento
+                INNER JOIN detalle_viaje dv
+                    ON dvas.idDetalle_Viaje = dv.id
+                INNER JOIN viaje vi 
+                	ON dv.idViaje=vi.id
+                WHERE vi.id= %s;
+            """,(id_viaje))
+        finally:
+            if conexion:
+                conexion.cerrar()
