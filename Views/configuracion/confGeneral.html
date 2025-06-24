@@ -16,8 +16,8 @@
                         <div class="col-md-12 mb-3">
                             <label for="txt_IGV">IGV</label>
                             <div class="input-group">
-                                <input type="number" step="0.01" min="0" id="txt_IGV" class="form-control" placeholder="IGV"
-                                    value="{{ conf_general.igv }}">
+                                <input type="number" step="0.01" min="0" id="txt_IGV" class="form-control"
+                                    placeholder="IGV" value="{{ conf_general.igv }}">
                                 <div class="input-group-append">
                                     <div class="input-group-text"><i class="fas fa-percent"></i></div>
                                 </div>
@@ -58,12 +58,54 @@
                             </div>
                         </div>
                         <!-- Viajes Reprogramables -->
-                         <div class="col-md-12 mb-3">
+                        <div class="col-md-12 mb-3">
                             <label for="txt_ViajesReprogramables">Viajes reprogramables</label>
                             <select id="cbx_ViajesReprogramables" class="form-control">
-                                <option value="1" {% if conf_general.viajesReprogramables== 1 %}selected{% endif %}>Sí</option>
-                                <option value="0" {% if conf_general.viajesReprogramables== 0 %}selected{% endif %}>No</option>
+                                <option value="1" {% if conf_general.viajesReprogramables==1 %}selected{% endif %}>Sí
+                                </option>
+                                <option value="0" {% if conf_general.viajesReprogramables==0 %}selected{% endif %}>No
+                                </option>
                             </select>
+                        </div>
+                        <!-- Vigencia días reprogramación -->
+                        <div class="col-md-12 mb-3">
+                            <label for="txt_DiasVigenciaReprogramacion">Días vigentes después de reprogramación</label>
+                            <div class="input-group">
+                                <input type="number" id="txt_DiasVigenciaReprogramacion" class="form-control"
+                                    placeholder="Días vigentes después de reprogramación" min="0"
+                                    value="{{ conf_general.max_dias_vigencia_reprogramacion }}">
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><i class="fas fa-clock"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Precio cambio ruta -->
+                        <div class="col-md-12 mb-3">
+                            <label for="txt_PrecioCambioRuta">Precio para el cambio de ruta</label>
+                            <div class="input-group">
+                                <div class="input-group">
+                                <input type="number" id="txt_PrecioCambioRuta" class="form-control"
+                                    placeholder="Precio para el cambio de ruta" min="0" step="0.01"
+                                    value="{{ conf_general.precioCambioRuta }}">
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><i class="fas fa-money-bill-wave"></i></div>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                        <!-- Precio transferencia -->
+                        <div class="col-md-12 mb-3">
+                            <label for="txt_PrecioTransferencia">Precio para la transferencia de pasaje</label>
+                            <div class="input-group">
+                                <div class="input-group">
+                                <input type="number" id="txt_PrecioTransferencia" class="form-control"
+                                    placeholder="Precio para la transferencia de pasaje" min="0" step="0.01"
+                                    value="{{ conf_general.precioTransferencia }}">
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><i class="fas fa-money-bill-wave"></i></div>
+                                </div>
+                            </div>
+                            </div>
                         </div>
                         <div class="col-md-12 text-center">
                             <button id="{{ btnId }}" type="button" class="btn btn-primary">Guardar</button>
@@ -84,13 +126,16 @@
             let maxPasajesVenta = $("#txt_MaxPasajesVenta").val().trim();
             let tiempoMaximoVenta = $("#txt_TiempoMaximoVenta").val().trim();
             let viajesReprogramables = $("#cbx_ViajesReprogramables").val();
+            let diasVigentesReprogramacion = $('#txt_DiasVigenciaReprogramacion').val();
+            let precioCambioRuta = $('#txt_PrecioCambioRuta').val();
+            let precioTransferencia = $('#txt_PrecioTransferencia').val();
 
-            if (!igv || !tarifaBase || !maxPasajesVenta || !tiempoMaximoVenta || !viajesReprogramables) {
+            if (!igv || !tarifaBase || !maxPasajesVenta || !tiempoMaximoVenta || !viajesReprogramables || !diasVigentesReprogramacion || !precioCambioRuta || !precioTransferencia) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
 
-            if (igv <= 0 || tarifaBase <= 0 || maxPasajesVenta <= 0 || tiempoMaximoVenta <= 0){
+            if (igv <= 0 || tarifaBase <= 0 || maxPasajesVenta <= 0 || tiempoMaximoVenta <= 0 || diasVigentesReprogramacion <= 0 || precioCambioRuta <= 0 || precioTransferencia <= 0) {
                 toastr.warning("Todos los valores ingresados deben ser válidos", 'MENSAJE DE SISTEMA');
                 return;
             }
@@ -114,6 +159,9 @@
                     formData.append("max_pasajes_venta", maxPasajesVenta);
                     formData.append("tiempo_maximo_venta_minutos", tiempoMaximoVenta);
                     formData.append("viajesReprogramables", viajesReprogramables);
+                    formData.append("diasVigentes", diasVigentesReprogramacion);
+                    formData.append("precioCambioRuta", precioCambioRuta);
+                    formData.append("precioTransferencia", precioTransferencia);
 
                     $.ajax({
                         url: "/trabajadores/configuracion/EditarConfiguracionGeneral",

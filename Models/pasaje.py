@@ -97,8 +97,36 @@ class Pasaje:
         conexion = None
         try:
             conexion = bd.Conexion()
-            sql = """SELECT numeroComprobante, codigo FROM pasaje ps WHERE ps.numeroComprobante = %s AND ps.codigo = %s;"""
+            sql = """SELECT precio FROM pasaje ps WHERE ps.numeroComprobante = %s AND ps.codigo = %s;"""
             return conexion.obtener(sql, (num_comprobante, codigo_prom))
+        finally:
+            if conexion:
+                conexion.cerrar()
+
+    @classmethod
+    def detalle_viaje(cls, id_detalle_asiento):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            sql = """SELECT dv.id AS id_detalle_viaje, dv.fechaSalida, dv.fechaLlegadaEstimada, 
+                            so.nombre AS origen, sd.nombre AS destino, so.ciudad AS ciudad_origen, 
+                            sd.ciudad AS ciudad_destino
+                     FROM detalle_viaje_asiento dva
+                     JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
+                     JOIN sucursal so ON dv.idSucursalOrigen = so.id
+                     JOIN sucursal sd ON dv.idSucursalDestino = sd.id
+                     WHERE dva.id = %s;"""
+            return conexion.obtener(sql, (id_detalle_asiento,))
+        finally:
+            if conexion:
+                conexion.cerrar()
+
+    @classmethod
+    def cambiarEstadoAsiento(cls, ):
+        conexion = None
+        try:
+            conexion =  bd.Conexion()
+            sql = ""
         finally:
             if conexion:
                 conexion.cerrar()
@@ -188,7 +216,8 @@ class Pasaje:
                         sd.nombre                                        AS DESTINO,
                         v.fecha                                          AS FECHA,
                         p.codigo                                         AS CODIGO,
-                        p.precio as PRECIO
+                        p.precio as PRECIO,
+                        dva.idAsiento                                      AS ASIENTO,
                         FROM pasaje p
                         JOIN venta v                    ON v.id = p.idVenta
                         JOIN cliente cli                ON cli.id = v.idCliente
@@ -324,6 +353,28 @@ class Pasaje:
             return resultado[0] if resultado else {"msj": None, "msj2": "Error al recuperar mensaje"}
         except Exception as e:
             return {"msj": None, "msj2": f"Error en la reserva: {e}"}
+        finally:
+            if conexion:
+                conexion.cerrar()
+
+    @classmethod
+    def esCambioRuta(cls, numero_comprobante):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            sql = "UPDATE pasaje SET esCambioRuta = 1, esReserva = 0, esPasajeNormal = 0, esPasajeLibre = 0, esTransferencia = 0 WHERE numeroComprobante = %s;"
+            conexion.ejecutar(sql, (numero_comprobante,))
+            sql = """UPDATE detalle_viaje_asiento dva
+                        INNER JOIN pasaje p
+                        ON p.idDetalleViajeAsiento = dva.id
+                        SET dva.esDisponible = 1
+                        WHERE p.numeroComprobante = %s; 
+                """
+            conexion.ejecutar(sql, (numero_comprobante,))
+            resultado = conexion.obtener("SELECT esCambioRuta FROM pasaje WHERE numeroComprobante = %s;", (numero_comprobante,))
+            if resultado:
+                return resultado[0]['esCambioRuta'] == 1
+            return False
         finally:
             if conexion:
                 conexion.cerrar()
@@ -794,6 +845,19 @@ class Pasaje:
             conexion = bd.Conexion()
             filas = conexion.obtener(
                 "SELECT * FROM pasaje pa inner join reembolso re on re.idPasaje=pa.id where pa.numeroComprobante= %s;", (numcomprobante,)
+            )
+            return filas[0] if filas else None
+        finally:
+            if conexion:
+                conexion.cerrar()
+                
+    @classmethod
+    def validar_codigo_reprogramacion(cls, codigo):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            filas = conexion.obtener(
+                "SELECT * FROM `pasaje` WHERE codigo= %s and fechaInicioReprogramacion is not null and fechaFinReprogramacion is not null", (codigo,)
             )
             return filas[0] if filas else None
         finally:

@@ -1,39 +1,26 @@
 {% extends "index.html" %}
 
-{% block title %}YATRAX - Gestión de reembolsos{% endblock %}
+{% block title %}YATRAX - Gestión de tipos de asientos{% endblock %}
 
 {% block content %}
 <div class="container-fluid p-4">
     <div class="panel-heading">
         <div class="row">
             <div class="col-md-12">
-                <h1>Gestionar reembolsos</h1>
+                <h1>Gestionar tipos de asientos</h1>
             </div>
         </div>
     </div>
-    <div class="row mb-2">
-    <div class="col-md-3">
-        <label for="filtroEstado" class="form-label">Filtrar por estado:</label>
-        <select id="filtroEstado" class="form-select form-select-sm">
-            <option value="">Todos</option>
-            <option value="ACEPTADO">Aceptado</option>
-            <option value="PENDIENTE">Pendiente</option>
-            <option value="RECHAZADO">Rechazado</option>
-        </select>
-    </div>
-</div>
-
     <div class="panel-body">
         <div class="row">
             <div class="col-12">
-                <table id="tbl_Plantillas" class="table table-bordered table-short-rows">
+                <table id="tbl_TipoAsientos" class="table table-bordered table-short-rows">
                     <thead class="bg-gray">
                         <tr>
-                            <th class="text-center">N° COMPROBANTE</th>
-                            <th class="text-center">CLIENTE</th>
-                            <th class="text-center">ASIENTO</th>
-                            <th class="text-center">ORIGEN-DESTINO</th>
-                            <th class="text-center">ESTADO</th>
+                            <th class="text-center">ID</th>
+                            <th class="text-center">NOMBRE</th>
+                            <th class="text-center">PRECIO (S/ .)</th>
+                            <th class="text-center">ÍCONO</th>
                             <th class="text-center">ACCIÓN</th>
                         </tr>
                     </thead>
@@ -47,10 +34,12 @@
 {% endblock %}
 {% block scripts %}
 <script>
-    var dtUsuarios;
+    var dtAsientos;
+
     $(document).ready(function () {
         // $('body').addClass('sidebar-collapse');
         var windowHeight = $('body > div.wrapper > div.content-wrapper').height() / 2;
+        // var windowHeight = $('body > div.os-padding.menu-open > div > div > div > div.content-wrapper').height() / 2;
         //CONFIGURACION POR DEFECTO DATATABLES
         $.extend($.fn.dataTable.defaults, {
             dom: "<'row align-items-center'<'col-sm-8 justify-content-start'f><'col-sm-4 c1 d-flex justify-content-end'>>" + "<'row align-items-center'<'col-sm-4'l><'col-sm-4 my-3 justify-content-start d-flex'B><'col-sm-4 d-flex justify-content-end'p>>" + "rt" + "<'row'<'col-sm-6'i><'col-sm-6 mt-1 d-flex justify-content-end'p>>",
@@ -112,12 +101,12 @@
             lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
         });
 
-        fct_IniciarTablaPlantillas('#tbl_Plantillas');
+        fct_IniciarTablaTipoAsientos('#tbl_TipoAsientos');
     });
 
-    function fct_IniciarTablaPlantillas(IdTabla) {
+    function fct_IniciarTablaTipoAsientos(IdTabla) {
         // Inicializar DataTables con botones
-        dtUsuarios = $(IdTabla).DataTable({
+        dtAsientos = $(IdTabla).DataTable({
             buttons: [
                 {
                     extend: 'copy',
@@ -130,7 +119,7 @@
                     text: '<i class="bi bi-file-earmark-excel"></i>',
                     titleAttr: 'Exportar a Excel',
                     className: 'btn btn-success',
-                    filename: 'Reembolsos' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Tipos de asientos' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     footer: true,
                     exportOptions:
                     {
@@ -143,7 +132,7 @@
                     text: '<i class="bi bi-file-earmark-pdf"></i>',
                     titleAttr: 'Exportar a PDF',
                     className: 'btn btn-danger',
-                    filename: 'Reembolsos' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Tipos de asientos' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     exportOptions:
                     {
                         stripHtml: true,
@@ -170,9 +159,18 @@
                     className: 'btn btn-warning',
                     columns: ':not(.noVis)',
                 },
+                {
+                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo tipo asiento',
+                    className: 'btn bg-success m-1',
+                    titleAttr: 'Nuevo',
+                    action: function (e, dt, node, config) {
+                        fct_TipoAsientoNuevo();
+                    },
+                },
             ],
+
             ajax: {
-                url: "/trabajadores/atencion/GetData_Reembolsos",
+                url: "/trabajadores/viajes/GetData_TipoAsiento",
                 type: "GET",
                 datatype: "json",
                 data: function (d) {
@@ -191,22 +189,16 @@
                 },
             },
             columns: [
-                { data: "numeroComprobante", name: "numeroComprobante" },
-                { data: "nombreCompleto", name: "nombreCompleto" },
-                { data: "asiento", name: "asiento"},
-                { data: "origen_destino", name: "origen_destino"},
+                { data: "id", name: "id" },
+                { data: "nombre", name: "nombre" },
+                { data: "precio", name: "precio" },
                 {
-                    data: "estado",
-                    name: "estado",
+                    data: null,
+                    name: null,
                     render: function (data, type, row) {
-                        
-                        if (data === 'ACEPTADO') {
-                            return `<span class="badge bg-success">ACEPTADO</span>`;
-                        } else if (data === 'PENDIENTE') {
-                            return `<span class="badge bg-secondary">PENDIENTE</span>`;
-                        }else{
-                            return `<span class="badge bg-danger">RECHAZADO</span>`;
-                        }
+                        return `<div>
+                            <img src="/Static/${data.icono}" class="img-thumbnail" style="max-width: 100px;">
+                        </div>`;
                     },
                     className: 'text-center align-middle',
                 },
@@ -215,27 +207,32 @@
                     name: null,
                     render: function (data, type, row) {
                         return `
-                        <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 bg-green" onclick="fctAceptarReembolso('${data.id}')" title="Aceptar Reembolso"><i class="bi bi-check"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fctRechazarReembolso('${data.id}')" title="Rechazar Reembolso"><i class="	bi bi-x"></i></button>
-                        </div>
-                        `;
+                <div class="flex-wrap btn-group">
+                    <button class="btn btn-xs m-1 btn-info" onclick="fct_AsientoVer('${row.id}')" title="Ver asiento"><i class="bi bi-eye"></i></button>
+                    <button class="btn btn-xs m-1 btn-primary" onclick="fct_AsientoEditar('${row.id}')" title="Editar asiento"><i class="bi bi-pencil-square"></i></button>
+                    <button class="btn btn-xs m-1 btn-warning" onclick="fct_AsientoDarBaja('${row.id}')" title="Dar de baja asiento"><i class="bi bi-arrow-down-circle"></i></button>
+                    <button class="btn btn-xs m-1 btn-danger" onclick="fct_AsientoEliminar('${row.id}')" title="Eliminar asiento"><i class="bi bi-trash"></i></button>
+                </div>
+            `;
                     },
                     className: 'text-center align-middle',
+                    orderable: false
                 }
             ],
+
             columnDefs: [
                 {
                     targets: [0],
                     className: "text-center align-middle",
                 },
                 {
-                    targets: [1, 2, 3,4],
-                    className: 'align-middle',
+                    targets: [1, 2, 3, 4],
+                    className: 'text-center align-middle',
                 },
                 {
-                    targets: [3],
+                    targets: [4],
                     orderable: false,
+                    className: 'text-center align-middle',
                     width: '10%',
                 },
             ],
@@ -264,144 +261,94 @@
         });
     }
 
-     $('#filtroEstado').on('change', function () {
-        const estado = $(this).val();
-        dtUsuarios.column(4).search(estado).draw();
-    });
-
-    function fct_PlantillaNuevo() {
-        window.location.href = '/trabajadores/configuracion/PlantillaNuevo';
+    function fct_AsientoNuevo() {
+        window.location.href = '/trabajadores/viajes/AsientoNuevo';
     }
 
-    function fctAceptarReembolso(Id) {
-         Swal.fire({
-            title: "¿Estás seguro?",
-            text: "Esta acción aceptará la solicitud de reembolso. ¿Deseas continuar?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Sí, aceptar",
-            cancelButtonText: "Cancelar",
-            reverseButtons: true // Invertir el orden de los botones
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                url: `/trabajadores/atencion/cambiarEstadoReembolso`,
-                type: "POST",
-                contentType: "application/json",
-                data: JSON.stringify({ Id: Id, estado: 'ACEPTADO' }), 
-                success: function (response) {
-                    if (response.Status === "success") {
-                        fct_IniciarTablaPlantillas('#tbl_Plantillas');
-                        $('#filtroEstado').trigger('change');
-                        toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                    } else {
-                        toastr.error(response.Msj, "MENSAJE DE SISTEMA");
-                        console.error('Error: ' + response.Msj);
-                    }
-                },
-                error: function () {
-                    toastr.error("Error al conectar con el servidor", "MENSAJE DE SISTEMA");
-                }
-            });
-            }
-        });
+    function fct_AsientoEditar(Id) {
+        window.location.href = `/trabajadores/viajes/EditarAsiento/${Id}`;
     }
 
-    function fct_PlantillaVer(Id) {
-        
+    function fct_AsientoVer(Id) {
+        window.location.href = `/trabajadores/viajes/VerAsiento/${Id}`;
     }
 
-    function fctRechazarReembolso(Id) {
+    function fct_AsientoEliminar(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción rechazará la solicitud de reembolso. ¿Deseas continuar?",
+            text: "Esta acción eliminará al asiento. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             cancelButtonColor: "#d33",
-            confirmButtonText: "Sí, rechazar",
+            confirmButtonText: "Sí, eliminar",
             cancelButtonText: "Cancelar",
             reverseButtons: true // Invertir el orden de los botones
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                url: `/trabajadores/atencion/cambiarEstadoReembolso`,
-                type: "POST",
-                contentType: "application/json",
-                data: JSON.stringify({ Id: Id, estado: 'RECHAZADO' }), 
-                success: function (response) {
-                    if (response.Status === "success") {
-                        fct_IniciarTablaPlantillas('#tbl_Plantillas');
-                        $('#filtroEstado').trigger('change');
-                        toastr.success(response.Msj, "MENSAJE DE SISTEMA");
-                    } else {
-                        toastr.error(response.Msj, "MENSAJE DE SISTEMA");
-                        console.error('Error: ' + response.Msj);
+                    url: `/trabajadores/viajes/EliminarAsiento/${Id}`,  // Pasamos el ID en la URL
+                    type: "POST",
+                    contentType: "application/json",
+                    success: function (response) {
+                        if (response.Status === "success") {
+                            if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                return;
+                            }
+                            fct_IniciarTablaAsientos('#tbl_Asientos');
+                            toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                        } else {
+                            toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                            console.error('Error: ' + response.Msj);
+                        }
+                    },
+                    error: function (xhr, Status, error) {
+                        toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                        console.error('Error:' + error);
                     }
-                },
-                error: function () {
-                    toastr.error("Error al conectar con el servidor", "MENSAJE DE SISTEMA");
-                }
-            });
+                });
             }
         });
     }
 
-    function newexportaction(e, dt, button, config) {
-        // Guardar el contenido original del botón
-        var originalText = $(button).html();
-        // Cambiar el contenido del botón para incluir un spinner
-        $(button).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
-
-        var self = this;
-        var oldStart = dt.settings()[0]._iDisplayStart;
-        dt.one('preXhr', function (e, s, data) {
-            // Just this once, load all data from the server...
-            data.start = 0;
-            data.length = 2147483647;
-            dt.one('preDraw', function (e, settings) {
-                // Call the original action function
-                if (button[0].className.indexOf('buttons-copy') >= 0 || button[0].className.indexOf('btn btn-primary') >= 0) {
-                    $.fn.dataTable.ext.buttons.copyHtml5.action.call(self, e, dt, button, config);
-                }
-                else if (button[0].className.indexOf('btn btn-success') >= 0 || button[0].className.indexOf('btn btn-success') >= 0) {
-                    $.fn.dataTable.ext.buttons.excelHtml5.available(dt, config) ?
-                        $.fn.dataTable.ext.buttons.excelHtml5.action.call(self, e, dt, button, config) :
-                        $.fn.dataTable.ext.buttons.excelFlash.action.call(self, e, dt, button, config);
-                }
-                else if (button[0].className.indexOf('buttons-csv') >= 0) {
-                    $.fn.dataTable.ext.buttons.csvHtml5.available(dt, config) ?
-                        $.fn.dataTable.ext.buttons.csvHtml5.action.call(self, e, dt, button, config) :
-                        $.fn.dataTable.ext.buttons.csvFlash.action.call(self, e, dt, button, config);
-                }
-                else if (button[0].className.indexOf('buttons-pdf') >= 0 || button[0].className.indexOf('btn btn-danger') >= 0) {
-                    $.fn.dataTable.ext.buttons.pdfHtml5.available(dt, config) ?
-                        $.fn.dataTable.ext.buttons.pdfHtml5.action.call(self, e, dt, button, config) :
-                        $.fn.dataTable.ext.buttons.pdfFlash.action.call(self, e, dt, button, config);
-                }
-                else if (button[0].className.indexOf('buttons-print') >= 0 || button[0].className.indexOf('btn btn-info') >= 0) {
-                    $.fn.dataTable.ext.buttons.print.action(e, dt, button, config);
-                }
-                // Restaurar el contenido original del botón después de que la exportación ha concluido
-                $(button).html(originalText);
-
-                dt.one('preXhr', function (e, s, data) {
-                    // DataTables thinks the first item displayed is index 0, but we're not drawing that.
-                    // Set the property to what it was before exporting.
-                    settings._iDisplayStart = oldStart;
-                    data.start = oldStart;
+    function fct_AsientoDarBaja(Id) {
+        Swal.fire({
+            title: "¿Estás seguro?",
+            text: "Esta acción le dará de baja al asiento. ¿Deseas continuar?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sí, dar de baja",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true // Invertir el orden de los botones
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/trabajadores/viajes/DarBajaAsiento/${Id}`,  // Pasamos el ID en la URL
+                    type: "POST",
+                    contentType: "application/json",
+                    success: function (response) {
+                        if (response.Status === "success") {
+                            if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                return;
+                            }
+                            fct_IniciarTablaAsientos('#tbl_Asientos');
+                            toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                        } else {
+                            toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                            console.error('Error: ' + response.Msj);
+                        }
+                    },
+                    error: function (xhr, Status, error) {
+                        toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                        console.error('Error:' + error);
+                    }
                 });
-                // Reload the grid with the original page. Otherwise, API functions like table.cell(this) don't work properly.
-                setTimeout(dt.ajax.reload, 0);
-                // Prevent rendering of the full data to the DOM
-                return false;
-            });
+            }
         });
-        // Requery the server with the new one-time export settings
-        dt.ajax.reload();
-        
-    };
+    }
 </script>
 {% endblock %}

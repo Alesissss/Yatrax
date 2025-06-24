@@ -18,7 +18,7 @@ const CONFIG = {
         PROCESAR_PAGO: '/ecommerce/home/procesar_pago',
         MARCAR_ASIENTO_OCUPADO: '/ecommerce/home/ocuparAsiento',
         MARCAR_ASIENTO_DISPONIBLE: '/ecommerce/home/liberarAsiento',
-        DATOS_CAMBIORUTA: '/ecommerce/home/obtenerDatosPasajero',
+        DATOS_CAMBIORUTA: '/ecommerce/home/cambiarEstadoPasaje'
     },
     GRILLA: {
         FILAS: 15,
@@ -133,10 +133,15 @@ const NavigationManager = {
 
         // Controlar acceso a pestañas
         tabs.forEach((tab, index) => {
-            if (index > AppState.maxStep) {
+            if (index === 2) {
+                // Siempre desactivar el paso 2
+                tab.classList.add('disabled');
+                tab.setAttribute('disabled', 'false');
+            } else if (index > AppState.maxStep) {
                 tab.classList.add('disabled');
                 tab.setAttribute('disabled', 'true');
             } else {
+                tab.classList.remove('disabled');
                 tab.removeAttribute('disabled');
             }
         });
@@ -174,6 +179,10 @@ const NavigationManager = {
 // =============================================================================
 // GESTIÓN DE BÚSQUEDA Y DATOS
 // =============================================================================
+
+document.getElementById('div_vuelta').style.visibility = 'hidden';
+document.getElementById('step-0').style.display = 'none';
+
 
 const SearchManager = {
     capturarDatos() {
@@ -1221,6 +1230,9 @@ const FormManager = {
             <input class="form-check-input" type="checkbox" id="esMenor_${asientoId}" disabled readonly>
             <label class="form-check-label" for="esMenor_${asientoId}">Es menor de edad</label>
             </div>
+            <div class="mb-2" style="display: none;">
+            <label id="asiento_id">${asientoId}</label>
+            </div>
             <button class="btn btn-secondary w-100" disabled
             onclick='FormManager.enviarDatosPasajero("${asientoNombre}", ${asientoId}); 
             try {
@@ -2166,7 +2178,25 @@ const PaymentManager = {
         this.mostrarLoader();
 
         try {
-            // Llamada al servidor
+            // Primero cambia el estado del pasaje
+            const comprobante = document.getElementById('comprobante')?.value;
+            if (!comprobante) {
+                throw new Error("Número de comprobante no encontrado");
+            }
+
+            const cambiarEstado = await fetch('/ecommerce/home/cambiarEstadoPasaje', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ comprobante })
+            });
+
+            const estadoResultado = await cambiarEstado.json();
+
+            if (estadoResultado.Status !== 'success') {
+                throw new Error(estadoResultado.Msj || 'No se pudo cambiar el estado del pasaje');
+            }
+
+            // Luego procesa el pago
             const response = await fetch(CONFIG.RUTAS.PROCESAR_PAGO, {
                 method: 'POST',
                 headers: {
@@ -2177,7 +2207,6 @@ const PaymentManager = {
 
             const resultado = await response.json();
 
-            // Ocultar loader
             this.ocultarLoader();
 
             if (resultado.Status === 'success') {

@@ -1,6 +1,9 @@
 {% extends "maestra.html" %}
 {% block titulo %}YATRAX - Tranferencia de pasaje{%endblock %}
 {% block contenido %}
+<script src="{{ url_for('static', filename='js/jquery.min.js')}}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/locale/es.min.js"></script>
 
 <style>
   #editMenor {
@@ -678,14 +681,14 @@
         contenedorInputExtra.innerHTML = `
       <label for="cciRem" class="form-label">CCI</label>
       <input type="text" id="cciRem" class="form-control" placeholder="Número de CCI (20 dígitos)" maxlength="20" />
-    `;
-      } else if (tipoTexto.includes("billetera")) {
-        contenedorInputExtra.innerHTML = `
-      <label for="celularRem" class="form-label">Número de celular</label>
-      <input type="tel" id="celularRem" class="form-control" placeholder="Número asociado a billetera" maxlength="9" />
-    `;
-      }
-    });
+      `;
+          } else if (tipoTexto.includes("billetera")) {
+            contenedorInputExtra.innerHTML = `
+        <label for="celularRem" class="form-label">Número de celular</label>
+        <input type="tel" id="celularRem" class="form-control" placeholder="Número asociado a billetera" maxlength="9" />
+      `;
+        }
+      });
 
     // Ejecutar al cargar la página si ya hay un valor seleccionado
     setTimeout(() => {
@@ -794,32 +797,33 @@
       }
     });
 
-    document.getElementById("btnGuardarReembolso").addEventListener("click", () => {
-      const numeroComprobante = document.getElementById("comprobante").value.trim();
-      const tipoDocId = document.getElementById("tipoDocNuevoRem").value;
-      const tipoDocTexto = document.getElementById("tipoDocNuevoRem").selectedOptions[0]?.text || "";
-      const numeroDoc = document.getElementById("numeroDocNuevoRem").value.trim();
-      const correo = document.getElementById("correoRem").value.trim();
-      const nombres = document.getElementById("nombresRem").value.trim();
-      const apellidoPaterno = document.getElementById("apellidoPaternoRem").value.trim();
-      const apellidoMaterno = document.getElementById("apellidoMaternoRem").value.trim();
-      const fechaNacimiento = document.getElementById("fechaNacimientoRem").value;
-      const telefono = document.getElementById("telefonoRem").value.trim();
-      const sexo = document.querySelector('input[name="sexoRem"]:checked')?.value || null;
-      const tipoComprobante = document.getElementById("tipoComprobante").value;
-      const metodoPago = document.getElementById("metodoPagoRem").value;
-      const tipoMetodoPago = document.getElementById("tipoMetodoPagoRem").value;
-      const idPasaje = document.getElementById("pasCod").value;
-
-      // VALIDACIONES BÁSICAS
-      if (!numeroComprobante || !idPasaje) {
-        toastr.warning("Debe buscar un pasaje válido primero", "MENSAJE DEL SISTEMA");
-        return;
-      }
-      if (!tipoDocId || !numeroDoc || !correo || !nombres || !telefono || !tipoComprobante || !metodoPago || !tipoMetodoPago) {
-        toastr.warning("Complete todos los campos requeridos", "MENSAJE DEL SISTEMA");
-        return;
-      }
+      document.getElementById("btnGuardarReembolso").addEventListener("click", () => {
+        const numeroComprobante = document.getElementById("comprobante").value.trim();
+        const tipoDocId = document.getElementById("tipoDocNuevoRem").value;
+        const tipoDocTexto = document.getElementById("tipoDocNuevoRem").selectedOptions[0]?.text || "";
+        const numeroDoc = document.getElementById("numeroDocNuevoRem").value.trim();
+        const correo = document.getElementById("correoRem").value.trim();
+        const nombres = document.getElementById("nombresRem").value.trim();
+        const apellidoPaterno = document.getElementById("apellidoPaternoRem").value.trim();
+        const apellidoMaterno = document.getElementById("apellidoMaternoRem").value.trim();
+        const fechaNacimiento = document.getElementById("fechaNacimientoRem").value;
+        const telefono = document.getElementById("telefonoRem").value.trim();
+        const sexo = document.querySelector('input[name="sexoRem"]:checked')?.value || null;
+        const tipoComprobante = document.getElementById("tipoComprobante").value;
+        const metodoPago = document.getElementById("metodoPagoRem").value;
+        const tipoMetodoPago = document.getElementById("tipoMetodoPagoRem").value;
+        const idPasaje = document.getElementById("pasCod").value;
+        const celPag = document.getElementById("celularRem")?.value.trim() || "";
+        const cciPag = document.getElementById("cciRem")?.value.trim() || "";
+        // VALIDACIONES BÁSICAS
+        if (!numeroComprobante || !idPasaje) {
+          toastr.warning("Debe buscar un pasaje válido primero", "MENSAJE DEL SISTEMA");
+          return;
+        }
+        if (!tipoDocId || !numeroDoc || !correo || !nombres || !telefono || !tipoComprobante || !metodoPago || !tipoMetodoPago) {
+          toastr.warning("Complete todos los campos requeridos", "MENSAJE DEL SISTEMA");
+          return;
+        }
 
       // Validar email
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
