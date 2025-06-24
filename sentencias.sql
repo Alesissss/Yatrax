@@ -478,6 +478,7 @@ CREATE TABLE conf_general (
     max_pasajes_venta INT NOT NULL,
     tiempo_maximo_venta_minutos DECIMAL(9,2),
     viajesReprogramables BOOLEAN NOT NULL,
+    max_dias_vigencia_reprogramacion INT NOT NULL,
     precioCambioRuta DECIMAL(9,2) NOT NULL,
     precioTransferencia DECIMAL(9,2) NOT NULL
 );
@@ -3088,7 +3089,7 @@ INSERT INTO usuarios (id, id_personal, email, password, imagen, estado, id_tipou
 '/Static/img/trabajadores/luis.jpg', 1, 1,'2025-03-06 20:06:14','SYSTEM');
 
 -- Tabla de configuración general
-INSERT INTO conf_general (id, igv, tarifaBase, max_pasajes_venta, tiempo_maximo_venta_minutos, viajesReprogramables) VALUES (1, 0.18, 10, 4, 10, 0);
+INSERT INTO conf_general (id, igv, tarifaBase, max_pasajes_venta, tiempo_maximo_venta_minutos, viajesReprogramables, max_dias_vigencia_reprogramacion, precioCambioRuta, precioTransferencia) VALUES (1, 0.18, 10, 4, 10, 0, 7, 50, 50);
 
 -- Tabla menus
 INSERT INTO conf_menus (id, nombre, estado) VALUES (1, 'M_USUARIOS', 1);
@@ -8022,7 +8023,10 @@ CREATE PROCEDURE SP_MODIFICAR_CONF_GENERAL(
     IN P_TARIFABASE DECIMAL(9,2),
     IN P_MAXPASAJESVENTA INT,
     IN P_TIEMPO_MAXIMO_VENTA_MINUTOS INT,
-    IN P_VIAJES_REPROGRAMABLES INT
+    IN P_VIAJES_REPROGRAMABLES INT,
+    IN P_DIAS_REPROGRAMACION INT,
+    IN P_PRECIO_CAMBIO_RUTA DECIMAL(9,2),
+    IN P_PRECIO_TRANSFERENCIA DECIMAL(9,2)
 )
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -8039,7 +8043,10 @@ BEGIN
             tarifaBase = P_TARIFABASE,
             max_pasajes_venta = P_MAXPASAJESVENTA,
             tiempo_maximo_venta_minutos = P_TIEMPO_MAXIMO_VENTA_MINUTOS,
-            viajesReprogramables = P_VIAJES_REPROGRAMABLES;
+            viajesReprogramables = P_VIAJES_REPROGRAMABLES,
+            max_dias_vigencia_reprogramacion = P_DIAS_REPROGRAMACION,
+            precioCambioRuta = P_PRECIO_CAMBIO_RUTA,
+            precioTransferencia = P_PRECIO_TRANSFERENCIA;
 
         SET @MSJ = 'Configuración general modificada correctamente';
     ELSE
