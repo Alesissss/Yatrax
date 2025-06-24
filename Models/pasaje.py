@@ -545,15 +545,16 @@ class Pasaje:
             sql_update = """
                 UPDATE pasaje
                 SET esPasajeLibre = 1,
-                    enTransaccion = 1
+                    enTransaccion = 1,
+                    esPasajeNormal = 0,
+                    esReserva = 0
                 WHERE id = %s;
             """
             conexion.ejecutar(sql_update, (id_pasaje,), auto_commit=False)
             
             sql_update2 = """
                 UPDATE detalle_viaje_asiento
-                SET idAsiento = NULL,
-                    esDisponible = 0
+                SET esDisponible = 1
                 WHERE id = %s;
             """
             conexion.ejecutar(sql_update2, (idDetViajeAs,), auto_commit=False)
@@ -577,6 +578,7 @@ class Pasaje:
             sql_update = """
                 UPDATE pasaje
                 SET esTransferencia = 1,
+                    esReserva = 0,
                     enTransaccion   = 1
                 WHERE id = %s;
             """
