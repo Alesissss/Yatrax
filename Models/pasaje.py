@@ -4,7 +4,6 @@ import random
 import os
 import xml.etree.ElementTree as ET
 from jinja2 import Environment, FileSystemLoader
-from weasyprint import HTML
 
 from Models.tipoDocumento import TipoDocumento
 class Pasaje:
@@ -399,32 +398,23 @@ class Pasaje:
             # lo que da un total de 11,881,376,000 combinaciones posibles.
     
     @classmethod
-    def cambiar_a_transaccion_1(cls, numComprobante):
+    def cambiar_estado_transaccion(cls, id_pasaje):
         conexion = bd.Conexion()
         try:
-            # Cambia el estado de un pasaje a transacción
-            conexion.ejecutar(
-                "UPDATE pasaje SET enTransaccion = 1 WHERE numeroComprobante = %s;",
-                (numComprobante,)
-            )
-            return {"msj": "Estado de pasaje actualizado", "msj2": None}
+            sql_select = "SELECT enTransaccion FROM pasaje WHERE id = %s;"
+            filas = conexion.obtener(sql_select, (id_pasaje,))
+            if not filas:
+                return {"error": "Pasaje no encontrado"}
+
+            estado_actual = filas[0]['enTransaccion']
+            nuevo_estado = 0 if estado_actual else 1
+
+            sql_update = "UPDATE pasaje SET enTransaccion = %s WHERE id = %s;"
+            conexion.ejecutar(sql_update, (nuevo_estado, id_pasaje))
+
+            return {"nuevoEstado": nuevo_estado}
         except Exception as e:
-            return {"msj": None, "msj2": f"Error al cambiar estado de pasaje: {e}"}
-        finally:
-            conexion.cerrar()
-    
-    @classmethod
-    def cambiar_a_transaccion_0(cls, numComprobante):
-        conexion = bd.Conexion()
-        try:
-            # Cambia el estado de un pasaje a no transacción
-            conexion.ejecutar(
-                "UPDATE pasaje SET enTransaccion = 0 WHERE numeroComprobante = %s;",
-                (numComprobante,)
-            )
-            return {"msj": "Estado de pasaje actualizado", "msj2": None}
-        except Exception as e:
-            return {"msj": None, "msj2": f"Error al cambiar estado de pasaje: {e}"}
+            raise
         finally:
             conexion.cerrar()
 
@@ -496,7 +486,6 @@ class Pasaje:
                 WHERE dp.viajeEnBrazos != 1 AND pas.numeroComprobante = %s;
             """
             filas = conexion.obtener(query, (numComprobante,))
-            print (filas)
             return filas[0] if filas else None
         finally:
             if conexion:
@@ -515,11 +504,75 @@ class Pasaje:
         finally:
             if conexion:
                 conexion.cerrar()
+                
+    @classmethod
+    def obtener_estados_pasaje(cls, id_pasaje):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            sql = """
+                SELECT 
+                    esTransferencia AS esTransferencia,
+                    esReembolso AS esReembolso,
+                    esCambioRuta AS esCambioRuta,
+                    esPasajeLibre AS esPasajeLibre
+                FROM pasaje
+                WHERE id = %s AND enTransaccion = 1;
+            """
+            resultado = conexion.obtener(sql, (id_pasaje,))[0]
+            if resultado['esTransferencia'] == 1:
+                resultado['estado'] = 'Ya se ha realizado una transferencia de este pasaje.'
+            elif resultado['esReembolso'] == 1:
+                resultado['estado'] = 'Ya se ha realizado un reembolso de este pasaje.'
+            elif resultado['esCambioRuta'] == 1:
+                resultado['estado'] = 'Ya se ha realizado un cambio de ruta de este pasaje.'
+            elif resultado['esPasajeLibre'] == 1:
+                resultado['estado'] = 'Ya se ha convertido a pasaje libre este pasaje.'
+            else:
+                resultado['estado'] = 'El pasaje se encuentra en un proceso de transacción.'
+            return resultado
+        
+        finally:
+            if conexion:
+                conexion.cerrar()
     
     @classmethod
-    def realizarTransferencia(cls, pasaje: dict, persona1: dict, persona2: dict = None):
-        conexion = bd.Conexion()
+    def convertirPasajeLibre(cls, id_pasaje, idDetViajeAs):
+        conexion = None
         try:
+            conexion = bd.Conexion()
+            
+            sql_update = """
+                UPDATE pasaje
+                SET esPasajeLibre = 1,
+                    enTransaccion = 1
+                WHERE id = %s;
+            """
+            conexion.ejecutar(sql_update, (id_pasaje,), auto_commit=False)
+            
+            sql_update2 = """
+                UPDATE detalle_viaje_asiento
+                SET idAsiento = NULL,
+                    esDisponible = 0
+                WHERE id = %s;
+            """
+            conexion.ejecutar(sql_update2, (idDetViajeAs,), auto_commit=False)
+
+            conexion.conn.commit()
+            
+            return {"msj": "Pasaje convertido a libre exitosamente", "msj2": None}
+        except Exception as e:
+            conexion.conn.rollback()
+            return {"msj": None, "msj2": f"Error al convertir pasaje a libre: {e}"}
+        finally:
+            if conexion:
+                conexion.cerrar()
+
+    @classmethod
+    def realizarTransferencia(cls, pasaje: dict, persona1: dict, persona2: dict = None):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
             # 1) Marcar el pasaje original como transferencia
             sql_update = """
                 UPDATE pasaje
@@ -612,9 +665,9 @@ class Pasaje:
         except Exception as e:
             conexion.conn.rollback()
             return {"msj": None, "msj2": f"Error al realizar transferencia: {e}"}
-
         finally:
-            conexion.cerrar()
+            if conexion:
+                conexion.cerrar()
 
         
     @classmethod
@@ -744,3 +797,5 @@ class Pasaje:
         finally:
             if conexion:
                 conexion.cerrar()
+                
+    

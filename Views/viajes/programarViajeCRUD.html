@@ -162,6 +162,7 @@
                                             </div>
                                         </div>
                                         <div class="col-md-8">
+                                            {% if btnId == 'btn_Aceptar' %}
                                             <div class="card card-outline card-primary h-100">
                                                 <div class="card-header">
                                                     <h3 class="mb-0 text-center">
@@ -204,6 +205,50 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            {% else %}
+                                            <div class="card card-outline card-primary h-100">
+                                                <div class="card-header">
+                                                    <h3 class="mb-0 text-center">
+                                                        <i class="fas fa-route me-2"></i>
+                                                        Tracking del viaje (Solo disponible para: "Ver viaje")
+                                                    </h3>
+                                                    <p class="mb-0 text-center mt-2">Seguimiento en tiempo real del
+                                                        viaje programado</p>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <!-- Mapa -->
+                                                            <div class="position-relative">
+                                                                <div class="status-badge">
+                                                                    <span id="statusBadge"
+                                                                        class="badge bg-secondary">Sin ruta
+                                                                        seleccionada</span>
+                                                                </div>
+                                                                <div id="map"></div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-12 mt-4">
+                                                            <!-- Registro del Viaje -->
+                                                            <div class="travel-log">
+                                                                <h5 class="mb-3">
+                                                                    <i class="fas fa-clipboard-list me-2"></i>
+                                                                    Registro del viaje
+                                                                </h5>
+                                                                <div id="travelLogContent">
+                                                                    <div class="text-center text-muted py-4">
+                                                                        <i class="fas fa-info-circle fa-2x mb-2"></i>
+                                                                        <p>Seleccione una ruta para ver el
+                                                                            registro del viaje</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>
@@ -227,7 +272,8 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-warning text-dark">
-                <h5 id="modal-title" class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Viaje No Iniciado</h5>
+                <h5 id="modal-title" class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Viaje No
+                    Iniciado</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span>×</span>
                 </button>
@@ -239,7 +285,8 @@
                     tracking estará disponible una vez que el viaje inicie.</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal" aria-label="Close">Entendido</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                    aria-label="Close">Entendido</button>
             </div>
         </div>
         <!-- /.modal-content -->
@@ -949,171 +996,175 @@
 </script>
 <!-- Tracking -->
 <script>
-    let map;
-    let currentRoute;
-    let routeMarkers = [];
-    let vehicleMarkerLive;
+    let esVer = '{{ btnId }}' === 'btn_Aceptar' ? true : false;
 
-    const iconoSucursal = L.icon({
-        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
-    });
+    if (esVer) {
+        let map;
+        let currentRoute;
+        let routeMarkers = [];
+        let vehicleMarkerLive;
 
-    const iconoVehiculo = L.divIcon({
-        html: '<i class="fas fa-bus fa-2x text-primary vehicle-marker"></i>',
-        iconSize: [30, 30],
-        iconAnchor: [15, 15],
-        className: 'vehicle-icon'
-    });
-
-    function initMap() {
-        map = L.map('map').setView([-9.19, -75.0152], 6);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 18,
-            minZoom: 5,
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-
-        drawRouteFromBackend(Number('{{ viaje.id }}'));
-        setInterval(() => actualizarPosicionVehiculo(Number('{{ viaje.id }}')), 3000);
-    }
-
-    function clearMap() {
-        if (currentRoute) map.removeControl(currentRoute);
-        if (vehicleMarkerLive) {
-            map.removeLayer(vehicleMarkerLive);
-            vehicleMarkerLive = null;
-        }
-        routeMarkers.forEach(marker => map.removeLayer(marker));
-        routeMarkers = [];
-    }
-
-    function drawRouteFromBackend(viajeId) {
-        showSpinner();
-        $.getJSON('/trabajadores/viajes/GetData_TrackingViaje', { id: viajeId }, function (response) {
-            if (response.Status === "success") {
-                const data = response.data;
-                const escalas = data.escalas;
-                const viaje = data.viaje;
-
-                updateStatusBadge(viaje.estado_viaje);
-
-                if (viaje.estado_viaje === 'PROGRAMADO') {
-                    showSpinner(false);
-                    new bootstrap.Modal(document.getElementById('modalViajeNoIniciado')).show();
-                    // return;
-                }
-
-                clearMap();
-
-                const waypoints = escalas.map(escala => {
-                    const lat = parseFloat(escala.latitud);
-                    const lng = parseFloat(escala.longitud);
-
-                    const marker = L.marker([lat, lng], { icon: iconoSucursal })
-                        .addTo(map)
-                        .bindPopup(`<b>${escala.nombre}</b><br>Orden: ${escala.nro_orden}`);
-
-                    console.log(marker);
-                    routeMarkers.push(marker);
-
-                    return L.latLng(lat, lng);
-                });
-
-
-                currentRoute = L.Routing.control({
-                    waypoints: waypoints,
-                    routeWhileDragging: false,
-                    createMarker: () => null,
-                    lineOptions: {
-                        styles: [{ color: '#007bff', weight: 4, opacity: 0.8 }]
-                    }
-                }).addTo(map);
-
-                const group = new L.featureGroup(routeMarkers);
-                map.fitBounds(group.getBounds().pad(0.1));
-
-                updateTravelLog([]);
-                setTimeout(() => showSpinner(false), 1000);
-            } else {
-                showSpinner(false);
-                console.error("Error al obtener datos:", response.Msj);
-            }
+        const iconoSucursal = L.icon({
+            iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
         });
-    }
 
-    function actualizarPosicionVehiculo(viajeId) {
-        fetch(`/trabajadores/viajes/api/obtener_posicion?id_viaje=${viajeId}`)
-            .then(res => res.json())
-            .then(response => {
+        const iconoVehiculo = L.divIcon({
+            html: '<i class="fas fa-bus fa-2x text-primary vehicle-marker"></i>',
+            iconSize: [30, 30],
+            iconAnchor: [15, 15],
+            className: 'vehicle-icon'
+        });
+
+        function initMap() {
+            map = L.map('map').setView([-9.19, -75.0152], 6);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 18,
+                minZoom: 5,
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            drawRouteFromBackend(Number('{{ viaje.id }}'));
+            setInterval(() => actualizarPosicionVehiculo(Number('{{ viaje.id }}')), 3000);
+        }
+
+        function clearMap() {
+            if (currentRoute) map.removeControl(currentRoute);
+            if (vehicleMarkerLive) {
+                map.removeLayer(vehicleMarkerLive);
+                vehicleMarkerLive = null;
+            }
+            routeMarkers.forEach(marker => map.removeLayer(marker));
+            routeMarkers = [];
+        }
+
+        function drawRouteFromBackend(viajeId) {
+            showSpinner();
+            $.getJSON('/trabajadores/viajes/GetData_TrackingViaje', { id: viajeId }, function (response) {
                 if (response.Status === "success") {
-                    const { lat, lng } = response.data;
+                    const data = response.data;
+                    const escalas = data.escalas;
+                    const viaje = data.viaje;
 
-                    const latlng = L.latLng(lat, lng);
+                    updateStatusBadge(viaje.estado_viaje);
 
-                    if (vehicleMarkerLive) {
-                        vehicleMarkerLive.setLatLng(latlng);
-                    } else {
-                        vehicleMarkerLive = L.marker(latlng, { icon: iconoVehiculo })
-                            .addTo(map)
-                            .bindPopup("Vehículo en tiempo real");
+                    if (viaje.estado_viaje === 'PROGRAMADO') {
+                        showSpinner(false);
+                        new bootstrap.Modal(document.getElementById('modalViajeNoIniciado')).show();
+                        // return;
                     }
 
-                    // 👇 Esta línea hace que el mapa se mueva al vehículo
-                    map.panTo(latlng);
+                    clearMap();
+
+                    const waypoints = escalas.map(escala => {
+                        const lat = parseFloat(escala.latitud);
+                        const lng = parseFloat(escala.longitud);
+
+                        const marker = L.marker([lat, lng], { icon: iconoSucursal })
+                            .addTo(map)
+                            .bindPopup(`<b>${escala.nombre}</b><br>Orden: ${escala.nro_orden}`);
+
+                        console.log(marker);
+                        routeMarkers.push(marker);
+
+                        return L.latLng(lat, lng);
+                    });
+
+
+                    currentRoute = L.Routing.control({
+                        waypoints: waypoints,
+                        routeWhileDragging: false,
+                        createMarker: () => null,
+                        lineOptions: {
+                            styles: [{ color: '#007bff', weight: 4, opacity: 0.8 }]
+                        }
+                    }).addTo(map);
+
+                    const group = new L.featureGroup(routeMarkers);
+                    map.fitBounds(group.getBounds().pad(0.1));
+
+                    updateTravelLog([]);
+                    setTimeout(() => showSpinner(false), 1000);
+                } else {
+                    showSpinner(false);
+                    console.error("Error al obtener datos:", response.Msj);
                 }
-            })
-            .catch(err => console.error("Error al obtener posición:", err));
-    }
-
-    function updateStatusBadge(estado) {
-        const badge = document.getElementById('statusBadge');
-        badge.className = 'badge ';
-        switch (estado) {
-            case 'PROGRAMADO':
-                badge.className += 'bg-warning text-dark';
-                badge.textContent = 'Viaje no iniciado';
-                break;
-            case 'EN CURSO':
-                badge.className += 'bg-success';
-                badge.textContent = 'Viaje en curso';
-                break;
-            case 'FINALIZADO':
-                badge.className += 'bg-secondary';
-                badge.textContent = 'Viaje finalizado';
-                break;
-            default:
-                badge.className += 'bg-secondary';
-                badge.textContent = 'Sin viaje seleccionada';
+            });
         }
-    }
 
-    function updateTravelLog(registros) {
-        const container = document.getElementById('travelLogContent');
-        if (!registros.length) {
-            container.innerHTML = `
+        function actualizarPosicionVehiculo(viajeId) {
+            fetch(`/trabajadores/viajes/api/obtener_posicion?id_viaje=${viajeId}`)
+                .then(res => res.json())
+                .then(response => {
+                    if (response.Status === "success") {
+                        const { lat, lng } = response.data;
+
+                        const latlng = L.latLng(lat, lng);
+
+                        if (vehicleMarkerLive) {
+                            vehicleMarkerLive.setLatLng(latlng);
+                        } else {
+                            vehicleMarkerLive = L.marker(latlng, { icon: iconoVehiculo })
+                                .addTo(map)
+                                .bindPopup("Vehículo en tiempo real");
+                        }
+
+                        // 👇 Esta línea hace que el mapa se mueva al vehículo
+                        map.panTo(latlng);
+                    }
+                })
+                .catch(err => console.error("Error al obtener posición:", err));
+        }
+
+        function updateStatusBadge(estado) {
+            const badge = document.getElementById('statusBadge');
+            badge.className = 'badge ';
+            switch (estado) {
+                case 'PROGRAMADO':
+                    badge.className += 'bg-warning text-dark';
+                    badge.textContent = 'Viaje no iniciado';
+                    break;
+                case 'EN CURSO':
+                    badge.className += 'bg-success';
+                    badge.textContent = 'Viaje en curso';
+                    break;
+                case 'FINALIZADO':
+                    badge.className += 'bg-secondary';
+                    badge.textContent = 'Viaje finalizado';
+                    break;
+                default:
+                    badge.className += 'bg-secondary';
+                    badge.textContent = 'Sin viaje seleccionada';
+            }
+        }
+
+        function updateTravelLog(registros) {
+            const container = document.getElementById('travelLogContent');
+            if (!registros.length) {
+                container.innerHTML = `
                 <div class="text-center text-muted py-4">
                     <i class="fas fa-info-circle fa-2x mb-2"></i>
                     <p>No hay registros de viaje disponibles</p>
                 </div>`;
-            return;
-        }
-        container.innerHTML = registros.map(registro => `
+                return;
+            }
+            container.innerHTML = registros.map(registro => `
             <div class="travel-log-item">
                 <div class="log-time">${registro.tiempo}</div>
                 <i class="fas ${registro.icono} log-icon"></i>
                 <div class="flex-grow-1">${registro.descripcion}</div>
             </div>`).join('');
-    }
+        }
 
-    function showSpinner(show = true) {
-        const spinner = document.getElementById('loadingSpinner');
-        show ? spinner.classList.remove('d-none') : spinner.classList.add('d-none');
-    }
+        function showSpinner(show = true) {
+            const spinner = document.getElementById('loadingSpinner');
+            show ? spinner.classList.remove('d-none') : spinner.classList.add('d-none');
+        }
 
-    document.addEventListener('DOMContentLoaded', initMap);
+        document.addEventListener('DOMContentLoaded', initMap);
+    }
 </script>
 {% endblock %}
