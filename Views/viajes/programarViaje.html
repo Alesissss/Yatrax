@@ -534,6 +534,28 @@
                                     } else {
                                         toastr.success(res.Msj, "MENSAJE DE SISTEMA");
                                         fct_IniciarTablaViajes('#tbl_Viajes');
+                                        if (mensaje=="¿Estas seguro de dar de baja este viaje? Este viaje tiene pasajes vendidos, se habilitara la opción de reembolso para los clientes afectados."){
+                                            datos ={
+                                            idViaje:Id
+                                        }
+                                         $.ajax({
+                                            url: "/ecommerce/home/enviar_correos_darBaja_Viaje",
+                                            type: "POST",
+                                            contentType: "application/json",
+                                            data: JSON.stringify(datos),
+                                            success: function (response) {
+                                                if (response.status == 'ok') {
+                                                    toastr.success("Correos enviados correctamente", 'MENSAJE DE SISTEMA');
+                                                    return;
+                                                } else {
+                                                    toastr.error("OCurrio algo inesperado al intentar enviar los correos", "MENSAJE DE SISTEMA");
+                                                }
+                                            },
+                                            error: function (xhr, status, error) {
+                                                toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                                            }
+                                        });
+                                        }
                                     }
                                 } else {
                                     toastr.error(res.Msj, "MENSAJE DE SISTEMA");

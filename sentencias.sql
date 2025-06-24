@@ -217,7 +217,7 @@ DROP TABLE IF EXISTS ciudad;
 DROP TABLE IF EXISTS pais;
 DROP TABLE IF EXISTS herramienta;
 DROP TABLE IF EXISTS tipo_herramienta;
-DROP TABLE IF EXISTS tipo_metodoPago;
+DROP TABLE IF EXISTS tipo_metodopago;
 DROP TABLE IF EXISTS terminos_condiciones;
 DROP TABLE IF EXISTS preguntas_frecuentes;
 DROP TABLE IF EXISTS promocion;
@@ -308,8 +308,9 @@ CREATE TABLE tipo_comprobante (
     estado BOOLEAN NOT NULL,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) not null
-    );
-    CREATE TABLE tipo_herramienta(
+);
+
+CREATE TABLE tipo_herramienta(
     id int AUTO_INCREMENT PRIMARY KEY,
     nombre varchar(50),
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -617,6 +618,7 @@ CREATE TABLE herramienta(
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre varchar(60),
     icono varchar(200),
+    precio DECIMAL(9,2),
     id_tipo INT NOT NULL,
     FOREIGN KEY (id_tipo) REFERENCES tipo_herramienta(id)
 );
@@ -983,9 +985,9 @@ INSERT INTO tipo_herramienta (id, nombre) VALUES (4, 'Multimedia');
 
 -- INSERT HERRAMIENTA
 
-INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (1, 'Asiento a 140°','img/herramienta/asiento_140.png',1);
-INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (2, 'Asiento a 160°','img/herramienta/asiento_160.png',1);
-INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (3, 'Asiento cama','img/herramienta/asiento_180.png',1);
+INSERT INTO herramienta (id, nombre, precio, icono,id_tipo) VALUES (1, 'Asiento a 140°', 100, 'img/herramienta/asiento_140.png',1);
+INSERT INTO herramienta (id, nombre, precio, icono,id_tipo) VALUES (2, 'Asiento a 160°', 150, 'img/herramienta/asiento_160.png',1);
+INSERT INTO herramienta (id, nombre, precio, icono,id_tipo) VALUES (3, 'Asiento cama', 200, 'img/herramienta/asiento_180.png',1);
 
 INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (4, 'Televisor','img/herramienta/tv.png',4);
 
