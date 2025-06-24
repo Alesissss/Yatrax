@@ -983,6 +983,10 @@
           checkboxCargo.style.display = 'block';
           toastr.info("Recuerde que el cambio de ruta tiene un cargo extra", "INFORMACIÓN");
           cambiarEstadoTransaccion();
+        } else if (operacion === 'convertir-libre') { 
+          toastr.info("Recuerde que la conversión a pasaje libre tiene un cargo extra", "INFORMACIÓN");
+          cambiarEstadoTransaccion();
+          convertirPasajeLibre();
         } else {
           contenidoOtrasOperaciones.style.display = 'block';
 
@@ -992,10 +996,6 @@
               tituloOperacion.innerHTML = '<strong>Reembolso</strong>';
               descripcionOperacion.textContent = 'Contenido específico para solicitar reembolso del pasaje.';
               document.getElementById("datosReembolso").style.display = 'block';
-              break;
-            case 'convertir-libre':
-              tituloOperacion.innerHTML = '<strong>Convertir pasaje libre</strong>';
-              descripcionOperacion.textContent = 'Contenido específico para convertir a pasaje libre.';
               break;
           }
         }
@@ -1655,6 +1655,49 @@
               toastr.error("No se ha podido conectar con el servidor", "ERROR")
             );
         }
+      }
+
+      function convertirPasajeLibre() {
+        const pasId = document.getElementById("pasId").value;
+        const detViaje = document.getElementById("detViajeAsiento").value
+        if (!pasId) {
+          toastr.warning("Debe buscar un pasaje primero", "MENSAJE DEL SISTEMA");
+          return;
+        }
+
+        Swal.fire({
+          title: '¿Estás seguro de convertir a pasaje libre?',
+          text: "Esta acción convertirá el pasaje a libre, no se podrá revertir.",
+          icon: 'warning',
+          showCancelButton: true,
+          cancelButtonColor: "#d33",
+          confirmButtonColor: "#3085d6",
+          cancelButtonText: 'Cancelar',
+          confirmButtonText: 'Sí, convertir en pasaje libre',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            fetch(`/ecommerce/home/convertirPasajeLibre`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ pasaje_id: pasId, detViajeAsiento: detViaje})
+            })
+              .then(res => res.json())
+              .then(data => {
+                if (data.Status === "success") {
+                  toastr.success(data.Msj, "ÉXITO");
+                } else {
+                  toastr.error(data.Msj, "ERROR");
+                }
+              })
+              .catch(() => {
+                toastr.error("No se ha podido conectar con el servidor", "ERROR");
+              });
+          }else{
+            cambiarEstadoTransaccion();
+            ocultarContenido();
+            toastr.info("Conversión a pasaje libre cancelada", "INFORMACIÓN");
+          }
+        });
       }
 
       // Función para realizar la transferencia de pasaje
