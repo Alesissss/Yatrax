@@ -944,7 +944,7 @@ def get_conf_general():
         if result:
             result['igv'] = float(result['igv'])
             result['max_pasajes_venta'] = float(result['max_pasajes_venta'])
-            result['tarifaBase'] = float(result['tarifaBase'])
+            result['precioPasajeLibre'] = float(result['precioPasajeLibre'])
             result['tiempo_maximo_venta_minutos'] = float(result['tiempo_maximo_venta_minutos'])
             result['precioCambioRuta'] = float(result['precioCambioRuta'])
             result['precioTransferencia'] = float(result['precioTransferencia'])
