@@ -798,4 +798,15 @@ class Pasaje:
             if conexion:
                 conexion.cerrar()
                 
-    
+    @classmethod
+    def validar_codigo_reprogramacion(cls, codigo):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            filas = conexion.obtener(
+                "SELECT * FROM `pasaje` WHERE codigo= %s and fechaInicioReprogramacion is not null and fechaFinReprogramacion is not null", (codigo,)
+            )
+            return filas[0] if filas else None
+        finally:
+            if conexion:
+                conexion.cerrar()

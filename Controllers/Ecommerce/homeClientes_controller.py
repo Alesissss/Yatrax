@@ -974,9 +974,9 @@ import traceback
 @homeClientes_bp.route('/enviar_correos_reprogramacion', methods=['POST'])
 def enviar_correos_reprogramacio():
     try:
-        # data = request.get_json()
-        # email = Viaje.obtener_clientes_por_viaje(data.get("id_viaje"))
-        email = Viaje.obtener_clientes_por_viaje(1)
+        data = request.get_json()
+        email = Viaje.obtener_clientes_por_viaje(data.get("idViaje"))
+        # email = Viaje.obtener_clientes_por_viaje(1)
         dias_reprogramacion = ConfGeneral.obtener()
         if not email:
             return jsonify({
@@ -1005,12 +1005,9 @@ def enviar_correos_reprogramacio():
                     f"Su código de canje de pasaje gratis o reembolso para el asiento {asiento} es: {codigo}"
                 )
             }
-
             resultado = enviar_correo(current_app.extensions['mail'], datosEnvio)
             print(f"[INFO] Resultado del envío a {correo}: {resultado}")
-
         return jsonify({'status': 'ok'})
-
     except Exception as e:
         print("[ERROR] Excepción capturada en el controlador:")
         traceback.print_exc()
@@ -1020,21 +1017,6 @@ def enviar_correos_reprogramacio():
 # END REEMBOLSO
 
 # REGION REPROGRAMACION
-
-@homeClientes_bp.route("/validarCodigoReprogramacion", methods=["POST"])
-def validar_codigo_reprogramacion():
-    try:
-        numero_comprobante = request.json.get("numeroComprobante")
-        codigo = request.json.get("codigoReprogramacion")
-        if not numero_comprobante or not codigo:
-            return jsonify({"Status": "error", "Msj": "Número de comprobante y código son requeridos"}), 400
-        reprogramacion = Pasaje.validar_codigo_reprogramacion(numero_comprobante, codigo)
-        if reprogramacion:
-            return jsonify({"Status": "success", "data": reprogramacion, "Msj": "Código de reprogramación validado correctamente"})
-        else:
-            return jsonify({"Status": "error", "data": {}, "Msj": "Código de reprogramación inválido"}), 400
-    except Exception as e:
-        return jsonify({"Status": "error", "data": {}, "Msj": f"Error al validar el código: {repr(e)}"}), 500
 
 @homeClientes_bp.route("/getTiposMetodoPago")
 def get_tipos_metodo_pago():
@@ -1059,5 +1041,20 @@ def get_metodos_pago_por_tipo(id_tipo):
     except Exception as e:
         return jsonify({"Status": "error", "Msj": str(e)})
 
+
+@homeClientes_bp.route("/validarCodigoReprogramacion", methods=["POST"])
+def validar_codigo_reprogramacion():
+    try:
+        numero_comprobante = request.json.get("numeroComprobante")
+        codigo = request.json.get("codigoReprogramacion")
+        if not numero_comprobante or not codigo:
+            return jsonify({"Status": "error", "Msj": "Número de comprobante y código son requeridos"}), 400
+        reprogramacion = Pasaje.validar_codigo_reprogramacion(numero_comprobante, codigo)
+        if reprogramacion:
+            return jsonify({"Status": "success", "data": reprogramacion, "Msj": "Código de reprogramación validado correctamente"})
+        else:
+            return jsonify({"Status": "error", "data": {}, "Msj": "Código de reprogramación inválido"}), 400
+    except Exception as e:
+        return jsonify({"Status": "error", "data": {}, "Msj": f"Error al validar el código: {repr(e)}"}), 500
 
 # END REPROGRAMACION
