@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pasarela de Pagos - Modal</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .modal-dialog { max-width: 480px; }
+        .modal-content { border: none; border-radius: 20px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15); }
+        .modal-header { border-bottom: 2px solid #f0f0f0; padding: 1.5rem 2rem 1rem; }
+        .modal-body { padding: 1.5rem 2rem 2rem; }
+        .pago-header { display: flex; align-items: center; margin-bottom: 0; width: 100%; }
+        .pago-logo { width: 40px; height: 40px; background: linear-gradient(135deg, #4ECDC4, #44A08D); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 0.75rem; }
+        .pago-title { font-size: 1.3rem; font-weight: 600; color: #333; margin: 0; }
+        .pago-secure { color: #6c757d; font-size: 0.85rem; margin-left: auto; }
+        .step-number { width: 30px; height: 30px; background: linear-gradient(135deg, #4ECDC4, #44A08D); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.9rem; margin-right: 0.75rem; }
+        .step-title { font-size: 1rem; font-weight: 600; color: #333; margin-bottom: 0.75rem; }
+        .tipo-comprobante { margin-bottom: 1.5rem; }
+        .form-check-input:checked { background-color: #4ECDC4; border-color: #4ECDC4; }
+        .form-check-label { font-size: 0.9rem; }
+        .metodos-pago { margin-bottom: 1.5rem; }
+        .metodo-pago { border: 2px solid #e9ecef; border-radius: 10px; padding: 0.75rem; margin-bottom: 0.5rem; cursor: pointer; transition: all 0.3s ease; background: white; }
+        .metodo-pago:hover { border-color: #4ECDC4; transform: translateY(-1px); box-shadow: 0 3px 10px rgba(78, 205, 196, 0.2); }
+        .metodo-pago.selected { border-color: #4ECDC4; background: linear-gradient(135deg, rgba(78, 205, 196, 0.1), rgba(68, 160, 141, 0.1)); }
+        .metodo-content { display: flex; align-items: center; justify-content: space-between; }
+        .metodo-info { display: flex; align-items: center; }
+        .radio-custom { width: 16px; height: 16px; border: 2px solid #dee2e6; border-radius: 50%; position: relative; margin-right: 0.75rem; }
+        .radio-custom.checked { border-color: #4ECDC4; background: #4ECDC4; }
+        .radio-custom.checked::after { content: ''; width: 6px; height: 6px; background: white; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .metodo-icon { width: 32px; height: 32px; background: #f8f9fa; border-radius: 6px; display: flex; align-items: center; justify-content: center; margin-right: 0.75rem; color: #6c757d; font-size: 0.9rem; }
+        .metodo-nombre { font-weight: 500; color: #333; margin: 0; font-size: 0.9rem; }
+        .resumen-pago { background: #f8f9fa; border-radius: 10px; padding: 1rem; margin-bottom: 1.5rem; }
+        .btn-continuar { background: linear-gradient(135deg, #4ECDC4, #44A08D); border: none; border-radius: 10px; padding: 10px 1.5rem; font-weight: 600; width: 100%; transition: all 0.3s ease; font-size: 0.95rem; }
+        .btn-continuar:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3); }
+        @media (max-width: 576px) {
+            .modal-dialog { margin: 0.5rem; max-width: calc(100% - 1rem); }
+            .modal-header { padding: 1rem 1.5rem 0.75rem; }
+            .modal-body { padding: 1rem 1.5rem 1.5rem; }
+            .pago-title { font-size: 1.2rem; }
+            .metodo-nombre { font-size: 0.85rem; }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Modal de Pasarela de Pagos -->
+    <div class="modal fade" id="pagoModal" tabindex="-1" aria-labelledby="pagoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <!-- Header del Modal -->
+                <div class="modal-header">
+                    <div class="pago-header">
+                        <div class="pago-logo">
+                            <i class="fas fa-credit-card text-white"></i>
+                        </div>
+                        <h5 class="pago-title" id="pagoModalLabel">Pago</h5>
+                        <div class="pago-secure">
+                            <i class="fas fa-lock"></i> Seguro
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <!-- Cuerpo del Modal -->
+                <div class="modal-body">
+                    <form id="pagoForm" method="POST" action="/procesar_pago">
+                        <!-- Paso 1: Tipo de comprobante -->
+                        <div class="tipo-comprobante">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="step-number">1</div>
+                                <div class="step-title">Tipo de comprobante</div>
+                            </div>
+                            <div class="row">
+                                {% for tipo in tipo_comprobante %}
+                                <div class="col-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="tipo_comprobante" id="tipo_{{ tipo.id }}" value="{{ tipo.id }}" {% if loop.first %}checked{% endif %}>
+                                        <label class="form-check-label fw-medium" for="tipo_{{ tipo.id }}">{{ tipo.nombre }}</label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Paso 2: Método de pago -->
+                        <div class="metodos-pago">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="step-number">2</div>
+                                <div class="step-title">Elige un método de pago</div>
+                            </div>
+                            <div id="metodosContainer" style="max-height: 240px; overflow-y: auto;">
+                                {% for metodo in metodo_pago %}
+                                <div class="metodo-pago" data-metodo="{{ metodo.id }}">
+                                    <div class="metodo-content">
+                                        <div class="metodo-info">
+                                            <div class="radio-custom"></div>
+                                            <div class="metodo-icon">
+                                                <i class="fas fa-credit-card"></i>
+                                            </div>
+                                            <p class="metodo-nombre">{{ metodo.nombre }}</p>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="fab fa-cc-visa text-primary fa-2x"></i>
+                                            <i class="fab fa-cc-mastercard text-warning fa-2x"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Resumen del Pago -->
+                        <div class="resumen-pago">
+                            <div class="d-flex justify-content-between mb-2"><span>Subtotal:</span><span>S/ 100.00</span></div>
+                            <div class="d-flex justify-content-between mb-2"><span>IGV (18%):</span><span>S/ 18.00</span></div>
+                            <hr>
+                            <div class="d-flex justify-content-between fw-bold"><span>Total:</span><span>S/ 118.00</span></div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-continuar">
+                            <i class="fas fa-lock me-2"></i>Continuar con el pago
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const metodos = document.querySelectorAll('.metodo-pago');
+            const pagoModal = document.getElementById('pagoModal');
+
+            metodos.forEach(m => {
+                m.addEventListener('click', () => {
+                    metodos.forEach(x => {
+                        x.classList.remove('selected');
+                        x.querySelector('.radio-custom').classList.remove('checked');
+                    });
+                    m.classList.add('selected');
+                    m.querySelector('.radio-custom').classList.add('checked');
+
+                    let input = document.querySelector('input[name="metodo_pago"]');
+                    if (!input) {
+                        input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'metodo_pago';
+                        document.getElementById('pagoForm').appendChild(input);
+                    }
+                    input.value = m.dataset.metodo;
+                });
+            });
+
+            pagoModal.addEventListener('shown.bs.modal', () => metodos[0]?.click());
+
+            document.getElementById('pagoForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const tipo = document.querySelector('input[name="tipo_comprobante"]:checked');
+                const metodo = document.querySelector('input[name="metodo_pago"]');
+                if (!tipo) return alert('Selecciona un tipo de comprobante');
+                if (!metodo || !metodo.value) return alert('Selecciona un método de pago');
+
+                const btn = document.querySelector('.btn-continuar');
+                const original = btn.innerHTML;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
+                btn.disabled = true;
+
+                setTimeout(() => {
+                    alert('¡Pago procesado exitosamente!');
+                    bootstrap.Modal.getInstance(pagoModal).hide();
+                    btn.innerHTML = original;
+                    btn.disabled = false;
+                    document.getElementById('pagoForm').reset();
+                    metodos.forEach(x => {
+                        x.classList.remove('selected');
+                        x.querySelector('.radio-custom').classList.remove('checked');
+                    });
+                    document.querySelector('input[name="metodo_pago"]')?.remove();
+                }, 2000);
+            });
+
+            pagoModal.addEventListener('hidden.bs.modal', () => {
+                document.getElementById('pagoForm').reset();
+                document.querySelector('input[name="metodo_pago"]')?.remove();
+            });
+        });
+    </script>
+</body>
+
+</html>

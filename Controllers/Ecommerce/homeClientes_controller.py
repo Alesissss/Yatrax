@@ -793,10 +793,11 @@ def realizar_transferencia():
     except Exception as e:
         return jsonify({"Status":"error", "Msj": f"Error inesperado: {e}"})
 
-@homeClientes_bp.route("/mostrarPasarelaPago", methods=["POST"])
-def mostrar_pasarela_pago():
+@homeClientes_bp.route("/modalPasarelaPago", methods=["POST"])
+def modal_pasarela_pago():
+    tipo_comprobante = TipoComprobante.obtener_todos()
     metodo_pago = MetodoPago.obtener_todos()
-    return render_template("Ecommerce/home/pasarelaPagos.html", metodo_pago=metodo_pago)
+    return render_template('Ecommerce/home/pasarelaPagos.html', metodo_pago=metodo_pago, tipo_comprobante=tipo_comprobante)
 
 @homeClientes_bp.route("/verificarEstadoPasaje", methods=["GET"])
 def verificar_estado_pasaje():

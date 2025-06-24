@@ -2526,19 +2526,14 @@ const PaymentManager = {
             let nombreTipoMetodo = await obtenerNombreTipoMetodo(tipoMetodo)
             let nombreMetodo = await obtenerNombreMetodo(metodoPago)
 
-            alert(tipoMetodo)
-            alert(metodoPago)
-            alert(nombreTipoMetodo)
-            alert(nombreMetodo)
 
             if (nombreMetodo == "tarjeta de credito" || nombreMetodo == "tarjeta") {
-                alert("dentro 1")
+               
                 this.procesarPago();
             } else if (nombreTipoMetodo == "efectivo" && nombreMetodo == "efectivo") {
-                alert("dentro 2")
+               
                 this.procesarReserva();
             } else {
-                alert("dentro 3")
                 console.log(nombreTipoMetodo)
                 console.log(nombreMetodo)
                 console.error("Espacio para pasaje libre en un futuro");
