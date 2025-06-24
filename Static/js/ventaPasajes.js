@@ -48,27 +48,6 @@ async function obtenerNombreTipoMetodo(idTipo) {
     return data;
 }
 
-$.ajax({
-    url: '/ecommerce/home/GetConfGeneral',  // Ruta de la API
-    method: 'GET',  // Método GET
-    success: function (data) {
-        // Verificamos si la respuesta es exitosa
-        if (data.Status === 'success' && data.data) {
-            CONFIG.MAX_ASIENTOS = data.data.max_pasajes_venta;
-            CONFIG.TIEMPO_MAXIMO_COMPRA = data.data.tiempo_maximo_venta_minutos;
-            CONFIG.IGV = data.data.igv;
-            console.log("MAX_ASIENTOS actualizado:", CONFIG.MAX_ASIENTOS);
-        } else {
-            console.error("Error al recuperar la configuración general");
-        }
-    },
-    error: function (xhr, status, error) {
-        console.error("Error en la llamada AJAX:", error);
-    }
-});
-
-
-
 // =============================================================================
 // ESTADO GLOBAL DE LA APLICACIÓN
 // =============================================================================
@@ -758,7 +737,7 @@ const ItineraryManager = {
                     // Pequeño delay para asegurar que el contenido esté renderizado
                     setTimeout(() => {
                         SeatManager.inicializarSeleccionAsientos(sufijo);
-                        TimerManager.iniciar(300, sufijo);
+                        TimerManager.iniciar(CONFIG.TIEMPO_MAXIMO_COMPRA * 60, sufijo);
 
                         // ✅ CORRECCIÓN: Restaurar estado si hay asientos seleccionados
                         VehicleLayoutManager.restaurarEstadoAsientos(sufijo);
@@ -3273,7 +3252,25 @@ const App = {
         this.inicializarComponentes();
         NavigationManager.inicializarEstadoPorDefecto();
         PageUnloadManager.init();
-        FormValidationManager.init()
+        FormValidationManager.init();
+        $.ajax({
+            url: '/ecommerce/home/GetConfGeneral',  // Ruta de la API
+            method: 'GET',  // Método GET
+            success: function (data) {
+                // Verificamos si la respuesta es exitosa
+                if (data.Status === 'success' && data.data) {
+                    CONFIG.MAX_ASIENTOS = data.data.max_pasajes_venta;
+                    CONFIG.TIEMPO_MAXIMO_COMPRA = data.data.tiempo_maximo_venta_minutos;
+                    CONFIG.IGV = data.data.igv;
+                    console.log("MAX_ASIENTOS actualizado:", CONFIG.MAX_ASIENTOS);
+                } else {
+                    console.error("Error al recuperar la configuración general");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Error en la llamada AJAX:", error);
+            }
+        });
     },
 
     // =============================================================================
