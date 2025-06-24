@@ -227,10 +227,18 @@
                                     <a href="{{ url_for('ventas.Menu_TransaccionesPasajes') }}"
                                         class="nav-link {% if active_page == 'transaccionesPasajes' %}active{% endif %}">
                                         <i class="bi bi-gear nav-icon"></i>
-                                        <p>Transanacción de pasajes</p>
+                                        <p>Transacción de pasajes</p>
                                     </a>
                                 </li>
-                                <!-- -- fin vender pasaje -->
+                                <!-- -- Reportes -->
+                                <li class="nav-header">Reportes</li>
+                                <li class="nav-item align-items-center">
+                                    <a href="{{ url_for('ventas.Menu_ReporteVentas') }}"
+                                        class="nav-link {% if active_page == 'reporteVentas' %}active{% endif %}">
+                                        <i class="bi bi-graph-up-arrow"></i>
+                                        <p>Reporte de ventas</p>
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                         {% endif %}
