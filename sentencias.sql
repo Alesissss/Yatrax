@@ -698,7 +698,7 @@ CREATE TABLE asiento (
 CREATE TABLE detalle_viaje_asiento(
     id INT AUTO_INCREMENT PRIMARY KEY,
     idDetalle_Viaje INT NOT NULL ,
-    idAsiento INT NULL, -- Puede ser NULL si el viaje es libre
+    idAsiento INT NULL,
     esDisponible BOOLEAN NOT NULL DEFAULT 1, -- 1: disponible, 0: no disponible
     -- Auditoría
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,

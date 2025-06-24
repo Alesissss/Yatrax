@@ -459,6 +459,7 @@ const SearchManager = {
                 text: "Esta acción eliminará tu progreso actual, ¿estás seguro de hacerlo?",
                 icon: "warning",
                 showCancelButton: true,
+                reverseButtons: true,
                 confirmButtonText: "Sí, buscar",
                 cancelButtonText: "Cancelar",
                 confirmButtonColor: '#d33',
@@ -1840,15 +1841,9 @@ const PageUnloadManager = {
                 console.log(`🔓 Total de asientos para liberar: ${asientosArray.length}`, asientosArray);
 
                 asientosArray.forEach(asientoId => {
-                    const formData = new FormData();
-                    formData.append('asiento_id', asientoId);
-                    formData.append('accion', 'liberar');
-                    formData.append('motivo', 'cierre_pagina');
-                    formData.append('timestamp', new Date().toISOString());
-
-                    // sendBeacon es más confiable que fetch en unload
-                    navigator.sendBeacon(CONFIG.RUTAS.MARCAR_ASIENTO_DISPONIBLE, formData);
+                    SeatManager.marcarAsientoComoDisponible(asientoId)
                 });
+
 
                 console.log(`✅ ${asientosArray.length} asientos enviados para liberación`);
             }
@@ -2505,19 +2500,14 @@ const PaymentManager = {
             let nombreTipoMetodo = await obtenerNombreTipoMetodo(tipoMetodo)
             let nombreMetodo = await obtenerNombreMetodo(metodoPago)
 
-            alert(tipoMetodo)
-            alert(metodoPago)
-            alert(nombreTipoMetodo)
-            alert(nombreMetodo)
 
             if (nombreMetodo == "tarjeta de credito" || nombreMetodo == "tarjeta") {
-                alert("dentro 1")
+               
                 this.procesarPago();
             } else if (nombreTipoMetodo == "efectivo" && nombreMetodo == "efectivo") {
-                alert("dentro 2")
+               
                 this.procesarReserva();
             } else {
-                alert("dentro 3")
                 console.log(nombreTipoMetodo)
                 console.log(nombreMetodo)
                 console.error("Espacio para pasaje libre en un futuro");
@@ -3240,6 +3230,10 @@ const FormValidationManager = {
         accordion.find('.invalid-feedback').remove();
     }
 };
+
+const ClearManager = {
+    
+}
 
 const App = {
     init() {
