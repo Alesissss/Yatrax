@@ -217,7 +217,7 @@ DROP TABLE IF EXISTS ciudad;
 DROP TABLE IF EXISTS pais;
 DROP TABLE IF EXISTS herramienta;
 DROP TABLE IF EXISTS tipo_herramienta;
-DROP TABLE IF EXISTS tipo_metodoPago;
+DROP TABLE IF EXISTS tipo_metodopago;
 DROP TABLE IF EXISTS terminos_condiciones;
 DROP TABLE IF EXISTS preguntas_frecuentes;
 DROP TABLE IF EXISTS promocion;
