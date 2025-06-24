@@ -474,7 +474,7 @@ CREATE TABLE cliente (
 -- Crear tabla conf_general
 CREATE TABLE conf_general (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    tarifaBase DECIMAL(9,2) NOT NULL,
+    precioPasajeLibre DECIMAL(9,2) NOT NULL,
     igv DECIMAL(9,2) NOT NULL,
     max_pasajes_venta INT NOT NULL,
     tiempo_maximo_venta_minutos DECIMAL(9,2),
@@ -3091,7 +3091,7 @@ INSERT INTO usuarios (id, id_personal, email, password, imagen, estado, id_tipou
 '/Static/img/trabajadores/luis.jpg', 1, 1,'2025-03-06 20:06:14','SYSTEM');
 
 -- Tabla de configuración general
-INSERT INTO conf_general (id, igv, tarifaBase, max_pasajes_venta, tiempo_maximo_venta_minutos, viajesReprogramables, max_dias_vigencia_reprogramacion, precioCambioRuta, precioTransferencia) VALUES (1, 0.18, 10, 4, 10, 0, 7, 50, 50);
+INSERT INTO conf_general (id, igv, precioPasajeLibre, max_pasajes_venta, tiempo_maximo_venta_minutos, viajesReprogramables, max_dias_vigencia_reprogramacion, precioCambioRuta, precioTransferencia) VALUES (1, 0.18, 50, 4, 10, 0, 7, 50, 50);
 
 -- Tabla menus
 INSERT INTO conf_menus (id, nombre, estado) VALUES (1, 'M_USUARIOS', 1);
@@ -8022,7 +8022,7 @@ DELIMITER $$
 
 CREATE PROCEDURE SP_MODIFICAR_CONF_GENERAL(
     IN P_IGV DECIMAL(5,2),
-    IN P_TARIFABASE DECIMAL(9,2),
+    IN P_PASAJE_LIBRE DECIMAL(9,2),
     IN P_MAXPASAJESVENTA INT,
     IN P_TIEMPO_MAXIMO_VENTA_MINUTOS INT,
     IN P_VIAJES_REPROGRAMABLES INT,
@@ -8042,7 +8042,7 @@ BEGIN
     IF EXISTS (SELECT 1 FROM conf_general LIMIT 1) THEN
         UPDATE conf_general
         SET igv = P_IGV, 
-            tarifaBase = P_TARIFABASE,
+            precioPasajeLibre = P_PASAJE_LIBRE,
             max_pasajes_venta = P_MAXPASAJESVENTA,
             tiempo_maximo_venta_minutos = P_TIEMPO_MAXIMO_VENTA_MINUTOS,
             viajesReprogramables = P_VIAJES_REPROGRAMABLES,

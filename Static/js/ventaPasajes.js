@@ -37,27 +37,6 @@ async function obtenerNombreTipoMetodo(idTipo) {
     return data;
 }
 
-$.ajax({
-    url: '/ecommerce/home/GetConfGeneral',  // Ruta de la API
-    method: 'GET',  // Método GET
-    success: function (data) {
-        // Verificamos si la respuesta es exitosa
-        if (data.Status === 'success' && data.data) {
-            CONFIG.MAX_ASIENTOS = data.data.max_pasajes_venta;
-            CONFIG.TIEMPO_MAXIMO_COMPRA = data.data.tiempo_maximo_venta_minutos;
-            CONFIG.IGV = data.data.igv;
-            console.log("MAX_ASIENTOS actualizado:", CONFIG.MAX_ASIENTOS);
-        } else {
-            console.error("Error al recuperar la configuración general");
-        }
-    },
-    error: function (xhr, status, error) {
-        console.error("Error en la llamada AJAX:", error);
-    }
-});
-
-
-
 // =============================================================================
 // ESTADO GLOBAL DE LA APLICACIÓN
 // =============================================================================
@@ -147,15 +126,15 @@ const NavigationManager = {
     // ✅ NUEVA FUNCIÓN: Control estricto de acceso a tabs
     controlarAccesoTabs() {
         const tabs = document.querySelectorAll('.tab-link');
-        
+
         tabs.forEach((tab, index) => {
             const stepIndex = parseInt(tab.getAttribute('data-step'));
-            
+
             // Por defecto, deshabilitar todos los tabs
             tab.classList.add('disabled');
             tab.setAttribute('disabled', 'true');
             tab.style.pointerEvents = 'none';
-            
+
             // Habilitar tabs según el estado actual
             if (this.puedeAccederATab(stepIndex)) {
                 tab.classList.remove('disabled');
@@ -171,20 +150,20 @@ const NavigationManager = {
             case 0: // Tab "Elegir destino"
                 // Solo se puede acceder si no hemos avanzado
                 return AppState.currentStep === 0;
-                
+
             case 1: // Tab "Itinerario ida"
                 // Se puede acceder si estamos en él o si podemos volver desde tab 2
-                return AppState.currentStep === 1 || 
-                       (AppState.currentStep === 2 && this.tieneItinerarioRegreso());
-                
+                return AppState.currentStep === 1 ||
+                    (AppState.currentStep === 2 && this.tieneItinerarioRegreso());
+
             case 2: // Tab "Itinerario regreso"
                 // Solo si estamos en él y hay itinerario de regreso
                 return AppState.currentStep === 2 && this.tieneItinerarioRegreso();
-                
+
             case 3: // Tab "Pago"
                 // Solo si estamos en él
                 return AppState.currentStep === 3;
-                
+
             default:
                 return false;
         }
@@ -260,12 +239,12 @@ const NavigationManager = {
     // ✅ NUEVA FUNCIÓN: Procesar búsqueda desde tab 0 a tab 1
     async procesarBusqueda() {
         await this.mostrarLoader("Buscando viajes disponibles...");
-        
+
         // Avanzar a tab 1
         AppState.setCurrentStep(1);
         AppState.maxStep = Math.max(AppState.maxStep, 1);
         this.updateFormVisibility();
-        
+
         this.ocultarLoader();
     },
 
@@ -293,7 +272,7 @@ const NavigationManager = {
 
         // Verificar si hay fecha de vuelta
         const fechaVuelta = $("input[name='fecha_vuelta']").val();
-        
+
         if (!fechaVuelta || fechaVuelta.trim() === '') {
             // No hay fecha de vuelta, ir directo al pago
             await this.irAPago();
@@ -340,15 +319,15 @@ const NavigationManager = {
     // ✅ NUEVA FUNCIÓN: Ir al itinerario de regreso
     async irAItinerarioRegreso() {
         await this.mostrarLoader("Cargando itinerario de regreso...");
-        
+
         AppState.setCurrentStep(2);
         AppState.maxStep = Math.max(AppState.maxStep, 2);
-        
+
         // Cargar itinerario de regreso
         setTimeout(() => {
             ItineraryManager.cargarItinerario(AppState.itinerarioRegreso, 'contenedor_viajes_vuelta', 'vuelta');
         }, 100);
-        
+
         this.updateFormVisibility();
         this.ocultarLoader();
     },
@@ -356,17 +335,17 @@ const NavigationManager = {
     // ✅ NUEVA FUNCIÓN: Ir al pago
     async irAPago() {
         await this.mostrarLoader("Preparando información de pago...");
-        
+
         AppState.setCurrentStep(3);
         AppState.maxStep = Math.max(AppState.maxStep, 3);
-        
+
         // Inicializar sistema de pago
         setTimeout(() => {
             if (typeof PaymentManager !== 'undefined') {
                 PaymentManager.initialize();
             }
         }, 100);
-        
+
         this.updateFormVisibility();
         this.ocultarLoader();
     },
@@ -419,14 +398,14 @@ const NavigationManager = {
         document.querySelectorAll('.tab-link').forEach(tab => {
             tab.addEventListener('click', (event) => {
                 const stepIndex = parseInt(tab.getAttribute('data-step'));
-                
+
                 // Prevenir comportamiento por defecto si no se puede acceder
                 if (!this.puedeAccederATab(stepIndex)) {
                     event.preventDefault();
                     toastr.warning("No puedes acceder a esta sección en este momento.");
                     return;
                 }
-                
+
                 this.goToStep(stepIndex);
             });
         });
@@ -746,7 +725,7 @@ const ItineraryManager = {
                     // Pequeño delay para asegurar que el contenido esté renderizado
                     setTimeout(() => {
                         SeatManager.inicializarSeleccionAsientos(sufijo);
-                        TimerManager.iniciar(300, sufijo);
+                        TimerManager.iniciar(CONFIG.TIEMPO_MAXIMO_COMPRA * 60, sufijo);
 
                         // ✅ CORRECCIÓN: Restaurar estado si hay asientos seleccionados
                         VehicleLayoutManager.restaurarEstadoAsientos(sufijo);
@@ -2989,11 +2968,11 @@ const FormValidationManager = {
         $(document).on('input', '[id^="accordionPasajeros_"] input', (e) => {
             const $element = $(e.target);
             const sufijo = this.getSufijoFromElement(e.target);
-            
+
             if (sufijo) {
                 // Validar inmediatamente mientras escribe
                 this.validarCampoIndividual($element);
-                
+
                 // Validar el formulario completo sin delay
                 this.validarFormularioCompleto(sufijo);
             }
@@ -3003,7 +2982,7 @@ const FormValidationManager = {
         $(document).on('change', '[id^="accordionPasajeros_"] select', (e) => {
             const $element = $(e.target);
             const sufijo = this.getSufijoFromElement(e.target);
-            
+
             if (sufijo) {
                 this.validarCampoIndividual($element);
                 this.validarFormularioCompleto(sufijo);
@@ -3049,7 +3028,7 @@ const FormValidationManager = {
         if (botonGuardar.length) {
             // Siempre mostrar "Guardar datos"
             botonGuardar.html('<i class="fas fa-save"></i> Guardar datos');
-            
+
             // Agregar clases Bootstrap para mejor UX
             botonGuardar.removeClass('btn-outline-primary').addClass('btn-outline-secondary');
             botonGuardar.prop('disabled', true);
@@ -3066,11 +3045,11 @@ const FormValidationManager = {
         const valor = $element.val()?.trim();
         const tipo = $element.attr('type') || ($element.is('select') ? 'select' : 'text');
         const nombre = $element.attr('name') || $element.attr('placeholder') || 'Campo';
-        
+
         console.log(`⌨️ Validando en tiempo real: ${nombre} = "${valor}"`);
-        
+
         const validacion = this.validarCampo($element, valor, tipo);
-        
+
         if (!validacion.valido) {
             this.marcarCampoInvalido($element, validacion.mensaje);
             console.log(`❌ ${nombre}: ${validacion.mensaje}`);
@@ -3104,7 +3083,7 @@ const FormValidationManager = {
 
             // Validar cada campo
             const validacion = this.validarCampo($element, valor, tipo);
-            
+
             if (validacion.valido) {
                 camposValidos++;
                 this.marcarCampoValido($element);
@@ -3151,13 +3130,13 @@ const FormValidationManager = {
                         return { valido: false, mensaje: 'Solo letras y espacios' };
                     }
                 }
-                
+
                 if (nombre.toLowerCase().includes('dni') || placeholder.toLowerCase().includes('dni')) {
                     if (!/^\d{8}$/.test(valor)) {
                         return { valido: false, mensaje: 'DNI debe tener exactamente 8 dígitos' };
                     }
                 }
-                
+
                 if (nombre.toLowerCase().includes('telefono') || placeholder.toLowerCase().includes('telefono')) {
                     if (!/^\d{9}$/.test(valor)) {
                         return { valido: false, mensaje: 'Teléfono debe tener 9 dígitos' };
@@ -3170,7 +3149,7 @@ const FormValidationManager = {
                 if (isNaN(fecha.getTime())) {
                     return { valido: false, mensaje: 'Fecha inválida' };
                 }
-                
+
                 // Validar que no sea fecha futura para fecha de nacimiento
                 if (nombre.toLowerCase().includes('nacimiento')) {
                     const hoy = new Date();
@@ -3193,7 +3172,7 @@ const FormValidationManager = {
     // ✅ MARCAR CAMPO COMO INVÁLIDO
     marcarCampoInvalido($element, mensaje) {
         $element.removeClass('is-valid').addClass('is-invalid');
-        
+
         // Buscar o crear feedback
         let feedback = $element.siblings('.invalid-feedback');
         if (!feedback.length) {
@@ -3213,19 +3192,19 @@ const FormValidationManager = {
     actualizarBotonGuardar(sufijo, todoValido) {
         const accordion = $(`#accordionPasajeros_${sufijo}`);
         const boton = accordion.closest('.col-md-12').find('button[onclick*="acabar"]');
-        
+
         if (boton.length) {
             // Texto siempre igual
             boton.html('<i class="fas fa-save"></i> Guardar datos');
-            
+
             if (todoValido) {
                 boton.prop('disabled', false)
-                     .removeClass('btn-outline-secondary')
-                     .addClass('btn-outline-primary');
+                    .removeClass('btn-outline-secondary')
+                    .addClass('btn-outline-primary');
             } else {
                 boton.prop('disabled', true)
-                     .removeClass('btn-outline-primary')
-                     .addClass('btn-outline-secondary');
+                    .removeClass('btn-outline-primary')
+                    .addClass('btn-outline-secondary');
             }
         }
     },
@@ -3239,7 +3218,7 @@ const FormValidationManager = {
     // ✅ VALIDAR ANTES DE NAVEGAR (VALIDACIÓN REAL)
     puedeNavegar(sufijo) {
         const datosValidados = this.estanDatosValidados(sufijo);
-        
+
         if (!datosValidados) {
             Swal.fire({
                 title: "Datos incompletos o incorrectos",
@@ -3250,7 +3229,7 @@ const FormValidationManager = {
             });
             return false;
         }
-        
+
         return true;
     },
 
@@ -3268,13 +3247,31 @@ const App = {
         this.inicializarComponentes();
         NavigationManager.inicializarEstadoPorDefecto();
         PageUnloadManager.init();
-        FormValidationManager.init()
+        FormValidationManager.init();
+        $.ajax({
+            url: '/ecommerce/home/GetConfGeneral',  // Ruta de la API
+            method: 'GET',  // Método GET
+            success: function (data) {
+                // Verificamos si la respuesta es exitosa
+                if (data.Status === 'success' && data.data) {
+                    CONFIG.MAX_ASIENTOS = data.data.max_pasajes_venta;
+                    CONFIG.TIEMPO_MAXIMO_COMPRA = data.data.tiempo_maximo_venta_minutos;
+                    CONFIG.IGV = data.data.igv;
+                    console.log("MAX_ASIENTOS actualizado:", CONFIG.MAX_ASIENTOS);
+                } else {
+                    console.error("Error al recuperar la configuración general");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Error en la llamada AJAX:", error);
+            }
+        });
     },
 
     // =============================================================================
     // FUNCIONES DE RESETEO
     // =============================================================================
-    
+
     resetearSistemaCompletoSinRutas() {
         console.log('🔄 Reseteando sistema completo (preservando rutas)...');
 
@@ -3298,7 +3295,7 @@ const App = {
             AppState.currentStep = 0;
             AppState.maxStep = 0;
             AppState.itinerarioRegreso = null;
-            
+
             // ✅ NUEVO: Limpiar validaciones de formularios
             if (typeof FormValidationManager !== 'undefined') {
                 AppState.validacionFormularios = {};
