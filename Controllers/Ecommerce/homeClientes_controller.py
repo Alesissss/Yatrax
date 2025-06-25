@@ -36,8 +36,6 @@ from Models.asiento import Asiento
 from Models.venta import Venta
 from Models.reserva import Reserva
 from Models.conf_general import ConfGeneral
-from Models.metodo_pago import MetodoPago
-from Models.tipoMetodoPago import TipoMetodoPago
 
 homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/home')
 
@@ -72,7 +70,7 @@ def registrar_venta():
         # 2. Datos de la venta
         sub_total = data['subTotal']
         igv = 0.18 #data['igv']
-        id_promocion = 1 #data['idPromocion']
+        id_promocion = 1  #data['idPromocion']
         id_metodo_pago = data['idMetodoPago']
         id_tipo_comprobante = data['idTipoComprobante']
 
@@ -224,7 +222,6 @@ def obtenerDatosPasajero():
 
     # Suponemos que Pasajero.obtener_por_numero_documento devuelve un dict o un objeto serializable
     datos_pasajero = Pasajero.obtener_por_numero_documento(numero_doc)
-    print(f"Datos del pasajero: {datos_pasajero}")
     if not datos_pasajero:
         return jsonify(status="error", msg="Pasajero no encontrado"), 404
 
@@ -754,6 +751,14 @@ def procesar_pago():
         else:
             return jsonify({"Status": "error", "Msj": resultado["msg"]})
 
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Error inesperado: {repr(e)}"})
+
+@homeClientes_bp.route("/obtenerMetodosPago")
+def obtener_metodos_pago():
+    try:
+        metodos = MetodoPago.obtener_todos()
+        return jsonify({"Status": "success", "data": metodos})
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Error inesperado: {repr(e)}"})
 

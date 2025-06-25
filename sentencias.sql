@@ -172,6 +172,7 @@ DROP PROCEDURE IF EXISTS SP_REGISTRAR_REEMBOLSO;
 DROP PROCEDURE IF EXISTS SP_CAMBIAR_ESTADO_REEMBOLSO;
 
 -- Eliminar tablas si existen
+DROP TABLE IF EXISTS empresa;
 DROP TABLE IF EXISTS pais_sucursal;
 DROP TABLE IF EXISTS conf_general;
 DROP TABLE IF EXISTS reclamo;
@@ -469,6 +470,18 @@ CREATE TABLE cliente (
     CONSTRAINT fk_pais FOREIGN KEY (id_pais) REFERENCES pais(id),
     CONSTRAINT fk_tipo_cliente FOREIGN KEY (id_tipo_cliente) REFERENCES tipo_cliente(idTipoCliente),
     CONSTRAINT fk_tipo_doc FOREIGN KEY (id_tipo_doc) REFERENCES tipo_documento(id)
+);
+
+CREATE TABLE empresa (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    razon_social VARCHAR(255) NOT NULL,
+    ruc VARCHAR(11) NOT NULL UNIQUE,
+    direccion VARCHAR(255) NOT NULL,
+    telefono VARCHAR(15) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    estado BOOLEAN NOT NULL DEFAULT TRUE,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL
 );
 
 -- Crear tabla conf_general

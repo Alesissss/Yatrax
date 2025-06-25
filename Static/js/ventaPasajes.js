@@ -2030,10 +2030,6 @@ const PaymentManager = {
         if (tipoComprobante == '1') {
             contenedor.innerHTML = `
                 <div class="row g-3">
-                    <div class="col-md-12">
-                        <label for="email_contacto" class="form-label">Correo electrónico *</label>
-                        <input type="email" id="email_contacto" class="form-control" required>
-                    </div>
                     <div class="col-md-6">
                         <label for="tipo_documento_contacto" class="form-label">Tipo de documento *</label>
                         <select id="tipo_documento_contacto" class="form-select">
@@ -2043,7 +2039,11 @@ const PaymentManager = {
                     </div>
                     <div class="col-md-6">
                         <label for="numero_documento_contacto" class="form-label">Número de documento *</label>
-                        <input type="text" id="numero_documento_contacto" class="form-control" required>
+                        <input type="text" id="numero_documento_contacto" class="form-control" minlength="8" maxlength="12" required>
+                    </div>
+                    <div class="col-md-12">
+                        <label for="email_contacto" class="form-label">Correo electrónico *</label>
+                        <input type="email" id="email_contacto" class="form-control" required>
                     </div>
                     <div class="col-md-12">
                         <label for="nombres_contacto" class="form-label">Nombres *</label>
