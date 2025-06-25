@@ -1,6 +1,7 @@
 import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort, json
 from xml.etree import ElementTree as ET
+from datetime import datetime
 from jinja2 import Environment, FileSystemLoader
 from werkzeug.utils import secure_filename
 from Models.tipoCliente import TipoCliente
@@ -12,6 +13,7 @@ from Models.cliente import Cliente
 from Models.pais import Pais
 from Models.pasaje import Pasaje
 from Models.herramienta import Herramienta
+from Models.venta import Venta
 
 ventas_bp = Blueprint('ventas', __name__, url_prefix='/trabajadores/ventas')
 
@@ -1037,5 +1039,36 @@ def generar_comprobante_pdf():
 
     return rutas_pdf
 
+# REGION REPORTES
+
+@ventas_bp.route("/ObtenerReporteVentas", methods=["GET"])
+def obtener_reporte_ventas():
+    try:
+        fechaInicio = request.args.get("fechaInicio")
+        fechaFin = request.args.get("fechaFin")
+
+        raw_rows = Venta.obtener_reporte_ventas()
+
+        data = []
+        for row in raw_rows:
+            fecha = row.get('fecha')
+            # Si viene como datetime
+            if isinstance(fecha, datetime):
+                # Pasamos a "2025-06-25T10:52:12"
+                row['fecha'] = fecha.strftime("%Y-%m-%dT%H:%M:%S")
+            else:
+                # Si viene como cadena RFC, la parseamos primero
+                try:
+                    dt = datetime.strptime(fecha, "%a, %d %b %Y %H:%M:%S GMT")
+                    row['fecha'] = dt.strftime("%Y-%m-%dT%H:%M:%S")
+                except Exception:
+                    # Si falla el parseo, la dejamos tal cual
+                    pass
+            data.append(row)
+
+        return jsonify({"data": data, "Status": "success", 'Msj': 'Reporte recuperado exitosamente'})
+    except Exception as e:
+        return jsonify({"data": [], "Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+# END REGION REPORTES
 
 # END FUNCIONES
