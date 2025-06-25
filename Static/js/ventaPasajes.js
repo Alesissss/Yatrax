@@ -294,7 +294,7 @@ const NavigationManager = {
             cancelButtonText: 'Revisar datos',
             confirmButtonColor: '#28a745',
             cancelButtonColor: '#6c757d',
-            reverseButton: true
+            reverseButtons: true
         });
 
         if (!confirmacion.isConfirmed) return;
@@ -337,7 +337,7 @@ const NavigationManager = {
             cancelButtonText: 'Revisar datos',
             confirmButtonColor: '#28a745',
             cancelButtonColor: '#6c757d',
-            reverseButton: true
+            reverseButtons: true
         });
 
         if (!confirmacion.isConfirmed) return;
@@ -417,7 +417,7 @@ const NavigationManager = {
             cancelButtonText: 'Cancelar',
             confirmButtonColor: '#17a2b8',
             cancelButtonColor: '#6c757d',
-            reverseButton: true
+            reverseButtons: true
         });
 
         if (!confirmacion.isConfirmed) return;
@@ -490,13 +490,11 @@ const SearchManager = {
                 text: "Esta acción eliminará tu progreso actual, ¿estás seguro de hacerlo?",
                 icon: "warning",
                 showCancelButton: true,
-                reverseButtons: true,
                 confirmButtonText: "Sí, buscar",
                 cancelButtonText: "Cancelar",
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#6c757d',
-
-                reverseButton: true
+                reverseButtons: true,
             });
 
             if (!confirmacion.isConfirmed) return;
@@ -1253,8 +1251,7 @@ const SeatManager = {
             showCancelButton: true,
             confirmButtonText: 'Sí, eliminar',
             cancelButtonText: 'Cancelar',
-
-            reverseButton: true
+            reverseButtons: true
         });
 
         if (confirm.isConfirmed) {
@@ -3275,7 +3272,7 @@ const FormValidationManager = {
                 icon: "warning",
                 confirmButtonText: "Entendido",
                 confirmButtonColor: '#3085d6',
-                reverseButton: true
+                reverseButtons: true
             });
             return false;
         }

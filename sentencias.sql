@@ -770,6 +770,7 @@ CREATE TABLE pasaje(
     fechaReprogramacion DATETIME NULL,
     codigoReserva CHAR(14) NULL, -- Código de reserva, si es un pasaje de reserva
     fecha_reserva DATETIME NULL, -- Fecha de reserva, si es un pasaje de reserva
+    reservaLiberada BOOLEAN DEFAULT 0 NULL,
     FOREIGN KEY (idDetalleViajeAsiento) REFERENCES detalle_viaje_asiento(id),
     FOREIGN KEY (idVenta) REFERENCES venta(id)
 );
