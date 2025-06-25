@@ -3,7 +3,7 @@
 // =============================================================================
 
 const CONFIG = {
-    MAX_ASIENTOS: 4, // Valor por defecto
+    MAX_ASIENTOS: 1, // Valor por defecto
     IGV: 0.18, // En decimal, en porcentaje 18%
     TIEMPO_MAXIMO_COMPRA: 5, // En minutos
     RUTAS: {
@@ -20,22 +20,39 @@ const CONFIG = {
         MARCAR_ASIENTO_DISPONIBLE: '/ecommerce/home/liberarAsiento'
     },
     GRILLA: {
-        FILAS: 15,
-        COLUMNAS: 6
+        FILA_1: 1,
+        FILA_2: 1,
+        COL_1: 1,
+        COL_2: 1,
     }
 };
 
-const SetearConfig = {   
-    init(){
-
+const SetearConfig = {
+    async init() {
+        this.setDatos();
     },
-
-    setMaxAsientos(){
-
+    async setDatos(){
+        const datosFetch = await this.getDatosFromBD();
+        CONFIG.MAX_ASIENTOS = datosFetch.max_pasajes_venta;
+        CONFIG.IGV = datosFetch.igv;
+        CONFIG.TIEMPO_MAXIMO_COMPRA= datosFetch.tiempo_maximo_venta_minutos;
+    },
+    async getDatosFromBD() {
+        try {
+            const resp = await fetch("/ecommerce/home/GetConfGeneral");
+            const resp_json = await resp.json();
+            console.log(resp_json);
+            if (resp_json.Status == 'success') {
+                return resp_json.data;
+            }
+            toastr.error("Error al cargar las configuraciones");
+            console.log("Error al cargar las configuraciones: " + resp_json.Msj)
+        } catch (error) {
+            toastr.error("Error al cargar las configuraciones");
+            console.log("Error al cargar las configuraciones: " + error.message)
+        }
     }
-
 }
-
 async function obtenerNombreMetodo(idMetodo) {
     const response = await fetch(`/ecommerce/home/obtenerMetodoPagoxID/${idMetodo}`)
     const data = await response.text()
@@ -819,6 +836,17 @@ const VehicleLayoutManager = {
 
             const res = await response.json();
             const datos = res.data;
+            const niveles = res.niveles;
+            niveles.forEach(dict => {
+                if (dict.nivel_id == 1) {
+                    CONFIG.GRILLA.COL_1 = dict.y;
+                    CONFIG.GRILLA.FILA_1 = dict.x;
+                }
+                if (dict.nivel_id == 2) {
+                    CONFIG.GRILLA.COL_2 = dict.y;
+                    CONFIG.GRILLA.FILA_2 = dict.x;
+                }
+            })
 
             const datosPiso1 = datos.filter(d => d.nroPiso == 1);
             const datosPiso2 = datos.filter(d => d.nroPiso == 2);
@@ -847,10 +875,21 @@ const VehicleLayoutManager = {
         if (!contenedor) return;
 
         contenedor.innerHTML = '';
-        this.configurarEstilosMatriz(contenedor);
+        this.configurarEstilosMatriz(contenedor, piso);
+        let FILA;
+        let COLUMNA;
 
-        for (let y = 1; y <= CONFIG.GRILLA.FILAS; y++) {
-            for (let x = 1; x <= CONFIG.GRILLA.COLUMNAS; x++) {
+        
+        if (piso == 1) {
+            COLUMNA = CONFIG.GRILLA.COL_1;
+            FILA = CONFIG.GRILLA.FILA_1;
+        }
+        if (piso == 2) {
+            COLUMNA = CONFIG.GRILLA.COL_2;
+            FILA = CONFIG.GRILLA.FILA_2;
+        }
+        for (let y = 1; y <= FILA; y++) {
+            for (let x = 1; x <= COLUMNA; x++) {
                 // ✅ CORRECCIÓN: Pasar tipoItinerario para identificar correctamente
                 const btn = this.crearElementoMatriz(datos, x, y, tipoItinerario);
                 contenedor.appendChild(btn);
@@ -858,7 +897,8 @@ const VehicleLayoutManager = {
         }
     },
 
-    configurarEstilosMatriz(contenedor) {
+    configurarEstilosMatriz(contenedor, piso) {
+
         Object.assign(contenedor.style, {
             display: 'grid',
             gridTemplateColumns: `repeat(${CONFIG.GRILLA.COLUMNAS}, 40px)`,
@@ -1120,6 +1160,7 @@ const SeatManager = {
         console.log('🧹 Set de asientos seleccionados limpiado');
     },
 
+    // Se ejecuta al dar click al asiento llama a: marcarAsientoComoOcupado - 
     async manejarClickAsiento(event, sufijo) {
         const btn = event.target;
         const nombreAsiento = btn.innerText.trim();
@@ -2513,10 +2554,10 @@ const PaymentManager = {
 
 
             if (nombreMetodo == "tarjeta de credito" || nombreMetodo == "tarjeta") {
-               
+
                 this.procesarPago();
             } else if (nombreTipoMetodo == "efectivo" && nombreMetodo == "efectivo") {
-               
+
                 this.procesarReserva();
             } else {
                 console.log(nombreTipoMetodo)
@@ -3243,7 +3284,7 @@ const FormValidationManager = {
 };
 
 const ClearManager = {
-    
+
 }
 
 const App = {
@@ -3253,24 +3294,7 @@ const App = {
         NavigationManager.inicializarEstadoPorDefecto();
         PageUnloadManager.init();
         FormValidationManager.init();
-        $.ajax({
-            url: '/ecommerce/home/GetConfGeneral',  // Ruta de la API
-            method: 'GET',  // Método GET
-            success: function (data) {
-                // Verificamos si la respuesta es exitosa
-                if (data.Status === 'success' && data.data) {
-                    CONFIG.MAX_ASIENTOS = data.data.max_pasajes_venta;
-                    CONFIG.TIEMPO_MAXIMO_COMPRA = data.data.tiempo_maximo_venta_minutos;
-                    CONFIG.IGV = data.data.igv;
-                    console.log("MAX_ASIENTOS actualizado:", CONFIG.MAX_ASIENTOS);
-                } else {
-                    console.error("Error al recuperar la configuración general");
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error("Error en la llamada AJAX:", error);
-            }
-        });
+        SetearConfig.init();
     },
 
     // =============================================================================

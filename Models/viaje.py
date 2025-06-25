@@ -672,6 +672,22 @@ class Viaje:
             conexion.cerrar()
 
     @classmethod
+    def obtener_tamano_niveles(cls,id):
+        conexion = bd.Conexion()
+        try:
+            niveles = conexion.obtener("""
+                SELECT DISTINCT n.id as nivel_id, n.x_dimension as x, n.y_dimension as y
+                FROM detalle_viaje dv INNER JOIN viaje v ON dv.idViaje = v.id
+                INNER JOIN vehiculo ve ON ve.id = v.idVehiculo
+                INNER JOIN tipo_vehiculo tv ON tv.id = ve.id_tipo_vehiculo
+                INNER JOIN nivel n ON n.id_tipo_vehiculo = tv.id
+                WHERE dv.id = %s
+                             """,(id,))
+            return niveles
+        except:
+            conexion.cerrar()
+
+    @classmethod
     def obtener_clientes_por_viaje(cls, id_viaje):
         conexion = None
         try:

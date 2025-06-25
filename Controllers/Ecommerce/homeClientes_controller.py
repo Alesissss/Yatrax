@@ -686,8 +686,10 @@ def buscarViajes():
 def obtener_diseno_vehiculo():
     detalle_viaje_id = request.json.get("id_dv")
     datos = Viaje.obtener_asientos(detalle_viaje_id)
+    niveles = Viaje.obtener_tamano_niveles(detalle_viaje_id)
     return jsonify({
         "data": datos,
+        "niveles": niveles,
         "Status": "success",
         "msg": "Retornado con éxito" 
     })
@@ -944,7 +946,7 @@ def get_conf_general():
         if result:
             result['igv'] = float(result['igv'])
             result['max_pasajes_venta'] = float(result['max_pasajes_venta'])
-            result['tarifaBase'] = float(result['tarifaBase'])
+            # result['tarifaBase'] = float(result['tarifaBase'])
             result['tiempo_maximo_venta_minutos'] = float(result['tiempo_maximo_venta_minutos'])
             result['precioCambioRuta'] = float(result['precioCambioRuta'])
             result['precioTransferencia'] = float(result['precioTransferencia'])

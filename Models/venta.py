@@ -10,6 +10,11 @@ class Venta:
     
     @classmethod
     def registrar_operacion(cls, contacto: dict, pago: dict, ventas: dict):
+        print(contacto)
+
+        print(contacto)
+        print(pago)
+        print(ventas)
         conexion = bd.Conexion()
         try:
             # TIPO COMPROBANTE 1 == BOLETA ,  2 == FACTURA
