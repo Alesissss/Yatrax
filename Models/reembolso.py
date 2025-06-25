@@ -38,7 +38,8 @@ CONCAT(pas.ape_paterno,' ', pas.ape_materno,' ', pas.nombre) as nombreCompleto,
 a.nombre as asiento,
 CONCAT((select ciudad from sucursal sucu where sucu.id=dv.idSucursalOrigen) , '-',
 (select ciudad from sucursal sucu where sucu.id=dv.idSucursalDestino)) AS origen_destino,
-r.estado
+r.estado,
+r.monto
 FROM reembolso r 
 INNER JOIN pasaje pa on pa.id=r.idPasaje
 INNER JOIN detalle_pasaje dp on dp.idPasaje= pa.id
@@ -112,6 +113,10 @@ INNER JOIN asiento a on dva.idAsiento=a.id
             if(nuevo_estado =='ACEPTADO'):
                 conexion.ejecutar(
                     "UPDATE pasaje set esReembolso= 1 WHERE id = (SELECT idPasaje FROM reembolso WHERE id = %s);",
+                    (id_reembolso,)
+                )
+                conexion.ejecutar(
+                    "UPDATE detalle_viaje_asiento set esDisponible= 1 WHERE id = (select pa.idDetalleViajeAsiento from reembolso re inner join pasaje pa on pa.id=re.idPasaje where re.id=%s);",
                     (id_reembolso,)
                 )
                 conexion.ejecutar(

@@ -814,6 +814,19 @@
       const idPasaje = document.getElementById("pasCod").value;
       const celPag = document.getElementById("celularRem")?.value.trim() || "";
       const cciPag = document.getElementById("cciRem")?.value.trim() || "";
+      // Validar campos adicionales según el tipo de método de pago
+      const tipoMetodoTexto = document.getElementById("tipoMetodoPagoRem").selectedOptions[0].text.toLowerCase();
+
+      if (tipoMetodoTexto.includes("tarjeta") && cciPag.length !== 20) {
+        toastr.warning("Debe ingresar un número de CCI válido (20 dígitos)", "MENSAJE DEL SISTEMA");
+        return;
+      }
+
+      if (tipoMetodoTexto.includes("billetera") && (celPag.length !== 9 || isNaN(celPag))) {
+        toastr.warning("Debe ingresar un número de celular válido (9 dígitos)", "MENSAJE DEL SISTEMA");
+        return;
+      }
+
       // VALIDACIONES BÁSICAS
       if (!numeroComprobante || !idPasaje) {
         toastr.warning("Debe buscar un pasaje válido primero", "MENSAJE DEL SISTEMA");
