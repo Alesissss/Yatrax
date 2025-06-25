@@ -108,6 +108,16 @@ class Asiento:
             conexion.cerrar()
     
     @classmethod
+    def dar_alta(cls, id):
+        conexion = bd.Conexion()
+        try:
+            conexion.ejecutar("CALL SP_DARALTA_ASIENTO(%s);", (id,))
+            resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
+            return resultado[0]
+        finally:
+            conexion.cerrar()
+    
+    @classmethod
     def obtenerDatosAsiento(cls,id):
         conexion = bd.Conexion()
         try:
