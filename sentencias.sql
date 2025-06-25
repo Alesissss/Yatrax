@@ -7575,6 +7575,10 @@ BEGIN
         esCambioRuta    = 0
     WHERE id = p_idPasaje;
 
+    SELECT @idDetalle := idDetalleViajeAsiento FROM pasaje WHERE id=p_idPasaje;
+
+    UPDATE detalle_viaje_asiento SET esDisponible=0 WHERE id=@idDetalle;
+
     -- Comprobamos si realmente se actualizó alguna fila
     IF ROW_COUNT() = 0 THEN
         SET p_MSJ  = '';
