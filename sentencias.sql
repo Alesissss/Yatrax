@@ -3411,33 +3411,40 @@ VALUES ('factura', 1, 'alexis@gmail.com');
 INSERT INTO `tipo_metodopago` (`nombre`, `estado`, `usuario`)
 VALUES ('Efectivo', 1, 'alexis@gmail.com');
 INSERT INTO `tipo_metodopago` (`nombre`, `estado`, `usuario`)
-VALUES ('Tarjeta', 1, 'alexis@gmail.com');
+VALUES ('Tarjeta', 1, 'luis@gmail.com');
 INSERT INTO `tipo_metodopago` (`nombre`, `estado`, `usuario`)
-VALUES ('Billetera virtual', 1, 'alexis@gmail.com');
+VALUES ('Billetera virtual', 1, 'luis@gmail.com');
 
 INSERT INTO `metodo_pago`
 (`nombre`, `logo`, `estado`, `id_tipo_metodoPago`, `qr`, `usuario`)
 VALUES
 (
 'Efectivo',
-'/static/img/efectivo.png',
+'/Static/img/metodos_pago/logo/default_metodopago.png',
 1,
 1,
 null,
-'alexis@gmail.com'
+'luis@gmail.com'
 );
 
 INSERT INTO `metodo_pago`
 (`nombre`, `logo`, `estado`, `id_tipo_metodoPago`, `qr`, `usuario`)
 VALUES
-(
-'Tarjeta de Credito',
-'/static/img/efectivo.png',
-1,
-2,
-null,
-'alexis@gmail.com'
-);
+('Tarjeta de Credito','/Static/img/metodos_pago/logo/tarjeta.png',1,2,null,'luis@gmail.com');
+
+INSERT INTO `metodo_pago`
+(`nombre`, `logo`, `estado`, `id_tipo_metodoPago`, `qr`, `usuario`)
+VALUES
+('Tarjeta de Debito','/Static/img/metodos_pago/logo/tarjeta.png',1,2,null,'luis@gmail.com');
+
+INSERT INTO `metodo_pago`
+(`nombre`, `logo`, `estado`, `id_tipo_metodoPago`, `qr`, `usuario`)
+VALUES
+('Yape','/Static/img/metodos_pago/logo/yape.png',1,3,'/Static/img/metodos_pago/qr/qryape.png','luis@gmail.com');
+INSERT INTO `metodo_pago`
+(`nombre`, `logo`, `estado`, `id_tipo_metodoPago`, `qr`, `usuario`)
+VALUES
+('Plin','/Static/img/metodos_pago/logo/plin.png',1,3,'/Static/img/metodos_pago/qr/qrplin.png','luis@gmail.com');
 -- Crear procedimiento SP_REGISTRAR_PERSONAL_INCIDENCIA
 DELIMITER $$
 
