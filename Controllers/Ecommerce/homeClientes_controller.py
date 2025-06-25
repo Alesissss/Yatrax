@@ -968,7 +968,7 @@ def validar_pasaje_dado_baja():
             return jsonify({"Status": "error", "Msj": "Número de comprobante es requerido"}), 400
         reembolso = Reembolso.validar_pasaje_dadoBaja(numero_comprobante)
         if reembolso:
-            if reembolso["estado_viaje"] == 0 or reembolso["fechaInicioReprogramacion"] is not None or reembolso["fechaFinReprogramacion"] is not None:
+            if reembolso["estado_viaje"] == 0 or reembolso["fechaReprogramacion"] is not None:
                 return jsonify({"Status": "success", "data": reembolso, "Msj": "Pasaje validado correctamente"})
             else:
                 return jsonify({
@@ -1001,7 +1001,7 @@ def registrar_reembolso():
         id_cliente= id_cliente["id"]
         id_metodo_pago = data.get("metodoPago")
         id_tipo_comprobante = data.get("tipoComprobante")
-
+        monto= Pasaje.obtener_por_id(id_pasaje)
         # Validar campos requeridos
         if not all([numero_comprobante, id_cliente, id_metodo_pago, id_tipo_comprobante, id_pasaje]):
             return jsonify({"Status": "error", "Msj": "Faltan datos requeridos"}), 400
@@ -1009,7 +1009,7 @@ def registrar_reembolso():
         # Aquí puedes calcular el monto dinámicamente si es necesario
         pasaje=Pasaje.obtener_por_id(id_pasaje)
         print(pasaje)
-        monto = 25.00  # ← cambiar si se requiere consultar de otra tabla
+        monto = monto["precio"]  # ← cambiar si se requiere consultar de otra tabla
         resultado = Reembolso.registrar(
             numeroComprobante=numero_comprobante,
             monto=monto,

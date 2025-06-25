@@ -33,6 +33,7 @@
                             <th class="text-center">CLIENTE</th>
                             <th class="text-center">ASIENTO</th>
                             <th class="text-center">ORIGEN-DESTINO</th>
+                            <th class="text-center">MONTO</th>
                             <th class="text-center">ESTADO</th>
                             <th class="text-center">ACCIÓN</th>
                         </tr>
@@ -196,6 +197,11 @@
                 { data: "asiento", name: "asiento"},
                 { data: "origen_destino", name: "origen_destino"},
                 {
+                    data: "monto",
+                    name: "monto",
+                    className: 'text-end align-middle',
+                },
+                {
                     data: "estado",
                     name: "estado",
                     render: function (data, type, row) {
@@ -294,6 +300,7 @@
                 success: function (response) {
                     if (response.Status === "success") {
                         fct_IniciarTablaPlantillas('#tbl_Plantillas');
+                        
                         $('#filtroEstado').trigger('change');
                         toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                     } else {
