@@ -172,6 +172,7 @@ DROP PROCEDURE IF EXISTS SP_REGISTRAR_REEMBOLSO;
 DROP PROCEDURE IF EXISTS SP_CAMBIAR_ESTADO_REEMBOLSO;
 
 -- Eliminar tablas si existen
+DROP TABLE IF EXISTS empresa;
 DROP TABLE IF EXISTS pais_sucursal;
 DROP TABLE IF EXISTS conf_general;
 DROP TABLE IF EXISTS reclamo;
@@ -308,8 +309,9 @@ CREATE TABLE tipo_comprobante (
     estado BOOLEAN NOT NULL,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) not null
-    );
-    CREATE TABLE tipo_herramienta(
+);
+
+CREATE TABLE tipo_herramienta(
     id int AUTO_INCREMENT PRIMARY KEY,
     nombre varchar(50),
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -470,10 +472,22 @@ CREATE TABLE cliente (
     CONSTRAINT fk_tipo_doc FOREIGN KEY (id_tipo_doc) REFERENCES tipo_documento(id)
 );
 
+CREATE TABLE empresa (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    razon_social VARCHAR(255) NOT NULL,
+    ruc VARCHAR(11) NOT NULL UNIQUE,
+    direccion VARCHAR(255) NOT NULL,
+    telefono VARCHAR(15) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    estado BOOLEAN NOT NULL DEFAULT TRUE,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL
+);
+
 -- Crear tabla conf_general
 CREATE TABLE conf_general (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    tarifaBase DECIMAL(9,2) NOT NULL,
+    precioPasajeLibre DECIMAL(9,2) NOT NULL,
     igv DECIMAL(9,2) NOT NULL,
     max_pasajes_venta INT NOT NULL,
     tiempo_maximo_venta_minutos DECIMAL(9,2),
@@ -617,6 +631,7 @@ CREATE TABLE herramienta(
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre varchar(60),
     icono varchar(200),
+    precio DECIMAL(9,2),
     id_tipo INT NOT NULL,
     FOREIGN KEY (id_tipo) REFERENCES tipo_herramienta(id)
 );
@@ -696,7 +711,7 @@ CREATE TABLE asiento (
 CREATE TABLE detalle_viaje_asiento(
     id INT AUTO_INCREMENT PRIMARY KEY,
     idDetalle_Viaje INT NOT NULL ,
-    idAsiento INT NULL, -- Puede ser NULL si el viaje es libre
+    idAsiento INT NULL,
     esDisponible BOOLEAN NOT NULL DEFAULT 1, -- 1: disponible, 0: no disponible
     -- Auditoría
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -754,8 +769,7 @@ CREATE TABLE pasaje(
     enTransaccion TINYINT NULL DEFAULT 0, -- 1: en transacción, 0: no en transacción
     idPasaje INT NULL, -- Para operaciones con pasajes
     precio DECIMAL(10,2) NOT NULL,
-    fechaInicioReprogramacion DATETIME NULL,
-    fechaFinReprogramacion DATETIME NULL,
+    fechaReprogramacion DATETIME NULL,
     codigoReserva CHAR(14) NULL, -- Código de reserva, si es un pasaje de reserva
     fecha_reserva DATETIME NULL, -- Fecha de reserva, si es un pasaje de reserva
     FOREIGN KEY (idDetalleViajeAsiento) REFERENCES detalle_viaje_asiento(id),
@@ -983,9 +997,9 @@ INSERT INTO tipo_herramienta (id, nombre) VALUES (4, 'Multimedia');
 
 -- INSERT HERRAMIENTA
 
-INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (1, 'Asiento a 140°','img/herramienta/asiento_140.png',1);
-INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (2, 'Asiento a 160°','img/herramienta/asiento_160.png',1);
-INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (3, 'Asiento cama','img/herramienta/asiento_180.png',1);
+INSERT INTO herramienta (id, nombre, precio, icono,id_tipo) VALUES (1, 'Asiento a 140°', 100, 'img/herramienta/asiento_140.png',1);
+INSERT INTO herramienta (id, nombre, precio, icono,id_tipo) VALUES (2, 'Asiento a 160°', 150, 'img/herramienta/asiento_160.png',1);
+INSERT INTO herramienta (id, nombre, precio, icono,id_tipo) VALUES (3, 'Asiento cama', 200, 'img/herramienta/asiento_180.png',1);
 
 INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (4, 'Televisor','img/herramienta/tv.png',4);
 
@@ -3089,7 +3103,7 @@ INSERT INTO usuarios (id, id_personal, email, password, imagen, estado, id_tipou
 '/Static/img/trabajadores/luis.jpg', 1, 1,'2025-03-06 20:06:14','SYSTEM');
 
 -- Tabla de configuración general
-INSERT INTO conf_general (id, igv, tarifaBase, max_pasajes_venta, tiempo_maximo_venta_minutos, viajesReprogramables, max_dias_vigencia_reprogramacion, precioCambioRuta, precioTransferencia) VALUES (1, 0.18, 10, 4, 10, 0, 7, 50, 50);
+INSERT INTO conf_general (id, igv, precioPasajeLibre, max_pasajes_venta, tiempo_maximo_venta_minutos, viajesReprogramables, max_dias_vigencia_reprogramacion, precioCambioRuta, precioTransferencia) VALUES (1, 0.18, 50, 4, 10, 0, 7, 50, 50);
 
 -- Tabla menus
 INSERT INTO conf_menus (id, nombre, estado) VALUES (1, 'M_USUARIOS', 1);
@@ -3410,33 +3424,40 @@ VALUES ('factura', 1, 'alexis@gmail.com');
 INSERT INTO `tipo_metodopago` (`nombre`, `estado`, `usuario`)
 VALUES ('Efectivo', 1, 'alexis@gmail.com');
 INSERT INTO `tipo_metodopago` (`nombre`, `estado`, `usuario`)
-VALUES ('Tarjeta', 1, 'alexis@gmail.com');
+VALUES ('Tarjeta', 1, 'luis@gmail.com');
 INSERT INTO `tipo_metodopago` (`nombre`, `estado`, `usuario`)
-VALUES ('Billetera virtual', 1, 'alexis@gmail.com');
+VALUES ('Billetera virtual', 1, 'luis@gmail.com');
 
 INSERT INTO `metodo_pago`
 (`nombre`, `logo`, `estado`, `id_tipo_metodoPago`, `qr`, `usuario`)
 VALUES
 (
 'Efectivo',
-'/static/img/efectivo.png',
+'/Static/img/metodos_pago/logo/default_metodopago.png',
 1,
 1,
 null,
-'alexis@gmail.com'
+'luis@gmail.com'
 );
 
 INSERT INTO `metodo_pago`
 (`nombre`, `logo`, `estado`, `id_tipo_metodoPago`, `qr`, `usuario`)
 VALUES
-(
-'Tarjeta de Credito',
-'/static/img/efectivo.png',
-1,
-1,
-null,
-'alexis@gmail.com'
-);
+('Tarjeta de Credito','/Static/img/metodos_pago/logo/tarjeta.png',1,2,null,'luis@gmail.com');
+
+INSERT INTO `metodo_pago`
+(`nombre`, `logo`, `estado`, `id_tipo_metodoPago`, `qr`, `usuario`)
+VALUES
+('Tarjeta de Debito','/Static/img/metodos_pago/logo/tarjeta.png',1,2,null,'luis@gmail.com');
+
+INSERT INTO `metodo_pago`
+(`nombre`, `logo`, `estado`, `id_tipo_metodoPago`, `qr`, `usuario`)
+VALUES
+('Yape','/Static/img/metodos_pago/logo/yape.png',1,3,'/Static/img/metodos_pago/qr/qryape.png','luis@gmail.com');
+INSERT INTO `metodo_pago`
+(`nombre`, `logo`, `estado`, `id_tipo_metodoPago`, `qr`, `usuario`)
+VALUES
+('Plin','/Static/img/metodos_pago/logo/plin.png',1,3,'/Static/img/metodos_pago/qr/qrplin.png','luis@gmail.com');
 -- Crear procedimiento SP_REGISTRAR_PERSONAL_INCIDENCIA
 DELIMITER $$
 
@@ -8020,7 +8041,7 @@ DELIMITER $$
 
 CREATE PROCEDURE SP_MODIFICAR_CONF_GENERAL(
     IN P_IGV DECIMAL(5,2),
-    IN P_TARIFABASE DECIMAL(9,2),
+    IN P_PASAJE_LIBRE DECIMAL(9,2),
     IN P_MAXPASAJESVENTA INT,
     IN P_TIEMPO_MAXIMO_VENTA_MINUTOS INT,
     IN P_VIAJES_REPROGRAMABLES INT,
@@ -8040,7 +8061,7 @@ BEGIN
     IF EXISTS (SELECT 1 FROM conf_general LIMIT 1) THEN
         UPDATE conf_general
         SET igv = P_IGV, 
-            tarifaBase = P_TARIFABASE,
+            precioPasajeLibre = P_PASAJE_LIBRE,
             max_pasajes_venta = P_MAXPASAJESVENTA,
             tiempo_maximo_venta_minutos = P_TIEMPO_MAXIMO_VENTA_MINUTOS,
             viajesReprogramables = P_VIAJES_REPROGRAMABLES,

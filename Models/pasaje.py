@@ -22,6 +22,53 @@ class Pasaje:
         self.codigo = codigo
         self.id_pasaje = id_pasaje
 
+
+    @classmethod
+    def obtener_id_por_comprobante(cls, numero_comprobante):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            sql = "SELECT id FROM pasaje WHERE numeroComprobante = %s;"
+            filas = conexion.obtener(sql, (numero_comprobante,))
+            return filas[0]['id'] if filas else None
+        finally:
+            if conexion:
+                conexion.cerrar()
+
+    @classmethod
+    def obtener_ultimo_comprobante(cls):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            sql = "SELECT numeroComprobante FROM pasaje ORDER BY id DESC LIMIT 1;"
+            filas = conexion.obtener(sql)
+            return filas[0]['numeroComprobante'] if filas else None
+        finally:
+            if conexion:
+                conexion.cerrar()
+
+    @classmethod
+    def actualizar_id_pasaje_ultimo(cls):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            # Obtener el último comprobante
+            ultimo_comprobante = cls.obtener_ultimo_comprobante()
+            if not ultimo_comprobante:
+                return {"msj": None, "msj2": "No se encontró comprobante"}
+            # Obtener el id correspondiente
+            id_pasaje = cls.obtener_id_por_comprobante(ultimo_comprobante)
+            if not id_pasaje:
+                return {"msj": None, "msj2": "No se encontró pasaje para el comprobante"}
+            # Actualizar el campo idPasaje con su propio id
+            sql = "UPDATE pasaje SET idPasaje = %s WHERE numeroComprobante = %s;"
+            conexion.ejecutar(sql, (id_pasaje, ultimo_comprobante))
+            return {"msj": "idPasaje actualizado correctamente", "msj2": None}
+        finally:
+            if conexion:
+                conexion.cerrar()
+
+
     @classmethod
     def obtener_todos(cls):
         conexion = None
@@ -121,6 +168,16 @@ class Pasaje:
             if conexion:
                 conexion.cerrar()
 
+    @classmethod
+    def cambiarEstadoAsiento(cls, ):
+        conexion = None
+        try:
+            conexion =  bd.Conexion()
+            sql = ""
+        finally:
+            if conexion:
+                conexion.cerrar()
+
 
     @classmethod
     def dar_baja_cambio_ruta(cls, id_pasaje):
@@ -206,7 +263,8 @@ class Pasaje:
                         sd.nombre                                        AS DESTINO,
                         v.fecha                                          AS FECHA,
                         p.codigo                                         AS CODIGO,
-                        p.precio as PRECIO
+                        p.precio as PRECIO,
+                        dva.idAsiento                                      AS ASIENTO,
                         FROM pasaje p
                         JOIN venta v                    ON v.id = p.idVenta
                         JOIN cliente cli                ON cli.id = v.idCliente
@@ -353,8 +411,13 @@ class Pasaje:
             conexion = bd.Conexion()
             sql = "UPDATE pasaje SET esCambioRuta = 1, esReserva = 0, esPasajeNormal = 0, esPasajeLibre = 0, esTransferencia = 0 WHERE numeroComprobante = %s;"
             conexion.ejecutar(sql, (numero_comprobante,))
-            # Un UPDATE no retorna filas, así que no puedes acceder a filas[0]['esCambioRuta']
-            # Si quieres verificar el cambio, haz un SELECT después:
+            sql = """UPDATE detalle_viaje_asiento dva
+                        INNER JOIN pasaje p
+                        ON p.idDetalleViajeAsiento = dva.id
+                        SET dva.esDisponible = 1
+                        WHERE p.numeroComprobante = %s; 
+                """
+            conexion.ejecutar(sql, (numero_comprobante,))
             resultado = conexion.obtener("SELECT esCambioRuta FROM pasaje WHERE numeroComprobante = %s;", (numero_comprobante,))
             if resultado:
                 return resultado[0]['esCambioRuta'] == 1
@@ -489,37 +552,52 @@ class Pasaje:
         try:
             conexion = bd.Conexion()
             query = """
-                SELECT 
-                    td.abreviatura AS tipo_documento,
-                    pa.numero_documento,
-                    CONCAT_WS(' ', pa.nombre, pa.ape_paterno, pa.ape_materno) AS nombre_completo,
-                    s_origen.ciudad AS origen,
-                    s_destino.ciudad AS destino,
-                    dv.fechaSalida AS fecha_salida,
-                    DATE_FORMAT(dv.fechaSalida, '%%H:%%i') AS hora_salida,
-                    a.nombre AS asiento,
-                    ser.nombre AS servicio,
-                    pas.codigo AS codigo_pasaje,
-                    pas.enTransaccion AS estado_transaccion,
-                    v.idEstadoViaje AS estado_viaje,    
-                    pas.numeroComprobante,
-                    pas.idDetalleViajeAsiento,
-                    pas.id
-                FROM pasaje pas 
-                INNER JOIN detalle_viaje_asiento dva ON dva.id = pas.idDetalleViajeAsiento
-                INNER JOIN detalle_viaje dv ON dv.id = dva.idDetalle_Viaje
-                INNER JOIN detalle_pasaje dp ON dp.idPasaje = pas.id 
-                INNER JOIN pasajero pa ON pa.id = dp.idPasajero
-                INNER JOIN tipo_documento td ON td.id = pa.idTipoDocumento
-                INNER JOIN asiento a ON a.id = dva.idAsiento
-                INNER JOIN sucursal s_origen ON s_origen.id = dv.idSucursalOrigen
-                INNER JOIN sucursal s_destino ON s_destino.id = dv.idSucursalDestino
-                INNER JOIN vehiculo ve ON ve.id = a.id_vehiculo
-                INNER JOIN tipo_vehiculo tv ON tv.id = ve.id_tipo_vehiculo
-                INNER JOIN servicio ser ON ser.id = tv.id_servicio
-                INNER JOIN viaje v ON v.id = dv.idViaje
-                WHERE dp.viajeEnBrazos != 1 AND pas.numeroComprobante = %s;
-            """
+            SELECT 
+                td.abreviatura AS tipo_documento,
+                pa.numero_documento,
+                CONCAT_WS(' ', pa.nombre, pa.ape_paterno, pa.ape_materno) AS nombre_completo,
+                s_origen.id AS idSucursalOrigen,
+                s_origen.ciudad AS origen,
+                s_destino.id AS idSucursalDestino,
+                s_destino.ciudad AS destino,
+                dv.fechaSalida AS fecha_salida,
+                DATE_FORMAT(dv.fechaSalida, '%%H:%%i') AS hora_salida,
+                a.nombre AS asiento,
+                ser.nombre AS servicio,
+                pas.codigo AS codigo_pasaje,
+                pas.enTransaccion AS estado_transaccion,
+                v.idEstadoViaje AS estado_viaje,    
+                pas.numeroComprobante,
+                pas.idDetalleViajeAsiento,
+                pas.id
+            FROM pasaje pas 
+            INNER JOIN detalle_viaje_asiento dva 
+                ON dva.id = pas.idDetalleViajeAsiento
+            INNER JOIN detalle_viaje dv 
+                ON dv.id = dva.idDetalle_Viaje
+            INNER JOIN detalle_pasaje dp 
+                ON dp.idPasaje = pas.id 
+            INNER JOIN pasajero pa 
+                ON pa.id = dp.idPasajero
+            INNER JOIN tipo_documento td 
+                ON td.id = pa.idTipoDocumento
+            INNER JOIN asiento a 
+                ON a.id = dva.idAsiento
+            INNER JOIN sucursal s_origen 
+                ON s_origen.id = dv.idSucursalOrigen
+            INNER JOIN sucursal s_destino 
+                ON s_destino.id = dv.idSucursalDestino
+            INNER JOIN vehiculo ve 
+                ON ve.id = a.id_vehiculo
+            INNER JOIN tipo_vehiculo tv 
+                ON tv.id = ve.id_tipo_vehiculo
+            INNER JOIN servicio ser 
+                ON ser.id = tv.id_servicio
+            INNER JOIN viaje v 
+                ON v.id = dv.idViaje
+            WHERE dp.viajeEnBrazos != 1
+              AND pas.numeroComprobante = %s;
+        """
             filas = conexion.obtener(query, (numComprobante,))
             return filas[0] if filas else None
         finally:
@@ -580,15 +658,16 @@ class Pasaje:
             sql_update = """
                 UPDATE pasaje
                 SET esPasajeLibre = 1,
-                    enTransaccion = 1
+                    enTransaccion = 1,
+                    esPasajeNormal = 0,
+                    esReserva = 0
                 WHERE id = %s;
             """
             conexion.ejecutar(sql_update, (id_pasaje,), auto_commit=False)
             
             sql_update2 = """
                 UPDATE detalle_viaje_asiento
-                SET idAsiento = NULL,
-                    esDisponible = 0
+                SET esDisponible = 1
                 WHERE id = %s;
             """
             conexion.ejecutar(sql_update2, (idDetViajeAs,), auto_commit=False)
@@ -612,6 +691,7 @@ class Pasaje:
             sql_update = """
                 UPDATE pasaje
                 SET esTransferencia = 1,
+                    esReserva = 0,
                     enTransaccion   = 1
                 WHERE id = %s;
             """

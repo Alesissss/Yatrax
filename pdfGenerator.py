@@ -11,16 +11,20 @@ class TicketTransporteSimple:
         self.pdf.add_page()
         self.pdf.set_auto_page_break(auto=True, margin=10)
         self.pdf.set_margins(self.margen, self.margen, self.margen)
+        
+        dir_sunat = "Static/compro_sunat/"
 
-    def generar_ticket(self, datos_ticket, nombre_archivo="ticket_transporte.pdf"):
+    def generar_ticket(self, datos_ticket):
         try:
+            dir_tick = "Static/tickets/"
             empresa = datos_ticket['empresa']
             comprobante = datos_ticket['comprobante']
             cliente = datos_ticket['cliente']
             viaje = datos_ticket.get('viaje', {})
             servicio = datos_ticket['servicio']
             totales = datos_ticket['totales']
-
+            
+            absoluteName = f"{dir_tick}{empresa["numero_comprobante"]}.pdf"
             # Datos de empresa
             self.pdf.set_font('Helvetica', 'B', 10)
             self.pdf.multi_cell(self.ancho_util, 5, empresa['nombre'], align='C')
@@ -125,8 +129,8 @@ class TicketTransporteSimple:
             self.pdf.set_font('Helvetica', '', 7)
             self.pdf.multi_cell(self.ancho_util, 4, "Cubierto por POLIZA DE SEGURO LA POSITIVA 05-60004991 - 1 15/01/2024-15/01/2025", align='C')
 
-            self.pdf.output(nombre_archivo)
-            return os.path.abspath(nombre_archivo) if os.path.exists(nombre_archivo) else None
+            self.pdf.output(absoluteName)
+            return os.path.abspath(absoluteName) if os.path.exists(absoluteName) else None
 
         except Exception as e:
             print(f"\u274c Error al generar ticket: {str(e)}")
@@ -169,12 +173,16 @@ class TicketTransporteSimple:
 def ejemplo_ticket():
     print("\U0001f68c Generando ticket de transporte...")
 
-    url = 'http://see.transporteschiclayo.pe/'
-    ruta_qr = generar_codigo_qr(url)
 
+    
+    url = 'http://see.transporteschiclayo.pe/'
+    ruta_qr = generar_codigo_qr(url,"mi_qr.jpg")
+    ticket = TicketTransporteSimple()
+    
     datos_ticket = {
         'empresa': {
             'nombre': 'EMPRESA DE TRANSPORTES CHICLAYO S.A.',
+
             'ruc': '20103626448',
             'direccion': 'AV PASEO DE LA REPÚBLICA 857 INT 1 LA VICTORIA, LIMA, LIMA',
             'telefono': 'CHICLAYO-CHICLAYO-957578490/',
@@ -220,12 +228,11 @@ def ejemplo_ticket():
             'url_consulta': url,
             'poliza_seguro': 'Cubierto por POLIZA DE SEGURO LA POSITIVA 05-60004991 - 1 15/01/2024-15/01/2025'
         },
-        'qr': ruta_qr,
-        'url': url
+        'qr': ruta_qr
     }
-
-    ticket = TicketTransporteSimple()
-    ruta = ticket.generar_ticket(datos_ticket, "mi_ticket_transporte.pdf")
+    
+    ruta = ticket.generar_ticket(datos_ticket)
+    
 
     if ruta:
         print(f"\U0001f3ab ¡Éxito! Tu ticket está listo en: {ruta}")

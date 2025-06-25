@@ -3,7 +3,7 @@
 // =============================================================================
 
 const CONFIG = {
-    MAX_ASIENTOS: 4, // Valor por defecto
+    MAX_ASIENTOS: 1, // Valor por defecto
     IGV: 0.18, // En decimal, en porcentaje 18%
     TIEMPO_MAXIMO_COMPRA: 5, // En minutos
     RUTAS: {
@@ -20,11 +20,39 @@ const CONFIG = {
         MARCAR_ASIENTO_DISPONIBLE: '/ecommerce/home/liberarAsiento'
     },
     GRILLA: {
-        FILAS: 15,
-        COLUMNAS: 6
+        FILA_1: 1,
+        FILA_2: 1,
+        COL_1: 1,
+        COL_2: 1,
     }
 };
 
+const SetearConfig = {
+    async init() {
+        this.setDatos();
+    },
+    async setDatos() {
+        const datosFetch = await this.getDatosFromBD();
+        CONFIG.MAX_ASIENTOS = datosFetch.max_pasajes_venta;
+        CONFIG.IGV = datosFetch.igv;
+        CONFIG.TIEMPO_MAXIMO_COMPRA = datosFetch.tiempo_maximo_venta_minutos;
+    },
+    async getDatosFromBD() {
+        try {
+            const resp = await fetch("/ecommerce/home/GetConfGeneral");
+            const resp_json = await resp.json();
+            console.log(resp_json);
+            if (resp_json.Status == 'success') {
+                return resp_json.data;
+            }
+            toastr.error("Error al cargar las configuraciones");
+            console.log("Error al cargar las configuraciones: " + resp_json.Msj)
+        } catch (error) {
+            toastr.error("Error al cargar las configuraciones");
+            console.log("Error al cargar las configuraciones: " + error.message)
+        }
+    }
+}
 async function obtenerNombreMetodo(idMetodo) {
     const response = await fetch(`/ecommerce/home/obtenerMetodoPagoxID/${idMetodo}`)
     const data = await response.text()
@@ -36,27 +64,6 @@ async function obtenerNombreTipoMetodo(idTipo) {
     const data = await response.text()
     return data;
 }
-
-$.ajax({
-    url: '/ecommerce/home/GetConfGeneral',  // Ruta de la API
-    method: 'GET',  // Método GET
-    success: function (data) {
-        // Verificamos si la respuesta es exitosa
-        if (data.Status === 'success' && data.data) {
-            CONFIG.MAX_ASIENTOS = data.data.max_pasajes_venta;
-            CONFIG.TIEMPO_MAXIMO_COMPRA = data.data.tiempo_maximo_venta_minutos;
-            CONFIG.IGV = data.data.igv;
-            console.log("MAX_ASIENTOS actualizado:", CONFIG.MAX_ASIENTOS);
-        } else {
-            console.error("Error al recuperar la configuración general");
-        }
-    },
-    error: function (xhr, status, error) {
-        console.error("Error en la llamada AJAX:", error);
-    }
-});
-
-
 
 // =============================================================================
 // ESTADO GLOBAL DE LA APLICACIÓN
@@ -147,15 +154,15 @@ const NavigationManager = {
     // ✅ NUEVA FUNCIÓN: Control estricto de acceso a tabs
     controlarAccesoTabs() {
         const tabs = document.querySelectorAll('.tab-link');
-        
+
         tabs.forEach((tab, index) => {
             const stepIndex = parseInt(tab.getAttribute('data-step'));
-            
+
             // Por defecto, deshabilitar todos los tabs
             tab.classList.add('disabled');
             tab.setAttribute('disabled', 'true');
             tab.style.pointerEvents = 'none';
-            
+
             // Habilitar tabs según el estado actual
             if (this.puedeAccederATab(stepIndex)) {
                 tab.classList.remove('disabled');
@@ -171,20 +178,20 @@ const NavigationManager = {
             case 0: // Tab "Elegir destino"
                 // Solo se puede acceder si no hemos avanzado
                 return AppState.currentStep === 0;
-                
+
             case 1: // Tab "Itinerario ida"
                 // Se puede acceder si estamos en él o si podemos volver desde tab 2
-                return AppState.currentStep === 1 || 
-                       (AppState.currentStep === 2 && this.tieneItinerarioRegreso());
-                
+                return AppState.currentStep === 1 ||
+                    (AppState.currentStep === 2 && this.tieneItinerarioRegreso());
+
             case 2: // Tab "Itinerario regreso"
                 // Solo si estamos en él y hay itinerario de regreso
                 return AppState.currentStep === 2 && this.tieneItinerarioRegreso();
-                
+
             case 3: // Tab "Pago"
                 // Solo si estamos en él
                 return AppState.currentStep === 3;
-                
+
             default:
                 return false;
         }
@@ -260,12 +267,12 @@ const NavigationManager = {
     // ✅ NUEVA FUNCIÓN: Procesar búsqueda desde tab 0 a tab 1
     async procesarBusqueda() {
         await this.mostrarLoader("Buscando viajes disponibles...");
-        
+
         // Avanzar a tab 1
         AppState.setCurrentStep(1);
         AppState.maxStep = Math.max(AppState.maxStep, 1);
         this.updateFormVisibility();
-        
+
         this.ocultarLoader();
     },
 
@@ -286,14 +293,15 @@ const NavigationManager = {
             confirmButtonText: 'Sí, continuar',
             cancelButtonText: 'Revisar datos',
             confirmButtonColor: '#28a745',
-            cancelButtonColor: '#6c757d'
+            cancelButtonColor: '#6c757d',
+            reverseButton: true
         });
 
         if (!confirmacion.isConfirmed) return;
 
         // Verificar si hay fecha de vuelta
         const fechaVuelta = $("input[name='fecha_vuelta']").val();
-        
+
         if (!fechaVuelta || fechaVuelta.trim() === '') {
             // No hay fecha de vuelta, ir directo al pago
             await this.irAPago();
@@ -328,7 +336,8 @@ const NavigationManager = {
             confirmButtonText: 'Sí, ir al pago',
             cancelButtonText: 'Revisar datos',
             confirmButtonColor: '#28a745',
-            cancelButtonColor: '#6c757d'
+            cancelButtonColor: '#6c757d',
+            reverseButton: true
         });
 
         if (!confirmacion.isConfirmed) return;
@@ -340,15 +349,15 @@ const NavigationManager = {
     // ✅ NUEVA FUNCIÓN: Ir al itinerario de regreso
     async irAItinerarioRegreso() {
         await this.mostrarLoader("Cargando itinerario de regreso...");
-        
+
         AppState.setCurrentStep(2);
         AppState.maxStep = Math.max(AppState.maxStep, 2);
-        
+
         // Cargar itinerario de regreso
         setTimeout(() => {
             ItineraryManager.cargarItinerario(AppState.itinerarioRegreso, 'contenedor_viajes_vuelta', 'vuelta');
         }, 100);
-        
+
         this.updateFormVisibility();
         this.ocultarLoader();
     },
@@ -356,17 +365,17 @@ const NavigationManager = {
     // ✅ NUEVA FUNCIÓN: Ir al pago
     async irAPago() {
         await this.mostrarLoader("Preparando información de pago...");
-        
+
         AppState.setCurrentStep(3);
         AppState.maxStep = Math.max(AppState.maxStep, 3);
-        
+
         // Inicializar sistema de pago
         setTimeout(() => {
             if (typeof PaymentManager !== 'undefined') {
                 PaymentManager.initialize();
             }
         }, 100);
-        
+
         this.updateFormVisibility();
         this.ocultarLoader();
     },
@@ -407,7 +416,8 @@ const NavigationManager = {
             confirmButtonText: 'Sí, volver',
             cancelButtonText: 'Cancelar',
             confirmButtonColor: '#17a2b8',
-            cancelButtonColor: '#6c757d'
+            cancelButtonColor: '#6c757d',
+            reverseButton: true
         });
 
         if (!confirmacion.isConfirmed) return;
@@ -419,14 +429,14 @@ const NavigationManager = {
         document.querySelectorAll('.tab-link').forEach(tab => {
             tab.addEventListener('click', (event) => {
                 const stepIndex = parseInt(tab.getAttribute('data-step'));
-                
+
                 // Prevenir comportamiento por defecto si no se puede acceder
                 if (!this.puedeAccederATab(stepIndex)) {
                     event.preventDefault();
                     toastr.warning("No puedes acceder a esta sección en este momento.");
                     return;
                 }
-                
+
                 this.goToStep(stepIndex);
             });
         });
@@ -480,10 +490,13 @@ const SearchManager = {
                 text: "Esta acción eliminará tu progreso actual, ¿estás seguro de hacerlo?",
                 icon: "warning",
                 showCancelButton: true,
+                reverseButtons: true,
                 confirmButtonText: "Sí, buscar",
                 cancelButtonText: "Cancelar",
                 confirmButtonColor: '#d33',
-                cancelButtonColor: '#6c757d'
+                cancelButtonColor: '#6c757d',
+
+                reverseButton: true
             });
 
             if (!confirmacion.isConfirmed) return;
@@ -746,7 +759,7 @@ const ItineraryManager = {
                     // Pequeño delay para asegurar que el contenido esté renderizado
                     setTimeout(() => {
                         SeatManager.inicializarSeleccionAsientos(sufijo);
-                        TimerManager.iniciar(300, sufijo);
+                        TimerManager.iniciar(CONFIG.TIEMPO_MAXIMO_COMPRA * 60, sufijo);
 
                         // ✅ CORRECCIÓN: Restaurar estado si hay asientos seleccionados
                         VehicleLayoutManager.restaurarEstadoAsientos(sufijo);
@@ -828,6 +841,17 @@ const VehicleLayoutManager = {
 
             const res = await response.json();
             const datos = res.data;
+            const niveles = res.niveles;
+            niveles.forEach(dict => {
+                if (dict.nivel_id == 1) {
+                    CONFIG.GRILLA.COL_1 = dict.y;
+                    CONFIG.GRILLA.FILA_1 = dict.x;
+                }
+                if (dict.nivel_id == 2) {
+                    CONFIG.GRILLA.COL_2 = dict.y;
+                    CONFIG.GRILLA.FILA_2 = dict.x;
+                }
+            })
 
             const datosPiso1 = datos.filter(d => d.nroPiso == 1);
             const datosPiso2 = datos.filter(d => d.nroPiso == 2);
@@ -856,10 +880,21 @@ const VehicleLayoutManager = {
         if (!contenedor) return;
 
         contenedor.innerHTML = '';
-        this.configurarEstilosMatriz(contenedor);
+        this.configurarEstilosMatriz(contenedor, piso);
+        let FILA;
+        let COLUMNA;
 
-        for (let y = 1; y <= CONFIG.GRILLA.FILAS; y++) {
-            for (let x = 1; x <= CONFIG.GRILLA.COLUMNAS; x++) {
+
+        if (piso == 1) {
+            COLUMNA = CONFIG.GRILLA.COL_1;
+            FILA = CONFIG.GRILLA.FILA_1;
+        }
+        if (piso == 2) {
+            COLUMNA = CONFIG.GRILLA.COL_2;
+            FILA = CONFIG.GRILLA.FILA_2;
+        }
+        for (let y = 1; y <= FILA; y++) {
+            for (let x = 1; x <= COLUMNA; x++) {
                 // ✅ CORRECCIÓN: Pasar tipoItinerario para identificar correctamente
                 const btn = this.crearElementoMatriz(datos, x, y, tipoItinerario);
                 contenedor.appendChild(btn);
@@ -867,7 +902,8 @@ const VehicleLayoutManager = {
         }
     },
 
-    configurarEstilosMatriz(contenedor) {
+    configurarEstilosMatriz(contenedor, piso) {
+
         Object.assign(contenedor.style, {
             display: 'grid',
             gridTemplateColumns: `repeat(${CONFIG.GRILLA.COLUMNAS}, 40px)`,
@@ -1129,6 +1165,7 @@ const SeatManager = {
         console.log('🧹 Set de asientos seleccionados limpiado');
     },
 
+    // Se ejecuta al dar click al asiento llama a: marcarAsientoComoOcupado - 
     async manejarClickAsiento(event, sufijo) {
         const btn = event.target;
         const nombreAsiento = btn.innerText.trim();
@@ -1216,6 +1253,8 @@ const SeatManager = {
             showCancelButton: true,
             confirmButtonText: 'Sí, eliminar',
             cancelButtonText: 'Cancelar',
+
+            reverseButton: true
         });
 
         if (confirm.isConfirmed) {
@@ -1861,15 +1900,9 @@ const PageUnloadManager = {
                 console.log(`🔓 Total de asientos para liberar: ${asientosArray.length}`, asientosArray);
 
                 asientosArray.forEach(asientoId => {
-                    const formData = new FormData();
-                    formData.append('asiento_id', asientoId);
-                    formData.append('accion', 'liberar');
-                    formData.append('motivo', 'cierre_pagina');
-                    formData.append('timestamp', new Date().toISOString());
-
-                    // sendBeacon es más confiable que fetch en unload
-                    navigator.sendBeacon(CONFIG.RUTAS.MARCAR_ASIENTO_DISPONIBLE, formData);
+                    SeatManager.marcarAsientoComoDisponible(asientoId)
                 });
+
 
                 console.log(`✅ ${asientosArray.length} asientos enviados para liberación`);
             }
@@ -2045,10 +2078,6 @@ const PaymentManager = {
         if (tipoComprobante == '1') {
             contenedor.innerHTML = `
                 <div class="row g-3">
-                    <div class="col-md-12">
-                        <label for="email_contacto" class="form-label">Correo electrónico *</label>
-                        <input type="email" id="email_contacto" class="form-control" required>
-                    </div>
                     <div class="col-md-6">
                         <label for="tipo_documento_contacto" class="form-label">Tipo de documento *</label>
                         <select id="tipo_documento_contacto" class="form-select">
@@ -2058,7 +2087,11 @@ const PaymentManager = {
                     </div>
                     <div class="col-md-6">
                         <label for="numero_documento_contacto" class="form-label">Número de documento *</label>
-                        <input type="text" id="numero_documento_contacto" class="form-control" required>
+                        <input type="text" id="numero_documento_contacto" class="form-control" minlength="8" maxlength="12" required>
+                    </div>
+                    <div class="col-md-12">
+                        <label for="email_contacto" class="form-label">Correo electrónico *</label>
+                        <input type="email" id="email_contacto" class="form-control" required>
                     </div>
                     <div class="col-md-12">
                         <label for="nombres_contacto" class="form-label">Nombres *</label>
@@ -2526,19 +2559,14 @@ const PaymentManager = {
             let nombreTipoMetodo = await obtenerNombreTipoMetodo(tipoMetodo)
             let nombreMetodo = await obtenerNombreMetodo(metodoPago)
 
-            alert(tipoMetodo)
-            alert(metodoPago)
-            alert(nombreTipoMetodo)
-            alert(nombreMetodo)
 
             if (nombreMetodo == "tarjeta de credito" || nombreMetodo == "tarjeta") {
-                alert("dentro 1")
+
                 this.procesarPago();
             } else if (nombreTipoMetodo == "efectivo" && nombreMetodo == "efectivo") {
-                alert("dentro 2")
+
                 this.procesarReserva();
             } else {
-                alert("dentro 3")
                 console.log(nombreTipoMetodo)
                 console.log(nombreMetodo)
                 console.error("Espacio para pasaje libre en un futuro");
@@ -2989,11 +3017,11 @@ const FormValidationManager = {
         $(document).on('input', '[id^="accordionPasajeros_"] input', (e) => {
             const $element = $(e.target);
             const sufijo = this.getSufijoFromElement(e.target);
-            
+
             if (sufijo) {
                 // Validar inmediatamente mientras escribe
                 this.validarCampoIndividual($element);
-                
+
                 // Validar el formulario completo sin delay
                 this.validarFormularioCompleto(sufijo);
             }
@@ -3003,7 +3031,7 @@ const FormValidationManager = {
         $(document).on('change', '[id^="accordionPasajeros_"] select', (e) => {
             const $element = $(e.target);
             const sufijo = this.getSufijoFromElement(e.target);
-            
+
             if (sufijo) {
                 this.validarCampoIndividual($element);
                 this.validarFormularioCompleto(sufijo);
@@ -3049,7 +3077,7 @@ const FormValidationManager = {
         if (botonGuardar.length) {
             // Siempre mostrar "Guardar datos"
             botonGuardar.html('<i class="fas fa-save"></i> Guardar datos');
-            
+
             // Agregar clases Bootstrap para mejor UX
             botonGuardar.removeClass('btn-outline-primary').addClass('btn-outline-secondary');
             botonGuardar.prop('disabled', true);
@@ -3066,11 +3094,11 @@ const FormValidationManager = {
         const valor = $element.val()?.trim();
         const tipo = $element.attr('type') || ($element.is('select') ? 'select' : 'text');
         const nombre = $element.attr('name') || $element.attr('placeholder') || 'Campo';
-        
+
         console.log(`⌨️ Validando en tiempo real: ${nombre} = "${valor}"`);
-        
+
         const validacion = this.validarCampo($element, valor, tipo);
-        
+
         if (!validacion.valido) {
             this.marcarCampoInvalido($element, validacion.mensaje);
             console.log(`❌ ${nombre}: ${validacion.mensaje}`);
@@ -3104,7 +3132,7 @@ const FormValidationManager = {
 
             // Validar cada campo
             const validacion = this.validarCampo($element, valor, tipo);
-            
+
             if (validacion.valido) {
                 camposValidos++;
                 this.marcarCampoValido($element);
@@ -3151,13 +3179,13 @@ const FormValidationManager = {
                         return { valido: false, mensaje: 'Solo letras y espacios' };
                     }
                 }
-                
+
                 if (nombre.toLowerCase().includes('dni') || placeholder.toLowerCase().includes('dni')) {
                     if (!/^\d{8}$/.test(valor)) {
                         return { valido: false, mensaje: 'DNI debe tener exactamente 8 dígitos' };
                     }
                 }
-                
+
                 if (nombre.toLowerCase().includes('telefono') || placeholder.toLowerCase().includes('telefono')) {
                     if (!/^\d{9}$/.test(valor)) {
                         return { valido: false, mensaje: 'Teléfono debe tener 9 dígitos' };
@@ -3170,7 +3198,7 @@ const FormValidationManager = {
                 if (isNaN(fecha.getTime())) {
                     return { valido: false, mensaje: 'Fecha inválida' };
                 }
-                
+
                 // Validar que no sea fecha futura para fecha de nacimiento
                 if (nombre.toLowerCase().includes('nacimiento')) {
                     const hoy = new Date();
@@ -3193,7 +3221,7 @@ const FormValidationManager = {
     // ✅ MARCAR CAMPO COMO INVÁLIDO
     marcarCampoInvalido($element, mensaje) {
         $element.removeClass('is-valid').addClass('is-invalid');
-        
+
         // Buscar o crear feedback
         let feedback = $element.siblings('.invalid-feedback');
         if (!feedback.length) {
@@ -3213,19 +3241,19 @@ const FormValidationManager = {
     actualizarBotonGuardar(sufijo, todoValido) {
         const accordion = $(`#accordionPasajeros_${sufijo}`);
         const boton = accordion.closest('.col-md-12').find('button[onclick*="acabar"]');
-        
+
         if (boton.length) {
             // Texto siempre igual
             boton.html('<i class="fas fa-save"></i> Guardar datos');
-            
+
             if (todoValido) {
                 boton.prop('disabled', false)
-                     .removeClass('btn-outline-secondary')
-                     .addClass('btn-outline-primary');
+                    .removeClass('btn-outline-secondary')
+                    .addClass('btn-outline-primary');
             } else {
                 boton.prop('disabled', true)
-                     .removeClass('btn-outline-primary')
-                     .addClass('btn-outline-secondary');
+                    .removeClass('btn-outline-primary')
+                    .addClass('btn-outline-secondary');
             }
         }
     },
@@ -3239,18 +3267,19 @@ const FormValidationManager = {
     // ✅ VALIDAR ANTES DE NAVEGAR (VALIDACIÓN REAL)
     puedeNavegar(sufijo) {
         const datosValidados = this.estanDatosValidados(sufijo);
-        
+
         if (!datosValidados) {
             Swal.fire({
                 title: "Datos incompletos o incorrectos",
                 text: "Debes completar correctamente todos los campos requeridos antes de continuar.",
                 icon: "warning",
                 confirmButtonText: "Entendido",
-                confirmButtonColor: '#3085d6'
+                confirmButtonColor: '#3085d6',
+                reverseButton: true
             });
             return false;
         }
-        
+
         return true;
     },
 
@@ -3262,19 +3291,24 @@ const FormValidationManager = {
     }
 };
 
+const ClearManager = {
+
+}
+
 const App = {
     init() {
         this.configurarEventosGlobales();
         this.inicializarComponentes();
         NavigationManager.inicializarEstadoPorDefecto();
         PageUnloadManager.init();
-        FormValidationManager.init()
+        FormValidationManager.init();
+        SetearConfig.init();
     },
 
     // =============================================================================
     // FUNCIONES DE RESETEO
     // =============================================================================
-    
+
     resetearSistemaCompletoSinRutas() {
         console.log('🔄 Reseteando sistema completo (preservando rutas)...');
 
@@ -3298,7 +3332,7 @@ const App = {
             AppState.currentStep = 0;
             AppState.maxStep = 0;
             AppState.itinerarioRegreso = null;
-            
+
             // ✅ NUEVO: Limpiar validaciones de formularios
             if (typeof FormValidationManager !== 'undefined') {
                 AppState.validacionFormularios = {};

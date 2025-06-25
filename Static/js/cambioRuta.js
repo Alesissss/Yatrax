@@ -3,7 +3,7 @@
 // =============================================================================
 
 const CONFIG = {
-    MAX_ASIENTOS: 4, // Valor por defecto
+    MAX_ASIENTOS: 1, // Valor por defecto
     IGV: 0.18, // En decimal, en porcentaje 18%
     TIEMPO_MAXIMO_COMPRA: 5, // En minutos
     PRECIORUTA: 10, // Valor por defecto, se actualizará desde la API
@@ -32,7 +32,6 @@ $.ajax({
     success: function (data) {
         // Verificamos si la respuesta es exitosa
         if (data.Status === 'success' && data.data) {
-            CONFIG.MAX_ASIENTOS = data.data.max_pasajes_venta;
             CONFIG.TIEMPO_MAXIMO_COMPRA = data.data.tiempo_maximo_venta_minutos;
             CONFIG.IGV = data.data.igv;
             CONFIG.PRECIORUTA = data.data.precioCambioRuta;
@@ -349,7 +348,6 @@ const SearchManager = {
 // =============================================================================
 // GESTIÓN DE RUTAS Y FECHAS
 // =============================================================================
-
 const RouteManager = {
     cargarRutas() {
         $.getJSON(CONFIG.RUTAS.OBTENER_RUTAS, (response) => {

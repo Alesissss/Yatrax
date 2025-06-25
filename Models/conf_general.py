@@ -22,12 +22,12 @@ class ConfGeneral:
             conexion.cerrar()
 
     @classmethod
-    def modificar(cls, igv, tarifaBase, max_pasajes_venta, tiempo_maximo_venta_minutos, viajesReprogramables, max_dias_reprogramacion, precioCambioRuta, precioTransferencia):
+    def modificar(cls, igv, precioPasajeLibre, max_pasajes_venta, tiempo_maximo_venta_minutos, viajesReprogramables, max_dias_reprogramacion, precioCambioRuta, precioTransferencia):
         conexion = bd.Conexion()
 
         try:
             conexion.ejecutar("CALL SP_MODIFICAR_CONF_GENERAL(%s, %s, %s, %s, %s, %s, %s, %s);", 
-                              (igv, tarifaBase, max_pasajes_venta, tiempo_maximo_venta_minutos, viajesReprogramables, max_dias_reprogramacion, precioCambioRuta, precioTransferencia))
+                              (igv, precioPasajeLibre, max_pasajes_venta, tiempo_maximo_venta_minutos, viajesReprogramables, max_dias_reprogramacion, precioCambioRuta, precioTransferencia))
 
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
             return resultado[0]  # Retorna un diccionario con los mensajes
