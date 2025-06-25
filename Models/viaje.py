@@ -330,9 +330,8 @@ class Viaje:
                         ON dva.idDetalle_Viaje = dv.id
                         AND dv.idViaje = %s
                         SET
-                        p.fechaInicioReprogramacion = NOW(),
-                        p.fechaFinReprogramacion    = DATE_ADD(NOW(), INTERVAL %s DAY)
-                    """, (idViaje, dias_reprogramacion), auto_commit=False)
+                        p.fechaReprogramacion = NOW()
+                    """, (idViaje), auto_commit=False)
 
                     conexion.conn.commit()
                     return {'@MSJ': 'Viaje reprogramado correctamente', '@MSJ2': ''}
@@ -574,7 +573,32 @@ class Viaje:
             return lista_origenes
         finally:
             conexion.cerrar()
-    
+
+    @classmethod
+    def obtenerDestinosMenosActual(cls, origen_id, destino_id):
+        conexion = bd.Conexion()
+        try:
+            query = """
+                SELECT DISTINCT
+                    CONCAT(s_origen.ciudad, ' - ', s_destino.ciudad) AS ruta
+                FROM detalle_viaje dv
+                INNER JOIN sucursal s_origen
+                    ON s_origen.id = dv.idSucursalOrigen
+                INNER JOIN sucursal s_destino
+                    ON s_destino.id = dv.idSucursalDestino
+                INNER JOIN viaje v
+                    ON v.id = dv.idViaje
+                WHERE v.estado = 1
+                AND v.idEstadoViaje = 1
+                AND NOT (
+                        dv.idSucursalOrigen = %s
+                    AND dv.idSucursalDestino = %s
+                );
+            """
+            return conexion.obtener(query, (origen_id, destino_id))
+        finally:
+            conexion.cerrar()
+
     @classmethod
     def buscarViajePorRutaYFecha(cls, origen,destino,fecha):
         conexion = bd.Conexion()

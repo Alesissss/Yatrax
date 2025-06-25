@@ -348,7 +348,6 @@ const SearchManager = {
 // =============================================================================
 // GESTIÓN DE RUTAS Y FECHAS
 // =============================================================================
-
 const RouteManager = {
     cargarRutas() {
         $.getJSON(CONFIG.RUTAS.OBTENER_RUTAS, (response) => {

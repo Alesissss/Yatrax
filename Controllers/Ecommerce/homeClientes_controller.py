@@ -2,6 +2,7 @@ import hashlib
 import os
 import re
 import random
+from weakref import ref
 #extra agregado para la transaccion
 import bd
 from correo import enviar_correo
@@ -441,6 +442,20 @@ def cambiarEstadoPasaje():
         return jsonify({'Status': 'success', 'Msj': 'Estado del pasaje cambiado correctamente.'})
     except Exception as e:
         return jsonify({'Status': 'error', 'Msj': f'Ocurrió un error al cambiar el estado del pasaje: {repr(e)}'})
+    
+@homeClientes_bp.route('/referenciarPasaje', methods=['POST'])
+def referenciar_pasaje():
+    try:
+        num_comprobante = request.json.get('num_comprobante')
+        if not num_comprobante:
+            return jsonify({'Status': 'error', 'Msj': 'Falta el número de comprobante.'})
+        ref = Pasaje.obtener_id_por_comprobante(num_comprobante)
+        if ref is None:
+            return jsonify({'Status': 'error', 'Msj': 'No se encontró el pasaje con el comprobante proporcionado.'})
+        execute = Pasaje.actualizar_id_pasaje_ultimo()    
+    except Exception as e:
+        return jsonify({'Status': 'error', 'Msj': f'Ocurrió un error al referenciar el pasaje: {repr(e)}'})
+    
 
 # END REGIÓN CAMBIO DE RUTA #
 
@@ -465,6 +480,56 @@ def get_rutasConcatenadas():
             return jsonify({'data': {}, 'Status': 'error', 'Msj': 'No se encontraron rutas activas.'})
     except Exception as e:
         return jsonify({'data': {}, 'Status': 'error', 'Msj': f'Ocurrió un error al obtener la ruta: {repr(e)}'})
+
+@homeClientes_bp.route('/GetRutasConcatenadasA', methods=['POST'])
+def get_rutasA():
+    try:
+        payload = request.get_json(force=True)
+        s_origen  = payload.get('origen')
+        s_destino = payload.get('destino')
+        lista_pasajes = Viaje.obtenerDestinosMenosActual(s_origen, s_destino)
+        if lista_pasajes:
+            return jsonify({'data': lista_pasajes, 'Status': 'success', 'Msj': 'Rutas obtenidas correctamente.'})
+        else:
+            return jsonify({'data': {}, 'Status': 'error', 'Msj': 'No se encontraron rutas distintas.'})
+    except Exception as e:
+        return jsonify({'data': {}, 'Status': 'error', 'Msj': f'Ocurrió un error al obtener la ruta: {repr(e)}'})
+
+
+@homeClientes_bp.route('/GetRutasConcatenadasSinLaActusal', methods=['GET', 'POST'])
+def get_rutas_concatenadas_sin_la_actual():
+    try:
+        # 1) Intentamos GET ?numeroComprobante=XXX
+        num_comprobante = request.args.get('A000-00000007')
+        # 2) Si no vino, miramos en JSON POST (por compatibilidad)
+        if not num_comprobante and request.is_json:
+            num_comprobante = request.get_json().get('numeroComprobante')
+        if not num_comprobante:
+            return jsonify({
+                'data': {}, 'Status': 'error',
+                'Msj': 'Falta numeroComprobante.'
+            }), 400
+
+        datos = Pasaje.obtenerDatosPasaje(num_comprobante)
+        if not datos:
+            return jsonify({
+                'data': {}, 'Status': 'error',
+                'Msj': 'No se encontró pasaje para ese comprobante.'
+            }), 404
+
+        rutas = Viaje.obtenerDestinosMenosActual(
+            datos['idSucursalOrigen'], datos['idSucursalDestino']
+        )
+        return jsonify({
+            'data': rutas or [], 
+            'Status': rutas and 'success' or 'error',
+            'Msj': rutas and 'Rutas obtenidas.' or 'No hay rutas distintas.'
+        })
+    except Exception as e:
+        return jsonify({
+            'data': {}, 'Status': 'error',
+            'Msj': f'Error interno: {e!r}'
+        }), 500   
     
 # API NET RENIEC
 # controller_clientes.py
@@ -946,7 +1011,7 @@ def get_conf_general():
         if result:
             result['igv'] = float(result['igv'])
             result['max_pasajes_venta'] = float(result['max_pasajes_venta'])
-            # result['tarifaBase'] = float(result['tarifaBase'])
+            result['precioPasajeLibre'] = float(result['precioPasajeLibre'])
             result['tiempo_maximo_venta_minutos'] = float(result['tiempo_maximo_venta_minutos'])
             result['precioCambioRuta'] = float(result['precioCambioRuta'])
             result['precioTransferencia'] = float(result['precioTransferencia'])
@@ -970,7 +1035,7 @@ def validar_pasaje_dado_baja():
             return jsonify({"Status": "error", "Msj": "Número de comprobante es requerido"}), 400
         reembolso = Reembolso.validar_pasaje_dadoBaja(numero_comprobante)
         if reembolso:
-            if reembolso["estado_viaje"] == 0 or reembolso["fechaInicioReprogramacion"] is not None or reembolso["fechaFinReprogramacion"] is not None:
+            if reembolso["estado_viaje"] == 0 or reembolso["fechaReprogramacion"] is not None:
                 return jsonify({"Status": "success", "data": reembolso, "Msj": "Pasaje validado correctamente"})
             else:
                 return jsonify({
@@ -1003,7 +1068,7 @@ def registrar_reembolso():
         id_cliente= id_cliente["id"]
         id_metodo_pago = data.get("metodoPago")
         id_tipo_comprobante = data.get("tipoComprobante")
-
+        monto= Pasaje.obtener_por_id(id_pasaje)
         # Validar campos requeridos
         if not all([numero_comprobante, id_cliente, id_metodo_pago, id_tipo_comprobante, id_pasaje]):
             return jsonify({"Status": "error", "Msj": "Faltan datos requeridos"}), 400
@@ -1011,7 +1076,7 @@ def registrar_reembolso():
         # Aquí puedes calcular el monto dinámicamente si es necesario
         pasaje=Pasaje.obtener_por_id(id_pasaje)
         print(pasaje)
-        monto = 25.00  # ← cambiar si se requiere consultar de otra tabla
+        monto = monto["precio"]  # ← cambiar si se requiere consultar de otra tabla
         resultado = Reembolso.registrar(
             numeroComprobante=numero_comprobante,
             monto=monto,
