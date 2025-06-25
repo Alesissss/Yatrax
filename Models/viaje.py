@@ -573,7 +573,32 @@ class Viaje:
             return lista_origenes
         finally:
             conexion.cerrar()
-    
+
+    @classmethod
+    def obtenerDestinosMenosActual(cls, origen_id, destino_id):
+        conexion = bd.Conexion()
+        try:
+            query = """
+                SELECT DISTINCT
+                    CONCAT(s_origen.ciudad, ' - ', s_destino.ciudad) AS ruta
+                FROM detalle_viaje dv
+                INNER JOIN sucursal s_origen
+                    ON s_origen.id = dv.idSucursalOrigen
+                INNER JOIN sucursal s_destino
+                    ON s_destino.id = dv.idSucursalDestino
+                INNER JOIN viaje v
+                    ON v.id = dv.idViaje
+                WHERE v.estado = 1
+                AND v.idEstadoViaje = 1
+                AND NOT (
+                        dv.idSucursalOrigen = %s
+                    AND dv.idSucursalDestino = %s
+                );
+            """
+            return conexion.obtener(query, (origen_id, destino_id))
+        finally:
+            conexion.cerrar()
+
     @classmethod
     def buscarViajePorRutaYFecha(cls, origen,destino,fecha):
         conexion = bd.Conexion()
@@ -668,6 +693,22 @@ class Viaje:
 
             return listado
         finally:
+            conexion.cerrar()
+
+    @classmethod
+    def obtener_tamano_niveles(cls,id):
+        conexion = bd.Conexion()
+        try:
+            niveles = conexion.obtener("""
+                SELECT DISTINCT n.id as nivel_id, n.x_dimension as x, n.y_dimension as y
+                FROM detalle_viaje dv INNER JOIN viaje v ON dv.idViaje = v.id
+                INNER JOIN vehiculo ve ON ve.id = v.idVehiculo
+                INNER JOIN tipo_vehiculo tv ON tv.id = ve.id_tipo_vehiculo
+                INNER JOIN nivel n ON n.id_tipo_vehiculo = tv.id
+                WHERE dv.id = %s
+                             """,(id,))
+            return niveles
+        except:
             conexion.cerrar()
 
     @classmethod

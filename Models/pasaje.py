@@ -22,6 +22,53 @@ class Pasaje:
         self.codigo = codigo
         self.id_pasaje = id_pasaje
 
+
+    @classmethod
+    def obtener_id_por_comprobante(cls, numero_comprobante):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            sql = "SELECT id FROM pasaje WHERE numeroComprobante = %s;"
+            filas = conexion.obtener(sql, (numero_comprobante,))
+            return filas[0]['id'] if filas else None
+        finally:
+            if conexion:
+                conexion.cerrar()
+
+    @classmethod
+    def obtener_ultimo_comprobante(cls):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            sql = "SELECT numeroComprobante FROM pasaje ORDER BY id DESC LIMIT 1;"
+            filas = conexion.obtener(sql)
+            return filas[0]['numeroComprobante'] if filas else None
+        finally:
+            if conexion:
+                conexion.cerrar()
+
+    @classmethod
+    def actualizar_id_pasaje_ultimo(cls):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            # Obtener el último comprobante
+            ultimo_comprobante = cls.obtener_ultimo_comprobante()
+            if not ultimo_comprobante:
+                return {"msj": None, "msj2": "No se encontró comprobante"}
+            # Obtener el id correspondiente
+            id_pasaje = cls.obtener_id_por_comprobante(ultimo_comprobante)
+            if not id_pasaje:
+                return {"msj": None, "msj2": "No se encontró pasaje para el comprobante"}
+            # Actualizar el campo idPasaje con su propio id
+            sql = "UPDATE pasaje SET idPasaje = %s WHERE numeroComprobante = %s;"
+            conexion.ejecutar(sql, (id_pasaje, ultimo_comprobante))
+            return {"msj": "idPasaje actualizado correctamente", "msj2": None}
+        finally:
+            if conexion:
+                conexion.cerrar()
+
+
     @classmethod
     def obtener_todos(cls):
         conexion = None
@@ -505,37 +552,52 @@ class Pasaje:
         try:
             conexion = bd.Conexion()
             query = """
-                SELECT 
-                    td.abreviatura AS tipo_documento,
-                    pa.numero_documento,
-                    CONCAT_WS(' ', pa.nombre, pa.ape_paterno, pa.ape_materno) AS nombre_completo,
-                    s_origen.ciudad AS origen,
-                    s_destino.ciudad AS destino,
-                    dv.fechaSalida AS fecha_salida,
-                    DATE_FORMAT(dv.fechaSalida, '%%H:%%i') AS hora_salida,
-                    a.nombre AS asiento,
-                    ser.nombre AS servicio,
-                    pas.codigo AS codigo_pasaje,
-                    pas.enTransaccion AS estado_transaccion,
-                    v.idEstadoViaje AS estado_viaje,    
-                    pas.numeroComprobante,
-                    pas.idDetalleViajeAsiento,
-                    pas.id
-                FROM pasaje pas 
-                INNER JOIN detalle_viaje_asiento dva ON dva.id = pas.idDetalleViajeAsiento
-                INNER JOIN detalle_viaje dv ON dv.id = dva.idDetalle_Viaje
-                INNER JOIN detalle_pasaje dp ON dp.idPasaje = pas.id 
-                INNER JOIN pasajero pa ON pa.id = dp.idPasajero
-                INNER JOIN tipo_documento td ON td.id = pa.idTipoDocumento
-                INNER JOIN asiento a ON a.id = dva.idAsiento
-                INNER JOIN sucursal s_origen ON s_origen.id = dv.idSucursalOrigen
-                INNER JOIN sucursal s_destino ON s_destino.id = dv.idSucursalDestino
-                INNER JOIN vehiculo ve ON ve.id = a.id_vehiculo
-                INNER JOIN tipo_vehiculo tv ON tv.id = ve.id_tipo_vehiculo
-                INNER JOIN servicio ser ON ser.id = tv.id_servicio
-                INNER JOIN viaje v ON v.id = dv.idViaje
-                WHERE dp.viajeEnBrazos != 1 AND pas.numeroComprobante = %s;
-            """
+            SELECT 
+                td.abreviatura AS tipo_documento,
+                pa.numero_documento,
+                CONCAT_WS(' ', pa.nombre, pa.ape_paterno, pa.ape_materno) AS nombre_completo,
+                s_origen.id AS idSucursalOrigen,
+                s_origen.ciudad AS origen,
+                s_destino.id AS idSucursalDestino,
+                s_destino.ciudad AS destino,
+                dv.fechaSalida AS fecha_salida,
+                DATE_FORMAT(dv.fechaSalida, '%%H:%%i') AS hora_salida,
+                a.nombre AS asiento,
+                ser.nombre AS servicio,
+                pas.codigo AS codigo_pasaje,
+                pas.enTransaccion AS estado_transaccion,
+                v.idEstadoViaje AS estado_viaje,    
+                pas.numeroComprobante,
+                pas.idDetalleViajeAsiento,
+                pas.id
+            FROM pasaje pas 
+            INNER JOIN detalle_viaje_asiento dva 
+                ON dva.id = pas.idDetalleViajeAsiento
+            INNER JOIN detalle_viaje dv 
+                ON dv.id = dva.idDetalle_Viaje
+            INNER JOIN detalle_pasaje dp 
+                ON dp.idPasaje = pas.id 
+            INNER JOIN pasajero pa 
+                ON pa.id = dp.idPasajero
+            INNER JOIN tipo_documento td 
+                ON td.id = pa.idTipoDocumento
+            INNER JOIN asiento a 
+                ON a.id = dva.idAsiento
+            INNER JOIN sucursal s_origen 
+                ON s_origen.id = dv.idSucursalOrigen
+            INNER JOIN sucursal s_destino 
+                ON s_destino.id = dv.idSucursalDestino
+            INNER JOIN vehiculo ve 
+                ON ve.id = a.id_vehiculo
+            INNER JOIN tipo_vehiculo tv 
+                ON tv.id = ve.id_tipo_vehiculo
+            INNER JOIN servicio ser 
+                ON ser.id = tv.id_servicio
+            INNER JOIN viaje v 
+                ON v.id = dv.idViaje
+            WHERE dp.viajeEnBrazos != 1
+              AND pas.numeroComprobante = %s;
+        """
             filas = conexion.obtener(query, (numComprobante,))
             return filas[0] if filas else None
         finally:
@@ -862,4 +924,39 @@ class Pasaje:
             return filas[0] if filas else None
         finally:
             if conexion:
+                conexion.cerrar()
+
+    @classmethod
+    def liberarAsientosxReserva(cls):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            ids = conexion.obtener("""
+                SELECT pas.id as idPasaje, pas.idDetalleViajeAsiento as id
+                FROM pasaje pas
+                JOIN detalle_viaje_asiento dva ON dva.id = pas.idDetalleViajeAsiento
+                WHERE pas.esReserva = 1
+                AND pas.fecha_reserva IS NOT NULL
+                AND pas.fecha_reserva < NOW() - INTERVAL 2 HOUR
+                AND dva.esDisponible = 0
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM pasaje p2
+                    WHERE p2.idDetalleViajeAsiento = pas.idDetalleViajeAsiento
+                    AND p2.esReserva = 0
+                );
+            """)
+
+            print(ids)
+
+            if ids:
+                for idReserva in ids:
+                    sentencia = "UPDATE detalle_viaje_asiento SET esDisponible=1 WHERE id="+str(idReserva['id'])
+                    print(sentencia)
+                    conexion.ejecutar(sentencia)
+
+        except Exception as e:
+            print("Ha ocurrido un error: "+repr(e))
+        finally:
+            if conexion != None:
                 conexion.cerrar()

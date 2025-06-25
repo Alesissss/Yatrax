@@ -173,6 +173,7 @@ DROP PROCEDURE IF EXISTS SP_REGISTRAR_REEMBOLSO;
 DROP PROCEDURE IF EXISTS SP_CAMBIAR_ESTADO_REEMBOLSO;
 
 -- Eliminar tablas si existen
+DROP TABLE IF EXISTS empresa;
 DROP TABLE IF EXISTS pais_sucursal;
 DROP TABLE IF EXISTS conf_general;
 DROP TABLE IF EXISTS reclamo;
@@ -470,6 +471,18 @@ CREATE TABLE cliente (
     CONSTRAINT fk_pais FOREIGN KEY (id_pais) REFERENCES pais(id),
     CONSTRAINT fk_tipo_cliente FOREIGN KEY (id_tipo_cliente) REFERENCES tipo_cliente(idTipoCliente),
     CONSTRAINT fk_tipo_doc FOREIGN KEY (id_tipo_doc) REFERENCES tipo_documento(id)
+);
+
+CREATE TABLE empresa (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    razon_social VARCHAR(255) NOT NULL,
+    ruc VARCHAR(11) NOT NULL UNIQUE,
+    direccion VARCHAR(255) NOT NULL,
+    telefono VARCHAR(15) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    estado BOOLEAN NOT NULL DEFAULT TRUE,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    usuario VARCHAR(100) NOT NULL
 );
 
 -- Crear tabla conf_general
@@ -3409,33 +3422,40 @@ VALUES ('factura', 1, 'alexis@gmail.com');
 INSERT INTO `tipo_metodopago` (`nombre`, `estado`, `usuario`)
 VALUES ('Efectivo', 1, 'alexis@gmail.com');
 INSERT INTO `tipo_metodopago` (`nombre`, `estado`, `usuario`)
-VALUES ('Tarjeta', 1, 'alexis@gmail.com');
+VALUES ('Tarjeta', 1, 'luis@gmail.com');
 INSERT INTO `tipo_metodopago` (`nombre`, `estado`, `usuario`)
-VALUES ('Billetera virtual', 1, 'alexis@gmail.com');
+VALUES ('Billetera virtual', 1, 'luis@gmail.com');
 
 INSERT INTO `metodo_pago`
 (`nombre`, `logo`, `estado`, `id_tipo_metodoPago`, `qr`, `usuario`)
 VALUES
 (
 'Efectivo',
-'/static/img/efectivo.png',
+'/Static/img/metodos_pago/logo/default_metodopago.png',
 1,
 1,
 null,
-'alexis@gmail.com'
+'luis@gmail.com'
 );
 
 INSERT INTO `metodo_pago`
 (`nombre`, `logo`, `estado`, `id_tipo_metodoPago`, `qr`, `usuario`)
 VALUES
-(
-'Tarjeta de Credito',
-'/static/img/efectivo.png',
-1,
-2,
-null,
-'alexis@gmail.com'
-);
+('Tarjeta de Credito','/Static/img/metodos_pago/logo/tarjeta.png',1,2,null,'luis@gmail.com');
+
+INSERT INTO `metodo_pago`
+(`nombre`, `logo`, `estado`, `id_tipo_metodoPago`, `qr`, `usuario`)
+VALUES
+('Tarjeta de Debito','/Static/img/metodos_pago/logo/tarjeta.png',1,2,null,'luis@gmail.com');
+
+INSERT INTO `metodo_pago`
+(`nombre`, `logo`, `estado`, `id_tipo_metodoPago`, `qr`, `usuario`)
+VALUES
+('Yape','/Static/img/metodos_pago/logo/yape.png',1,3,'/Static/img/metodos_pago/qr/qryape.png','luis@gmail.com');
+INSERT INTO `metodo_pago`
+(`nombre`, `logo`, `estado`, `id_tipo_metodoPago`, `qr`, `usuario`)
+VALUES
+('Plin','/Static/img/metodos_pago/logo/plin.png',1,3,'/Static/img/metodos_pago/qr/qrplin.png','luis@gmail.com');
 -- Crear procedimiento SP_REGISTRAR_PERSONAL_INCIDENCIA
 DELIMITER $$
 

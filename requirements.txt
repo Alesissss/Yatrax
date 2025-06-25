@@ -15,4 +15,5 @@ tinycss2
 tinyhtml5
 fpdf2
 qrcode[pil]
+apscheduler
 # $ pip install -r requirements.txt

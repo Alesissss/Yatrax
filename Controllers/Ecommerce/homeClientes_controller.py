@@ -2,6 +2,7 @@ import hashlib
 import os
 import re
 import random
+from weakref import ref
 #extra agregado para la transaccion
 import bd
 from correo import enviar_correo
@@ -36,103 +37,10 @@ from Models.asiento import Asiento
 from Models.venta import Venta
 from Models.reserva import Reserva
 from Models.conf_general import ConfGeneral
-from Models.metodo_pago import MetodoPago
-from Models.tipoMetodoPago import TipoMetodoPago
 
 homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/home')
 
 # FUNCIONES AUXILIARES
-#REGION PROTOTIPO DE PRUEBA 
-@homeClientes_bp.route('/registrar_venta', methods=['POST'])
-def registrar_venta():
-    data = request.json
-    try:
-        conn = bd.Conexion()
-        cursor = conn.cursor()
-        conn.autocommit = False
-
-        # 1. Datos del cliente
-        numero_documento = data['numero_documento']
-        nombre = data['nombre']
-        ape_paterno = data['ape_paterno']
-        ape_materno = data['ape_materno']
-        razon_social = data.get('razon_social')  # opcional
-        sexo = data['sexo']
-        f_nacimiento = data['f_nacimiento']
-        direccion = data['direccion']
-        telefono = data['telefono']
-        email = data['email']
-        password = data['password']
-        estado = True
-        id_pais =  1 #data['id_pais']
-        id_tipo_cliente = data['id_tipo_cliente']
-        id_tipo_doc = data['id_tipo_doc']
-        usuario = data.get('usuario', 'sistema')
-
-        # 2. Datos de la venta
-        sub_total = data['subTotal']
-        igv = 0.18 #data['igv']
-        id_promocion = 1 #data['idPromocion']
-        id_metodo_pago = data['idMetodoPago']
-        id_tipo_comprobante = data['idTipoComprobante']
-
-        # 3. Asiento y viaje
-        id_asiento = data['idAsiento']
-        id_detalle_viaje = data['idDetalleViaje']
-        id_detalle_viaje_asiento = data['id_detalle_viaje_asiento']
-
-        # Verificar que el asiento esté libre (estado = 0)
-        cursor.execute("SELECT estado FROM asiento WHERE id = ?", id_asiento)
-        estado = cursor.fetchone()
-        if not estado or estado[0] != 0:
-            return jsonify({'error': 'El asiento ya está ocupado o no existe'}), 400
-
-        # Insertar cliente
-        cursor.execute("INSERT INTO cliente (numero_documento, nombre, ape_paterno, ape_materno, razon_social, sexo, f_nacimiento, direccion, telefono, email, password, estado, id_pais, id_tipo_cliente, id_tipo_doc, usuario) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            numero_documento, nombre, ape_paterno, ape_materno, razon_social, sexo, f_nacimiento, direccion, telefono, email, password, estado, id_pais, id_tipo_cliente, id_tipo_doc, usuario)
-
-        cursor.execute("SELECT @@IDENTITY")
-        id_cliente = cursor.fetchone()[0]
-
-        # Insertar venta
-        cursor.execute("INSERT INTO venta (idCliente, subTotal, igv, idPromocion, idMetodoPago, idTipoComprobante) VALUES (?, ?, ?, ?, ?, ?)",
-            id_cliente, sub_total, igv, id_promocion, id_metodo_pago, id_tipo_comprobante)
-        cursor.execute("SELECT @@IDENTITY")
-        id_venta = cursor.fetchone()[0]
-
-        # Insertar pasaje
-        cursor.execute("""
-            INSERT INTO pasaje (
-                idDetalleViajeAsiento, numeroComprobante,
-                esPasajeNormal, esPasajeLibre, esTransferencia, esReserva, esCambioRuta,
-                idVenta, codigo, idPasaje
-            )
-            VALUES (?, NULL, ?, ?, ?, ?, ?, ?, ?, NULL)
-        """, id_detalle_viaje_asiento,
-              1,  # esPasajeNormal
-              0, 0, 0, 0,
-              id_venta,
-              "AA0001"  # código del pasaje, sugerido automatizar
-        )
-
-        # Insertar en detalle_viaje_asiento (marcar como no disponible)
-        cursor.execute("INSERT INTO detalle_viaje_asiento (idDetalle_Viaje, idAsiento, esDisponible, usuario) VALUES (?, ?, 0, ?)",
-            id_detalle_viaje, id_asiento, usuario)
-
-        # Actualizar estado del asiento
-        cursor.execute("UPDATE asiento SET estado = 1 WHERE id = ?", id_asiento)
-
-        conn.commit()
-        return jsonify({'mensaje': 'Venta registrada correctamente'}), 200
-
-    except Exception as e:
-        conn.rollback()
-        return jsonify({'error': str(e)}), 500
-    finally:
-        cursor.close()
-        conn.close()
-
-# END PROTOTIPO
 # REGION RESERVA
 
 @homeClientes_bp.route("/obtenerMetodoPagoxID/<int:idMetodo>")
@@ -224,7 +132,6 @@ def obtenerDatosPasajero():
 
     # Suponemos que Pasajero.obtener_por_numero_documento devuelve un dict o un objeto serializable
     datos_pasajero = Pasajero.obtener_por_numero_documento(numero_doc)
-    print(f"Datos del pasajero: {datos_pasajero}")
     if not datos_pasajero:
         return jsonify(status="error", msg="Pasajero no encontrado"), 404
 
@@ -441,6 +348,20 @@ def cambiarEstadoPasaje():
         return jsonify({'Status': 'success', 'Msj': 'Estado del pasaje cambiado correctamente.'})
     except Exception as e:
         return jsonify({'Status': 'error', 'Msj': f'Ocurrió un error al cambiar el estado del pasaje: {repr(e)}'})
+    
+@homeClientes_bp.route('/referenciarPasaje', methods=['POST'])
+def referenciar_pasaje():
+    try:
+        num_comprobante = request.json.get('num_comprobante')
+        if not num_comprobante:
+            return jsonify({'Status': 'error', 'Msj': 'Falta el número de comprobante.'})
+        ref = Pasaje.obtener_id_por_comprobante(num_comprobante)
+        if ref is None:
+            return jsonify({'Status': 'error', 'Msj': 'No se encontró el pasaje con el comprobante proporcionado.'})
+        execute = Pasaje.actualizar_id_pasaje_ultimo()    
+    except Exception as e:
+        return jsonify({'Status': 'error', 'Msj': f'Ocurrió un error al referenciar el pasaje: {repr(e)}'})
+    
 
 # END REGIÓN CAMBIO DE RUTA #
 
@@ -465,6 +386,56 @@ def get_rutasConcatenadas():
             return jsonify({'data': {}, 'Status': 'error', 'Msj': 'No se encontraron rutas activas.'})
     except Exception as e:
         return jsonify({'data': {}, 'Status': 'error', 'Msj': f'Ocurrió un error al obtener la ruta: {repr(e)}'})
+
+@homeClientes_bp.route('/GetRutasConcatenadasA', methods=['POST'])
+def get_rutasA():
+    try:
+        payload = request.get_json(force=True)
+        s_origen  = payload.get('origen')
+        s_destino = payload.get('destino')
+        lista_pasajes = Viaje.obtenerDestinosMenosActual(s_origen, s_destino)
+        if lista_pasajes:
+            return jsonify({'data': lista_pasajes, 'Status': 'success', 'Msj': 'Rutas obtenidas correctamente.'})
+        else:
+            return jsonify({'data': {}, 'Status': 'error', 'Msj': 'No se encontraron rutas distintas.'})
+    except Exception as e:
+        return jsonify({'data': {}, 'Status': 'error', 'Msj': f'Ocurrió un error al obtener la ruta: {repr(e)}'})
+
+
+@homeClientes_bp.route('/GetRutasConcatenadasSinLaActusal', methods=['GET', 'POST'])
+def get_rutas_concatenadas_sin_la_actual():
+    try:
+        # 1) Intentamos GET ?numeroComprobante=XXX
+        num_comprobante = request.args.get('A000-00000007')
+        # 2) Si no vino, miramos en JSON POST (por compatibilidad)
+        if not num_comprobante and request.is_json:
+            num_comprobante = request.get_json().get('numeroComprobante')
+        if not num_comprobante:
+            return jsonify({
+                'data': {}, 'Status': 'error',
+                'Msj': 'Falta numeroComprobante.'
+            }), 400
+
+        datos = Pasaje.obtenerDatosPasaje(num_comprobante)
+        if not datos:
+            return jsonify({
+                'data': {}, 'Status': 'error',
+                'Msj': 'No se encontró pasaje para ese comprobante.'
+            }), 404
+
+        rutas = Viaje.obtenerDestinosMenosActual(
+            datos['idSucursalOrigen'], datos['idSucursalDestino']
+        )
+        return jsonify({
+            'data': rutas or [], 
+            'Status': rutas and 'success' or 'error',
+            'Msj': rutas and 'Rutas obtenidas.' or 'No hay rutas distintas.'
+        })
+    except Exception as e:
+        return jsonify({
+            'data': {}, 'Status': 'error',
+            'Msj': f'Error interno: {e!r}'
+        }), 500   
     
 # API NET RENIEC
 # controller_clientes.py
@@ -686,8 +657,10 @@ def buscarViajes():
 def obtener_diseno_vehiculo():
     detalle_viaje_id = request.json.get("id_dv")
     datos = Viaje.obtener_asientos(detalle_viaje_id)
+    niveles = Viaje.obtener_tamano_niveles(detalle_viaje_id)
     return jsonify({
         "data": datos,
+        "niveles": niveles,
         "Status": "success",
         "msg": "Retornado con éxito" 
     })
@@ -754,6 +727,14 @@ def procesar_pago():
         else:
             return jsonify({"Status": "error", "Msj": resultado["msg"]})
 
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Error inesperado: {repr(e)}"})
+
+@homeClientes_bp.route("/obtenerMetodosPago")
+def obtener_metodos_pago():
+    try:
+        metodos = MetodoPago.obtener_todos()
+        return jsonify({"Status": "success", "data": metodos})
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Error inesperado: {repr(e)}"})
 
