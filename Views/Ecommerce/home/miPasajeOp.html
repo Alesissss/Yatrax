@@ -582,7 +582,7 @@
                         </div>
                         <div class="col-md-6" id="contenedorInputExtraRem"></div>
 <div class="col-12 my-2 text-end">
-                            <button id="btnCancelarReembolso" type="button" class="btn btn-secondary me-2">
+                            <button id="btnCancelarReembolso" type="button" class="btn btn-secondary me-2 bg-danger">
                             <i class="fas fa-times me-1"></i> Cancelar 
                             </button>
                           <button id="btnGuardarReembolso" type="submit" class="btn btn-success">
@@ -1843,7 +1843,7 @@
       cambiarEstadoTransaccion();
       ocultarContenido();
     });
-    
+
     document.getElementById("btnCancelarReembolso").addEventListener("click", () => {
       cambiarEstadoTransaccion();
       ocultarContenido();
