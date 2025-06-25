@@ -845,3 +845,38 @@ class Pasaje:
         finally:
             if conexion:
                 conexion.cerrar()
+
+    @classmethod
+    def liberarAsientosxReserva(cls):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            ids = conexion.obtener("""
+                SELECT pas.id as idPasaje, pas.idDetalleViajeAsiento as id
+                FROM pasaje pas
+                JOIN detalle_viaje_asiento dva ON dva.id = pas.idDetalleViajeAsiento
+                WHERE pas.esReserva = 1
+                AND pas.fecha_reserva IS NOT NULL
+                AND pas.fecha_reserva < NOW() - INTERVAL 2 HOUR
+                AND dva.esDisponible = 0
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM pasaje p2
+                    WHERE p2.idDetalleViajeAsiento = pas.idDetalleViajeAsiento
+                    AND p2.esReserva = 0
+                );
+            """)
+
+            print(ids)
+
+            if ids:
+                for idReserva in ids:
+                    sentencia = "UPDATE detalle_viaje_asiento SET esDisponible=1 WHERE id="+str(idReserva['id'])
+                    print(sentencia)
+                    conexion.ejecutar(sentencia)
+
+        except Exception as e:
+            print("Ha ocurrido un error: "+repr(e))
+        finally:
+            if conexion != None:
+                conexion.cerrar()

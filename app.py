@@ -13,6 +13,11 @@ from Controllers.Trabajadores.personal_controller import personal_bp
 from Controllers.Ecommerce.homeClientes_controller import homeClientes_bp
 #Extra para email
 from flask_mail import Mail, Message
+# liberar asientos en reserva:
+from apscheduler.schedulers.background import BackgroundScheduler
+from datetime import datetime, timedelta
+# Trayendo Pasaje para liberar asiento
+from Models.pasaje import Pasaje
 
 app = Flask(__name__, template_folder="Views", static_folder="Static")
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -76,4 +81,8 @@ def home():
 #         return redirect(url_for('home.login'))
 
 if __name__ == "__main__":
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(Pasaje.liberarAsientosxReserva, 'interval', minutes=1)
+    scheduler.start()
+    print("Modo automatico activado")
     app.run(debug=True)
