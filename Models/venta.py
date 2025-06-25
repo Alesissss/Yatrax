@@ -5,11 +5,13 @@ from Models.pasaje import Pasaje
 import bd  # Utilizamos tu clase Conexion personalizada
 
 class Venta:
-
-
-    
     @classmethod
     def registrar_operacion(cls, contacto: dict, pago: dict, ventas: dict):
+        print(contacto)
+
+        print(contacto)
+        print(pago)
+        print(ventas)
         conexion = bd.Conexion()
         try:
             # TIPO COMPROBANTE 1 == BOLETA ,  2 == FACTURA
@@ -303,5 +305,20 @@ class Venta:
             conexion.conn.rollback()
             return {"status": -1, "msg": f"Error al registrar venta: {str(e)}"}
 
+        finally:
+            conexion.cerrar()
+
+    @classmethod
+    def obtener_reporte_ventas(cls):
+        try:
+            conexion = bd.Conexion()
+            result = conexion.obtener(""" SELECT c.nombre, c.ape_paterno, c.ape_materno, v.fecha, sum(subtotal + igv), count(p.id) 
+                FROM venta v 
+                INNER JOIN cliente c on v.idCliente = c.id 
+                INNER JOIN pasaje p on p.idVenta = v.id
+                -- WHERE p.esPasajeNormal = 1
+                GROUP BY c.nombre, c.ape_paterno, c.ape_materno, v.fecha """)
+            
+            return result
         finally:
             conexion.cerrar()
