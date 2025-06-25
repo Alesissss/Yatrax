@@ -1466,6 +1466,23 @@ def dar_baja_asiento(id):
             return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja el asiento'})
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+    
+# Dar de alta asiento
+@viajes_bp.route("/DarAltaAsiento/<int:id>", methods=['POST'])
+def dar_alta_asiento(id):
+    try:
+        mensajes = Asiento.dar_alta(id)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja el asiento'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
 # END REGION ASIENTO
 
