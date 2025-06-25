@@ -31,11 +31,11 @@ const SetearConfig = {
     async init() {
         this.setDatos();
     },
-    async setDatos(){
+    async setDatos() {
         const datosFetch = await this.getDatosFromBD();
         CONFIG.MAX_ASIENTOS = datosFetch.max_pasajes_venta;
         CONFIG.IGV = datosFetch.igv;
-        CONFIG.TIEMPO_MAXIMO_COMPRA= datosFetch.tiempo_maximo_venta_minutos;
+        CONFIG.TIEMPO_MAXIMO_COMPRA = datosFetch.tiempo_maximo_venta_minutos;
     },
     async getDatosFromBD() {
         try {
@@ -293,7 +293,8 @@ const NavigationManager = {
             confirmButtonText: 'Sí, continuar',
             cancelButtonText: 'Revisar datos',
             confirmButtonColor: '#28a745',
-            cancelButtonColor: '#6c757d'
+            cancelButtonColor: '#6c757d',
+            reverseButton: true
         });
 
         if (!confirmacion.isConfirmed) return;
@@ -335,7 +336,8 @@ const NavigationManager = {
             confirmButtonText: 'Sí, ir al pago',
             cancelButtonText: 'Revisar datos',
             confirmButtonColor: '#28a745',
-            cancelButtonColor: '#6c757d'
+            cancelButtonColor: '#6c757d',
+            reverseButton: true
         });
 
         if (!confirmacion.isConfirmed) return;
@@ -414,7 +416,8 @@ const NavigationManager = {
             confirmButtonText: 'Sí, volver',
             cancelButtonText: 'Cancelar',
             confirmButtonColor: '#17a2b8',
-            cancelButtonColor: '#6c757d'
+            cancelButtonColor: '#6c757d',
+            reverseButton: true
         });
 
         if (!confirmacion.isConfirmed) return;
@@ -491,7 +494,9 @@ const SearchManager = {
                 confirmButtonText: "Sí, buscar",
                 cancelButtonText: "Cancelar",
                 confirmButtonColor: '#d33',
-                cancelButtonColor: '#6c757d'
+                cancelButtonColor: '#6c757d',
+
+                reverseButton: true
             });
 
             if (!confirmacion.isConfirmed) return;
@@ -879,7 +884,7 @@ const VehicleLayoutManager = {
         let FILA;
         let COLUMNA;
 
-        
+
         if (piso == 1) {
             COLUMNA = CONFIG.GRILLA.COL_1;
             FILA = CONFIG.GRILLA.FILA_1;
@@ -1248,6 +1253,8 @@ const SeatManager = {
             showCancelButton: true,
             confirmButtonText: 'Sí, eliminar',
             cancelButtonText: 'Cancelar',
+
+            reverseButton: true
         });
 
         if (confirm.isConfirmed) {
@@ -3267,7 +3274,8 @@ const FormValidationManager = {
                 text: "Debes completar correctamente todos los campos requeridos antes de continuar.",
                 icon: "warning",
                 confirmButtonText: "Entendido",
-                confirmButtonColor: '#3085d6'
+                confirmButtonColor: '#3085d6',
+                reverseButton: true
             });
             return false;
         }
