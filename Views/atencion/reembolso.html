@@ -294,6 +294,7 @@
                 success: function (response) {
                     if (response.Status === "success") {
                         fct_IniciarTablaPlantillas('#tbl_Plantillas');
+                        
                         $('#filtroEstado').trigger('change');
                         toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                     } else {

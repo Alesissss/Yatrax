@@ -756,8 +756,7 @@ CREATE TABLE pasaje(
     enTransaccion TINYINT NULL DEFAULT 0, -- 1: en transacción, 0: no en transacción
     idPasaje INT NULL, -- Para operaciones con pasajes
     precio DECIMAL(10,2) NOT NULL,
-    fechaInicioReprogramacion DATETIME NULL,
-    fechaFinReprogramacion DATETIME NULL,
+    fechaReprogramacion DATETIME NULL,
     codigoReserva CHAR(14) NULL, -- Código de reserva, si es un pasaje de reserva
     fecha_reserva DATETIME NULL, -- Fecha de reserva, si es un pasaje de reserva
     FOREIGN KEY (idDetalleViajeAsiento) REFERENCES detalle_viaje_asiento(id),
@@ -3435,7 +3434,7 @@ VALUES
 'Tarjeta de Credito',
 '/static/img/efectivo.png',
 1,
-1,
+2,
 null,
 'alexis@gmail.com'
 );

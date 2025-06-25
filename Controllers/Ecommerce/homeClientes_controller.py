@@ -967,7 +967,7 @@ def validar_pasaje_dado_baja():
             return jsonify({"Status": "error", "Msj": "Número de comprobante es requerido"}), 400
         reembolso = Reembolso.validar_pasaje_dadoBaja(numero_comprobante)
         if reembolso:
-            if reembolso["estado_viaje"] == 0 or reembolso["fechaInicioReprogramacion"] is not None or reembolso["fechaFinReprogramacion"] is not None:
+            if reembolso["estado_viaje"] == 0 or reembolso["fechaReprogramacion"] is not None:
                 return jsonify({"Status": "success", "data": reembolso, "Msj": "Pasaje validado correctamente"})
             else:
                 return jsonify({

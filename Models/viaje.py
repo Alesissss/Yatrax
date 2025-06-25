@@ -330,9 +330,8 @@ class Viaje:
                         ON dva.idDetalle_Viaje = dv.id
                         AND dv.idViaje = %s
                         SET
-                        p.fechaInicioReprogramacion = NOW(),
-                        p.fechaFinReprogramacion    = DATE_ADD(NOW(), INTERVAL %s DAY)
-                    """, (idViaje, dias_reprogramacion), auto_commit=False)
+                        p.fechaReprogramacion = NOW()
+                    """, (idViaje), auto_commit=False)
 
                     conexion.conn.commit()
                     return {'@MSJ': 'Viaje reprogramado correctamente', '@MSJ2': ''}

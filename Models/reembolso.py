@@ -79,8 +79,7 @@ INNER JOIN asiento a on dva.idAsiento=a.id
                         WHEN v.estado = 1 THEN 'Activo'
                         ELSE 'Desconocido'
                     END AS estado_descripcion,
-                    p.fechaInicioReprogramacion,
-                    p.fechaFinReprogramacion
+                    p.fechaReprogramacion
                 FROM pasaje p
                 INNER JOIN detalle_viaje_asiento dva ON p.idDetalleViajeAsiento = dva.id
                 INNER JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
