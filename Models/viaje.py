@@ -567,6 +567,7 @@ class Viaje:
                 INNER JOIN escala e_destino ON dv.idSucursalDestino = e_destino.id
                 INNER JOIN sucursal s_destino ON s_destino.id = e_destino.id
                 INNER JOIN viaje v ON v.id = dv.idViaje
+                WHERE v.estado = 1 AND v.idEstadoViaje = 1
             """                 
             )
             return lista_origenes
@@ -601,7 +602,7 @@ class Viaje:
             INNER JOIN ruta r ON r.id = vi.idRuta
             INNER JOIN escala e_origen ON r.id = e_origen.idRuta AND s_origen.id = e_origen.idSucursal
             INNER JOIN escala e_destino ON r.id = e_destino.idRuta AND s_destino.id = e_destino.idSucursal
-            WHERE s_origen.ciudad = %s AND s_destino.ciudad = %s AND DATE(dv.fechaSalida) = %s;
+            WHERE s_origen.ciudad = %s AND s_destino.ciudad = %s AND DATE(dv.fechaSalida) = %s AND vi.estado = 1 AND vi.idEstadoViaje = 1;
 
                              """, (origen,destino,fecha))
             return datos_viaje

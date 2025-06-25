@@ -117,21 +117,17 @@ def Menu_TransaccionesPasajes():
 def TransaccionesPasajes_Nuevo():
     return render_template('ventas/pasajesTransaccionesCRUD.html', active_page="transaccionesPasajes", active_menu='mVentas', transaccion = {}, tittle = 'Registrar transacción de pasajes', btnId = 'btn_Registrar')
 
-@ventas_bp.route('/cambioRuta')
-def cambio_ruta():
-    return render_template('ventas/cambioRuta.html', active_page="cambioRuta", active_menu="home")
+# VIEWS - REPORTES
 
-@ventas_bp.route('/cambioRutaNuevo')
-def cambio_ruta_nuevo():
-    return render_template('ventas/cambioRutaCRUD.html', active_page="cambioRutaNuevo", active_menu="home", cambioRuta = {}, tittle = 'Registrar cambio de ruta', btnId = 'btn_Registrar')
+@ventas_bp.route('/ReporteVentas')
+def Menu_ReporteVentas():
+    return render_template('ventas/reporteVentas.html', active_page="reporteVentas", active_menu="mVentas")
 
-
+# END REPORTES
 
 # END VIEWS
 
 # FUNCIONES
-
-
 
 ## REGIÓN CAMBIO DE RUTA ##
 

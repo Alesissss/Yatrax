@@ -23,17 +23,6 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Tarifa Base -->
-                        <div class="col-md-12 mb-3">
-                            <label for="txt_TarifaBase">Tarifa base</label>
-                            <div class="input-group">
-                                <input type="number" step="0.01" min="0" id="txt_TarifaBase" class="form-control"
-                                    placeholder="Tarifa Base" value="{{ conf_general.tarifaBase }}">
-                                <div class="input-group-append">
-                                    <div class="input-group-text"><i class="fas fa-money-bill-wave"></i></div>
-                                </div>
-                            </div>
-                        </div>
                         <!-- Máximo de Pasajes Venta -->
                         <div class="col-md-12 mb-3">
                             <label for="txt_MaxPasajesVenta">Máximo de pasajes venta</label>
@@ -76,6 +65,17 @@
                                     value="{{ conf_general.max_dias_vigencia_reprogramacion }}">
                                 <div class="input-group-append">
                                     <div class="input-group-text"><i class="fas fa-clock"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Precio pasaje libre -->
+                        <div class="col-md-12 mb-3">
+                            <label for="txt_PrecioPasajeLibre">Precio para el pasaje libre</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" min="0" id="txt_PrecioPasajeLibre" class="form-control"
+                                    placeholder="Tarifa Base" value="{{ conf_general.precioPasajeLibre }}">
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><i class="fas fa-money-bill-wave"></i></div>
                                 </div>
                             </div>
                         </div>
@@ -122,7 +122,7 @@
     $(document).ready(function () {
         $("#btn_Editar").click(function () {
             let igv = $("#txt_IGV").val().trim();
-            let tarifaBase = $("#txt_TarifaBase").val().trim();
+            let precioPasajeLibre = $("#txt_PrecioPasajeLibre").val().trim();
             let maxPasajesVenta = $("#txt_MaxPasajesVenta").val().trim();
             let tiempoMaximoVenta = $("#txt_TiempoMaximoVenta").val().trim();
             let viajesReprogramables = $("#cbx_ViajesReprogramables").val();
@@ -130,12 +130,12 @@
             let precioCambioRuta = $('#txt_PrecioCambioRuta').val();
             let precioTransferencia = $('#txt_PrecioTransferencia').val();
 
-            if (!igv || !tarifaBase || !maxPasajesVenta || !tiempoMaximoVenta || !viajesReprogramables || !diasVigentesReprogramacion || !precioCambioRuta || !precioTransferencia) {
+            if (!igv || !precioPasajeLibre || !maxPasajesVenta || !tiempoMaximoVenta || !viajesReprogramables || !diasVigentesReprogramacion || !precioCambioRuta || !precioTransferencia) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
 
-            if (igv <= 0 || tarifaBase <= 0 || maxPasajesVenta <= 0 || tiempoMaximoVenta <= 0 || diasVigentesReprogramacion <= 0 || precioCambioRuta <= 0 || precioTransferencia <= 0) {
+            if (igv <= 0 || precioPasajeLibre <= 0 || maxPasajesVenta <= 0 || tiempoMaximoVenta <= 0 || diasVigentesReprogramacion <= 0 || precioCambioRuta <= 0 || precioTransferencia <= 0) {
                 toastr.warning("Todos los valores ingresados deben ser válidos", 'MENSAJE DE SISTEMA');
                 return;
             }
@@ -155,7 +155,7 @@
 
                     let formData = new FormData();
                     formData.append("igv", igv);
-                    formData.append("tarifaBase", tarifaBase);
+                    formData.append("precioPasajeLibre", precioPasajeLibre);
                     formData.append("max_pasajes_venta", maxPasajesVenta);
                     formData.append("tiempo_maximo_venta_minutos", tiempoMaximoVenta);
                     formData.append("viajesReprogramables", viajesReprogramables);
