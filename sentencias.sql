@@ -67,6 +67,7 @@ DROP PROCEDURE IF EXISTS SP_EDITAR_PERSONAL_INCIDENCIA;
 DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_CLIENTE;
 
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_ASIENTO;
+DROP PROCEDURE IF EXISTS SP_DARALTA_ASIENTO;
 DROP PROCEDURE IF EXISTS SP_DARBAJA_ASIENTO;
 DROP PROCEDURE IF EXISTS SP_EDITAR_ASIENTO;
 DROP PROCEDURE IF EXISTS SP_REGISTRAR_ASIENTO;
@@ -1010,19 +1011,19 @@ INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (8, 'Subida','img/her
 INSERT INTO herramienta (id, nombre, icono,id_tipo) VALUES (9, 'Bajada','img/herramienta/escalera_hacia_abajo.png',2);
 
 -- INSERTS NIVELES
-INSERT INTO `nivel` (`id`, `nroPiso`, `id_tipo_vehiculo`, `x_dimension`, `y_dimension`, `precio`, `estado`) VALUES
-(1, 1, 1, 5, 4, 0.00, 1),
-(2, 2, 1, 6, 15, 0.00, 1),
-(3, 1, 2, 5, 4, 0.00, 1),
-(4, 2, 2, 6, 15, 0.00, 1),
-(5, 1, 4, 5, 4, 0.00, 1),
-(6, 2, 4, 6, 15, 0.00, 1),
-(7, 1, 3, 5, 4, 0.00, 1),
-(8, 1, 5, 5, 4, 0.00, 1),
-(9, 1, 6, 5, 4, 0.00, 1),
-(10, 1, 7, 5, 4, 0.00, 1),
-(11, 1, 8, 5, 4, 0.00, 1),
-(12, 1, 9, 5, 4, 0.00, 1);
+INSERT INTO `nivel` (`id`, `nroPiso`, `id_tipo_vehiculo`, `x_dimension`, `y_dimension`, `estado`) VALUES
+(1, 1, 1, 5, 4, 1),
+(2, 2, 1, 6, 15, 1),
+(3, 1, 2, 5, 4, 1),
+(4, 2, 2, 6, 15, 1),
+(5, 1, 4, 5, 4, 1),
+(6, 2, 4, 6, 15, 1),
+(7, 1, 3, 5, 4, 1),
+(8, 1, 5, 5, 4, 1),
+(9, 1, 6, 5, 4, 1),
+(10, 1, 7, 5, 4, 1),
+(11, 1, 8, 5, 4, 1),
+(12, 1, 9, 5, 4, 1);
 
 -- INSERTS NIVEL_HERRAMIENTA
 INSERT INTO `nivel_herramienta` (`id`, `id_herramienta`, `id_nivel`, `x_dimension`, `y_dimension`) VALUES
@@ -4702,6 +4703,38 @@ END $$
 
 DELIMITER ;
 
+-- Crear procedimiento SP_DARBAJA_ASIENTO
+DELIMITER $$
+
+CREATE PROCEDURE SP_DARALTA_ASIENTO(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cAsiento INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cAsiento FROM asiento WHERE id = P_ID;
+
+    IF cAsiento = 0 THEN
+        SET @MSJ2 = 'El asiento que intenta dar de alta no existe';
+    ELSE
+        UPDATE asiento
+        SET estado = 1
+        WHERE id = P_ID;
+
+        SET @MSJ = 'Se dio de alta correctamente el asiento';
+    END IF;
+END $$
+
+DELIMITER ;
+
 -- Crear procedimiento SP_ELIMINAR_ASIENTO
 DELIMITER $$
 
@@ -7571,6 +7604,10 @@ BEGIN
         esReserva       = 0,
         esCambioRuta    = 0
     WHERE id = p_idPasaje;
+
+    SELECT @idDetalle := idDetalleViajeAsiento FROM pasaje WHERE id=p_idPasaje;
+
+    UPDATE detalle_viaje_asiento SET esDisponible=0 WHERE id=@idDetalle;
 
     -- Comprobamos si realmente se actualizó alguna fila
     IF ROW_COUNT() = 0 THEN

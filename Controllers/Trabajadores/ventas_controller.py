@@ -1047,26 +1047,31 @@ def obtener_reporte_ventas():
         fechaInicio = request.args.get("fechaInicio")
         fechaFin = request.args.get("fechaFin")
 
+        # Convertir a objetos datetime
+        fecha_inicio_dt = datetime.strptime(fechaInicio, "%Y-%m-%d")
+        fecha_fin_dt = datetime.strptime(fechaFin, "%Y-%m-%d")
+
         raw_rows = Venta.obtener_reporte_ventas()
 
         data = []
         for row in raw_rows:
             fecha = row.get('fecha')
-            # Si viene como datetime
-            if isinstance(fecha, datetime):
-                # Pasamos a "2025-06-25T10:52:12"
-                row['fecha'] = fecha.strftime("%Y-%m-%dT%H:%M:%S")
-            else:
-                # Si viene como cadena RFC, la parseamos primero
-                try:
-                    dt = datetime.strptime(fecha, "%a, %d %b %Y %H:%M:%S GMT")
-                    row['fecha'] = dt.strftime("%Y-%m-%dT%H:%M:%S")
-                except Exception:
-                    # Si falla el parseo, la dejamos tal cual
-                    pass
-            data.append(row)
 
-        return jsonify({"data": data, "Status": "success", 'Msj': 'Reporte recuperado exitosamente'})
+            # Asegurar formato de fecha
+            if isinstance(fecha, datetime):
+                fecha_dt = fecha
+            else:
+                try:
+                    fecha_dt = datetime.strptime(fecha, "%a, %d %b %Y %H:%M:%S GMT")
+                except Exception:
+                    continue  # O puedes dejarla pasar como hiciste tú
+
+            # Aquí se aplica el filtro por rango de fechas
+            if fecha_inicio_dt <= fecha_dt <= fecha_fin_dt:
+                row['fecha'] = fecha_dt.strftime("%Y-%m-%dT%H:%M:%S")
+                data.append(row)
+
+        return jsonify({"data": data, "Status": "success", 'Msj': 'Reporte filtrado correctamente'})
     except Exception as e:
         return jsonify({"data": [], "Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 # END REGION REPORTES

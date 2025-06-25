@@ -23,7 +23,6 @@
                             <th class="text-center">TIPO DE ASIENTO</th>
                             <th class="text-center">PISO</th>
                             <th class="text-center">ESTADO</th>
-
                             <th class="text-center">ACCIÓN</th>
                         </tr>
                     </thead>
@@ -162,14 +161,6 @@
                     className: 'btn btn-warning',
                     columns: ':not(.noVis)',
                 },
-                {
-                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo asiento',
-                    className: 'btn bg-success m-1',
-                    titleAttr: 'Nuevo',
-                    action: function (e, dt, node, config) {
-                        fct_AsientoNuevo();
-                    },
-                },
             ],
 
             ajax: {
@@ -193,7 +184,6 @@
             },
             columns: [
                 { data: "id", name: "id" },
-                
                 { data: "nombre", name: "nombre" },
                 { data: "vehiculo", name: "vehiculo" },
                 { data: "tipo_asiento", name: "tipo_asiento" },
@@ -212,14 +202,23 @@
                     data: null,
                     name: null,
                     render: function (data, type, row) {
-                        return `
-                <div class="flex-wrap btn-group">
-                    <button class="btn btn-xs m-1 btn-info" onclick="fct_AsientoVer('${row.id}')" title="Ver asiento"><i class="bi bi-eye"></i></button>
-                    <button class="btn btn-xs m-1 btn-primary" onclick="fct_AsientoEditar('${row.id}')" title="Editar asiento"><i class="bi bi-pencil-square"></i></button>
-                    <button class="btn btn-xs m-1 btn-warning" onclick="fct_AsientoDarBaja('${row.id}')" title="Dar de baja asiento"><i class="bi bi-arrow-down-circle"></i></button>
-                    <button class="btn btn-xs m-1 btn-danger" onclick="fct_AsientoEliminar('${row.id}')" title="Eliminar asiento"><i class="bi bi-trash"></i></button>
-                </div>
-            `;
+                        if (data.estado === 1) {
+                            return `
+                                <div class="flex-wrap btn-group">
+                                    <button class="btn btn-xs m-1 btn-warning" onclick="fct_AsientoDarBaja('${row.id}')" title="Dar de baja asiento">
+                                        <i class="bi bi-arrow-down-circle"></i>
+                                    </button>
+                                </div>
+                            `;
+                        } else if (data.estado === 0) {
+                            return `
+                            <div class="flex-wrap btn-group">
+                                <button class="btn btn-xs m-1 btn-primary" onclick="fct_AsientoDarAlta('${row.id}')" title="Dar de alta asiento">
+                                    <i class="bi bi-arrow-up-circle"></i>
+                                </button>
+                            </div>
+                        `;
+                        }
                     },
                     className: 'text-center align-middle',
                     orderable: false
@@ -232,14 +231,14 @@
                     className: "text-center align-middle",
                 },
                 {
-                    targets: [1, 2, 3, 4,5],
+                    targets: [1, 2, 3, 4, 5],
                     className: 'text-center align-middle',
                 },
                 {
                     targets: [6],
                     orderable: false,
                     className: 'text-center align-middle',
-                    width: '10%',
+                    width: '6%',
                 },
             ],
             lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
@@ -333,6 +332,45 @@
             if (result.isConfirmed) {
                 $.ajax({
                     url: `/trabajadores/viajes/DarBajaAsiento/${Id}`,  // Pasamos el ID en la URL
+                    type: "POST",
+                    contentType: "application/json",
+                    success: function (response) {
+                        if (response.Status === "success") {
+                            if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                return;
+                            }
+                            fct_IniciarTablaAsientos('#tbl_Asientos');
+                            toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                        } else {
+                            toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                            console.error('Error: ' + response.Msj);
+                        }
+                    },
+                    error: function (xhr, Status, error) {
+                        toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                        console.error('Error:' + error);
+                    }
+                });
+            }
+        });
+    }
+
+    function fct_AsientoDarAlta(Id) {
+        Swal.fire({
+            title: "¿Estás seguro?",
+            text: "Esta acción le dará de alta al asiento. ¿Deseas continuar?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sí, dar de alta",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true // Invertir el orden de los botones
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/trabajadores/viajes/DarAltaAsiento/${Id}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
