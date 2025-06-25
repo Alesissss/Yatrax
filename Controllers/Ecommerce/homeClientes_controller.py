@@ -2,6 +2,7 @@ import hashlib
 import os
 import re
 import random
+from weakref import ref
 #extra agregado para la transaccion
 import bd
 from correo import enviar_correo
@@ -441,6 +442,20 @@ def cambiarEstadoPasaje():
         return jsonify({'Status': 'success', 'Msj': 'Estado del pasaje cambiado correctamente.'})
     except Exception as e:
         return jsonify({'Status': 'error', 'Msj': f'Ocurrió un error al cambiar el estado del pasaje: {repr(e)}'})
+    
+@homeClientes_bp.route('/referenciarPasaje', methods=['POST'])
+def referenciar_pasaje():
+    try:
+        num_comprobante = request.json.get('num_comprobante')
+        if not num_comprobante:
+            return jsonify({'Status': 'error', 'Msj': 'Falta el número de comprobante.'})
+        ref = Pasaje.obtener_id_por_comprobante(num_comprobante)
+        if ref is None:
+            return jsonify({'Status': 'error', 'Msj': 'No se encontró el pasaje con el comprobante proporcionado.'})
+        execute = Pasaje.actualizar_id_pasaje_ultimo()    
+    except Exception as e:
+        return jsonify({'Status': 'error', 'Msj': f'Ocurrió un error al referenciar el pasaje: {repr(e)}'})
+    
 
 # END REGIÓN CAMBIO DE RUTA #
 
@@ -465,6 +480,56 @@ def get_rutasConcatenadas():
             return jsonify({'data': {}, 'Status': 'error', 'Msj': 'No se encontraron rutas activas.'})
     except Exception as e:
         return jsonify({'data': {}, 'Status': 'error', 'Msj': f'Ocurrió un error al obtener la ruta: {repr(e)}'})
+
+@homeClientes_bp.route('/GetRutasConcatenadasA', methods=['POST'])
+def get_rutasA():
+    try:
+        payload = request.get_json(force=True)
+        s_origen  = payload.get('origen')
+        s_destino = payload.get('destino')
+        lista_pasajes = Viaje.obtenerDestinosMenosActual(s_origen, s_destino)
+        if lista_pasajes:
+            return jsonify({'data': lista_pasajes, 'Status': 'success', 'Msj': 'Rutas obtenidas correctamente.'})
+        else:
+            return jsonify({'data': {}, 'Status': 'error', 'Msj': 'No se encontraron rutas distintas.'})
+    except Exception as e:
+        return jsonify({'data': {}, 'Status': 'error', 'Msj': f'Ocurrió un error al obtener la ruta: {repr(e)}'})
+
+
+@homeClientes_bp.route('/GetRutasConcatenadasSinLaActusal', methods=['GET', 'POST'])
+def get_rutas_concatenadas_sin_la_actual():
+    try:
+        # 1) Intentamos GET ?numeroComprobante=XXX
+        num_comprobante = request.args.get('A000-00000007')
+        # 2) Si no vino, miramos en JSON POST (por compatibilidad)
+        if not num_comprobante and request.is_json:
+            num_comprobante = request.get_json().get('numeroComprobante')
+        if not num_comprobante:
+            return jsonify({
+                'data': {}, 'Status': 'error',
+                'Msj': 'Falta numeroComprobante.'
+            }), 400
+
+        datos = Pasaje.obtenerDatosPasaje(num_comprobante)
+        if not datos:
+            return jsonify({
+                'data': {}, 'Status': 'error',
+                'Msj': 'No se encontró pasaje para ese comprobante.'
+            }), 404
+
+        rutas = Viaje.obtenerDestinosMenosActual(
+            datos['idSucursalOrigen'], datos['idSucursalDestino']
+        )
+        return jsonify({
+            'data': rutas or [], 
+            'Status': rutas and 'success' or 'error',
+            'Msj': rutas and 'Rutas obtenidas.' or 'No hay rutas distintas.'
+        })
+    except Exception as e:
+        return jsonify({
+            'data': {}, 'Status': 'error',
+            'Msj': f'Error interno: {e!r}'
+        }), 500   
     
 # API NET RENIEC
 # controller_clientes.py

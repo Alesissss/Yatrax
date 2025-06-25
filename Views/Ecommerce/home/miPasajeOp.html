@@ -1891,6 +1891,32 @@
 
   //Región cambio de ruta //
 
+
+  $(document).on('click', '#btnCambioRuta', function() {
+    const destino = $('#destinoViaje').val();
+    const origen = $('#origenViaje').val();
+    $.ajax({
+      url: '/ecommerce/home/GetRutasConcatenadasA',
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({ destino : destino, origen: origen }),
+      success: function(response) {
+        if (response.Status === 'success') {
+          const rutas = response.data;
+          const clave = `${origen} - ${destino}`;
+          const rutasFiltradas = rutas.filter(item => item.ruta !== clave);
+          console.log("Rutas filtradas:", rutasFiltradas);
+          $('#cbx_Ciudades').empty();
+          rutasFiltradas.forEach(item => {
+            $('#cbx_Ciudades').append(new Option(item.ruta, item.id));
+          });
+        } else {
+          toastr.error(response.Msj || "No se pudo obtener las rutas", "ERROR");
+        }
+      }
+    })
+  })
+
   function renderResumen(data) {
     const viaje = data.detalle_viaje;
     const pasajeros = data.pasajeros;
@@ -1900,8 +1926,9 @@
     const descuento = descuentoAplicado;
     const cambioRuta = precioCambioRuta;
 
-    const fechaSalida = moment(viaje.fechaSalida).locale('es').format('dddd D [de] MMMM [de] YYYY, HH:mm');
-    const fechaLlegada = moment(viaje.fechaLlegadaEstimada).locale('es').format('dddd D [de] MMMM [de] YYYY, HH:mm');
+    const fechaSalida = moment(viaje.fechaSalida).format("DD-MM-YYYY, HH:mm");
+    const fechaLlegada = moment(viaje.fechaLlegadaEstimada).format("DD-MM-YYYY, HH:mm");
+
 
     let html = `
         <div class="card mb-3">
@@ -1981,11 +2008,13 @@
     });
   });
 
-  function procesarPagossss() {
+  function procesarPagos() {
     const comprobante = document.getElementById('comprobante')?.value;
     if (!comprobante) {
       toastr.warning("Falta el número de comprobante");
       return;
+    } else {
+      console.log("Se completó:", xd);
     }
 
     $.ajax({
@@ -2005,6 +2034,24 @@
       }
     });
   }
+
+  $(document).on('click', '#btn_finalizar_pago', function () {
+    const comprobante = $('#comprobante').val();
+    $.ajax({
+      url: 'ecommerce/home/referenciarPasaje',
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({ comprobante: comprobante }),
+      success: function (response) {
+        if (response.Status === 'success') {
+          toastr.success("El pasaje ha sido referenciado correctamente");
+        } else {
+          toastr.error(response.Msj || "No se pudo referenciar el pasaje", "ERROR");
+        }
+      },
+    })
+
+  });
 
   let descuentoAplicado = 0;
 
@@ -2034,6 +2081,9 @@
       }
     });
   });
+
+
+  
   //End región cambio de ruta //
 </script>
 
