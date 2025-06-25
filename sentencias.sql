@@ -577,8 +577,6 @@ CREATE TABLE vehiculo (
     usuario VARCHAR(100) NOT NULL,
     FOREIGN KEY (id_tipo_vehiculo)
     REFERENCES tipo_vehiculo(id)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE
 );
 
 CREATE TABLE nivel(
@@ -587,7 +585,6 @@ CREATE TABLE nivel(
     id_tipo_vehiculo int not null,
     x_dimension int not null,
     y_dimension int not null,
-    precio DECIMAL(10,2) not null,
     estado BOOLEAN not null,
     foreign key (id_tipo_vehiculo) references tipo_vehiculo(id)
 );
