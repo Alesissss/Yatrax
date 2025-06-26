@@ -13,11 +13,10 @@
 *PASAJES*
 1. Los pasajes adquiridos son personales e intransferibles, salvo cuando se solicite una transferencia por los medios autorizados.
 2. Tipos de pasaje disponibles:
+    * Reemboslo: Puede solocitarlo solo si la empresa cancela el viaje o realiza un reprogramación
     * Pasaje Normal: Válido solo para la fecha y hora comprada.
-    * Pasaje Libre: Tiene una vigencia de 90 días desde la fecha de compra. Puede activarse posteriormente según disponibilidad de rutas y asientos.
-    * Transferencia de Pasaje: Debe solicitarse con 4 horas de anticipación al viaje, con un costo adicional de S/ 10.00.
-    * Cambio de Ruta: Puede solicitarse hasta 6 horas antes del viaje, sujeto a disponibilidad de la nueva ruta. Si la nueva ruta es más cara, el pasajero debe pagar la diferencia. Si la nueva ruta es más barata, no se hacen reembolsos.
-    * Conversión de Pasaje Normal a Pasaje Libre: Debe realizarse como mínimo 6 horas antes del viaje y tiene un costo adicional de S/ 5.00.
+    * Transferencia de Pasaje: Debe solicitarse con 4 horas de anticipación al viaje, no tiene un costo
+    * Cambio de Ruta: Puede solicitarse antes de la realizarse el viaje, sujeto a disponibilidad de la nueva ruta. Si la nueva ruta es más cara, el pasajero debe pagar la diferencia. Si la nueva ruta es más barata, no se hacen reembolsos.
 3. Todos los cambios o trámites relacionados con los pasajes están sujetos a cargos adicionales y deben realizarse dentro de los horarios autorizados por la empresa. Si el pasajero no realiza los trámites a tiempo, es su responsabilidad.
 4. Los reembolsos solo aplican en caso de que la empresa no cumpla con el servicio de viaje. Si el pasajero no se presenta o no aborda el bus a tiempo, pierde su boleto sin derecho a reembolso.
 5. El pasajero debe presentarse al embarque con al menos 30 minutos de anticipación. Si no llega a tiempo, perderá su viaje.
