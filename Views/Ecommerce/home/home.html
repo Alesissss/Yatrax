@@ -323,6 +323,163 @@
 {% block scripts %}
 <script>
 
+let descuentoAplicado = 0;
+
+function renderResumen(data) {
+  let html = '';
+
+  // Verificar que 'data' sea un array
+  if (!Array.isArray(data) || data.length === 0) {
+    console.error('No hay datos válidos para renderizar.');
+    return;
+  }
+
+  // Inicializar variables
+  let totalPasajes = 0;  // Variable para acumular el total
+  let pasajeros = [];  // Array para almacenar los datos de los pasajeros
+  let viaje = null;  // Detalles del viaje
+
+  // Iterar sobre los datos para agrupar los pasajes
+  data.forEach((resumen) => {
+    if (!resumen.detalle_viaje || !resumen.pasajero) {
+      console.error('Datos del resumen incompletos:', resumen);
+      return;
+    }
+
+    // Asignar los detalles del viaje (suponemos que es el mismo para todos los pasajes)
+    if (!viaje) {
+      viaje = resumen.detalle_viaje;
+    }
+
+    // Agregar los datos del pasajero a la lista, incluyendo el precio individual
+    let pasajero = Object.assign({}, resumen.pasajero);
+    pasajero.precio = parseFloat(resumen.precio_total) || 0;
+    pasajeros.push(pasajero);
+    totalPasajes += pasajero.precio;  // Acumulamos el precio total de todos los pasajes
+  });
+
+  // Formato de fecha para la salida y llegada
+  const fechaSalida = moment(viaje.fechaSalida).format("DD-MM-YYYY, HH:mm");
+  const fechaLlegada = moment(viaje.fechaLlegadaEstimada).format("DD-MM-YYYY, HH:mm");
+
+  // Generamos el HTML para el detalle del viaje (único para todos los pasajes)
+  html += `
+    <div class="card mb-3">
+      <div class="card-header bg-dark text-white">Detalle del viaje</div>
+      <div class="card-body">
+        <p><strong>${fechaSalida}</strong> ${viaje.ciudad_origen} (${viaje.origen})</p>
+        <p><strong>${fechaLlegada}</strong> ${viaje.ciudad_destino} (${viaje.destino})</p>
+        <p><i class="fas fa-user"></i> ${pasajeros.length} pasajero${pasajeros.length > 1 ? 's' : ''}</p>
+      </div>
+    </div>
+  `;
+
+  // Resumen de compra: Aquí agrupamos todos los pasajes
+  html += `
+    <div class="card">
+      <div class="card-header bg-dark text-white">Resumen de compra</div>
+      <div class="card-body">
+        <p>${viaje.ciudad_origen} → ${viaje.ciudad_destino}</p>
+  `;
+
+  // Aquí agregamos los detalles de cada pasajero
+  pasajeros.forEach((p, index) => {
+    html += `<p>Pasajero ${index + 1} (Asiento ${p.asiento}) - S/ ${(parseFloat(p.precio) || 0).toFixed(2)}</p>`;
+  });
+
+  // Descuento y cálculo del total
+  const descuento = parseFloat(descuentoAplicado) || 0;
+
+  html += `
+      <hr>
+      <p><strong>Descuento aplicado:</strong> S/ ${descuento.toFixed(2)}</p>
+      <p><strong>Total a pagar:</strong> S/ ${(descuento >= (totalPasajes)) ? '0.00' : ((totalPasajes - descuento)).toFixed(2)}</p>
+      </div>
+    </div>
+  `;
+
+  // Verifica que el contenedor esté presente antes de actualizar el HTML
+  const contenedorResumen = $('#contenedorResumen');
+  if (contenedorResumen.length) {
+    contenedorResumen.html(html);
+  } else {
+    console.error("No se encontró el contenedor #contenedorResumen");
+  }
+}
+
+
+$(document).on('click', '#confirmarDatos', function () {
+  let viaje = sessionStorage.getItem('btn_id_ida');
+  let asiento_ids = [];
+  let datosPasajeros = [];
+  let precioTotal = 0; // Variable para calcular el total
+
+  $('[id^="heading-"]').each(function() {
+    let asientoId = $(this).attr('id').split('-')[1];
+    asiento_ids.push(asientoId);
+    console.log("Asiento seleccionado:", asientoId);
+
+    let datosFormulario = FormManager.recopilarDatosFormulario(asientoId);
+
+    // Obtener el precio del asiento - esto depende de cómo lo tengas en tu formulario
+    let precioAsiento = parseFloat(datosFormulario[11]) || 0; // Asegúrate que el índice es correcto
+
+    const pasajero = {
+      asiento: asientoId,
+      tipoDoc: datosFormulario[0],
+      numDoc: datosFormulario[1],
+      nombres: datosFormulario[2],
+      apellidoPaterno: datosFormulario[3],
+      apellidoMaterno: datosFormulario[4],
+      fechaNacimiento: datosFormulario[5],
+      telefono: datosFormulario[6],
+      sexo: datosFormulario[7].includes('Masculino') ? 'Masculino' : 'Femenino',
+      correo: datosFormulario[8],
+      brazos: datosFormulario[9],
+      esMenor: datosFormulario[10],
+      precio: precioAsiento, // Asignar el precio del asiento
+    };
+    console.log("Datos del pasajero:", pasajero);
+
+    precioTotal += precioAsiento; // Sumar al total
+    datosPasajeros.push(pasajero);
+  });
+
+  if (asiento_ids.length === 0) {
+    console.error("No se han seleccionado asientos.");
+    return;
+  }
+
+  // Aplicar descuento si existe (ejemplo: S/ 20 por pasaje)
+  const descuentoPorPasaje = 20;
+  const descuentoTotal = descuentoPorPasaje * datosPasajeros.length;
+  const totalAPagar = precioTotal - descuentoTotal;
+
+  // Enviar datos al backend
+  $.ajax({
+    url: '/ecommerce/home/resumenGeneral',
+    type: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify({
+      asiento_ids: asiento_ids,
+      viaje: viaje,
+      pasajeros: datosPasajeros,
+      precio_total: precioTotal,
+      descuento: descuentoTotal,
+      total_a_pagar: totalAPagar
+    }),
+    success: function (response) {
+      if (response.Status === 'success') {
+        renderResumen(response.data);
+        console.log('Resumen general:', response.data);
+      }
+    },
+    error: function (error) {
+      console.error('Error en la llamada AJAX:', error);
+    }
+  });
+});
+
   document.addEventListener('DOMContentLoaded', () => {
 
     $.ajax({
@@ -334,7 +491,6 @@
             const config = response.data;
             // Cambiar el color de fondo de jinja-carousel
             $('#jinja-carousel').css('background-color', config.color_header);
-            console.error('Error al obtener la configuración:', response.Msj);
         }
     },
     error: function (xhr, status, error) {

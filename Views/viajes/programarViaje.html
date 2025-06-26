@@ -407,7 +407,7 @@
                             return estado ? estado.nombre : '';
                         }
 
-                        if (false) {
+                        if (true) {
                             let options = estadosViaje
                                 .filter(est => est.id >= row.idEstadoViaje)
                                 .map(est => {
@@ -495,12 +495,28 @@
                     data: null,
                     name: null,
                     render: function (data, type, row) {
+                        let editar = '{{ "Editar viajes" in session["claims"] }}';
+                        let darBaja = '{{ "Dar baja viajes" in session["claims"] }}';
+                        let eliminar = '{{ "Eliminar viajes" in session["claims"] }}';
+                        let ver = '{{ "Ver viajes" in session["claims"] }}';
+
+                        let buttons = '';
+                        if (ver === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-info" onclick="fct_ViajeVer('${data.id}')" title="Ver viaje"><i class="bi bi-eye"></i></button>`;
+                        }
+                        if (editar === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-primary" onclick="fct_ViajeEditar('${data.id}')" title="Editar viaje"><i class="bi bi-pencil-square"></i></button>`;
+                        }
+                        if (darBaja === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-warning" onclick="fct_ViajeDarBaja('${data.id}')" title="Dar de baja viaje"><i class="bi bi-arrow-down-circle"></i></button>`;
+                        }
+                        if (eliminar === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-danger" onclick="fct_ViajeEliminar('${data.id}')" title="Eliminar viaje"><i class="bi bi-trash"></i></button>`;
+                        }
+
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_ViajeVer('${data.id}')" title="Ver viaje"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_ViajeEditar('${data.id}')" title="Editar viaje"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_ViajeDarBaja('${data.id}')" title="Dar de baja viaje"><i class="bi bi-arrow-down-circle"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_ViajeEliminar('${data.id}')" title="Eliminar viaje"><i class="bi bi-trash"></i></button>
+                            ${buttons}
                         </div>
                         `;
                     },

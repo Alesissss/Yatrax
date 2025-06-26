@@ -125,7 +125,7 @@
                                 </p>
                             </a>
                             <ul class="nav nav-treeview" style="display: block;">
-                                {% if 11 in session['menus'] %}
+                                {% if 10 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('usuario.Menu_TipoUsuario') }}"
                                         class="nav-link {% if active_page == 'tipoUsuario' %}active{% endif %}">
@@ -134,7 +134,7 @@
                                     </a>
                                 </li>
                                 {% endif %}
-                                {% if 10 in session['menus'] %}
+                                {% if 11 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('usuario.Menu_Usuarios') }}"
                                         class="nav-link {% if active_page == 'usuarios' %}active{% endif %}">
@@ -158,7 +158,7 @@
                             </a>
                             <ul class="nav nav-treeview" style="display: block;">
                                 <li class="nav-header">Clientes</li>
-                                {% if 31 in session['menus'] %}
+                                {% if 30 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('ventas.Menu_TipoClientes') }}"
                                         class="nav-link {% if active_page == 'tipoCliente' %}active{% endif %}">
@@ -167,7 +167,7 @@
                                     </a>
                                 </li>
                                 {% endif %}
-                                {% if 32 in session['menus'] %}
+                                {% if 31 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('ventas.Menu_Clientes') }}"
                                         class="nav-link {% if active_page == 'cliente' %}active{% endif %}">
@@ -177,7 +177,7 @@
                                 </li>
                                 {% endif %}
                                 <li class="nav-header">Servicios</li>
-                                {% if 33 in session['menus'] %}
+                                {% if 32 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('ventas.Menu_Servicio') }}"
                                         class="nav-link {% if active_page == 'servicio' %}active{% endif %}">
@@ -186,7 +186,7 @@
                                     </a>
                                 </li>
                                 {% endif %}
-                                {% if 34 in session['menus'] %}
+                                {% if 33 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('ventas.Menu_Microservicio') }}"
                                         class="nav-link {% if active_page == 'microservicio' %}active{% endif %}">
@@ -196,7 +196,7 @@
                                 </li>
                                 {% endif %}
                                 <li class="nav-header">Documentos</li>
-                                {% if 35 in session['menus'] %}
+                                {% if 34 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('ventas.Menu_TipoDocumento') }}"
                                         class="nav-link {% if active_page == 'tipoDocumento' %}active{% endif %}">
@@ -205,7 +205,7 @@
                                     </a>
                                 </li>
                                 {% endif %}
-                                {% if 30 in session['menus'] %}
+                                {% if 35 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('ventas.Menu_TipoComprobante') }}"
                                         class="nav-link {% if active_page == 'tipoComprobante' %}active{% endif %}">
@@ -215,23 +215,10 @@
                                 </li>
                                 {% endif %}
                                 <li class="nav-header">Pasajes</li>
-                                <!-- -- vender pasaje y transacciones -->
-                                <li class="nav-item align-items-center">
-                                    <a href="{{ url_for('ventas.Menu_VenderPasajes') }}"
-                                        class="nav-link {% if active_page == 'venderPasajes' %}active{% endif %}">
-                                        <i class="bi bi-ticket nav-icon"></i>
-                                        <p>Vender pasaje</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="{{ url_for('ventas.Menu_TransaccionesPasajes') }}"
-                                        class="nav-link {% if active_page == 'transaccionesPasajes' %}active{% endif %}">
-                                        <i class="bi bi-gear nav-icon"></i>
-                                        <p>Transacción de pasajes</p>
-                                    </a>
-                                </li>
+
                                 <!-- -- Reportes -->
                                 <li class="nav-header">Reportes</li>
+                                {% if 36 in session['menus'] %}
                                 <li class="nav-item align-items-center">
                                     <a href="{{ url_for('ventas.Menu_DashboardVentas') }}"
                                         class="nav-link {% if active_page == 'dashboardVentas' %}active{% endif %}">
@@ -239,6 +226,7 @@
                                         <p>Dashboard de ventas</p>
                                     </a>
                                 </li>
+                                {% endif %}
                             </ul>
                         </li>
                         {% endif %}
@@ -253,17 +241,8 @@
                                 </p>
                             </a>
                             <ul class="nav nav-treeview" style="display: block;">
-                                <!-- {% if 40 in session['menus'] %}
-                                <li class="nav-item">
-                                    <a href="{{ url_for('viajes.Menu_Horarios') }}"
-                                        class="nav-link {% if active_page == 'horarios' %}active{% endif %}">
-                                        <i class="bi bi-calendar-week nav-icon"></i>
-                                        <p>Gestionar horarios</p>
-                                    </a>
-                                </li>
-                                {% endif %} -->
                                 <li class="nav-header">Vehículos</li>
-                                {% if 46 in session['menus'] %}
+                                {% if 40 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('viajes.Menu_Marcas') }}"
                                         class="nav-link {% if active_page == 'marcas' %}active{% endif %}">
@@ -292,20 +271,13 @@
                                 {% endif %}
                                 <!-- {% if 43 in session['menus'] %}
                                 <li class="nav-item">
-                                    <a href="{{ url_for('viajes.Menu_Nivel') }}"
-                                        class="nav-link {% if active_page == 'nivel' %}active{% endif %}">
-                                        <i class="bi bi-bar-chart-steps nav-icon"></i>
-                                        <p>Gestionar niveles</p>
-                                    </a>
-                                </li>
-                                {% endif %} -->
-                                <li class="nav-item">
                                     <a href="{{ url_for('viajes.Menu_TipoAsiento') }}"
                                         class="nav-link {% if active_page == 'tipoAsiento' %}active{% endif %}">
                                         <i class="bi bi-bar-chart-steps nav-icon"></i>
                                         <p>Gestionar tipos de asientos</p>
                                     </a>
                                 </li>
+                                {% endif %} -->
                                 {% if 44 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('viajes.Menu_Asiento') }}"
@@ -325,7 +297,7 @@
                                     </a>
                                 </li>
                                 {% endif %}
-                                {% if 47 in session['menus'] %}
+                                {% if 46 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('viajes.Menu_Rutas') }}"
                                         class="nav-link {% if active_page == 'ruta' %}active{% endif %}">
@@ -334,7 +306,7 @@
                                     </a>
                                 </li>
                                 {% endif %}
-                                {% if 48 in session['menus'] %}
+                                {% if 47 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('viajes.Menu_ProgramarViaje') }}"
                                         class="nav-link {% if active_page == 'programarViaje' %}active{% endif %}">
@@ -375,7 +347,7 @@
                                     </a>
                                 </li>
                                 {% endif %}
-                                {% if 51 in session['menus'] %}
+                                {% if 52 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('personal.Menu_Incidencia') }}"
                                         class="nav-link {% if active_page == 'sancion' %}active{% endif %}">
@@ -384,7 +356,7 @@
                                     </a>
                                 </li>
                                 {% endif %}
-                                {% if 51 in session['menus'] %}
+                                {% if 53 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('personal.Menu_SancionPersonal') }}"
                                         class="nav-link {% if active_page == 'sancionPersonal' %}active{% endif %}">
@@ -416,7 +388,7 @@
                                     </a>
                                 </li>
                                 {% endif %}
-                                <!--Rutas en duro-->
+                                {% if 61 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('atencion.Menu_TipoReclamo') }}"
                                         class="nav-link {% if active_page == 'tipoReclamo' %}active{% endif %}">
@@ -424,6 +396,8 @@
                                         <p>Gestionar tipo reclamo</p>
                                     </a>
                                 </li>
+                                {% endif %}
+                                {% if 62 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('atencion.Menu_Reclamo') }}"
                                         class="nav-link {% if active_page == 'reclamo' %}active{% endif %}">
@@ -431,6 +405,8 @@
                                         <p>Gestionar reclamo</p>
                                     </a>
                                 </li>
+                                {% endif %}
+                                {% if 63 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('atencion.Menu_Reembolso') }}"
                                         class="nav-link {% if active_page == 'reembolso' %}active{% endif %}">
@@ -438,7 +414,7 @@
                                         <p>Gestionar reembolso</p>
                                     </a>
                                 </li>
-                                <!--End Rutas-->
+                                {% endif %}
                             </ul>
                         </li>
                         {% endif %}
@@ -453,6 +429,7 @@
                             </a>
                             <ul class="nav nav-treeview" style="display: block;">
                                 <li class="nav-header">General</li>
+                                {% if 20 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('configuracion.editar_configuracion') }}"
                                         class="nav-link {% if active_page == 'conf_general' %}active{% endif %}">
@@ -460,7 +437,8 @@
                                         <p>Configuración general</p>
                                     </a>
                                 </li>
-                                {% if 20 in session['menus'] %}
+                                {% endif %}
+                                {% if 21 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('configuracion.Menu_Permisos') }}"
                                         class="nav-link {% if active_page == 'permisos' %}active{% endif %}">
@@ -469,7 +447,7 @@
                                     </a>
                                 </li>
                                 {% endif %}
-                                {% if 21 in session['menus'] %}
+                                {% if 22 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('configuracion.Menu_Plantillas') }}"
                                         class="nav-link {% if active_page == 'plantillas' %}active{% endif %}">
@@ -478,6 +456,7 @@
                                     </a>
                                 </li>
                                 {% endif %}
+                                {% if 23 in session['menus'] %}
                                 <li class="nav-header">Pagos y promociones</li>
                                 <li class="nav-item">
                                     <a href="{{ url_for('configuracion.Menu_TipoMetodoPago') }}"
@@ -486,8 +465,8 @@
                                         <p>Gestionar tipo de métodos de pago</p>
                                     </a>
                                 </li>
-
-                                {% if 22 in session['menus'] %}
+                                {% endif %}
+                                {% if 24 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('configuracion.Menu_MetodosPago') }}"
                                         class="nav-link {% if active_page == 'metodosPago' %}active{% endif %}">
@@ -496,6 +475,7 @@
                                     </a>
                                 </li>
                                 {% endif %}
+                                {% if 25 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('configuracion.Menu_Promociones')}}"
                                         class="nav-link {% if active_page == 'promociones' %}active{% endif %}">
@@ -503,7 +483,9 @@
                                         <p>Gestionar promociones</p>
                                     </a>
                                 </li>
+                                {% endif %}
                                 <li class="nav-header">Políticas</li>
+                                {% if 26 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('configuracion.Menu_TerminosCondiciones')}}"
                                         class="nav-link {% if active_page == 'terminosCondiciones' %}active{% endif %}">
@@ -511,7 +493,8 @@
                                         <p>Gestionar términos y condiciones</p>
                                     </a>
                                 </li>
-
+                                {% endif %}
+                                {% if 27 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('configuracion.Menu_PreguntasFrecuentes') }}"
                                         class="nav-link {% if active_page == 'preguntasFrecuentes' %}active{% endif %}">
@@ -519,7 +502,8 @@
                                         <p>Gestionar preguntas frecuentes</p>
                                     </a>
                                 </li>
-
+                                {% endif %}
+                                {% if 28 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('configuracion.Menu_Empresa') }}"
                                         class="nav-link {% if active_page == 'empresas' %}active{% endif %}">
@@ -527,7 +511,7 @@
                                         <p>Gestionar empresa</p>
                                     </a>
                                 </li>
-
+                                {% endif %}
                             </ul>
                         </li>
                         {% endif %}

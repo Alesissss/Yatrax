@@ -336,6 +336,51 @@ def resumen_viaje():
     
     except Exception as e:
         return jsonify({'Status': 'error', 'Msj': f'Ocurrió un error al procesar el viaje: {repr(e)}'})
+    
+
+@homeClientes_bp.route('/resumenGeneral', methods=['POST'])
+def resumen_general():
+    try:
+        asiento_ids = request.json.get('asiento_ids')  # Los IDs de los asientos
+        viaje = request.json.get('viaje')  # El ID del viaje
+        pasajeros = request.json.get('pasajeros')  # Los datos estructurados de los pasajeros
+
+        if not asiento_ids or not viaje:
+            return jsonify({'Status': 'error', 'Msj': 'Faltan los IDs de los asientos o el viaje.'})
+
+        resumen = []
+
+        # Procesar cada asiento para obtener el detalle del viaje
+        for asiento_id, datos_pasajero in zip(asiento_ids, pasajeros):
+            datos = Pasaje.detalle_viaje(asiento_id, viaje)
+            
+            if not datos:
+                resumen.append({
+                    'Status': 'error',
+                    'Msj': f'No se encontraron datos para el asiento {asiento_id}.'
+                })
+                continue
+            
+            detalle = datos[0] if isinstance(datos, list) and datos else None
+            if not detalle:
+                resumen.append({
+                    'Status': 'error',
+                    'Msj': f'No se encontró detalle válido para el asiento {asiento_id}.'
+                })
+                continue
+
+            # Agregar el detalle de cada asiento al resumen
+            resumen.append({
+                'detalle_viaje': detalle,
+                'pasajero': datos_pasajero,  # Los datos del pasajero correspondientes
+                'precio_total': detalle['precio_total']  # Total sin aplicar descuento
+            })
+
+        # Si todo está correcto, devolver el resumen con la información de todos los asientos
+        return jsonify({'Status': 'success', 'data': resumen, 'Msj': 'Resumen general generado correctamente.'})
+
+    except Exception as e:
+        return jsonify({'Status': 'error', 'Msj': f'Ocurrió un error al procesar el resumen general: {repr(e)}'})
 
 @homeClientes_bp.route('/obtenerPrecioPasaje', methods=['POST'])
 def obtener_precio_cambio_ruta():
@@ -469,7 +514,8 @@ def get_rutas_concatenadas_sin_la_actual():
 def get_persona_data():
     def responder(datos):
         if datos:
-            print(datos)
+            f_nacimiento = datos.get("f_nacimiento")
+            datos["f_nacimiento"] = f_nacimiento.strftime("%Y-%m-%d %H:%M:%S") if f_nacimiento else None
             return jsonify({'data': datos, 'Status': 'success', 'Msj': 'Datos obtenidos correctamente'})
         return None  # Si no hay datos, no responde nada aún
 

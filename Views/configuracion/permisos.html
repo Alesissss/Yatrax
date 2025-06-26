@@ -179,8 +179,8 @@
             columns: [
                 { data: "id", name: "id" },
                 { data: "nombre", name: "nombre" },
-                { 
-                    data: "estado", 
+                {
+                    data: "estado",
                     name: "estado",
                     render: function (data, type, row) {
                         let estado = data === 1 ? 'Vigente' : 'No vigente';
@@ -197,7 +197,12 @@
                     data: null,
                     name: null,
                     render: function (data, type, row) {
-                        return `<button class="btn btn-xs m-1 btn-primary" onclick="fct_UsuarioEditar('${data.id}')" title="Editar permisos de usuario"><i class="bi bi-pencil-square"></i></button>`;
+                        let editar = '{{ "Editar permisos" in session["claims"] }}';
+                        if (editar === "True") {
+                            return `<button class="btn btn-xs m-1 btn-primary" onclick="fct_UsuarioEditar('${data.id}')" title="Editar permisos de usuario"><i class="bi bi-pencil-square"></i></button>`;
+                        } else {
+                            return ""
+                        }
                     },
                     className: 'text-center',
                 }

@@ -323,3 +323,44 @@ class Venta:
             return result
         finally:
             conexion.cerrar()
+            
+    @classmethod
+    def obtener_reporte_puntualidad(cls):
+        try:
+            conexion = bd.Conexion()
+            result = conexion.obtener("""
+                SELECT 
+                    ru.nombre AS ruta,
+                    CONCAT(UPPER(suo.nombre), ' - ', UPPER(suo.ciudad)) AS sucursalOrigen,
+                    CONCAT(UPPER(sud.nombre), ' - ', UPPER(sud.ciudad)) AS sucursalDestino,
+                    idViaje, 
+                    idSucursalOrigen, 
+                    idSucursalDestino, 
+                    fechaSalida, 
+                    fechaSalidaReal, 
+                    TIMESTAMPDIFF(MINUTE, fechaSalida, fechaSalidaReal) AS minDiferenciaSalida, 
+                    fechaLlegadaEstimada, 
+                    fechaLlegadaReal, 
+                    TIMESTAMPDIFF(MINUTE, fechaLlegadaEstimada, fechaLlegadaReal) AS minDiferenciaLlegada, 
+                    CASE 
+                        WHEN fechaSalida = fechaSalidaReal THEN 'Puntual' 
+                        ELSE 'Retraso' 
+                    END AS PuntualidadSalida, 
+                    CASE 
+                        WHEN fechaLlegadaEstimada = fechaLlegadaReal THEN 'Puntual' 
+                        ELSE 'Retraso' 
+                    END AS PuntualidadLlegada
+                FROM 
+                    detalle_viaje dv
+                INNER JOIN 
+                    viaje vi ON vi.id = dv.idViaje
+                INNER JOIN 
+                    ruta ru ON ru.id = vi.idRuta
+                INNER JOIN 
+                    sucursal suo ON suo.id = dv.idSucursalOrigen
+                INNER JOIN 
+                    sucursal sud ON sud.id = dv.idSucursalDestino;
+            """)
+            return result
+        finally:
+            conexion.cerrar()

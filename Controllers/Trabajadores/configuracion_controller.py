@@ -884,7 +884,28 @@ def activar_empresa(id):
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
-
+@configuracion_bp.route("/VerEmpresa/<int:id>", methods=['GET'])
+def ver_empresa(id):
+    try:
+        empresa = Empresa.obtener_por_id(id)
+        
+        if empresa:
+            return render_template('configuracion/empresaCRUD.html', 
+                                 active_page="empresas", 
+                                 active_menu='mConfiguracion', 
+                                 empresa=empresa, 
+                                 tittle='Ver empresa', 
+                                 btnId='btn_Aceptar')
+        
+        return render_template('configuracion/empresaCRUD.html', 
+                             active_page="empresas", 
+                             active_menu='mConfiguracion', 
+                             empresa={},
+                             tittle='Ver empresa', 
+                             btnId='btn_Aceptar')
+        
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
 # REGION TERMINOS Y CONDICIONES
 def allowed_file_txt(filename):

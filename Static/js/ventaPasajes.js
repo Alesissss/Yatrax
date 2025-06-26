@@ -3,7 +3,7 @@
 // =============================================================================
 
 const CONFIG = {
-    MAX_ASIENTOS: 1,
+    MAX_ASIENTOS: 2,
     IGV: 0.18,
     TIEMPO_MAXIMO_COMPRA: 5, // En minutos
     RUTAS: {
@@ -841,6 +841,8 @@ const ItineraryManager = {
                 const btn = event.target;
                 event.stopPropagation();
                 VehicleLayoutManager.generarMatrices(btn.id, sufijo);
+                console.log(`🎯 Click detectado en botón: ${btn.id} para ${sufijo}`);
+                sessionStorage.setItem(`btn_id_${sufijo}`, btn.id);
             }
         });
 

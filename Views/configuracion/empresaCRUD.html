@@ -91,28 +91,13 @@
                             >
                         </div>
                         
-                        {% if btnId != 'btn_Registrar' %}
-                        <div class="mb-3">
-                            <label for="sel_Estado" class="form-label">Estado</label>
-                            <select
-                                id="sel_Estado"
-                                name="estado"
-                                class="form-select"
-                                {% if btnId=='btn_Aceptar' %}disabled{% endif %}
-                            >
-                                <option value="1" {% if empresa and empresa.estado == 1 %}selected{% endif %}>Activo</option>
-                                <option value="0" {% if empresa and empresa.estado == 0 %}selected{% endif %}>Inactivo</option>
-                            </select>
-                        </div>
-                        {% endif %}
-                        
                         <div class="text-center">
                             <button
                                 id="btn_Volver"
                                 type="button"
                                 class="btn btn-danger me-2"
                             >
-                                <i class="bi bi-arrow-left"></i> Volver al listado
+                                Volver al listado
                             </button>
                             
                             <button
@@ -121,11 +106,11 @@
                                 class="btn btn-primary"
                             >
                                 {% if btnId == 'btn_Registrar' %}
-                                    <i class="bi bi-plus-circle"></i> Registrar
+                                    Registrar
                                 {% elif btnId == 'btn_Editar' %}
-                                    <i class="bi bi-pencil-square"></i> Actualizar
+                                    Actualizar
                                 {% else %}
-                                    <i class="bi bi-check-circle"></i> Aceptar
+                                    Aceptar
                                 {% endif %}
                             </button>
                         </div>
