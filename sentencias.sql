@@ -3430,14 +3430,7 @@ VALUES ('Billetera virtual', 1, 'luis@gmail.com');
 INSERT INTO `metodo_pago`
 (`nombre`, `logo`, `estado`, `id_tipo_metodoPago`, `qr`, `usuario`)
 VALUES
-(
-'Efectivo',
-'/Static/img/metodos_pago/logo/default_metodopago.png',
-1,
-1,
-null,
-'luis@gmail.com'
-);
+('Efectivo','/Static/img/metodos_pago/logo/default_metodopago.png',1,1,null,'luis@gmail.com');
 
 INSERT INTO `metodo_pago`
 (`nombre`, `logo`, `estado`, `id_tipo_metodoPago`, `qr`, `usuario`)

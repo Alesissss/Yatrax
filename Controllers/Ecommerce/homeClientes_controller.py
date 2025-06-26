@@ -36,6 +36,8 @@ from Models.asiento import Asiento
 from Models.venta import Venta
 from Models.reserva import Reserva
 from Models.conf_general import ConfGeneral
+from Models.promocion import Promocion
+
 
 homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/home')
 
@@ -113,7 +115,8 @@ def index():
     
     datos_recibidos = {
         "servicios":Servicio.obtener_todos(),
-        "contenido_venta": renderizarCompra()
+        "contenido_venta": renderizarCompra(),
+        "promociones": Promocion.obtener_todos()
     }
     return render_template('Ecommerce/home/home.html', active_page="home",datos=datos_recibidos)
 
@@ -203,7 +206,7 @@ def perfilCliente():
             else:
                 password_hash = None
             
-            Cliente.actualizar_cliente(id_cliente,id_pais,id_tipo_cliente,id_tipo_doc,numero_documento,nombres,ape_paterno,ape_materno,sexo,f_nacimiento,razon_social,direccion,telefono,email,password_hash,usuario)
+            Cliente.actualizarPerfil(id_cliente,id_pais,id_tipo_cliente,id_tipo_doc,numero_documento,nombres,ape_paterno,ape_materno,sexo,f_nacimiento,razon_social,direccion,telefono,email,password_hash,usuario)
 
             return jsonify({"Status":1,"Mensaje":"Se ha actualizado los datos del cliente correctamente"})
         except Exception as e:

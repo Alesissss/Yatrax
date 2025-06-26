@@ -149,9 +149,27 @@
   }
 </style>
 {% endblock %}
+<section>
+  <div id="jinja-carousel" class="carousel slide" class="position-relative"  data-bs-ride="carousel" data-bs-interval="4000">
+    <div class="carousel-inner">
+      {% for item in datos["promociones"] %}
+        <div class="carousel-item {% if loop.first %}active{% endif %} text-center">
+          <div class="d-flex justify-content-center align-items-center">
+            <div class="d-flex flex-column justify-content-center align-items-center">
+              <span style="font-size: 20px; font-weight: bold;">Canjea el codigo "{{ item.codigo }}" y obten S/.{{item.monto_promo}} de descuento</span>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
 <header>
   <h1>{% block tematica %}{% endblock %}</h1>
 </header>
+
+
 <main style="padding-bottom: 40px;">
   <!-- INICIO SECCIÓN: COMPRA PASAJE -->
    <!-- Inyectar section -->
@@ -209,6 +227,7 @@
       </div>
     </div>
   </section>
+
 
   <section id="principal" class="container-fluid">
     <div class="container">
