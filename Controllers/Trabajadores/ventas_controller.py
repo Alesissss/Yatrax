@@ -1096,6 +1096,19 @@ def obtener_reporte_ventas():
         return jsonify({"data": data, "Status": "success", 'Msj': 'Reporte filtrado correctamente'})
     except Exception as e:
         return jsonify({"data": [], "Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@ventas_bp.route("/ObtenerDashboardViajesPuntualidad", methods=["GET"])
+def obtener_reporte_viajes_puntualidad():
+    try:
+        
+        idRuta = request.args.get("idRuta")
+        
+        data = Venta.obtener_reporte_puntualidad(idRuta)
+        
+        return jsonify({"data": data, "Status": "success", 'Msj': 'Reporte generado correctamente'})
+    except Exception as e:
+        return jsonify({"data": [], "Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
 # END REGION REPORTES
 
 # END FUNCIONES

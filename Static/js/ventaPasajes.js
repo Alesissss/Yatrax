@@ -2254,11 +2254,11 @@ const PaymentManager = {
                 <div class="row g-3">
                     <div class="col-12">
                         <label class="form-label">Número de tarjeta</label>
-                        <input id="numero_tarjeta" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19">
+                        <input id="numero_tarjeta" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19" required>
                     </div>
                     <div class="col-12">
                         <label class="form-label">Nombre del titular</label>
-                        <input id="titular_tarjeta" class="form-control" placeholder="Nombre completo como aparece en la tarjeta">
+                        <input id="titular_tarjeta" class="form-control" placeholder="Nombre completo como aparece en la tarjeta" required>
                     </div>
                     <div class="col-6">
                         <label class="form-label">Mes de vencimiento</label>
@@ -2279,7 +2279,7 @@ const PaymentManager = {
                     </div>
                     <div class="col-6">
                         <label class="form-label">CVV</label>
-                        <input id="cvv_tarjeta" class="form-control" placeholder="123" maxlength="4">
+                        <input id="cvv_tarjeta" class="form-control" placeholder="123" maxlength="4" required>
                     </div>
                     <div class="col-6">
                         <label class="form-label">Código promocional (opcional)</label>
@@ -2353,7 +2353,7 @@ const PaymentManager = {
             } else if (nombreTipoMetodo == "efectivo" && nombreMetodo == "efectivo") {
                 this.procesarReserva();
             } else {
-                toastr.info("Funcionalidad en desarrollo");
+                this.procesarPago();
             }
         });
     },
@@ -2464,6 +2464,7 @@ const PaymentManager = {
 
     capturarDatosPago() {
         const tipoComprobante = document.getElementById("tipo_comprobante").value;
+        const igv = CONFIG.IGV;
 
         let datosContacto = {
             tipo_comprobante: tipoComprobante,
@@ -2493,6 +2494,7 @@ const PaymentManager = {
         const metodoEspecifico = document.getElementById("metodo_pago_especifico")?.value;
 
         const datosPago = {
+            igv:igv,
             tipo_metodo: tipoMetodo,
             metodo_especifico: metodoEspecifico,
             timestamp: new Date().toISOString()
