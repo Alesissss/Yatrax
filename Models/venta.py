@@ -296,7 +296,7 @@ class Venta:
             return result
         finally:
             conexion.cerrar()
-
+    @classmethod
     def consultar_empresa_activa(cls):
         conexion = bd.Conexion()
         try:
