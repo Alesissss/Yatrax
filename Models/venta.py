@@ -296,3 +296,11 @@ class Venta:
             return result
         finally:
             conexion.cerrar()
+
+    def consultar_empresa_activa(cls):
+        conexion = bd.Conexion()
+        try:
+            lista = conexion.obtener("SELECT * FROM empresa WHERE estado = 1")
+            if lista: return lista[0]
+        finally:
+            conexion.cerrar()
