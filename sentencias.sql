@@ -6435,6 +6435,7 @@ END $$
 DELIMITER ;
 
 -- Procedimiento para actualizar cliente
+
 DELIMITER $$
 
 CREATE PROCEDURE SP_ACTUALIZAR_CLIENTE (
@@ -6458,38 +6459,62 @@ CREATE PROCEDURE SP_ACTUALIZAR_CLIENTE (
     OUT MSJ2 VARCHAR(100)
 )
 BEGIN
+    DECLARE existe_duplicado INT DEFAULT 0;
+
     DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
     BEGIN
         SET MSJ = NULL;
         SET MSJ2 = 'Error al actualizar cliente';
     END;
 
-    UPDATE cliente
-    SET id_pais = p_id_pais,
-        id_tipo_cliente = p_id_tipo_cliente,
-        id_tipo_doc = p_id_tipo_doc,
-        numero_documento = p_numero_documento,
-        nombres = p_nombres,
-        ape_paterno = p_ape_paterno,
-        ape_materno = p_ape_materno,
-        sexo = p_sexo,
-        f_nacimiento = p_f_nacimiento,
-        razon_social = p_razon_social,
-        direccion = p_direccion,
-        telefono = p_telefono,
-        email = p_email,
-        usuario = p_usuario
-    WHERE id = p_id;
+    -- Inicializar mensajes
+    SET MSJ = NULL;
+    SET MSJ2 = NULL;
 
-    IF p_password IS NOT NULL AND LENGTH(p_password) > 0 THEN
+    -- Verificar duplicado
+    SELECT COUNT(*) INTO existe_duplicado
+    FROM cliente
+    WHERE id_tipo_doc = p_id_tipo_doc
+      AND numero_documento = p_numero_documento
+      AND id <> p_id;
+
+    IF existe_duplicado > 0 THEN
+        SET MSJ = NULL;
+        SET MSJ2 = 'El número de documento ya está registrado para ese tipo de documento.';
+    ELSE
+        -- Actualizar datos
         UPDATE cliente
-        SET password = p_password
+        SET id_pais = p_id_pais,
+            id_tipo_cliente = p_id_tipo_cliente,
+            id_tipo_doc = p_id_tipo_doc,
+            numero_documento = p_numero_documento,
+            nombre = p_nombres,
+            ape_paterno = p_ape_paterno,
+            ape_materno = p_ape_materno,
+            sexo = p_sexo,
+            f_nacimiento = p_f_nacimiento,
+            razon_social = p_razon_social,
+            direccion = p_direccion,
+            telefono = p_telefono,
+            email = p_email,
+            usuario = p_usuario
         WHERE id = p_id;
+
+        IF p_password IS NOT NULL AND LENGTH(p_password) > 0 THEN
+            UPDATE cliente
+            SET password = p_password
+            WHERE id = p_id;
+        END IF;
+
+        SET MSJ = 'Cliente actualizado correctamente';
+        SET MSJ2 = NULL;
     END IF;
 
-    SET MSJ = 'Cliente actualizado correctamente';
-    SET MSJ2 = NULL;
 END $$
+
+DELIMITER ;
+
+DELIMITER $$
 
 -- Procedimiento para insertar tipo de comprobante
 CREATE PROCEDURE SP_INSERTAR_TIPO_COMPROBANTE(
