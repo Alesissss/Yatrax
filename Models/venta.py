@@ -313,13 +313,12 @@ class Venta:
         try:
             conexion = bd.Conexion()
             result = conexion.obtener(""" SELECT c.id, c.numero_documento, c.sexo, c.email, c.nombre, 
-                c.ape_paterno, c.ape_materno, v.fecha, 
-                sum(subtotal + igv) as totalMonto, count(p.id) as totalPasajes
+                c.ape_paterno, c.ape_materno, v.fecha, (subtotal + igv) as totalMonto, count(p.id) as totalPasajes
                 FROM venta v 
                 INNER JOIN cliente c on v.idCliente = c.id 
                 INNER JOIN pasaje p on p.idVenta = v.id
                 WHERE p.esPasajeNormal = 1
-                GROUP BY c.id, c.numero_documento, c.sexo, c.email, c.nombre, c.ape_paterno, c.ape_materno, v.fecha """)
+                GROUP BY c.id, c.numero_documento, c.sexo, c.email, c.nombre, c.ape_paterno, c.ape_materno, v.fecha, v.subtotal, v.igv """)
             
             return result
         finally:

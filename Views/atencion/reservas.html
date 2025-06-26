@@ -168,14 +168,14 @@
                     className: 'btn btn-warning',
                     columns: ':not(.noVis)',
                 },
-                {
-                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nueva reserva',
-                    className: 'btn bg-success m-1',
-                    titleAttr: 'Nuevo',
-                    action: function (e, dt, node, config) {
-                        fct_reservaNueva();
-                    },
-                },
+                // {
+                //     text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nueva reserva',
+                //     className: 'btn bg-success m-1',
+                //     titleAttr: 'Nuevo',
+                //     action: function (e, dt, node, config) {
+                //         fct_reservaNueva();
+                //     },
+                // },
             ],
             ajax: {
                 url: "/trabajadores/atencion/GetData_Reservas",
@@ -224,7 +224,7 @@
                     render: function (data, type, row) {
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_VerReserva('${data.id}')" title="Ver usuario"><i class="bi bi-eye"></i></button>
+                           
                             <button class="btn btn-xs m-1 btn-warning" onclick="fct_PagarReserva('${data.id}')" title="Pagar reserva">Pagar reserva</button>
                             <button class="btn btn-xs m-1 btn-danger" onclick = "fct_eliminarReserva('${data.id}')" title="Eliminar usuario"><i class="bi bi-trash"></i></button>
                         </div>

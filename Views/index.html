@@ -375,6 +375,24 @@
                                     </a>
                                 </li>
                                 {% endif %}
+                                {% if 51 in session['menus'] %}
+                                <li class="nav-item">
+                                    <a href="{{ url_for('personal.Menu_Incidencia') }}"
+                                        class="nav-link {% if active_page == 'sancion' %}active{% endif %}">
+                                        <i class="bi bi-person-vcard nav-icon"></i>
+                                        <p>Gestionar sanciones</p>
+                                    </a>
+                                </li>
+                                {% endif %}
+                                {% if 51 in session['menus'] %}
+                                <li class="nav-item">
+                                    <a href="{{ url_for('personal.Menu_SancionPersonal') }}"
+                                        class="nav-link {% if active_page == 'sancionPersonal' %}active{% endif %}">
+                                        <i class="bi bi-person-vcard nav-icon"></i>
+                                        <p>Gestionar sanción a personal</p>
+                                    </a>
+                                </li>
+                                {% endif %}
                             </ul>
                         </li>
                         {% endif %}
@@ -392,7 +410,7 @@
                                 {% if 60 in session['menus'] %}
                                 <li class="nav-item">
                                     <a href="{{ url_for('atencion.Menu_Atencion') }}"
-                                        class="nav-link {% if active_page == 'ejemplo' %}active{% endif %}">
+                                        class="nav-link {% if active_page == 'reservas' %}active{% endif %}">
                                         <i class="bi bi-calendar-week nav-icon"></i>
                                         <p>Gestionar reservas</p>
                                     </a>
@@ -401,21 +419,21 @@
                                 <!--Rutas en duro-->
                                 <li class="nav-item">
                                     <a href="{{ url_for('atencion.Menu_TipoReclamo') }}"
-                                        class="nav-link {% if active_page == 'ejemplo' %}active{% endif %}">
+                                        class="nav-link {% if active_page == 'tipoReclamo' %}active{% endif %}">
                                         <i class="bi bi-calendar-week nav-icon"></i>
                                         <p>Gestionar tipo reclamo</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a href="{{ url_for('atencion.Menu_Reclamo') }}"
-                                        class="nav-link {% if active_page == 'ejemplo' %}active{% endif %}">
+                                        class="nav-link {% if active_page == 'reclamo' %}active{% endif %}">
                                         <i class="bi bi-calendar-week nav-icon"></i>
                                         <p>Gestionar reclamo</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a href="{{ url_for('atencion.Menu_Reembolso') }}"
-                                        class="nav-link {% if active_page == 'ejemplo' %}active{% endif %}">
+                                        class="nav-link {% if active_page == 'reembolso' %}active{% endif %}">
                                         <i class="bi bi-calendar-week nav-icon"></i>
                                         <p>Gestionar reembolso</p>
                                     </a>
@@ -756,8 +774,6 @@
                                     lng: pos.coords.longitude,
                                     id_viaje: viajeId
                                 };
-
-                                console.log(data);
 
                                 fetch('/trabajadores/viajes/api/registrar_posicion', {
                                     method: 'POST',

@@ -20,9 +20,9 @@
                             <th class="text-center">ID</th>
                             <th class="text-center">NOMBRE</th>
                             <th class="text-center">CODIGO</th>
-                            <th class="text-center">MONTO</th>
-                            <th class="text-center">Fecha inicio</th>
-                            <th class="text-center">Fecha Fin</th>
+                            <th class="text-center">MONTO (S/. )</th>
+                            <th class="text-center">FECHA INICIO</th>
+                            <th class="text-center">FECHA FIN</th>
                             <th class="text-center">ESTADO</th>
                             <th class="text-center">ACCIÓN</th>
                         </tr>
@@ -194,24 +194,20 @@
                 { data: "nombre", name: "nombre" },
                 { data: "codigo", name: "codigo" },
                 { data: "monto_promo", name: "monto_promo" },
-                { data: "fecha_inicio", name: "fecha_inicio", render: function(data, type, row) {
-        if (!data) return '';
-        const fecha = new Date(data);
-        const dia = String(fecha.getDate()+1).padStart(2, '0');
-        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-        const anio = fecha.getFullYear();
-        return `${dia}/${mes}/${anio}`;
-    }},
-                { data: "fecha_fin", name: "fecha_fin",render: function(data, type, row) {
-        if (!data) return '';
-        const fecha = new Date(data);
-        const dia = String(fecha.getDate()+1).padStart(2, '0');
-        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-        const anio = fecha.getFullYear();
-        return `${dia}/${mes}/${anio}`;
-    } },
-                { 
-                    data: "estado", 
+                {
+                    data: "fecha_inicio",
+                    name: "fecha_inicio",
+                    render: function (data, type, row) {
+                        return moment(data).format('DD/MM/YYYY');
+                    }
+                },
+                {
+                    data: "fecha_fin", name: "fecha_fin", render: function (data, type, row) {
+                        return moment(data).format('DD/MM/YYYY');
+                    }
+                },
+                {
+                    data: "estado",
                     name: "estado",
                     render: function (data, type, row) {
                         let estado = data === 1 ? 'Vigente' : 'No vigente';
@@ -246,11 +242,11 @@
                     className: "text-center align-middle",
                 },
                 {
-                    targets: [1, 2, 3],
+                    targets: [1, 2, 3, 4, 5, 6, 7],
                     className: 'align-middle',
                 },
                 {
-                    targets: [3],
+                    targets: [7],
                     orderable: false,
                     width: '10%',
                 },
@@ -311,7 +307,7 @@
                     contentType: "application/json",
                     success: function (response) {
                         if (response.Status === "success") {
-                            
+
                             fct_IniciarTablaTipoMetodoPago('#tbl_TipoMetodoPago');
                             toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                         } else {
@@ -320,7 +316,7 @@
                         }
                     },
                     error: function (xhr, Status, error) {
-                        toastr.error("Error en el servidor"+ error, "MENSAJE DE SISTEMA");
+                        toastr.error("Error en el servidor" + error, "MENSAJE DE SISTEMA");
                         console.error('Error:' + error);
                     }
                 });
