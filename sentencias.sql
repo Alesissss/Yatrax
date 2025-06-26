@@ -831,6 +831,16 @@ CREATE TABLE pais_sucursal (
     FOREIGN KEY (id_conf_general) REFERENCES conf_general(id)
 );
 
+
+INSERT INTO promocion (nombre, estado, fecha_inicio, fecha_fin, codigo, monto_promo)
+VALUES 
+('Promoción Verano', 1, '2025-01-12', '2025-03-23', '12345678', 50.00);
+
+INSERT INTO promocion (nombre, estado, fecha_inicio, fecha_fin, codigo, monto_promo)
+VALUES 
+('Descuento de Navidad', 1, '2025-12-12', '2025-12-25', '98765432', 30.00);
+
+
 INSERT INTO preguntas_frecuentes (pregunta, respuesta, estado, fecha_registro, usuario) VALUES ('¿Qué medios de pago
 aceptan para comprar pasajes en línea?','Aceptamos tarjetas de crédito y débito Visa, así como billeteras digitales como
 Yape y Plin.','1','2025-06-07 11:34:18','ander@gmail.com');
@@ -3430,14 +3440,7 @@ VALUES ('Billetera virtual', 1, 'luis@gmail.com');
 INSERT INTO `metodo_pago`
 (`nombre`, `logo`, `estado`, `id_tipo_metodoPago`, `qr`, `usuario`)
 VALUES
-(
-'Efectivo',
-'/Static/img/metodos_pago/logo/default_metodopago.png',
-1,
-1,
-null,
-'luis@gmail.com'
-);
+('Efectivo','/Static/img/metodos_pago/logo/default_metodopago.png',1,1,null,'luis@gmail.com');
 
 INSERT INTO `metodo_pago`
 (`nombre`, `logo`, `estado`, `id_tipo_metodoPago`, `qr`, `usuario`)

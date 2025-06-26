@@ -37,6 +37,8 @@ from Models.asiento import Asiento
 from Models.venta import Venta
 from Models.reserva import Reserva
 from Models.conf_general import ConfGeneral
+from Models.promocion import Promocion
+
 
 homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/home')
 
@@ -114,7 +116,8 @@ def index():
     
     datos_recibidos = {
         "servicios":Servicio.obtener_todos(),
-        "contenido_venta": renderizarCompra()
+        "contenido_venta": renderizarCompra(),
+        "promociones": Promocion.obtener_todos_activos()
     }
     return render_template('Ecommerce/home/home.html', active_page="home",datos=datos_recibidos)
 
