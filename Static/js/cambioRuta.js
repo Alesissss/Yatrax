@@ -15,7 +15,7 @@ const CONFIG = {
         API_PERSONA: '/ecommerce/home/api/get_persona_data',
         API_SUNAT: '/ecommerce/home/api/get_persona_data',
         METODOS: '/ecommerce/home/cargar_metodos',
-        PROCESAR_PAGO: '/ecommerce/home/procesar_pago',
+        PROCESAR_PAGO: '/ecommerce/home/procesar_pago_x',
         MARCAR_ASIENTO_OCUPADO: '/ecommerce/home/ocuparAsiento',
         MARCAR_ASIENTO_DISPONIBLE: '/ecommerce/home/liberarAsiento',
         DATOS_CAMBIORUTA: '/ecommerce/home/cambiarEstadoPasaje'
@@ -2150,7 +2150,6 @@ const PaymentManager = {
             this.procesarPago();
         });
     },
-
     async procesarPago() {
         if (!this.validarFormularioCompleto()) {
             toastr.error("Por favor complete todos los campos requeridos");
@@ -2196,6 +2195,7 @@ const PaymentManager = {
 
             if (resultado.Status === 'success') {
                 this.mostrarPagoExitoso(resultado);
+                
             } else {
                 throw new Error(resultado.Msj || 'Error en el procesamiento del pago');
             }
