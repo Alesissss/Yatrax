@@ -391,6 +391,9 @@
           if (data.Status === "success") {
             toastr.success("Registro exitoso"+ (data.Msj || data.Msj2));
             form.reset();
+            setTimeout(() => {
+                      window.location.href = "/ecommerce/home/inicio";
+                    }, 500);
           } else {
             toastr.error("❌ Error: " + (data.Msj || data.Msj2));
           }
