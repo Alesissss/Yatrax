@@ -502,6 +502,14 @@
                                     </a>
                                 </li>
 
+                                <li class="nav-item">
+                                    <a href="{{ url_for('configuracion.Menu_Empresa') }}"
+                                        class="nav-link {% if active_page == 'empresas' %}active{% endif %}">
+                                        <i class="bi bi-building nav-icon"></i>
+                                        <p>Gestionar empresa</p>
+                                    </a>
+                                </li>
+
                             </ul>
                         </li>
                         {% endif %}

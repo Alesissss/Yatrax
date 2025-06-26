@@ -370,7 +370,7 @@ def referenciar_pasaje():
             return jsonify({'Status': 'error', 'Msj': 'No se encontró el pasaje con el comprobante proporcionado.'})
         execute = Pasaje.actualizar_id_pasaje_ultimo()    
     except Exception as e:
-        return jsonify({'Status': 'error', 'Msj': f'Ocurrió un error al referenciar el pasaje: {repr(e)}'})
+        return jsonify({'Status': 'error', 'Msj': f'Ocurrió un error al referenciar el pasaje : {repr(e)}'})
     
 
 # END REGIÓN CAMBIO DE RUTA #

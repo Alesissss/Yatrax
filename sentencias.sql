@@ -65,6 +65,10 @@ DROP PROCEDURE IF EXISTS SP_DARBAJA_PERSONAL_INCIDENCIA;
 DROP PROCEDURE IF EXISTS SP_REGISTRAR_PERSONAL_INCIDENCIA;
 DROP PROCEDURE IF EXISTS SP_EDITAR_PERSONAL_INCIDENCIA;
 DROP PROCEDURE IF EXISTS SP_ACTUALIZAR_CLIENTE;
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_EMPRESA;
+DROP PROCEDURE IF EXISTS SP_EDITAR_EMPRESA;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_EMPRESA;
+DROP PROCEDURE IF EXISTS SP_ACTIVAR_EMPRESA;
 
 DROP PROCEDURE IF EXISTS SP_ELIMINAR_ASIENTO;
 DROP PROCEDURE IF EXISTS SP_DARALTA_ASIENTO;
@@ -3920,6 +3924,160 @@ BEGIN
         UPDATE terminos_condiciones SET estado = 1 WHERE id = P_ID;
 
         SET @MSJ = 'Se activó correctamente el término y condición';
+    END IF;
+END $$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE SP_REGISTRAR_EMPRESA(
+    IN P_RAZON_SOCIAL VARCHAR(255),
+    IN P_RUC VARCHAR(11),
+    IN P_DIRECCION VARCHAR(255),
+    IN P_TELEFONO VARCHAR(15),
+    IN P_EMAIL VARCHAR(255),
+    IN P_USUARIO VARCHAR(100)
+)
+BEGIN
+    DECLARE cRuc INT;
+    DECLARE cEmail INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cRuc FROM empresa WHERE ruc = P_RUC;
+    SELECT COUNT(*) INTO cEmail FROM empresa WHERE email = P_EMAIL;
+
+    IF cRuc > 0 THEN
+        SET @MSJ2 = 'El RUC ya está registrado en una empresa';
+    ELSEIF cEmail > 0 THEN
+        SET @MSJ2 = 'El correo electrónico ya está registrado en una empresa';
+    ELSE
+        INSERT INTO empresa (
+            razon_social, ruc, direccion, telefono, email, estado, usuario
+        ) VALUES (
+            P_RAZON_SOCIAL, P_RUC, P_DIRECCION, P_TELEFONO, P_EMAIL, 0, P_USUARIO
+        );
+
+        SET @MSJ = 'Empresa registrada correctamente';
+    END IF;
+END $$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE SP_EDITAR_EMPRESA(
+    IN P_ID INT,
+    IN P_RAZON_SOCIAL VARCHAR(255),
+    IN P_RUC VARCHAR(11),
+    IN P_DIRECCION VARCHAR(255),
+    IN P_TELEFONO VARCHAR(15),
+    IN P_EMAIL VARCHAR(255),
+    IN P_USUARIO VARCHAR(100)
+)
+BEGIN
+    DECLARE cEmpresa INT;
+    DECLARE cRuc INT;
+    DECLARE cEmail INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cEmpresa FROM empresa WHERE id = P_ID;
+    SELECT COUNT(*) INTO cRuc FROM empresa WHERE ruc = P_RUC AND id != P_ID;
+    SELECT COUNT(*) INTO cEmail FROM empresa WHERE email = P_EMAIL AND id != P_ID;
+
+    IF cEmpresa <= 0 THEN
+        SET @MSJ2 = 'La empresa que intenta editar no existe';
+    ELSEIF cRuc > 0 THEN
+        SET @MSJ2 = 'El RUC ingresado ya está registrado en otra empresa';
+    ELSEIF cEmail > 0 THEN
+        SET @MSJ2 = 'El correo electrónico ingresado ya está registrado en otra empresa';
+    ELSE
+        UPDATE empresa
+        SET razon_social = P_RAZON_SOCIAL,
+            ruc = P_RUC,
+            direccion = P_DIRECCION,
+            telefono = P_TELEFONO,
+            email = P_EMAIL,
+            usuario = P_USUARIO
+        WHERE id = P_ID;
+
+        SET @MSJ = 'Empresa editada correctamente';
+    END IF;
+END $$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE SP_ELIMINAR_EMPRESA(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cEmpresa INT;
+    DECLARE flagEstado BOOLEAN;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cEmpresa FROM empresa WHERE id = P_ID;
+    SELECT estado INTO flagEstado FROM empresa WHERE id = P_ID;
+
+    IF cEmpresa <= 0 THEN
+        SET @MSJ2 = 'La empresa que intenta eliminar no existe';
+    ELSEIF flagEstado = 1 THEN
+        SET @MSJ2 = 'La empresa ya está activada y no puede ser eliminada';
+    ELSE
+        DELETE FROM empresa WHERE id = P_ID;
+        SET @MSJ = 'Empresa eliminada correctamente';
+    END IF;
+
+END $$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE SP_ACTIVAR_EMPRESA(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cEmpresa INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cEmpresa FROM empresa WHERE id = P_ID;
+
+    IF cEmpresa <= 0 THEN
+        SET @MSJ2 = 'La empresa que intenta activar no existe';
+    ELSE
+        UPDATE empresa SET estado = 0 ;
+        UPDATE empresa SET estado = 1 WHERE id = P_ID;
+        SET @MSJ = 'Empresa activada correctamente';
     END IF;
 END $$
 
