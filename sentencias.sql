@@ -495,7 +495,8 @@ CREATE TABLE conf_general (
     viajesReprogramables BOOLEAN NOT NULL,
     max_dias_vigencia_reprogramacion INT NOT NULL,
     precioCambioRuta DECIMAL(9,2) NOT NULL,
-    precioTransferencia DECIMAL(9,2) NOT NULL
+    precioTransferencia DECIMAL(9,2) NOT NULL,
+    horaTransaccion INT NOT NULL
 );
 
 -- Crear tabla menus
@@ -3113,7 +3114,7 @@ INSERT INTO usuarios (id, id_personal, email, password, imagen, estado, id_tipou
 '/Static/img/trabajadores/luis.jpg', 1, 1,'2025-03-06 20:06:14','SYSTEM');
 
 -- Tabla de configuración general
-INSERT INTO conf_general (id, igv, precioPasajeLibre, max_pasajes_venta, tiempo_maximo_venta_minutos, viajesReprogramables, max_dias_vigencia_reprogramacion, precioCambioRuta, precioTransferencia) VALUES (1, 0.18, 50, 4, 10, 0, 7, 50, 50);
+INSERT INTO conf_general (id, igv, precioPasajeLibre, max_pasajes_venta, tiempo_maximo_venta_minutos, viajesReprogramables, max_dias_vigencia_reprogramacion, precioCambioRuta, precioTransferencia, horaTransaccion) VALUES (1, 0.18, 50, 4, 10, 0, 7, 50, 50, 4);
 
 -- Tabla menus
 INSERT INTO conf_menus (id, nombre, estado) VALUES (1, 'M_USUARIOS', 1);
@@ -3426,10 +3427,10 @@ INSERT INTO cliente (
 ('60594837', 'SEBASTIAN', 'CELIZ', 'GUERRERO', 1, '2010-09-30', 'AV. BRASIL 101', '94435638', 'sebastian@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'ADMIN');
 
 INSERT INTO `tipo_comprobante` (`nombre`, `estado`, `usuario`)
-VALUES ('boleta', 1, 'alexis@gmail.com');
+VALUES ('Boleta', 1, 'alexis@gmail.com');
 
 INSERT INTO `tipo_comprobante` (`nombre`, `estado`, `usuario`)
-VALUES ('factura', 1, 'alexis@gmail.com');
+VALUES ('Factura', 1, 'alexis@gmail.com');
 
 INSERT INTO `tipo_metodopago` (`nombre`, `estado`, `usuario`)
 VALUES ('Efectivo', 1, 'alexis@gmail.com');
@@ -8111,7 +8112,8 @@ CREATE PROCEDURE SP_MODIFICAR_CONF_GENERAL(
     IN P_VIAJES_REPROGRAMABLES INT,
     IN P_DIAS_REPROGRAMACION INT,
     IN P_PRECIO_CAMBIO_RUTA DECIMAL(9,2),
-    IN P_PRECIO_TRANSFERENCIA DECIMAL(9,2)
+    IN P_PRECIO_TRANSFERENCIA DECIMAL(9,2),
+    IN P_HORA_TRANSACCION INT
 )
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -8131,7 +8133,8 @@ BEGIN
             viajesReprogramables = P_VIAJES_REPROGRAMABLES,
             max_dias_vigencia_reprogramacion = P_DIAS_REPROGRAMACION,
             precioCambioRuta = P_PRECIO_CAMBIO_RUTA,
-            precioTransferencia = P_PRECIO_TRANSFERENCIA;
+            precioTransferencia = P_PRECIO_TRANSFERENCIA,
+            horaTransaccion = P_HORA_TRANSACCION;
 
         SET @MSJ = 'Configuración general modificada correctamente';
     ELSE

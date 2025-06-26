@@ -107,6 +107,19 @@
                             </div>
                             </div>
                         </div>
+                        <!-- Horas antes de un viaje para transacciones -->
+                        <div class="col-md-12 mb-3">
+                            <label for="txt_HorasAntesViaje">Hora para transacciones antes de un viaje</label>
+                            <div class="input-group">
+                                <input type="number" id="txt_HorasAntesViaje" class="form-control"
+                                    placeholder="Hora para transacciones antes de un viaje" min="0" step="1"
+                                    value="{{ conf_general.horaTransaccion }}">
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><i class="fas fa-clock"></i></div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="col-md-12 text-center">
                             <button id="{{ btnId }}" type="button" class="btn btn-primary">Guardar</button>
                         </div>
@@ -129,8 +142,9 @@
             let diasVigentesReprogramacion = $('#txt_DiasVigenciaReprogramacion').val();
             let precioCambioRuta = $('#txt_PrecioCambioRuta').val();
             let precioTransferencia = $('#txt_PrecioTransferencia').val();
+            let horaTransaccion = $('#txt_HorasAntesViaje').val();
 
-            if (!igv || !precioPasajeLibre || !maxPasajesVenta || !tiempoMaximoVenta || !viajesReprogramables || !diasVigentesReprogramacion || !precioCambioRuta || !precioTransferencia) {
+            if (!igv || !precioPasajeLibre || !maxPasajesVenta || !tiempoMaximoVenta || !viajesReprogramables || !diasVigentesReprogramacion || !precioCambioRuta || !precioTransferencia || !horaTransaccion) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
@@ -162,6 +176,7 @@
                     formData.append("diasVigentes", diasVigentesReprogramacion);
                     formData.append("precioCambioRuta", precioCambioRuta);
                     formData.append("precioTransferencia", precioTransferencia);
+                    formData.append("horaTransaccion", horaTransaccion);
 
                     $.ajax({
                         url: "/trabajadores/configuracion/EditarConfiguracionGeneral",

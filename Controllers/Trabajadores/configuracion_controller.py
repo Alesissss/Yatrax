@@ -1156,8 +1156,9 @@ def editar_configuracion():
             dias_vigentes = request.form.get("diasVigentes").strip()
             precioCambioRuta = request.form.get("precioCambioRuta").strip()
             precioTransferencia = request.form.get("precioTransferencia").strip()
+            horaTransaccion = request.form.get("horaTransaccion", "").strip()
 
-            mensajes = ConfGeneral.modificar(igv, precioPasajeLibre, max_pasajes_venta, tiempo_maximo_venta_minutos, viajes_reprogramables, dias_vigentes, precioCambioRuta, precioTransferencia)
+            mensajes = ConfGeneral.modificar(igv, precioPasajeLibre, max_pasajes_venta, tiempo_maximo_venta_minutos, viajes_reprogramables, dias_vigentes, precioCambioRuta, precioTransferencia, horaTransaccion)
 
             msj1 = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
