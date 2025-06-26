@@ -2600,7 +2600,7 @@ const PaymentManager = {
                 <h1 style="color: #155724; margin-bottom: 20px; font-weight: bold;">¡Pago Confirmado!</h1>
                 <h4 style="color: #155724; margin-bottom: 15px;">Código de confirmación: <strong>${resultado.codigo_confirmacion || 'PAY-' + Date.now()}</strong></h4>
                 <p style="color: #155724; font-size: 18px; margin-bottom: 30px;">
-                    Su reserva ha sido procesada exitosamente.<br>
+                    Su operación ha sido procesada exitosamente.<br>
                     Recibirá un correo de confirmación en ${this.datosContacto.email || 'su email'}
                 </p>
                 <button id="btn_nueva_reserva" class="btn btn-success btn-lg" style="margin-right: 15px;">
