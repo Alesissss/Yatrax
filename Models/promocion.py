@@ -20,6 +20,20 @@ class Promocion:
             """)
         finally:
             conexion.cerrar()
+            
+    @classmethod
+    def obtener_todos_activos(cls):
+        conexion = bd.Conexion()
+        try:
+            return conexion.obtener("""
+                SELECT id, nombre, estado, fecha_inicio, fecha_fin, codigo, monto_promo , CURDATE()
+                FROM promocion
+                where estado = 1 and
+                fecha_fin >= CURDATE() AND
+                fecha_inicio <= CURDATE()
+            """)
+        finally:
+            conexion.cerrar()
 
     @classmethod
     def obtener_por_id(cls, id):

@@ -24,7 +24,7 @@ class Viaje:
     def obtener_todos(cls):
         conexion = bd.Conexion()
         try:
-            viajes = conexion.obtener(""" SELECT v.id, v.idRuta, v.estado, v.idEstadoViaje, ev.nombre AS estado_viaje, r.nombre AS ruta, 
+            viajes = conexion.obtener(""" SELECT v.id, v.idRuta, v.estado, v.idEstadoViaje, ev.nombre AS estado_viaje, r.nombre AS ruta, v.idSucursalActual,
                 r.tipo AS tipo_ruta, tv.id_servicio, s.nombre AS servicio, CONCAT(tv.nombre, ' - ', ve.placa) AS vehiculo, 
                 v.esReprogramado, v.fechaHoraSalida, v.fechaHoraLlegada
                 FROM viaje v
@@ -42,7 +42,7 @@ class Viaje:
     def obtener_por_id(cls, viaje_id):
         conexion = bd.Conexion()
         try:
-            viaje = conexion.obtener(""" SELECT v.id, v.idRuta, v.estado, v.idEstadoViaje, ev.nombre AS estado_viaje, r.nombre AS ruta, 
+            viaje = conexion.obtener(""" SELECT v.id, v.idRuta, v.estado, v.idEstadoViaje, ev.nombre AS estado_viaje, r.nombre AS ruta, v.idSucursalActual,
                 r.tipo AS tipo_ruta, tv.id_servicio, s.nombre AS servicio, CONCAT(tv.nombre, ' - ', ve.placa) AS vehiculo, 
                 v.esReprogramado, v.fechaHoraSalida, v.fechaHoraLlegada
                 FROM viaje v
@@ -129,6 +129,52 @@ class Viaje:
             conexion.cerrar()
 
     @classmethod
+    def actualizar_fechas_detalles(cls, viaje_id):
+        try:
+            conexion = bd.Conexion()
+
+            idSucursalSiguiente = conexion.obtener(""" select e.idsucursal as id
+                from escala e 
+                inner join ruta r on r.id = e.idRuta
+                inner join viaje v on v.idRuta = r.id
+                where v.id = %s
+                AND nro_orden - 1 = (select e.nro_orden
+                FROM escala e
+                inner join ruta r on r.id = e.idRuta
+                inner join viaje v on v.idRuta = r.id
+                where e.idSucursal = v.idSucursalActual
+                and v.id = %s) """, (viaje_id, viaje_id,))[0]['id']
+            
+            conexion.ejecutar(""" UPDATE detalle_viaje
+                SET fechaLlegadaReal = NOW()
+                WHERE idViaje = %s
+                AND idSucursalDestino = (
+                    SELECT s.id
+                    FROM sucursal s WHERE id = %s
+                )
+                """, (viaje_id, idSucursalSiguiente,), auto_commit=False)
+            
+            conexion.ejecutar(""" UPDATE detalle_viaje
+                SET fechaSalidaReal = NOW()
+                WHERE idViaje = %s
+                AND idSucursalOrigen = (
+                    SELECT s.id
+                    FROM sucursal s WHERE id = %s
+                )
+                """, (viaje_id, idSucursalSiguiente,), auto_commit=False)
+            
+            conexion.ejecutar(""" UPDATE viaje SET idSucursalActual = %s WHERE id = %s""", (idSucursalSiguiente, viaje_id,), auto_commit=False)
+            conexion.conn.commit()
+            return {'@MSJ': 'Actualización de escala exitosa', '@MSJ2': ''}
+        except Exception as e:
+            # Si algo falla, hacemos un rollback
+            conexion.conn.rollback()
+            return {'@MSJ': '', '@MSJ2': f'Error al ejecutar la transacción de actualizar la escala : {str(e)}'}
+
+        finally:
+            conexion.cerrar()
+
+    @classmethod
     def obtener_personal_viaje(cls, viaje_id):
         try:
             conexion = bd.Conexion()
@@ -179,7 +225,7 @@ class Viaje:
         except Exception as e:
             # Si algo falla, hacemos un rollback
             conexion.conn.rollback()
-            return {'@MSJ': '', '@MSJ2': f'Error al ejecutar la transacción de registro de viaje: {repr(e)}'}
+            return {'@MSJ': '', '@MSJ2': f'Error al ejecutar la transacción de registro de viaje: {str(e)}'}
 
         finally:
             # Cerramos la conexión
@@ -547,6 +593,22 @@ class Viaje:
             conexion = bd.Conexion()
 
             conexion.ejecutar(""" UPDATE viaje SET idEstadoViaje = %s WHERE id = %s""", (idEstadoViaje, id,), auto_commit=False)
+
+            if int(idEstadoViaje) == 2:
+                idSucursal = conexion.obtener(""" SELECT s.id AS id
+                    FROM viaje v
+                    INNER JOIN ruta r ON v.idRuta = r.id
+                    INNER JOIN escala e ON e.idRuta = r.id
+                    INNER JOIN sucursal s ON s.id = e.idSucursal
+                    WHERE e.nro_orden = 1 AND v.id = %s""", (id,))[0]['id']
+
+
+                conexion.ejecutar(""" UPDATE detalle_viaje dv 
+                    SET fechaSalidaReal = NOW() 
+                    WHERE dv.idViaje = %s AND dv.idSucursalOrigen = 
+                    (%s)""", (id, idSucursal,), auto_commit=False)
+                
+                conexion.ejecutar(""" UPDATE viaje SET idSucursalActual = %s WHERE id = %s""", (idSucursal, id,), auto_commit=False)
 
             conexion.conn.commit()
             return {'@MSJ': 'Viaje cambiado de estado correctamente', '@MSJ2': ''}

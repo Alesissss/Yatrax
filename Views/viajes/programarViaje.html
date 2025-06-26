@@ -39,6 +39,7 @@
                                 <th class="text-center">FECHA LLEGADA ESTIMADA</th>
                                 <th class="text-center">ID ESTADO VIAJE</th>
                                 <th class="text-center">ESTADO DE VIAJE</th>
+                                <th class="text-center">ESCALA ACTUAL</th>
                                 <th class="text-center">ESTADO</th>
                                 <th class="text-center">ACCIÓN</th>
                             </tr>
@@ -148,6 +149,57 @@
             }
         });
 
+    });
+
+    $(document).on('change', '.escala-select', function () {
+        const id = $(this).data('id');
+        const prevValue = $(this).data('prev');
+
+        let formData = new FormData();
+        formData.append('id', id);
+
+        Swal.fire({
+            title: "¿Estás seguro?",
+            text: "Esta acción cambiará de escala al viaje. ¿Deseas continuar?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sí, cambiar escala",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/trabajadores/viajes/CambiarEscalaViaje',
+                    type: "POST",
+                    processData: false,
+                    contentType: false,
+                    data: formData,
+                    success: function (response) {
+                        if (response.Status === "success") {
+                            if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                return;
+                            }
+                            fct_IniciarTablaViajes('#tbl_Viajes');
+                            toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                        } else {
+                            toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                            console.error('Error: ' + response.Msj);
+                            $(this).val(prevValue);
+                        }
+                    },
+                    error: function (xhr, Status, error) {
+                        toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                        console.error('Error:' + error);
+                        $(this).val(prevValue);
+                    },
+                });
+            } else {
+                $(this).val(prevValue);
+            }
+        });
     });
 
     $(document).on('change', '.estado-select', function () {
@@ -383,6 +435,49 @@
                     }
                 },
                 {
+                    data: null,
+                    name: "escala_actual",
+                    render: function (data, type, row) {
+                        if (data.idEstadoViaje === 1) {
+                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge fs-5" style="background-color: #800080; color: white;">Viaje no iniciado</span></h5>`;
+                        } else if (data.idEstadoViaje === 3) {
+                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-danger fs-5">Viaje finalizado</span></h5>`;
+                        }else if (data.idEstadoViaje === 2) {
+                            if (!data.escalas.length) return `<span>Cargando...</span>`;
+
+                            let idSucursalActual = data.idSucursalActual;
+                            let nro_orden_actual;
+
+                            const escalaActual = data.escalas.find(e => e.idSucursal === idSucursalActual);
+                            if (escalaActual) {
+                                nro_orden_actual = escalaActual.nro_orden;
+                            }
+
+                            let options = '';
+
+                            if (false) {
+                                $.each(data.escalas, function (index, item) {
+                                    options += `<option value="${item.idSucursal}" data-orden="${item.nro_orden}">${item.nombre}</option>`;
+                                });
+
+                                return `<select class="form-control escala-select" data-id="${row.id}">${options}</select>`;
+                            } else {
+                                $.each(data.escalas, function (index, item) {
+                                    if (item.nro_orden < nro_orden_actual) {
+                                        return true;
+                                    }
+
+                                    if (item.nro_orden === nro_orden_actual || item.nro_orden === nro_orden_actual + 1) {
+                                        options += `<option value="${item.idSucursal}" data-orden="${item.nro_orden}">${item.nombre}</option>`;
+                                    }
+                                });
+
+                                return `<select class="form-control escala-select" data-prev=${idSucursalActual} data-id="${row.id}">${options}</select>`;
+                            }
+                        }
+                    }
+                },
+                {
                     data: "estado",
                     name: "estado",
                     render: function (data, type, row) {
@@ -418,11 +513,11 @@
                     className: "text-center align-middle",
                 },
                 {
-                    targets: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                    targets: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
                     className: 'align-middle',
                 },
                 {
-                    targets: [10],
+                    targets: [11],
                     orderable: false,
                     width: '10%',
                 },
@@ -504,78 +599,78 @@
     }
 
     function fct_ViajeDarBaja(Id) {
-    $.ajax({
-        url: `/trabajadores/viajes/PrevisualizarDarBaja/${Id}`,
-        type: "GET",
-        success: function (response) {
-            if (response.Status === "success") {
-                const mensaje = response.Msj || "¿Deseas continuar con esta acción?";
-                Swal.fire({
-                    title: "¿Estás seguro?",
-                    text: mensaje,
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#3085d6",
-                    cancelButtonColor: "#d33",
-                    confirmButtonText: "Sí, dar de baja",
-                    cancelButtonText: "Cancelar",
-                    reverseButtons: true
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // ahora sí ejecutamos la baja real
-                        $.ajax({
-                            url: `/trabajadores/viajes/DarBajaViaje/${Id}`,
-                            type: "POST",
-                            contentType: "application/json",
-                            success: function (res) {
-                                if (res.Status === "success") {
-                                    if (res.Msj2) {
-                                        toastr.warning(res.Msj2, 'MENSAJE DE SISTEMA');
-                                    } else {
-                                        toastr.success(res.Msj, "MENSAJE DE SISTEMA");
-                                        fct_IniciarTablaViajes('#tbl_Viajes');
-                                        if (mensaje=="¿Estas seguro de dar de baja este viaje? Este viaje tiene pasajes vendidos, se habilitara la opción de reembolso para los clientes afectados."){
-                                            datos ={
-                                            idViaje:Id
-                                        }
-                                         $.ajax({
-                                            url: "/ecommerce/home/enviar_correos_darBaja_Viaje",
-                                            type: "POST",
-                                            contentType: "application/json",
-                                            data: JSON.stringify(datos),
-                                            success: function (response) {
-                                                if (response.status == 'ok') {
-                                                    toastr.success("Correos enviados correctamente", 'MENSAJE DE SISTEMA');
-                                                    return;
-                                                } else {
-                                                    toastr.error("OCurrio algo inesperado al intentar enviar los correos", "MENSAJE DE SISTEMA");
+        $.ajax({
+            url: `/trabajadores/viajes/PrevisualizarDarBaja/${Id}`,
+            type: "GET",
+            success: function (response) {
+                if (response.Status === "success") {
+                    const mensaje = response.Msj || "¿Deseas continuar con esta acción?";
+                    Swal.fire({
+                        title: "¿Estás seguro?",
+                        text: mensaje,
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#3085d6",
+                        cancelButtonColor: "#d33",
+                        confirmButtonText: "Sí, dar de baja",
+                        cancelButtonText: "Cancelar",
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // ahora sí ejecutamos la baja real
+                            $.ajax({
+                                url: `/trabajadores/viajes/DarBajaViaje/${Id}`,
+                                type: "POST",
+                                contentType: "application/json",
+                                success: function (res) {
+                                    if (res.Status === "success") {
+                                        if (res.Msj2) {
+                                            toastr.warning(res.Msj2, 'MENSAJE DE SISTEMA');
+                                        } else {
+                                            toastr.success(res.Msj, "MENSAJE DE SISTEMA");
+                                            fct_IniciarTablaViajes('#tbl_Viajes');
+                                            if (mensaje == "¿Estas seguro de dar de baja este viaje? Este viaje tiene pasajes vendidos, se habilitara la opción de reembolso para los clientes afectados.") {
+                                                datos = {
+                                                    idViaje: Id
                                                 }
-                                            },
-                                            error: function (xhr, status, error) {
-                                                toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                                                $.ajax({
+                                                    url: "/ecommerce/home/enviar_correos_darBaja_Viaje",
+                                                    type: "POST",
+                                                    contentType: "application/json",
+                                                    data: JSON.stringify(datos),
+                                                    success: function (response) {
+                                                        if (response.status == 'ok') {
+                                                            toastr.success("Correos enviados correctamente", 'MENSAJE DE SISTEMA');
+                                                            return;
+                                                        } else {
+                                                            toastr.error("OCurrio algo inesperado al intentar enviar los correos", "MENSAJE DE SISTEMA");
+                                                        }
+                                                    },
+                                                    error: function (xhr, status, error) {
+                                                        toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                                                    }
+                                                });
                                             }
-                                        });
                                         }
+                                    } else {
+                                        toastr.error(res.Msj, "MENSAJE DE SISTEMA");
                                     }
-                                } else {
-                                    toastr.error(res.Msj, "MENSAJE DE SISTEMA");
+                                },
+                                error: function () {
+                                    toastr.error("Error al conectar con el servidor", "MENSAJE DE SISTEMA");
                                 }
-                            },
-                            error: function () {
-                                toastr.error("Error al conectar con el servidor", "MENSAJE DE SISTEMA");
-                            }
-                        });
-                    }
-                });
-            } else {
-                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                            });
+                        }
+                    });
+                } else {
+                    toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                }
+            },
+            error: function () {
+                toastr.error("Error al obtener información previa", "MENSAJE DE SISTEMA");
             }
-        },
-        error: function () {
-            toastr.error("Error al obtener información previa", "MENSAJE DE SISTEMA");
-        }
-    });
-}
+        });
+    }
 
 
     function newexportaction(e, dt, button, config) {
