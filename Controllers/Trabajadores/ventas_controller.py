@@ -14,6 +14,7 @@ from Models.pais import Pais
 from Models.pasaje import Pasaje
 from Models.herramienta import Herramienta
 from Models.venta import Venta
+from Models.Reportes import Reporte
 
 ventas_bp = Blueprint('ventas', __name__, url_prefix='/trabajadores/ventas')
 
@@ -55,6 +56,14 @@ def renderizar_itinerario():
     return jsonify({'html': html_renderizado})
 
 # END AUXILIARES
+
+@ventas_bp.route("/obtenerVentasxServicio")
+def obtenerVentasxServicio():
+    try:
+        cantidad = Reporte.cantidadIngresosxServicio()
+        return cantidad
+    except Exception as e:
+        return repr(e)
 
 @ventas_bp.route('/GestionarTipoCliente')
 def Menu_TipoClientes():
