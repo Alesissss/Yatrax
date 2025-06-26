@@ -449,6 +449,8 @@ const ItineraryManager = {
                 const btn = event.target;
                 console.log(`🎯 Click detectado en botón: ${btn.id} para ${sufijo}`);
 
+                sessionStorage.setItem(`btn_id_${sufijo}`, btn.id);
+
                 // Prevenir ejecución múltiple
                 event.stopPropagation();
 
@@ -540,10 +542,11 @@ const ItineraryManager = {
 // =============================================================================
 
 const VehicleLayoutManager = {
+    columnas: { "1": "", "2": "" },
+    filas: { "1": "", "2": "" },
+
     async generarMatrices(idBoton, sufijo) {
         try {
-            console.log(`🎨 Generando matrices para ${idBoton} - ${sufijo}`);
-
             const response = await fetch(CONFIG.RUTAS.OBTENER_DISENO_VEHICULO, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -552,25 +555,29 @@ const VehicleLayoutManager = {
 
             const res = await response.json();
             const datos = res.data;
+            const niveles = res.niveles;
+
+            niveles.forEach(dict => {
+                this.columnas[`${dict.nroPiso}`] = dict.x;
+                this.filas[`${dict.nroPiso}`] = dict.y;
+            });
 
             const datosPiso1 = datos.filter(d => d.nroPiso == 1);
             const datosPiso2 = datos.filter(d => d.nroPiso == 2);
 
-            // ✅ CORRECCIÓN: Regenerar matriz manteniendo asientos seleccionados
             this.generarMatrizDesdeDatos(datosPiso1, 1, `${idBoton}_${sufijo}`, sufijo);
 
+            const contenedorPiso2 = document.getElementById(`contenedor_piso_2_${idBoton}_${sufijo}`);
             if (datosPiso2.length > 0) {
-                document.getElementById(`contenedor_piso_2_${idBoton}_${sufijo}`).style.display = 'block';
+                contenedorPiso2.style.display = 'block';
                 this.generarMatrizDesdeDatos(datosPiso2, 2, `${idBoton}_${sufijo}`, sufijo);
             } else {
-                document.getElementById(`contenedor_piso_2_${idBoton}_${sufijo}`).style.display = 'none';
+                contenedorPiso2.style.display = 'none';
             }
 
-            // ✅ CORRECCIÓN: Restaurar estado de asientos después de regenerar
             this.restaurarEstadoAsientos(sufijo);
 
         } catch (error) {
-            console.error("Error detallado:", error);
             toastr.error("Error al cargar el diseño del vehículo");
         }
     },
@@ -580,22 +587,21 @@ const VehicleLayoutManager = {
         if (!contenedor) return;
 
         contenedor.innerHTML = '';
-        this.configurarEstilosMatriz(contenedor);
+        this.configurarEstilosMatriz(contenedor, piso);
 
-        for (let y = 1; y <= CONFIG.GRILLA.FILAS; y++) {
-            for (let x = 1; x <= CONFIG.GRILLA.COLUMNAS; x++) {
-                // ✅ CORRECCIÓN: Pasar tipoItinerario para identificar correctamente
+        for (let y = 1; y <= this.filas[`${piso}`]; y++) {
+            for (let x = 1; x <= this.columnas[`${piso}`]; x++) {
                 const btn = this.crearElementoMatriz(datos, x, y, tipoItinerario);
                 contenedor.appendChild(btn);
             }
         }
     },
 
-    configurarEstilosMatriz(contenedor) {
+    configurarEstilosMatriz(contenedor, piso) {
         Object.assign(contenedor.style, {
             display: 'grid',
-            gridTemplateColumns: `repeat(${CONFIG.GRILLA.COLUMNAS}, 40px)`,
-            gridTemplateRows: `repeat(${CONFIG.GRILLA.FILAS}, 40px)`,
+            gridTemplateColumns: `repeat(${this.columnas[piso]}, 40px)`,
+            gridTemplateRows: `repeat(${this.filas[piso]}, 40px)`,
             padding: '10px',
             margin: '0 auto',
             width: 'max-content',
@@ -610,11 +616,7 @@ const VehicleLayoutManager = {
         );
 
         const btn = document.createElement('button');
-        Object.assign(btn.style, {
-            width: '40px',
-            height: '40px'
-        });
-
+        Object.assign(btn.style, { width: '40px', height: '40px' });
         btn.setAttribute('data-x', x);
         btn.setAttribute('data-y', y);
 
@@ -633,23 +635,17 @@ const VehicleLayoutManager = {
         btn.style.cursor = 'pointer';
 
         if (dato.tipo_herramienta === 1) {
-            // ✅ CORRECCIÓN: Verificar si el asiento ya está en nuestro control local
             const estaSeleccionadoLocalmente = SeatManager.asientosSeleccionados.has(dato.id_asiento);
 
             if (estaSeleccionadoLocalmente) {
-                // Asiento seleccionado por nosotros - verde
                 btn.className = 'border border-dark border-2 asiento-seleccionado';
                 btn.style.backgroundColor = '#28a745';
                 btn.style.color = 'white';
                 btn.innerText = dato.nombre;
-                btn.style.cursor = 'pointer';
             } else if (dato.estado === 1) {
-                // Asiento disponible - blanco con borde negro
                 btn.className = 'border border-dark border-2 bg-white';
                 btn.innerText = dato.nombre;
-                btn.style.cursor = 'pointer';
             } else {
-                // Asiento ocupado por otros - negro con texto blanco
                 btn.className = 'border border-dark border-2 bg-dark text-white';
                 btn.innerText = dato.nombre;
                 btn.style.cursor = 'not-allowed';
@@ -657,7 +653,6 @@ const VehicleLayoutManager = {
                 btn.title = 'Asiento ocupado';
             }
         } else {
-            // Otra herramienta
             this.configurarElementoHerramienta(btn, dato);
         }
     },
@@ -685,23 +680,16 @@ const VehicleLayoutManager = {
         return `<img src="/Static/${icono}" width="32" height="32" style="display: block; margin: auto;" alt="icono">`;
     },
 
-    // ✅ NUEVA FUNCIÓN: Restaurar estado visual de asientos seleccionados
     restaurarEstadoAsientos(sufijo) {
-        console.log(`🔄 Restaurando estado de asientos para ${sufijo}`);
-
-        // Restaurar estado visual de asientos seleccionados
         SeatManager.asientosSeleccionados.forEach(asientoId => {
             const btnAsiento = document.getElementById(asientoId);
             if (btnAsiento && btnAsiento.getAttribute('data-tipo') === '1') {
                 btnAsiento.classList.add("asiento-seleccionado");
                 btnAsiento.style.backgroundColor = '#28a745';
                 btnAsiento.style.color = 'white';
-
-                console.log(`✅ Asiento ${asientoId} restaurado como seleccionado`);
             }
         });
 
-        // Reinicializar eventos de selección después de regenerar
         setTimeout(() => {
             SeatManager.inicializarSeleccionAsientos(sufijo);
         }, 100);
@@ -1201,17 +1189,17 @@ const FormManager = {
         }, 0);
 
         return `
-            <div class="mb-2 fw-bold text-primary">Asiento: ${asientoNombre} (<span>S/0.00</span>)</div>
+            <div class="mb-2 fw-bold text-primary">Asiento: ${asientoNombre} (<span></span>)</div>
             <select class="form-select mb-2" id="tipo_doc_${asientoId}" disabled readonly>
             <option value="DNI">DNI</option>
             <option value="CE">CE</option>
             </select>
-            <input class="form-control mb-2" id="numeroDocNuevo_${asientoId}" placeholder="N° Documento" value="${dniValue}" readonly disabled>
+            <input type="number" class="form-control mb-2" id="numeroDocNuevo_${asientoId}" placeholder="N° Documento" value="${dniValue}" readonly disabled>
             <input class="form-control mb-2" id="nombres_${asientoId}" placeholder="Nombres" readonly disabled>
             <input class="form-control mb-2" id="apellidoPaterno_${asientoId}" placeholder="Apellido paterno" readonly disabled>
             <input class="form-control mb-2" id="apellidoMaterno_${asientoId}" placeholder="Apellido materno" readonly disabled>
             <input class="form-control mb-2" id="fechaNacimientoNuevo_${asientoId}" type="date" placeholder="Fecha nacimiento" readonly disabled>
-            <input class="form-control mb-2" id="telefono_${asientoId}" placeholder="Teléfono" readonly disabled>
+            <input type="number" class="form-control mb-2" id="telefono_${asientoId}" placeholder="Teléfono" readonly disabled>
             <div class="mb-2">
             <label class="me-2">Sexo:</label>
             <input type="radio" class="form-check-input" name="sexo-${asientoId}" id="sexoMasculino_${asientoId}" value="M" disabled readonly>
@@ -2098,7 +2086,7 @@ const PaymentManager = {
                     </div>
                     <div class="col-6">
                         <label class="form-label">Código promocional (opcional)</label>
-                        <input id="codigo_promocional" class="form-control" placeholder="Ingrese código">
+                        <input id="codigo_promocional" class="form-control" placeholder="Códigos promocionales no disponibles para cambio de ruta" disabled>
                     </div>
                 </div>
             `;
@@ -2112,7 +2100,7 @@ const PaymentManager = {
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Código promocional (opcional)</label>
-                        <input id="codigo_promocional_billetera" class="form-control" placeholder="Ingrese código promocional">
+                        <input id="codigo_promocional" class="form-control" placeholder="Códigos promocionales no disponibles para cambio de ruta" disabled>
                     </div>
                 `;
             }
@@ -2129,7 +2117,7 @@ const PaymentManager = {
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Código promocional (opcional)</label>
-                    <input id="codigo_promocional_efectivo" class="form-control" placeholder="Ingrese código promocional">
+                        <input id="codigo_promocional" class="form-control" placeholder="Códigos promocionales no disponibles para cambio de ruta" disabled>
                 </div>
             `;
         }

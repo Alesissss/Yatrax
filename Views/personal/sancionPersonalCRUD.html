@@ -93,7 +93,7 @@
             if (resPersonal && resPersonal.Status === "success") {
                 let html = '<option disabled selected>--SELECCIONAR--</option>';
                 resPersonal.data.forEach(p => {
-                    html += `<option value="${p.id}">${p.nombre}</option>`;
+                    html += `<option value="${p.id}">${p.ape_paterno} ${p.ape_materno}, ${p.nombre}</option>`;
                 });
                 $('#cbx_Personal').html(html);
             } else {

@@ -14,6 +14,7 @@ from Models.pais import Pais
 from Models.pasaje import Pasaje
 from Models.herramienta import Herramienta
 from Models.venta import Venta
+from Models.Reportes import Reporte
 
 ventas_bp = Blueprint('ventas', __name__, url_prefix='/trabajadores/ventas')
 
@@ -55,6 +56,14 @@ def renderizar_itinerario():
     return jsonify({'html': html_renderizado})
 
 # END AUXILIARES
+
+@ventas_bp.route("/obtenerVentasxServicio")
+def obtenerVentasxServicio():
+    try:
+        cantidad = Reporte.cantidadIngresosxServicio()
+        return cantidad
+    except Exception as e:
+        return repr(e)
 
 @ventas_bp.route('/GestionarTipoCliente')
 def Menu_TipoClientes():
@@ -877,11 +886,16 @@ def eliminar_tipo_documento(id):
 def get_cliente():
     try:
         tipo_doc = request.args.get('tipo_doc').strip()  # Obtener el tipo de documento del query string
-        print(f"Tipo de documento recibido: {tipo_doc}")  # Para depuración
-        clientes = Cliente.obtener_todos(tipo_doc)
-        if not clientes:
+        clientes_raw = Cliente.obtener_todos(tipo_doc)
+
+        if not clientes_raw:
             return jsonify({'data': [], 'Status': 'success', 'Msj': 'No se encontraron clientes'})
-        return jsonify({'data': clientes, 'Status': 'success', 'Msj': 'Listado de clientes retornado exitosamente'})
+
+        for cliente in clientes_raw:
+            f_nacimiento = cliente.get("f_nacimiento")
+            cliente["f_nacimiento"] = f_nacimiento.strftime("%Y-%m-%d %H:%M:%S")
+
+        return jsonify({'data': clientes_raw, 'Status': 'success', 'Msj': 'Listado de clientes retornado exitosamente'})
     except Exception as e:
         return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar clientes: {repr(e)}'})
 
@@ -937,6 +951,14 @@ def eliminar_cliente(id):  # Recibe el ID de la URL
 def editar_cliente(id):
     try:
         cliente = Cliente.obtener_por_id(id)
+
+        if cliente:
+            f_nacimiento = cliente.get("f_nacimiento")
+            if f_nacimiento and isinstance(f_nacimiento, str):
+                try:
+                    cliente["f_nacimiento"] = datetime.strptime(f_nacimiento, "%Y-%m-%d").date()
+                except ValueError:
+                    print(f"Formato de fecha inesperado: {f_nacimiento}")
 
         if request.method == 'POST':
             tipo_documento = request.form.get("tipo_documento", "").strip()

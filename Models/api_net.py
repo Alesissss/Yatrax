@@ -30,13 +30,11 @@ class ApiNetPe:
         try:
             response = requests.get(url, headers=headers, params=params, timeout=5)
         except requests.RequestException as e:
-            logging.warning(f"Request failed for token {self._api_token}: {e}")
             return None
 
         if response.status_code == 200:
             return response.json()
         else:
-            logging.warning(f"API Error {response.status_code} with token {self._api_token}: {response.text}")
             return None
 
     def get_person(self, dni: str) -> Optional[dict]:
@@ -47,7 +45,6 @@ class ApiNetPe:
             if data:
                 return data
         # Si ninguno funcionó, devuelve None
-        logging.error(f"Todos los tokens fallaron al consultar RENIEC DNI {dni}")
         return None
 
     def get_company(self, ruc: str) -> Optional[dict]:
@@ -57,5 +54,4 @@ class ApiNetPe:
             data = self._get("/v2/sunat/ruc", {"numero": ruc})
             if data:
                 return data
-        logging.error(f"Todos los tokens fallaron al consultar SUNAT RUC {ruc}")
-        return None  
+        return None

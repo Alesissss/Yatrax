@@ -4,6 +4,7 @@ from werkzeug.utils import secure_filename
 from Models.usuario import Usuario
 from Models.tipoUsuario import TipoUsuario
 from Models.personal import Personal
+from Models.Reportes import Reporte
 
 usuario_bp = Blueprint('usuario', __name__, url_prefix='/trabajadores/usuarios')
 
@@ -50,6 +51,22 @@ def TipoUsuario_Nuevo():
 
 # REGION USUARIOS
 # Función para validar el tipo de archivo
+@usuario_bp.route('/CantidadUsuariosxTipo')
+def cantidadUsuariosxTipo():
+    try:
+        datos = Reporte.cantidadUsuariosxTipo()
+        return datos
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+@usuario_bp.route('/CantidadUsuariosActivos')
+def cantidadUsuariosActivos():
+    try:
+        datos = Reporte.cantidadUsuariosActivos()
+        return datos
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 def allowed_file(filename):
     ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS

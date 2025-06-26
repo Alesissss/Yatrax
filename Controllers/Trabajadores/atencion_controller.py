@@ -30,19 +30,19 @@ def verificar_sesion():
 # VIEWS
 @atencion_bp.route('/GestionarReservas')
 def Menu_Atencion():
-    return render_template('atencion/reservas.html', active_page="ejemplo", active_menu='mAtencion')
+    return render_template('atencion/reservas.html', active_page="reservas", active_menu='mAtencion')
 
 @atencion_bp.route('/GestionarTipoReclamo')
 def Menu_TipoReclamo():
-    return render_template('atencion/tipoReclamo.html', active_page="ejemplo", active_menu='mAtencion')
+    return render_template('atencion/tipoReclamo.html', active_page="tipoReclamo", active_menu='mAtencion')
 
 @atencion_bp.route('/GestionarReclamo')
 def Menu_Reclamo():
-    return render_template('atencion/reclamo.html', active_page="ejemplo", active_menu='mAtencion')
+    return render_template('atencion/reclamo.html', active_page="reclamo", active_menu='mAtencion')
 
 @atencion_bp.route('/GestionarReembolso')
 def Menu_Reembolso():
-    return render_template('atencion/reembolso.html', active_page="ejemplo", active_menu='mAtencion')
+    return render_template('atencion/reembolso.html', active_page="reembolso", active_menu='mAtencion')
 
 # END VIEWS
 
@@ -62,6 +62,8 @@ def registrarReserva():
     if request.method == "GET":
         return render_template(
             "atencion/reservaCRUD.html",
+            active_page="reservas", 
+            active_menu='mAtencion',
             tittle="Registrar reserva",
             btnId="btn_Registrar"
         )
@@ -125,7 +127,7 @@ def eliminarReserva(id):
 @atencion_bp.route('/VerReserva/<int:idReserva>')
 def verReserva(idReserva):
     reserva = Pasaje.obtener_por_id(idReserva)
-    return render_template("atencion/reservaCRUD.html",tittle="Ver reserva",reserva=reserva,btnId="btn_Ver")
+    return render_template("atencion/reservaCRUD.html", active_page="reservas", active_menu='mAtencion', tittle="Ver reserva",reserva=reserva,btnId="btn_Ver")
 
 @atencion_bp.route('/CambiarEstado/<int:id_pasaje>', methods=["POST"])
 def cambiarEstadoPasaje(id_pasaje):
@@ -152,7 +154,7 @@ def listarTiposReclamos():
 @atencion_bp.route('/RegistrarTipoReclamo',methods=["GET","POST"])
 def registrarTipoReclamo():
     if request.method == "GET":
-        return render_template("atencion/tipoReclamoCRUD.html",tittle="Nuevo tipo reclamo",btnId="btn_Registrar")
+        return render_template("atencion/tipoReclamoCRUD.html", active_page="tipoReclamo", active_menu='mAtencion', tittle="Nuevo tipo reclamo",btnId="btn_Registrar")
     else:
         try:
             nombre = request.form["nombre"]
@@ -180,7 +182,7 @@ def registrarTipoReclamo():
 def editarTipoReclamo(idTipoReclamo):
     if request.method == "GET":
         tipo = Tipo_Reclamo.obtener_por_id(idTipoReclamo)
-        return render_template("atencion/tipoReclamoCRUD.html",tipoReclamo=tipo,tittle="Editar tipo reclamo",btnId="btn_Actualizar")
+        return render_template("atencion/tipoReclamoCRUD.html", active_page="tipoReclamo", active_menu='mAtencion', tipoReclamo=tipo,tittle="Editar tipo reclamo",btnId="btn_Actualizar")
     else:
         try:
             nombre_tipo = request.form["nombre"]
@@ -233,7 +235,7 @@ def eliminarTipoReclamo(idTipoReclamo):
 @atencion_bp.route('/verTipoReclamo/<int:idTipoReclamo>')
 def verTipoReclamo(idTipoReclamo):
     tipo = Tipo_Reclamo.obtener_por_id(idTipoReclamo)
-    return render_template("atencion/tipoReclamoCRUD.html",tipoReclamo=tipo,tittle="Ver tipo reclamo",btnId="btn_Ver")  
+    return render_template("atencion/tipoReclamoCRUD.html",active_page="tipoReclamo", active_menu='mAtencion',tipoReclamo=tipo,tittle="Ver tipo reclamo",btnId="btn_Ver")  
 
 @atencion_bp.route("/darBajaTipoReclamo/<int:idTipoReclamo>",methods=["POST"])
 def darBajaTipoReclamo(idTipoReclamo):
@@ -271,7 +273,7 @@ def listarReclamos():
 @atencion_bp.route('/RegistrarReclamo',methods=["GET","POST"])
 def registrarReclamo():
     if request.method == "GET":
-        return render_template("atencion/reclamoCRUD.html",tittle="Nuevo reclamo",btnId="btn_Registrar")
+        return render_template("atencion/reclamoCRUD.html",active_page="reclamo", active_menu='mAtencion',tittle="Nuevo reclamo",btnId="btn_Registrar")
     else:
         try:
             idTipoReclamo = int(request.form["idTipoReclamo"])
@@ -305,7 +307,7 @@ def registrarReclamo():
 def editarReclamo(idReclamo):
     if request.method == "GET":
         reclamo = Reclamo.obtener_por_id(idReclamo)
-        return render_template("atencion/reclamoCRUD.html",reclamo=reclamo,tittle="Editar reclamo",btnId="btn_Actualizar")
+        return render_template("atencion/reclamoCRUD.html",active_page="reclamo", active_menu='mAtencion',reclamo=reclamo,tittle="Editar reclamo",btnId="btn_Actualizar")
     else:
         try:
             idTipoReclamo = int(request.form["idTipoReclamo"])
@@ -361,7 +363,7 @@ def eliminarReclamo(idReclamo):
 @atencion_bp.route('/VerReclamo/<int:idReclamo>')
 def verReclamo(idReclamo):
     reclamo = Reclamo.obtener_por_id(idReclamo)
-    return render_template("atencion/reclamoCRUD.html",reclamo=reclamo,tittle="Editar reclamo",btnId="btn_Ver")
+    return render_template("atencion/reclamoCRUD.html",active_page="reclamo", active_menu='mAtencion',reclamo=reclamo,tittle="Editar reclamo",btnId="btn_Ver")
 
 @atencion_bp.route("/darBajaReclamo/<int:idReclamo>",methods=["POST"])
 def darBajaReclamo(idReclamo):

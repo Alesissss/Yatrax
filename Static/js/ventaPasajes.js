@@ -3,7 +3,7 @@
 // =============================================================================
 
 const CONFIG = {
-    MAX_ASIENTOS: 1,
+    MAX_ASIENTOS: 2,
     IGV: 0.18,
     TIEMPO_MAXIMO_COMPRA: 5, // En minutos
     RUTAS: {
@@ -842,6 +842,8 @@ const ItineraryManager = {
                 const btn = event.target;
                 event.stopPropagation();
                 VehicleLayoutManager.generarMatrices(btn.id, sufijo);
+                console.log(`🎯 Click detectado en botón: ${btn.id} para ${sufijo}`);
+                sessionStorage.setItem(`btn_id_${sufijo}`, btn.id);
             }
         });
 
@@ -1411,12 +1413,12 @@ const FormManager = {
                 <option value="DNI">DNI</option>
                 <option value="CE">CE</option>
             </select>
-            <input class="form-control mb-2" id="numeroDocNuevo_${asientoId}" placeholder="N° Documento" required>
+            <input type="number" class="form-control mb-2" id="numeroDocNuevo_${asientoId}" placeholder="N° Documento" required>
             <input class="form-control mb-2" id="nombres_${asientoId}" placeholder="Nombres" required>
             <input class="form-control mb-2" id="apellidoPaterno_${asientoId}" placeholder="Apellido paterno" required>
             <input class="form-control mb-2" id="apellidoMaterno_${asientoId}" placeholder="Apellido materno" required>
             <input class="form-control mb-2" id="fechaNacimientoNuevo_${asientoId}" type="date" placeholder="Fecha nacimiento" required>
-            <input class="form-control mb-2" id="telefono_${asientoId}" placeholder="Teléfono" type="tel" required>
+            <input type="number" class="form-control mb-2" id="telefono_${asientoId}" placeholder="Teléfono" type="tel" required>
             <div class="mb-2">
                 <label class="me-2">Sexo:</label>
                 <input type="radio" class="form-check-input" name="sexo-${asientoId}" id="sexoMasculino_${asientoId}" value="M" required> 
@@ -1426,12 +1428,12 @@ const FormManager = {
             </div>
             <input class="form-control mb-2" id="correo_${asientoId}" placeholder="Correo electrónico" type="email" required>
             <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="brazos_${asientoId}">
-                <label class="form-check-label" for="brazos_${asientoId}">Con menor en brazos</label>
+            <input class="hidden" type="checkbox" id="brazos_${asientoId}">
+            <label class="hidden" for="brazos_${asientoId}">Con menor en brazos</label>
             </div>
             <div class="form-check mb-2">
-                <input class="form-check-input" type="checkbox" id="esMenor_${asientoId}">
-                <label class="form-check-label" for="esMenor_${asientoId}">Es menor de edad</label>
+            <input class="form-check-input" type="checkbox" id="esMenor_${asientoId}" disabled>
+            <label class="form-check-label disabled" for="esMenor_${asientoId}">Es menor de edad</label>
             </div>
             <button class="btn btn-secondary w-100" disabled
                 onclick='FormManager.enviarDatosPasajero("${asientoNombre}", ${asientoId}); 
@@ -2307,7 +2309,7 @@ const PaymentManager = {
                     <strong>Instrucciones para pago en efectivo:</strong>
                     <ul class="mt-2 mb-0">
                         <li>Debe completar el pago en ventanilla dentro de las próximas 2 horas</li>
-                        <li>Presente este código de reserva: <strong id="codigo_reserva">${this.generarCodigoReserva()}</strong></li>
+                        <li>Presente el código de reserva que se le asigne</li>
                         <li>El boleto será válido una vez confirmado el pago</li>
                     </ul>
                 </div>
@@ -2370,7 +2372,7 @@ const PaymentManager = {
             const response = await fetch(CONFIG.RUTAS.PROCESAR_PAGO, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(datosCompletos)
+                body: JSON.stringify(datosCompletos) // Asegura que el body sea un string JSON
             });
 
             const resultado = await response.json();
@@ -2525,6 +2527,7 @@ const PaymentManager = {
             contacto: datosContacto,
             pago: datosPago,
             ventas: JSON.parse(sessionStorage.getItem("ventas") || "{}"),
+            
             itinerario: {
                 currentStep: AppState.currentStep,
                 itinerarioRegreso: AppState.itinerarioRegreso

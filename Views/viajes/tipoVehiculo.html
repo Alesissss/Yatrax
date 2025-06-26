@@ -162,6 +162,7 @@ endblock %} {% block content %}
           className: "btn btn-warning",
           columns: ":not(.noVis)",
         },
+        {% if "Registrar tipo vehículo" in session["claims"] %}
         {
           text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo tipo vehiculo',
           className: "btn bg-success m-1",
@@ -170,6 +171,7 @@ endblock %} {% block content %}
             fct_NuevoTipoVehiculo();
           },
         },
+        {% endif %}
       ],
       ajax: {
         url: "/trabajadores/viajes/GetData_TipoVehiculo",
@@ -218,14 +220,30 @@ endblock %} {% block content %}
           data: null,
           name: null,
           render: function (data, type, row) {
+            let editar = '{{ "Editar tipo vehículo" in session["claims"] }}';
+            let darBaja = '{{ "Dar baja tipo vehículo" in session["claims"] }}';
+            let eliminar = '{{ "Eliminar tipo vehículo" in session["claims"] }}';
+            let ver = '{{ "Ver tipo vehículo" in session["claims"] }}';
+
+            let buttons = '';
+            if (ver === "True") {
+                buttons += `<button class="btn btn-xs m-1 btn-info" onclick="fct_VerTipoVehiculo('${data.id}')" title="Ver tipo vehículo"><i class="bi bi-eye"></i></button>`;
+            }
+            if (editar === "True") {
+                buttons += `<button class="btn btn-xs m-1 btn-primary" onclick="fct_tipoVehiculoEditar('${data.id}')" title="Editar tipo vehículo"><i class="bi bi-pencil-square"></i></button>`;
+            }
+            if (darBaja === "True") {
+                buttons += `<button class="btn btn-xs m-1 btn-warning" onclick="fct_tipoVehiculoDarBaja('${data.id}')" title="Dar de baja tipo vehículo"><i class="bi bi-arrow-down-circle"></i></button>`;
+            }
+            if (eliminar === "True") {
+                buttons += `<button class="btn btn-xs m-1 btn-danger" onclick="fct_tipoVehiculoEliminar('${data.id}')" title="Eliminar tipo vehículo"><i class="bi bi-trash"></i></button>`;
+            }
+
             return `
-                        <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_VerTipoVehiculo('${data.id}')" title="Ver tipo vehiculo"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_tipoVehiculoEditar('${data.id}')" title="Editar tipo vehiculo"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_tipoVehiculoDarBaja('${data.id}')" title="Dar de baja tipo vehiculo"><i class="bi bi-arrow-down-circle"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_tipoVehiculoEliminar('${data.id}')" title="Eliminar tipo vehiculo"><i class="bi bi-trash"></i></button>
-                        </div>
-                        `;
+            <div class="flex-wrap btn-group">
+                ${buttons}
+            </div>
+            `;
           },
           className: "text-center align-middle",
         },

@@ -240,10 +240,59 @@ class Venta:
             conexion.cerrar()
 
     @classmethod
-    def consultar_empresa_activa(cls):
-        conexion = bd.Conexion()
+    def obtener_dashboard_ventas(cls):
         try:
-            lista = conexion.obtener("SELECT * FROM empresa WHERE estado = 1")
-            if lista: return lista[0]
+            conexion = bd.Conexion()
+            result = conexion.obtener(""" SELECT c.id, c.numero_documento, c.sexo, c.email, c.nombre, 
+                c.ape_paterno, c.ape_materno, v.fecha, (subtotal + igv) as totalMonto, count(p.id) as totalPasajes
+                FROM venta v 
+                INNER JOIN cliente c on v.idCliente = c.id 
+                INNER JOIN pasaje p on p.idVenta = v.id
+                WHERE p.esPasajeNormal = 1
+                GROUP BY c.id, c.numero_documento, c.sexo, c.email, c.nombre, c.ape_paterno, c.ape_materno, v.fecha, v.subtotal, v.igv """)
+            
+            return result
+        finally:
+            conexion.cerrar()
+
+            
+    @classmethod
+    def obtener_reporte_puntualidad(cls):
+        try:
+            conexion = bd.Conexion()
+            result = conexion.obtener("""
+                SELECT 
+                    ru.nombre AS ruta,
+                    CONCAT(UPPER(suo.nombre), ' - ', UPPER(suo.ciudad)) AS sucursalOrigen,
+                    CONCAT(UPPER(sud.nombre), ' - ', UPPER(sud.ciudad)) AS sucursalDestino,
+                    idViaje, 
+                    idSucursalOrigen, 
+                    idSucursalDestino, 
+                    fechaSalida, 
+                    fechaSalidaReal, 
+                    TIMESTAMPDIFF(MINUTE, fechaSalida, fechaSalidaReal) AS minDiferenciaSalida, 
+                    fechaLlegadaEstimada, 
+                    fechaLlegadaReal, 
+                    TIMESTAMPDIFF(MINUTE, fechaLlegadaEstimada, fechaLlegadaReal) AS minDiferenciaLlegada, 
+                    CASE 
+                        WHEN fechaSalida = fechaSalidaReal THEN 'Puntual' 
+                        ELSE 'Retraso' 
+                    END AS PuntualidadSalida, 
+                    CASE 
+                        WHEN fechaLlegadaEstimada = fechaLlegadaReal THEN 'Puntual' 
+                        ELSE 'Retraso' 
+                    END AS PuntualidadLlegada
+                FROM 
+                    detalle_viaje dv
+                INNER JOIN 
+                    viaje vi ON vi.id = dv.idViaje
+                INNER JOIN 
+                    ruta ru ON ru.id = vi.idRuta
+                INNER JOIN 
+                    sucursal suo ON suo.id = dv.idSucursalOrigen
+                INNER JOIN 
+                    sucursal sud ON sud.id = dv.idSucursalDestino;
+            """)
+            return result
         finally:
             conexion.cerrar()

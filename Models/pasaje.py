@@ -151,19 +151,82 @@ class Pasaje:
                 conexion.cerrar()
 
     @classmethod
-    def detalle_viaje(cls, id_detalle_asiento):
+    def detalle_viaje(cls, id_detalle_asiento, idDetalle_Viaje):
         conexion = None
         try:
             conexion = bd.Conexion()
-            sql = """SELECT dv.id AS id_detalle_viaje, dv.fechaSalida, dv.fechaLlegadaEstimada, 
-                            so.nombre AS origen, sd.nombre AS destino, so.ciudad AS ciudad_origen, 
-                            sd.ciudad AS ciudad_destino
-                     FROM detalle_viaje_asiento dva
-                     JOIN detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
-                     JOIN sucursal so ON dv.idSucursalOrigen = so.id
-                     JOIN sucursal sd ON dv.idSucursalDestino = sd.id
-                     WHERE dva.id = %s;"""
-            return conexion.obtener(sql, (id_detalle_asiento,))
+            sql = """SELECT
+                            dv.id AS id_detalle_viaje, 
+                            dv.fechaSalida, 
+                            dv.fechaLlegadaEstimada, 
+                            so.nombre AS origen, 
+                            sd.nombre AS destino, 
+                            so.ciudad AS ciudad_origen, 
+                            sd.ciudad AS ciudad_destino,
+                            hr.precio + dv.precio AS precio_total,
+                            dva.idAsiento as asientoid, dva.idDetalle_Viaje as idViaje
+                        FROM 
+                            detalle_viaje_asiento dva
+                        JOIN 
+                            detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
+                        JOIN 
+                            sucursal so ON dv.idSucursalOrigen = so.id
+                        JOIN 
+                            sucursal sd ON dv.idSucursalDestino = sd.id
+                        JOIN 
+                            asiento a ON dva.idAsiento = a.id
+                        JOIN 
+                            nivel_herramienta nv ON a.id_nivel_herramienta = nv.id
+                        JOIN
+                            herramienta hr ON nv.id_herramienta = hr.id
+                        WHERE 
+                            dva.id = %s and dva.idDetalle_Viaje = %s;"""
+            return conexion.obtener(sql, (id_detalle_asiento, idDetalle_Viaje))
+        finally:
+            if conexion:
+                conexion.cerrar()
+
+
+    @classmethod
+    def detalle_viaje_general(cls, id_detalle_asiento_list, idDetalle_Viaje):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            
+            # Usamos 'IN' para permitir varios ids de asiento
+            sql = """SELECT
+                            dv.id AS id_detalle_viaje, 
+                            dv.fechaSalida, 
+                            dv.fechaLlegadaEstimada, 
+                            so.nombre AS origen, 
+                            sd.nombre AS destino, 
+                            so.ciudad AS ciudad_origen, 
+                            sd.ciudad AS ciudad_destino,
+                            hr.precio + dv.precio AS precio_total,
+                            dva.idAsiento as asientoid, dva.idDetalle_Viaje as idViaje
+                        FROM 
+                            detalle_viaje_asiento dva
+                        JOIN 
+                            detalle_viaje dv ON dva.idDetalle_Viaje = dv.id
+                        JOIN 
+                            sucursal so ON dv.idSucursalOrigen = so.id
+                        JOIN 
+                            sucursal sd ON dv.idSucursalDestino = sd.id
+                        JOIN 
+                            asiento a ON dva.idAsiento = a.id
+                        JOIN 
+                            nivel_herramienta nv ON a.id_nivel_herramienta = nv.id
+                        JOIN
+                            herramienta hr ON nv.id_herramienta = hr.id
+                        WHERE 
+                            dva.idAsiento IN (%s) AND dva.idDetalle_Viaje = %s;"""
+            
+            # Convertir la lista de ids de asientos a una cadena separada por comas
+            format_in = ','.join(['%s'] * len(id_detalle_asiento_list))
+            
+            # Ejecutar la consulta con el array de ids de asiento
+            sql = sql % format_in
+            return conexion.obtener(sql, tuple(id_detalle_asiento_list) + (idDetalle_Viaje,))
         finally:
             if conexion:
                 conexion.cerrar()

@@ -20,9 +20,9 @@
                             <th class="text-center">ID</th>
                             <th class="text-center">NOMBRE</th>
                             <th class="text-center">CODIGO</th>
-                            <th class="text-center">MONTO</th>
-                            <th class="text-center">Fecha inicio</th>
-                            <th class="text-center">Fecha Fin</th>
+                            <th class="text-center">MONTO (S/. )</th>
+                            <th class="text-center">FECHA INICIO</th>
+                            <th class="text-center">FECHA FIN</th>
                             <th class="text-center">ESTADO</th>
                             <th class="text-center">ACCIÓN</th>
                         </tr>
@@ -161,6 +161,7 @@
                     className: 'btn btn-warning',
                     columns: ':not(.noVis)',
                 },
+                {% if "Registrar promoción" in session["claims"] %}
                 {
                     text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nueva promoción',
                     className: 'btn bg-success m-1',
@@ -169,6 +170,7 @@
                         fct_TipoMetodoPagoNuevo();
                     },
                 },
+                {% endif %}
             ],
             ajax: {
                 url: "/trabajadores/configuracion/GetData_Promociones",
@@ -194,24 +196,20 @@
                 { data: "nombre", name: "nombre" },
                 { data: "codigo", name: "codigo" },
                 { data: "monto_promo", name: "monto_promo" },
-                { data: "fecha_inicio", name: "fecha_inicio", render: function(data, type, row) {
-        if (!data) return '';
-        const fecha = new Date(data);
-        const dia = String(fecha.getDate()+1).padStart(2, '0');
-        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-        const anio = fecha.getFullYear();
-        return `${dia}/${mes}/${anio}`;
-    }},
-                { data: "fecha_fin", name: "fecha_fin",render: function(data, type, row) {
-        if (!data) return '';
-        const fecha = new Date(data);
-        const dia = String(fecha.getDate()+1).padStart(2, '0');
-        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-        const anio = fecha.getFullYear();
-        return `${dia}/${mes}/${anio}`;
-    } },
-                { 
-                    data: "estado", 
+                {
+                    data: "fecha_inicio",
+                    name: "fecha_inicio",
+                    render: function (data, type, row) {
+                        return moment(data).format('DD/MM/YYYY');
+                    }
+                },
+                {
+                    data: "fecha_fin", name: "fecha_fin", render: function (data, type, row) {
+                        return moment(data).format('DD/MM/YYYY');
+                    }
+                },
+                {
+                    data: "estado",
                     name: "estado",
                     render: function (data, type, row) {
                         let estado = data === 1 ? 'Vigente' : 'No vigente';
@@ -228,12 +226,28 @@
                     data: null,
                     name: null,
                     render: function (data, type, row) {
+                        let editar = '{{ "Editar promoción" in session["claims"] }}';
+                        let darBaja = '{{ "Dar baja promoción" in session["claims"] }}';
+                        let eliminar = '{{ "Eliminar promoción" in session["claims"] }}';
+                        let ver = '{{ "Ver promoción" in session["claims"] }}';
+
+                        let buttons = '';
+                        if (ver === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-info" onclick="fct_TipoMetodoPagoVer('${data.id}')" title="Ver tipo método de pago"><i class="bi bi-eye"></i></button>`;
+                        }
+                        if (editar === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-primary" onclick="fct_TipoMetodoPagoEditar('${data.id}')" title="Editar tipo método de pago"><i class="bi bi-pencil-square"></i></button>`;
+                        }
+                        if (darBaja === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-warning" onclick="fct_TipoMetodoPagoDarBaja('${data.id}')" title="Dar de baja tipo método de pago"><i class="bi bi-arrow-down-circle"></i></button>`;
+                        }
+                        if (eliminar === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-danger" onclick="fct_TipoMetodoPagoEliminar('${data.id}')" title="Eliminar tipo método de pago"><i class="bi bi-trash"></i></button>`;
+                        }
+
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_TipoMetodoPagoVer('${data.id}')" title="Ver tipo metodo de pago"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_TipoMetodoPagoEditar('${data.id}')" title="Editar tipo metodo de pago"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_TipoMetodoPagoDarBaja('${data.id}')" title="Dar de baja tipo metodo de pago"><i class="bi bi-arrow-down-circle"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_TipoMetodoPagoEliminar('${data.id}')" title="Eliminar tipo metodo de pago"><i class="bi bi-trash"></i></button>
+                            ${buttons}
                         </div>
                         `;
                     },
@@ -246,11 +260,11 @@
                     className: "text-center align-middle",
                 },
                 {
-                    targets: [1, 2, 3],
+                    targets: [1, 2, 3, 4, 5, 6, 7],
                     className: 'align-middle',
                 },
                 {
-                    targets: [3],
+                    targets: [7],
                     orderable: false,
                     width: '10%',
                 },
@@ -311,7 +325,7 @@
                     contentType: "application/json",
                     success: function (response) {
                         if (response.Status === "success") {
-                            
+
                             fct_IniciarTablaTipoMetodoPago('#tbl_TipoMetodoPago');
                             toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                         } else {
@@ -320,7 +334,7 @@
                         }
                     },
                     error: function (xhr, Status, error) {
-                        toastr.error("Error en el servidor"+ error, "MENSAJE DE SISTEMA");
+                        toastr.error("Error en el servidor" + error, "MENSAJE DE SISTEMA");
                         console.error('Error:' + error);
                     }
                 });

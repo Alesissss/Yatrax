@@ -160,6 +160,7 @@
                     className: 'btn btn-warning',
                     columns: ':not(.noVis)',
                 },
+                {% if "Registrar rutas" in session["claims"] %}
                 {
                     text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nueva ruta',
                     className: 'btn bg-success m-1',
@@ -168,6 +169,7 @@
                         fct_RutaNuevo();
                     },
                 },
+                {% endif %}
             ],
             ajax: {
                 url: "/trabajadores/viajes/GetData_Ruta",
@@ -224,12 +226,28 @@
                     data: null,
                     name: null,
                     render: function (data, type, row) {
+                        let editar = '{{ "Editar rutas" in session["claims"] }}';
+                        let darBaja = '{{ "Dar baja rutas" in session["claims"] }}';
+                        let eliminar = '{{ "Eliminar rutas" in session["claims"] }}';
+                        let ver = '{{ "Ver rutas" in session["claims"] }}';
+
+                        let buttons = '';
+                        if (ver === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-info" onclick="fct_RutaVer('${data.id}')" title="Ver ruta"><i class="bi bi-eye"></i></button>`;
+                        }
+                        if (editar === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-primary" onclick="fct_RutaEditar('${data.id}')" title="Editar ruta"><i class="bi bi-pencil-square"></i></button>`;
+                        }
+                        if (darBaja === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-warning" onclick="fct_RutaDarBaja('${data.id}')" title="Dar de baja ruta"><i class="bi bi-arrow-down-circle"></i></button>`;
+                        }
+                        if (eliminar === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-danger" onclick="fct_RutaEliminar('${data.id}')" title="Eliminar ruta"><i class="bi bi-trash"></i></button>`;
+                        }
+
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_RutaVer('${data.id}')" title="Ver ruta"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_RutaEditar('${data.id}')" title="Editar ruta"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_RutaDarBaja('${data.id}')" title="Dar de baja ruta"><i class="bi bi-arrow-down-circle"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_RutaEliminar('${data.id}')" title="Eliminar ruta"><i class="bi bi-trash"></i></button>
+                            ${buttons}
                         </div>
                         `;
                     },
