@@ -1410,12 +1410,12 @@ const FormManager = {
                 <option value="DNI">DNI</option>
                 <option value="CE">CE</option>
             </select>
-            <input class="form-control mb-2" id="numeroDocNuevo_${asientoId}" placeholder="N° Documento" required>
+            <input type="number" class="form-control mb-2" id="numeroDocNuevo_${asientoId}" placeholder="N° Documento" required>
             <input class="form-control mb-2" id="nombres_${asientoId}" placeholder="Nombres" required>
             <input class="form-control mb-2" id="apellidoPaterno_${asientoId}" placeholder="Apellido paterno" required>
             <input class="form-control mb-2" id="apellidoMaterno_${asientoId}" placeholder="Apellido materno" required>
             <input class="form-control mb-2" id="fechaNacimientoNuevo_${asientoId}" type="date" placeholder="Fecha nacimiento" required>
-            <input class="form-control mb-2" id="telefono_${asientoId}" placeholder="Teléfono" type="tel" required>
+            <input type="number" class="form-control mb-2" id="telefono_${asientoId}" placeholder="Teléfono" type="tel" required>
             <div class="mb-2">
                 <label class="me-2">Sexo:</label>
                 <input type="radio" class="form-check-input" name="sexo-${asientoId}" id="sexoMasculino_${asientoId}" value="M" required> 
