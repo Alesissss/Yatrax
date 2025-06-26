@@ -1090,11 +1090,10 @@ def enviar_correos_reprogramacio():
                 'remitente': 'yatraxyatusa@gmail.com',
                 'destinatario': correo,
                 'mensaje': (
-                    f"Estimado cliente, su viaje ha sido reprogramado. "
-                    f"Tiene {dias_vigencia} días para realizar el canje de su código. "
-                    f"Si no lo realiza en este tiempo, se perderá el pasaje. "
+                    f"Estimado cliente, su viaje ha sido reprogramado."
+                    f"Por favor solicite su reembolso en nuestro apartado de mi pasaje. \n"
                     f"Para más información visite nuestra página web.\n"
-                    f"Su código de canje de pasaje gratis o reembolso para el asiento {asiento} es: {codigo}"
+                    f"Su código de reembolso para el asiento {asiento} es: {codigo}"
                 )
             }
             resultado = enviar_correo(current_app.extensions['mail'], datosEnvio)
