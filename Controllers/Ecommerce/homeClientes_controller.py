@@ -254,11 +254,12 @@ def mi_pasaje_operaciones():
     datos_recibidos = {
         "contenido_venta": renderizarCompra()
     }
+    result = ConfGeneral.obtener()
     TipoDocumentos=TipoDocumento.obtener_todos()
     TipoMetodosPago = TipoMetodoPago.obtener_todos()
     MetodoPagos = MetodoPago.obtener_todos()
     TipoComprobantes = TipoComprobante.obtener_todos()
-    return render_template('Ecommerce/home/miPasajeOp.html', datos=datos_recibidos, TipoDocumento=TipoDocumentos, TipoMetodosPago=TipoMetodosPago, MetodosPagos=MetodoPagos, TipoComprobantes=TipoComprobantes)
+    return render_template('Ecommerce/home/miPasajeOp.html', datos=datos_recibidos, TipoDocumento=TipoDocumentos, TipoMetodosPago=TipoMetodosPago, MetodosPagos=MetodoPagos, TipoComprobantes=TipoComprobantes, result=result)
 
 @homeClientes_bp.route('/seguimientoViaje')
 def seguimiento_viaje():
@@ -930,7 +931,8 @@ def get_conf_general():
             result['precioCambioRuta'] = float(result['precioCambioRuta'])
             result['precioTransferencia'] = float(result['precioTransferencia'])
             result['viajesReprogramables'] = int(result['viajesReprogramables'])  # Puedes usar int si es un valor booleano 0/1
-        
+            result['horaTransaccion'] = int(result['horaTransaccion'])
+            
         return jsonify({'data': result, 'Status': 'success', 'Msj': 'Configuración general recuperada exitosamente'})
     except Exception as e:
         return jsonify({'data': {}, 'Status': 'error', 'Msj': f'Ocurrió un error al listar configuración general: {repr(e)}'})

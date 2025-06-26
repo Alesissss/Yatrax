@@ -1520,12 +1520,12 @@ const FormManager = {
             </div>
             <input class="form-control mb-2" id="correo_${asientoId}" placeholder="Correo electrónico" type="email">
             <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="brazos_${asientoId}">
-            <label class="form-check-label" for="brazos_${asientoId}">Con menor en brazos</label>
+            <input class="hidden" type="checkbox" id="brazos_${asientoId}">
+            <label class="hidden" for="brazos_${asientoId}">Con menor en brazos</label>
             </div>
             <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" id="esMenor_${asientoId}">
-            <label class="form-check-label" for="esMenor_${asientoId}">Es menor de edad</label>
+            <input class="form-check-input" type="checkbox" id="esMenor_${asientoId}" disabled>
+            <label class="form-check-label disabled" for="esMenor_${asientoId}">Es menor de edad</label>
             </div>
             <button class="btn btn-secondary w-100" disabled
                 onclick='FormManager.enviarDatosPasajero("${asientoNombre}", ${asientoId}); 
@@ -2517,7 +2517,7 @@ const PaymentManager = {
                     <strong>Instrucciones para pago en efectivo:</strong>
                     <ul class="mt-2 mb-0">
                         <li>Debe completar el pago en ventanilla dentro de las próximas 2 horas</li>
-                        <li>Presente este código de reserva: <strong id="codigo_reserva">${this.generarCodigoReserva()}</strong></li>
+                        <li>Presente el código de reserva que se le asigne</li>
                         <li>El boleto será válido una vez confirmado el pago</li>
                     </ul>
                 </div>
