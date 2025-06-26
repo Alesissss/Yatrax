@@ -96,7 +96,7 @@ def procesar_reserva():
 
 def renderizarCompra():
     herramientas = Herramienta.obtener_todos()
-    return render_template('Ecommerce/home/partials/ventaPasajes.html', herramientas = herramientas)
+    return render_template('/Ecommerce/home/partials/ventaPasajes.html', herramientas = herramientas)
 
 
 @homeClientes_bp.route('/renderizar_itinerario', methods=['POST'])
@@ -136,6 +136,13 @@ def obtenerDatosPasajero():
     datos_pasajero = Pasajero.obtener_por_numero_documento(numero_doc)
     if not datos_pasajero:
         return jsonify(status="error", msg="Pasajero no encontrado"), 404
+    
+    # Convertir fecha si es string
+    if isinstance(datos_pasajero["f_nacimiento"], str):
+        try:
+            datos_pasajero["f_nacimiento"] = datetime.strptime(datos_pasajero["f_nacimiento"], "%Y-%m-%d")
+        except ValueError:
+            return jsonify(status="error", msg="Formato de fecha inválido"), 500
 
     return jsonify(status="success", datos=datos_pasajero), 200
 
@@ -185,30 +192,36 @@ def perfilCliente():
         return render_template("Ecommerce/home/miPerfil.html",paises=paises,tiposCliente=tipoCliente,tipoDocumentos=tipoDocumentos)
     else:
         try:
-            id_cliente = request.form["id_cliente"]
-            usuario = request.form["usuario"]
-            id_pais = request.form["id_pais"]
-            id_tipo_cliente = request.form["id_tipo_cliente"]
-            razon_social = request.form["razon_social"]
-            id_tipo_doc = request.form["id_tipo_doc"]
-            numero_documento = request.form["numero_documento"]
-            f_nacimiento = request.form["f_nacimiento"]
-            nombres = request.form["nombres"]
-            ape_paterno = request.form["ape_paterno"]
-            ape_materno = request.form["ape_materno"]
-            sexo = request.form["sexo"]
-            direccion = request.form["direccion"]
-            telefono = request.form["telefono"]
-            email = request.form["email"]
-            password = request.form["password"]
+            data = request.get_json()  # Recupera el JSON enviado
+            # Accede a cada campo del JSON
+            id_cliente = data.get("id_cliente")
+            usuario = data.get("usuario")
+            id_pais = data.get("id_pais")
+            id_tipo_cliente = data.get("id_tipo_cliente")
+            razon_social = data.get("razon_social")
+            id_tipo_doc = data.get("id_tipo_doc")
+            numero_documento = data.get("numero_documento")
+            f_nacimiento = data.get("f_nacimiento")
+            nombres = data.get("nombres")
+            ape_paterno = data.get("ape_paterno")
+            ape_materno = data.get("ape_materno")
+            sexo = data.get("sexo")
+            direccion = data.get("direccion")
+            telefono = data.get("telefono")
+            email = data.get("email")
+            password = data.get("password")
+            
             if password.strip():
                 password_hash = hashlib.sha256(password.encode()).hexdigest()
             else:
                 password_hash = None
             
-            Cliente.actualizarPerfil(id_cliente,id_pais,id_tipo_cliente,id_tipo_doc,numero_documento,nombres,ape_paterno,ape_materno,sexo,f_nacimiento,razon_social,direccion,telefono,email,password_hash,usuario)
+            resultado = Cliente.actualizarPerfil(id_cliente, id_pais, id_tipo_cliente, id_tipo_doc, numero_documento,nombres, ape_paterno, ape_materno, sexo, f_nacimiento,razon_social, direccion, telefono, email, password_hash, usuario)
 
-            return jsonify({"Status":1,"Mensaje":"Se ha actualizado los datos del cliente correctamente"})
+            if resultado.get('MSJ2'):  # Si hay mensaje de error
+                return jsonify({"Status": 0, "Mensaje": resultado['MSJ2']})
+            else:
+                return jsonify({"Status": 1, "Mensaje": resultado['MSJ']})
         except Exception as e:
             return jsonify({"Status":0,"Mensaje":"Error: "+str(e)})
 
@@ -256,11 +269,12 @@ def mi_pasaje_operaciones():
     datos_recibidos = {
         "contenido_venta": renderizarCompra()
     }
+    result = ConfGeneral.obtener()
     TipoDocumentos=TipoDocumento.obtener_todos()
     TipoMetodosPago = TipoMetodoPago.obtener_todos()
     MetodoPagos = MetodoPago.obtener_todos()
     TipoComprobantes = TipoComprobante.obtener_todos()
-    return render_template('Ecommerce/home/miPasajeOp.html', datos=datos_recibidos, TipoDocumento=TipoDocumentos, TipoMetodosPago=TipoMetodosPago, MetodosPagos=MetodoPagos, TipoComprobantes=TipoComprobantes)
+    return render_template('Ecommerce/home/miPasajeOp.html', datos=datos_recibidos, TipoDocumento=TipoDocumentos, TipoMetodosPago=TipoMetodosPago, MetodosPagos=MetodoPagos, TipoComprobantes=TipoComprobantes, result=result)
 
 @homeClientes_bp.route('/seguimientoViaje')
 def seguimiento_viaje():
@@ -870,6 +884,7 @@ def cambiarEnTransaccion():
             return jsonify(status="error", message=resultado["error"]), 404
 
         return jsonify(status="success", nuevoEstado=resultado["nuevoEstado"]), 200
+
     except Exception as e:
         return jsonify(status="error", message=str(e)), 500
         
@@ -941,7 +956,8 @@ def get_conf_general():
             result['precioCambioRuta'] = float(result['precioCambioRuta'])
             result['precioTransferencia'] = float(result['precioTransferencia'])
             result['viajesReprogramables'] = int(result['viajesReprogramables'])  # Puedes usar int si es un valor booleano 0/1
-        
+            result['horaTransaccion'] = int(result['horaTransaccion'])
+            
         return jsonify({'data': result, 'Status': 'success', 'Msj': 'Configuración general recuperada exitosamente'})
     except Exception as e:
         return jsonify({'data': {}, 'Status': 'error', 'Msj': f'Ocurrió un error al listar configuración general: {repr(e)}'})

@@ -10,8 +10,6 @@
     background-color: rgb(36, 80, 118);
   }
 
-
-
   .bgcustom {
     background-color: #d2d3ce;
   }
@@ -265,18 +263,18 @@
 
         <h4>Operaciones</h4>
         <div class="row g-2 mb-3">
-          <div class="col-lg-3 col-md-6 col-sm-6">
+          <div class="col-lg-4 col-md-6 col-sm-6">
             <button class="btn btn-secondary w-100" id="btnTransferir">Transferir pasaje</button>
           </div>
-          <div class="col-lg-3 col-md-6 col-sm-6">
+          <div class="col-lg-4 col-md-6 col-sm-6">
             <button class="btn btn-secondary w-100" id="btnCambioRuta">Cambio de ruta</button>
           </div>
-          <div class="col-lg-3 col-md-6 col-sm-6">
+          <div class="col-lg-4 col-md-6 col-sm-6">
             <button class="btn btn-secondary w-100" id="btnReembolso">Reembolso</button>
           </div>
-          <div class="col-lg-3 col-md-6 col-sm-6">
+          <!-- <div class="col-lg-3 col-md-6 col-sm-6">
             <button class="btn btn-secondary w-100" id="btnConvertirLibre">Convertir pasaje libre</button>
-          </div>
+          </div> -->
         </div>
 
         <!-- Modal de validación de código -->
@@ -341,7 +339,7 @@
             <h5><strong>Datos del nuevo pasajero</strong></h5>
             <div class="row gy-3">
               <div class="col-md-4">
-                <label class="form-label">Tipo documento</label>
+                <label class="form-label">Tipo documento *</label>
                 <select id="tipoDocNuevo" class="form-select">
                   <option value="">Tipo documento</option>
                   <option>DNI</option>
@@ -349,33 +347,33 @@
                 </select>
               </div>
               <div class="col-md-4">
-                <label class="form-label">Número de documento *</label>
+                <label class="form-label">Número de documento</label>
                 <input type="text" id="numeroDocNuevo" maxlength="11" class="form-control"
                   placeholder="Número de documento" />
               </div>
               <div class="col-md-4">
-                <label class="form-label">Correo *</label>
-                <input type="email" id="correo" class="form-control" placeholder="Correo" required />
+                <label class="form-label">Correo</label>
+                <input type="email" id="correo" class="form-control" placeholder="Correo" />
               </div>
               <div class="col-md-4">
-                <label class="form-label">Nombres *</label>
-                <input type="text" id="nombres" class="form-control" placeholder="Nombres" required />
+                <label class="form-label">Nombres</label>
+                <input type="text" id="nombres" class="form-control" placeholder="Nombres" />
               </div>
               <div class="col-md-4">
-                <label class="form-label">Apellido paterno *</label>
-                <input type="text" id="apellidoPaterno" class="form-control" placeholder="Apellido paterno" required />
+                <label class="form-label">Apellido paterno</label>
+                <input type="text" id="apellidoPaterno" class="form-control" placeholder="Apellido paterno" />
               </div>
               <div class="col-md-4">
-                <label class="form-label">Apellido materno *</label>
-                <input type="text" id="apellidoMaterno" class="form-control" placeholder="Apellido materno" required />
+                <label class="form-label">Apellido materno</label>
+                <input type="text" id="apellidoMaterno" class="form-control" placeholder="Apellido materno" />
               </div>
               <div class="col-md-4">
-                <label class="form-label">Teléfono *</label>
-                <input type="tel" id="telefono" class="form-control" placeholder="Teléfono" required />
+                <label class="form-label">Teléfono</label>
+                <input type="tel" id="telefono" class="form-control" placeholder="Teléfono" />
               </div>
               <div class="col-md-4">
-                <label class="form-label">Fecha de nacimiento *</label>
-                <input type="date" id="fechaNacimientoNuevo" class="form-control" required />
+                <label class="form-label">Fecha de nacimiento</label>
+                <input type="date" id="fechaNacimientoNuevo" class="form-control" />
               </div>
               <div class="col-md-4 align-content-center">
                 <div class="form-label">Sexo</div>
@@ -583,24 +581,24 @@
                           </select>
                         </div>
                         <div class="col-md-6" id="contenedorInputExtraRem"></div>
-<div class="col-12 my-2 text-end">
-                            <button id="btnCancelarReembolso" type="button" class="btn btn-secondary me-2 bg-danger">
-                            <i class="fas fa-times me-1"></i> Cancelar 
-                            </button>
+                        <div class="col-12 my-2 text-end">
+                          <button id="btnCancelarReembolso" type="button" class="btn btn-secondary me-2 bg-danger">
+                            <i class="fas fa-times me-1"></i> Cancelar
+                          </button>
                           <button id="btnGuardarReembolso" type="submit" class="btn btn-success">
                             <i class="fas fa-paper-plane me-1"></i> Enviar solicitud de reembolso
                           </button>
                         </div>
 
-                        
+
                       </div>
-                      
+
                     </div>
-              
+
                   </div>
-                  
+
                 </div>
-                
+
               </div>
             </div>
           </div>
@@ -675,6 +673,137 @@
   </div>
 </div>
 
+<!-- Modal método de pago -->
+<div class="modal fade" id="modalPagoCustom" tabindex="-1" aria-labelledby="modalPagoCustomLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalPagoCustomLabel">Pasarela de Pago (Custom)</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div class="accordion" id="accordionPagoCustom">
+
+          <!-- SECCIÓN CONTACTO -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingContactoCustom">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                data-bs-target="#collapseContactoCustom" aria-expanded="true" aria-controls="collapseContactoCustom">
+                <i class="fas fa-id-card me-2"></i> Contacto
+              </button>
+            </h2>
+            <div id="collapseContactoCustom" class="accordion-collapse collapse show"
+              data-bs-parent="#accordionPagoCustom">
+              <div class="accordion-body">
+                <form id="formContactoCustom">
+                  <!-- Tipo de comprobante -->
+                  <div class="mb-3">
+                    <label for="tipoComprobanteCustom" class="form-label">Tipo de comprobante</label>
+                    <select id="tipoComprobanteCustom" class="form-select">
+                      <option value="Boleta">Boleta</option>
+                      <option value="Factura">Factura</option>
+                    </select>
+                  </div>
+
+                  <!-- Información común para todos los tipos de comprobante -->
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label for="tipoDocumentoCustom" class="form-label">Tipo de documento *</label>
+                      <select id="tipoDocumentoCustom" class="form-select">
+                        {% for doc in TipoDocumento %}
+                        <option value="{{ doc.id }}">{{ doc.abreviatura }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="numeroDocumentoCustom" class="form-label">Número de documento *</label>
+                      <input type="text" id="numeroDocumentoCustom" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="nombresCustom" class="form-label">Nombres *</label>
+                      <input type="text" id="nombresCustom" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="apePaternoCustom" class="form-label">Apellido paterno *</label>
+                      <input type="text" id="apePaternoCustom" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="apeMaternoCustom" class="form-label">Apellido materno *</label>
+                      <input type="text" id="apeMaternoCustom" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="correoCustom" class="form-label">Correo electrónico *</label>
+                      <input type="email" id="correoCustom" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="telefonoCustom" class="form-label">Teléfono/móvil *</label>
+                      <input type="tel" id="telefonoCustom" class="form-control" required>
+                    </div>
+                  </div>
+
+                  <!-- Campos adicionales para "Factura" -->
+                  <div id="facturaFieldsCustom" style="display: none;">
+                    <div class="col-md-6">
+                      <label for="rucCustom" class="form-label">RUC *</label>
+                      <input type="text" id="rucCustom" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="razonSocialCustom" class="form-label">Razón Social *</label>
+                      <input type="text" id="razonSocialCustom" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="direccionCustom" class="form-label">Dirección *</label>
+                      <input type="text" id="direccionCustom" class="form-control" required>
+                    </div>
+                  </div>
+
+                  <div class="text-end mt-3">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="collapse"
+                      data-bs-target="#collapsePagoCustom" aria-expanded="false" aria-controls="collapsePagoCustom">
+                      Siguiente →
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN PAGO -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingPagoCustom">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#collapsePagoCustom" aria-expanded="false" aria-controls="collapsePagoCustom">
+                <i class="fas fa-credit-card me-2"></i> Pago
+              </button>
+            </h2>
+            <div id="collapsePagoCustom" class="accordion-collapse collapse" data-bs-parent="#accordionPagoCustom">
+              <div class="accordion-body">
+                <div class="mb-3">
+                  <label for="metodoPagoCustom" class="form-label">Método de pago</label>
+                  <select id="metodoPagoCustom" class="form-select">
+                    {% for mp in MetodosPagos %}
+                    <option value="{{ mp.id }}">{{ mp.nombre }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div id="contenidoPagoCustomDinamico">
+                  <!-- aquí inyecta renderizarContenidoMetodo(metodo, tipoMetodo) -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button id="btnProcesarPagoCustom" type="button" class="btn btn-success">Procesar pago</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     const contenedorInputExtra = document.getElementById("contenedorInputExtraRem");
@@ -720,9 +849,6 @@
         }
       }
     }, 300);
-
-
-
 
     function cargarMetodosPorTipo(tipoId) {
       const metodoPagoSelect = document.getElementById("metodoPagoRem");
@@ -950,7 +1076,7 @@
     const btnTransferir = document.getElementById("btnTransferir");
     const btnCambioRuta = document.getElementById("btnCambioRuta");
     const btnReembolso = document.getElementById("btnReembolso");
-    const btnConvertirLibre = document.getElementById("btnConvertirLibre");
+    // const btnConvertirLibre = document.getElementById("btnConvertirLibre");
 
     const contenidoOperacion = document.getElementById("contenidoOperacion");
     const datosNuevoPasajero = document.getElementById("datosNuevoPasajero");
@@ -962,10 +1088,14 @@
     const descripcionOperacion = document.getElementById("descripcionOperacion");
     const checkboxCargo = document.getElementById("checkboxCargo");
 
+    let precioTransferencia = 0; // Inicializado, se actualizará al cargar configuración
+    let precioCambioRuta = 0; // Inicializado, se actualizará al cargar configuración
+    let horaTransaccion = 0; // Inicializado, se actualizará al cargar configuración
+
     resetearModal(); // Inicializar el modal al cargar la página
 
     // Array de botones de operaciones
-    const botonesOperaciones = [btnTransferir, btnCambioRuta, btnReembolso, btnConvertirLibre];
+    const botonesOperaciones = [btnTransferir, btnCambioRuta, btnReembolso];
 
     // Función para resetear colores de botones
     function resetearColoresBotones() {
@@ -1007,6 +1137,34 @@
       setTimeout(() => {
         codigoPasajeInput.focus();
       }, 500);
+    }
+
+    // Función obtner datos configuracion general
+    function obtenerDatosConfiguracionGeneral() {
+      return fetch('/ecommerce/home/GetConfGeneral')
+        .then(response => response.json())
+        .then(data => {
+          if (data.Status === 'success') {
+            // Aquí puedes acceder a los datos de configuración
+            const confGeneral = data.data;
+
+            return confGeneral; // Regresa los datos para usarlos posteriormente
+          } else {
+            console.error('Error al obtener configuración general:', data.Msj);
+            return {};
+          }
+        })
+        .catch(error => {
+          console.error('Error en la solicitud AJAX:', error);
+          return {};
+        });
+    }
+
+    async function obtenerConfiguracion() {
+      const conf = await obtenerDatosConfiguracionGeneral();
+      precioTransferencia = conf.precioTransferencia || 0;
+      precioCambioRuta = conf.precioCambioRuta || 0;
+      horaTransaccion = conf.horaTransaccion || 0;
     }
 
     // Función para mostrar contenido según operación
@@ -1055,12 +1213,12 @@
         toastr.warning("Debe buscar un pasaje primero", "MENSAJE DEL SISTEMA");
         return;
       }
-      if (enTransaccion.value !== "0") {
-        verificarEstadoPasaje();
-        return;
-      }
       if (estadoViaje.value !== "1") {
         verificarEstadoViaje();
+        return;
+      }
+      if (enTransaccion.value !== "0") {
+        verificarEstadoPasaje();
         return;
       }
       abrirModalValidacion('transferir', btnTransferir);
@@ -1072,12 +1230,12 @@
         toastr.warning("Debe buscar un pasaje primero", "MENSAJE DEL SISTEMA");
         return;
       }
-      if (enTransaccion.value !== "0") {
-        verificarEstadoPasaje();
-        return;
-      }
       if (estadoViaje.value !== "1") {
         verificarEstadoViaje();
+        return;
+      }
+      if (enTransaccion.value !== "0") {
+        verificarEstadoPasaje();
         return;
       }
       abrirModalValidacion('cambio-ruta', btnCambioRuta);
@@ -1093,29 +1251,21 @@
         verificarEstadoPasaje();
         return;
       }
-      if (estadoViaje.value !== "1") {
-        verificarEstadoViaje();
-        return;
-      }
       abrirModalValidacion('reembolso', btnReembolso);
     });
 
-    btnConvertirLibre.addEventListener('click', () => {
-      const pasCod = document.getElementById('pasCod').value;
-      if (!pasCod) {
-        toastr.warning("Debe buscar un pasaje primero", "MENSAJE DEL SISTEMA");
-        return;
-      }
-      if (enTransaccion.value !== "0") {
-        verificarEstadoPasaje();
-        return;
-      }
-      if (estadoViaje.value !== "1") {
-        verificarEstadoViaje();
-        return;
-      }
-      abrirModalValidacion('convertir-libre', btnConvertirLibre);
-    });
+    // btnConvertirLibre.addEventListener('click', () => {
+    //   const pasCod = document.getElementById('pasCod').value;
+    //   if (!pasCod) {
+    //     toastr.warning("Debe buscar un pasaje primero", "MENSAJE DEL SISTEMA");
+    //     return;
+    //   }
+    //   if (enTransaccion.value !== "0") {
+    //     verificarEstadoPasaje();
+    //     return;
+    //   }
+    //   abrirModalValidacion('convertir-libre', btnConvertirLibre);
+    // });
 
     // Event listeners del modal
     btnValidarCodigo.addEventListener('click', validarCodigo);
@@ -1176,6 +1326,7 @@
             contenidoOtrasOperaciones.style.display = 'none';
             checkboxCargo.style.display = 'none';
             resetearColoresBotones(); // Resetear colores de botones
+            obtenerConfiguracion();
           } else
             toastr.error("No se encontraron datos para el comprobante ingresado", "ERROR");
         })
@@ -1219,6 +1370,8 @@
       const dniPasajeroTr = document.getElementById("numeroDocNuevo").value;
       const dniPasajeroMen = document.getElementById("numeroDocMenor").value;
       const conMenor = document.getElementById("conMenor").checked;
+
+
 
       if (dniPasaje === dniPasajeroTr) {
         toastr.error("El DNI de pasajero a transferir debe ser diferente", "ERROR");
@@ -1855,11 +2008,11 @@
         });
     }
 
-    document.getElementById("btnPagarTransferencia").addEventListener("click", () => {
-      // realizarTransferencia();
-      // ocultarContenido();
+    // document.getElementById("btnPagarTransferencia").addEventListener("click", () => {
+    //   // realizarTransferencia();
+    //   // ocultarContenido();
 
-    });
+    // });
 
     function ocultarContenido() {
       contenidoOperacion.style.display = 'none';
@@ -1924,6 +2077,59 @@
     });
   });
 
+  const metodosPagoCustomList = {{ MetodosPagos | tojson }};
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const pagoCustomModal = new bootstrap.Modal(document.getElementById('modalPagoCustom'));
+
+    // Abrir modal
+    document.getElementById('btnPagarTransferencia').addEventListener('click', () => {
+      // reset acordeón
+      document.getElementById('collapseContactoCustom').classList.add('show');
+      document.getElementById('collapsePagoCustom').classList.remove('show');
+      // limpiar contenido dinámico
+      document.getElementById('contenidoPagoCustomDinamico').innerHTML = '';
+      pagoCustomModal.show();
+    });
+
+    // Al cambiar tipo de comprobante
+    document.getElementById('tipoComprobanteCustom').addEventListener('change', function () {
+      const tipoComprobante = this.value;
+      const facturaFields = document.getElementById('facturaFieldsCustom');
+      if (tipoComprobante === 'Factura') {
+        facturaFields.style.display = 'block';  // Mostrar campos de Factura
+      } else {
+        facturaFields.style.display = 'none';   // Ocultar campos de Factura
+      }
+    });
+
+    // Al cambiar método de pago
+    document.getElementById('metodoPagoCustom').addEventListener('change', function () {
+      const sel = this.value;
+      const metodo = metodosPagoCustomList.find(m => m.id == sel);
+      if (metodo) {
+        renderizarContenidoMetodo(metodo, metodo.tipoMetodo);
+      }
+    });
+
+    // Función de ejemplo de renderizado dinámico
+    function renderizarContenidoMetodo(metodo, tipoMetodo) {
+      const cont = document.getElementById('contenidoPagoCustomDinamico');
+      cont.innerHTML = '';
+      const div = document.createElement('div');
+      div.id = 'extraPagoCustom';
+      if (tipoMetodo === 'Tarjeta') {
+        div.innerHTML = `
+      <div class="mb-3">
+        <label class="form-label">Número de tarjeta</label>
+        <input class="form-control" placeholder="1234 5678 9012 3456" maxlength="19">
+      </div>`;
+      } else if (tipoMetodo === 'BILLETERA VIRTUAL') {
+        div.innerHTML = `<p>Escanea este QR: <img src="${metodo.qr}" style="max-width:150px"></p>`;
+      }
+      cont.appendChild(div);
+    }
+  });
   //Región cambio de ruta //
 
 
@@ -2046,13 +2252,11 @@ function renderResumen(data) {
     });
   });
 
-  function procesarPagos() {
+  function procesarPagossss() {
     const comprobante = document.getElementById('comprobante')?.value;
     if (!comprobante) {
       toastr.warning("Falta el número de comprobante");
       return;
-    } else {
-      console.log("Se completó:", xd);
     }
 
     $.ajax({
@@ -2072,24 +2276,6 @@ function renderResumen(data) {
       }
     });
   }
-
-  $(document).on('click', '#btn_finalizar_pago', function () {
-    const comprobante = $('#comprobante').val();
-    $.ajax({
-      url: 'ecommerce/home/referenciarPasaje',
-      type: 'POST',
-      contentType: 'application/json',
-      data: JSON.stringify({ comprobante: comprobante }),
-      success: function (response) {
-        if (response.Status === 'success') {
-          toastr.success("El pasaje ha sido referenciado correctamente");
-        } else {
-          toastr.error(response.Msj || "No se pudo referenciar el pasaje", "ERROR");
-        }
-      },
-    })
-
-  });
 
   let descuentoAplicado = 0;
 
