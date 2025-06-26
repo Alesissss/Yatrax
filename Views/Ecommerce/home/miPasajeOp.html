@@ -10,8 +10,6 @@
     background-color: rgb(36, 80, 118);
   }
 
-
-
   .bgcustom {
     background-color: #d2d3ce;
   }
@@ -265,18 +263,18 @@
 
         <h4>Operaciones</h4>
         <div class="row g-2 mb-3">
-          <div class="col-lg-3 col-md-6 col-sm-6">
+          <div class="col-lg-4 col-md-6 col-sm-6">
             <button class="btn btn-secondary w-100" id="btnTransferir">Transferir pasaje</button>
           </div>
-          <div class="col-lg-3 col-md-6 col-sm-6">
+          <div class="col-lg-4 col-md-6 col-sm-6">
             <button class="btn btn-secondary w-100" id="btnCambioRuta">Cambio de ruta</button>
           </div>
-          <div class="col-lg-3 col-md-6 col-sm-6">
+          <div class="col-lg-4 col-md-6 col-sm-6">
             <button class="btn btn-secondary w-100" id="btnReembolso">Reembolso</button>
           </div>
-          <div class="col-lg-3 col-md-6 col-sm-6">
+          <!-- <div class="col-lg-3 col-md-6 col-sm-6">
             <button class="btn btn-secondary w-100" id="btnConvertirLibre">Convertir pasaje libre</button>
-          </div>
+          </div> -->
         </div>
 
         <!-- Modal de validación de código -->
@@ -349,33 +347,33 @@
                 </select>
               </div>
               <div class="col-md-4">
-                <label class="form-label">Número de documento *</label>
+                <label class="form-label">Número de documento</label>
                 <input type="text" id="numeroDocNuevo" maxlength="11" class="form-control"
                   placeholder="Número de documento" />
               </div>
               <div class="col-md-4">
-                <label class="form-label">Correo *</label>
-                <input type="email" id="correo" class="form-control" placeholder="Correo" required />
+                <label class="form-label">Correo</label>
+                <input type="email" id="correo" class="form-control" placeholder="Correo" />
               </div>
               <div class="col-md-4">
-                <label class="form-label">Nombres *</label>
-                <input type="text" id="nombres" class="form-control" placeholder="Nombres" required />
+                <label class="form-label">Nombres</label>
+                <input type="text" id="nombres" class="form-control" placeholder="Nombres" />
               </div>
               <div class="col-md-4">
-                <label class="form-label">Apellido paterno *</label>
-                <input type="text" id="apellidoPaterno" class="form-control" placeholder="Apellido paterno" required />
+                <label class="form-label">Apellido paterno</label>
+                <input type="text" id="apellidoPaterno" class="form-control" placeholder="Apellido paterno" />
               </div>
               <div class="col-md-4">
-                <label class="form-label">Apellido materno *</label>
-                <input type="text" id="apellidoMaterno" class="form-control" placeholder="Apellido materno" required />
+                <label class="form-label">Apellido materno</label>
+                <input type="text" id="apellidoMaterno" class="form-control" placeholder="Apellido materno" />
               </div>
               <div class="col-md-4">
-                <label class="form-label">Teléfono *</label>
-                <input type="tel" id="telefono" class="form-control" placeholder="Teléfono" required />
+                <label class="form-label">Teléfono</label>
+                <input type="tel" id="telefono" class="form-control" placeholder="Teléfono" />
               </div>
               <div class="col-md-4">
-                <label class="form-label">Fecha de nacimiento *</label>
-                <input type="date" id="fechaNacimientoNuevo" class="form-control" required />
+                <label class="form-label">Fecha de nacimiento</label>
+                <input type="date" id="fechaNacimientoNuevo" class="form-control" />
               </div>
               <div class="col-md-4 align-content-center">
                 <div class="form-label">Sexo</div>
@@ -924,7 +922,6 @@
   document.addEventListener("DOMContentLoaded", () => {
 
     const enTransaccion = document.getElementById("pasEstTran");
-    const estadoViaje = document.getElementById("pasEstViaje");
 
     // Variables para el modal
     let operacionSeleccionada = null;
@@ -950,7 +947,7 @@
     const btnTransferir = document.getElementById("btnTransferir");
     const btnCambioRuta = document.getElementById("btnCambioRuta");
     const btnReembolso = document.getElementById("btnReembolso");
-    const btnConvertirLibre = document.getElementById("btnConvertirLibre");
+    // const btnConvertirLibre = document.getElementById("btnConvertirLibre");
 
     const contenidoOperacion = document.getElementById("contenidoOperacion");
     const datosNuevoPasajero = document.getElementById("datosNuevoPasajero");
@@ -965,7 +962,7 @@
     resetearModal(); // Inicializar el modal al cargar la página
 
     // Array de botones de operaciones
-    const botonesOperaciones = [btnTransferir, btnCambioRuta, btnReembolso, btnConvertirLibre];
+    const botonesOperaciones = [btnTransferir, btnCambioRuta, btnReembolso];
 
     // Función para resetear colores de botones
     function resetearColoresBotones() {
@@ -1059,10 +1056,6 @@
         verificarEstadoPasaje();
         return;
       }
-      if (estadoViaje.value !== "1") {
-        verificarEstadoViaje();
-        return;
-      }
       abrirModalValidacion('transferir', btnTransferir);
     });
 
@@ -1074,10 +1067,6 @@
       }
       if (enTransaccion.value !== "0") {
         verificarEstadoPasaje();
-        return;
-      }
-      if (estadoViaje.value !== "1") {
-        verificarEstadoViaje();
         return;
       }
       abrirModalValidacion('cambio-ruta', btnCambioRuta);
@@ -1093,29 +1082,21 @@
         verificarEstadoPasaje();
         return;
       }
-      if (estadoViaje.value !== "1") {
-        verificarEstadoViaje();
-        return;
-      }
       abrirModalValidacion('reembolso', btnReembolso);
     });
 
-    btnConvertirLibre.addEventListener('click', () => {
-      const pasCod = document.getElementById('pasCod').value;
-      if (!pasCod) {
-        toastr.warning("Debe buscar un pasaje primero", "MENSAJE DEL SISTEMA");
-        return;
-      }
-      if (enTransaccion.value !== "0") {
-        verificarEstadoPasaje();
-        return;
-      }
-      if (estadoViaje.value !== "1") {
-        verificarEstadoViaje();
-        return;
-      }
-      abrirModalValidacion('convertir-libre', btnConvertirLibre);
-    });
+    // btnConvertirLibre.addEventListener('click', () => {
+    //   const pasCod = document.getElementById('pasCod').value;
+    //   if (!pasCod) {
+    //     toastr.warning("Debe buscar un pasaje primero", "MENSAJE DEL SISTEMA");
+    //     return;
+    //   }
+    //   if (enTransaccion.value !== "0") {
+    //     verificarEstadoPasaje();
+    //     return;
+    //   }
+    //   abrirModalValidacion('convertir-libre', btnConvertirLibre);
+    // });
 
     // Event listeners del modal
     btnValidarCodigo.addEventListener('click', validarCodigo);
@@ -1184,17 +1165,6 @@
         });
     })
 
-    function verificarEstadoViaje() {
-      const estViaje = document.getElementById("pasEstViaje").value;
-      if (estViaje === '2') {
-        toastr.warning("El viaje ya está en curso, no se puede realizar esta operación", "MENSAJE DEL SISTEMA");
-      }
-
-      if (estViaje === '3') {
-        toastr.warning("El viaje ya ha finalizado, no se puede realizar esta operación", "MENSAJE DEL SISTEMA");
-      }
-    }
-
     // Funcion para saber es estado de una pasaje
     function verificarEstadoPasaje() {
       const idPasaje = document.getElementById("pasId").value;
@@ -1218,14 +1188,13 @@
       const dniPasaje = document.getElementById("numDocAnt").value;
       const dniPasajeroTr = document.getElementById("numeroDocNuevo").value;
       const dniPasajeroMen = document.getElementById("numeroDocMenor").value;
-      const conMenor = document.getElementById("conMenor").checked;
 
       if (dniPasaje === dniPasajeroTr) {
         toastr.error("El DNI de pasajero a transferir debe ser diferente", "ERROR");
         document.getElementById("numeroDocNuevo").value = "";
         return false;
       }
-      if (conMenor && (dniPasajeroTr === dniPasajeroMen)) {
+      if (dniPasajeroTr === dniPasajeroMen) {
         toastr.error("Los DNI del pasajero y del menor deben ser diferentes", "ERROR");
         document.getElementById("numeroDocMenor").value = "";
         return false;
@@ -1856,9 +1825,8 @@
     }
 
     document.getElementById("btnPagarTransferencia").addEventListener("click", () => {
-      // realizarTransferencia();
-      // ocultarContenido();
-
+      realizarTransferencia();
+      ocultarContenido();
     });
 
     function ocultarContenido() {
@@ -1926,32 +1894,6 @@
 
   //Región cambio de ruta //
 
-
-  $(document).on('click', '#btnCambioRuta', function() {
-    const destino = $('#destinoViaje').val();
-    const origen = $('#origenViaje').val();
-    $.ajax({
-      url: '/ecommerce/home/GetRutasConcatenadasA',
-      type: 'POST',
-      contentType: 'application/json',
-      data: JSON.stringify({ destino : destino, origen: origen }),
-      success: function(response) {
-        if (response.Status === 'success') {
-          const rutas = response.data;
-          const clave = `${origen} - ${destino}`;
-          const rutasFiltradas = rutas.filter(item => item.ruta !== clave);
-          console.log("Rutas filtradas:", rutasFiltradas);
-          $('#cbx_Ciudades').empty();
-          rutasFiltradas.forEach(item => {
-            $('#cbx_Ciudades').append(new Option(item.ruta, item.id));
-          });
-        } else {
-          toastr.error(response.Msj || "No se pudo obtener las rutas", "ERROR");
-        }
-      }
-    })
-  })
-
   function renderResumen(data) {
     const viaje = data.detalle_viaje;
     const pasajeros = data.pasajeros;
@@ -1961,9 +1903,8 @@
     const descuento = descuentoAplicado;
     const cambioRuta = precioCambioRuta;
 
-    const fechaSalida = moment(viaje.fechaSalida).format("DD-MM-YYYY, HH:mm");
-    const fechaLlegada = moment(viaje.fechaLlegadaEstimada).format("DD-MM-YYYY, HH:mm");
-
+    const fechaSalida = moment(viaje.fechaSalida).locale('es').format('dddd D [de] MMMM [de] YYYY, HH:mm');
+    const fechaLlegada = moment(viaje.fechaLlegadaEstimada).locale('es').format('dddd D [de] MMMM [de] YYYY, HH:mm');
 
     let html = `
         <div class="card mb-3">
@@ -2043,13 +1984,11 @@
     });
   });
 
-  function procesarPagos() {
+  function procesarPagossss() {
     const comprobante = document.getElementById('comprobante')?.value;
     if (!comprobante) {
       toastr.warning("Falta el número de comprobante");
       return;
-    } else {
-      console.log("Se completó:", xd);
     }
 
     $.ajax({
@@ -2069,24 +2008,6 @@
       }
     });
   }
-
-  $(document).on('click', '#btn_finalizar_pago', function () {
-    const comprobante = $('#comprobante').val();
-    $.ajax({
-      url: 'ecommerce/home/referenciarPasaje',
-      type: 'POST',
-      contentType: 'application/json',
-      data: JSON.stringify({ comprobante: comprobante }),
-      success: function (response) {
-        if (response.Status === 'success') {
-          toastr.success("El pasaje ha sido referenciado correctamente");
-        } else {
-          toastr.error(response.Msj || "No se pudo referenciar el pasaje", "ERROR");
-        }
-      },
-    })
-
-  });
 
   let descuentoAplicado = 0;
 
@@ -2116,9 +2037,6 @@
       }
     });
   });
-
-
-  
   //End región cambio de ruta //
 </script>
 
