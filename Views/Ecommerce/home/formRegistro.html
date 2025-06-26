@@ -160,7 +160,7 @@
           id="ytrx-fullname"
           name="ytrx-fullname"
           class="ytrx-form-input"
-          placeholder="Nombres"
+          placeholder="Nombre"
           required
         />
       </div>
@@ -188,25 +188,28 @@
       </div>
 
       <!-- Fecha nacimiento -->
-      <div class="ytrx-input-group" id="grupo-fecha-nacimiento">
-        <input
-          type="date"
-          id="ytrx-birthdate"
-          name="ytrx-birthdate"
-          class="ytrx-form-input"
-        />
-      </div>
+       <div class="row">
+          <div class="col ytrx-input-group" id="grupo-fecha-nacimiento">
+                  <input
+                    type="date"
+                    id="ytrx-birthdate"
+                    name="ytrx-birthdate"
+                    class="ytrx-form-input"
+                  />
+                </div>
 
-      <!-- Sexo -->
-      <div class="row" id="grupo-sexo">
-        <div class="ytrx-input-group col">
-          <select id="ytrx-gender" name="ytrx-gender">
-            <option value="" disabled selected>Sexo</option>
-            <option value="M">Masculino</option>
-            <option value="F">Femenino</option>
-          </select>
-        </div>
-      </div>
+                <!-- Sexo -->
+                <div class="col">
+                  <div class="ytrx-input-group" id="grupo-sexo">
+                    <select id="ytrx-gender" name="ytrx-gender">
+                      <option value="" disabled selected>Sexo</option>
+                      <option value="M">Masculino</option>
+                      <option value="F">Femenino</option>
+                    </select>
+                  </div>
+                </div>
+       </div>
+      
 
       <!-- Teléfono -->
       <div class="ytrx-input-group">
@@ -216,12 +219,13 @@
           name="ytrx-phone"
           class="ytrx-form-input"
           placeholder="Número de teléfono"
+          required
         />
       </div>
 
       <!-- País -->
       <div class="ytrx-input-group">
-        <select id="ytrx-country" name="ytrx-country">
+        <select required id="ytrx-country" name="ytrx-country">
           <option value="" disabled selected>País</option>
           {% for pais in Paises %}
           <option value="{{ pais.id }}">{{ pais.nombre }}</option>
@@ -237,6 +241,7 @@
           name="ytrx-address"
           class="ytrx-form-input"
           placeholder="Dirección"
+          required
         />
       </div>
 
@@ -440,20 +445,21 @@
           .then((json) => {
             if (json.Status === "success") {
               const d = json.data;
-              if (d.nombres)
-                document.getElementById("ytrx-fullname").value = d.nombres;
-              else document.getElementById("ytrx-fullname").value = "Nombres";
+              if (d.nombre|| d.nombres)
+                document.getElementById("ytrx-fullname").value = d.nombres || d.nombre;
+              else
+              document.getElementById("ytrx-fullname").value = "Nombres";
 
-              if (d.apellidoPaterno)
+              if (d.ape_paterno || d.apellidoPaterno)
                 document.getElementById("ytrx-lastname-father").value =
-                  d.apellidoPaterno;
+                  d.ape_paterno || d.apellidoPaterno;
               else
                 document.getElementById("ytrx-lastname-father").value =
                   "Apellido paterno";
 
-              if (d.apellidoMaterno)
+              if (d.ape_materno || d.apellidoMaterno)
                 document.getElementById("ytrx-lastname-mother").value =
-                  d.apellidoMaterno;
+                  d.ape_materno || d.apellidoMaterno;
               else
                 document.getElementById("ytrx-lastname-mother").value =
                   "Apellido materno";
@@ -483,9 +489,9 @@
           .then((json) => {
             if (json.Status === "success") {
               const d = json.data;
-              if (d.razonSocial)
+              if (d.razonSocial || d.nombre)
                 document.getElementById("ytrx-fullname").value =
-                  d.razonSocial;
+                 d.razonSocial || d.nombre;
               else
                 document.getElementById("ytrx-fullname").value =
                   "RazonSocial";
