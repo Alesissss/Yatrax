@@ -116,7 +116,7 @@ def index():
     datos_recibidos = {
         "servicios":Servicio.obtener_todos(),
         "contenido_venta": renderizarCompra(),
-        "promociones": Promocion.obtener_todos()
+        "promociones": Promocion.obtener_todos_activos()
     }
     return render_template('Ecommerce/home/home.html', active_page="home",datos=datos_recibidos)
 
