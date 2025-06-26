@@ -74,16 +74,6 @@
                     <h3 class="card-title">Cantidad de usuarios activos</h3>
                 </div>
                 <div class="card-body">
-                    <div class="col-md-12 mb-3">
-                        <label for="cbx_Estado">Estado</label>
-                        <div class="input-group">
-                            <select id="cbx_Estado" class="form-control">
-                                <option disabled>--SELECCIONAR--</option>
-                                <option value="1">Vigente</option>
-                                <option value="0">No vigente</option>
-                            </select>
-                        </div>
-                    </div>
                     <div id="chartRegistrosMensuales" style="width: 100%; height: 300px;"></div>
                 </div>
             </div>
@@ -99,69 +89,120 @@
 <!-- Apache ECharts -->
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/theme/dark.min.js"></script>
-
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        let isDarkMode = document.body.classList.contains('dark-mode');
+    async function cantidadUsuariosxTipo() {
+        const response = await fetch('/trabajadores/usuarios/CantidadUsuariosxTipo');
+        const data = await response.json();
 
-        var chartUsuarios = echarts.init(document.getElementById('chartUsuariosTipo'), isDarkMode ? 'dark' : '');
-        var optionUsuarios = {
-            tooltip: {
-                trigger: 'item'
-            },
-            legend: {
-                top: '5%',
-                left: 'center'
-            },
-            series: [
-                {
-                    name: 'Usuarios',
-                    type: 'pie',
-                    radius: '50%',
-                    data: [
-                        { value: 1048, name: 'Administradores' },
-                        { value: 735, name: 'Supervisores' },
-                        { value: 580, name: 'Usuarios normales' }
-                    ],
-                    emphasis: {
-                        itemStyle: {
-                            shadowBlur: 10,
-                            shadowOffsetX: 0,
-                            shadowColor: 'rgba(0, 0, 0, 0.5)'
-                        }
+        if (Array.isArray(data)) {
+            return data.map(item => ({ name: item.estado, value: item.cantidad }));
+        } else {
+            return [{ name: data.estado, value: data.cantidad }];
+        }
+    }
+
+    async function cantidadUsuariosActivos(estado = null) {
+        let url = '/trabajadores/usuarios/CantidadUsuariosActivos';
+        if (estado !== null) {
+            url += `?estado=${estado}`;
+        }
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (Array.isArray(data)) {
+            return data.map(item => ({ name: item.estado || 'Tipo Usuario', value: item.cantidad }));
+        } else {
+            return [{ name: data.estado || 'Tipo Usuario', value: data.cantidad }];
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", async function () {
+    const isDarkMode = document.body.classList.contains('dark-mode');
+
+    const chartUsuarios = echarts.init(document.getElementById('chartUsuariosTipo'), isDarkMode ? 'dark' : '');
+    const chartRegistros = echarts.init(document.getElementById('chartRegistrosMensuales'), isDarkMode ? 'dark' : '');
+
+    async function cantidadUsuariosxTipo() {
+        const response = await fetch('/trabajadores/usuarios/CantidadUsuariosxTipo');
+        const data = await response.json();
+        if (Array.isArray(data)) {
+            return data.map(item => ({ name: item.tipo, value: item.cantidad }));
+        } else {
+            return [{ name: data.tipo, value: data.cantidad }];
+        }
+    }
+
+    async function cantidadUsuariosActivos(estado = null) {
+        let url = '/trabajadores/usuarios/CantidadUsuariosActivos';
+        if (estado !== null) url += `?estado=${estado}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        if (Array.isArray(data)) {
+            return data.map(item => ({ name: item.estado || 'Estado', value: item.cantidad }));
+        } else {
+            return [{ name: data.estado || 'Estado', value: data.cantidad }];
+        }
+    }
+
+    async function cargarGraficoUsuariosTipo() {
+        const datosUsuariosTipo = await cantidadUsuariosxTipo();
+        const optionUsuarios = {
+            color: ['#5470C6', '#91CC75', '#FAC858'], // paleta personalizada para primer gráfico
+            tooltip: { trigger: 'item' },
+            legend: { top: '5%', left: 'center' },
+            series: [{
+                name: 'Usuarios',
+                type: 'pie',
+                radius: '50%',
+                data: datosUsuariosTipo,
+                emphasis: {
+                    itemStyle: {
+                        shadowBlur: 10,
+                        shadowOffsetX: 0,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)'
                     }
                 }
-            ]
+            }]
         };
         chartUsuarios.setOption(optionUsuarios);
+    }
 
-        var chartRegistros = echarts.init(document.getElementById('chartRegistrosMensuales'), isDarkMode ? 'dark' : '');
-        var optionRegistros = {
-            tooltip: {
-                trigger: 'axis'
-            },
-            xAxis: {
-                type: 'category',
-                data: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic']
-            },
-            yAxis: {
-                type: 'value'
-            },
+    async function cargarGraficoUsuariosActivos(estado = null) {
+        const datosActivos = await cantidadUsuariosActivos(null);
+        const optionRegistros = {
+            color: ['#5470C6', '#91CC75', '#FC8452'], // paleta diferente para segundo gráfico
+            tooltip: { trigger: 'item' },
+            legend: { top: '5%', left: 'center' },
             series: [{
-                data: [120, 200, 150, 80, 70, 110, 40, 20, 50, 150, 220, 100],
-                type: 'bar',
-                barWidth: '60%',
-                itemStyle: {
-                    color: '#00c0ef'
+                name: 'Usuarios Activos',
+                type: 'pie',
+                radius: '50%',
+                data: datosActivos,
+                emphasis: {
+                    itemStyle: {
+                        shadowBlur: 10,
+                        shadowOffsetX: 0,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
                 }
             }]
         };
         chartRegistros.setOption(optionRegistros);
+    }
 
-        window.addEventListener('resize', function () {
-            chartUsuarios.resize();
-            chartRegistros.resize();
-        });
+    await cargarGraficoUsuariosTipo();
+    await cargarGraficoUsuariosActivos();
+
+    const selectEstado = document.getElementById('cbx_Estado');
+    selectEstado.addEventListener('change', async function () {
+        await cargarGraficoUsuariosActivos(this.value);
     });
+
+    window.addEventListener('resize', () => {
+        chartUsuarios.resize();
+        chartRegistros.resize();
+    });
+});
+
 </script>
 {% endblock %}

@@ -1880,6 +1880,7 @@
     document.getElementById("btnPagarTransferencia").addEventListener("click", () => {
       realizarTransferencia();
       ocultarContenido();
+
     });
 
     function ocultarContenido() {
@@ -1945,6 +1946,59 @@
     });
   });
 
+  const metodosPagoCustomList = {{ MetodosPagos | tojson }};
+
+  // document.addEventListener('DOMContentLoaded', () => {
+  //   const pagoCustomModal = new bootstrap.Modal(document.getElementById('modalPagoCustom'));
+
+  //   // Abrir modal
+  //   document.getElementById('btnPagarTransferencia').addEventListener('click', () => {
+  //     // reset acordeón
+  //     document.getElementById('collapseContactoCustom').classList.add('show');
+  //     document.getElementById('collapsePagoCustom').classList.remove('show');
+  //     // limpiar contenido dinámico
+  //     document.getElementById('contenidoPagoCustomDinamico').innerHTML = '';
+  //     pagoCustomModal.show();
+  //   });
+
+  //   // Al cambiar tipo de comprobante
+  //   document.getElementById('tipoComprobanteCustom').addEventListener('change', function () {
+  //     const tipoComprobante = this.value;
+  //     const facturaFields = document.getElementById('facturaFieldsCustom');
+  //     if (tipoComprobante === 'Factura') {
+  //       facturaFields.style.display = 'block';  // Mostrar campos de Factura
+  //     } else {
+  //       facturaFields.style.display = 'none';   // Ocultar campos de Factura
+  //     }
+  //   });
+
+  //   // Al cambiar método de pago
+  //   document.getElementById('metodoPagoCustom').addEventListener('change', function () {
+  //     const sel = this.value;
+  //     const metodo = metodosPagoCustomList.find(m => m.id == sel);
+  //     if (metodo) {
+  //       renderizarContenidoMetodo(metodo, metodo.tipoMetodo);
+  //     }
+  //   });
+
+  //   // Función de ejemplo de renderizado dinámico
+  //   function renderizarContenidoMetodo(metodo, tipoMetodo) {
+  //     const cont = document.getElementById('contenidoPagoCustomDinamico');
+  //     cont.innerHTML = '';
+  //     const div = document.createElement('div');
+  //     div.id = 'extraPagoCustom';
+  //     if (tipoMetodo === 'Tarjeta') {
+  //       div.innerHTML = `
+  //     <div class="mb-3">
+  //       <label class="form-label">Número de tarjeta</label>
+  //       <input class="form-control" placeholder="1234 5678 9012 3456" maxlength="19">
+  //     </div>`;
+  //     } else if (tipoMetodo === 'BILLETERA VIRTUAL') {
+  //       div.innerHTML = `<p>Escanea este QR: <img src="${metodo.qr}" style="max-width:150px"></p>`;
+  //     }
+  //     cont.appendChild(div);
+  //   }
+  // });
   //Región cambio de ruta //
 
 

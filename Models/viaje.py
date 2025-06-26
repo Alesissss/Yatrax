@@ -723,7 +723,8 @@ class Viaje:
                     nh.x_dimension,
                     nh.y_dimension,
                     n.nroPiso,
-                    h.icono
+                    h.icono,
+                    h.precio + (SELECT precio FROM detalle_viaje WHERE id = %s ) as precio
                 FROM nivel_herramienta nh
                 JOIN nivel n ON nh.id_nivel = n.id
                 JOIN herramienta h ON nh.id_herramienta = h.id
@@ -741,7 +742,8 @@ class Viaje:
                     nh.x_dimension,
                     nh.y_dimension,
                     n.nroPiso,
-                    h.icono
+                    h.icono,
+                    0 as precio
                 FROM nivel_herramienta nh
                 JOIN nivel n ON nh.id_nivel = n.id
                 JOIN herramienta h ON nh.id_herramienta = h.id
@@ -751,7 +753,7 @@ class Viaje:
                 JOIN detalle_viaje dv ON dv.idViaje = vi.id
                 WHERE dv.id = %s AND h.id_tipo != 1;
                 
-           """, (id_dv,id_dv))
+           """, (id_dv,id_dv,id_dv))
 
             return listado
         finally:

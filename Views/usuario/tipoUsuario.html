@@ -157,6 +157,7 @@
                     className: 'btn btn-warning',
                     columns: ':not(.noVis)',
                 },
+                {% if "Registrar tipo de usuario" in session['claims'] %}
                 {
                     text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo tipo usuario',
                     className: 'btn bg-success m-1',
@@ -165,6 +166,7 @@
                         fct_TipoUsuarioNuevo();
                     },
                 },
+                {% endif %}
             ],
             ajax: {
                 url: "/trabajadores/usuarios/GetData_TipoUsuario",
@@ -206,12 +208,30 @@
                     data: null,
                     name: null,
                     render: function (data, type, row) {
+                        let editar = '{{ "Editar tipo de usuario" in session["claims"] }}';
+                        let darBaja = '{{ "Dar baja tipo de usuario" in session["claims"] }}';
+                        let eliminar = '{{ "Eliminar tipo de usuario" in session["claims"] }}';
+                        let ver = '{{ "Ver tipo de usuario" in session["claims"] }}';
+
+                        let buttons = '';
+                        if (ver === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-info" onclick="fct_TipoUsuarioVer('${data.id}')" title="Ver tipo usuario"><i class="bi bi-eye"></i></button>`
+                        }
+
+                        if (editar === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-primary" onclick="fct_TipoUsuarioEditar('${data.id}')" title="Editar tipo usuario"><i class="bi bi-pencil-square"></i></button>`
+                        }
+
+                        if (eliminar === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-danger" onclick = "fct_TipoUsuarioEliminar('${data.id}')" title="Eliminar tipo usuario"><i class="bi bi-trash"></i></button>`
+                        }
+
+                        if (darBaja === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-warning" onclick="fct_TipoUsuarioDarBaja('${data.id}')" title="Dar de baja tipo usuario"><i class="bi bi-arrow-down-circle"></i></button>`
+                        }
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_TipoUsuarioVer('${data.id}')" title="Ver tipo usuario"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_TipoUsuarioEditar('${data.id}')" title="Editar tipo usuario"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_TipoUsuarioDarBaja('${data.id}')" title="Dar de baja tipo usuario"><i class="bi bi-arrow-down-circle"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_TipoUsuarioEliminar('${data.id}')" title="Eliminar tipo usuario"><i class="bi bi-trash"></i></button>
+                            ${buttons}
                         </div>
                         `;
                     },

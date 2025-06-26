@@ -99,9 +99,10 @@ const AppState = {
 // =============================================================================
 
 class Venta {
-    constructor(tipo_doc, numDoc, nombres, apellidoPaterno, apellidoMaterno, fechaNacimiento,
+    constructor(tipo_doc, precio, numDoc, nombres, apellidoPaterno, apellidoMaterno, fechaNacimiento,
         telefono, seleccionSexo, sexo, correo, brazos, esMenor) {
         this.tipoDoc = tipo_doc;
+        this.precio = precio;
         this.numDoc = numDoc;
         this.nombres = nombres;
         this.apellidoPaterno = apellidoPaterno;
@@ -495,7 +496,7 @@ const NavigationManager = {
             await this.irAPago();
         }
     },
-    soloIrAPago(){
+    soloIrAPago() {
 
     },
 
@@ -966,7 +967,7 @@ const VehicleLayoutManager = {
 
     crearElementoMatriz(datos, x, y, tipoItinerario) {
         const dato = datos.find(d =>
-            parseInt(d.x_dimension) === x && parseInt(d.y_dimension) === y
+            parseInt(d.x_dimension) === x && parseInt(d.y_dimension) === y 
         );
 
         const btn = document.createElement('button');
@@ -976,6 +977,7 @@ const VehicleLayoutManager = {
 
         if (dato) {
             this.configurarElementoConDatos(btn, dato, tipoItinerario);
+            
         } else {
             this.configurarElementoVacio(btn);
         }
@@ -986,6 +988,7 @@ const VehicleLayoutManager = {
     configurarElementoConDatos(btn, dato, tipoItinerario) {
         btn.id = dato.id_asiento ?? '';
         btn.setAttribute('data-tipo', dato.tipo_herramienta);
+        btn.setAttribute('data-precio',dato.precio)
         btn.style.cursor = 'pointer';
 
         if (dato.tipo_herramienta === 1) {
@@ -1410,12 +1413,12 @@ const FormManager = {
                 <option value="DNI">DNI</option>
                 <option value="CE">CE</option>
             </select>
-            <input class="form-control mb-2" id="numeroDocNuevo_${asientoId}" placeholder="N° Documento" required>
+            <input type="number" class="form-control mb-2" id="numeroDocNuevo_${asientoId}" placeholder="N° Documento" required>
             <input class="form-control mb-2" id="nombres_${asientoId}" placeholder="Nombres" required>
             <input class="form-control mb-2" id="apellidoPaterno_${asientoId}" placeholder="Apellido paterno" required>
             <input class="form-control mb-2" id="apellidoMaterno_${asientoId}" placeholder="Apellido materno" required>
             <input class="form-control mb-2" id="fechaNacimientoNuevo_${asientoId}" type="date" placeholder="Fecha nacimiento" required>
-            <input class="form-control mb-2" id="telefono_${asientoId}" placeholder="Teléfono" type="tel" required>
+            <input type="number" class="form-control mb-2" id="telefono_${asientoId}" placeholder="Teléfono" type="tel" required>
             <div class="mb-2">
                 <label class="me-2">Sexo:</label>
                 <input type="radio" class="form-check-input" name="sexo-${asientoId}" id="sexoMasculino_${asientoId}" value="M" required> 
@@ -1471,11 +1474,11 @@ const FormManager = {
         const correo = document.getElementById(`correo_${idAsiento}`).value;
         const brazos = document.getElementById(`brazos_${idAsiento}`).checked;
         const esMenor = document.getElementById(`esMenor_${idAsiento}`).checked;
-
+        const precio = document.getElementById(`${idAsiento}`).getAttribute('data-precio');
         const recuperarSeleccion = document.querySelector(`input[name="sexo-${idAsiento}"]:checked`)?.id;
         const sexo = recuperarSeleccion?.includes("Masculino") ? 1 : 0;
 
-        return [tipoDoc, numDoc, nombres, apellidoPaterno, apellidoMaterno, fechaNacimiento,
+        return [tipoDoc, precio, numDoc, nombres, apellidoPaterno, apellidoMaterno, fechaNacimiento,
             telefono, recuperarSeleccion, sexo, correo, brazos, esMenor];
     }
 };
@@ -1821,7 +1824,6 @@ const PaymentManager = {
                     <label for="tipo_comprobante" class="form-label">Tipo de comprobante</label>
                     <select id="tipo_comprobante" class="form-select">
                         <option value=1>Boleta</option>
-                        <option value=2>Factura</option>
                     </select>
                 </div>
                 
@@ -2355,7 +2357,7 @@ const PaymentManager = {
             }
         });
     },
-
+    rutas: new Array(),
     async procesarPago() {
         if (!this.validarFormularioCompleto()) {
             toastr.error("Por favor complete todos los campos requeridos");
@@ -2369,13 +2371,15 @@ const PaymentManager = {
             const response = await fetch(CONFIG.RUTAS.PROCESAR_PAGO, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(datosCompletos)
+                body: JSON.stringify(datosCompletos) // Asegura que el body sea un string JSON
             });
 
             const resultado = await response.json();
             this.ocultarLoader();
 
             if (resultado.Status === 'success') {
+                // Almacenamos las rutas de los boletos en el array
+                this.rutas = resultado.tickets;
                 this.mostrarPagoExitoso(resultado);
             } else {
                 throw new Error(resultado.Msj || 'Error en el procesamiento del pago');
@@ -2522,6 +2526,7 @@ const PaymentManager = {
             contacto: datosContacto,
             pago: datosPago,
             ventas: JSON.parse(sessionStorage.getItem("ventas") || "{}"),
+            
             itinerario: {
                 currentStep: AppState.currentStep,
                 itinerarioRegreso: AppState.itinerarioRegreso
@@ -2649,16 +2654,36 @@ const PaymentManager = {
     },
 
     descargarBoleto(resultado) {
-        toastr.info('Preparando descarga del boleto...');
+        toastr.info('Preparando descarga de los boletos...');
 
         setTimeout(() => {
-            const link = document.createElement('a');
-            link.href = '#';
-            link.download = `boleto-${resultado.codigo_confirmacion || 'reserva'}.pdf`;
-            link.click();
-            toastr.success('Boleto descargado exitosamente');
+            // Verificamos si el array de rutas tiene boletos generados
+            if (this.rutas && Array.isArray(this.rutas)) {
+                this.rutas.forEach((ruta, index) => {
+                    const link = document.createElement('a');
+
+                    // Aquí aseguramos que la ruta tenga el formato adecuado para el navegador
+                    // Asumimos que la ruta es algo como "C:\\Users\\Edgar\\Desktop\\Calidad\\Yatrax\\Static\\tickets\\A000-00000009.pdf"
+                    // y necesitamos cambiarla a "/static/tickets/A000-00000009.pdf"
+                    const rutaFormateada = '/Static/tickets/' + ruta.split('\\').pop();  // Extraemos el nombre del archivo y lo anexamos a /static/tickets/
+
+                    link.href = rutaFormateada;  // Establece la ruta formateada
+                    link.download = `boleto-${resultado.codigo_confirmacion || 'reserva'}-${index + 1}.pdf`;  // Asigna nombre único
+                    document.body.appendChild(link);  // Necesario para algunos navegadores
+                    link.click();  // Dispara la descarga
+                    document.body.removeChild(link);  // Limpia el DOM
+                });
+
+                toastr.success('Boletos descargados exitosamente');
+            } else {
+                toastr.error('No se encontraron boletos para descargar');
+            }
         }, 1500);
     },
+
+
+
+
 
     limpiarDatosReserva() {
         sessionStorage.removeItem('ventas');

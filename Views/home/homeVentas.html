@@ -68,28 +68,6 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header bg-danger text-white">
-                    <h3 class="card-title">Cantidad de ingresos por un determinado periodo</h3>
-                </div>
-                <div class="card-body">
-                    <div class="col-md-12 mb-3">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label for="">Fecha de inicio: </label>
-                                <input type="date" name="" id="" class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="">Fecha final: </label>
-                                <input type="date" name="" id="" class="form-control">
-                            </div>
-                        </div>
-                    </div>
-                    <div id="chartRegistrosMensuales" style="width: 100%; height: 300px;"></div>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 {% endblock %}
@@ -103,67 +81,73 @@
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/theme/dark.min.js"></script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        let isDarkMode = document.body.classList.contains('dark-mode');
+    async function cantidadIngresosxServicio() {
+        const response = await fetch("/trabajadores/ventas/obtenerVentasxServicio");
+        const data = await response.json();
 
-        var chartUsuarios = echarts.init(document.getElementById('chartUsuariosTipo'), isDarkMode ? 'dark' : '');
-        var optionUsuarios = {
-            tooltip: {
-                trigger: 'item'
-            },
-            legend: {
-                top: '5%',
-                left: 'center'
-            },
-            series: [
-                {
-                    name: 'Usuarios',
-                    type: 'pie',
-                    radius: '50%',
-                    data: [
-                        { value: 1048, name: 'Buscama' },
-                        { value: 735, name: 'Bus' },
-                        { value: 580, name: 'Buscama-plus' }
-                    ],
-                    emphasis: {
-                        itemStyle: {
-                            shadowBlur: 10,
-                            shadowOffsetX: 0,
-                            shadowColor: 'rgba(0, 0, 0, 0.5)'
-                        }
+        // Suponemos que data es un arreglo de objetos con { servicio, cantidad }
+        // Ajusta los nombres de propiedades según tu JSON real
+        if (Array.isArray(data)) {
+            return data.map(item => ({
+                name: item.servicio || item.servicio || 'Servicio',
+                value: item.cantidad_ventas || 0
+            }));
+        } else {
+            return [{ name: data.servicio || data.servicio || 'Servicio', value: data.cantidad_ventas || 0 }];
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", async function () {
+        const isDarkMode = document.body.classList.contains('dark-mode');
+
+        // Inicializar gráfico circular (pie) para ventas por servicio
+        const chartUsuarios = echarts.init(document.getElementById('chartUsuariosTipo'), isDarkMode ? 'dark' : '');
+        const datosVentas = await cantidadIngresosxServicio();
+
+        const optionUsuarios = {
+            color: ['#5470C6', '#91CC75', '#FAC858', '#EE6666', '#73C0DE'], // paleta colores
+            tooltip: { trigger: 'item' },
+            legend: { top: '5%', left: 'center' },
+            series: [{
+                name: 'Ventas por Servicio',
+                type: 'pie',
+                radius: '50%',
+                data: datosVentas,
+                emphasis: {
+                    itemStyle: {
+                        shadowBlur: 10,
+                        shadowOffsetX: 0,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)'
                     }
                 }
-            ]
+            }]
         };
         chartUsuarios.setOption(optionUsuarios);
 
-        var chartRegistros = echarts.init(document.getElementById('chartRegistrosMensuales'), isDarkMode ? 'dark' : '');
-        var optionRegistros = {
-            tooltip: {
-                trigger: 'axis'
-            },
+        // Inicializar gráfico de barras para ingresos por periodo (datos estáticos, puedes adaptar)
+        const chartRegistros = echarts.init(document.getElementById('chartRegistrosMensuales'), isDarkMode ? 'dark' : '');
+        const optionRegistros = {
+            tooltip: { trigger: 'axis' },
             xAxis: {
                 type: 'category',
                 data: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic']
             },
-            yAxis: {
-                type: 'value'
-            },
+            yAxis: { type: 'value' },
             series: [{
                 data: [120, 200, 150, 80, 70, 110, 40, 20, 50, 150, 220, 100],
                 type: 'bar',
                 barWidth: '60%',
-                itemStyle: {
-                    color: '#00c0ef'
-                }
+                itemStyle: { color: '#00c0ef' }
             }]
         };
         chartRegistros.setOption(optionRegistros);
 
-        window.addEventListener('resize', function () {
+        // Redimensionar gráficos al cambiar tamaño de ventana
+        window.addEventListener('resize', () => {
             chartUsuarios.resize();
             chartRegistros.resize();
         });
     });
 </script>
+
 {% endblock %}

@@ -212,7 +212,7 @@
                     render: function (data, type, row) {
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_PersonalSancionlVer('${data.personalid}', '${data.incidenciaid}')" title="Ver sanción del personal"><i class="bi bi-eye"></i></button>
+                            <button class="btn btn-xs m-1 btn-info" onclick="fct_PersonalSancionVer('${data.personalid}', '${data.incidenciaid}')" title="Ver sanción del personal"><i class="bi bi-eye"></i></button>
                             <button class="btn btn-xs m-1 btn-primary" onclick="fct_PersonalSancionEditar('${data.personalid}', '${data.incidenciaid}')" title="Editar sanción del personal"><i class="bi bi-pencil-square"></i></button>
                             <button class="btn btn-xs m-1 btn-warning" onclick="fct_PersonalSancionDarBaja('${data.personalid}', '${data.incidenciaid}')" title="Dar de baja la sanción del personal"><i class="bi bi-arrow-down-circle"></i></button>
                             <button class="btn btn-xs m-1 btn-danger" onclick="fct_PersonalSancionEliminar('${data.personalid}', '${data.incidenciaid}')" title="Eliminar sanción depersonal"><i class="bi bi-trash"></i></button>

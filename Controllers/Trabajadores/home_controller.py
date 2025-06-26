@@ -45,7 +45,7 @@ def login():
                 menus = TipoUsuario.obtener_menus(usuario['id_tipousuario'])
                 claims = TipoUsuario.obtener_claims(usuario['id_tipousuario'])
                 menu_ids = [menu['id'] for menu in menus]  # List comprehension para obtener solo los IDs
-                claims_ids = [claim['id'] for claim in claims]
+                claims_ids = [claim['nombre'] for claim in claims]
                 session['usuario'] = usuario
                 session['menus'] = menu_ids
                 session['claims'] = claims_ids

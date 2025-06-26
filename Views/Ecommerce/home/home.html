@@ -338,6 +338,7 @@ function renderResumen(data) {
   let totalPasajes = 0;  // Variable para acumular el total
   let pasajeros = [];  // Array para almacenar los datos de los pasajeros
   let viaje = null;  // Detalles del viaje
+  let asientosPrecios = {}; // Para almacenar los precios por asiento
 
   // Iterar sobre los datos para agrupar los pasajes
   data.forEach((resumen) => {
@@ -356,7 +357,15 @@ function renderResumen(data) {
     pasajero.precio = parseFloat(resumen.precio_total) || 0;
     pasajeros.push(pasajero);
     totalPasajes += pasajero.precio;  // Acumulamos el precio total de todos los pasajes
+
+    // Guardar el precio del asiento en el objeto asientosPrecios
+    if (pasajero.asiento) {
+      asientosPrecios[pasajero.asiento] = pasajero.precio;
+    }
   });
+
+  // Guardar los precios de los asientos en sessionStorage
+  guardarPreciosAsientos(asientosPrecios);
 
   // Formato de fecha para la salida y llegada
   const fechaSalida = moment(viaje.fechaSalida).format("DD-MM-YYYY, HH:mm");
@@ -384,7 +393,7 @@ function renderResumen(data) {
 
   // Aquí agregamos los detalles de cada pasajero
   pasajeros.forEach((p, index) => {
-    html += `<p>Pasajero ${index + 1} (Asiento ${p.asiento}) - S/ ${(parseFloat(p.precio) || 0).toFixed(2)}</p>`;
+    html += `<p id="precio - ${p.asiento}">Pasajero ${index + 1} (Asiento ${p.asiento}) - S/ ${(parseFloat(p.precio) || 0).toFixed(2)}</p>`;
   });
 
   // Descuento y cálculo del total
@@ -408,11 +417,24 @@ function renderResumen(data) {
 }
 
 
+// Guardar precios de asientos en sessionStorage
+function guardarPreciosAsientos(asientosPrecios) {
+  // asientosPrecios: objeto {asientoId: precio, ...}
+  sessionStorage.setItem('precios_asientos', JSON.stringify(asientosPrecios));
+}
+
+// Obtener precios de asientos desde sessionStorage
+function obtenerPreciosAsientos() {
+  const data = sessionStorage.getItem('precios_asientos');
+  return data ? JSON.parse(data) : {};
+}
+
 $(document).on('click', '#confirmarDatos', function () {
   let viaje = sessionStorage.getItem('btn_id_ida');
   let asiento_ids = [];
   let datosPasajeros = [];
   let precioTotal = 0; // Variable para calcular el total
+  let asientosPrecios = {}; // Para guardar los precios por asiento
 
   $('[id^="heading-"]').each(function() {
     let asientoId = $(this).attr('id').split('-')[1];
@@ -421,8 +443,16 @@ $(document).on('click', '#confirmarDatos', function () {
 
     let datosFormulario = FormManager.recopilarDatosFormulario(asientoId);
 
-    // Obtener el precio del asiento - esto depende de cómo lo tengas en tu formulario
-    let precioAsiento = parseFloat(datosFormulario[11]) || 0; // Asegúrate que el índice es correcto
+    // Buscar el input de precio del asiento por id dinámico
+    let precioAsiento = 0;
+    let inputPrecio = $(`#precio_asiento_${asientoId}`);
+    if (inputPrecio.length) {
+      precioAsiento = parseFloat(inputPrecio.val()) || 0;
+    } else if (datosFormulario[11] !== undefined) {
+      precioAsiento = parseFloat(datosFormulario[11]) || 0;
+    }
+
+    asientosPrecios[asientoId] = precioAsiento; // Guardar precio por asiento
 
     const pasajero = {
       asiento: asientoId,
@@ -444,6 +474,9 @@ $(document).on('click', '#confirmarDatos', function () {
     precioTotal += precioAsiento; // Sumar al total
     datosPasajeros.push(pasajero);
   });
+
+  // Guardar los precios de los asientos en sessionStorage
+  guardarPreciosAsientos(asientosPrecios);
 
   if (asiento_ids.length === 0) {
     console.error("No se han seleccionado asientos.");
@@ -491,7 +524,6 @@ $(document).on('click', '#confirmarDatos', function () {
             const config = response.data;
             // Cambiar el color de fondo de jinja-carousel
             $('#jinja-carousel').css('background-color', config.color_header);
-            console.error('Error al obtener la configuración:', response.Msj);
         }
     },
     error: function (xhr, status, error) {

@@ -1189,17 +1189,17 @@ const FormManager = {
         }, 0);
 
         return `
-            <div class="mb-2 fw-bold text-primary">Asiento: ${asientoNombre} (<span>S/0.00</span>)</div>
+            <div class="mb-2 fw-bold text-primary">Asiento: ${asientoNombre} (<span></span>)</div>
             <select class="form-select mb-2" id="tipo_doc_${asientoId}" disabled readonly>
             <option value="DNI">DNI</option>
             <option value="CE">CE</option>
             </select>
-            <input class="form-control mb-2" id="numeroDocNuevo_${asientoId}" placeholder="N° Documento" value="${dniValue}" readonly disabled>
+            <input type="number" class="form-control mb-2" id="numeroDocNuevo_${asientoId}" placeholder="N° Documento" value="${dniValue}" readonly disabled>
             <input class="form-control mb-2" id="nombres_${asientoId}" placeholder="Nombres" readonly disabled>
             <input class="form-control mb-2" id="apellidoPaterno_${asientoId}" placeholder="Apellido paterno" readonly disabled>
             <input class="form-control mb-2" id="apellidoMaterno_${asientoId}" placeholder="Apellido materno" readonly disabled>
             <input class="form-control mb-2" id="fechaNacimientoNuevo_${asientoId}" type="date" placeholder="Fecha nacimiento" readonly disabled>
-            <input class="form-control mb-2" id="telefono_${asientoId}" placeholder="Teléfono" readonly disabled>
+            <input type="number" class="form-control mb-2" id="telefono_${asientoId}" placeholder="Teléfono" readonly disabled>
             <div class="mb-2">
             <label class="me-2">Sexo:</label>
             <input type="radio" class="form-check-input" name="sexo-${asientoId}" id="sexoMasculino_${asientoId}" value="M" disabled readonly>
@@ -1623,7 +1623,6 @@ const PaymentManager = {
                     <label for="tipo_comprobante" class="form-label">Tipo de comprobante</label>
                     <select id="tipo_comprobante" class="form-select">
                         <option value=1>Boleta</option>
-                        <option value=2>Factura</option>
                     </select>
                 </div>
                 
