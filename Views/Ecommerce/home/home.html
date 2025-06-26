@@ -524,7 +524,6 @@ $(document).on('click', '#confirmarDatos', function () {
             const config = response.data;
             // Cambiar el color de fondo de jinja-carousel
             $('#jinja-carousel').css('background-color', config.color_header);
-            console.error('Error al obtener la configuración:', response.Msj);
         }
     },
     error: function (xhr, status, error) {

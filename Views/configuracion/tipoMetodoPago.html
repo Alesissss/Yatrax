@@ -157,6 +157,7 @@
                     className: 'btn btn-warning',
                     columns: ':not(.noVis)',
                 },
+                {% if "Registrar tipo método de pago" in session['claims'] %}
                 {
                     text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo tipo metodo de pago',
                     className: 'btn bg-success m-1',
@@ -165,6 +166,7 @@
                         fct_TipoMetodoPagoNuevo();
                     },
                 },
+                {% endif %}
             ],
             ajax: {
                 url: "/trabajadores/configuracion/GetData_TipoMetodoPago",
@@ -206,14 +208,31 @@
                     data: null,
                     name: null,
                     render: function (data, type, row) {
+                        let editar = '{{ "Editar tipo método de pago" in session["claims"] }}';
+                        let darBaja = '{{ "Dar baja tipo método de pago" in session["claims"] }}';
+                        let eliminar = '{{ "Eliminar tipo método de pago" in session["claims"] }}';
+                        let ver = '{{ "Ver tipo método de pago" in session["claims"] }}';
+
+                        let buttons = '';
+                        if (ver === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-info" onclick="fct_TipoMetodoPagoVer('${data.ID}')" title="Ver tipo método de pago"><i class="bi bi-eye"></i></button>`;
+                        }
+                        if (editar === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-primary" onclick="fct_TipoMetodoPagoEditar('${data.ID}')" title="Editar tipo método de pago"><i class="bi bi-pencil-square"></i></button>`;
+                        }
+                        if (darBaja === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-warning" onclick="fct_TipoMetodoPagoDarBaja('${data.ID}')" title="Dar de baja tipo método de pago"><i class="bi bi-arrow-down-circle"></i></button>`;
+                        }
+                        if (eliminar === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-danger" onclick="fct_TipoMetodoPagoEliminar('${data.ID}')" title="Eliminar tipo método de pago"><i class="bi bi-trash"></i></button>`;
+                        }
+
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_TipoMetodoPagoVer('${data.ID}')" title="Ver tipo metodo de pago"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_TipoMetodoPagoEditar('${data.ID}')" title="Editar tipo metodo de pago"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_TipoMetodoPagoDarBaja('${data.ID}')" title="Dar de baja tipo metodo de pago"><i class="bi bi-arrow-down-circle"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_TipoMetodoPagoEliminar('${data.ID}')" title="Eliminar tipo metodo de pago"><i class="bi bi-trash"></i></button>
+                            ${buttons}
                         </div>
                         `;
+
                     },
                     className: 'text-center align-middle',
                 }

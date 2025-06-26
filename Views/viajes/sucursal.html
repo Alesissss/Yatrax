@@ -160,6 +160,7 @@
                     className: 'btn btn-warning',
                     columns: ':not(.noVis)',
                 },
+                {% if "Registrar sucursales" in session["claims"] %}
                 {
                     text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo Sucursal',
                     className: 'btn bg-success m-1',
@@ -168,6 +169,7 @@
                         fct_SucursalNuevo();
                     },
                 },
+                {% endif %}
             ],
             ajax: {
                 url: "/trabajadores/viajes/GetData_Sucursal",
@@ -212,12 +214,28 @@
                     data: null,
                     name: null,
                     render: function (data, type, row) {
+                        let editar = '{{ "Editar sucursales" in session["claims"] }}';
+                        let darBaja = '{{ "Dar baja sucursales" in session["claims"] }}';
+                        let eliminar = '{{ "Eliminar sucursales" in session["claims"] }}';
+                        let ver = '{{ "Ver sucursales" in session["claims"] }}';
+
+                        let buttons = '';
+                        if (ver === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-info" onclick="fct_SucursalVer('${data.id}')" title="Ver Sucursal"><i class="bi bi-eye"></i></button>`;
+                        }
+                        if (editar === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-primary" onclick="fct_SucursalEditar('${data.id}')" title="Editar Sucursal"><i class="bi bi-pencil-square"></i></button>`;
+                        }
+                        if (darBaja === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-warning" onclick="fct_SucursalDarBaja('${data.id}')" title="Dar de baja Sucursal"><i class="bi bi-arrow-down-circle"></i></button>`;
+                        }
+                        if (eliminar === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-danger" onclick="fct_SucursalEliminar('${data.id}')" title="Eliminar Sucursal"><i class="bi bi-trash"></i></button>`;
+                        }
+
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_SucursalVer('${data.id}')" title="Ver Sucursal"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_SucursalEditar('${data.id}')" title="Editar Sucursal"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_SucursalDarBaja('${data.id}')" title="Dar de baja Sucursal"><i class="bi bi-arrow-down-circle"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_SucursalEliminar('${data.id}')" title="Eliminar Sucursal"><i class="bi bi-trash"></i></button>
+                            ${buttons}
                         </div>
                         `;
                     },

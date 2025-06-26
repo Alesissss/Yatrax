@@ -157,6 +157,7 @@
                     className: 'btn btn-warning',
                     columns: ':not(.noVis)',
                 },
+                {% if "Registrar tipo cliente" in session["claims"] %}
                 {
                     text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo tipo cliente',
                     className: 'btn bg-success m-1',
@@ -165,6 +166,7 @@
                         fct_TipoClienteNuevo();
                     },
                 },
+                {% endif %}
             ],
             ajax: {
                 url: "/trabajadores/ventas/GetData_TipoCliente",
@@ -206,12 +208,28 @@
                     data: null,
                     name: null,
                     render: function (data, type, row) {
+                        let editar = '{{ "Editar tipo cliente" in session["claims"] }}';
+                        let darBaja = '{{ "Dar baja tipo cliente" in session["claims"] }}';
+                        let eliminar = '{{ "Eliminar tipo cliente" in session["claims"] }}';
+                        let ver = '{{ "Ver tipo cliente" in session["claims"] }}';
+
+                        let buttons = '';
+                        if (ver === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-info" onclick="fct_TipoClienteVer('${data.ID}')" title="Ver tipo cliente"><i class="bi bi-eye"></i></button>`;
+                        }
+                        if (editar === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-primary" onclick="fct_TipoClienteEditar('${data.ID}')" title="Editar tipo cliente"><i class="bi bi-pencil-square"></i></button>`;
+                        }
+                        if (darBaja === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-warning" onclick="fct_TipoClienteDarBaja('${data.ID}')" title="Dar de baja tipo cliente"><i class="bi bi-arrow-down-circle"></i></button>`;
+                        }
+                        if (eliminar === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-danger" onclick="fct_TipoClienteEliminar('${data.ID}')" title="Eliminar tipo cliente"><i class="bi bi-trash"></i></button>`;
+                        }
+
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_TipoClienteVer('${data.ID}')" title="Ver tipo cliente"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_TipoClienteEditar('${data.ID}')" title="Editar tipo cliente"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_TipoClienteDarBaja('${data.ID}')" title="Dar de baja tipo cliente"><i class="bi bi-arrow-down-circle"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_TipoClienteEliminar('${data.ID}')" title="Eliminar tipo cliente"><i class="bi bi-trash"></i></button>
+                            ${buttons}
                         </div>
                         `;
                     },

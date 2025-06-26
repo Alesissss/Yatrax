@@ -514,7 +514,8 @@ def get_rutas_concatenadas_sin_la_actual():
 def get_persona_data():
     def responder(datos):
         if datos:
-            print(datos)
+            f_nacimiento = datos.get("f_nacimiento")
+            datos["f_nacimiento"] = f_nacimiento.strftime("%Y-%m-%d %H:%M:%S") if f_nacimiento else None
             return jsonify({'data': datos, 'Status': 'success', 'Msj': 'Datos obtenidos correctamente'})
         return None  # Si no hay datos, no responde nada aún
 

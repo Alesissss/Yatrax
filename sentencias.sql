@@ -847,6 +847,10 @@ VALUES
 ('Descuento', 1, '2025-02-12', '2025-12-25', 'GINGOBELL', 30.00);
 
 
+INSERT INTO `empresa`(`id`, `razon_social`, `ruc`, `direccion`, `telefono`, `email`, `estado`, `fecha_registro`, `usuario`) VALUES (1,'YATRAX SAC','20709942650','
+Av. José Balta 2704, Chiclayo 14003', '913626759','yatraxcontacto@yatusa.com',1,CURRENT_TIMESTAMP,'ander@gmail.com');
+
+
 INSERT INTO preguntas_frecuentes (pregunta, respuesta, estado, fecha_registro, usuario) VALUES ('¿Qué medios de pago
 aceptan para comprar pasajes en línea?','Aceptamos tarjetas de crédito y débito Visa, así como billeteras digitales como
 Yape y Plin.','1','2025-06-07 11:34:18','ander@gmail.com');
@@ -3129,23 +3133,24 @@ INSERT INTO conf_menus (id, nombre, estado) VALUES (5, 'M_PERSONAL', 1);
 INSERT INTO conf_menus (id, nombre, estado) VALUES (6, 'M_ATENCION', 1);
 
 -- Submenús de USUARIOS
--- Gestionar usuarios
-INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (10, 'Gestionar usuarios', 1, 1);
--- Claims de Gestionar usuarios (Menú 10)
-INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Registrar usuario', 1, 10);
-INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Editar usuario', 1, 10);
-INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Dar baja usuario', 1, 10);
-INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Eliminar usuario', 1, 10);
-INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Ver usuario', 1, 10);
 
 -- Gestionar tipos de usuarios
-INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (11, 'Gestionar tipos de usuarios', 1, 1);
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (10, 'Gestionar tipos de usuarios', 1, 1);
 -- Claims de Gestionar tipos de usuarios (Menú 11)
-INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Registrar tipo de usuario', 1, 11);
-INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Editar tipo de usuario', 1, 11);
-INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Dar baja tipo de usuario', 1, 11);
-INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Eliminar tipo de usuario', 1, 11);
-INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Ver tipo de usuario', 1, 11);
+INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Registrar tipo de usuario', 1, 10);
+INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Editar tipo de usuario', 1, 10);
+INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Dar baja tipo de usuario', 1, 10);
+INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Eliminar tipo de usuario', 1, 10);
+INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Ver tipo de usuario', 1, 10);
+
+-- Gestionar usuarios
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (11, 'Gestionar usuarios', 1, 1);
+-- Claims de Gestionar usuarios (Menú 10)
+INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Registrar usuario', 1, 11);
+INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Editar usuario', 1, 11);
+INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Dar baja usuario', 1, 11);
+INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Eliminar usuario', 1, 11);
+INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Ver usuario', 1, 11);
 
 -- Submenús de CONFIGURACIÓN
 -- Gestionar conf_general
@@ -3233,7 +3238,7 @@ INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Ver tipo cliente', 1, 
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (31, 'Gestionar cliente', 1, 3);
 -- Claims de Gestionar cliente (Menú 32)
 INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Registrar cliente', 1, 31);
-INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Editar tipo cliente', 1, 31);
+INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Editar cliente', 1, 31);
 INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Dar baja cliente', 1, 31);
 INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Eliminar cliente', 1, 31);
 INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Ver cliente', 1, 31);
@@ -3382,7 +3387,31 @@ INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Eliminar sanción a pe
 INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Ver sanción a personal', 1, 53);
 
 -- Submenús de ATENCIÓN AL CLIENTE
-INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (60, 'Ejemplo', 1, 6);
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (60, 'Gestionar reservas', 1, 6);
+-- Claims de Gestionar tipo personal (Menú 50)
+INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Pagar reserva', 1, 60);
+INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Eliminar reserva', 1, 60);
+
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (61, 'Gestionar tipo reclamo', 1, 6);
+-- Claims de Gestionar tipo personal (Menú 50)
+INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Registrar tipo reclamo', 1, 61);
+INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Editar tipo reclamo', 1, 61);
+INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Dar baja tipo reclamo', 1, 61);
+INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Eliminar tipo reclamo', 1, 61);
+INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Ver tipo reclamo', 1, 61);
+
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (62, 'Gestionar reclamo', 1, 6);
+-- Claims de Gestionar tipo personal (Menú 50)
+INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Registrar reclamo', 1, 62);
+INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Editar reclamo', 1, 62);
+INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Dar baja reclamo', 1, 62);
+INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Eliminar reclamo', 1, 62);
+INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Ver reclamo', 1, 62);
+
+INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (63, 'Gestionar reembolso', 1, 6);
+-- Claims de Gestionar tipo personal (Menú 50)
+INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Aceptar reembolso', 1, 63);
+INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Rechazar reembolso', 1, 63);
 
 -- Tabla dmenus
 INSERT INTO conf_dmenus (idTipoUsuario, idMenu)
