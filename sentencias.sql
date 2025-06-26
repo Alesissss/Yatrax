@@ -658,6 +658,7 @@ CREATE TABLE viaje (
     esReprogramado BOOLEAN DEFAULT 0,
     fechaHoraSalida DATETIME NOT NULL,
     fechaHoraLlegada DATETIME NOT NULL,
+    idSucursalActual INT NULL,
     -- Auditoría
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NOT NULL,

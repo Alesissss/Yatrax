@@ -1526,7 +1526,9 @@ def get_viajesProgramados():
                 'vehiculo': dv['vehiculo'],
                 'esReprogramado': dv['esReprogramado'],
                 'fechaHoraSalida': dv['fechaHoraSalida'].strftime("%Y-%m-%d %H:%M:%S") if dv['fechaHoraSalida'] else None, 
-                'fechaHoraLlegada': dv['fechaHoraLlegada'].strftime("%Y-%m-%d %H:%M:%S") if dv['fechaHoraLlegada'] else None
+                'fechaHoraLlegada': dv['fechaHoraLlegada'].strftime("%Y-%m-%d %H:%M:%S") if dv['fechaHoraLlegada'] else None,
+                'escalas': Ruta.obtener_escalas_por_ruta(dv['idRuta']) if Ruta.obtener_escalas_por_ruta(dv['idRuta']) else [],
+                'idSucursalActual': dv['idSucursalActual'],
                 } for dv in viajes]
         return jsonify({'data': viajes, 'Status': 'success', 'Msj': 'Listado de viajes retornado exitosamente'})
     except Exception as e:
@@ -1805,6 +1807,24 @@ def cambiar_estado_viaje():
             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
         else:
             return jsonify({"Status": "error", 'Msj': 'Error desconocido al cambiar estado al viaje'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+    
+@viajes_bp.route("/CambiarEscalaViaje", methods=['POST'])
+def cambiar_escala_viaje():
+    try:
+        id = request.form.get('id')
+
+        mensajes = Viaje.actualizar_fechas_detalles(id)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al cambiar escala del viaje'})
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
     
