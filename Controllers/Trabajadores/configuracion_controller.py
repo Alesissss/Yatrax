@@ -1,5 +1,6 @@
 import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort
+from  datetime import datetime
 from Models.usuario import Usuario
 from Models.tipoUsuario import TipoUsuario
 from Models.metodo_pago import MetodoPago
@@ -960,6 +961,16 @@ def activar_terminos(id):
 def get_promociones():
     try:
         promociones = Promocion.obtener_todos()
+        promociones = [{
+            'id': p['id'],
+            'nombre': p['nombre'],
+            'estado': p['estado'],
+            'fecha_inicio': p['fecha_inicio'].strftime('%Y-%m-%d %H:%M:%S') if p['fecha_inicio'] else None,
+            'fecha_fin': p['fecha_fin'].strftime('%Y-%m-%d %H:%M:%S') if p['fecha_fin'] else None,
+            'codigo': p['codigo'],
+            'monto_promo': p['monto_promo'],
+            } for p in promociones] 
+
         if promociones:
             return jsonify({"Status": "success", "data": promociones})
         return jsonify({"Status": "info", "Msj": "Aún no hay tipos de métodos de pago registrados", "data": []})
@@ -1010,6 +1021,12 @@ def editar_promocion(id):
         promocion = Promocion.obtener_por_id(id)
         if not promocion:
             return jsonify({"Status": "error", "Msj": "Promoción no encontrada"})
+        
+        if promocion:
+            if isinstance(promocion["fecha_inicio"], str):
+                promocion["fecha_inicio"] = datetime.strptime(promocion["fecha_inicio"], "%Y-%m-%d")
+            if isinstance(promocion["fecha_fin"], str):
+                promocion["fecha_fin"] = datetime.strptime(promocion["fecha_fin"], "%Y-%m-%d")
 
         if request.method == 'POST':
             nombre = request.form.get("nombre", "").strip()
@@ -1058,6 +1075,12 @@ def ver_promocion(id):
         promocion = Promocion.obtener_por_id(id)
         if not promocion:
             return render_template("error.html", error="Promoción no encontrada")
+        
+        if promocion:
+            if isinstance(promocion["fecha_inicio"], str):
+                promocion["fecha_inicio"] = datetime.strptime(promocion["fecha_inicio"], "%Y-%m-%d")
+            if isinstance(promocion["fecha_fin"], str):
+                promocion["fecha_fin"] = datetime.strptime(promocion["fecha_fin"], "%Y-%m-%d")
 
         return render_template("configuracion/promocionCRUD.html",
                                promocion=promocion,

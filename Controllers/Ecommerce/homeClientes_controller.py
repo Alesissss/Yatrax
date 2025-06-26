@@ -17,7 +17,6 @@ from Models.servicio import Servicio
 from Models.cliente import Cliente
 from Models.tipo_herramienta import TipoHerramienta
 from Models.microservicio import MicroServicio
-
 from Models.tipoDocumento import TipoDocumento
 from Models.tipoCliente import TipoCliente
 from Models.tipoVehiculo import TipoVehiculo
@@ -97,7 +96,7 @@ def procesar_reserva():
 
 def renderizarCompra():
     herramientas = Herramienta.obtener_todos()
-    return render_template('Ecommerce/home/partials/ventaPasajes.html', herramientas = herramientas)
+    return render_template('/Ecommerce/home/partials/ventaPasajes.html', herramientas = herramientas)
 
 
 @homeClientes_bp.route('/renderizar_itinerario', methods=['POST'])
@@ -137,6 +136,13 @@ def obtenerDatosPasajero():
     datos_pasajero = Pasajero.obtener_por_numero_documento(numero_doc)
     if not datos_pasajero:
         return jsonify(status="error", msg="Pasajero no encontrado"), 404
+    
+    # Convertir fecha si es string
+    if isinstance(datos_pasajero["f_nacimiento"], str):
+        try:
+            datos_pasajero["f_nacimiento"] = datetime.strptime(datos_pasajero["f_nacimiento"], "%Y-%m-%d")
+        except ValueError:
+            return jsonify(status="error", msg="Formato de fecha inválido"), 500
 
     return jsonify(status="success", datos=datos_pasajero), 200
 
