@@ -51,9 +51,6 @@
                         <a class="navbar-brand text-white"
                             href="{{url_for('homeClientes.index')}}#seccionServicio">Servicios</a>
                     </li>
-                    <!-- <li class="nav-item">
-                        <a class="navbar-brand text-white" href="#">Sucursales</a>
-                    </li> -->
                     <li class="nav-item">
                         <a class="navbar-brand text-white" href="{{ url_for('homeClientes.mi_pasaje_operaciones') }}">Mi pasaje</a>
                     </li>
@@ -313,6 +310,20 @@
                     $('#maestra_footer')[0].style.setProperty('background-color', config.color_footer, 'important');
                     $('#maestra_logo').attr('src', config.logo);
                     $('#maestra_logo_footer').attr('src', config.logo);
+
+                    let titulo = document.title.split('-')[1].trim();
+                    $('#nombreEmpresa').text(config.nombre);
+                    document.title = config.nombre + ' - ' + titulo
+
+                    const existingFavicon = document.querySelector("link[rel='icon']");
+                    if (existingFavicon) {
+                        existingFavicon.parentNode.removeChild(existingFavicon);
+                    }
+
+                    const newFavicon = document.createElement("link");
+                    newFavicon.rel = "icon";
+                    newFavicon.href = config.logo;
+                    document.head.appendChild(newFavicon);
 
                 } else {
                     console.error('Error al obtener la configuración:', response.Msj);
