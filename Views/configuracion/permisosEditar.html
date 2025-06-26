@@ -57,55 +57,62 @@
                 {% endfor %}
             </tbody>
         </table> -->
-        <table class="table table-bordered table-hover permisos-table">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Nombre del módulo</th>
-                    <th class="columna-permiso">Permiso</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for menu in menus %}
-                <!-- Módulo principal -->
-                <tr class="modulo-principal" data-modulo="{{ menu['id'] }}">
-                    <td>
-                        <span class="expandir-icon" onclick="toggleSubmenus(`{{ menu['id'] }}`)">
-                            <i class="fas fa-chevron-right"></i>
-                        </span>
-                        {{ menu['nombre'] }}
-                    </td>
-                    <td class="columna-permiso">
-                        <input type="checkbox" class="permiso-checkbox" data-idmenu="{{ menu['id'] }}"
-                            data-idusuario="{{ tipoUsuario.id }}" {% if menu['id'] in dmnus_ids %}checked{% endif %}>
-                    </td>
-                </tr>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover permisos-table">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Nombre del módulo</th>
+                        <th class="columna-permiso">Permiso</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for menu in menus %}
+                    <!-- Módulo principal -->
+                    <tr class="modulo-principal" data-modulo="{{ menu['id'] }}">
+                        <td>
+                            <span class="expandir-icon" onclick="toggleSubmenus(`{{ menu['id'] }}`)">
+                                <i class="fas fa-chevron-right"></i>
+                            </span>
+                            {{ menu['nombre'] }}
+                        </td>
+                        <td class="columna-permiso">
+                            <input type="checkbox" class="permiso-checkbox" data-idmenu="{{ menu['id'] }}"
+                                data-idusuario="{{ tipoUsuario.id }}" {% if menu['id'] in dmnus_ids %}checked{% endif
+                                %}>
+                        </td>
+                    </tr>
 
-                <!-- Submenús -->
-                {% for submenu in menu['submenus'] %}
-                <tr class="modulo-submenu submenu-{{ menu['id'] }} submenu-hidden" data-submenu="{{ submenu['id'] }}">
-                    <td>
-                        <span class="expandir-icon" onclick="toggleClaim(`{{ submenu['id'] }}`)">
-                            <i class="fas fa-chevron-right"></i>
-                        </span>
-                        {{ submenu['nombre'] }}</td>
-                    <td class="columna-permiso">
-                        <input type="checkbox" class="permiso-checkbox" data-idmenu="{{ submenu['id'] }}"
-                            data-idusuario="{{ tipoUsuario.id }}" {% if submenu['id'] in dmnus_ids %}checked{% endif %}>
-                    </td>
-                </tr>
-                {% for claim in submenu['submenus'] %}
-                <tr class="modulo-claim claim-{{ submenu['id'] }} submenu-hidden">
-                    <td>- {{ claim['nombre'] }}</td>
-                    <td class="columna-permiso">
-                        <input type="checkbox" class="claim-checkbox" data-idclaim="{{ claim['id'] }}"
-                            data-idusuario="{{ tipoUsuario.id }}" {% if claim['id'] in dclaims_ids %}checked{% endif %}>
-                    </td>
-                </tr>
-                {% endfor %}
-                {% endfor %}
-                {% endfor %}
-            </tbody>
-        </table>
+                    <!-- Submenús -->
+                    {% for submenu in menu['submenus'] %}
+                    <tr class="modulo-submenu submenu-{{ menu['id'] }} submenu-hidden"
+                        data-submenu="{{ submenu['id'] }}">
+                        <td>
+                            <span class="expandir-icon" onclick="toggleClaim(`{{ submenu['id'] }}`)">
+                                <i class="fas fa-chevron-right"></i>
+                            </span>
+                            {{ submenu['nombre'] }}
+                        </td>
+                        <td class="columna-permiso">
+                            <input type="checkbox" class="permiso-checkbox" data-idmenu="{{ submenu['id'] }}"
+                                data-idusuario="{{ tipoUsuario.id }}" {% if submenu['id'] in dmnus_ids %}checked{% endif
+                                %}>
+                        </td>
+                    </tr>
+                    {% for claim in submenu['submenus'] %}
+                    <tr class="modulo-claim claim-{{ submenu['id'] }} submenu-hidden">
+                        <td>- {{ claim['nombre'] }}</td>
+                        <td class="columna-permiso">
+                            <input type="checkbox" class="claim-checkbox" data-idclaim="{{ claim['id'] }}"
+                                data-idusuario="{{ tipoUsuario.id }}" {% if claim['id'] in dclaims_ids %}checked{% endif
+                                %}>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -197,7 +204,7 @@
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
-                    
+
                     const formData = new FormData();
                     formData.append('idMenu', idMenu);
                     formData.append('idTipoUsuario', idUsuario);
@@ -256,7 +263,7 @@
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
-                    
+
                     const formData = new FormData();
                     formData.append('idMenu', idMenu);
                     formData.append('idTipoUsuario', idUsuario);

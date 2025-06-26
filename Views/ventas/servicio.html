@@ -160,6 +160,7 @@
                     className: 'btn btn-warning',
                     columns: ':not(.noVis)',
                 },
+                {% if "Registrar servicio" in session["claims"] %}
                 {
                     text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo servicio',
                     className: 'btn bg-success m-1',
@@ -168,6 +169,7 @@
                         fct_NuevoServicio();
                     },
                 },
+                {% endif %}
             ],
             ajax: {
                 url: "/trabajadores/ventas/GetData_Servicio",
@@ -236,12 +238,28 @@
                     data: null,
                     name: null,
                     render: function (data, type, row) {
+                        let editar = '{{ "Editar servicio" in session["claims"] }}';
+                        let darBaja = '{{ "Dar baja servicio" in session["claims"] }}';
+                        let eliminar = '{{ "Eliminar servicio" in session["claims"] }}';
+                        let ver = '{{ "Ver servicio" in session["claims"] }}';
+
+                        let buttons = '';
+                        if (ver === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-info" onclick="fct_VerServicio('${data.id}')" title="Ver servicio"><i class="bi bi-eye"></i></button>`;
+                        }
+                        if (editar === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-primary" onclick="fct_ServicioEditar('${data.id}')" title="Editar servicio"><i class="bi bi-pencil-square"></i></button>`;
+                        }
+                        if (darBaja === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-warning" onclick="fct_ServicioDarBaja('${data.id}')" title="Dar de baja servicio"><i class="bi bi-arrow-down-circle"></i></button>`;
+                        }
+                        if (eliminar === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-danger" onclick="fct_ServicioEliminar('${data.id}')" title="Eliminar servicio"><i class="bi bi-trash"></i></button>`;
+                        }
+
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_VerServicio('${data.id}')" title="Ver servicio"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_ServicioEditar('${data.id}')" title="Editar servicio"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_ServicioDarBaja('${data.id}')" title="Dar de baja servicio"><i class="bi bi-arrow-down-circle"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_ServicioEliminar('${data.id}')" title="Eliminar servicio"><i class="bi bi-trash"></i></button>
+                            ${buttons}
                         </div>
                         `;
                     },

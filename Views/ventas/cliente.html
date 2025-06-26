@@ -244,6 +244,7 @@
                     className: 'btn btn-warning',
                     columns: ':not(.noVis)',
                 },
+                {% if "Registrar cliente" in session["claims"] %}
                 {
                     text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo cliente',
                     className: 'btn bg-success m-1',
@@ -252,6 +253,7 @@
                         fct_ClienteNuevo();
                     },
                 },
+                {% endif %}
             ],
             ajax: {
                 url: "/trabajadores/ventas/GetData_Cliente",
@@ -325,14 +327,30 @@
                     data: null,
                     name: null,
                     render: function (data, type, row) {
+                        let editar = '{{ "Editar cliente" in session["claims"] }}';
+                        let darBaja = '{{ "Dar baja cliente" in session["claims"] }}';
+                        let eliminar = '{{ "Eliminar cliente" in session["claims"] }}';
+                        let ver = '{{ "Ver cliente" in session["claims"] }}';
+
+                        let buttons = '';
+                        if (ver === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-info" onclick="fct_ClienteVer('${data.ID}')" title="Ver cliente"><i class="bi bi-eye"></i></button>`;
+                        }
+                        if (editar === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-primary" onclick="fct_ClienteEditar('${data.ID}')" title="Editar cliente"><i class="bi bi-pencil-square"></i></button>`;
+                        }
+                        if (darBaja === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-warning" onclick="fct_ClienteDarBaja('${data.ID}')" title="Dar de baja cliente"><i class="bi bi-arrow-down-circle"></i></button>`;
+                        }
+                        if (eliminar === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-danger" onclick="fct_ClienteEliminar('${data.ID}')" title="Eliminar cliente"><i class="bi bi-trash"></i></button>`;
+                        }
+
                         return `
-                <div class="flex-wrap btn-group">
-                    <button class="btn btn-xs m-1 btn-info" onclick="fct_ClienteVer('${data.ID}')" title="Ver cliente"><i class="bi bi-eye"></i></button>
-                    <button class="btn btn-xs m-1 btn-primary" onclick="fct_ClienteEditar('${data.ID}')" title="Editar cliente"><i class="bi bi-pencil-square"></i></button>
-                    <button class="btn btn-xs m-1 btn-warning" onclick="fct_ClienteDarBaja('${data.ID}')" title="Dar de baja cliente"><i class="bi bi-arrow-down-circle"></i></button>
-                    <button class="btn btn-xs m-1 btn-danger" onclick="fct_ClienteEliminar('${data.ID}')" title="Eliminar cliente"><i class="bi bi-trash"></i></button>
-                </div>
-            `;
+                        <div class="flex-wrap btn-group">
+                            ${buttons}
+                        </div>
+                        `;
                     },
                     className: 'text-center align-middle',
                     orderable: false

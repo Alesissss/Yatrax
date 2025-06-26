@@ -161,6 +161,7 @@
                     className: 'btn btn-warning',
                     columns: ':not(.noVis)',
                 },
+                {% if "Registrar preguntas frecuentes" in session["claims"] %}
                 {
                     text: '<i class="bi bi-plus-circle" style="margin-right: 5px;"></i>Nueva pregunta frecuente',
                     className: 'btn bg-success m-1',
@@ -169,6 +170,7 @@
                         fct_PreguntasFrecuentesNuevo();
                     },
                 },
+                {% endif %}
             ],
             ajax: {
                 url: "/trabajadores/configuracion/GetData_PreguntasFrecuentes",
@@ -209,12 +211,28 @@
                     data: null,
                     name: null,
                     render: function (data, type, row) {
+                        let editar = '{{ "Editar preguntas frecuentes" in session["claims"] }}';
+                        let darBaja = '{{ "Dar baja preguntas frecuentes" in session["claims"] }}';
+                        let eliminar = '{{ "Eliminar preguntas frecuentes" in session["claims"] }}';
+                        let ver = '{{ "Ver preguntas frecuentes" in session["claims"] }}';
+
+                        let buttons = '';
+                        if (ver === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-info" onclick="fct_PreguntasFrecuentesVer('${data.id}')" title="Ver pregunta frecuente"><i class="bi bi-eye"></i></button>`;
+                        }
+                        if (editar === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-primary" onclick="fct_PreguntasFrecuentesEditar('${data.id}')" title="Editar pregunta frecuente"><i class="bi bi-pencil-square"></i></button>`;
+                        }
+                        if (darBaja === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-warning" onclick="fct_PreguntasFrecuentesDarBaja('${data.id}')" title="Dar de baja pregunta frecuente"><i class="bi bi-arrow-down-circle"></i></button>`;
+                        }
+                        if (eliminar === "True") {
+                            buttons += `<button class="btn btn-xs m-1 btn-danger" onclick="fct_PreguntasFrecuentesEliminar('${data.id}')" title="Eliminar pregunta frecuente"><i class="bi bi-trash"></i></button>`;
+                        }
+
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_PreguntasFrecuentesVer('${data.id}')" title="Ver pregunta frecuente"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_PreguntasFrecuentesEditar('${data.id}')" title="Editar pregunta frecuente"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_PreguntasFrecuentesDarBaja('${data.id}')" title="Dar de baja pregunta frecuente"><i class="bi bi-arrow-down-circle"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick="fct_PreguntasFrecuentesEliminar('${data.id}')" title="Eliminar pregunta frecuente"><i class="bi bi-trash"></i></button>
+                            ${buttons}
                         </div>
                         `;
                     },
