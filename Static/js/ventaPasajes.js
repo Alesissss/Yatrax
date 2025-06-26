@@ -2288,7 +2288,7 @@ const PaymentManager = {
                     </div>
                 </div>
             `;
-        } else if (tipoMetodo === "BILLETERA VIRTUAL") {
+        } else if (tipoMetodo.toUpperCase() == "BILLETERA VIRTUAL") {
             if (metodo.qr) {
                 divExtra.innerHTML = `
                     <div class="text-center">
@@ -2354,7 +2354,7 @@ const PaymentManager = {
             } else if (nombreTipoMetodo == "efectivo" && nombreMetodo == "efectivo") {
                 this.procesarReserva();
             } else {
-                toastr.info("Funcionalidad en desarrollo");
+                this.procesarPago();
             }
         });
     },
@@ -2465,6 +2465,7 @@ const PaymentManager = {
 
     capturarDatosPago() {
         const tipoComprobante = document.getElementById("tipo_comprobante").value;
+        const igv = CONFIG.IGV;
 
         let datosContacto = {
             tipo_comprobante: tipoComprobante,
@@ -2494,6 +2495,7 @@ const PaymentManager = {
         const metodoEspecifico = document.getElementById("metodo_pago_especifico")?.value;
 
         const datosPago = {
+            igv:igv,
             tipo_metodo: tipoMetodo,
             metodo_especifico: metodoEspecifico,
             timestamp: new Date().toISOString()
