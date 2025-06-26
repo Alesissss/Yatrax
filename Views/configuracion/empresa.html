@@ -1,34 +1,28 @@
 {% extends "index.html" %}
 
-{% block title %}YATRAX - Gestión de reclamos{% endblock %}
+{% block title %}YATRAX - Empresas{% endblock %}
 
 {% block content %}
-<div class="card d-none" id="efec-cargando">
-    <div
-        class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center overlay dark">
-        <i class="fas fa-3x fa-sync-alt fa-spin text-white"></i>
-    </div>
-</div>
 <div class="container-fluid p-4">
     <div class="panel-heading">
         <div class="row">
             <div class="col-md-12">
-                <h1>Gestionar reclamos</h1>
+                <h1>Gestionar empresas</h1>
             </div>
         </div>
     </div>
     <div class="panel-body">
         <div class="row">
             <div class="col-12">
-                <table id="tbl_Usuarios" class="table table-bordered table-short-rows">
+                <table id="tbl_Empresas" class="table table-bordered table-short-rows">
                     <thead class="bg-gray">
                         <tr>
                             <th class="text-center">ID</th>
-                            <th class="text-center">ID_PASAJE</th>
-                            <th class="text-center">TIPO_RECLAMO</th>
-                            <th class="text-center">MOTIVO</th>
-                            <th class="text-center">MONTO</th>
-                            <th class="text-center">DETALLE</th>
+                            <th class="text-center">RAZÓN SOCIAL</th>
+                            <th class="text-center">RUC</th>
+                            <th class="text-center">DIRECCIÓN</th>
+                            <th class="text-center">TELÉFONO</th>
+                            <th class="text-center">EMAIL</th>
                             <th class="text-center">ESTADO</th>
                             <th class="text-center">ACCIÓN</th>
                         </tr>
@@ -41,9 +35,10 @@
     </div>
 </div>
 {% endblock %}
+
 {% block scripts %}
 <script>
-    var dtUsuarios;
+    var dtEmpresas;
 
     $(document).ready(function () {
         // $('body').addClass('sidebar-collapse');
@@ -109,38 +104,97 @@
             lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
         });
 
-        fct_IniciarTablaUsuarios('#tbl_Usuarios');
+        fct_IniciarTablaEmpresas('#tbl_Empresas');
+
+        $('#tbl_Empresas').on('click', '.activar-empresa', function (e) {
+            const checkbox = $(this);
+            const id = checkbox.data('id');
+            const isChecked = checkbox.is(':checked');
+            const accion = isChecked ? 1 : 0;
+            let texto = accion === 1 ? 'asignar' : 'eliminar';
+
+            e.preventDefault();
+
+            if (accion === 0) {
+                toastr.warning('No se puede desactivar una empresa activa; por favor, active la que desea activar para que las demás se desactiven', 'MENSAJE DE SISTEMA');
+                return;
+            }
+
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción activará la empresa y desactivará a las demás. ¿Deseas continuar?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, activar empresa",
+                cancelButtonText: "Cancelar",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Si el usuario confirma, hacemos la petición AJAX
+                    $.ajax({
+                        url: `/trabajadores/configuracion/ActivarEmpresa/${id}`,  // Pasamos el ID en la URL
+                        type: "POST",
+                        contentType: "application/json",
+                        success: function (response) {
+                            if (response.Status === "success") {
+                                if (response.Msj2 !== '' && response.Msj2 !== null) {
+                                    toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
+                                    return;
+                                }
+
+                                fct_IniciarTablaEmpresas('#tbl_Empresas');
+                                toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                            } else {
+                                toastr.error(response.Msj, "MENSAJE DE SISTEMA");
+                                console.error('Error: ' + response.Msj);
+                            }
+                        },
+                        error: function (xhr, Status, error) {
+                            toastr.error("Error en el servidor", "MENSAJE DE SISTEMA");
+                            console.error('Error:' + error);
+                        }
+                    });
+
+                } else {
+                    checkbox.prop('checked', !isChecked);
+                }
+            });
+        });
     });
 
-    function fct_IniciarTablaUsuarios(IdTabla) {
+    function fct_IniciarTablaEmpresas(IdTabla) {
         // Inicializar DataTables con botones
-        dtUsuarios = $(IdTabla).DataTable({
+        dtEmpresas = $(IdTabla).DataTable({
             buttons: [
                 {
                     extend: 'copy',
                     text: '<i class="bi bi-back"></i>',
                     titleAttr: 'Copiar en portapapeles',
                     className: 'btn btn-primary',
+                    action: newexportaction
                 },
                 {
                     extend: 'excel',
                     text: '<i class="bi bi-file-earmark-excel"></i>',
                     titleAttr: 'Exportar a Excel',
                     className: 'btn btn-success',
-                    filename: 'Usuarios' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Empresas' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     footer: true,
                     exportOptions:
                     {
                         stripHtml: true,
                         columns: ':not(:last-child)'
                     },
+                    action: newexportaction
                 },
                 {
                     extend: 'pdf',
                     text: '<i class="bi bi-file-earmark-pdf"></i>',
                     titleAttr: 'Exportar a PDF',
                     className: 'btn btn-danger',
-                    filename: 'Usuarios' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    filename: 'Empresas' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
                     exportOptions:
                     {
                         stripHtml: true,
@@ -148,6 +202,7 @@
                     },
                     orientation: 'landscape',
                     pageSize: 'LEGAL',
+                    action: newexportaction
                 },
                 {
                     extend: 'print',
@@ -159,6 +214,7 @@
                         stripHtml: true,
                         columns: ':not(:last-child)'
                     },
+                    action: newexportaction
                 },
                 {
                     extend: 'colvis',
@@ -168,16 +224,16 @@
                     columns: ':not(.noVis)',
                 },
                 {
-                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo reclamo',
+                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nueva empresa',
                     className: 'btn bg-success m-1',
                     titleAttr: 'Nuevo',
                     action: function (e, dt, node, config) {
-                        fct_NuevoReclamo();
+                        fct_EmpresaNuevo();
                     },
                 },
             ],
             ajax: {
-                url: "/trabajadores/atencion/GetData_Reclamo",
+                url: "/trabajadores/configuracion/GetData_Empresas",
                 type: "GET",
                 datatype: "json",
                 data: function (d) {
@@ -196,25 +252,26 @@
                 },
             },
             columns: [
-                { data: "id", name: "Id" },
-                { data: "idPasaje", name: "Id pasaje" },
-                { data: "id_tipo_reclamo", name: "Tipo reclamo" },
-                { data: "motivo", name: "motivo" },
-                { data: "monto", name: "monto" },
-                { data: "detalle", name: "detalle" },
+                { data: "id", name: "id" },
+                { data: "razon_social", name: "razon_social" },
+                { data: "ruc", name: "ruc" },
+                { data: "direccion", name: "direccion" },
+                { data: "telefono", name: "telefono" },
+                { data: "email", name: "email" },
                 {
                     data: "estado",
                     name: "estado",
                     render: function (data, type, row) {
-                        let estado = data === 1 ? 'Vigente' : 'No vigente';
-                        if (estado === "Vigente") {
-                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-success fs-5">${estado}</span></h5>`;
-                        } else if (estado === "No vigente") {
-                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-danger fs-5">${estado}</span></h5>`;
-                        } else {
-                            return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge fs-5" style="background-color: #800080; color: white;">${estado}</span></h5>`;
-                        }
+                        const checked = data === 1 ? 'checked' : '';
+                        const switchId = `customSwitch_${row.id}`;
+                        const disabled = data === 1 ? 'disabled' : '';
+                        return `
+                        <div class="custom-control custom-switch custom-switch-off-danger custom-switch-on-success">
+                            <input type="checkbox" class="activar-empresa" data-id="${row.id}" ${disabled} ${checked}>
+                        </div>
+                        `;
                     },
+                    className: 'text-center align-middle',
                 },
                 {
                     data: null,
@@ -222,10 +279,9 @@
                     render: function (data, type, row) {
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_VerReclamo('${data.id}')" title="Ver usuario"><i class="bi bi-eye"></i></button>
-                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_editarReclamo('${data.id}')" title="Editar usuario"><i class="bi bi-pencil-square"></i></button>
-                            <button class="btn btn-xs m-1 btn-warning" onclick="fct_darBajaReclamo('${data.id}')" title="Dar de baja reclamo"><i class="bi bi-arrow-down-circle"></i></button>
-                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_eliminarReclamo('${data.id}')" title="Eliminar usuario"><i class="bi bi-trash"></i></button>
+                            <button class="btn btn-xs m-1 btn-info" onclick="fct_EmpresaVer('${data.id}')" title="Ver empresa"><i class="bi bi-eye"></i></button>
+                            <button class="btn btn-xs m-1 btn-primary" onclick="fct_EmpresaEditar('${data.id}')" title="Editar empresa"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-xs m-1 btn-danger" onclick = "fct_EmpresaEliminar('${data.id}')" title="Eliminar empresa"><i class="bi bi-trash"></i></button>
                         </div>
                         `;
                     },
@@ -238,7 +294,7 @@
                     className: "text-center align-middle",
                 },
                 {
-                    targets: [1, 2, 3, 4, 5,6],
+                    targets: [1, 2, 3, 4, 5, 6],
                     className: 'align-middle',
                 },
                 {
@@ -272,22 +328,21 @@
         });
     }
 
-    function fct_NuevoReclamo() {
-        window.location.href = '/trabajadores/atencion/RegistrarReclamo';
+    function fct_EmpresaNuevo() {
+        window.location.href = '/trabajadores/configuracion/EmpresaNuevo';
     }
 
-    function fct_editarReclamo(Id) {
-        window.location.href = `/trabajadores/atencion/EditarReclamo/${Id}`;
+    function fct_EmpresaEditar(Id) {
+        window.location.href = `/trabajadores/configuracion/EditarEmpresa/${Id}`;
     }
 
-    function fct_VerReclamo(Id) {
-        window.location.href = `/trabajadores/atencion/VerReclamo/${Id}`;
+    function fct_EmpresaVer(Id) {
+        window.location.href = `/trabajadores/configuracion/VerEmpresa/${Id}`;
     }
-
-    function fct_eliminarReclamo(Id) {
+    function fct_EmpresaEliminar(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
-            text: "Esta acción eliminará la reserva. ¿Deseas continuar?",
+            text: "Esta acción eliminará la empresa. ¿Deseas continuar?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -298,7 +353,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `/trabajadores/atencion/EliminarReclamo/${Id}`,  // Pasamos el ID en la URL
+                    url: `/trabajadores/configuracion/EliminarEmpresa/${Id}`,  // Pasamos el ID en la URL
                     type: "POST",
                     contentType: "application/json",
                     success: function (response) {
@@ -307,7 +362,7 @@
                                 toastr.warning(response.Msj2, 'MENSAJE DE SISTEMA');
                                 return;
                             }
-                            fct_IniciarTablaUsuarios('#tbl_Usuarios');
+                            fct_IniciarTablaEmpresas('#tbl_Empresas');
                             toastr.success(response.Msj, "MENSAJE DE SISTEMA");
                         } else {
                             toastr.error(response.Msj, "MENSAJE DE SISTEMA");
@@ -321,35 +376,6 @@
                 });
             }
         });
-    }
-
-    function fct_darBajaReclamo(Id) {
-        $.ajax({
-            url: `/trabajadores/atencion/darBajaReclamo/${Id}`,  // Ruta creada en Flask
-            method: "POST",
-            success: function(response) {
-                if (response.Status === "success") {
-                    toastr.success(response.Msj);
-                } else {
-                    toastr.error("Error al dar baja: " + response.Msj2);
-                }
-            },
-            error: function(xhr, status, error) {
-                // Capturamos el 500 ó cualquier otro error HTTP
-                console.error("Error AJAX:", xhr.status, xhr.responseText);
-                alert("Ocurrió un error interno al intentar pagar la reserva.");
-            }
-        });
-
-        fct_IniciarTablaUsuarios('#tbl_Usuarios');
-    }
-
-    function ShowSpinner() {
-        $('#efec-cargando').removeClass('d-none');
-    }
-
-    function HideSpinner() {
-        $('#efec-cargando').addClass('d-none');
     }
 
     function newexportaction(e, dt, button, config) {

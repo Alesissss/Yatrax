@@ -168,14 +168,14 @@
                     className: 'btn btn-warning',
                     columns: ':not(.noVis)',
                 },
-                {
-                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nueva reserva',
-                    className: 'btn bg-success m-1',
-                    titleAttr: 'Nuevo',
-                    action: function (e, dt, node, config) {
-                        fct_reservaNueva();
-                    },
-                },
+                // {
+                //     text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nueva reserva',
+                //     className: 'btn bg-success m-1',
+                //     titleAttr: 'Nuevo',
+                //     action: function (e, dt, node, config) {
+                //         fct_reservaNueva();
+                //     },
+                // },
             ],
             ajax: {
                 url: "/trabajadores/atencion/GetData_Reservas",
@@ -224,7 +224,7 @@
                     render: function (data, type, row) {
                         return `
                         <div class="flex-wrap btn-group">
-                            <button class="btn btn-xs m-1 btn-info" onclick="fct_VerReserva('${data.id}')" title="Ver usuario"><i class="bi bi-eye"></i></button>
+                           
                             <button class="btn btn-xs m-1 btn-warning" onclick="fct_PagarReserva('${data.id}')" title="Pagar reserva">Pagar reserva</button>
                             <button class="btn btn-xs m-1 btn-danger" onclick = "fct_eliminarReserva('${data.id}')" title="Eliminar usuario"><i class="bi bi-trash"></i></button>
                         </div>
@@ -277,10 +277,6 @@
         window.location.href = '/trabajadores/atencion/RegistrarReserva';
     }
 
-    function fct_VerReserva(Id) {
-        window.location.href = `/trabajadores/atencion/VerReserva/${Id}`;
-    }
-
     function fct_eliminarReserva(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
@@ -321,24 +317,38 @@
     }
 
     function fct_PagarReserva(Id) {
-        $.ajax({
-            url: `/trabajadores/atencion/CambiarEstado/${Id}`,  // Ruta creada en Flask
-            method: "POST",
-            success: function(response) {
-                if (response.Status === "success") {
-                    toastr.success(response.Msj);
-                } else {
-                    toastr.error("Error al pagar reserva: " + response.Msj2);
-                }
-            },
-            error: function(xhr, status, error) {
-                // Capturamos el 500 ó cualquier otro error HTTP
-                console.error("Error AJAX:", xhr.status, xhr.responseText);
-                alert("Ocurrió un error interno al intentar pagar la reserva.");
+        Swal.fire({
+            title: "¿Estás seguro?",
+            text: "Esta acción pagará la reserva. ¿Deseas continuar?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sí, eliminar",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true // Invertir el orden de los botones
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/trabajadores/atencion/CambiarEstado/${Id}`,  // Ruta creada en Flask
+                    method: "POST",
+                    success: function(response) {
+                        if (response.Status === "success") {
+                            toastr.success(response.Msj);
+                        } else {
+                            toastr.error("Error al pagar reserva: " + response.Msj2);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        // Capturamos el 500 ó cualquier otro error HTTP
+                        console.error("Error AJAX:", xhr.status, xhr.responseText);
+                        alert("Ocurrió un error interno al intentar pagar la reserva.");
+                    }
+                });
+
+                fct_IniciarTablaUsuarios('#tbl_Usuarios');
             }
         });
-
-        fct_IniciarTablaUsuarios('#tbl_Usuarios');
     }
 
     function ShowSpinner() {
