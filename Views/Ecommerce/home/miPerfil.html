@@ -1,6 +1,6 @@
 {% extends "maestra.html" %}
 {% block contenido %}
-<form id="formPerfil" class="p-4 rounded bg-white shadow-sm">
+<form id="formPerfil" action="/ecommerce/home/miPerfil" class="p-4 rounded bg-white shadow-sm">
   <h4 class="mb-4">Mi Perfil</h4>
   {% set datosUsuario = session['cliente'] %}
 
@@ -53,7 +53,7 @@
     <div class="col-md-4 mb-3">
       <label for="f_nacimiento" class="form-label">Fecha de Nacimiento</label>
       {% set meses = {'Jan':'01', 'Feb':'02', 'Mar':'03', 'Apr':'04', 'May':'05', 'Jun':'06', 'Jul':'07', 'Aug':'08', 'Sep':'09', 'Oct':'10', 'Nov':'11', 'Dec':'12'} %}
-      {% set partes = datosUsuario.f_nacimiento.split() %}
+      {% set partes = datosUsuario.f_nacimiento.split() if datosUsuario.f_nacimiento else '' %}
       <input type="date" id="f_nacimiento" name="f_nacimiento"
              value="{% if partes|length >= 4 %}{{ partes[3] }}-{{ meses[partes[2]] }}-{{ partes[1] }}{% endif %}"
              class="form-control">
@@ -65,7 +65,7 @@
   <div class="row">
     <div class="col-md-4 mb-3">
       <label for="nombres" class="form-label">Nombres</label>
-      <input type="text" id="nombres" name="nombres" class="form-control" value="{{ datosUsuario.nombres }}" required>
+      <input type="text" id="nombres" name="nombres" class="form-control" value="{{ datosUsuario.nombre }}" required>
     </div>
 
     <div class="col-md-4 mb-3">
