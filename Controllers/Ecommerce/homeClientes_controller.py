@@ -17,7 +17,6 @@ from Models.servicio import Servicio
 from Models.cliente import Cliente
 from Models.tipo_herramienta import TipoHerramienta
 from Models.microservicio import MicroServicio
-
 from Models.tipoDocumento import TipoDocumento
 from Models.tipoCliente import TipoCliente
 from Models.tipoVehiculo import TipoVehiculo
@@ -97,7 +96,7 @@ def procesar_reserva():
 
 def renderizarCompra():
     herramientas = Herramienta.obtener_todos()
-    return render_template('Ecommerce/home/partials/ventaPasajes.html', herramientas = herramientas)
+    return render_template('/Ecommerce/home/partials/ventaPasajes.html', herramientas = herramientas)
 
 
 @homeClientes_bp.route('/renderizar_itinerario', methods=['POST'])
@@ -137,6 +136,13 @@ def obtenerDatosPasajero():
     datos_pasajero = Pasajero.obtener_por_numero_documento(numero_doc)
     if not datos_pasajero:
         return jsonify(status="error", msg="Pasajero no encontrado"), 404
+    
+    # Convertir fecha si es string
+    if isinstance(datos_pasajero["f_nacimiento"], str):
+        try:
+            datos_pasajero["f_nacimiento"] = datetime.strptime(datos_pasajero["f_nacimiento"], "%Y-%m-%d")
+        except ValueError:
+            return jsonify(status="error", msg="Formato de fecha inválido"), 500
 
     return jsonify(status="success", datos=datos_pasajero), 200
 
@@ -263,11 +269,12 @@ def mi_pasaje_operaciones():
     datos_recibidos = {
         "contenido_venta": renderizarCompra()
     }
+    result = ConfGeneral.obtener()
     TipoDocumentos=TipoDocumento.obtener_todos()
     TipoMetodosPago = TipoMetodoPago.obtener_todos()
     MetodoPagos = MetodoPago.obtener_todos()
     TipoComprobantes = TipoComprobante.obtener_todos()
-    return render_template('Ecommerce/home/miPasajeOp.html', datos=datos_recibidos, TipoDocumento=TipoDocumentos, TipoMetodosPago=TipoMetodosPago, MetodosPagos=MetodoPagos, TipoComprobantes=TipoComprobantes)
+    return render_template('Ecommerce/home/miPasajeOp.html', datos=datos_recibidos, TipoDocumento=TipoDocumentos, TipoMetodosPago=TipoMetodosPago, MetodosPagos=MetodoPagos, TipoComprobantes=TipoComprobantes, result=result)
 
 @homeClientes_bp.route('/seguimientoViaje')
 def seguimiento_viaje():
@@ -290,31 +297,41 @@ def terminos_y_condiciones():
 @homeClientes_bp.route('/resumenViaje', methods=['POST'])
 def resumen_viaje():
     try:
+        # Obtener los datos del JSON recibido
         asiento_id = request.json.get('asiento_id')
+        viaje = request.json.get('viaje')
         
-        if not asiento_id:
-            return jsonify({'Status': 'error', 'Msj': 'Falta el ID del asiento.'})
+        # Verificar que los datos se están recibiendo correctamente
+        print(f"asiento_id: {asiento_id}, viaje: {viaje}")  # Verifica que los valores sean correctos
 
-        datos = Pasaje.detalle_viaje(asiento_id)
-        print(f'Información de resumen: {datos}')
+        if not asiento_id or not viaje:
+            return jsonify({'Status': 'error', 'Msj': 'Falta el ID del asiento o el ID del viaje.'})
+
+        # Obtener los datos del viaje usando el método de Pasaje
+        datos = Pasaje.detalle_viaje(asiento_id, viaje)
+        print(f'Información de resumen: {datos}')  # Verifica qué datos se están recuperando
         
         if not datos:
             return jsonify({'Status': 'error', 'Msj': 'No se encontraron datos para el asiento proporcionado.'})
 
+        # Si los datos son correctos, se toma el primer elemento de la lista
         detalle = datos[0] if isinstance(datos, list) and datos else None
+        
         if not detalle:
             return jsonify({'Status': 'error', 'Msj': 'No se encontró detalle válido del viaje.'})
 
+        # Crear la respuesta con los detalles del viaje y el precio total
         resumen = {
             'detalle_viaje': detalle,
             'pasajeros': [{
                 'numero': 1,
                 'asiento': asiento_id,
-                'precio': 40.0  # Precio base sin descuento
+                'precio': detalle.get('precio_total', 0),  # Se asegura de que el precio exista
             }],
-            'precio_total': 40.0  # Total sin aplicar descuento (se aplicará en frontend)
+            'precio_total': detalle.get('precio_total', 0)  # Usamos el precio_total
         }
 
+        # Responder con éxito
         return jsonify({'Status': 'success', 'data': resumen, 'Msj': 'Datos del viaje obtenidos correctamente.'})
     
     except Exception as e:
@@ -939,7 +956,8 @@ def get_conf_general():
             result['precioCambioRuta'] = float(result['precioCambioRuta'])
             result['precioTransferencia'] = float(result['precioTransferencia'])
             result['viajesReprogramables'] = int(result['viajesReprogramables'])  # Puedes usar int si es un valor booleano 0/1
-        
+            result['horaTransaccion'] = int(result['horaTransaccion'])
+            
         return jsonify({'data': result, 'Status': 'success', 'Msj': 'Configuración general recuperada exitosamente'})
     except Exception as e:
         return jsonify({'data': {}, 'Status': 'error', 'Msj': f'Ocurrió un error al listar configuración general: {repr(e)}'})

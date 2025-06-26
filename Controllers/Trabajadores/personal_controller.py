@@ -1,5 +1,6 @@
 import os
 from flask import Blueprint, request, jsonify, render_template, session, flash, redirect, url_for, abort
+from datetime import datetime
 from Models.tipoPersonal import TipoPersonal
 from Models.personal import Personal
 from Models.sancion import Sancion
@@ -279,6 +280,15 @@ def darBajaSancion(id):
 def get_SancionPersonal():
     try:
         sp = Personal_Sancion.obtener_todos()
+
+        # Convertir fecha_fin si es string
+        for item in sp:
+            if isinstance(item["fecha_fin"], str):
+                try:
+                    item["fecha_fin"] = datetime.strptime(item["fecha_fin"], "%Y-%m-%d")
+                except ValueError:
+                    item["fecha_fin"] = None  # O lanza una excepción si prefieres
+
         return jsonify({'data': sp, 'Status': 'success', 'Msj': 'Listado de sanciones a personal retornado exitosamente'})
     except Exception as e:
         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
@@ -311,6 +321,14 @@ def registrar_sancionPersonal():
 def editar_personalSancion(personalid, sancionid):
     try:
         sancion_personal = Personal_Sancion.obtener_por_id(personalid, sancionid)
+
+        sancion_personal = Personal_Sancion.obtener_por_id(personalid, sancionid)
+        if sancion_personal and isinstance(sancion_personal["fecha_fin"], str):
+            try:
+                sancion_personal["fecha_fin"] = datetime.strptime(sancion_personal["fecha_fin"], "%Y-%m-%d")
+            except ValueError:
+                sancion_personal["fecha_fin"] = None  # O manejar el error como prefieras
+        
         if request.method == "POST":
             descripcion = request.form.get("descripcion").strip()
             estado = request.form.get("estado")
