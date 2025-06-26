@@ -847,6 +847,10 @@ VALUES
 ('Descuento', 1, '2025-02-12', '2025-12-25', 'GINGOBELL', 30.00);
 
 
+INSERT INTO `empresa`(`id`, `razon_social`, `ruc`, `direccion`, `telefono`, `email`, `estado`, `fecha_registro`, `usuario`) VALUES (1,'YATRAX SAC','20709942650','
+Av. José Balta 2704, Chiclayo 14003', '913626759','yatraxcontacto@yatusa.com',1,CURRENT_TIMESTAMP,'ander@gmail.com');
+
+
 INSERT INTO preguntas_frecuentes (pregunta, respuesta, estado, fecha_registro, usuario) VALUES ('¿Qué medios de pago
 aceptan para comprar pasajes en línea?','Aceptamos tarjetas de crédito y débito Visa, así como billeteras digitales como
 Yape y Plin.','1','2025-06-07 11:34:18','ander@gmail.com');

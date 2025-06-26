@@ -277,10 +277,6 @@
         window.location.href = '/trabajadores/atencion/RegistrarReserva';
     }
 
-    function fct_VerReserva(Id) {
-        window.location.href = `/trabajadores/atencion/VerReserva/${Id}`;
-    }
-
     function fct_eliminarReserva(Id) {
         Swal.fire({
             title: "¿Estás seguro?",
@@ -321,24 +317,38 @@
     }
 
     function fct_PagarReserva(Id) {
-        $.ajax({
-            url: `/trabajadores/atencion/CambiarEstado/${Id}`,  // Ruta creada en Flask
-            method: "POST",
-            success: function(response) {
-                if (response.Status === "success") {
-                    toastr.success(response.Msj);
-                } else {
-                    toastr.error("Error al pagar reserva: " + response.Msj2);
-                }
-            },
-            error: function(xhr, status, error) {
-                // Capturamos el 500 ó cualquier otro error HTTP
-                console.error("Error AJAX:", xhr.status, xhr.responseText);
-                alert("Ocurrió un error interno al intentar pagar la reserva.");
+        Swal.fire({
+            title: "¿Estás seguro?",
+            text: "Esta acción pagará la reserva. ¿Deseas continuar?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sí, eliminar",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true // Invertir el orden de los botones
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/trabajadores/atencion/CambiarEstado/${Id}`,  // Ruta creada en Flask
+                    method: "POST",
+                    success: function(response) {
+                        if (response.Status === "success") {
+                            toastr.success(response.Msj);
+                        } else {
+                            toastr.error("Error al pagar reserva: " + response.Msj2);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        // Capturamos el 500 ó cualquier otro error HTTP
+                        console.error("Error AJAX:", xhr.status, xhr.responseText);
+                        alert("Ocurrió un error interno al intentar pagar la reserva.");
+                    }
+                });
+
+                fct_IniciarTablaUsuarios('#tbl_Usuarios');
             }
         });
-
-        fct_IniciarTablaUsuarios('#tbl_Usuarios');
     }
 
     function ShowSpinner() {
