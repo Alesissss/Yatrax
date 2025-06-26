@@ -185,23 +185,6 @@
                                                                 <div id="map"></div>
                                                             </div>
                                                         </div>
-
-                                                        <div class="col-md-12 mt-4">
-                                                            <!-- Registro del Viaje -->
-                                                            <div class="travel-log">
-                                                                <h5 class="mb-3">
-                                                                    <i class="fas fa-clipboard-list me-2"></i>
-                                                                    Registro del viaje
-                                                                </h5>
-                                                                <div id="travelLogContent">
-                                                                    <div class="text-center text-muted py-4">
-                                                                        <i class="fas fa-info-circle fa-2x mb-2"></i>
-                                                                        <p>Seleccione una ruta para ver el
-                                                                            registro del viaje</p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -227,8 +210,8 @@
                                                             <div class="position-relative">
                                                                 <div class="status-badge">
                                                                     <span id="statusBadge"
-                                                                        class="badge bg-secondary">Sin ruta
-                                                                        seleccionada</span>
+                                                                        class="badge bg-secondary">Sin viaje
+                                                                        seleccionado</span>
                                                                 </div>
                                                                 <div id="map"></div>
                                                             </div>
@@ -243,8 +226,7 @@
                                                                 <div id="travelLogContent">
                                                                     <div class="text-center text-muted py-4">
                                                                         <i class="fas fa-info-circle fa-2x mb-2"></i>
-                                                                        <p>Seleccione una ruta para ver el
-                                                                            registro del viaje</p>
+                                                                        <p>Seleccione un viaje para ver el tracking</p>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -311,7 +293,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
 <style>
     #map {
-        height: 400px;
+        height: 700px;
         width: 100%;
         border-radius: 8px;
         border: 2px solid #dee2e6;
@@ -325,36 +307,8 @@
         border: 1px solid #e9ecef;
     }
 
-    .travel-log {
-        background-color: white;
-        border-radius: 8px;
-        padding: 20px;
-        max-height: 500px;
-        overflow-y: auto;
-        border: 1px solid #e9ecef;
-    }
-
-    .travel-log-item {
-        display: flex;
-        align-items: center;
-        padding: 10px 0;
-        border-bottom: 1px solid #f1f3f4;
-    }
-
-    .travel-log-item:last-child {
-        border-bottom: none;
-    }
-
-    .log-time {
-        font-weight: bold;
-        color: #007bff;
-        margin-right: 15px;
-        min-width: 80px;
-    }
-
-    .log-icon {
-        margin-right: 10px;
-        color: #28a745;
+    .leaflet-routing-container {
+        display: none !important;
     }
 
     .tooltip-ruta {
@@ -1061,7 +1015,7 @@
             map = L.map('map').setView([-9.19, -75.0152], 6);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 18,
-                minZoom: 5,
+                minZoom: 6,
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
 
@@ -1110,7 +1064,6 @@
                         return L.latLng(lat, lng);
                     });
 
-
                     currentRoute = L.Routing.control({
                         waypoints: waypoints,
                         routeWhileDragging: false,
@@ -1123,7 +1076,6 @@
                     const group = new L.featureGroup(routeMarkers);
                     map.fitBounds(group.getBounds().pad(0.1));
 
-                    updateTravelLog([]);
                     setTimeout(() => showSpinner(false), 1000);
                 } else {
                     showSpinner(false);
@@ -1161,7 +1113,7 @@
             badge.className = 'badge ';
             switch (estado) {
                 case 'PROGRAMADO':
-                    badge.className += 'bg-warning text-dark';
+                    badge.className += 'bg-warning text-white';
                     badge.textContent = 'Viaje no iniciado';
                     break;
                 case 'EN CURSO':
@@ -1176,24 +1128,6 @@
                     badge.className += 'bg-secondary';
                     badge.textContent = 'Sin viaje seleccionada';
             }
-        }
-
-        function updateTravelLog(registros) {
-            const container = document.getElementById('travelLogContent');
-            if (!registros.length) {
-                container.innerHTML = `
-                <div class="text-center text-muted py-4">
-                    <i class="fas fa-info-circle fa-2x mb-2"></i>
-                    <p>No hay registros de viaje disponibles</p>
-                </div>`;
-                return;
-            }
-            container.innerHTML = registros.map(registro => `
-            <div class="travel-log-item">
-                <div class="log-time">${registro.tiempo}</div>
-                <i class="fas ${registro.icono} log-icon"></i>
-                <div class="flex-grow-1">${registro.descripcion}</div>
-            </div>`).join('');
         }
 
         function showSpinner(show = true) {

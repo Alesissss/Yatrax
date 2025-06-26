@@ -807,7 +807,7 @@ class Pasaje:
                 conexion.cerrar()
     
     @classmethod
-    def generar_xml_comprobante(datos):
+    def generar_xml_comprobante(cls, datos):
         comprobante = ET.Element('comprobante')
 
         ET.SubElement(comprobante, 'ruc').text = datos['ruc']
@@ -860,7 +860,7 @@ class Pasaje:
                 conexion.cerrar()
     
     @classmethod         
-    def generar_pdf_desde_xml(ruta_xml):
+    def generar_pdf_desde_xml(cls, ruta_xml):
         tree = ET.parse(ruta_xml)
         root = tree.getroot()
 
@@ -883,9 +883,8 @@ class Pasaje:
         ruta_pdf = os.path.join('Static', 'pdf', nombre_archivo)
         os.makedirs(os.path.dirname(ruta_pdf), exist_ok=True)
 
-        HTML(string=html_renderizado).write_pdf(ruta_pdf)
+        # HTML(string=html_renderizado).write_pdf(ruta_pdf)
         return ruta_pdf
-    
     
     @classmethod
     def obtener_id_por_numComprobante(cls, numcomprobante):
@@ -924,4 +923,43 @@ class Pasaje:
             return filas[0] if filas else None
         finally:
             if conexion:
+                conexion.cerrar()
+
+    @classmethod
+    def liberarAsientosxReserva(cls):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            ids = conexion.obtener("""
+                SELECT pas.id as idPasaje, pas.idDetalleViajeAsiento as id
+                FROM pasaje pas
+                JOIN detalle_viaje_asiento dva ON dva.id = pas.idDetalleViajeAsiento
+                WHERE pas.esReserva = 1
+                AND pas.fecha_reserva IS NOT NULL
+                AND pas.fecha_reserva < NOW() - INTERVAL 2 HOUR
+                AND dva.esDisponible = 0
+                AND pas.reservaLiberada = 0
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM pasaje p2
+                    WHERE p2.idDetalleViajeAsiento = pas.idDetalleViajeAsiento
+                    AND p2.esReserva = 0
+                );
+            """)
+
+            if ids:
+                print('Ids', ids)
+                for idReserva in ids:
+                    conexion.ejecutar("UPDATE pasaje SET reservaLiberada = 1 WHERE id = %s", (idReserva['idPasaje'],), auto_commit=False)
+                    
+                    sentencia = "UPDATE detalle_viaje_asiento SET esDisponible=1 WHERE id="+str(idReserva['id'])
+                    conexion.ejecutar(sentencia, auto_commit=False)
+
+                conexion.conn.commit()
+                
+        except Exception as e:
+            conexion.conn.rollback()
+            print("Ha ocurrido un error: "+repr(e))
+        finally:
+            if conexion != None:
                 conexion.cerrar()

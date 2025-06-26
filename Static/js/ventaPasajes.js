@@ -288,7 +288,7 @@ const NavigationManager = {
             cancelButtonText: 'Revisar datos',
             confirmButtonColor: '#28a745',
             cancelButtonColor: '#6c757d',
-            reverseButton: true
+            reverseButtons: true
         });
 
         if (!confirmacion.isConfirmed) return;
@@ -331,7 +331,7 @@ const NavigationManager = {
             cancelButtonText: 'Revisar datos',
             confirmButtonColor: '#28a745',
             cancelButtonColor: '#6c757d',
-            reverseButton: true
+            reverseButtons: true
         });
 
         if (!confirmacion.isConfirmed) return;
@@ -411,7 +411,7 @@ const NavigationManager = {
             cancelButtonText: 'Cancelar',
             confirmButtonColor: '#17a2b8',
             cancelButtonColor: '#6c757d',
-            reverseButton: true
+            reverseButtons: true
         });
 
         if (!confirmacion.isConfirmed) return;
@@ -484,13 +484,11 @@ const SearchManager = {
                 text: "Esta acción eliminará tu progreso actual, ¿estás seguro de hacerlo?",
                 icon: "warning",
                 showCancelButton: true,
-                reverseButtons: true,
                 confirmButtonText: "Sí, buscar",
                 cancelButtonText: "Cancelar",
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#6c757d',
-
-                reverseButton: true
+                reverseButtons: true,
             });
 
             if (!confirmacion.isConfirmed) return;
@@ -1245,8 +1243,7 @@ const SeatManager = {
             showCancelButton: true,
             confirmButtonText: 'Sí, eliminar',
             cancelButtonText: 'Cancelar',
-
-            reverseButton: true
+            reverseButtons: true
         });
 
         if (confirm.isConfirmed) {
@@ -2070,10 +2067,6 @@ const PaymentManager = {
         if (tipoComprobante == '1') {
             contenedor.innerHTML = `
                 <div class="row g-3">
-                    <div class="col-md-12">
-                        <label for="email_contacto" class="form-label">Correo electrónico *</label>
-                        <input type="email" id="email_contacto" class="form-control" required>
-                    </div>
                     <div class="col-md-6">
                         <label for="tipo_documento_contacto" class="form-label">Tipo de documento *</label>
                         <select id="tipo_documento_contacto" class="form-select">
@@ -2083,7 +2076,11 @@ const PaymentManager = {
                     </div>
                     <div class="col-md-6">
                         <label for="numero_documento_contacto" class="form-label">Número de documento *</label>
-                        <input type="text" id="numero_documento_contacto" class="form-control" required>
+                        <input type="text" id="numero_documento_contacto" class="form-control" minlength="8" maxlength="12" required>
+                    </div>
+                    <div class="col-md-12">
+                        <label for="email_contacto" class="form-label">Correo electrónico *</label>
+                        <input type="email" id="email_contacto" class="form-control" required>
                     </div>
                     <div class="col-md-12">
                         <label for="nombres_contacto" class="form-label">Nombres *</label>
@@ -3267,7 +3264,7 @@ const FormValidationManager = {
                 icon: "warning",
                 confirmButtonText: "Entendido",
                 confirmButtonColor: '#3085d6',
-                reverseButton: true
+                reverseButtons: true
             });
             return false;
         }

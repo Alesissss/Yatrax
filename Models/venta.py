@@ -312,7 +312,7 @@ class Venta:
     def obtener_reporte_ventas(cls):
         try:
             conexion = bd.Conexion()
-            result = conexion.obtener(""" SELECT c.nombre, c.ape_paterno, c.ape_materno, v.fecha, sum(subtotal + igv), count(p.id) 
+            result = conexion.obtener(""" SELECT c.nombre, c.ape_paterno, c.ape_materno, v.fecha, sum(subtotal + igv) as totalMonto, count(p.id) as totalPasajes
                 FROM venta v 
                 INNER JOIN cliente c on v.idCliente = c.id 
                 INNER JOIN pasaje p on p.idVenta = v.id

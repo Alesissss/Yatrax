@@ -15,10 +15,35 @@
                 <h1>Reporte de ventas</h1>
             </div>
             <div class="col-md-12">
-                <div class="row justify-content-end">
-                    <div class="col-md-10"></div>
+                <div class="row">
+                    <div class="col-md-10">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="txt_fechaInicio">Fecha inicio</label>
+                                <div class="input-group">
+                                    <input type="date" id="txt_fechaInicio" class="form-control">
+                                    <div class="input-group-append">
+                                        <div class="input-group-text"><i class="fas fa-calendar-alt"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="txt_fechaFin">Fecha fin</label>
+                                <div class="input-group">
+                                    <input type="date" id="txt_fechaFin" class="form-control">
+                                    <div class="input-group-append">
+                                        <div class="input-group-text"><i class="fas fa-calendar-alt"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="col-md-2">
-                        <button class="btn btn-success">Generar reporte</button>
+                        <div class="row">
+                            <div class="col-md-12 mt-4">
+                                <button id="btn_GenerarReporte" class="btn btn-success">Generar reporte</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -48,10 +73,10 @@
                                 <div class="small-box bg-info">
                                     <div class="inner">
                                         <h3 id="cantidadPasajes">0</h3>
-                                        <p>Cantidada de pasajes vendidos</p>
+                                        <p>Cantidad de pasajes vendidos</p>
                                     </div>
                                     <div class="icon">
-                                        <i class="fas fa-shopping-cart"></i>
+                                        <i class="fas fa-ticket-alt"></i>
                                     </div>
                                     <!-- <a href="#" class="small-box-footer">
                                 More info <i class="fas fa-arrow-circle-right"></i>
@@ -62,13 +87,14 @@
                     </div>
                     <div class="col-md-12">
                         <div class="card">
+                            <div class="card-header bg-primary">
+                                <h5>Gráfico de reporte de ventas por mes</h5>
+                            </div>
                             <div class="card-body">
                                 <div id="graficoPrincipal" style="width: 100%; height: 400px;"></div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="row">
                 </div>
             </div>
         </div>
@@ -79,107 +105,133 @@
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/theme/dark.min.js"></script>
 <script>
+    let isDarkMode;
+
     $(document).ready(function () {
-        let isDarkMode = document.body.classList.contains('dark-mode');
+        const today = new Date();
+        const year = today.getFullYear();
 
-        $.getJSON("/trabajadores/ventas/ObtenerReporteVentas", { fechaInicio: 2, fechaFin: 2 }, function (response) {
-            HideSpinner();
+        const primerDia = `${year}-01-01`;
+        const ultimoDia = `${year}-12-31`;
 
-            if (response.Status !== "success") {
-                console.error("Ocurrió un error: ", response.Msj);
+        $('#txt_fechaInicio').val(primerDia);
+        $('#txt_fechaFin').val(ultimoDia);
+
+        isDarkMode = document.body.classList.contains('dark-mode');
+
+        $('#btn_GenerarReporte').on('click', function () {
+            ShowSpinner();
+            let fechaInicio = $('#txt_fechaInicio').val();
+            let fechaFin = $('#txt_fechaFin').val();
+
+            if (!fechaInicio || !fechaFin) {
+                HideSpinner();
+                toastr.warning('Debe ingresar valores válidos', 'MENSAJE DE SISTEMA');
                 return;
             }
 
-            const datos = response.data;
+            $.getJSON("/trabajadores/ventas/ObtenerReporteVentas", { fechaInicio: fechaInicio, fechaFin: fechaFin }, function (response) {
+                HideSpinner();
 
-            // Meses en español
-            const meses = [
-                'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-            ];
+                if (response.Status !== "success") {
+                    console.error("Ocurrió un error: ", response.Msj);
+                    return;
+                }
 
-            // Inicializo totales por mes y contador de pasajes
-            const totalesPorMes = new Array(12).fill(0);
-            let totalPasajes = 0;
+                const datos = response.data;
 
-            datos.forEach(item => {
-                const fecha = new Date(item.fecha);
-                const mesIdx = fecha.getMonth();
-                const suma = parseFloat(item["sum(subtotal + igv)"]) || 0;
-                const cantidad = parseInt(item["count(p.id)"]) || 0;
-
-                totalesPorMes[mesIdx] += suma;
-                totalPasajes += cantidad;
+                fct_GenerarReporteVentas(datos)
             });
+        });
+    });
 
-            // Lleno los infobox
-            const totalVentas = totalesPorMes.reduce((a, v) => a + v, 0);
-            document.getElementById('totalVentas').innerText =
-                'S/. ' + formatearNumero(totalVentas);
-            // Sin símbolo de soles y sin decimales
-            document.getElementById('cantidadPasajes').innerText =
-                totalPasajes.toLocaleString('en-US');
+    function fct_GenerarReporteVentas(datos) {
+        // Meses en español
+        const meses = [
+            'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+            'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+        ];
 
-            // Preparo la serie para el gráfico
-            const serieVentas = totalesPorMes;
+        // Inicializo totales por mes y contador de pasajes
+        const totalesPorMes = new Array(12).fill(0);
+        let totalPasajes = 0;
 
-            // Inicializo ECharts
-            const chartDom = document.getElementById('graficoPrincipal');
-            const myChart = echarts.init(chartDom, isDarkMode ? 'dark' : '');
+        datos.forEach(item => {
+            const fecha = new Date(item.fecha);
+            const mesIdx = fecha.getMonth();
+            const suma = parseFloat(item["totalMonto"]) || 0;
+            const cantidad = parseInt(item["totalPasajes"]) || 0;
 
-            const option = {
-                title: {
-                    text: 'Ventas por mes',
-                    left: 'center'
-                },
-                tooltip: {
-                    trigger: 'axis',
-                    formatter: params => {
-                        const p = params[0];
-                        return `
+            totalesPorMes[mesIdx] += suma;
+            totalPasajes += cantidad;
+        });
+
+        // Lleno los infobox
+        const totalVentas = totalesPorMes.reduce((a, v) => a + v, 0);
+        document.getElementById('totalVentas').innerText =
+            'S/. ' + formatearNumero(totalVentas);
+        // Sin símbolo de soles y sin decimales
+        document.getElementById('cantidadPasajes').innerText =
+            totalPasajes.toLocaleString('en-US');
+
+        // Preparo la serie para el gráfico
+        const serieVentas = totalesPorMes;
+
+        // Inicializo ECharts
+        const chartDom = document.getElementById('graficoPrincipal');
+        const myChart = echarts.init(chartDom, isDarkMode ? 'dark' : '');
+
+        const option = {
+            title: {
+                text: 'Ventas por mes',
+                left: 'center'
+            },
+            tooltip: {
+                trigger: 'axis',
+                formatter: params => {
+                    const p = params[0];
+                    return `
               ${p.seriesName}<br/>
               ${p.axisValue} : S/. ${formatearNumero(p.value)}
             `;
-                    }
-                },
-                toolbox: {
-                    show: true,
-                    feature: {
-                        magicType: {
-                            type: ['line', 'bar'],
-                            title: { line: 'Línea', bar: 'Barras' },
-                            selected: { line: false, bar: true }
-                        },
-                        saveAsImage: { title: 'Descargar como imagen' }
+                }
+            },
+            toolbox: {
+                show: true,
+                feature: {
+                    magicType: {
+                        type: ['line', 'bar'],
+                        title: { line: 'Línea', bar: 'Barras' },
+                        selected: { line: false, bar: true }
                     },
-                    right: 20,
-                    top: 10
+                    saveAsImage: { title: 'Descargar como imagen' }
                 },
-                xAxis: {
-                    type: 'category',
-                    data: meses
-                },
-                yAxis: {
-                    type: 'value',
-                    axisLabel: {
-                        formatter: value => formatearNumero(value)
-                    }
-                },
-                series: [{
-                    name: 'Monto vendido',
-                    type: 'bar',          // comienza en barras
-                    data: serieVentas,
-                    smooth: true,
-                    barMaxWidth: '40%',
-                    areaStyle: {}         // sombra bajo la línea si cambias a 'line'
-                }]
-            };
+                right: 20,
+                top: 10
+            },
+            xAxis: {
+                type: 'category',
+                data: meses
+            },
+            yAxis: {
+                type: 'value',
+                axisLabel: {
+                    formatter: value => formatearNumero(value)
+                }
+            },
+            series: [{
+                name: 'Monto vendido',
+                type: 'line',          // comienza en barras
+                data: serieVentas,
+                smooth: true,
+                barMaxWidth: '40%',
+                areaStyle: {}         // sombra bajo la línea si cambias a 'line'
+            }]
+        };
 
-            myChart.setOption(option);
-            window.addEventListener('resize', () => myChart.resize());
-        }
-        );
-    });
+        myChart.setOption(option);
+        window.addEventListener('resize', () => myChart.resize());
+    }
 
     function ShowSpinner() {
         $('#efec-cargando').removeClass('d-none');
