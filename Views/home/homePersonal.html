@@ -88,28 +88,49 @@
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/theme/dark.min.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        let isDarkMode = document.body.classList.contains('dark-mode');
+    // Obtiene arreglo de personal por tipo [{ name, value }, ...]
+    async function cantidadPersonalxTipo() {
+        const response = await fetch("/trabajadores/personal/CantidadPersonalxTipo");
+        const data = await response.json();
 
-        var chartUsuarios = echarts.init(document.getElementById('chartPersonalxTipo'), isDarkMode ? 'dark' : '');
-        var optionUsuarios = {
-            tooltip: {
-                trigger: 'item'
-            },
-            legend: {
-                top: '5%',
-                left: 'center'
-            },
-            series: [
-                {
-                    name: 'Usuarios',
+        // Si devuelve arreglo, mapeamos; si es un solo objeto, lo convertimos en arreglo
+        if (Array.isArray(data)) {
+            return data.map(item => ({ name: item.nombre || item.nombre || 'Tipo', value: item.cantidad }));
+        } else {
+            return [{ name: data.nombre || data.nombre || 'Tipo', value: data.cantidad }];
+        }
+    }
+
+    // Obtiene arreglo de personal activo por mes [{ name, value }, ...]
+    async function cantidadPersonalActivo() {
+        const response = await fetch("/trabajadores/personal/CantidadPersonalActivo"); // Asegúrate que este endpoint sea correcto y distinto si corresponde
+        const data = await response.json();
+
+        if (Array.isArray(data)) {
+            return data.map(item => ({ name: item.estado || 'Estado', value: item.cantidad }));
+        } else {
+            return [{ name: data.estado || 'Estado', value: data.cantidad }];
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", async function () {
+        const isDarkMode = document.body.classList.contains('dark-mode');
+
+        const chartPersonalTipo = echarts.init(document.getElementById('chartPersonalxTipo'), isDarkMode ? 'dark' : '');
+        const chartPersonalMes = echarts.init(document.getElementById('chartPersonalxMes'), isDarkMode ? 'dark' : '');
+
+        async function cargarGraficoPersonalTipo() {
+            const datos = await cantidadPersonalxTipo();
+
+            const option = {
+                color: ['#5470C6', '#91CC75', '#FAC858', '#EE6666', '#73C0DE'], // paleta personalizada
+                tooltip: { trigger: 'item' },
+                legend: { top: '5%', left: 'center' },
+                series: [{
+                    name: 'Personal por Tipo',
                     type: 'pie',
                     radius: '50%',
-                    data: [
-                        { value: 1048, name: 'Administradores' },
-                        { value: 735, name: 'Supervisores' },
-                        { value: 580, name: 'Usuarios normales' }
-                    ],
+                    data: datos,
                     emphasis: {
                         itemStyle: {
                             shadowBlur: 10,
@@ -117,38 +138,45 @@
                             shadowColor: 'rgba(0, 0, 0, 0.5)'
                         }
                     }
-                }
-            ]
-        };
-        chartUsuarios.setOption(optionUsuarios);
+                }]
+            };
 
-        var chartRegistros = echarts.init(document.getElementById('chartPersonalxMes'), isDarkMode ? 'dark' : '');
-        var optionRegistros = {
-            tooltip: {
-                trigger: 'axis'
-            },
-            xAxis: {
-                type: 'category',
-                data: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic']
-            },
-            yAxis: {
-                type: 'value'
-            },
-            series: [{
-                data: [120, 200, 150, 80, 70, 110, 40, 20, 50, 150, 220, 100],
-                type: 'bar',
-                barWidth: '60%',
-                itemStyle: {
-                    color: '#00c0ef'
-                }
-            }]
-        };
-        chartRegistros.setOption(optionRegistros);
+            chartPersonalTipo.setOption(option);
+        }
 
-        window.addEventListener('resize', function () {
-            chartUsuarios.resize();
-            chartRegistros.resize();
+        async function cargarGraficoPersonalActivo() {
+            const datos = await cantidadPersonalActivo();
+
+            const option = {
+                color: ['#EE6666', '#73C0DE', '#3BA272', '#FC8452', '#9A60B4'], // paleta diferente
+                tooltip: { trigger: 'item' },
+                legend: { top: '5%', left: 'center' },
+                series: [{
+                    name: 'Personal Activo',
+                    type: 'pie',
+                    radius: '50%',
+                    data: datos,
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }]
+            };
+
+            chartPersonalMes.setOption(option);
+        }
+
+        await cargarGraficoPersonalTipo();
+        await cargarGraficoPersonalActivo();
+
+        window.addEventListener('resize', () => {
+            chartPersonalTipo.resize();
+            chartPersonalMes.resize();
         });
     });
 </script>
+
 {% endblock %}

@@ -41,9 +41,9 @@ class Reporte:
         try:
             conexion = bd.Conexion()
             resultados = conexion.obtener("""
-                SELECT tipPer.nombre,COALESCE(COUNT(per.id),0) from personal per LEFT JOIN tipo_personal tipPer ON per.id_tipopersonal=tipPer.id GROUP BY tipPer.nombre order by COALESCE(count(per.id),0) DESC;
+                SELECT tipPer.nombre,COALESCE(COUNT(per.id),0) as cantidad from personal per LEFT JOIN tipo_personal tipPer ON per.id_tipopersonal=tipPer.id GROUP BY tipPer.nombre order by COALESCE(count(per.id),0) DESC;
             """)
-            return resultados[0]
+            return resultados
         except Exception as e:
             print("Error al obtener la cantidad de personal por tipo: ", e)
 
@@ -61,7 +61,7 @@ class Reporte:
                 GROUP BY per.estado
                 ORDER BY COUNT(per.id) DESC;
             """)
-            return resultados[0]
+            return resultados
         except Exception as e:
             print("Error al obtener la cantidad de personal activo: ", e)
 
@@ -83,7 +83,7 @@ class Reporte:
                 ORDER BY total_compras DESC
                 LIMIT 3;
             """)
-            return resultados[0]
+            return resultados
         except Exception as e:
             print("Error al obtener la cantidad de rutas solicitadas: ", e)
 
@@ -99,7 +99,7 @@ class Reporte:
                 GROUP BY mes
                 ORDER BY mes;
             """)
-            return resultados[0]
+            return resultados
         except Exception as e:
             print("Error al obtener la cantidad de rutas programadas por mes: ", e)
 
