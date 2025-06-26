@@ -3270,7 +3270,7 @@ INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Dar baja tipo comproba
 INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Eliminar tipo comprobante', 1, 35);
 INSERT INTO conf_claims(nombre, estado, idPadre) VALUES ('Ver tipo comprobante', 1, 35);
 
---Dashboard ventas
+-- Dashboard ventas
 INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (36, 'Dashboard ventas', 1, 3);
 
 -- Submenús de VIAJES
@@ -3384,7 +3384,7 @@ INSERT INTO conf_menus (id, nombre, estado, idPadre) VALUES (60, 'Ejemplo', 1, 6
 INSERT INTO conf_dmenus (idTipoUsuario, idMenu)
 SELECT 1, id FROM conf_menus;
 
-INSERT INTO conf_dclaims (idTipoUsuario, idMenu)
+INSERT INTO conf_dclaims (idTipoUsuario, idClaim)
 SELECT 1, id FROM conf_claims;
 
 -- Tabla apariencia
