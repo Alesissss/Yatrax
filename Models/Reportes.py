@@ -3,18 +3,18 @@ import bd
 class Reporte:
 
     @classmethod
-    def cantidadUsuariosxTipo():
+    def cantidadUsuariosxTipo(cls):
         # tipo , cantidad
         conexion = None
         try:
             conexion = bd.Conexion()
             resultados = conexion.obtener("select tipUsu.nombre as tipo, count(usu.id) as cantidad from usuarios usu left join tipo_usuario tipUsu on usu.id_tipousuario=tipUsu.id group by tipUsu.nombre;")
-            return resultados[0]
+            return resultados
         except Exception as e:
             print("Error al obtener la cantidad de usuarios por tipo: ", e)
 
     @classmethod
-    def cantidadUsuariosActivos():
+    def cantidadUsuariosActivos(cls):
         conexion = None
         try:
             # estado, cantidad
@@ -30,12 +30,12 @@ class Reporte:
                 GROUP BY usuarios.estado
                 ORDER BY COALESCE(COUNT(usuarios.id),0) DESC;
             """)
-            return resultados[0]
+            return resultados
         except Exception as e:
             print("Error al obtener la cantidad de usuarios activos: ", e)
 
     @classmethod
-    def cantidadPersonalxTipo():
+    def cantidadPersonalxTipo(cls):
         # tipo, cantidad
         conexion = None
         try:
@@ -48,7 +48,7 @@ class Reporte:
             print("Error al obtener la cantidad de personal por tipo: ", e)
 
     @classmethod
-    def cantidadPersonalActivo():
+    def cantidadPersonalActivo(cls):
         conexion = None
         try:
             # estado, cantidad
@@ -67,7 +67,7 @@ class Reporte:
 
     #Falta probar
     @classmethod
-    def topRutasSolicitadas():
+    def topRutasSolicitadas(cls):
         # ruta, cantidad
         conexion = None
         try:
@@ -88,7 +88,7 @@ class Reporte:
             print("Error al obtener la cantidad de rutas solicitadas: ", e)
 
     @classmethod
-    def cantidadRutasProgramadasxMes():
+    def cantidadRutasProgramadasxMes(cls):
         conexion = None
         try:
             # mes, total_programaciones
@@ -104,7 +104,7 @@ class Reporte:
             print("Error al obtener la cantidad de rutas programadas por mes: ", e)
 
     @classmethod
-    def cantidadIngresosxServicio():
+    def cantidadIngresosxServicio(cls):
         # servicio, cantidad
         conexion = None
         try:
@@ -129,11 +129,11 @@ class Reporte:
 
     #aun falta
     @classmethod
-    def cantidadIngresosxPeriodo():
+    def cantidadIngresosxPeriodo(cls):
         pass
 
     @classmethod
-    def cantidadClientesxPais():
+    def cantidadClientesxPais(cls):
         conexion = None
         try:
             # pais, cantidad
@@ -154,7 +154,7 @@ class Reporte:
 
 
     @classmethod
-    def cantidadClientesxTipo():
+    def cantidadClientesxTipo(cls):
         conexion = None
         try:
             # tipo_cliente, cantidad
