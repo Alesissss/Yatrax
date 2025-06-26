@@ -1,6 +1,6 @@
 {% extends "maestra.html" %}
 {% block contenido %}
-<form id="formPerfil" class="p-4 rounded bg-white shadow-sm">
+<div id="formPerfil" class="p-4 rounded bg-white shadow-sm">
   <h4 class="mb-4">Mi Perfil</h4>
   {% set datosUsuario = session['cliente'] %}
 
@@ -53,7 +53,7 @@
     <div class="col-md-4 mb-3">
       <label for="f_nacimiento" class="form-label">Fecha de Nacimiento</label>
       {% set meses = {'Jan':'01', 'Feb':'02', 'Mar':'03', 'Apr':'04', 'May':'05', 'Jun':'06', 'Jul':'07', 'Aug':'08', 'Sep':'09', 'Oct':'10', 'Nov':'11', 'Dec':'12'} %}
-      {% set partes = datosUsuario.f_nacimiento.split() %}
+      {% set partes = datosUsuario.f_nacimiento.split() if datosUsuario.f_nacimiento else '' %}
       <input type="date" id="f_nacimiento" name="f_nacimiento"
              value="{% if partes|length >= 4 %}{{ partes[3] }}-{{ meses[partes[2]] }}-{{ partes[1] }}{% endif %}"
              class="form-control">
@@ -65,7 +65,7 @@
   <div class="row">
     <div class="col-md-4 mb-3">
       <label for="nombres" class="form-label">Nombres</label>
-      <input type="text" id="nombres" name="nombres" class="form-control" value="{{ datosUsuario.nombres }}" required>
+      <input type="text" id="nombres" name="nombres" class="form-control" value="{{ datosUsuario.nombre }}" required>
     </div>
 
     <div class="col-md-4 mb-3">
@@ -114,9 +114,9 @@
   <!-- Botones -->
   <div class="mt-4 text-end">
     <button type="button" id="regresar" class="btn btn-secondary">Regresar al inicio</button>
-    <button type="submit" class="btn btn-primary">Actualizar Perfil</button>
+    <button id="btnActualizar" class="btn btn-primary">Actualizar Perfil</button>
   </div>
-</form>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -127,27 +127,57 @@
 
 <script>
 $(document).ready(function () {
-    $('#formPerfil').submit(function (e) {
-        e.preventDefault(); // Evita que se envíe el formulario de forma tradicional
+    $('#btnActualizar').click(function () {
+        var formData = {
+            id_cliente: $('#formPerfil').find('input[name="id_cliente"]').val(),
+            usuario: $('#formPerfil').find('input[name="usuario"]').val(),
+            id_pais: $('#formPerfil').find('select[name="id_pais"]').val(),
+            id_tipo_cliente: $('#formPerfil').find('select[name="id_tipo_cliente"]').val(),
+            razon_social: $('#formPerfil').find('input[name="razon_social"]').val(),
+            id_tipo_doc: $('#formPerfil').find('select[name="id_tipo_doc"]').val(),
+            numero_documento: $('#formPerfil').find('input[name="numero_documento"]').val(),
+            f_nacimiento: $('#formPerfil').find('input[name="f_nacimiento"]').val(),
+            nombres: $('#formPerfil').find('input[name="nombres"]').val(),
+            ape_paterno: $('#formPerfil').find('input[name="ape_paterno"]').val(),
+            ape_materno: $('#formPerfil').find('input[name="ape_materno"]').val(),
+            sexo: $('#formPerfil').find('select[name="sexo"]').val(),
+            direccion: $('#formPerfil').find('input[name="direccion"]').val(),
+            telefono: $('#formPerfil').find('input[name="telefono"]').val(),
+            email: $('#formPerfil').find('input[name="email"]').val(),
+            password: $('#formPerfil').find('input[name="password"]').val()
+        };
 
-        var form = $(this);
-        var actionUrl = form.attr('action');
-        var formData = form.serialize(); // Serializa los datos del formulario
+        console.log("Datos recopilados del formulario:", formData);
 
-        $.post(actionUrl, formData, function (response) {
-            if (response.Status == 1) {
-                toastr.success(response.Mensaje);
-                setTimeout(()=>{
-                  window.location.href = "/ecommerce/home/logout";
-                },1000)
-            } else {
-                toastr.error(response.Mensaje);
+        var actionUrl = "{{ url_for('homeClientes.perfilCliente') }}";
+        console.log("URL de acción:", actionUrl);
+
+        $.ajax({
+            url: actionUrl,
+            type: 'POST',
+            data: JSON.stringify(formData),
+            contentType: 'application/json',
+            dataType: 'json',
+            success: function (response) {
+                console.log("Respuesta del servidor:", response);
+                if (response.Status == 1) {
+                    toastr.success(response.Mensaje);
+                    setTimeout(() => {
+                        window.location.href = "/ecommerce/home/logout";
+                    }, 1000);
+                } else {
+                    toastr.error(response.Mensaje);
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.error("Error en la petición AJAX:", textStatus, errorThrown);
+                console.error("Respuesta del servidor:", jqXHR.responseText);
+                toastr.error('Error inesperado al enviar el formulario.');
             }
-        }).fail(function () {
-            toastr.error('Error inesperado al enviar el formulario.');
         });
     });
 });
+
 </script>
 
 <script>

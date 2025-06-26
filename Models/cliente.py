@@ -102,6 +102,38 @@ class Cliente:
             conexion.cerrar()
 
     @classmethod
+    def actualizarPerfil(cls, id_cliente, id_pais, id_tipo_cliente, id_tipo_doc, numero_documento,
+                         nombre, ape_paterno, ape_materno, sexo, f_nacimiento,
+                         razon_social, direccion, telefono, email, password, usuario):
+        conexion = bd.Conexion()
+        try:
+            # Hashear la contraseña solo si viene
+            password_hash = hashlib.sha256(password.encode()).hexdigest() if password else None
+
+            # Ejecutar el procedimiento almacenado con parámetros separados por comas
+            conexion.ejecutar(
+                "CALL SP_ACTUALIZAR_CLIENTE(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, @MSJ, @MSJ2);",
+                (
+                    id_cliente, id_pais, id_tipo_cliente, id_tipo_doc, numero_documento,
+                    nombre, ape_paterno, ape_materno, sexo, f_nacimiento,
+                    razon_social, direccion, telefono, email, password_hash, usuario
+                )
+            )
+
+            # Obtener los valores de salida
+            resultado = conexion.obtener("SELECT @MSJ AS MSJ, @MSJ2 AS MSJ2;")
+
+            # resultado es una lista de diccionarios, tomamos el primero
+            if resultado and len(resultado) > 0:
+                return resultado[0]
+            else:
+                return {'MSJ': None, 'MSJ2': None}
+        except Exception as e:
+            return {'MSJ': '', 'MSJ2': f'Error: {str(e)}'}
+        finally:
+            conexion.cerrar()
+
+    @classmethod
     def verificar_correo_cliente(cls,correo):
         conexion = bd.Conexion()
         status = -1
