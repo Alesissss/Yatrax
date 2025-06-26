@@ -72,6 +72,7 @@ class TicketTransporteSimple:
             self._etiqueta_valor("Cliente", cliente['nombre'])
             self._etiqueta_valor("EMBARQUE", viaje.get('embarque', ''))
             self._etiqueta_valor("DESEMBARQUE", viaje.get('desembarque', ''))
+            self._etiqueta_valor("CODIGO", viaje.get('codigo', ''))
             self.pdf.ln(2)
 
             # Línea separadora

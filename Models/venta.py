@@ -116,6 +116,7 @@ class Venta:
                 """
                 print(4)
                 numComprobante = Pasaje.generar_numComprobante()
+                codigoUnico = Pasaje.generar_codigo_unico()
                 conexion.ejecutar(insert_pasaje, (
                     # idDetalleViajeAsiento
                     key,
@@ -134,11 +135,12 @@ class Venta:
                     # idVenta
                     id_venta,
                     # codigo
-                    Pasaje.generar_codigo_unico(),
+                    codigoUnico,
                     # enTransaccion
                     0
                 ), auto_commit=False)
                 tickets_data.append({
+                    "codigo":codigoUnico,
                     "numero_comprobante": numComprobante,
                     "asiento": key,
                     "pasajero": f"{pasajero.get('nombres')} {pasajero.get('apellidoPaterno')} {pasajero.get('apellidoMaterno')}",
@@ -167,7 +169,8 @@ class Venta:
             empresa = Venta.consultar_empresa_activa()
             rutas_pdf = []  # Lista para almacenar las rutas de los tickets generados
             for datos in tickets_data:
-                cod_boleta = datos["numero_comprobante"]
+                num_boleta = datos["numero_comprobante"]
+                cod_boleta = datos["codigo"]
                 url_verificacion = f"http://see.transporteschiclayo.pe/verificar/{cod_boleta}"
                 qr_path = generar_codigo_qr(url_verificacion, cod_boleta)
 
@@ -178,7 +181,7 @@ class Venta:
                         "direccion": empresa["direccion"],
                         "telefono": empresa["telefono"],
                         "tipo_comprobante": "BOLETA DE VENTA ELECTRÓNICA",
-                        "numero_comprobante": cod_boleta
+                        "numero_comprobante": num_boleta
                     },
                     "comprobante": {
                         "fecha": datetime.now().strftime("%d/%m/%Y"),
@@ -192,7 +195,8 @@ class Venta:
                     },
                     "viaje": {
                         "embarque": "Por determinar",
-                        "desembarque": "Por determinar"
+                        "desembarque": "Por determinar",
+                        "codigo": cod_boleta
                     },
                     "servicio": {
                         "ruta": "CHICLAYO-LIMA",
