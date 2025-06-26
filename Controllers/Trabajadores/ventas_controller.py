@@ -121,9 +121,9 @@ def TransaccionesPasajes_Nuevo():
 
 # VIEWS - REPORTES
 
-@ventas_bp.route('/ReporteVentas')
-def Menu_ReporteVentas():
-    return render_template('ventas/reporteVentas.html', active_page="reporteVentas", active_menu="mVentas")
+@ventas_bp.route('/DashboardVentas')
+def Menu_DashboardVentas():
+    return render_template('ventas/dashboardVentas.html', active_page="dashboardVentas", active_menu="mVentas")
 
 # END REPORTES
 
@@ -1041,7 +1041,7 @@ def generar_comprobante_pdf():
 
 # REGION REPORTES
 
-@ventas_bp.route("/ObtenerReporteVentas", methods=["GET"])
+@ventas_bp.route("/ObtenerDashboardVentasVentas", methods=["GET"])
 def obtener_reporte_ventas():
     try:
         fechaInicio = request.args.get("fechaInicio")
@@ -1051,7 +1051,7 @@ def obtener_reporte_ventas():
         fecha_inicio_dt = datetime.strptime(fechaInicio, "%Y-%m-%d")
         fecha_fin_dt = datetime.strptime(fechaFin, "%Y-%m-%d")
 
-        raw_rows = Venta.obtener_reporte_ventas()
+        raw_rows = Venta.obtener_dashboard_ventas()
 
         data = []
         for row in raw_rows:
