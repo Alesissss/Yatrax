@@ -1952,18 +1952,17 @@
     })
   })
 
-  function renderResumen(data) {
+function renderResumen(data) {
     const viaje = data.detalle_viaje;
     const pasajeros = data.pasajeros;
-    const total = data.precio_total || 0;
+    const total = parseFloat(data.precio_total) || 0;  // Asegurarse de que total sea un número
 
     // Usar el descuento directamente desde la variable global:
-    const descuento = descuentoAplicado;
-    const cambioRuta = precioCambioRuta;
+    const descuento = parseFloat(descuentoAplicado) || 0;  // Convertir a número
+    const cambioRuta = parseFloat(precioCambioRuta) || 0;  // Convertir a número
 
     const fechaSalida = moment(viaje.fechaSalida).format("DD-MM-YYYY, HH:mm");
     const fechaLlegada = moment(viaje.fechaLlegadaEstimada).format("DD-MM-YYYY, HH:mm");
-
 
     let html = `
         <div class="card mb-3">
@@ -1971,7 +1970,7 @@
           <div class="card-body">
             <p><strong>${fechaSalida}</strong> ${viaje.ciudad_origen} (${viaje.origen})</p>
             <p><strong>${fechaLlegada}</strong> ${viaje.ciudad_destino} (${viaje.destino})</p>
-            <p><i class="fas fa-user"></i> ${pasajeros.length} pasajero</p>
+            <p><i class="fas fa-user"></i> ${pasajeros.length} pasajero${pasajeros.length > 1 ? 's' : ''}</p>
           </div>
         </div>
 
@@ -1982,33 +1981,37 @@
             `;
 
     pasajeros.forEach(p => {
-      html += `<p>Pasajero ${p.numero} (Asiento ${p.asiento}) - S/ ${p.precio.toFixed(2)}</p>`;
+      // Asegurarse de que el precio sea un número
+      html += `<p>Pasajero ${p.numero} (Asiento ${p.asiento}) - S/ ${(parseFloat(p.precio) || 0).toFixed(2)}</p>`;
     });
 
     html += `
             <hr>
             <p><strong>Precio cambio de ruta:</strong> S/ ${cambioRuta.toFixed(2)}</p>
-            <p><strong>Descuento aplicado:</strong> S/ ${descuento.toFixed(2)}</p>
-            <p><strong>Total a pagar:</strong> S/ ${(descuento >= (total + cambioRuta)) ? '0.00' : ((total - descuento) + cambioRuta).toFixed(2)
-      }</p>
+            <p><strong>Descuento aplicado por pasaje:</strong> S/ ${descuento.toFixed(2)}</p>
+            <p><strong>Total a pagar:</strong> S/ ${(descuento >= (total + cambioRuta)) ? '0.00' : ((total - descuento) + cambioRuta).toFixed(2)}</p>
           </div>
         </div>
-            `;
+    `;
 
-    $('#contenedorResumen').html(html);
-  }
+    // Verifica que el contenedor esté presente antes de actualizar el HTML
+    const contenedorResumen = $('#contenedorResumen');
+    if (contenedorResumen.length) {
+        contenedorResumen.html(html);
+    } else {
+        console.error("No se encontró el contenedor #contenedorResumen");
+    }
+}
 
-
-  // Obtener el precio de cambio de ruta al cargar la página
 
   $(document).on('click', '#confirmarDatos', function () {
     let id_asiento = $('#asiento_id').text();
-    console.log("Valor de #asiento_id:", $('#asiento_id').text());
+    let viaje = sessionStorage.getItem('btn_id_ida');
     $.ajax({
       url: '/ecommerce/home/resumenViaje',
       type: 'POST',
       contentType: 'application/json',
-      data: JSON.stringify({ asiento_id: id_asiento, descuento: descuentoAplicado }),
+      data: JSON.stringify({ asiento_id: id_asiento, descuento: descuentoAplicado , viaje : viaje}),
       success: function (response) {
         if (response.Status === 'success') {
           response.data.descuento = descuentoAplicado
