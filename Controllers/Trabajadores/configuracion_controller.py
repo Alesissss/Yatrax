@@ -11,8 +11,11 @@ from Models.tipoMetodoPago import TipoMetodoPago
 from Models.terminos_condiciones import TerminosCondiciones
 from Models.preguntas_frecuentes import PreguntasFrecuentes
 from Models.promocion import Promocion
+from Models.empresa import Empresa
+
 from Models.conf_general import ConfGeneral
 from werkzeug.utils import secure_filename
+
 
 configuracion_bp = Blueprint('configuracion', __name__, url_prefix='/trabajadores/configuracion')
 
@@ -69,6 +72,29 @@ def Menu_TerminosCondiciones():
 @configuracion_bp.route('/TerminosCondicionesNuevo')
 def TerminosCondiciones_Nuevo():
     return render_template('configuracion/terminosYCondicionesCRUD.html', active_page="terminosCondiciones", active_menu='mConfiguracion', terminosCondiciones={}, tittle = 'Registrar términos y condiciones', btnId = 'btn_Registrar')
+
+@configuracion_bp.route('/GestionarEmpresa')
+def Menu_Empresa():
+    # Recupera las empresas activas de la base de datos
+    empresas = Empresa.obtener_activos() 
+    return render_template(
+        'configuracion/empresa.html', 
+        active_page="empresas", 
+        active_menu='mConfiguracion', 
+        empresas=empresas
+    )
+
+@configuracion_bp.route('/EmpresaNuevo')
+def Empresa_Nuevo():
+    return render_template(
+        'configuracion/empresaCRUD.html', 
+        active_page="empresas", 
+        active_menu='mConfiguracion', 
+        empresa={}, 
+        tittle='Registrar empresa', 
+        btnId='btn_Registrar'
+    )
+
 
 @configuracion_bp.route('/GestionarPreguntasFrecuentes')
 def Menu_PreguntasFrecuentes():
@@ -757,6 +783,108 @@ def get_preguntas_frecuentes():
         return jsonify({"Status": "error", "Msj": f"Error al obtener las preguntas frecuentes: {repr(e)}", "data": []})
 
 # END REGION PREGUNTAS FRECUENTES
+
+# REGION EMPRESA
+@configuracion_bp.route("/GetData_Empresas", methods=["GET"])
+def get_empresas():
+    try:
+        empresas = Empresa.obtener_todos()
+        return jsonify({'data': empresas, 'Status': 'success', 'Msj': 'Listado de empresas retornado exitosamente'})
+    except Exception as e:
+        return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar empresas: {repr(e)}'})
+
+@configuracion_bp.route("/RegistrarEmpresa", methods=["POST"])
+def registrar_empresa():
+    try:
+        razon_social   = request.form.get("razon_social", "").strip()
+        ruc             = request.form.get("ruc", "").strip()
+        direccion       = request.form.get("direccion", "").strip()
+        telefono        = request.form.get("telefono", "").strip()
+        email           = request.form.get("email", "").strip()
+        usuario_actual  = session.get('usuario', {}).get('email', 'SIN USUARIO')
+
+        if not razon_social or not ruc or not direccion or not telefono or not email:
+            return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
+
+        # Registrar la empresa
+        mensajes = Empresa.registrar(razon_social, ruc, direccion, telefono, email, usuario_actual)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+        if msj1:
+            return jsonify({"Status": "success", "Msj": msj1, "Msj2": ""})
+        else:
+            return jsonify({"Status": "error", "Msj": "", "Msj2": msj2})
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Ocurrió un error inesperado: {repr(e)}"})
+
+@configuracion_bp.route("/EliminarEmpresa/<int:id>", methods=["POST"])
+def eliminar_empresa(id):
+    try:
+        mensajes = Empresa.eliminar(id)
+        msj = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj:
+            return jsonify({"Status": "success", 'Msj': msj, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al eliminar empresa'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@configuracion_bp.route("/EditarEmpresa/<int:id>", methods=["GET", "POST"])
+def editar_empresa(id):
+    try:
+        empresa = Empresa.obtener_por_id(id)  # Método correcto
+        if request.method == "GET" and empresa:
+            return render_template('configuracion/empresaCRUD.html', 
+                                   active_page="empresas", 
+                                   active_menu='mConfiguracion', 
+                                   empresa=empresa, 
+                                   tittle='Editar empresa', 
+                                   btnId='btn_Editar')
+
+        if request.method == 'POST':
+            razon_social = request.form.get("razon_social", "").strip()
+            ruc = request.form.get("ruc", "").strip()
+            direccion = request.form.get("direccion", "").strip()
+            telefono = request.form.get("telefono", "").strip()
+            email = request.form.get("email", "").strip()
+            usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO')
+
+            if not razon_social or not ruc or not direccion or not telefono or not email:
+                return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
+
+            mensajes = Empresa.editar(id, razon_social, ruc, direccion, telefono, email, usuario_actual)
+            msj = mensajes.get('@MSJ')
+            msj2 = mensajes.get('@MSJ2')
+            if msj:
+                return jsonify({"Status": "success", "Msj": msj})
+            else:
+                return jsonify({"Status": "error", "Msj": msj2})
+
+        return jsonify({"Status": "error", "Msj": "Empresa no encontrada"})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+@configuracion_bp.route("/ActivarEmpresa/<int:id>", methods=["POST"])
+def activar_empresa(id):
+    try:
+        mensajes = Empresa.activar(id)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al activar empresa'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+
 
 # REGION TERMINOS Y CONDICIONES
 def allowed_file_txt(filename):
