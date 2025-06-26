@@ -770,6 +770,7 @@ CREATE TABLE pasaje(
     fechaReprogramacion DATETIME NULL,
     codigoReserva CHAR(14) NULL, -- Código de reserva, si es un pasaje de reserva
     fecha_reserva DATETIME NULL, -- Fecha de reserva, si es un pasaje de reserva
+    reservaLiberada BOOLEAN DEFAULT 0 NULL,
     FOREIGN KEY (idDetalleViajeAsiento) REFERENCES detalle_viaje_asiento(id),
     FOREIGN KEY (idVenta) REFERENCES venta(id)
 );
@@ -7604,6 +7605,10 @@ BEGIN
         esReserva       = 0,
         esCambioRuta    = 0
     WHERE id = p_idPasaje;
+
+    SELECT @idDetalle := idDetalleViajeAsiento FROM pasaje WHERE id=p_idPasaje;
+
+    UPDATE detalle_viaje_asiento SET esDisponible=0 WHERE id=@idDetalle;
 
     -- Comprobamos si realmente se actualizó alguna fila
     IF ROW_COUNT() = 0 THEN

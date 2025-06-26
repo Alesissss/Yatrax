@@ -17,7 +17,6 @@ from Models.servicio import Servicio
 from Models.cliente import Cliente
 from Models.tipo_herramienta import TipoHerramienta
 from Models.microservicio import MicroServicio
-
 from Models.tipoDocumento import TipoDocumento
 from Models.tipoCliente import TipoCliente
 from Models.tipoVehiculo import TipoVehiculo
@@ -858,7 +857,6 @@ def cambiarEnTransaccion():
             return jsonify(status="error", message=resultado["error"]), 404
 
         return jsonify(status="success", nuevoEstado=resultado["nuevoEstado"]), 200
-
     except Exception as e:
         return jsonify(status="error", message=str(e)), 500
         

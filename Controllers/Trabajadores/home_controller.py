@@ -1,11 +1,11 @@
 import hashlib
+import random
 from datetime import datetime
 from flask import Blueprint, request, jsonify, render_template, session, redirect, url_for, abort, current_app
 from Models.usuario import Usuario
 from Models.tipoUsuario import TipoUsuario
 from Models.conf_menus import Conf_Menus
 from Models.personal import Personal
-import random
 from correo import enviar_correo
 
 home_bp = Blueprint('home', __name__, url_prefix='/trabajadores/home')

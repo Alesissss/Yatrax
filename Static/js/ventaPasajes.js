@@ -18,12 +18,6 @@ const CONFIG = {
         PROCESAR_RESERVA: '/ecommerce/home/procesar_reserva',
         MARCAR_ASIENTO_OCUPADO: '/ecommerce/home/ocuparAsiento',
         MARCAR_ASIENTO_DISPONIBLE: '/ecommerce/home/liberarAsiento'
-    },
-    GRILLA: {
-        FILA_1: 1,
-        FILA_2: 1,
-        COL_1: 1,
-        COL_2: 1,
     }
 };
 
@@ -294,7 +288,7 @@ const NavigationManager = {
             cancelButtonText: 'Revisar datos',
             confirmButtonColor: '#28a745',
             cancelButtonColor: '#6c757d',
-            reverseButton: true
+            reverseButtons: true
         });
 
         if (!confirmacion.isConfirmed) return;
@@ -337,7 +331,7 @@ const NavigationManager = {
             cancelButtonText: 'Revisar datos',
             confirmButtonColor: '#28a745',
             cancelButtonColor: '#6c757d',
-            reverseButton: true
+            reverseButtons: true
         });
 
         if (!confirmacion.isConfirmed) return;
@@ -417,7 +411,7 @@ const NavigationManager = {
             cancelButtonText: 'Cancelar',
             confirmButtonColor: '#17a2b8',
             cancelButtonColor: '#6c757d',
-            reverseButton: true
+            reverseButtons: true
         });
 
         if (!confirmacion.isConfirmed) return;
@@ -490,13 +484,11 @@ const SearchManager = {
                 text: "Esta acción eliminará tu progreso actual, ¿estás seguro de hacerlo?",
                 icon: "warning",
                 showCancelButton: true,
-                reverseButtons: true,
                 confirmButtonText: "Sí, buscar",
                 cancelButtonText: "Cancelar",
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#6c757d',
-
-                reverseButton: true
+                reverseButtons: true,
             });
 
             if (!confirmacion.isConfirmed) return;
@@ -831,8 +823,6 @@ const ItineraryManager = {
 const VehicleLayoutManager = {
     async generarMatrices(idBoton, sufijo) {
         try {
-            console.log(`🎨 Generando matrices para ${idBoton} - ${sufijo}`);
-
             const response = await fetch(CONFIG.RUTAS.OBTENER_DISENO_VEHICULO, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -1253,8 +1243,7 @@ const SeatManager = {
             showCancelButton: true,
             confirmButtonText: 'Sí, eliminar',
             cancelButtonText: 'Cancelar',
-
-            reverseButton: true
+            reverseButtons: true
         });
 
         if (confirm.isConfirmed) {
@@ -3275,7 +3264,7 @@ const FormValidationManager = {
                 icon: "warning",
                 confirmButtonText: "Entendido",
                 confirmButtonColor: '#3085d6',
-                reverseButton: true
+                reverseButtons: true
             });
             return false;
         }
