@@ -144,8 +144,8 @@ class Venta:
                     "asiento": key,
                     "pasajero": f"{pasajero.get('nombres')} {pasajero.get('apellidoPaterno')} {pasajero.get('apellidoMaterno')}",
                     "documento_pasajero": pasajero.get("numDoc"),
-                    "precio_unitario": pasajero.get("precio"),  # si deseas calcularlo dinámico, cámbialo aquí
-                    "fecha_viaje": "05/07/2025",  # pon aquí la real si la tienes
+                    "precio_unitario": pasajero.get("precio"),
+                    "fecha_viaje": "05/07/2025",
                     "hora_viaje": "04:06 PM"
                 })
                 id_pasaje = conexion.cursor.lastrowid
