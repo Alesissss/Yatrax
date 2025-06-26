@@ -2369,7 +2369,7 @@ const PaymentManager = {
             const response = await fetch(CONFIG.RUTAS.PROCESAR_PAGO, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(datosCompletos)
+                body: JSON.stringify(datosCompletos) // Asegura que el body sea un string JSON
             });
 
             const resultado = await response.json();
@@ -2522,6 +2522,7 @@ const PaymentManager = {
             contacto: datosContacto,
             pago: datosPago,
             ventas: JSON.parse(sessionStorage.getItem("ventas") || "{}"),
+            
             itinerario: {
                 currentStep: AppState.currentStep,
                 itinerarioRegreso: AppState.itinerarioRegreso
