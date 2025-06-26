@@ -1,0 +1,563 @@
+{% extends "index.html" %}
+
+{% block title %}YATRAX - Dashboard de ventas{% endblock %}
+
+{% block content %}
+<div class="card d-none" id="efec-cargando">
+    <div class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center overlay dark">
+        <i class="fas fa-3x fa-sync-alt fa-spin text-white"></i>
+    </div>
+</div>
+<div class="container-fluid p-4">
+    <div class="panel-heading">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Dashboard de ventas</h1>
+            </div>
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-md-10">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="txt_fechaInicio">Fecha inicio</label>
+                                <div class="input-group">
+                                    <input type="date" id="txt_fechaInicio" class="form-control">
+                                    <div class="input-group-append">
+                                        <div class="input-group-text"><i class="fas fa-calendar-alt"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="txt_fechaFin">Fecha fin</label>
+                                <div class="input-group">
+                                    <input type="date" id="txt_fechaFin" class="form-control">
+                                    <div class="input-group-append">
+                                        <div class="input-group-text"><i class="fas fa-calendar-alt"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="row">
+                            <div class="col-md-12 mt-4">
+                                <button id="btn_GenerarReporte" class="btn btn-success">Generar reporte</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel-body">
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="row mt-3 mb-3">
+                            <div class="col-md-12">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="small-box bg-primary">
+                                            <div class="inner">
+                                                <h3 id="totalVentas">0</h3>
+                                                <p>Total de ventas</p>
+                                            </div>
+                                            <div class="icon">
+                                                <i class="fas fa-shopping-cart"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="small-box bg-info">
+                                            <div class="inner">
+                                                <h3 id="cantidadPasajes">0</h3>
+                                                <p>Cantidad de pasajes vendidos</p>
+                                            </div>
+                                            <div class="icon">
+                                                <i class="fas fa-ticket-alt"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="card">
+                            <div class="card-header bg-primary">
+                                <h5>Gráfico de ventas por mes</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="chartPrincipal" style="width: 100%; height: 400px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="card">
+                            <div class="card-header bg-info">
+                                <h5>Gráfico de totales por sexo</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="chartTotalSexo" style="width: 100%; height: 400px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-info">
+                        <h5>Totales por clientes</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="tbl_Clientes" class="table table-bordered table-short-rows">
+                                <thead class="bg-gray">
+                                    <tr>
+                                        <th class="text-center">NOMBRE</th>
+                                        <th class="text-center">SEXO</th>
+                                        <th class="text-center">CORREO</th>
+                                        <th class="text-center">CANTIDAD DE PASAJES</th>
+                                        <th class="text-center">TOTAL MONTO (S/.)</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white table-short-rows">
+                                </tbody>
+                                <tfoot class="bg-white">
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/theme/dark.min.js"></script>
+<script>
+    let isDarkMode;
+    var dtClientes;
+
+    function fct_GenerarReporteVentas(datos) {
+        // Meses en español
+        const meses = [
+            'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+            'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+        ];
+
+        // Inicializo totales por mes y contador de pasajes
+        const totalesPorMes = new Array(12).fill(0);
+        let totalPasajes = 0;
+
+        // Inicializo datos para gráfico circular de totales por sexo
+        let totalMasculino = 0;
+        let totalFemenino = 0;
+        let totalSinSexo = 0;
+
+        datos.forEach(item => {
+            const fecha = new Date(item.fecha);
+            const mesIdx = fecha.getMonth();
+            const suma = parseFloat(item["totalMonto"]) || 0;
+            const cantidad = parseInt(item["totalPasajes"]) || 0;
+
+            totalesPorMes[mesIdx] += suma;
+            totalPasajes += cantidad;
+
+            // Lleno los totales por sexo
+            const sexo = item.sexo;  // Suponiendo que 'sexo' viene como 'M' o 'F', o 'null' si no se tiene información
+            if (sexo === 'M') {
+                totalMasculino += suma;
+            } else if (sexo === 'F') {
+                totalFemenino += suma;
+            } else {
+                totalSinSexo += suma;
+            }
+        });
+
+        // Lleno los infobox
+        const totalVentas = totalesPorMes.reduce((a, v) => a + v, 0);
+        document.getElementById('totalVentas').innerText =
+            'S/. ' + formatearNumero(totalVentas);
+        // Sin símbolo de soles y sin decimales
+        document.getElementById('cantidadPasajes').innerText =
+            totalPasajes.toLocaleString('en-US');
+
+        $('#tbl_Clientes tfoot').html(`
+            <tr>
+                <th colspan="3" class="text-right">Totales:</th>
+                <th class="text-right">${totalPasajes.toLocaleString('en-US')}</th>
+                <th class="text-right">S/. ${formatearNumero(totalVentas)}</th>
+            </tr>
+        `);
+
+        // Preparo la serie para el gráfico de ventas por mes
+        const serieVentas = totalesPorMes;
+
+        // Preparo el gráfico circular de totales por sexo
+        const serieSexo = [
+            { name: 'Masculino', value: totalMasculino },
+            { name: 'Femenino', value: totalFemenino },
+            { name: 'Sin sexo', value: totalSinSexo }
+        ];
+
+        // Inicializo ECharts
+        const chartDom = document.getElementById('chartPrincipal');
+        const myChart = echarts.init(chartDom, isDarkMode ? 'dark' : '');
+
+        const option = {
+            title: {
+                text: 'Ventas por mes',
+                left: 'center'
+            },
+            tooltip: {
+                trigger: 'axis',
+                formatter: params => {
+                    const p = params[0];
+                    return `
+              ${p.seriesName}<br/>
+              ${p.axisValue} : S/. ${formatearNumero(p.value)}
+            `;
+                }
+            },
+            toolbox: {
+                show: true,
+                feature: {
+                    magicType: {
+                        type: ['line', 'bar'],
+                        title: { line: 'Línea', bar: 'Barras' },
+                        selected: { line: false, bar: true }
+                    },
+                    saveAsImage: { title: 'Descargar como imagen' }
+                },
+                right: 20,
+                top: 10
+            },
+            xAxis: {
+                type: 'category',
+                data: meses
+            },
+            yAxis: {
+                type: 'value',
+                axisLabel: {
+                    formatter: value => formatearNumero(value)
+                }
+            },
+            series: [{
+                name: 'Monto vendido',
+                type: 'line',  // comienza en barras
+                data: serieVentas,
+                smooth: true,
+                barMaxWidth: '40%',
+                areaStyle: {},  // sombra bajo la línea si cambias a 'line'
+                label: {
+                    show: true,               // Mostrar el label
+                    position: 'top',          // Posición del label
+                    formatter: (params) => {
+                        return params.value !== 0 ? `S/. ${formatearNumero(params.value)}` : ''; // Formato del valor
+                    },
+                    textStyle: {
+                        fontSize: 14,          // Tamaño del texto del label
+                    }
+                }
+            }]
+        };
+
+        // Configuración para el gráfico de totales por sexo (gráfico circular)
+        const chartDomSexo = document.getElementById('chartTotalSexo');
+        const myChartSexo = echarts.init(chartDomSexo, isDarkMode ? 'dark' : '');
+
+        const optionSexo = {
+            title: {
+                text: 'Totales por Sexo',
+                left: 'center'
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: '{a} <br/>{b}: S/. {c} ({d}%)'
+            },
+            legend: {
+                orient: 'vertical',      // La leyenda será vertical
+                left: 'left',            // La leyenda se alineará a la izquierda
+                data: ['Masculino', 'Femenino', 'Sin sexo'], // Nombres de las categorías que aparecerán en la leyenda
+                textStyle: {
+                    fontSize: 14          // Tamaño de la fuente
+                }
+            },
+            series: [
+                {
+                    name: 'Sexo',
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    data: serieSexo,
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    },
+                    label: {
+                        show: true,               // Muestra el label en los segmentos
+                        formatter: '{b}: {d}%',   // Muestra el nombre y el porcentaje
+                        textStyle: {
+                            fontSize: 14          // Tamaño de la fuente en los labels
+                        }
+                    }
+                }
+            ]
+        };
+
+        myChart.setOption(option);
+        myChartSexo.setOption(optionSexo);
+
+        window.addEventListener('resize', () => {
+            myChart.resize();
+            myChartSexo.resize();
+        });
+    }
+
+    function fct_GenerarTablaClientes(data) {
+        dtClientes = $('#tbl_Clientes').DataTable({
+            buttons: [
+                {
+                    extend: 'copy',
+                    text: '<i class="bi bi-back"></i>',
+                    titleAttr: 'Copiar en portapapeles',
+                    className: 'btn btn-primary',
+                },
+                {
+                    extend: 'excel',
+                    text: '<i class="bi bi-file-earmark-excel"></i>',
+                    titleAttr: 'Exportar a Excel',
+                    className: 'btn btn-success',
+                    filename: 'Reporte ventas - clientes' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    footer: true,
+                    exportOptions:
+                    {
+                        stripHtml: true,
+                    },
+                },
+                {
+                    extend: 'pdf',
+                    text: '<i class="bi bi-file-earmark-pdf"></i>',
+                    titleAttr: 'Exportar a PDF',
+                    className: 'btn btn-danger',
+                    filename: 'Reporte ventas - clientes' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    exportOptions:
+                    {
+                        stripHtml: true,
+                    },
+                    orientation: 'landscape',
+                    pageSize: 'LEGAL',
+                },
+                {
+                    extend: 'print',
+                    text: '<i class="bi bi-printer-fill"></i>',
+                    titleAttr: 'Imprimir',
+                    className: 'btn btn-info',
+                    exportOptions:
+                    {
+                        stripHtml: true,
+                    },
+                },
+                {
+                    extend: 'colvis',
+                    text: '<i class="bi bi-ui-checks"></i>',
+                    titleAttr: 'Seleccionar',
+                    className: 'btn btn-warning',
+                    columns: ':not(.noVis)',
+                },
+            ],
+            data: data,
+            columns: [
+                {
+                    data: null,
+                    name: null,
+                    render: function (data, type, row) {
+                        if (!data.ape_paterno || !data.ape_materno) {
+                            return `${data.nombre}`;
+                        } else {
+                            return `${data.ape_paterno} ${data.ape_materno}, ${data.nombre}`;
+                        }
+                    },
+                    className: 'align-middle',
+                },
+                {
+                    data: null,
+                    name: null,
+                    render: function (data, type, row) {
+                        if (!data.sexo) {
+                            return `Sin sexo`;
+                        } else {
+                            return `${data.sexo}`;
+                        }
+                    },
+                    className: 'align-middle',
+                },
+                { data: "email", name: "email" },
+                {
+                    data: null,
+                    name: null,
+                    render: function (data, type, row) {
+                        return `${data.totalPasajes.toLocaleString('en-US')}`;
+                    },
+                    className: 'text-right align-middle',
+                },
+                {
+                    data: null,
+                    name: null,
+                    render: function (data, type, row) {
+                        return `S/. ${formatearNumero(data.totalMonto)}`;
+                    },
+                    className: 'text-right align-middle',
+                }
+            ],
+            columnDefs: [
+                {
+                    targets: [0, 1, 2, 3, 4],
+                    className: 'align-middle',
+                },
+                {
+                    targets: [3, 4],
+                    className: 'text-right',
+                    width: '15%',
+                },
+            ],
+            lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
+            initComplete: function (data, row, cell, start, end, display) {
+                $('.dt-buttons button').addClass('m-1');
+                $('.dt-button-collection').appendTo('.dt-buttons');
+                $('.btn.btn-success').removeClass('dt-button btn-secondary buttons-excel buttons-html5');
+                $('.btn.btn-danger').removeClass('dt-button btn-secondary buttons-pdf buttons-html5');
+                $('.btn.btn-primary').removeClass('dt-button btn-secondary buttons-copy buttons-html5');
+                $('.btn.btn-info').removeClass('dt-button btn-secondary buttons-print');
+                $('.btn.btn-warning').removeClass('dt-button btn-secondary buttons-collection buttons-colvis');
+                //TAMAÑO DE LOS BOTONES
+                $('.btn.btn-success.m-1').addClass('btn-xs');
+                $('.btn.btn-danger.m-1').addClass('btn-xs');
+                $('.btn.btn-primary.m-1').addClass('btn-xs');
+                $('.btn.btn-info.m-1').addClass('btn-xs');
+                $('.btn.btn-warning.m-1').addClass('btn-xs');
+            },
+        });
+    }
+
+    $(document).ready(function () {
+        const today = new Date();
+        const year = today.getFullYear();
+
+        const primerDia = `${year}-01-01`;
+        const ultimoDia = `${year}-12-31`;
+
+        $('#txt_fechaInicio').val(primerDia);
+        $('#txt_fechaFin').val(ultimoDia);
+
+        isDarkMode = document.body.classList.contains('dark-mode');
+
+        $('#btn_GenerarReporte').on('click', function () {
+            ShowSpinner();
+            let fechaInicio = $('#txt_fechaInicio').val();
+            let fechaFin = $('#txt_fechaFin').val();
+
+            if (!fechaInicio || !fechaFin) {
+                HideSpinner();
+                toastr.warning('Debe ingresar valores válidos', 'MENSAJE DE SISTEMA');
+                return;
+            }
+
+            $.getJSON("/trabajadores/ventas/ObtenerDashboardVentasVentas", { fechaInicio: fechaInicio, fechaFin: fechaFin }, function (response) {
+                HideSpinner();
+
+                if (response.Status !== "success") {
+                    console.error("Ocurrió un error: ", response.Msj);
+                    return;
+                }
+
+                const datos = response.data;
+
+                fct_GenerarReporteVentas(datos);
+                fct_GenerarTablaClientes(datos);
+            });
+        });
+
+        var windowHeight = $('body > div.wrapper > div.content-wrapper').height() / 2;
+        //CONFIGURACION POR DEFECTO DATATABLES
+        $.extend($.fn.dataTable.defaults, {
+            dom: "<'row align-items-center'<'col-sm-8 justify-content-start'f><'col-sm-4 c1 d-flex justify-content-end'>>" + "<'row align-items-center'<'col-sm-4'l><'col-sm-4 my-3 justify-content-start d-flex'B><'col-sm-4 d-flex justify-content-end'p>>" + "rt" + "<'row'<'col-sm-6'i><'col-sm-6 mt-1 d-flex justify-content-end'p>>",
+            // dom: "<'row pb-1'<'col-sm-9 d-flex'B><'col-sm-3 c1 d-flex justify-content-end'>>" + "<'row'<'col-sm-4'l><'col-sm-8 justify-content-start'f>>" + "<'row'<'col-sm-6'i><'col-sm-6 d-flex justify-content-end'p>>" + "rt" + "<'row'<'col-sm-6'i><'col-sm-6 mt-1 d-flex justify-content-end'p>>",
+            // dom: "<'row pb-1'<'col-sm-9'B><'col-sm-3 c1 d-flex justify-content-end'>>" + "<'row'<'col-sm-10'l><'col-sm-2'f>>" + "<'row'<'col-sm-6'i><'col-sm-6'p>>" + "rt" + "<'row'<'col-sm-6'i><'col-sm-6'p>>",
+            // dom: "<'row pb-1'<'col-sm-10'B><'col-sm-2 c1 d-flex justify-content-end'>>" + "<'row'<'col-sm-11'l><'col-sm-1'f>>" + "<'row'<'col-sm-10'i><'col-sm-2'p>>" + "rt" + "<'row'<'col-sm-10'i><'col-sm-2'p>>",
+            paging: true,
+            select: true,
+            scroller: false,
+            deferRender: true,
+            scrollY: windowHeight,
+            scrollX: false,
+            fixedHeader: true,
+            ordering: true,
+            destroy: true,
+            responsive: true,
+            autoWidth: false,
+            processing: true,
+            filter: true,
+            orderMulti: true,
+            stateSave: false,
+            serverSide: false,
+            language: {
+                processing: "Procesando...",
+                sSearch: "Buscar:",
+                lengthMenu: "Mostrar _MENU_ registros",
+                info: "Mostrando del _START_ al _END_ de un total de _TOTAL_ registros",
+                infoEmpty: "Sin registros encontrados.",
+                infoFiltered: "(Total de _MAX_ registros filtrados)",
+                loadingRecords: "Cargando...",
+                zeroRecords: "No se encontraron registros",
+                emptyTable: "No hay datos disponibles en la tabla",
+                paginate: {
+                    previous: "Anterior",
+                    next: "Siguiente",
+                    first: "Primero",
+                    last: "Último",
+                },
+                aria: {
+                    sortAscending: ": Activar para ordenar la columna de manera ascendente",
+                    sortDescending: ": Activar para ordenar la columna de manera descendente"
+                },
+                select: {
+                    rows: {
+                        _: "%d filas seleccionadas",
+                        0: "Haz clic en una fila para seleccionarla",
+                        1: "1 fila seleccionada"
+                    }
+                },
+                buttons: {
+                    copyTitle: 'Copiado en el portapapeles',
+                    copyKeys: 'Presiona <i>ctrl</i> o <i>\u2318</i> + <i>C</i> para copiar los datos de la tabla a tu portapapeles. <br><br>Para cancelar, haga clic en este mensaje o presione Esc.',
+                    copySuccess: {
+                        _: '%d registros copiados correctamente',
+                        1: '1 registro copiado correctamente'
+                    }
+                }
+            },
+            lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
+        });
+    });
+
+    function ShowSpinner() {
+        $('#efec-cargando').removeClass('d-none');
+    }
+
+    function HideSpinner() {
+        $('#efec-cargando').addClass('d-none');
+    }
+
+    function formatearNumero(numero) {
+        let numeroRedondeado = Math.round(numero * 100) / 100;
+        return new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(numeroRedondeado);
+    }
+</script>
+{% endblock %}

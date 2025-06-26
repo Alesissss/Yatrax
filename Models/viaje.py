@@ -700,7 +700,7 @@ class Viaje:
         conexion = bd.Conexion()
         try:
             niveles = conexion.obtener("""
-                SELECT DISTINCT n.id as nivel_id, n.x_dimension as x, n.y_dimension as y
+                SELECT DISTINCT n.id as nivel_id,n.nroPiso as nroPiso, n.x_dimension as x, n.y_dimension as y
                 FROM detalle_viaje dv INNER JOIN viaje v ON dv.idViaje = v.id
                 INNER JOIN vehiculo ve ON ve.id = v.idVehiculo
                 INNER JOIN tipo_vehiculo tv ON tv.id = ve.id_tipo_vehiculo

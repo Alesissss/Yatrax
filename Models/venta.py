@@ -309,15 +309,17 @@ class Venta:
             conexion.cerrar()
 
     @classmethod
-    def obtener_reporte_ventas(cls):
+    def obtener_dashboard_ventas(cls):
         try:
             conexion = bd.Conexion()
-            result = conexion.obtener(""" SELECT c.nombre, c.ape_paterno, c.ape_materno, v.fecha, sum(subtotal + igv) as totalMonto, count(p.id) as totalPasajes
+            result = conexion.obtener(""" SELECT c.id, c.numero_documento, c.sexo, c.email, c.nombre, 
+                c.ape_paterno, c.ape_materno, v.fecha, 
+                sum(subtotal + igv) as totalMonto, count(p.id) as totalPasajes
                 FROM venta v 
                 INNER JOIN cliente c on v.idCliente = c.id 
                 INNER JOIN pasaje p on p.idVenta = v.id
-                -- WHERE p.esPasajeNormal = 1
-                GROUP BY c.nombre, c.ape_paterno, c.ape_materno, v.fecha """)
+                WHERE p.esPasajeNormal = 1
+                GROUP BY c.id, c.numero_documento, c.sexo, c.email, c.nombre, c.ape_paterno, c.ape_materno, v.fecha """)
             
             return result
         finally:
