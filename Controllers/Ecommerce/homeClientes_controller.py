@@ -782,7 +782,26 @@ def liberar_asiento():
         return {"data": [], "msg": "Asiento liberado correctamente", "status": 1}
     except Exception as e:
         return {"data": [], "msg": f"Error al liberar el asiento: {repr(e)}", "status": -1}
-    
+
+@homeClientes_bp.route("/procesar_pago_x", methods=["POST"])
+def procesar_pago_x():
+    try:
+        data = request.get_json()
+
+        contacto = data.get("contacto", {})
+        pago = data.get("pago", {})
+        ventas = data.get("ventas", {})
+            
+        resultado = Venta.registrar_operacion_x(contacto, pago, ventas)
+
+        if resultado["status"] == 1:
+            return jsonify({"Status": "success", "codigo_confirmacion": f"VENTA-{resultado['id_venta']}"})
+        else:
+            return jsonify({"Status": "error", "Msj": resultado["msg"]})
+
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Error inesperado: {repr(e)}"})
+
 @homeClientes_bp.route("/procesar_pago", methods=["POST"])
 def procesar_pago():
     try:
