@@ -297,31 +297,41 @@ def terminos_y_condiciones():
 @homeClientes_bp.route('/resumenViaje', methods=['POST'])
 def resumen_viaje():
     try:
+        # Obtener los datos del JSON recibido
         asiento_id = request.json.get('asiento_id')
+        viaje = request.json.get('viaje')
         
-        if not asiento_id:
-            return jsonify({'Status': 'error', 'Msj': 'Falta el ID del asiento.'})
+        # Verificar que los datos se están recibiendo correctamente
+        print(f"asiento_id: {asiento_id}, viaje: {viaje}")  # Verifica que los valores sean correctos
 
-        datos = Pasaje.detalle_viaje(asiento_id)
-        print(f'Información de resumen: {datos}')
+        if not asiento_id or not viaje:
+            return jsonify({'Status': 'error', 'Msj': 'Falta el ID del asiento o el ID del viaje.'})
+
+        # Obtener los datos del viaje usando el método de Pasaje
+        datos = Pasaje.detalle_viaje(asiento_id, viaje)
+        print(f'Información de resumen: {datos}')  # Verifica qué datos se están recuperando
         
         if not datos:
             return jsonify({'Status': 'error', 'Msj': 'No se encontraron datos para el asiento proporcionado.'})
 
+        # Si los datos son correctos, se toma el primer elemento de la lista
         detalle = datos[0] if isinstance(datos, list) and datos else None
+        
         if not detalle:
             return jsonify({'Status': 'error', 'Msj': 'No se encontró detalle válido del viaje.'})
 
+        # Crear la respuesta con los detalles del viaje y el precio total
         resumen = {
             'detalle_viaje': detalle,
             'pasajeros': [{
                 'numero': 1,
                 'asiento': asiento_id,
-                'precio': 40.0  # Precio base sin descuento
+                'precio': detalle.get('precio_total', 0),  # Se asegura de que el precio exista
             }],
-            'precio_total': 40.0  # Total sin aplicar descuento (se aplicará en frontend)
+            'precio_total': detalle.get('precio_total', 0)  # Usamos el precio_total
         }
 
+        # Responder con éxito
         return jsonify({'Status': 'success', 'data': resumen, 'Msj': 'Datos del viaje obtenidos correctamente.'})
     
     except Exception as e:
@@ -966,8 +976,15 @@ def validar_pasaje_dado_baja():
             return jsonify({"Status": "error", "Msj": "Número de comprobante es requerido"}), 400
         reembolso = Reembolso.validar_pasaje_dadoBaja(numero_comprobante)
         if reembolso:
-            if reembolso["estado_viaje"] == 0 or reembolso["fechaReprogramacion"] is not None:
-                return jsonify({"Status": "success", "data": reembolso, "Msj": "Pasaje validado correctamente"})
+            if (reembolso["estado_viaje"] == 0 or reembolso["fechaReprogramacion"] is not None):
+                if reembolso["esReserva"] != 1:
+                    return jsonify({"Status": "success", "data": reembolso, "Msj": "Pasaje validado correctamente"})
+                else:
+                    return jsonify({
+                        "Status": "error",
+                        "data": {},
+                        "Msj": "No se cumple con las políticas de reembolso"
+                    }), 400
             else:
                 return jsonify({
                     "Status": "error",

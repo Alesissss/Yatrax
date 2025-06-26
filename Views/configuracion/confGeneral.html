@@ -57,7 +57,7 @@
                             </select>
                         </div>
                         <!-- Vigencia días reprogramación -->
-                        <div class="col-md-12 mb-3">
+                        <!-- <div class="col-md-12 mb-3">
                             <label for="txt_DiasVigenciaReprogramacion">Días vigentes después de reprogramación</label>
                             <div class="input-group">
                                 <input type="number" id="txt_DiasVigenciaReprogramacion" class="form-control"
@@ -67,7 +67,7 @@
                                     <div class="input-group-text"><i class="fas fa-clock"></i></div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                         <!-- Precio pasaje libre -->
                         <div class="col-md-12 mb-3">
                             <label for="txt_PrecioPasajeLibre">Precio para el pasaje libre</label>
@@ -139,17 +139,17 @@
             let maxPasajesVenta = $("#txt_MaxPasajesVenta").val().trim();
             let tiempoMaximoVenta = $("#txt_TiempoMaximoVenta").val().trim();
             let viajesReprogramables = $("#cbx_ViajesReprogramables").val();
-            let diasVigentesReprogramacion = $('#txt_DiasVigenciaReprogramacion').val();
+            // let diasVigentesReprogramacion = $('#txt_DiasVigenciaReprogramacion').val();
             let precioCambioRuta = $('#txt_PrecioCambioRuta').val();
             let precioTransferencia = $('#txt_PrecioTransferencia').val();
             let horaTransaccion = $('#txt_HorasAntesViaje').val();
 
-            if (!igv || !precioPasajeLibre || !maxPasajesVenta || !tiempoMaximoVenta || !viajesReprogramables || !diasVigentesReprogramacion || !precioCambioRuta || !precioTransferencia || !horaTransaccion) {
+            if (!igv || !precioPasajeLibre || !maxPasajesVenta || !tiempoMaximoVenta || !viajesReprogramables || !precioCambioRuta || !precioTransferencia) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
 
-            if (igv <= 0 || precioPasajeLibre <= 0 || maxPasajesVenta <= 0 || tiempoMaximoVenta <= 0 || diasVigentesReprogramacion <= 0 || precioCambioRuta <= 0 || precioTransferencia <= 0) {
+            if (igv <= 0 || precioPasajeLibre <= 0 || maxPasajesVenta <= 0 || tiempoMaximoVenta <= 0  || precioCambioRuta <= 0 || precioTransferencia <= 0) {
                 toastr.warning("Todos los valores ingresados deben ser válidos", 'MENSAJE DE SISTEMA');
                 return;
             }
@@ -173,7 +173,7 @@
                     formData.append("max_pasajes_venta", maxPasajesVenta);
                     formData.append("tiempo_maximo_venta_minutos", tiempoMaximoVenta);
                     formData.append("viajesReprogramables", viajesReprogramables);
-                    formData.append("diasVigentes", diasVigentesReprogramacion);
+                    formData.append("diasVigentes", 7);
                     formData.append("precioCambioRuta", precioCambioRuta);
                     formData.append("precioTransferencia", precioTransferencia);
                     formData.append("horaTransaccion", horaTransaccion);

@@ -449,6 +449,8 @@ const ItineraryManager = {
                 const btn = event.target;
                 console.log(`🎯 Click detectado en botón: ${btn.id} para ${sufijo}`);
 
+                sessionStorage.setItem(`btn_id_${sufijo}`, btn.id);
+                
                 // Prevenir ejecución múltiple
                 event.stopPropagation();
 
@@ -552,6 +554,12 @@ const VehicleLayoutManager = {
 
             const res = await response.json();
             const datos = res.data;
+
+            const contenedorDetalleViaje = document.createElement('div');
+            contenedorDetalleViaje.id = `detalle_viaje_${idBoton}_${sufijo}`;
+            contenedorDetalleViaje.style.display = 'none';
+            contenedorDetalleViaje.dataset.detalleViaje = JSON.stringify(datos);  // Guardamos el detalle_viaje como un JSON
+            document.body.appendChild(contenedorDetalleViaje); // Agregamos el contenedor al DOM
 
             const datosPiso1 = datos.filter(d => d.nroPiso == 1);
             const datosPiso2 = datos.filter(d => d.nroPiso == 2);
