@@ -7599,7 +7599,6 @@ BEGIN
         DELETE FROM detalle_pasaje WHERE idPasaje = P_id;
         DELETE FROM reclamo WHERE idPasaje = P_id;
         DELETE FROM reembolso WHERE idPasaje = P_id;
-
         -- Eliminar el pasaje principal
         DELETE FROM pasaje WHERE id = P_id;
 
