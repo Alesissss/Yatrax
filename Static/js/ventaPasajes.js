@@ -38,7 +38,7 @@ const SetearConfig = {
     async init() {
         await this.setDatos();
     },
-    
+
     async setDatos() {
         try {
             const datosFetch = await this.getDatosFromBD();
@@ -49,15 +49,15 @@ const SetearConfig = {
             toastr.error("Error al cargar las configuraciones");
         }
     },
-    
+
     async getDatosFromBD() {
         const response = await fetch("/ecommerce/home/GetConfGeneral");
         const data = await response.json();
-        
+
         if (data.Status === 'success') {
             return data.data;
         }
-        
+
         throw new Error(data.Msj || "Error al cargar configuraciones");
     }
 };
@@ -77,7 +77,7 @@ async function obtenerNombreTipoMetodo(idTipo) {
 // ESTADO GLOBAL DE LA APLICACIÓN
 // =============================================================================
 
-const   AppState = {
+const AppState = {
     currentStep: 0,
     maxStep: 0,
     itinerarioRegreso: null,
@@ -135,14 +135,14 @@ class Validator {
     static showError(input, msg, type = 'validation') {
         const errorClass = `error-msg-${type}`;
         let errorElement = input.parentNode.querySelector(`.${errorClass}`);
-        
+
         if (!errorElement) {
             errorElement = document.createElement('small');
             errorElement.className = errorClass;
             errorElement.style.color = '#fc8181';
             input.insertAdjacentElement('afterend', errorElement);
         }
-        
+
         errorElement.textContent = msg;
         errorElement.style.display = 'block';
         input.classList.add('manually-invalid');
@@ -151,11 +151,11 @@ class Validator {
     static clearError(input, type = 'validation') {
         const errorClass = `error-msg-${type}`;
         const errorElement = input.parentNode.querySelector(`.${errorClass}`);
-        
+
         if (errorElement) {
             errorElement.style.display = 'none';
         }
-        
+
         input.classList.remove('manually-invalid');
     }
 
@@ -205,8 +205,8 @@ class Validator {
         const camposRequeridos = contenedor.querySelectorAll('input[required], select[required], textarea[required]');
 
         for (let campo of camposRequeridos) {
-            const valor = campo.tagName.toLowerCase() === 'select' 
-                ? campo.value 
+            const valor = campo.tagName.toLowerCase() === 'select'
+                ? campo.value
                 : campo.value.trim();
 
             if (!valor) {
@@ -232,7 +232,7 @@ class Validator {
         for (const field of fields) {
             if (field.offsetParent === null) continue; // Campo oculto
             if (field.type === 'radio') continue; // Validación especial para radios
-            
+
             if (!field.value.trim()) {
                 isValid = false;
                 break;
@@ -350,7 +350,7 @@ const NavigationManager = {
 
         tabs.forEach(tab => {
             const stepIndex = parseInt(tab.getAttribute('data-step'));
-            
+
             tab.classList.add('disabled');
             tab.setAttribute('disabled', 'true');
             tab.style.pointerEvents = 'none';
@@ -368,10 +368,9 @@ const NavigationManager = {
             case 0:
                 return AppState.currentStep === 0;
             case 1:
-                return AppState.currentStep === 1 || 
-                       (AppState.currentStep === 2 && this.tieneItinerarioRegreso());
+                return AppState.currentStep === 1
             case 2:
-                return AppState.currentStep === 2 && this.tieneItinerarioRegreso();
+                return AppState.currentStep === 2
             case 3:
                 return AppState.currentStep === 3;
             default:
@@ -379,9 +378,13 @@ const NavigationManager = {
         }
     },
 
-    tieneItinerarioRegreso() {
+    eligioItinerarioRegreso() {
         const fechaVuelta = $("input[name='fecha_vuelta']").val();
-        return fechaVuelta && fechaVuelta.trim() !== '' && AppState.itinerarioRegreso;
+        return fechaVuelta && fechaVuelta.trim() !== '';  // Verifica si se ha elegido fecha de vuelta
+    },
+
+    tieneItinerarioRegreso() {
+        return AppState.itinerarioRegreso && AppState.itinerarioRegreso.length > 0;  // Verifica si ya hay un itinerario de regreso cargado
     },
 
     async mostrarLoader(mensaje = "Cargando...") {
@@ -461,12 +464,13 @@ const NavigationManager = {
 
         const fechaVuelta = $("input[name='fecha_vuelta']").val();
 
-        if (!fechaVuelta?.trim() || !AppState.itinerarioRegreso?.length) {
+        if (!fechaVuelta?.trim()) {
             await this.irAPago();
             return;
         }
+        let itinerarioVacio = !AppState.itinerarioRegreso?.length
 
-        await this.irAItinerarioRegreso();
+        await this.irAItinerarioRegreso(itinerarioVacio);
     },
 
     async confirmarDatosRegreso() {
@@ -491,14 +495,17 @@ const NavigationManager = {
             await this.irAPago();
         }
     },
+    soloIrAPago(){
 
-    async irAItinerarioRegreso() {
+    },
+
+    async irAItinerarioRegreso(itinerarioVacio) {
         await this.mostrarLoader("Cargando itinerario de regreso...");
         AppState.setCurrentStep(2);
         AppState.maxStep = Math.max(AppState.maxStep, 2);
 
         setTimeout(() => {
-            ItineraryManager.cargarItinerario(AppState.itinerarioRegreso, 'contenedor_viajes_vuelta', 'vuelta');
+            ItineraryManager.cargarItinerario(AppState.itinerarioRegreso, 'contenedor_viajes_vuelta', 'vuelta', itinerarioVacio);
         }, 100);
 
         this.updateFormVisibility();
@@ -783,9 +790,26 @@ const RouteManager = {
 // =============================================================================
 
 const ItineraryManager = {
-    async cargarItinerario(itinerarios, contenedorId, sufijo) {
+    async cargarItinerario(itinerarios, contenedorId, sufijo, itinerarioVacio = false) {
         const contenedor = document.getElementById(contenedorId);
         contenedor.innerHTML = '';
+        if (itinerarioVacio) {
+            contenedor.innerHTML = `
+        <div class="alert alert-warning text-center">
+            <i class="fas fa-exclamation-triangle"></i> 
+            <strong>No se encontraron viajes para esa fecha</strong>
+        </div>
+        <div class="d-grid gap-2 mt-3">
+            <button class="btn btn-outline-secondary" onclick="volverAItinerarioIda()">
+              <i class="fas fa-arrow-left"></i> Volver a ida
+            </button>
+            <button class="btn btn-outline-primary" onclick='acabarSegundoItinerario()'>
+              <i class="fas fa-credit-card"></i> Ir al pago
+            </button>
+          </div>
+        `;
+            return;
+        }
 
         try {
             const response = await fetch(CONFIG.RUTAS.RENDERIZAR_ITINERARIO, {
@@ -870,8 +894,8 @@ const ItineraryManager = {
 // =============================================================================
 
 const VehicleLayoutManager = {
-    columnas: {"1": "", "2": ""},
-    filas: {"1": "", "2": ""},
+    columnas: { "1": "", "2": "" },
+    filas: { "1": "", "2": "" },
 
     async generarMatrices(idBoton, sufijo) {
         try {
@@ -1772,7 +1796,7 @@ const PaymentManager = {
                 headers: { 'Content-Type': 'application/json' }
             });
             const data = await response.json();
-            
+
             if (data.status == 1) {
                 return data.data;
             } else {
@@ -2316,7 +2340,7 @@ const PaymentManager = {
         document.getElementById("btn_finalizar_pago").addEventListener("click", async () => {
             const tipoMetodo = document.getElementById("selector_metodo_pago").value;
             const metodoPago = document.getElementById("metodo_pago_especifico").value;
-            
+
             let nombreTipoMetodo = await obtenerNombreTipoMetodo(tipoMetodo);
             let nombreMetodo = await obtenerNombreMetodo(metodoPago);
 
