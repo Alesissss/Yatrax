@@ -388,12 +388,11 @@
               </div>
             </div>
 
-            <!-- Checkbox + edit icon wrapper - Solo para transferencia -->
-            <div class="form-check mt-3" id="menorWrapper">
+            <!-- <div class="form-check mt-3" id="menorWrapper">
               <input class="form-check-input" type="checkbox" id="conMenor" />
               <label class="form-check-label" for="conMenor">Con menor de edad en brazos</label>
               <i id="editMenor" class="fa-solid fa-pencil ms-2" style="display: none"></i>
-            </div>
+            </div> -->
 
             <!-- Bloque extra del menor -->
             <div id="MenorBlock" class="border p-3 mt-3 d-none">
@@ -673,136 +672,6 @@
   </div>
 </div>
 
-<!-- Modal método de pago -->
-<div class="modal fade" id="modalPagoCustom" tabindex="-1" aria-labelledby="modalPagoCustomLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalPagoCustomLabel">Pasarela de Pago (Custom)</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body">
-        <div class="accordion" id="accordionPagoCustom">
-
-          <!-- SECCIÓN CONTACTO -->
-          <div class="accordion-item">
-            <h2 class="accordion-header" id="headingContactoCustom">
-              <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                data-bs-target="#collapseContactoCustom" aria-expanded="true" aria-controls="collapseContactoCustom">
-                <i class="fas fa-id-card me-2"></i> Contacto
-              </button>
-            </h2>
-            <div id="collapseContactoCustom" class="accordion-collapse collapse show"
-              data-bs-parent="#accordionPagoCustom">
-              <div class="accordion-body">
-                <form id="formContactoCustom">
-                  <!-- Tipo de comprobante -->
-                  <div class="mb-3">
-                    <label for="tipoComprobanteCustom" class="form-label">Tipo de comprobante</label>
-                    <select id="tipoComprobanteCustom" class="form-select">
-                      <option value="Boleta">Boleta</option>
-                      <option value="Factura">Factura</option>
-                    </select>
-                  </div>
-
-                  <!-- Información común para todos los tipos de comprobante -->
-                  <div class="row g-3">
-                    <div class="col-md-6">
-                      <label for="tipoDocumentoCustom" class="form-label">Tipo de documento *</label>
-                      <select id="tipoDocumentoCustom" class="form-select">
-                        {% for doc in TipoDocumento %}
-                        <option value="{{ doc.id }}">{{ doc.abreviatura }}</option>
-                        {% endfor %}
-                      </select>
-                    </div>
-                    <div class="col-md-6">
-                      <label for="numeroDocumentoCustom" class="form-label">Número de documento *</label>
-                      <input type="text" id="numeroDocumentoCustom" class="form-control" required>
-                    </div>
-                    <div class="col-md-6">
-                      <label for="nombresCustom" class="form-label">Nombres *</label>
-                      <input type="text" id="nombresCustom" class="form-control" required>
-                    </div>
-                    <div class="col-md-6">
-                      <label for="apePaternoCustom" class="form-label">Apellido paterno *</label>
-                      <input type="text" id="apePaternoCustom" class="form-control" required>
-                    </div>
-                    <div class="col-md-6">
-                      <label for="apeMaternoCustom" class="form-label">Apellido materno *</label>
-                      <input type="text" id="apeMaternoCustom" class="form-control" required>
-                    </div>
-                    <div class="col-md-6">
-                      <label for="correoCustom" class="form-label">Correo electrónico *</label>
-                      <input type="email" id="correoCustom" class="form-control" required>
-                    </div>
-                    <div class="col-md-6">
-                      <label for="telefonoCustom" class="form-label">Teléfono/móvil *</label>
-                      <input type="tel" id="telefonoCustom" class="form-control" required>
-                    </div>
-                  </div>
-
-                  <!-- Campos adicionales para "Factura" -->
-                  <div id="facturaFieldsCustom" style="display: none;">
-                    <div class="col-md-6">
-                      <label for="rucCustom" class="form-label">RUC *</label>
-                      <input type="text" id="rucCustom" class="form-control" required>
-                    </div>
-                    <div class="col-md-6">
-                      <label for="razonSocialCustom" class="form-label">Razón Social *</label>
-                      <input type="text" id="razonSocialCustom" class="form-control" required>
-                    </div>
-                    <div class="col-md-6">
-                      <label for="direccionCustom" class="form-label">Dirección *</label>
-                      <input type="text" id="direccionCustom" class="form-control" required>
-                    </div>
-                  </div>
-
-                  <div class="text-end mt-3">
-                    <button type="button" class="btn btn-primary" data-bs-toggle="collapse"
-                      data-bs-target="#collapsePagoCustom" aria-expanded="false" aria-controls="collapsePagoCustom">
-                      Siguiente →
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-
-          <!-- SECCIÓN PAGO -->
-          <div class="accordion-item">
-            <h2 class="accordion-header" id="headingPagoCustom">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                data-bs-target="#collapsePagoCustom" aria-expanded="false" aria-controls="collapsePagoCustom">
-                <i class="fas fa-credit-card me-2"></i> Pago
-              </button>
-            </h2>
-            <div id="collapsePagoCustom" class="accordion-collapse collapse" data-bs-parent="#accordionPagoCustom">
-              <div class="accordion-body">
-                <div class="mb-3">
-                  <label for="metodoPagoCustom" class="form-label">Método de pago</label>
-                  <select id="metodoPagoCustom" class="form-select">
-                    {% for mp in MetodosPagos %}
-                    <option value="{{ mp.id }}">{{ mp.nombre }}</option>
-                    {% endfor %}
-                  </select>
-                </div>
-                <div id="contenidoPagoCustomDinamico">
-                  <!-- aquí inyecta renderizarContenidoMetodo(metodo, tipoMetodo) -->
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-        <button id="btnProcesarPagoCustom" type="button" class="btn btn-success">Procesar pago</button>
-      </div>
-    </div>
-  </div>
-</div>
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
@@ -2008,11 +1877,10 @@
         });
     }
 
-    // document.getElementById("btnPagarTransferencia").addEventListener("click", () => {
-    //   // realizarTransferencia();
-    //   // ocultarContenido();
-
-    // });
+    document.getElementById("btnPagarTransferencia").addEventListener("click", () => {
+      realizarTransferencia();
+      ocultarContenido();
+    });
 
     function ocultarContenido() {
       contenidoOperacion.style.display = 'none';
@@ -2077,59 +1945,6 @@
     });
   });
 
-  const metodosPagoCustomList = {{ MetodosPagos | tojson }};
-
-  document.addEventListener('DOMContentLoaded', () => {
-    const pagoCustomModal = new bootstrap.Modal(document.getElementById('modalPagoCustom'));
-
-    // Abrir modal
-    document.getElementById('btnPagarTransferencia').addEventListener('click', () => {
-      // reset acordeón
-      document.getElementById('collapseContactoCustom').classList.add('show');
-      document.getElementById('collapsePagoCustom').classList.remove('show');
-      // limpiar contenido dinámico
-      document.getElementById('contenidoPagoCustomDinamico').innerHTML = '';
-      pagoCustomModal.show();
-    });
-
-    // Al cambiar tipo de comprobante
-    document.getElementById('tipoComprobanteCustom').addEventListener('change', function () {
-      const tipoComprobante = this.value;
-      const facturaFields = document.getElementById('facturaFieldsCustom');
-      if (tipoComprobante === 'Factura') {
-        facturaFields.style.display = 'block';  // Mostrar campos de Factura
-      } else {
-        facturaFields.style.display = 'none';   // Ocultar campos de Factura
-      }
-    });
-
-    // Al cambiar método de pago
-    document.getElementById('metodoPagoCustom').addEventListener('change', function () {
-      const sel = this.value;
-      const metodo = metodosPagoCustomList.find(m => m.id == sel);
-      if (metodo) {
-        renderizarContenidoMetodo(metodo, metodo.tipoMetodo);
-      }
-    });
-
-    // Función de ejemplo de renderizado dinámico
-    function renderizarContenidoMetodo(metodo, tipoMetodo) {
-      const cont = document.getElementById('contenidoPagoCustomDinamico');
-      cont.innerHTML = '';
-      const div = document.createElement('div');
-      div.id = 'extraPagoCustom';
-      if (tipoMetodo === 'Tarjeta') {
-        div.innerHTML = `
-      <div class="mb-3">
-        <label class="form-label">Número de tarjeta</label>
-        <input class="form-control" placeholder="1234 5678 9012 3456" maxlength="19">
-      </div>`;
-      } else if (tipoMetodo === 'BILLETERA VIRTUAL') {
-        div.innerHTML = `<p>Escanea este QR: <img src="${metodo.qr}" style="max-width:150px"></p>`;
-      }
-      cont.appendChild(div);
-    }
-  });
   //Región cambio de ruta //
 
 

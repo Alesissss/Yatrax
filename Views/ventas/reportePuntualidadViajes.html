@@ -1,0 +1,81 @@
+{% extends "index.html" %}
+
+{% block title %}YATRAX - Reporte de puntualidad{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">Reporte de Puntualidad por Ruta</h2>
+
+  <div class="row mb-3">
+    <div class="col-md-4">
+      <label for="selectRuta">Seleccionar ruta:</label>
+      <select id="selectRuta" class="form-control">
+        <option value="">-- Selecciona una ruta --</option>
+        <!-- Opciones se cargarán dinámicamente -->
+      </select>
+    </div>
+  </div>
+
+  <table class="table table-striped" id="tablaReporte">
+    <thead class="thead-dark">
+      <tr>
+        <th>Ruta</th>
+        <th>Origen</th>
+        <th>Destino</th>
+        <th>Salida</th>
+        <th>Real Salida</th>
+        <th>Min. Dif. Salida</th>
+        <th>Est. Llegada</th>
+        <th>Real Llegada</th>
+        <th>Min. Dif. Llegada</th>
+        <th>Puntualidad Salida</th>
+        <th>Puntualidad Llegada</th>
+      </tr>
+    </thead>
+    <tbody id="cuerpoTabla"></tbody>
+  </table>
+</div>
+
+<script>
+  async function cargarRutas() {
+    const res = await fetch('/ObtenerListaRutas'); // Este endpoint debería devolver las rutas disponibles
+    const data = await res.json();
+    const select = document.getElementById('selectRuta');
+    data.forEach(ruta => {
+      const option = document.createElement('option');
+      option.value = ruta.id;
+      option.textContent = ruta.nombre;
+      select.appendChild(option);
+    });
+  }
+
+  async function cargarReporte(idRuta) {
+    const res = await fetch(`/ObtenerDashboardViajesPuntualidad?idRuta=${idRuta}`);
+    const json = await res.json();
+    const tbody = document.getElementById('cuerpoTabla');
+    tbody.innerHTML = '';
+    if (json.data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="11" class="text-center">Sin resultados</td></tr>`;
+      return;
+    }
+
+    json.data.forEach(row => {
+      const tr = document.createElement('tr');
+      row.forEach(col => {
+        const td = document.createElement('td');
+        td.textContent = col;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    cargarRutas();
+    document.getElementById('selectRuta').addEventListener('change', e => {
+      const idRuta = e.target.value;
+      if (idRuta) cargarReporte(idRuta);
+    });
+  });
+</script>
+{% endblock %}
