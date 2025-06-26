@@ -257,10 +257,11 @@ class Venta:
 
             
     @classmethod
-    def obtener_reporte_puntualidad(cls):
+    def obtener_reporte_puntualidad(cls, idRuta):
         try:
             conexion = bd.Conexion()
-            result = conexion.obtener("""
+            result = conexion.obtener(
+            """
                 SELECT 
                     ru.nombre AS ruta,
                     CONCAT(UPPER(suo.nombre), ' - ', UPPER(suo.ciudad)) AS sucursalOrigen,
@@ -291,8 +292,9 @@ class Venta:
                 INNER JOIN 
                     sucursal suo ON suo.id = dv.idSucursalOrigen
                 INNER JOIN 
-                    sucursal sud ON sud.id = dv.idSucursalDestino;
-            """)
+                    sucursal sud ON sud.id = dv.idSucursalDestino
+                WHERE ru.id = %s;
+            """, (idRuta,))
             return result
         finally:
             conexion.cerrar()

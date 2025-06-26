@@ -1623,7 +1623,6 @@ const PaymentManager = {
                     <label for="tipo_comprobante" class="form-label">Tipo de comprobante</label>
                     <select id="tipo_comprobante" class="form-select">
                         <option value=1>Boleta</option>
-                        <option value=2>Factura</option>
                     </select>
                 </div>
                 
