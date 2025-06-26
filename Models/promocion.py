@@ -30,7 +30,7 @@ class Promocion:
                 FROM promocion
                 where estado = 1 and
                 fecha_fin >= CURDATE() AND
-                fecha_inicio>= CURDATE()
+                fecha_inicio <= CURDATE()
             """)
         finally:
             conexion.cerrar()

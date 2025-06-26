@@ -834,11 +834,11 @@ CREATE TABLE pais_sucursal (
 
 INSERT INTO promocion (nombre, estado, fecha_inicio, fecha_fin, codigo, monto_promo)
 VALUES 
-('Promoción Verano', 1, '2025-01-12', '2025-03-23', '12345678', 50.00);
+('Promoción Verano', 1, '2025-01-12', '2025-12-23', 'CALOCHA', 50.00);
 
 INSERT INTO promocion (nombre, estado, fecha_inicio, fecha_fin, codigo, monto_promo)
 VALUES 
-('Descuento de Navidad', 1, '2025-12-12', '2025-12-25', '98765432', 30.00);
+('Descuento', 1, '2025-02-12', '2025-12-25', 'GINGOBELL', 30.00);
 
 
 INSERT INTO preguntas_frecuentes (pregunta, respuesta, estado, fecha_registro, usuario) VALUES ('¿Qué medios de pago

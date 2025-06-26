@@ -215,11 +215,12 @@
   #jinja-carousel .carousel-item span {
     font-size: 0.85rem;
   }
+  
 }
 </style>
 {% endblock %}
 <section>
-  <div id="jinja-carousel" class="carousel slide" class="position-relative"  data-bs-ride="carousel" data-bs-interval="3500">
+  <div id="jinja-carousel" class="carousel slide" class="position-relative"  data-bs-ride="carousel" data-bs-interval="3000">
     <div class="carousel-inner">
       {% for item in datos["promociones"] %}
         <div class="carousel-item {% if loop.first %}active{% endif %} text-center">
@@ -339,6 +340,24 @@
     error: function (xhr, status, error) {
         console.error('Error en la solicitud AJAX:', error);
     }
+});
+
+// Inicia el carrusel al pasar el cursor sobre él
+var myCarousel = document.getElementById('jinja-carousel');
+myCarousel.addEventListener('mouseenter', function () {
+    var carousel = new bootstrap.Carousel(myCarousel, {
+        ride: 'carousel', // Asegura que siga funcionando cuando pasa el cursor
+        interval: 3000,    // Intervalo de rotación
+    });
+    carousel.cycle(); // Inicia el ciclo para que no se detenga
+});
+
+myCarousel.addEventListener('mouseleave', function () {
+    var carousel = new bootstrap.Carousel(myCarousel, {
+        ride: 'carousel',
+        interval: 3500,
+    });
+    carousel.cycle(); // Reinicia el ciclo para que siga moviéndose
 });
 
 
