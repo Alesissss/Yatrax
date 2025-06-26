@@ -375,6 +375,24 @@
                                     </a>
                                 </li>
                                 {% endif %}
+                                {% if 51 in session['menus'] %}
+                                <li class="nav-item">
+                                    <a href="{{ url_for('personal.Menu_Incidencia') }}"
+                                        class="nav-link {% if active_page == 'sancion' %}active{% endif %}">
+                                        <i class="bi bi-person-vcard nav-icon"></i>
+                                        <p>Gestionar sanciones</p>
+                                    </a>
+                                </li>
+                                {% endif %}
+                                {% if 51 in session['menus'] %}
+                                <li class="nav-item">
+                                    <a href="{{ url_for('personal.Menu_SancionPersonal') }}"
+                                        class="nav-link {% if active_page == 'sancionPersonal' %}active{% endif %}">
+                                        <i class="bi bi-person-vcard nav-icon"></i>
+                                        <p>Gestionar sanción a personal</p>
+                                    </a>
+                                </li>
+                                {% endif %}
                             </ul>
                         </li>
                         {% endif %}
