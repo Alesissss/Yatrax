@@ -203,7 +203,7 @@ def perfilCliente():
             else:
                 password_hash = None
             
-            Cliente.actualizar_cliente(id_cliente,id_pais,id_tipo_cliente,id_tipo_doc,numero_documento,nombres,ape_paterno,ape_materno,sexo,f_nacimiento,razon_social,direccion,telefono,email,password_hash,usuario)
+            Cliente.actualizarPerfil(id_cliente,id_pais,id_tipo_cliente,id_tipo_doc,numero_documento,nombres,ape_paterno,ape_materno,sexo,f_nacimiento,razon_social,direccion,telefono,email,password_hash,usuario)
 
             return jsonify({"Status":1,"Mensaje":"Se ha actualizado los datos del cliente correctamente"})
         except Exception as e:
