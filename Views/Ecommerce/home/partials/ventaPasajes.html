@@ -47,7 +47,8 @@
     <div class="d-flex flex-wrap justify-content-between border-bottom bg-white">
         <button class="btn tab-link active flex-fill" data-step="0">Elegir destino</button>
         <button class="btn tab-link flex-fill" data-step="1" readonly>Itinerario ida</button>
-        <button class="btn tab-link flex-fill" data-step="2" readonly id="itinerario-regreso">Itinerario regreso</button>
+        <button class="btn tab-link flex-fill" data-step="2" readonly id="itinerario-regreso">Itinerario
+            regreso</button>
         <button class="btn tab-link flex-fill" data-step="3" readonly>Pago</button>
     </div>
 
@@ -78,7 +79,7 @@
 
     <div class="tab-content">
         <div class="step active bg-secondary-subtle" id="step-0">
-            <div class="col-12 d-flex align-items-center mt-3 gap-3">
+            <!-- <div class="col-12 d-flex align-items-center mt-3 gap-3">
                 {% if 'cliente' in session %}
                 <label for="pasaje_libre" class="form-label">
                     <input type="radio" id="pasaje_libre" name="tipo_pasaje" value="pasaje_libre">
@@ -94,7 +95,7 @@
                     &nbsp;Pasaje libre
                 </label>
                 {% endif %}
-            </div>
+            </div> -->
         </div>
         <div class="step" id="step-1">
             <div class="row rounded">
@@ -118,8 +119,8 @@
             <div id="contenedor_viajes_ida" class="row">
 
             </div>
-            <button class="btn btn-primary btn-siguiente" onclick="nextStep()">Siguiente <i
-                    class="fas fa-arrow-right"></i></button>
+            <!-- <button class="btn btn-primary btn-siguiente" onclick="nextStep()">Siguiente <i
+                    class="fas fa-arrow-right"></i></button> -->
         </div>
     </div>
     <div class="step" id="step-2">

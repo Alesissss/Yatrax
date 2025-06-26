@@ -6,6 +6,7 @@ from Models.usuario import Usuario
 from Models.tipoUsuario import TipoUsuario
 from Models.conf_menus import Conf_Menus
 from Models.personal import Personal
+from Models.conf_plantillas import Conf_Plantillas
 from correo import enviar_correo
 
 home_bp = Blueprint('home', __name__, url_prefix='/trabajadores/home')
@@ -218,6 +219,17 @@ def SetModulo():
         return jsonify({'Status': 'error', 'Msj': 'El módulo seleccionado no existe'})
     except Exception as e:
             return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+    
+@home_bp.route('/GetConfApariencia')
+def get_ConfApariencia():
+    try:
+        conf_apariencia = Conf_Plantillas.obtener_PlantillaActiva()
+        if conf_apariencia:
+            return jsonify({'data': conf_apariencia, 'Status': 'success', 'Msj': 'Configuración obtenida exitosamente.'})
+        else:
+            return jsonify({'data': {}, 'Status': 'error', 'Msj': 'No se encontró configuración activa.'})
+    except Exception as e:
+        return jsonify({'data': {}, 'Status': 'error', 'Msj': f'Ocurrió un error al obtener la configuración: {repr(e)}'})
     
 @home_bp.route('/inicioUsuarios')
 def inicioUsuarios():
