@@ -791,7 +791,7 @@ def procesar_pago():
         contacto = data.get("contacto", {})
         pago = data.get("pago", {})
         ventas = data.get("ventas", {})
-
+            
         resultado = Venta.registrar_operacion(contacto, pago, ventas)
 
         if resultado["status"] == 1:
