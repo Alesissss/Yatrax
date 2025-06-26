@@ -77,7 +77,7 @@ async function obtenerNombreTipoMetodo(idTipo) {
 // ESTADO GLOBAL DE LA APLICACIÓN
 // =============================================================================
 
-const AppState = {
+const   AppState = {
     currentStep: 0,
     maxStep: 0,
     itinerarioRegreso: null,
@@ -707,6 +707,8 @@ const SearchManager = {
         }
 
         if (!resp.data_ida || resp.data_ida.length === 0) {
+            AppState.setCurrentStep(0); // Cambiar a paso 0
+            NavigationManager.updateFormVisibility();
             toastr.warning("No se han encontrado viajes para esas fechas");
             return;
         }
@@ -747,7 +749,7 @@ const RouteManager = {
             data: items,
             language: { noResults: () => "No se encontraron resultados" },
             allowClear: true
-        });
+        }).trigger('change');
     },
 
     configurarSelect2Vacio() {
@@ -1251,8 +1253,10 @@ const SeatManager = {
         camposObligatorios.forEach(campoId => {
             const campo = document.getElementById(campoId);
             if (campo) {
-                campo.addEventListener('input', () => this.validarFormularioCompleto(asientoId));
-                campo.addEventListener('blur', () => this.validarCampoEnTiempoReal(campoId));
+                campo.addEventListener('input', () => {
+                    this.validarFormularioCompleto(asientoId);
+                    this.validarCampoEnTiempoReal(campoId);
+                });
             }
         });
 
