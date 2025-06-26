@@ -151,6 +151,7 @@
 
         // Inicializo totales por mes y contador de pasajes
         const totalesPorMes = new Array(12).fill(0);
+        const cantidadPasajesPorMes = new Array(12).fill(0);  // Nueva serie para cantidad de pasajes
         let totalPasajes = 0;
 
         // Inicializo datos para gráfico circular de totales por sexo
@@ -165,13 +166,14 @@
             const cantidad = parseInt(item["totalPasajes"]) || 0;
 
             totalesPorMes[mesIdx] += suma;
+            cantidadPasajesPorMes[mesIdx] += cantidad;  // Guardar cantidad de pasajes por mes
             totalPasajes += cantidad;
 
             // Lleno los totales por sexo
-            const sexo = item.sexo;  // Suponiendo que 'sexo' viene como 'M' o 'F', o 'null' si no se tiene información
-            if (sexo === 'M') {
+            const sexo = item.sexo;  // Suponiendo que 'sexo' viene como 1 o 0, o 'null' si no se tiene información
+            if (sexo === 1) {
                 totalMasculino += suma;
-            } else if (sexo === 'F') {
+            } else if (sexo === 0) {
                 totalFemenino += suma;
             } else {
                 totalSinSexo += suma;
@@ -196,6 +198,8 @@
 
         // Preparo la serie para el gráfico de ventas por mes
         const serieVentas = totalesPorMes;
+        const serieCantidadPasajes = cantidadPasajesPorMes;
+
 
         // Preparo el gráfico circular de totales por sexo
         const serieSexo = [
@@ -216,11 +220,22 @@
             tooltip: {
                 trigger: 'axis',
                 formatter: params => {
-                    const p = params[0];
-                    return `
-              ${p.seriesName}<br/>
-              ${p.axisValue} : S/. ${formatearNumero(p.value)}
-            `;
+                    let result = '';
+                    params.forEach(p => {
+                        // Formatear dependiendo de la serie
+                        if (p.seriesName === 'Monto vendido') {
+                            result += `
+                        <b>${p.seriesName}</b><br/>
+                        ${p.axisValue} : S/. ${formatearNumero(p.value)}<br/>
+                    `;
+                        } else if (p.seriesName === 'Cantidad de pasajes vendidos') {
+                            result += `
+                        <b>${p.seriesName}</b><br/>
+                        ${p.axisValue} : ${formatearNumero(p.value)}<br/>
+                    `;
+                        }
+                    });
+                    return result;  // Devuelve el tooltip formateado
                 }
             },
             toolbox: {
@@ -236,6 +251,14 @@
                 right: 20,
                 top: 10
             },
+            legend: {
+                data: ['Monto vendido', 'Cantidad de pasajes vendidos'],  // Leyenda para las dos series
+                left: 'center',
+                top: 'bottom',
+                textStyle: {
+                    fontSize: 14
+                }
+            },
             xAxis: {
                 type: 'category',
                 data: meses
@@ -246,24 +269,50 @@
                     formatter: value => formatearNumero(value)
                 }
             },
-            series: [{
-                name: 'Monto vendido',
-                type: 'line',  // comienza en barras
-                data: serieVentas,
-                smooth: true,
-                barMaxWidth: '40%',
-                areaStyle: {},  // sombra bajo la línea si cambias a 'line'
-                label: {
-                    show: true,               // Mostrar el label
-                    position: 'top',          // Posición del label
-                    formatter: (params) => {
-                        return params.value !== 0 ? `S/. ${formatearNumero(params.value)}` : ''; // Formato del valor
+            series: [
+                {
+                    name: 'Monto vendido',
+                    type: 'line',  // Comienza en líneas
+                    data: serieVentas,
+                    smooth: true,
+                    barMaxWidth: '40%',
+                    areaStyle: {},  // Sombra bajo la línea si cambias a 'line'
+                    lineStyle: {
+                        color: 'purple'  // Color distinto para diferenciar
                     },
-                    textStyle: {
-                        fontSize: 14,          // Tamaño del texto del label
+                    label: {
+                        show: true,  // Mostrar el label
+                        position: 'top',  // Posición del label
+                        formatter: (params) => {
+                            return params.value !== 0 ? `S/. ${formatearNumero(params.value)}` : '';  // Formato del valor
+                        },
+                        textStyle: {
+                            fontSize: 14
+                        }
+                    }
+                },
+                {
+                    name: 'Cantidad de pasajes vendidos',
+                    type: 'line',  // Usar línea para cantidad de pasajes
+                    data: serieCantidadPasajes,
+                    smooth: true,
+                    barMaxWidth: '40%',
+                    areaStyle: {},  // Sombra bajo la línea si cambias a 'line'
+                    lineStyle: {
+                        color: 'green'  // Color distinto para diferenciar
+                    },
+                    label: {
+                        show: true,
+                        position: 'bottom',  // Posición del label
+                        formatter: (params) => {
+                            return params.value !== 0 ? `${params.value}` : '';  // Solo mostrar cantidad de pasajes
+                        },
+                        textStyle: {
+                            fontSize: 14
+                        }
                     }
                 }
-            }]
+            ]
         };
 
         // Configuración para el gráfico de totales por sexo (gráfico circular)
@@ -277,7 +326,7 @@
             },
             tooltip: {
                 trigger: 'item',
-                formatter: '{a} <br/>{b}: S/. {c} ({d}%)'
+                formatter: '<b>{a}</b> <br/>{b}: S/. {c} ({d}%)'
             },
             legend: {
                 orient: 'vertical',      // La leyenda será vertical
