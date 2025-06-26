@@ -5,6 +5,7 @@ from Models.tipoPersonal import TipoPersonal
 from Models.personal import Personal
 from Models.sancion import Sancion
 from Models.personal_sancion import Personal_Sancion
+from Models.Reportes import Reporte
 
 personal_bp = Blueprint('personal', __name__, url_prefix='/trabajadores/personal')
 
@@ -64,6 +65,21 @@ def SancionPersonalNuevo():
 # END VIEWS
 
 # FUNCIONES
+@personal_bp.route("/CantidadPersonalxTipo")
+def cantidadPersonalxTipo():
+    try:
+        datos = Reporte.cantidadPersonalxTipo()
+        return datos
+    except Exception as e:
+        return str(e)
+
+@personal_bp.route("/CantidadPersonalActivo")
+def cantidadPersonalActivo():
+    try:
+        datos = Reporte.cantidadPersonalActivo()
+        return datos
+    except Exception as e:
+        return str(e)
 
 # REGION TIPO PERSONAL
 
