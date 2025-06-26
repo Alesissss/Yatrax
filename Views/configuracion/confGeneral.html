@@ -69,7 +69,7 @@
                             </div>
                         </div> -->
                         <!-- Precio pasaje libre -->
-                        <div class="col-md-12 mb-3">
+                        <!-- <div class="col-md-12 mb-3">
                             <label for="txt_PrecioPasajeLibre">Precio para el pasaje libre</label>
                             <div class="input-group">
                                 <input type="number" step="0.01" min="0" id="txt_PrecioPasajeLibre" class="form-control"
@@ -78,7 +78,7 @@
                                     <div class="input-group-text"><i class="fas fa-money-bill-wave"></i></div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                         <!-- Precio cambio ruta -->
                         <div class="col-md-12 mb-3">
                             <label for="txt_PrecioCambioRuta">Precio para el cambio de ruta</label>
@@ -94,7 +94,7 @@
                             </div>
                         </div>
                         <!-- Precio transferencia -->
-                        <div class="col-md-12 mb-3">
+                        <!-- <div class="col-md-12 mb-3">
                             <label for="txt_PrecioTransferencia">Precio para la transferencia de pasaje</label>
                             <div class="input-group">
                                 <div class="input-group">
@@ -106,7 +106,7 @@
                                 </div>
                             </div>
                             </div>
-                        </div>
+                        </div> -->
                         <!-- Horas antes de un viaje para transacciones -->
                         <div class="col-md-12 mb-3">
                             <label for="txt_HorasAntesViaje">Hora para transacciones antes de un viaje</label>
@@ -135,21 +135,21 @@
     $(document).ready(function () {
         $("#btn_Editar").click(function () {
             let igv = $("#txt_IGV").val().trim();
-            let precioPasajeLibre = $("#txt_PrecioPasajeLibre").val().trim();
+            // let precioPasajeLibre = $("#txt_PrecioPasajeLibre").val().trim();
             let maxPasajesVenta = $("#txt_MaxPasajesVenta").val().trim();
             let tiempoMaximoVenta = $("#txt_TiempoMaximoVenta").val().trim();
             let viajesReprogramables = $("#cbx_ViajesReprogramables").val();
             // let diasVigentesReprogramacion = $('#txt_DiasVigenciaReprogramacion').val();
             let precioCambioRuta = $('#txt_PrecioCambioRuta').val();
-            let precioTransferencia = $('#txt_PrecioTransferencia').val();
+            // let precioTransferencia = $('#txt_PrecioTransferencia').val();
             let horaTransaccion = $('#txt_HorasAntesViaje').val();
 
-            if (!igv || !precioPasajeLibre || !maxPasajesVenta || !tiempoMaximoVenta || !viajesReprogramables || !precioCambioRuta || !precioTransferencia) {
+            if (!igv || !maxPasajesVenta || !tiempoMaximoVenta || !viajesReprogramables || !precioCambioRuta) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
             }
 
-            if (igv <= 0 || precioPasajeLibre <= 0 || maxPasajesVenta <= 0 || tiempoMaximoVenta <= 0  || precioCambioRuta <= 0 || precioTransferencia <= 0) {
+            if (igv <= 0 || maxPasajesVenta <= 0 || tiempoMaximoVenta <= 0  || precioCambioRuta <= 0) {
                 toastr.warning("Todos los valores ingresados deben ser válidos", 'MENSAJE DE SISTEMA');
                 return;
             }
@@ -169,13 +169,13 @@
 
                     let formData = new FormData();
                     formData.append("igv", igv);
-                    formData.append("precioPasajeLibre", precioPasajeLibre);
+                    formData.append("precioPasajeLibre", 0);
                     formData.append("max_pasajes_venta", maxPasajesVenta);
                     formData.append("tiempo_maximo_venta_minutos", tiempoMaximoVenta);
                     formData.append("viajesReprogramables", viajesReprogramables);
                     formData.append("diasVigentes", 7);
                     formData.append("precioCambioRuta", precioCambioRuta);
-                    formData.append("precioTransferencia", precioTransferencia);
+                    formData.append("precioTransferencia", 0);
                     formData.append("horaTransaccion", horaTransaccion);
 
                     $.ajax({
