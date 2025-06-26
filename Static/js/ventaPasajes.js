@@ -2287,7 +2287,7 @@ const PaymentManager = {
                     </div>
                 </div>
             `;
-        } else if (tipoMetodo === "BILLETERA VIRTUAL") {
+        } else if (tipoMetodo.toUpperCase() === "BILLETERA VIRTUAL") {
             if (metodo.qr) {
                 divExtra.innerHTML = `
                     <div class="text-center">
