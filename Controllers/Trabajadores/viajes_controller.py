@@ -867,7 +867,8 @@ def obtener_sucursales_mapa():
                 'direccion': suc['direccion'],
                 'ciudad': suc['ciudad'],
                 'latitud': float(suc['latitud']) if suc['latitud'] else None,
-                'longitud': float(suc['longitud']) if suc['longitud'] else None
+                'longitud': float(suc['longitud']) if suc['longitud'] else None,
+                'cod_sucursal': suc['cod_sucursal'] if suc['cod_sucursal'] else None
             })
         
         return jsonify(sucursales_json)

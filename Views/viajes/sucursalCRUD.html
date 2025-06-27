@@ -192,7 +192,8 @@
                     if (sucursal.latitud && sucursal.longitud) {
                         const popupContent = `
                             <b>${sucursal.nombre}</b><br>
-                            <small>${sucursal.direccion || 'Sin dirección'}</small>
+                            <small>${sucursal.cod_sucursal || 'Sin código de sucursal'}</small><br>
+                            <small>${sucursal.direccion || 'Sin dirección'}</small><br>
                         `;
 
                         L.marker([sucursal.latitud, sucursal.longitud])
