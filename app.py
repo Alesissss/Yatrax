@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, flash, jsonify, session, url_for, abort
+from flask import Flask, render_template, request, redirect, flash, jsonify, session, url_for, abort, send_from_directory
 
 # BLUEPRINTS TRABAJADORES
 from Controllers.Trabajadores.home_controller import home_bp
@@ -71,6 +71,37 @@ app.register_blueprint(homeClientes_bp)
 def home():
     ##return redirect(url_for('home.login'))
     return redirect(url_for('homeClientes.index'))
+
+@app.route('/Static/tickets/<filename>')
+def serve_ticket(filename):
+    """Ruta específica para servir tickets PDF con headers apropiados"""
+    try:
+        from flask import send_from_directory, current_app
+        import os
+        
+        # Validar que el archivo sea PDF
+        if not filename.lower().endswith('.pdf'):
+            abort(404)
+        
+        tickets_dir = os.path.join(current_app.static_folder, 'tickets')
+        
+        # Verificar que el archivo existe
+        file_path = os.path.join(tickets_dir, filename)
+        if not os.path.exists(file_path):
+            abort(404)
+        
+        # Servir el archivo con headers apropiados para descarga
+        return send_from_directory(
+            tickets_dir, 
+            filename,
+            as_attachment=True,
+            download_name=filename,
+            mimetype='application/pdf'
+        )
+        
+    except Exception as e:
+        print(f"❌ Error sirviendo ticket {filename}: {str(e)}")
+        abort(500)
 
 
 # @app.before_request

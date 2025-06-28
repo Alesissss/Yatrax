@@ -2490,47 +2490,177 @@ const PaymentManager = {
         toastr.success('Listo para una nueva reserva');
     },
 
-    descargarBoleto(resultado) {
+    async descargarBoleto(resultado) {
         console.log('🎫 Iniciando descarga de boletos...');
         console.log('📋 Resultado recibido:', resultado);
         console.log('📂 Rutas disponibles:', this.rutas);
         
         toastr.info('Preparando descarga de los boletos...');
 
-        setTimeout(() => {
+        try {
             // Verificamos si el array de rutas tiene boletos generados
             if (this.rutas && Array.isArray(this.rutas) && this.rutas.length > 0) {
                 console.log(`📄 Descargando ${this.rutas.length} boleto(s)...`);
                 
-                this.rutas.forEach((ruta, index) => {
+                for (let index = 0; index < this.rutas.length; index++) {
+                    const ruta = this.rutas[index];
                     console.log(`🔗 Procesando ruta ${index + 1}:`, ruta);
                     
-                    const link = document.createElement('a');
-
-                    // Aquí aseguramos que la ruta tenga el formato adecuado para el navegador
-                    // Asumimos que la ruta es algo como "C:\\Users\\Edgar\\Desktop\\Calidad\\Yatrax\\Static\\tickets\\A000-00000009.pdf"
-                    // y necesitamos cambiarla a "/static/tickets/A000-00000009.pdf"
-                    const rutaFormateada = '/Static/tickets/' + ruta.split('\\').pop();  // Extraemos el nombre del archivo y lo anexamos a /static/tickets/
+                    // Extraer solo el nombre del archivo de la ruta completa
+                    let nombreArchivo = this.extraerNombreArchivo(ruta);
+                    console.log(`📁 Nombre del archivo extraído: ${nombreArchivo}`);
                     
-                    console.log(`🔄 Ruta original: ${ruta}`);
-                    console.log(`✅ Ruta formateada: ${rutaFormateada}`);
-
-                    link.href = rutaFormateada;  // Establece la ruta formateada
-                    link.download = `boleto-${resultado.codigo_confirmacion || 'reserva'}-${index + 1}.pdf`;  // Asigna nombre único
-                    document.body.appendChild(link);  // Necesario para algunos navegadores
-                    link.click();  // Dispara la descarga
-                    document.body.removeChild(link);  // Limpia el DOM
+                    // Verificar que el archivo existe antes de intentar descarga
+                    const existe = await this.verificarExistenciaArchivo(nombreArchivo);
                     
-                    console.log(`📥 Descarga iniciada para: ${link.download}`);
-                });
+                    if (!existe) {
+                        console.error(`❌ Archivo no encontrado: ${nombreArchivo}`);
+                        toastr.warning(`Archivo no encontrado: ${nombreArchivo}`);
+                        continue;
+                    }
+                    
+                    try {
+                        // Método 1: Intentar descarga directa con la ruta específica
+                        const urlDescarga = `/Static/tickets/${nombreArchivo}`;
+                        console.log(`🔗 Intentando descarga directa: ${urlDescarga}`);
+                        
+                        // Crear enlace directo de descarga
+                        const linkDirecto = document.createElement('a');
+                        linkDirecto.href = urlDescarga;
+                        linkDirecto.download = nombreArchivo;
+                        linkDirecto.style.display = 'none';
+                        document.body.appendChild(linkDirecto);
+                        linkDirecto.click();
+                        document.body.removeChild(linkDirecto);
+                        
+                        console.log(`✅ Descarga iniciada con enlace directo: ${nombreArchivo}`);
+                        
+                        // Si el método directo no funciona, intentar con window.open como respaldo
+                        setTimeout(() => {
+                            const nuevaVentana = window.open(urlDescarga, '_blank');
+                            if (nuevaVentana) {
+                                console.log(`✅ Descarga de respaldo con window.open: ${nombreArchivo}`);
+                                setTimeout(() => {
+                                    if (nuevaVentana && !nuevaVentana.closed) {
+                                        nuevaVentana.close();
+                                    }
+                                }, 2000);
+                            }
+                        }, 500);
+                        
+                        // Pequeña pausa entre descargas
+                        if (index < this.rutas.length - 1) {
+                            await new Promise(resolve => setTimeout(resolve, 800));
+                        }
+                        
+                    } catch (error) {
+                        console.error(`❌ Error en descarga individual de ${nombreArchivo}:`, error);
+                        
+                        // Intentar método alternativo
+                        try {
+                            await this.descargarPorEndpoint(nombreArchivo);
+                        } catch (fallbackError) {
+                            console.error(`❌ Error en método alternativo para ${nombreArchivo}:`, fallbackError);
+                            toastr.warning(`No se pudo descargar: ${nombreArchivo}`);
+                        }
+                    }
+                }
 
-                toastr.success('Boletos descargados exitosamente');
+                toastr.success('Proceso de descarga completado');
+                
             } else {
                 console.error('❌ No se encontraron rutas de boletos');
                 console.log('🔍 Estado actual de this.rutas:', this.rutas);
                 toastr.error('No se encontraron boletos para descargar');
             }
-        }, 1500);
+            
+        } catch (error) {
+            console.error('❌ Error general en descarga de boletos:', error);
+            toastr.error('Error al procesar la descarga de boletos');
+        }
+    },
+
+    extraerNombreArchivo(ruta) {
+        let nombreArchivo;
+        if (ruta.includes('\\')) {
+            nombreArchivo = ruta.split('\\').pop();
+        } else if (ruta.includes('/')) {
+            nombreArchivo = ruta.split('/').pop();
+        } else {
+            nombreArchivo = ruta;
+        }
+        
+        // Si el nombre ya tiene la extensión, lo usamos tal cual
+        // Si no, asumimos que es el nombre del comprobante y agregamos .pdf
+        if (!nombreArchivo.toLowerCase().endsWith('.pdf')) {
+            nombreArchivo = nombreArchivo + '.pdf';
+        }
+        
+        return nombreArchivo;
+    },
+
+    async verificarExistenciaArchivo(nombreArchivo) {
+        try {
+            const response = await fetch(`/ecommerce/home/verificar_ticket/${encodeURIComponent(nombreArchivo)}`);
+            const data = await response.json();
+            
+            console.log(`🔍 Verificación de ${nombreArchivo}:`, data);
+            
+            return data.existe === true;
+        } catch (error) {
+            console.error(`❌ Error verificando archivo ${nombreArchivo}:`, error);
+            return false;
+        }
+    },
+
+    descargarBlob(blob, nombreArchivo) {
+        // Crear URL del blob
+        const blobUrl = window.URL.createObjectURL(blob);
+        
+        // Crear enlace de descarga
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = nombreArchivo;
+        link.style.display = 'none';
+        
+        // Agregar al DOM, hacer clic y remover
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Limpiar el blob URL después de un momento
+        setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
+    },
+
+    async descargarPorEndpoint(nombreArchivo) {
+        console.log(`📥 Intentando descarga por endpoint para: ${nombreArchivo}`);
+        
+        try {
+            // Crear un formulario temporal para enviar al endpoint
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/ecommerce/home/descargar_ticket';
+            form.target = '_blank';
+            form.style.display = 'none';
+            
+            // Agregar el nombre del archivo
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'nombre_archivo';
+            input.value = nombreArchivo;
+            form.appendChild(input);
+            
+            // Agregar al DOM y enviar
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+            
+            console.log(`✅ Enviado formulario de descarga para: ${nombreArchivo}`);
+            
+        } catch (error) {
+            console.error(`❌ Error en descarga por endpoint para ${nombreArchivo}:`, error);
+            throw error;
+        }
     },
 
     limpiarDatosReserva() {
