@@ -288,47 +288,49 @@
       </div>
 
       <button type="submit" class="ytrx-submit-btn">Registrarse</button>
-
-      <!-- Redes sociales -->
-      <div style="text-align: center; margin-top: 30px">
-        <p style="margin-bottom: 15px; color: #666">O conéctate con</p>
-        <div class="social-buttons">
-          <button type="button">
-            <img
-              src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
-              alt="Google"
-              width="32"
-              height="32"
-            />
-          </button>
-          <button type="button">
-            <img
-              src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/facebook/facebook-original.svg"
-              alt="Facebook"
-              width="32"
-              height="32"
-            />
-          </button>
-          <button type="button">
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg"
-              alt="Microsoft"
-              width="32"
-              height="32"
-            />
-          </button>
-        </div>
-      </div>
+      
     </form>
 
-    <p class="ytrx-login-link">
-      ¿Ya tienes una cuenta? <a href="/login">Inicia sesión</a>
+    <p class="ytrx-login-link mt-5">
+      ¿Ya tienes una cuenta?
+        <a id="abrirModalLoginFormRegister" style="cursor: pointer; color: #1669c1;">Iniciar sesión</a>
+                        
     </p>
   </div>
 </main>
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
+
+
+            const btnAbrirLogin = document.getElementById("abrirModalLoginFormRegister");
+            if (btnAbrirLogin) {
+              btnAbrirLogin.addEventListener("click", function (event) {
+                event.preventDefault();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+                setTimeout(() => {
+                  loadInicioSesion();
+                }, 200); // Espera a que termine el scroll
+              });
+            }
+
+            function loadBigModal(url, title) {
+              $.ajax({
+                url: url,
+                type: 'GET',
+                success: function (html) {
+                  // Cambiar el contenido del modal
+                  $('#dynamic-modal .modal-dialog').attr('class', 'modal-dialog modal-xl');
+                  $('#modal-body').html(html);
+                  $('#modal-title').text(title);
+                  $('#dynamic-modal').modal('show');
+                },
+                error: function (xhr, status, error) {
+                  console.error('Error al cargar el contenido del modal:', error);
+                }
+              });
+            }
+
     const tipoDoc = document.getElementById("tipo-doc");
     const form = document.getElementById("ytrx-register-form");
 
