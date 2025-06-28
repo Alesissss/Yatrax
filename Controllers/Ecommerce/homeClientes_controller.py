@@ -1245,3 +1245,68 @@ def validar_codigo_reprogramacion():
         return jsonify({"Status": "error", "data": {}, "Msj": f"Error al validar el código: {repr(e)}"}), 500
 
 # END REPROGRAMACION
+
+@homeClientes_bp.route("/descargar_ticket", methods=["POST"])
+def descargar_ticket():
+    try:
+        from flask import send_file, abort
+        import os
+        
+        nombre_archivo = request.form.get("nombre_archivo")
+        if not nombre_archivo:
+            abort(400, "Nombre de archivo requerido")
+        
+        # Validar que el archivo tenga extensión .pdf
+        if not nombre_archivo.lower().endswith('.pdf'):
+            nombre_archivo += '.pdf'
+        
+        # Construir la ruta del archivo
+        ruta_archivo = os.path.join("Static", "tickets", nombre_archivo)
+        
+        # Verificar que el archivo existe
+        if not os.path.exists(ruta_archivo):
+            print(f"❌ Archivo no encontrado: {ruta_archivo}")
+            abort(404, "Archivo no encontrado")
+        
+        print(f"✅ Enviando archivo: {ruta_archivo}")
+        
+        # Enviar el archivo
+        return send_file(
+            ruta_archivo,
+            as_attachment=True,
+            download_name=nombre_archivo,
+            mimetype='application/pdf'
+        )
+        
+    except Exception as e:
+        print(f"❌ Error en descarga de ticket: {repr(e)}")
+        abort(500, f"Error al descargar archivo: {str(e)}")
+
+@homeClientes_bp.route("/verificar_ticket/<nombre_archivo>")
+def verificar_ticket(nombre_archivo):
+    try:
+        import os
+        
+        # Validar que el archivo tenga extensión .pdf
+        if not nombre_archivo.lower().endswith('.pdf'):
+            nombre_archivo += '.pdf'
+        
+        # Construir la ruta del archivo
+        ruta_archivo = os.path.join("Static", "tickets", nombre_archivo)
+        
+        # Verificar que el archivo existe
+        existe = os.path.exists(ruta_archivo)
+        
+        return jsonify({
+            "Status": "success" if existe else "error",
+            "existe": existe,
+            "ruta": ruta_archivo,
+            "nombre": nombre_archivo
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "Status": "error",
+            "existe": False,
+            "error": str(e)
+        })
