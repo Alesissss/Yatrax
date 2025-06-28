@@ -54,10 +54,10 @@
                         <div class="text-center">
                             <button id="btn_Volver" type="button" class="btn btn-danger">Volver al listado de marcas</button>
                             {% if ver %}
-                                <button id="btn_Aceptar" type="button" class="btn btn-primary">Ver</button>
+                                <button id="btn_Ver" type="button" class="btn btn-primary">Aceptar</button>
                             {% else %}
                                 <button id="{{ btnId }}" type="submit" class="btn btn-primary">
-                                    {% if btnId == 'btn_Registrar' %}Registrar{% elif btnId == 'btn_Editar' %}Actualizar{% else %}Ver{% endif %}
+                                    {% if btnId == 'btn_Registrar' %}Aceptar{% elif btnId == 'btn_Editar' %}Aceptar{% else %}Ver{% endif %}
                                 </button>
                             {% endif %}
                         </div>
@@ -72,6 +72,11 @@
 {% block scripts %}
 <script>
     $(document).ready(function () {
+
+        $("#btn_Ver").click(function () {
+            window.location.href = '/trabajadores/viajes/GestionarMarcas';
+        });
+
         // Volver al listado de marcas
         $("#btn_Volver").click(function () {
             window.location.href = '/trabajadores/viajes/GestionarMarcas';
