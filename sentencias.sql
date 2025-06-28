@@ -4192,41 +4192,6 @@ END $$
 
 DELIMITER ;
 
--- Crear procedimiento SP_CAMBIAR_CLAVE
-DELIMITER $$
-
--- CREATE PROCEDURE SP_CAMBIAR_CLAVE(
---     IN P_EMAIL VARCHAR(255),
---     IN P_PASSWORD VARCHAR(255),
---     OUT MSJ VARCHAR(255),
---     OUT MSJ2 VARCHAR(255)
--- )
--- BEGIN
---     DECLARE cEmail INT;
-
---     DECLARE EXIT HANDLER FOR SQLEXCEPTION
---     BEGIN
---         SET MSJ = 'Error inesperado al ejecutar el procedimiento almacenado';
---     END;
-
---     SELECT COUNT(*) INTO cEmail 
---     FROM usuarios 
---     WHERE EMAIL = P_EMAIL AND ESTADO = 1;
-
---     IF cEmail = 0 THEN
---         SET MSJ2 = 'El correo no existe o el usuario no está activo';
---     ELSE
---         UPDATE usuarios 
---         SET PASSWORD = P_PASSWORD
---         WHERE EMAIL = P_EMAIL AND ESTADO = 1;
-
---         SET MSJ = 'Contraseña modificada correctamente';
---     END IF;
--- END $$
-
--- DELIMITER ;
-
-DROP PROCEDURE IF EXISTS SP_CAMBIAR_CLAVE;
 DELIMITER $$
 
 CREATE PROCEDURE SP_CAMBIAR_CLAVE(
