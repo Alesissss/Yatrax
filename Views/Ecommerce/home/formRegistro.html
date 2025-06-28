@@ -147,6 +147,8 @@
               name="ytrx-doc-number"
               class="ytrx-form-input"
               placeholder="Número de documento"
+              maxlength="11"
+              minlength="8"
               required
             />
           </div>
@@ -219,6 +221,8 @@
           name="ytrx-phone"
           class="ytrx-form-input"
           placeholder="Número de teléfono"
+          minlength="9"
+          maxlength="9"
           required
         />
       </div>
@@ -358,6 +362,7 @@
         document.getElementById("ytrx-gender").selectedIndex = 0;
         document.getElementById("ytrx-birthdate").value = "";
         document.getElementById("ytrx-fullname").required = false;
+        
       } else {
         grupoNombres.style.display = "block";
         grupoApellidos.style.display = "flex";
@@ -397,7 +402,7 @@
                       window.location.href = "/ecommerce/home/inicio";
                     }, 500);
           } else {
-            toastr.error("❌ Error: " + (data.Msj || data.Msj2));
+            toastr.error( (data.Msj || data.Msj2), "Error");
           }
         },
         error: function (xhr, status, error) {
@@ -411,7 +416,7 @@
       .getElementById("ytrx-doc-number")
       .addEventListener("input", function () {
         clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(buscarPersona, 1000);
+        debounceTimer = setTimeout(buscarPersona, 500);
       });
 
     document
@@ -470,12 +475,12 @@
                   "Apellido materno";
               toastr.success(json.Msj, "OK");
             } else {
-              document.getElementById("ytrx-fullname").value = "Nombres";
+              document.getElementById("ytrx-fullname").value = "";
               document.getElementById("ytrx-lastname-father").value =
-                "Apellido paterno";
+                "";
               document.getElementById("ytrx-lastname-mother").value =
-                "Apellido materno";
-              toastr.error(json.Msj, "ERROR");
+                "";
+              toastr.warning(json.Msj, "No se ha encontrado datos");
             }
           })
           .catch(() =>
@@ -502,9 +507,8 @@
                   "RazonSocial";
             } else {
               document.getElementById("ytrx-fullname").value =
-                "RazonSocial";
-              toastr.error(json.Msj, "ERROR");
-            }
+                "";
+                toastr.warning(json.Msj, "No se ha encontrado datos");            }
           })
           .catch(() =>
             toastr.error("No se ha podido conectar con el servidor", "ERROR")
