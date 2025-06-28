@@ -113,7 +113,7 @@ INNER JOIN asiento a on dva.idAsiento=a.id
         try:
             if(nuevo_estado =='ACEPTADO'):
                 conexion.ejecutar(
-                    "UPDATE pasaje set esReembolso= 1 WHERE id = (SELECT idPasaje FROM reembolso WHERE id = %s);",
+                    "UPDATE pasaje set esReembolso= 1 enTransaccion=1 WHERE id = (SELECT idPasaje FROM reembolso WHERE id = %s);",
                     (id_reembolso,)
                 )
                 conexion.ejecutar(
