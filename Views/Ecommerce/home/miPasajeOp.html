@@ -2177,10 +2177,12 @@
     })
   })
 
+  let total = 0;
+
   function renderResumen(data) {
     const viaje = data.detalle_viaje;
     const pasajeros = data.pasajeros;
-    const total = parseFloat(data.precio_total) || 0;  // Asegurarse de que total sea un número
+    total = parseFloat(data.precio_total) || 0;  // Asegurarse de que total sea un número
 
     // Usar el descuento directamente desde la variable global:
     const descuento = parseFloat(descuentoAplicado) || 0;  // Convertir a número
@@ -2223,6 +2225,12 @@
     const contenedorResumen = $('#contenedorResumen');
     if (contenedorResumen.length) {
       contenedorResumen.html(html);
+      // Calcular el precio total final incluyendo cambio de ruta y descuento
+      const precioFinal = (descuento >= (total + cambioRuta)) ? 0 : ((total - descuento) + cambioRuta);
+      sessionStorage.setItem('precio_venta_total', precioFinal.toFixed(2));
+      
+      // Guardar los datos del resumen completo para usar en la generación del ticket
+      sessionStorage.setItem('datos_resumen_viaje', JSON.stringify(data));
     } else {
       console.error("No se encontró el contenedor #contenedorResumen");
     }

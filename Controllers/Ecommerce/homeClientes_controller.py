@@ -791,8 +791,10 @@ def procesar_pago_x():
         contacto = data.get("contacto", {})
         pago = data.get("pago", {})
         ventas = data.get("ventas", {})
+        precio_venta_total = data.get("precio_venta_total", 0.0)  # Obtener el precio total
+        datos_viaje = data.get("datos_viaje", {})  # Obtener datos del viaje
             
-        resultado = Venta.registrar_operacion_x(contacto, pago, ventas)
+        resultado = Venta.registrar_operacion_x(contacto, pago, ventas, precio_venta_total, datos_viaje)
 
         if resultado["status"] == 1:
             return jsonify({"Status": "success", "codigo_confirmacion": f"VENTA-{resultado['id_venta']}"})

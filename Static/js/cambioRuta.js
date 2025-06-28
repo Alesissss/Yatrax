@@ -1516,6 +1516,7 @@ const TimerManager = {
 const PaymentManager = {
     metodosPagoBD: null,
     datosContacto: {},
+    rutas: new Array(),  // Array para almacenar las rutas de los boletos
 
     async initialize() {
         console.log('🚀 Inicializando PaymentManager...');
@@ -2089,7 +2090,7 @@ const PaymentManager = {
                     </div>
                 </div>
             `;
-        } else if (tipoMetodo === "BILLETERA VIRTUAL") {
+        } else if (tipoMetodo.toUpperCase() === "BILLETERA VIRTUAL") {
             if (metodo.qr) {
                 divExtra.innerHTML = `
                     <div class="text-center">
@@ -2194,6 +2195,13 @@ const PaymentManager = {
             this.ocultarLoader();
 
             if (resultado.Status === 'success') {
+                // Almacenamos las rutas de los boletos en el array
+                console.log('🎉 Pago exitoso! Resultado completo:', resultado);
+                console.log('📂 Tickets en resultado:', resultado.tickets);
+                
+                this.rutas = resultado.tickets || [];
+                console.log('💾 Rutas almacenadas en this.rutas:', this.rutas);
+                
                 this.mostrarPagoExitoso(resultado);
                 
             } else {
@@ -2314,16 +2322,25 @@ const PaymentManager = {
                 codigo_promocional: document.getElementById("codigo_promocional_billetera").value || null,
             };
         }
-
+            console.log("Datos de pago capturados:", {
+            precio_venta_total: parseFloat(sessionStorage.getItem('precio_venta_total')) || 0,
+            });
+        
+        // Obtener datos del viaje desde sessionStorage o variables globales
+        const datosViaje = JSON.parse(sessionStorage.getItem('datos_resumen_viaje') || 'null');
+        
         return {
             contacto: datosContacto,
             pago: datosPago,
             ventas: JSON.parse(sessionStorage.getItem("ventas") || "{}"),
+            precio_venta_total: parseFloat(sessionStorage.getItem('precio_venta_total')) || 0,
+            datos_viaje: datosViaje ? datosViaje.detalle_viaje : null,  // Incluir datos del viaje
             itinerario: {
                 currentStep: AppState.currentStep,
                 itinerarioRegreso: AppState.itinerarioRegreso
             }
         };
+ 
     },
 
     mostrarLoader() {
@@ -2474,17 +2491,45 @@ const PaymentManager = {
     },
 
     descargarBoleto(resultado) {
-        // Aquí implementarías la descarga del boleto
-        // Por ahora, solo simulamos
-        toastr.info('Preparando descarga del boleto...');
+        console.log('🎫 Iniciando descarga de boletos...');
+        console.log('📋 Resultado recibido:', resultado);
+        console.log('📂 Rutas disponibles:', this.rutas);
+        
+        toastr.info('Preparando descarga de los boletos...');
 
-        // Simular descarga
         setTimeout(() => {
-            const link = document.createElement('a');
-            link.href = '#'; // En realidad sería la URL del PDF
-            link.download = `boleto-${resultado.codigo_confirmacion || 'reserva'}.pdf`;
-            link.click();
-            toastr.success('Boleto descargado exitosamente');
+            // Verificamos si el array de rutas tiene boletos generados
+            if (this.rutas && Array.isArray(this.rutas) && this.rutas.length > 0) {
+                console.log(`📄 Descargando ${this.rutas.length} boleto(s)...`);
+                
+                this.rutas.forEach((ruta, index) => {
+                    console.log(`🔗 Procesando ruta ${index + 1}:`, ruta);
+                    
+                    const link = document.createElement('a');
+
+                    // Aquí aseguramos que la ruta tenga el formato adecuado para el navegador
+                    // Asumimos que la ruta es algo como "C:\\Users\\Edgar\\Desktop\\Calidad\\Yatrax\\Static\\tickets\\A000-00000009.pdf"
+                    // y necesitamos cambiarla a "/static/tickets/A000-00000009.pdf"
+                    const rutaFormateada = '/Static/tickets/' + ruta.split('\\').pop();  // Extraemos el nombre del archivo y lo anexamos a /static/tickets/
+                    
+                    console.log(`🔄 Ruta original: ${ruta}`);
+                    console.log(`✅ Ruta formateada: ${rutaFormateada}`);
+
+                    link.href = rutaFormateada;  // Establece la ruta formateada
+                    link.download = `boleto-${resultado.codigo_confirmacion || 'reserva'}-${index + 1}.pdf`;  // Asigna nombre único
+                    document.body.appendChild(link);  // Necesario para algunos navegadores
+                    link.click();  // Dispara la descarga
+                    document.body.removeChild(link);  // Limpia el DOM
+                    
+                    console.log(`📥 Descarga iniciada para: ${link.download}`);
+                });
+
+                toastr.success('Boletos descargados exitosamente');
+            } else {
+                console.error('❌ No se encontraron rutas de boletos');
+                console.log('🔍 Estado actual de this.rutas:', this.rutas);
+                toastr.error('No se encontraron boletos para descargar');
+            }
         }, 1500);
     },
 
