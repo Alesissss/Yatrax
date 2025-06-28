@@ -22,6 +22,17 @@ class Cliente:
         # Auditoría
         self.fechaRegistro = fechaRegistro
         self.usuario = usuario
+    @classmethod
+    def obtener_todos_clientes(cls):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            listado_clientes = conexion.obtener("select * from cliente")
+            return listado_clientes
+        finally:
+            if conexion != None:
+                conexion.cerrar()
+    
     @classmethod    
     def obtener_todos(cls, id_tipo_doc):
         conexion = bd.Conexion()

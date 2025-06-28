@@ -4195,34 +4195,98 @@ DELIMITER ;
 -- Crear procedimiento SP_CAMBIAR_CLAVE
 DELIMITER $$
 
+-- CREATE PROCEDURE SP_CAMBIAR_CLAVE(
+--     IN P_EMAIL VARCHAR(255),
+--     IN P_PASSWORD VARCHAR(255),
+--     OUT MSJ VARCHAR(255),
+--     OUT MSJ2 VARCHAR(255)
+-- )
+-- BEGIN
+--     DECLARE cEmail INT;
+
+--     DECLARE EXIT HANDLER FOR SQLEXCEPTION
+--     BEGIN
+--         SET MSJ = 'Error inesperado al ejecutar el procedimiento almacenado';
+--     END;
+
+--     SELECT COUNT(*) INTO cEmail 
+--     FROM usuarios 
+--     WHERE EMAIL = P_EMAIL AND ESTADO = 1;
+
+--     IF cEmail = 0 THEN
+--         SET MSJ2 = 'El correo no existe o el usuario no está activo';
+--     ELSE
+--         UPDATE usuarios 
+--         SET PASSWORD = P_PASSWORD
+--         WHERE EMAIL = P_EMAIL AND ESTADO = 1;
+
+--         SET MSJ = 'Contraseña modificada correctamente';
+--     END IF;
+-- END $$
+
+-- DELIMITER ;
+
+DROP PROCEDURE IF EXISTS SP_CAMBIAR_CLAVE;
+DELIMITER $$
+
 CREATE PROCEDURE SP_CAMBIAR_CLAVE(
-    IN P_EMAIL VARCHAR(255),
-    IN P_PASSWORD VARCHAR(255),
-    OUT MSJ VARCHAR(255),
-    OUT MSJ2 VARCHAR(255)
+    IN  P_EMAIL    VARCHAR(255),
+    IN  P_PASSWORD VARCHAR(255),
+    OUT MSJ        VARCHAR(255),
+    OUT MSJ2       VARCHAR(255)
 )
 BEGIN
-    DECLARE cEmail INT;
+    DECLARE cClient INT DEFAULT 0;
+    DECLARE cUser   INT DEFAULT 0;
 
+    -- Manejador de errores
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
-        SET MSJ = 'Error inesperado al ejecutar el procedimiento almacenado';
+        SET MSJ  = 'Error inesperado al ejecutar el procedimiento almacenado';
+        SET MSJ2 = NULL;
     END;
 
-    SELECT COUNT(*) INTO cEmail 
-    FROM usuarios 
-    WHERE EMAIL = P_EMAIL AND ESTADO = 1;
+    -- 1) Compruebo en tabla cliente
+    SELECT COUNT(*) 
+      INTO cClient
+      FROM cliente
+     WHERE email  = P_EMAIL
+       AND estado = 1;
 
-    IF cEmail = 0 THEN
-        SET MSJ2 = 'El correo no existe o el usuario no está activo';
+    IF cClient > 0 THEN
+        -- Actualizo contraseña en cliente
+        UPDATE cliente
+           SET password = P_PASSWORD
+         WHERE email  = P_EMAIL
+           AND estado = 1;
+
+        SET MSJ  = 'Contraseña de CLIENTE modificada correctamente';
+        SET MSJ2 = NULL;
+
     ELSE
-        UPDATE usuarios 
-        SET PASSWORD = P_PASSWORD
-        WHERE EMAIL = P_EMAIL AND ESTADO = 1;
+        -- 2) Si no está en cliente, compruebo en usuarios
+        SELECT COUNT(*) 
+          INTO cUser
+          FROM usuarios
+         WHERE email  = P_EMAIL
+           AND estado = 1;
 
-        SET MSJ = 'Contraseña modificada correctamente';
+        IF cUser > 0 THEN
+            -- Actualizo contraseña en usuarios
+            UPDATE usuarios
+               SET password = P_PASSWORD
+             WHERE email  = P_EMAIL
+               AND estado = 1;
+
+            SET MSJ  = 'Contraseña de USUARIO modificada correctamente';
+            SET MSJ2 = NULL;
+        ELSE
+            -- No existe en ninguna de las dos tablas (o no está activo)
+            SET MSJ  = NULL;
+            SET MSJ2 = 'El correo ingresado no existe o no se encuentra activo';
+        END IF;
     END IF;
-END $$
+END$$
 
 DELIMITER ;
 

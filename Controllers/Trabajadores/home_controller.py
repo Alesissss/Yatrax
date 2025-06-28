@@ -7,6 +7,7 @@ from Models.tipoUsuario import TipoUsuario
 from Models.conf_menus import Conf_Menus
 from Models.personal import Personal
 from Models.conf_plantillas import Conf_Plantillas
+from Models.cliente import Cliente
 from correo import enviar_correo
 
 home_bp = Blueprint('home', __name__, url_prefix='/trabajadores/home')
@@ -77,9 +78,10 @@ def cambiarContrasena():
 
 @home_bp.route("/validarCorreo/<mail>")
 def validarCorreo(mail):
-    lista = [usuario["email"] for usuario in Usuario.obtener_todos()]
+    trabajadores = [usuario["email"] for usuario in Usuario.obtener_todos()]
+    clientes = [cliente["email"] for cliente in Cliente.obtener_todos_clientes()]
 
-    if mail in lista:
+    if mail in trabajadores or mail in clientes:
         session["tiempo_cambio"] = {
             "usuario":mail,
             "codVerificacion":None,

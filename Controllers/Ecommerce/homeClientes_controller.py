@@ -226,23 +226,13 @@ def perfilCliente():
             return jsonify({"Status":0,"Mensaje":"Error: "+str(e)})
 
 
-#Los HTML para recuperar contraseña del lado del cliente aun no existen
-@homeClientes_bp.route("",methods=["GET","POST"])
-def cambiarContrasena():
+#Recuperar contraseña terminado y arreglado
+@homeClientes_bp.route("/recuperarContrasena")
+def recuperarContrasena():
     if request.method == "GET":
-        return render_template("Ecommerce/home/forgotPassword.html")
-    else:
-        email = request.form["correo"]
-        respuesta = Cliente.verificar_correo_cliente(email)
-        if respuesta == 1:
-            return jsonify({"mensaje":"Correo valido, a continuación se enviará el código de verificación","status":1})
-        else:
-            return jsonify({"mensaje":"Correo no valido, vuelva a intentarlo","status":0})
-            
-# END POR TERMINAR
-@homeClientes_bp.route('/forgotPass')
-def forgot_password():
-    return render_template('Ecommerce/home/forgotPassword.html')
+        return render_template("home/changePassword.html")
+        
+#End region
 
 @homeClientes_bp.route('/register')
 def register_cliente():
