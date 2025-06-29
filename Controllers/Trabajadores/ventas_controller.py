@@ -893,7 +893,7 @@ def get_cliente():
 
         for cliente in clientes_raw:
             f_nacimiento = cliente.get("f_nacimiento")
-            cliente["f_nacimiento"] = f_nacimiento.strftime("%Y-%m-%d %H:%M:%S")
+            cliente["f_nacimiento"] = f_nacimiento.strftime("%Y-%m-%d %H:%M:%S") if cliente['f_nacimiento'] else None
 
         return jsonify({'data': clientes_raw, 'Status': 'success', 'Msj': 'Listado de clientes retornado exitosamente'})
     except Exception as e:
