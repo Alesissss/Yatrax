@@ -784,7 +784,8 @@ class Viaje:
                  SELECT 
                    cli.email,
                    pas.codigo,
-                   asi.nombre as asiento
+                   asi.nombre as asiento,
+                   dv.fechaSalida as fecha_salida
                 FROM pasaje pas
                 INNER JOIN venta v 
                     ON pas.idVenta = v.id
