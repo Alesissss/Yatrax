@@ -152,7 +152,7 @@ class TicketTransporteSimple:
 
             # Guarda el PDF en la ruta especificada
             self.pdf.output(absoluteName)
-            return os.path.abspath(absoluteName) if os.path.exists(absoluteName) else None
+            return absoluteName if os.path.exists(absoluteName) else None
 
         except Exception as e:
             print(f"❌ Error al generar ticket: {str(e)}")

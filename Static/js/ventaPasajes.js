@@ -759,7 +759,7 @@ const RouteManager = {
             allowClear: true
         }).trigger('change');
     },
-
+    
     configurarSelect2Vacio() {
         $('#cbx_Ciudades').html('<option disabled>-- No hay rutas disponibles --</option>')
             .select2({
