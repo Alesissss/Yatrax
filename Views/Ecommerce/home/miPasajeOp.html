@@ -369,7 +369,7 @@
               </div>
               <div class="col-md-4">
                 <label class="form-label">Fecha de nacimiento</label>
-                <input type="date" id="fechaNacimientoNuevo" class="form-control" />
+                <input type="date" id="fechaNacimientoNuevo" class="form-control" min="1900-01-01" />
               </div>
               <div class="col-md-4 align-content-center">
                 <div class="form-label">Sexo</div>
@@ -1032,6 +1032,12 @@
     const hoy = new Date().toISOString().split('T')[0];
     document.getElementById("fechaNacimientoMenor").setAttribute("max", hoy);
   });
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const hoy = new Date().toISOString().split('T')[0];
+    document.getElementById("fechaNacimientoNuevo").setAttribute("max", hoy);
+  });
+
   document.addEventListener("DOMContentLoaded", function () {
     // Siempre deshabilitar los campos itinerario-regreso y fecha_vuelta si existen
     const itinerarioRegreso = document.getElementById('itinerario-regreso');
@@ -1938,25 +1944,6 @@
     function realizarTransferencia() {
       const esMenorEdad = document.getElementById("esMenor").checked;
 
-      // Validar que los campos obligatorios estén completos
-      const camposObligatorios = [
-        "nombres", "apellidoPaterno", "apellidoMaterno", "telefono", "correo",
-        "fechaNacimientoNuevo", "tipoDocNuevo", "numeroDocNuevo"
-      ];
-      let camposCompletos = true;
-      camposObligatorios.forEach(id => {
-        const input = document.getElementById(id);
-        if (!input || input.value.trim() === "") {
-          toastr.warning(`El campo ${input ? input.placeholder : id} es obligatorio`, "MENSAJE DEL SISTEMA");
-          camposCompletos = false;
-        }
-      });
-
-      if (!camposCompletos) {
-        toastr.warning("Por favor complete todos los campos obligatorios", "MENSAJE DEL SISTEMA");
-        return;
-      }
-
       const pasaje = {
         id: document.getElementById("pasId").value,
         idDetalleViajeAsiento: document.getElementById("detViajeAsiento").value
@@ -2026,10 +2013,112 @@
       });
     }
 
-    document.getElementById("btnPagarTransferencia").addEventListener("click", () => {
-      realizarTransferencia();
-      ocultarContenido();
+    function validarDatosTransferencia() {
+      const nombres = document.getElementById("nombres").value.trim();
+      const apellidoPaterno = document.getElementById("apellidoPaterno").value.trim();
+      const apellidoMaterno = document.getElementById("apellidoMaterno").value.trim();
+      const telefono = document.getElementById("telefono").value.trim();
+      const correo = document.getElementById("correo").value.trim();
+      const numeroDoc = document.getElementById("numeroDocNuevo").value.trim();
+      const tipoDoc = document.getElementById("tipoDocNuevo").value;
 
+      if (!tipoDoc) {
+        toastr.warning("El tipo de documento es obligatorio", "MENSAJE DE SISTEMA");
+        $('#tipoDocNuevo').focus();
+        return false;
+      }
+
+      if (!numeroDoc) {
+        toastr.warning("El número de documento es obligatorio", "MENSAJE DE SISTEMA");
+        $('#numeroDocNuevo').focus();
+        return false;
+      }
+
+      // Validar número de documento
+      if (!/^\d{8,12}$/.test(numeroDoc)) {
+        toastr.warning("El número de documento debe tener entre 8 y 12 dígitos", "MENSAJE DE SISTEMA");
+        $('#numeroDocNuevo').focus();
+        return false;
+      }
+
+      // Validar que el número de documento no contenga caracteres especiales
+      if (/[^0-9]/.test(numeroDoc)) {
+        toastr.warning("El número de documento no debe contener caracteres especiales", "MENSAJE DE SISTEMA");
+        $('#numeroDocNuevo').focus();
+        return false;
+      }
+
+      if (!correo) {
+        toastr.warning("El email es obligatorio", "MENSAJE DE SISTEMA");
+        $('#correo').focus();
+        return false;
+      }
+
+      // Validar email si se proporciona
+      if (correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+        toastr.warning("El formato del email no es válido", "MENSAJE DE SISTEMA");
+        $('#correo').focus();
+        return false;
+      }
+
+      if (!telefono) {
+        toastr.warning("El teléfono es obligatorio", "MENSAJE DE SISTEMA");
+        $('#telefono').focus();
+        return false;
+      }
+
+      // Validar teléfono si se proporciona
+      if (telefono && !/^\d{7,15}$/.test(telefono)) {
+        toastr.warning("El formato del teléfono no es válido", "MENSAJE DE SISTEMA");
+        $('#telefono').focus();
+        return false;
+      }
+
+      if (!nombres) {
+        toastr.warning("El nombre es obligatorio", "MENSAJE DE SISTEMA");
+        $('#nombres').focus();
+        return false;
+      }
+
+      if (!apellidoPaterno) {
+        toastr.warning("El apellido paterno es obligatorio", "MENSAJE DE SISTEMA");
+        $('#apellidoPaterno').focus();
+        return false;
+      }
+
+      if (!apellidoMaterno) {
+        toastr.warning("El apellido materno es obligatorio", "MENSAJE DE SISTEMA");
+        $('#apellidoMaterno').focus();
+        return false;
+      }
+
+      // validar que nombres apellido paterno y apellido materno no tengan caracteres especiales ni numeros
+      if (/[^a-zA-Z\s]/.test(nombres)) {
+        toastr.warning("El nombre no debe contener caracteres especiales ni números", "MENSAJE DE SISTEMA");
+        $('#nombres').focus();
+        return false;
+      }
+
+      if (/[^a-zA-Z\s]/.test(apellidoPaterno)) {
+        toastr.warning("El apellido paterno no debe contener caracteres especiales ni números", "MENSAJE DE SISTEMA");
+        $('#apellidoPaterno').focus();
+        return false;
+      }
+
+      if (/[^a-zA-Z\s]/.test(apellidoMaterno)) {
+        toastr.warning("El apellido materno no debe contener caracteres especiales ni números", "MENSAJE DE SISTEMA");
+        $('#apellidoMaterno').focus();
+        return false;
+      }
+
+      return true;
+    }
+
+    document.getElementById("btnPagarTransferencia").addEventListener("click", () => {
+      if (validarDatosTransferencia() === true) {
+        realizarTransferencia();
+        ocultarContenido();
+      }
     });
 
     function ocultarContenido() {

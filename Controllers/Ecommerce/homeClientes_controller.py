@@ -555,7 +555,7 @@ def get_persona_data():
                 return respuesta
 
         # Si no se encontró nada, devuelve una lista vacía
-        return jsonify([])
+        return jsonify({'data': {}, 'Status': 'error', 'Msj': 'No se encontraron datos para el documento proporcionado'})
 
     except Exception as e:
         return jsonify({'data': {}, 'Status': 'error', 'Msj': f'Error en el servidor: {repr(e)}'})
