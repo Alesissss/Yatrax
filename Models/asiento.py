@@ -11,6 +11,7 @@ class Asiento:
         self.fecha_registro = fecha_registro
         self.usuario = usuario
     
+    
     @classmethod
     def verificarSolapamiento(cls,X1,Y1,X2,Y2):
         X1 = int(X1)
@@ -182,7 +183,52 @@ class Asiento:
     def liberar_asiento(cls, id):
         Asiento.actualizarEstadoAsiento(id,1)
 
-            
+    @classmethod
+    def obtener_datos_asiento(cls,key):
+        conexion = bd.Conexion()
+        try:
+            datos = conexion.obtener("""
+                SELECT 
+                a.nombre as nombre_asiento,
+                h.nombre as tipo_asiento
+                FROM detalle_viaje_asiento dva
+                INNER JOIN asiento a ON dva.idAsiento = a.id
+                INNER JOIN nivel_herramienta nh ON nh.id = a.id_nivel_herramienta
+                INNER JOIN herramienta h ON h.id = nh.id_herramienta
+                WHERE dva.id = %s
+                                     """,(key,))
+            if datos: return datos[0] 
+            else: return None
+        finally:
+            conexion.cerrar()
+    @classmethod
+    def obtener_datos_viaje(cls,key):
+        conexion = bd.Conexion()
+        try:
+            datos = conexion.obtener("""
+            SELECT 
+            s_origen.direccion as embarque,
+            s_destino.direccion as desembarque,
+            CONCAT(s_origen.ciudad, " - ",s_destino.ciudad) as ruta,
+            DATE_FORMAT(dv.fechaSalida,'%%H:%%i') as hora_salida,
+            DATE_FORMAT(dv.fechaSalida,'%%d/%%m/%%Y') as fecha_salida
+            FROM detalle_viaje dv INNER JOIN sucursal s_origen ON dv.idSucursalOrigen = s_origen.id
+            INNER JOIN detalle_viaje_asiento dva ON dva.idDetalle_Viaje = dv.id
+            INNER JOIN sucursal s_destino ON dv.idSucursalDestino = s_destino.id
+            INNER JOIN viaje vi ON dv.idViaje = vi.id
+            INNER JOIN vehiculo ve ON ve.id = vi.idVehiculo
+            INNER JOIN tipo_vehiculo tv ON tv.id = ve.id_tipo_vehiculo
+            INNER JOIN servicio se ON se.id = tv.id_servicio
+            INNER JOIN ruta r ON r.id = vi.idRuta
+            INNER JOIN escala e_origen ON r.id = e_origen.idRuta AND s_origen.id = e_origen.idSucursal
+            INNER JOIN escala e_destino ON r.id = e_destino.idRuta AND s_destino.id = e_destino.idSucursal
+            WHERE dva.id = %s
+                               """,(key,))
+            if datos: return datos[0] 
+            else: return None
+        finally:
+            conexion.cerrar()
+
     @classmethod
     def obtener_estado(cls, id):
         conexion = bd.Conexion()
