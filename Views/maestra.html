@@ -95,7 +95,7 @@
                         </li>
                         <li><a href="{{ url_for('homeClientes.perfilCliente') }}"
                                 class="dropdown-item border-bottom border-top">Mi Perfil</a></li>
-                        <li><a class="dropdown-item mb-0 border-bottom" href="#">Mis viajes</a></li>
+                        <li><a class="dropdown-item mb-0 border-bottom" href="{{ url_for('homeClientes.misboletos') }}">Mis viajes</a></li>
                         <li><a class="dropdown-item rounded mb-3"
                                 href="{{ url_for('homeClientes.logoutCliente') }}">Cerrar Sesión</a></li>
                     </ul>
