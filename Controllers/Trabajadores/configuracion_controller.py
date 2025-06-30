@@ -801,13 +801,15 @@ def registrar_empresa():
         direccion       = request.form.get("direccion", "").strip()
         telefono        = request.form.get("telefono", "").strip()
         email           = request.form.get("email", "").strip()
+        redes           = request.form.get("redes", "").strip()
+        eslogan         = request.form.get("eslogan", "").strip()
         usuario_actual  = session.get('usuario', {}).get('email', 'SIN USUARIO')
 
-        if not razon_social or not ruc or not direccion or not telefono or not email:
+        if not razon_social or not ruc or not direccion or not telefono or not email or not redes or not eslogan:
             return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
 
         # Registrar la empresa
-        mensajes = Empresa.registrar(razon_social, ruc, direccion, telefono, email, usuario_actual)
+        mensajes = Empresa.registrar(razon_social, ruc, direccion, telefono, email, redes, eslogan, usuario_actual)
         msj1 = mensajes.get('@MSJ')
         msj2 = mensajes.get('@MSJ2')
         if msj1:
@@ -851,12 +853,14 @@ def editar_empresa(id):
             direccion = request.form.get("direccion", "").strip()
             telefono = request.form.get("telefono", "").strip()
             email = request.form.get("email", "").strip()
+            redes = request.form.get("redes", "").strip()
+            eslogan = request.form.get("eslogan", "").strip()   
             usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO')
 
-            if not razon_social or not ruc or not direccion or not telefono or not email:
+            if not razon_social or not ruc or not direccion or not telefono or not email or not redes or not eslogan:
                 return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
 
-            mensajes = Empresa.editar(id, razon_social, ruc, direccion, telefono, email, usuario_actual)
+            mensajes = Empresa.editar(id, razon_social, ruc, direccion, telefono, email, redes, eslogan, usuario_actual)
             msj = mensajes.get('@MSJ')
             msj2 = mensajes.get('@MSJ2')
             if msj:

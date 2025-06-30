@@ -484,6 +484,8 @@ CREATE TABLE empresa (
     direccion VARCHAR(255) NOT NULL,
     telefono VARCHAR(15) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
+    redes VARCHAR(255) NOT NULL,
+    eslogan VARCHAR(255) NOT NULL,
     estado BOOLEAN NOT NULL DEFAULT TRUE,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NOT NULL
@@ -849,8 +851,8 @@ VALUES
 ('Descuento', 1, '2025-02-12', '2025-12-25', 'GINGOBELL', 30.00);
 
 
-INSERT INTO `empresa`(`id`, `razon_social`, `ruc`, `direccion`, `telefono`, `email`, `estado`, `fecha_registro`, `usuario`) VALUES (1,'YATRAX SAC','20709942650','
-Av. José Balta 2704, Chiclayo 14003', '913626759','yatraxcontacto@yatusa.com',1,CURRENT_TIMESTAMP,'ander@gmail.com');
+INSERT INTO `empresa`(`id`, `razon_social`, `ruc`, `direccion`, `telefono`, `email`, `redes`, `eslogan`, `estado`, `fecha_registro`, `usuario`) VALUES (1,'YATRAX SAC','20709942650','
+Av. José Balta 2704, Chiclayo 14003', '913626759','yatraxcontacto@yatusa.com','yatrax_peru','Conectamos destinos, impulsamos confianza',1,CURRENT_TIMESTAMP,'ander@gmail.com');
 
 
 INSERT INTO preguntas_frecuentes (pregunta, respuesta, estado, fecha_registro, usuario) VALUES ('¿Qué medios de pago
@@ -3952,6 +3954,8 @@ CREATE PROCEDURE SP_REGISTRAR_EMPRESA(
     IN P_DIRECCION VARCHAR(255),
     IN P_TELEFONO VARCHAR(15),
     IN P_EMAIL VARCHAR(255),
+    IN P_REDES VARCHAR(255),
+    IN P_ESLOGAN VARCHAR(255),
     IN P_USUARIO VARCHAR(100)
 )
 BEGIN
@@ -3975,9 +3979,9 @@ BEGIN
         SET @MSJ2 = 'El correo electrónico ya está registrado en una empresa';
     ELSE
         INSERT INTO empresa (
-            razon_social, ruc, direccion, telefono, email, estado, usuario
+            razon_social, ruc, direccion, telefono, email, redes, eslogan, estado, usuario
         ) VALUES (
-            P_RAZON_SOCIAL, P_RUC, P_DIRECCION, P_TELEFONO, P_EMAIL, 0, P_USUARIO
+            P_RAZON_SOCIAL, P_RUC, P_DIRECCION, P_TELEFONO, P_EMAIL, P_REDES, P_ESLOGAN, 0, P_USUARIO
         );
 
         SET @MSJ = 'Empresa registrada correctamente';
@@ -3995,6 +3999,8 @@ CREATE PROCEDURE SP_EDITAR_EMPRESA(
     IN P_DIRECCION VARCHAR(255),
     IN P_TELEFONO VARCHAR(15),
     IN P_EMAIL VARCHAR(255),
+    IN P_REDES VARCHAR(255),
+    IN P_ESLOGAN VARCHAR(255),
     IN P_USUARIO VARCHAR(100)
 )
 BEGIN
@@ -4027,6 +4033,8 @@ BEGIN
             direccion = P_DIRECCION,
             telefono = P_TELEFONO,
             email = P_EMAIL,
+            redes = P_REDES,
+            eslogan = P_ESLOGAN,
             usuario = P_USUARIO
         WHERE id = P_ID;
 
