@@ -3451,6 +3451,9 @@ VALUES ('Boleta', 1, 'alexis@gmail.com');
 INSERT INTO `tipo_comprobante` (`nombre`, `estado`, `usuario`)
 VALUES ('Factura', 1, 'alexis@gmail.com');
 
+INSERT INTO `tipo_comprobante` (`nombre`, `estado`, `usuario`)
+VALUES ('Ticket', 1, 'alexis@gmail.com');
+
 INSERT INTO `tipo_metodopago` (`nombre`, `estado`, `usuario`)
 VALUES ('Efectivo', 1, 'alexis@gmail.com');
 INSERT INTO `tipo_metodopago` (`nombre`, `estado`, `usuario`)

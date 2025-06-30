@@ -824,7 +824,8 @@ class Viaje:
                    pas.esReserva as estado_reserva,
                    pas.esReembolso as estado_reembolso,
                    pas.esTransferencia as estado_transferencia,
-                   pas.esPasajeNormal as estado_pasaje_normal
+                   pas.esPasajeNormal as estado_pasaje_normal,
+                   pas.esCambioRuta as estado_cambio_ruta
                 FROM pasaje pas
                 INNER JOIN venta v 
                     ON pas.idVenta = v.id

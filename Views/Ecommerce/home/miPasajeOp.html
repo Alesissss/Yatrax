@@ -695,7 +695,9 @@
                           <label for="tipoComprobante" class="form-label">Tipo de comprobante</label>
                           <select id="tipoComprobante" class="form-select">
                             {% for comprobante in TipoComprobantes %}
+                            {% if comprobante.TIPO == "Ticket" %}
                             <option value="{{ comprobante.ID }}">{{ comprobante.TIPO }}</option>
+                            {% endif %}
                             {% endfor %}
                           </select>
                         </div>

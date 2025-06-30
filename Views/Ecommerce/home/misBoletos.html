@@ -5,9 +5,14 @@
   border-radius: 16px;
   border: 1px solid #e0e0e0;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
   max-width: 400px;
+  min-width: 350px;
   margin: 0 auto;
   position: relative;
+  height: 380px; /* Altura fija para todas las tarjetas */
+  display: flex;
+  flex-direction: column;
 }
 
 .card:hover {
@@ -16,8 +21,49 @@
 }
 
 .card-body {
-  padding-bottom: 50px; /* Espacio para el botón de descarga */
+  padding: 1.25rem;
+  padding-bottom: 60px; /* Espacio para el botón de descarga */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Evita desbordamiento */
 }
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
+  /* Limitar título a 2 líneas máximo */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-text {
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+  /* Limitar cada línea de texto para evitar desbordamiento */
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-text:last-of-type {
+  margin-bottom: 0;
+}
+
+/* Estilos para los estados con colores más suaves */
+.card-text.text-success { color: #28a745 !important; font-weight: 500; }
+.card-text.text-danger { color: #dc3545 !important; font-weight: 500; }
+.card-text.text-warning { color: #fd7e14 !important; font-weight: 500; }
+.card-text.text-primary { color: #007bff !important; font-weight: 500; }
+.card-text.text-info { color: #17a2b8 !important; font-weight: 500; }
 
 .fas.fa-download {
   font-size: 20px;
@@ -25,13 +71,15 @@
   cursor: pointer;
   transition: color 0.3s ease;
   position: absolute;
-  bottom: 10px;
-  right: 15px;
+  bottom: 15px;
+  right: 20px;
   text-decoration: none;
+  z-index: 10;
 }
 
 .fas.fa-download:hover {
   color: #0d47a1;
+  transform: scale(1.1);
 }
 
 /* Centrar el contenedor de cards */
@@ -42,17 +90,30 @@
   gap: 20px;
 }
 
+.card-jinja {
+  width: 100%;
+  max-width: 400px;
+  min-width: 350px;
+  flex: 0 0 auto; /* No permitir flex grow/shrink */
+}
+
 /* Responsive: en pantallas más grandes, mostrar 2 cards por fila */
 @media (min-width: 768px) {
   .card-container-centered {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
+    align-items: stretch; /* Asegurar que todas tengan la misma altura */
   }
   
   .card-jinja {
     flex: 0 0 calc(50% - 20px);
     max-width: calc(50% - 20px);
+    min-width: 350px;
+  }
+  
+  .card {
+    height: 380px; /* Mantener altura fija en todas las resoluciones */
   }
 }
 
@@ -61,34 +122,98 @@
   .card-jinja {
     flex: 0 0 calc(33.333% - 20px);
     max-width: calc(33.333% - 20px);
+    min-width: 350px;
   }
+  
+  .card {
+    height: 380px; /* Mantener altura fija */
+  }
+}
+
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 576px) {
+  .card {
+    height: 380px; /* Mantener la misma altura en móviles */
+    max-width: 100%;
+    min-width: auto;
+  }
+  
+  .card-jinja {
+    min-width: auto;
+  }
+  
+  .card-body {
+    padding: 1rem;
+    padding-bottom: 50px;
+  }
+  
+  .card-title {
+    font-size: 1rem;
+  }
+  
+  .card-text {
+    font-size: 0.8rem;
+    margin-bottom: 0.4rem;
+  }
+}
+
+/* Estilos para la paginación */
+.pagination .page-item.active .page-link {
+  background-color: #1e88e5;
+  border-color: #1e88e5;
+}
+
+.pagination .page-link {
+  color: #1e88e5;
+  border-radius: 8px;
+  margin: 0 2px;
+}
+
+.pagination .page-link:hover {
+  color: #0d47a1;
+  background-color: #f8f9fa;
 }
 </style>
 
 <div class="container py-4">
   <h2 class="text-center mb-4">Listado de boletos</h2>
 
-  <div id="card-container" class="card-container-centered mx-5">
+  <div id="card-container" class="card-container-centered mx-3">
     {% for tarjeta in boletos %}
     <div class="col my-3 card-jinja d-none">
       <div class="card h-100 shadow-sm">
         <div class="card-body">
-          <h5 class="card-title">{{ tarjeta.ruta }}</h5>
-          <p class="card-text">Pasajero: {{ tarjeta.nombre_pasajero }}</p>
-          <p class="card-text">Fecha de salida: {{ tarjeta.fecha_salida.strftime('%d/%m/%Y') }}</p>
-          <p class="card-text">Hora de salida: {{ tarjeta.fecha_salida.strftime('%H:%M') }}</p>
-          <p class="card-text">Codigo: {{tarjeta.codigo}}</p>
+          <h5 class="card-title" title="{{ tarjeta.ruta }}">{{ tarjeta.ruta }}</h5>
+          <p class="card-text" title="Numero comprobante: {{tarjeta.num_documento}}">
+            <strong>Comprobante:</strong> {{tarjeta.num_documento}}
+          </p>
+          <p class="card-text" title="Pasajero: {{ tarjeta.nombre_pasajero }}">
+            <strong>Pasajero:</strong> {{ tarjeta.nombre_pasajero }}
+          </p>
+          <p class="card-text">
+            <strong>Fecha:</strong> {{ tarjeta.fecha_salida.strftime('%d/%m/%Y') }}
+          </p>
+          <p class="card-text">
+            <strong>Hora:</strong> {{ tarjeta.fecha_salida.strftime('%H:%M') }}
+          </p>
+          <p class="card-text" title="Codigo: {{tarjeta.codigo}}">
+            <strong>Código:</strong> {{tarjeta.codigo}}
+          </p>
+          
           {% if tarjeta.estado_reserva == 1 %}
-          <p class="card-text text-success">Estado: Reserva</p>
+          <p class="card-text text-success"><strong>Estado:</strong> Reserva</p>
           {% endif %}
           {% if tarjeta.estado_reembolso == 1 %}
-          <p class="card-text text-danger">Estado: Reembolso</p>
+          <p class="card-text text-danger">Se realizo una reembolso</p>
           {% endif %}
           {% if tarjeta.estado_transferencia == 1 %}
-          <p class="card-text text-warning">Estado: Transferencia</p>
+          <p class="card-text text-warning">Se realizo una transferencia</p>
           {% endif %}
           {% if tarjeta.estado_pasaje_normal == 1 %}
-          <p class="card-text text-primary">Estado: Pasaje Normal</p>
+          <p class="card-text text-primary"><strong>Pasaje Normal</strong> </p>
+          {% endif %}
+          {% if tarjeta.estado_cambio_ruta == 1 %}
+          <p class="card-text text-info">Se realizo un cambio de ruta</p>
           {% endif %}
         </div>
 
@@ -108,7 +233,7 @@
 </div>
 
 <script>
-  const itemsPerPage = 2; // Número de tarjetas por página
+  const itemsPerPage = 1; // Número de tarjetas por página
   const cards = document.querySelectorAll('.card-jinja'); // Selecciona todas las tarjetas
   const pagination = document.getElementById('pagination'); // Contenedor de la paginación
   const totalPages = Math.ceil(cards.length / itemsPerPage); // Total de páginas
@@ -128,11 +253,18 @@
   // Función para renderizar la paginación
   function renderPagination(currentPage) {
     pagination.innerHTML = '';
+    
+    // Solo mostrar paginación si hay más de una página
+    if (totalPages <= 1) return;
+    
     for (let i = 1; i <= totalPages; i++) {
       const li = document.createElement('li');
       li.className = `page-item ${i === currentPage ? 'active' : ''}`; // Clase activa para la página actual
       li.innerHTML = `<button class="page-link">${i}</button>`; // Botón de la página
-      li.addEventListener('click', () => renderPage(i));
+      li.addEventListener('click', (e) => {
+        e.preventDefault();
+        renderPage(i);
+      });
       pagination.appendChild(li);
     }
   }

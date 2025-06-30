@@ -579,6 +579,7 @@ def registrar_cliente_form():
         email = request.form.get("ytrx-email", "").strip()
         password = request.form.get("ytrx-password", "").strip()
         abreviatura = TipoDocumento.obtener_por_id(id_tipo_doc)
+        
         if  abreviatura['abreviatura']== "RUC":
             id_tipoCliente = TipoCliente.obtener_por_nombre("Empresa")
         else:
