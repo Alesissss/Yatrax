@@ -273,8 +273,12 @@ def seguimiento_viaje():
 
 @homeClientes_bp.route('/misBoletos')
 def misboletos():
-    boletos= Viaje.obtener_todos()
-    return render_template('Ecommerce/home/misBoletos.html', boletos=boletos)
+    if 'cliente' not in session:
+        return redirect(url_for('homeClientes.index'))
+    else:
+        id_cliente = session.get('cliente', {}).get('id')
+        boletos= Viaje.obtener_viajes_por_cliente(id_cliente)
+        return render_template('Ecommerce/home/misBoletos.html', boletos=boletos)
 
 @homeClientes_bp.route('/pago')
 def pago_pasajes():
@@ -576,6 +580,7 @@ def registrar_cliente_form():
         email = request.form.get("ytrx-email", "").strip()
         password = request.form.get("ytrx-password", "").strip()
         abreviatura = TipoDocumento.obtener_por_id(id_tipo_doc)
+        
         if  abreviatura['abreviatura']== "RUC":
             id_tipoCliente = TipoCliente.obtener_por_nombre("Empresa")
         else:

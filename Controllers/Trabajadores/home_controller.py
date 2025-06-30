@@ -27,7 +27,6 @@ def verificar_sesion():
         abort(401)  # Autenticado pero no autorizado para navegación general
 
 #Login
-@home_bp.route('/')
 @home_bp.route('/login', methods=['GET', 'POST'])
 def login():
     try:

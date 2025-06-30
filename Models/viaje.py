@@ -812,11 +812,20 @@ class Viaje:
         try:
             conexion = bd.Conexion()
             return conexion.obtener("""
-                 SELECT 
+                  SELECT 
                    cli.email,
+                   pas.numeroComprobante as num_documento,
                    pas.codigo,
                    asi.nombre as asiento,
-                   dv.fechaSalida as fecha_salida
+                   dv.fechaSalida as fecha_salida,
+                   asi.nombre as nombre_asiento,
+                   CONCAT(pasaj.ape_paterno," ", pasaj.ape_materno," ", pasaj.nombre) as nombre_pasajero,
+                   CONCAT((select ciudad from sucursal where id=dv.idSucursalOrigen),"-",(select ciudad from sucursal where id=dv.idSucursalDestino)) as ruta,
+                   pas.esReserva as estado_reserva,
+                   pas.esReembolso as estado_reembolso,
+                   pas.esTransferencia as estado_transferencia,
+                   pas.esPasajeNormal as estado_pasaje_normal,
+                   pas.esCambioRuta as estado_cambio_ruta
                 FROM pasaje pas
                 INNER JOIN venta v 
                     ON pas.idVenta = v.id
@@ -830,8 +839,12 @@ class Viaje:
                     ON dvas.idDetalle_Viaje = dv.id
                 INNER JOIN viaje vi 
                 	ON dv.idViaje=vi.id
-                WHERE pas.id= %s;
-            """,(id_cliente))
+                INNER JOIN detalle_pasaje dpas
+                	ON dpas.idPasaje=pas.id
+                INNER JOIN pasajero pasaj 
+                	ON pasaj.id=dpas.idPasajero
+                WHERE cli.id= %s;
+            """,(id_cliente,))
         finally:
             if conexion:
                 conexion.cerrar()
