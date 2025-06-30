@@ -804,3 +804,34 @@ class Viaje:
         finally:
             if conexion:
                 conexion.cerrar()
+                
+    
+    @classmethod
+    def obtener_viajes_por_cliente(cls, id_cliente):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            return conexion.obtener("""
+                 SELECT 
+                   cli.email,
+                   pas.codigo,
+                   asi.nombre as asiento,
+                   dv.fechaSalida as fecha_salida
+                FROM pasaje pas
+                INNER JOIN venta v 
+                    ON pas.idVenta = v.id
+                INNER JOIN cliente cli 
+                    ON v.idCliente = cli.id
+                INNER JOIN detalle_viaje_asiento dvas
+                    ON pas.idDetalleViajeAsiento = dvas.id
+                INNER JOIN asiento asi 
+                	ON asi.id=dvas.idAsiento
+                INNER JOIN detalle_viaje dv
+                    ON dvas.idDetalle_Viaje = dv.id
+                INNER JOIN viaje vi 
+                	ON dv.idViaje=vi.id
+                WHERE pas.id= %s;
+            """,(id_cliente))
+        finally:
+            if conexion:
+                conexion.cerrar()

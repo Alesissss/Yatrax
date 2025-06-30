@@ -257,6 +257,7 @@
           name="ytrx-email"
           class="ytrx-form-input"
           placeholder="Correo electrónico"
+          oninput="validarCorreo(this)"
           required
         />
       </div>
@@ -342,7 +343,6 @@
     const grupoApellidos = document.getElementById("grupo-apellidos");
     const grupoSexo = document.getElementById("grupo-sexo");
     const grupoNacimiento = document.getElementById("grupo-fecha-nacimiento");
-
     const campoPassword = document.getElementById("ytrx-password");
     const campoConfirmPassword = document.getElementById(
       "ytrx-confirm-password"
@@ -386,7 +386,12 @@
       } else {
         errorMsg.style.display = "none";
       }
-
+      const correo = document.getElementById("ytrx-email").value.trim();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(correo)) {
+        toastr.warning("Ingrese un correo electrónico válido", "MENSAJE DEL SISTEMA");
+        return;
+      }
 
       const formData = new FormData(form);
 
@@ -557,6 +562,9 @@
       } else {
       }
     }
+    
+   
+
   });
 </script>
 
