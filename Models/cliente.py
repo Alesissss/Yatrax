@@ -118,16 +118,13 @@ class Cliente:
                          razon_social, direccion, telefono, email, password, usuario):
         conexion = bd.Conexion()
         try:
-            # Hashear la contraseña solo si viene
-            password_hash = hashlib.sha256(password.encode()).hexdigest() if password else None
-
             # Ejecutar el procedimiento almacenado con parámetros separados por comas
             conexion.ejecutar(
                 "CALL SP_ACTUALIZAR_CLIENTE(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, @MSJ, @MSJ2);",
                 (
                     id_cliente, id_pais, id_tipo_cliente, id_tipo_doc, numero_documento,
                     nombre, ape_paterno, ape_materno, sexo, f_nacimiento,
-                    razon_social, direccion, telefono, email, password_hash, usuario
+                    razon_social, direccion, telefono, email, password, usuario
                 )
             )
 
