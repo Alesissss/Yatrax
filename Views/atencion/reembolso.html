@@ -308,8 +308,12 @@
                         console.error('Error: ' + response.Msj);
                     }
                 },
-                error: function () {
+                error: function (jqXHR, textStatus, errorThrown) {
                     toastr.error("Error al conectar con el servidor", "MENSAJE DE SISTEMA");
+                    // Mostrar más detalles en consola
+    console.error("Estado del error: ", textStatus); // ej: "timeout", "error", "abort", "parsererror"
+    console.error("Mensaje de error: ", errorThrown); // ej: "Internal Server Error"
+    console.error("Respuesta del servidor: ", jqXHR.responseText);
                 }
             });
             }

@@ -812,12 +812,12 @@
       if (tipoTexto.includes("tarjeta")) {
         contenedorInputExtra.innerHTML = `
       <label for="cciRem" class="form-label">CCI</label>
-      <input type="text" id="cciRem" class="form-control" placeholder="Número de CCI (20 dígitos)" maxlength="20" />
+      <input type="text" id="cciRem" class="form-control" placeholder="Número de CCI (20 dígitos)" maxlength="20" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/>
       `;
       } else if (tipoTexto.includes("billetera")) {
         contenedorInputExtra.innerHTML = `
         <label for="celularRem" class="form-label">Número de celular</label>
-        <input type="tel" id="celularRem" class="form-control" placeholder="Número asociado a billetera" maxlength="9" />
+        <input type="text" id="celularRem" class="form-control" placeholder="Número asociado a billetera" maxlength="9" oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
       `;
       }
     });
@@ -833,12 +833,12 @@
         if (tipoTexto.includes("tarjeta")) {
           contenedorInputExtra.innerHTML = `
         <label for="cciRem" class="form-label">CCI</label>
-        <input type="text" id="cciRem" class="form-control" placeholder="Número de CCI (20 dígitos)" maxlength="20" />
+        <input type="text" id="cciRem" class="form-control" placeholder="Número de CCI (20 dígitos)" maxlength="20" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/>
       `;
         } else if (tipoTexto.includes("billetera")) {
           contenedorInputExtra.innerHTML = `
         <label for="celularRem" class="form-label">Número de celular</label>
-        <input type="tel" id="celularRem" class="form-control" placeholder="Número asociado a billetera" maxlength="9" />
+        <input type="text" id="celularRem" class="form-control" placeholder="Número asociado a billetera" maxlength="9" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/>
       `;
         } else {
           contenedorInputExtra.innerHTML = "";

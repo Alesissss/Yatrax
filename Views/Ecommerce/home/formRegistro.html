@@ -347,11 +347,12 @@
     const campoConfirmPassword = document.getElementById(
       "ytrx-confirm-password"
     );
+    
 
     // Mostrar/ocultar campos según tipo de documento
     tipoDoc.addEventListener("change", function () {
       const seleccionado = tipoDoc.options[tipoDoc.selectedIndex].text;
-
+      const genero = document.getElementById("ytrx-gender");
       if (seleccionado === "RUC") {
         grupoApellidos.style.display = "none";
         grupoSexo.style.display = "none";
@@ -362,13 +363,14 @@
         document.getElementById("ytrx-gender").selectedIndex = 0;
         document.getElementById("ytrx-birthdate").value = "";
         document.getElementById("ytrx-fullname").required = false;
-        
+        genero.removeAttribute("required");
       } else {
         grupoNombres.style.display = "block";
         grupoApellidos.style.display = "flex";
         grupoSexo.style.display = "flex";
         grupoNacimiento.style.display = "block";
         document.getElementById("ytrx-fullname").required = true;
+        genero.setAttribute("required", "required");
       }
     });
 
