@@ -1,0 +1,60 @@
+{% extends "maestra.html" %} {% block titulo %}YATRAX - Mis boletos{% endblock %}
+{% block contenido %}
+
+ <div class="container py-4">
+  <h2 class="text-center mb-4">Listado de Tarjetas</h2>
+
+  <div id="card-container" class="row row-cols-1 mx-5">
+    {% for tarjeta in boletos %}
+    <div class="col my-3 mx-5 card-jinja d-none" style="max-width:40rem;">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">{{ tarjeta.id }}</h5>
+          <p class="card-text">{{ tarjeta.estado }}</p>
+        </div>
+        <a class="py-2 px-2 mx-1 mb-1 fas fa-download" style="text-align: end;" href=""></a>
+        </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <nav aria-label="Paginación tarjetas" class="mt-4">
+    <ul id="pagination" class="pagination justify-content-center"></ul>
+  </nav>
+</div>
+
+
+ <script>
+  const itemsPerPage = 3; // Número de tarjetas por página
+  const cards = document.querySelectorAll('.card-jinja'); // Selecciona todas las tarjetas
+  const pagination = document.getElementById('pagination'); // Contenedor de la paginación
+  const totalPages = Math.ceil(cards.length / itemsPerPage); // Total de páginas
+    // Función para renderizar las tarjetas de la página actual
+  function renderPage(page = 1) {  
+    const start = (page - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+
+    cards.forEach((card, i) => {
+      card.classList.toggle('d-none', i < start || i >= end);
+    });
+
+    renderPagination(page);
+  }
+    // Función para renderizar la paginación
+  function renderPagination(currentPage) {
+    pagination.innerHTML = '';
+    for (let i = 1; i <= totalPages; i++) {
+      const li = document.createElement('li');
+      li.className = `page-item ${i === currentPage ? 'active' : ''}`; // Clase activa para la página actual
+      li.innerHTML = `<button class="page-link">${i}</button>`; // Botón de la página
+      li.addEventListener('click', () => renderPage(i));
+      pagination.appendChild(li);
+    }
+  }
+
+  // Iniciar en página 1
+  renderPage();
+</script>
+
+
+{% endblock %}

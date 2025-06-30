@@ -1503,6 +1503,7 @@
       }
       if (codigoIngresado === codigoCorrecto) {
         if (operacionSeleccionada === 'reembolso') {
+          // Validar que el pasaje este dado de baja, se haya reprogramado y que no pertenezca a una reserva
           fetch('/ecommerce/home/validarPasajeDadoBaja', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1511,6 +1512,7 @@
             .then(r => r.json())
             .then(json => {
               if (json.Status === "success") {
+                // Validar si ya se ha solicitado un reembolso para este pasaje
                 fetch('/ecommerce/home/validarSolicitudReembolso', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },

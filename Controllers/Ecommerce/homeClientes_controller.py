@@ -270,6 +270,11 @@ def mi_pasaje_operaciones():
 def seguimiento_viaje():
     return render_template('Ecommerce/home/seguimientoViaje.html')
 
+@homeClientes_bp.route('/misBoletos')
+def misboletos():
+    boletos= Viaje.obtener_todos()
+    return render_template('Ecommerce/home/misBoletos.html', boletos=boletos)
+
 @homeClientes_bp.route('/pago')
 def pago_pasajes():
     return render_template('Ecommerce/home/pago.html')
@@ -1155,7 +1160,7 @@ def enviar_correos_reprogramacio():
                 )
             }
             resultado = enviar_correo(current_app.extensions['mail'], datosEnvio)
-            print(f"[INFO] Resultado del envío a {correo}: {resultado}")
+            
         return jsonify({'status': 'ok'})
     except Exception as e:
         print("[ERROR] Excepción capturada en el controlador:")
