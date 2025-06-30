@@ -778,6 +778,7 @@ CREATE TABLE pasaje(
     fecha_reserva DATETIME NULL, -- Fecha de reserva, si es un pasaje de reserva
     reservaLiberada BOOLEAN DEFAULT 0 NULL,
     rutaTicket text,
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (idDetalleViajeAsiento) REFERENCES detalle_viaje_asiento(id),
     FOREIGN KEY (idVenta) REFERENCES venta(id)
 );
