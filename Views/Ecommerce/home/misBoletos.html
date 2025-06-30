@@ -1,19 +1,103 @@
 {% extends "maestra.html" %} {% block titulo %}YATRAX - Mis boletos{% endblock %}
 {% block contenido %}
+<style>
+.card {
+  border-radius: 16px;
+  border: 1px solid #e0e0e0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  max-width: 400px;
+  margin: 0 auto;
+  position: relative;
+}
 
- <div class="container py-4">
-  <h2 class="text-center mb-4">Listado de Tarjetas</h2>
+.card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
 
-  <div id="card-container" class="row row-cols-1 mx-5">
+.card-body {
+  padding-bottom: 50px; /* Espacio para el botón de descarga */
+}
+
+.fas.fa-download {
+  font-size: 20px;
+  color: #1e88e5;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  position: absolute;
+  bottom: 10px;
+  right: 15px;
+  text-decoration: none;
+}
+
+.fas.fa-download:hover {
+  color: #0d47a1;
+}
+
+/* Centrar el contenedor de cards */
+.card-container-centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Responsive: en pantallas más grandes, mostrar 2 cards por fila */
+@media (min-width: 768px) {
+  .card-container-centered {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .card-jinja {
+    flex: 0 0 calc(50% - 20px);
+    max-width: calc(50% - 20px);
+  }
+}
+
+/* En pantallas muy grandes, máximo 3 cards por fila */
+@media (min-width: 1200px) {
+  .card-jinja {
+    flex: 0 0 calc(33.333% - 20px);
+    max-width: calc(33.333% - 20px);
+  }
+}
+</style>
+
+<div class="container py-4">
+  <h2 class="text-center mb-4">Listado de boletos</h2>
+
+  <div id="card-container" class="card-container-centered mx-5">
     {% for tarjeta in boletos %}
-    <div class="col my-3 mx-5 card-jinja d-none" style="max-width:40rem;">
+    <div class="col my-3 card-jinja d-none">
       <div class="card h-100 shadow-sm">
         <div class="card-body">
-          <h5 class="card-title">{{ tarjeta.id }}</h5>
-          <p class="card-text">{{ tarjeta.estado }}</p>
+          <h5 class="card-title">{{ tarjeta.ruta }}</h5>
+          <p class="card-text">Pasajero: {{ tarjeta.nombre_pasajero }}</p>
+          <p class="card-text">Fecha de salida: {{ tarjeta.fecha_salida.strftime('%d/%m/%Y') }}</p>
+          <p class="card-text">Hora de salida: {{ tarjeta.fecha_salida.strftime('%H:%M') }}</p>
+          <p class="card-text">Codigo: {{tarjeta.codigo}}</p>
+          {% if tarjeta.estado_reserva == 1 %}
+          <p class="card-text text-success">Estado: Reserva</p>
+          {% endif %}
+          {% if tarjeta.estado_reembolso == 1 %}
+          <p class="card-text text-danger">Estado: Reembolso</p>
+          {% endif %}
+          {% if tarjeta.estado_transferencia == 1 %}
+          <p class="card-text text-warning">Estado: Transferencia</p>
+          {% endif %}
+          {% if tarjeta.estado_pasaje_normal == 1 %}
+          <p class="card-text text-primary">Estado: Pasaje Normal</p>
+          {% endif %}
         </div>
-        <a class="py-2 px-2 mx-1 mb-1 fas fa-download" style="text-align: end;" href=""></a>
-        </div>
+
+        <a class="py-2 px-2 mx-1 mb-1 fas fa-download"
+           href="{{ url_for('static', filename='tickets/' ~ tarjeta.num_documento ~ '.pdf') }}"
+           download
+           title="Descargar boleto PDF">
+        </a>
+      </div>
     </div>
     {% endfor %}
   </div>
@@ -23,13 +107,13 @@
   </nav>
 </div>
 
-
- <script>
-  const itemsPerPage = 3; // Número de tarjetas por página
+<script>
+  const itemsPerPage = 2; // Número de tarjetas por página
   const cards = document.querySelectorAll('.card-jinja'); // Selecciona todas las tarjetas
   const pagination = document.getElementById('pagination'); // Contenedor de la paginación
   const totalPages = Math.ceil(cards.length / itemsPerPage); // Total de páginas
-    // Función para renderizar las tarjetas de la página actual
+  
+  // Función para renderizar las tarjetas de la página actual
   function renderPage(page = 1) {  
     const start = (page - 1) * itemsPerPage;
     const end = start + itemsPerPage;
@@ -40,7 +124,8 @@
 
     renderPagination(page);
   }
-    // Función para renderizar la paginación
+  
+  // Función para renderizar la paginación
   function renderPagination(currentPage) {
     pagination.innerHTML = '';
     for (let i = 1; i <= totalPages; i++) {
@@ -55,6 +140,5 @@
   // Iniciar en página 1
   renderPage();
 </script>
-
 
 {% endblock %}

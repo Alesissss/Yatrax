@@ -272,8 +272,12 @@ def seguimiento_viaje():
 
 @homeClientes_bp.route('/misBoletos')
 def misboletos():
-    boletos= Viaje.obtener_todos()
-    return render_template('Ecommerce/home/misBoletos.html', boletos=boletos)
+    if 'cliente' not in session:
+        return redirect(url_for('homeClientes.index'))
+    else:
+        id_cliente = session.get('cliente', {}).get('id')
+        boletos= Viaje.obtener_viajes_por_cliente(id_cliente)
+        return render_template('Ecommerce/home/misBoletos.html', boletos=boletos)
 
 @homeClientes_bp.route('/pago')
 def pago_pasajes():
