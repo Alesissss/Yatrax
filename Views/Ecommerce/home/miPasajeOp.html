@@ -1,334 +1,207 @@
 {% extends "maestra.html" %}
-{% block titulo %}YATRAX - Transferencia de pasaje{%endblock %}
+{% block titulo %}YATRAX - Tranferencia de pasaje{%endblock %}
 {% block contenido %}
 <script src="{{ url_for('static', filename='js/jquery.min.js')}}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment-with-locales.min.js"></script>
 
 <style>
-  :root {
-    --primary-color: #004d99; /* Darker blue for a professional look */
-    --secondary-color: #007bff; /* Bootstrap primary blue for accents */
-    --light-gray: #f8f9fa; /* Light background for sections */
-    --medium-gray: #e9ecef; /* Slightly darker gray for borders/inputs */
-    --dark-gray: #6c757d; /* For secondary text */
-    --success-color: #28a745;
-    --danger-color: #dc3545;
-    --info-color: #17a2b8;
-    --warning-color: #ffc107;
-    --border-radius-sm: 0.375rem;
-    --border-radius-md: 0.5rem;
-    --border-radius-lg: 1rem;
-    --transition-speed: 0.3s;
-    --box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-  }
-
-  .botonesOperaciones{
-    background-color: var(--primary-color);
-    
-    color: white;
-  }
-
-  body {
-    background-color: #f0f2f5; /* A very light blue-gray for the body */
-    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  }
-
-  .card {
-    border: none;
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--box-shadow);
-    overflow: hidden; /* Ensures header corners are rounded with card */
-  }
-
-  .card-header-primary {
-    background-color: var(--primary-color);
-    color: white;
-    padding: 1.5rem;
-    border-bottom: none;
-    font-size: 1.75rem;
-    font-weight: 600;
-  }
-
-  .form-label {
-    font-weight: 600;
-    color: var(--dark-gray);
-    margin-bottom: 0.5rem;
-  }
-
-  .form-control, .form-select {
-    border-radius: var(--border-radius-sm);
-    border: 1px solid var(--medium-gray);
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-  }
-
-  .form-control:focus, .form-select:focus {
-    border-color: var(--secondary-color);
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  #editMenor {
+    cursor: pointer;
+    background-color: rgb(36, 80, 118);
   }
 
   .bgcustom {
-    background-color: var(--light-gray);
-    opacity: 0.9;
+    background-color: #d2d3ce;
   }
 
-  /* Buttons */
-  .btn {
-    border-radius: var(--border-radius-sm);
-    padding: 0.75rem 1.25rem;
-    font-weight: 600;
-    transition: var(--transition-speed);
-  }
-
-  .btn-primary {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-  }
-
-  .btn-primary:hover {
-    background-color: #003b8b; /* Slightly darker on hover */
-    border-color: #003b8b;
-  }
-
-  .btn-secondary {
-    background-color: var(--dark-gray);
-    border-color: var(--dark-gray);
-  }
-
-  .btn-secondary:hover {
-    background-color: #5a6268;
-    border-color: #545b62;
-  }
-
-  .btn-danger {
-    background-color: var(--danger-color);
-    border-color: var(--danger-color);
-  }
-
-  .btn-danger:hover {
-    background-color: #c82333;
-    border-color: #bd2130;
-  }
-
-  .btn-success {
-    background-color: var(--success-color);
-    border-color: var(--success-color);
-  }
-
-  .btn-success:hover {
-    background-color: #218838;
-    border-color: #1e7e34;
-  }
-
-  /* Section styling */
-  .section-border {
-    border: 1px solid var(--medium-gray);
-    border-radius: var(--border-radius-md);
-    padding: 1.5rem;
-    background-color: white;
-    margin-bottom: 1.5rem;
-  }
-
-  h4 {
-    color: var(--primary-color);
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-    border-bottom: 2px solid var(--medium-gray);
-    padding-bottom: 0.5rem;
-  }
-
-  /* Specific elements */
-  #editMenor {
-    cursor: pointer;
-    color: var(--secondary-color); /* Use a more integrated color */
-    transition: var(--transition-speed);
-  }
-
-  #editMenor:hover {
-    transform: scale(1.1);
-    color: var(--primary-color);
+  .form-label {
+    margin-bottom: 0;
   }
 
   #MenorBlock {
-    background: #e0f2f7; /* Lighter blue background for the minor block */
-    border: 1px dashed #a7d9ee;
-    border-radius: var(--border-radius-md);
-    padding: 1.5rem;
-  }
-
-  /* Modal improvements */
-  .modal-content {
-    border-radius: var(--border-radius-lg);
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    background: #72a6d6;
   }
 
   .modal-header {
-    background-color: var(--primary-color);
-    color: white;
-    border-bottom: none;
-    padding: 1.25rem 1.5rem;
-    border-top-left-radius: var(--border-radius-lg);
-    border-top-right-radius: var(--border-radius-lg);
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
   }
 
   .modal-title {
-    font-weight: 700;
-    font-size: 1.25rem;
-    display: flex;
-    align-items: center;
-  }
-
-  .modal-title i {
-    font-size: 1.5rem;
-    margin-right: 0.75rem;
-  }
-
-  .btn-close {
-    filter: invert(1) grayscale(100%) brightness(200%); /* Makes it white */
-  }
-
-  .modal-body {
-    padding: 1.5rem;
-    color: #343a40;
+    font-weight: bold;
+    color: #495057;
   }
 
   .alert-danger {
-    background-color: #f8d7da;
-    color: var(--danger-color);
-    border-color: #f5c6cb;
-    padding: 0.75rem 1.25rem;
-    border-radius: var(--border-radius-sm);
-    font-weight: 500;
-  }
-
-  .alert-danger i {
-    color: var(--danger-color);
+    margin-bottom: 1rem;
   }
 
   .intentos-restantes {
-    font-size: 0.85em;
-    color: var(--dark-gray);
-    margin-top: 0.5rem;
+    font-size: 0.9em;
+    color: #6c757d;
   }
 
-  .modal-footer {
-    border-top: 1px solid var(--medium-gray);
-    padding: 1rem 1.5rem;
-    justify-content: flex-end; /* Align buttons to the right */
+  .row {
+    margin-left: 0px;
+    margin-right: 0px;
   }
 
-  .modal-footer .btn {
-    min-width: 120px; /* Give buttons a consistent width */
+  :root {
+    --primary-color: #003b8b;
+    --secondary-color: #315CAC;
+    --light-blue: #2196f3;
+    --success-color: #4caf50;
+    --danger-color: #c62828;
+    --border-radius: 10px;
+    --transition: all 0.3s ease;
   }
 
-  /* Accordion styles */
-  .accordion-item {
-    border: 1px solid var(--medium-gray);
-    border-radius: var(--border-radius-md);
-    margin-bottom: 0.75rem;
-    overflow: hidden;
-  }
-
-  .accordion-header button {
-    background-color: white;
-    color: var(--primary-color);
-    font-weight: 700;
-    padding: 1rem 1.5rem;
-    font-size: 1.1rem;
-    border-radius: var(--border-radius-md); /* Ensures rounded corners when not collapsed */
-    transition: var(--transition-speed);
-  }
-
-  .accordion-header button:not(.collapsed) {
-    background-color: var(--primary-color);
-    color: white;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-  }
-
-  .accordion-header button i {
-    margin-right: 0.75rem;
-    font-size: 1.25rem;
-  }
-
-  .accordion-body {
-    padding: 1.5rem;
-    background-color: var(--light-gray);
-    border-top: 1px solid var(--medium-gray);
-  }
-
-  /* Specific styles for reembolso modal */
-  #modalReembolsoExito .modal-header {
-    background-color: var(--success-color);
-  }
-
-  #modalReembolsoExito .modal-footer .btn {
-    border-color: var(--success-color);
-    color: var(--success-color);
-  }
-  #modalReembolsoExito .modal-footer .btn:hover {
-    background-color: var(--success-color);
-    color: white;
-  }
-
-  /* Placeholder for Seat Styling if applicable (adjust as needed) */
   .seat {
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: var(--border-radius-sm);
+    border-radius: 5px;
     font-weight: bold;
     cursor: pointer;
-    transition: var(--transition-speed);
+    transition: var(--transition);
     border: 2px solid transparent;
-    font-size: 14px;
-    margin: 5px; /* Add some space around seats */
+    font-size: 12px;
   }
 
   .available {
-    background-color: #e6ffe6; /* Very light green */
+    background-color: #e8f5e9;
     border-color: var(--success-color);
-    color: #1a662e;
+    color: #2e7d32;
+  }
+
+  .available:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   }
 
   .selected {
-    background-color: var(--secondary-color);
+    background-color: var(--light-blue);
     color: white;
-    border-color: #0056b3;
+    border-color: #0d47a1;
   }
 
   .occupied {
-    background-color: #ffe6e6; /* Very light red */
+    background-color: #ffcdd2;
     color: var(--danger-color);
-    border-color: #990000;
+    border-color: #b71c1c;
     cursor: not-allowed;
   }
 
+  /* .primero {
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+  } */
+
+  .azul {
+    background: var(--primary-color);
+    color: white;
+  }
+
+  .blanco {
+    background: #f4f4f4;
+    color: var(--primary-color);
+  }
+
+  .accordion-header button {
+    font-weight: bold;
+    color: var(--primary-color);
+  }
+
+  .accordion-item.active .accordion-header button {
+    background-color: var(--primary-color);
+    color: white;
+  }
+
+  .accordion-collapse {
+    min-width: 100%;
+    /* o ancho fijo en px */
+    max-width: 100%;
+    width: 100%;
+  }
+
+  #accordionExample {
+    width: 100%;
+  }
+
+  #accordionExample .accordion-item {
+    width: 100%;
+  }
+
+  #accordionExample .accordion-button {
+    width: 100%;
+    text-align: left;
+    /* para que el texto quede alineado a la izquierda */
+  }
+
+  #accordionExample .accordion-button>.px-3 {
+    flex-grow: 1;
+  }
+
+  .progreso-contacto-pago {
+    position: relative;
+  }
+
+  /* .accordion-button.collapsed {
+    background-color: #f8f9fa;
+    color: var(--primary-color);
+  }
+
+  .accordion-button:not(.collapsed) {
+    background-color: var(--primary-color);
+    color: white;
+  } */
+
+  .itinerario-item {
+    border: 1px solid #ccc;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    overflow: hidden;
+  }
+
+  .itinerario-body {
+    padding: 1rem;
+  }
+
+  .badge-directo {
+    background-color: #aaa;
+    color: white;
+  }
+
+  .badge-escala {
+    background-color: #fbc02d;
+    color: black;
+  }
+
+  .nivel-label {
+    font-weight: bold;
+  }
 </style>
 
-<div class="row justify-content-center py-4">
-  <div class="col-lg-10 col-md-11 col-sm-12">
+<div class="row justify-content-center py-2">
+  <div class="col-lg-12 col-md-10 col-sm-12">
     <div class="card">
-      <div class="card-header-primary text-center">
-        Mi pasaje
-      </div>
+      <h2 class="bg-primary text-white p-2">Mi pasaje</h2>
 
-      <div class="card-body p-4">
-        <div class="d-flex flex-column align-items-center mb-4">
-          <div class="d-flex align-items-center justify-content-center w-100 flex-wrap">
-            <label for="comprobante" class="me-2 mb-2 mb-md-0 fs-5 fw-bold">Número de comprobante:</label>
-            <input type="text" id="comprobante" class="form-control me-2 flex-grow-1" placeholder="# A001 - 12345678"
-              style="max-width: 250px;" />
-            <button id="btnBuscar" class="btn btn-primary mt-2 mt-md-0">
-              <i class="fas fa-search me-2"></i>Buscar
-            </button>
+      <div class="d-flex justify-content-center mt-3 mb-3">
+        <div class="text-center">
+          <!-- Fila principal con label, input y botón -->
+          <div class="d-flex align-items-center justify-content-center mb-2">
+            <label for="comprobante" class="me-2 mb-0">Número de comprobante</label>
+            <input type="text" id="comprobante" class="form-control me-2" placeholder="# A001 - 12345678"
+              style="max-width: 200px" />
+            <button id="btnBuscar" class="btn btn-primary">Buscar</button>
           </div>
-          <small class="text-muted mt-2">Ingrese el número de su comprobante para gestionar su pasaje.</small>
+          <!-- Texto de ayuda debajo -->
         </div>
-
-        <div class="section-border">
+      </div>
+      <div class="card-body">
+        <div class="border p-3 mb-4">
           <h5><strong>Datos de viaje del pasajero</strong></h5>
           <div class="row gy-3">
             <div class="col-md-6">
@@ -375,6 +248,7 @@
                 placeholder="Servicio" readonly />
             </div>
 
+            <!-- contenido invisible -->
             <input type="hidden" id="pasCod" value="" />
             <input type="hidden" id="pasEstTran" value="" />
             <input type="hidden" id="pasEstViaje" value="" />
@@ -384,70 +258,68 @@
         </div>
 
         <h4>Operaciones</h4>
-        <div class="row g-3 mb-4">
+        <div class="row g-2 mb-3">
           <div class="col-lg-4 col-md-6 col-sm-6">
-            <button class="btn w-100 btn-primary" id="btnTransferir">
-              <i class="fas fa-exchange-alt me-2"></i>Transferir pasaje
-            </button>
+            <button class="btn btn-secondary w-100" id="btnTransferir">Transferir pasaje</button>
           </div>
           <div class="col-lg-4 col-md-6 col-sm-6">
-            <button class="btn w-100 btn-primary" id="btnCambioRuta">
-              <i class="fas fa-route me-2"></i>Cambio de ruta
-            </button>
+            <button class="btn btn-secondary w-100" id="btnCambioRuta">Cambio de ruta</button>
           </div>
           <div class="col-lg-4 col-md-6 col-sm-6">
-            <button class="btn w-100 btn-primary" id="btnReembolso">
-              <i class="fas fa-money-bill-wave me-2"></i>Reembolso
-            </button>
+            <button class="btn btn-secondary w-100" id="btnReembolso">Reembolso</button>
           </div>
+          <!-- <div class="col-lg-3 col-md-6 col-sm-6">
+            <button class="btn btn-secondary w-100" id="btnConvertirLibre">Convertir pasaje libre</button>
+          </div> -->
         </div>
 
+        <!-- Modal de validación de código -->
         <div class="modal fade" id="modalValidacionCodigo" tabindex="-1" aria-labelledby="modalValidacionCodigoLabel"
           aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-              <div class="modal-header bg-primary text-white">
+              <div class="modal-header">
                 <h5 class="modal-title" id="modalValidacionCodigoLabel">
-                  <i class="fas fa-shield-alt me-2"></i>
+                  <i class="fas fa-lock me-2"></i>
                   <span id="tituloOperacionModal">Validación de Operación</span>
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body">
                 <div id="alertError" class="alert alert-danger d-none" role="alert">
-                  <i class="fas fa-exclamation-circle me-2"></i>
+                  <i class="fas fa-exclamation-triangle me-2"></i>
                   El código ingresado no es correcto. Por favor, inténtelo nuevamente.
                 </div>
 
-                <p class="mb-3 text-muted">
+                <p class="mb-3">
                   <i class="fas fa-info-circle me-2 text-info"></i>
-                  Para continuar con la transacción de <strong><span id="nombreOperacionModal" class="text-primary"></span></strong>,
+                  Para continuar con la transacción de <strong><span id="nombreOperacionModal"></span></strong>,
                   debe ingresar el código de su pasaje.
                 </p>
 
                 <div class="mb-3">
                   <label for="codigoPasajeInput" class="form-label">
-                    <i class="fas fa-key me-2"></i>
+                    <i class="fas fa-ticket-alt me-2"></i>
                     Código del pasaje:
                   </label>
-                  <input type="text" class="form-control form-control-lg text-center" id="codigoPasajeInput"
+                  <input type="text" class="form-control" id="codigoPasajeInput"
                     placeholder="Ingrese el código de su pasaje" maxlength="8">
                 </div>
 
                 <div class="intentos-restantes text-end">
                   <small>
-                    <i class="fas fa-redo-alt me-1"></i>
-                    Intentos restantes: <span id="intentosRestantes" class="fw-bold">3</span>
+                    <i class="fas fa-clock me-1"></i>
+                    Intentos restantes: <span id="intentosRestantes">3</span>
                   </small>
                 </div>
               </div>
-              <div class="modal-footer">
+              <div class="modal-footer justify-content-center">
                 <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
-                  <i class="fas fa-times-circle me-2"></i>
+                  <i class="fas fa-times me-2"></i>
                   Cancelar
                 </button>
                 <button type="button" class="btn btn-primary" id="btnValidarCodigo">
-                  <i class="fas fa-check-circle me-2"></i>
+                  <i class="fas fa-check me-2"></i>
                   Validar
                 </button>
               </div>
@@ -455,50 +327,52 @@
           </div>
         </div>
 
-        <div id="contenidoOperacion" class="mt-4" style="display: none;">
+        <!-- Contenido dinámico según operación seleccionada -->
+        <div id="contenidoOperacion" style="display: none;">
 
-          <div id="datosNuevoPasajero" class="section-border" style="display: none;">
+          <!-- Datos del nuevo pasajero - Solo para transferencia -->
+          <div id="datosNuevoPasajero" class="border p-3 mb-4" style="display: none;">
             <h5><strong>Datos del nuevo pasajero</strong></h5>
             <div class="row gy-3">
               <div class="col-md-4">
                 <label class="form-label">Tipo documento *</label>
                 <select id="tipoDocNuevo" class="form-select">
-                  <option value="">Seleccione tipo</option>
+                  <option value="">Tipo documento</option>
                   <option>DNI</option>
                   <option>CE</option>
                 </select>
               </div>
               <div class="col-md-4">
-                <label class="form-label">Número de documento *</label>
+                <label class="form-label">Número de documento</label>
                 <input type="text" id="numeroDocNuevo" maxlength="11" class="form-control"
                   placeholder="Número de documento" />
               </div>
               <div class="col-md-4">
-                <label class="form-label">Correo *</label>
-                <input type="email" id="correo" class="form-control" placeholder="ejemplo@correo.com" />
+                <label class="form-label">Correo</label>
+                <input type="email" id="correo" class="form-control" placeholder="Correo" />
               </div>
               <div class="col-md-4">
-                <label class="form-label">Nombres *</label>
+                <label class="form-label">Nombres</label>
                 <input type="text" id="nombres" class="form-control" placeholder="Nombres" />
               </div>
               <div class="col-md-4">
-                <label class="form-label">Apellido paterno *</label>
+                <label class="form-label">Apellido paterno</label>
                 <input type="text" id="apellidoPaterno" class="form-control" placeholder="Apellido paterno" />
               </div>
               <div class="col-md-4">
-                <label class="form-label">Apellido materno *</label>
+                <label class="form-label">Apellido materno</label>
                 <input type="text" id="apellidoMaterno" class="form-control" placeholder="Apellido materno" />
               </div>
               <div class="col-md-4">
-                <label class="form-label">Teléfono *</label>
-                <input type="tel" id="telefono" class="form-control" placeholder="9XXXXXXXX" />
+                <label class="form-label">Teléfono</label>
+                <input type="tel" id="telefono" class="form-control" placeholder="Teléfono" />
               </div>
               <div class="col-md-4">
-                <label class="form-label">Fecha de nacimiento *</label>
+                <label class="form-label">Fecha de nacimiento</label>
                 <input type="date" id="fechaNacimientoNuevo" class="form-control" min="1900-01-01" />
               </div>
-              <div class="col-md-4">
-                <div class="form-label">Sexo *</div>
+              <div class="col-md-4 align-content-center">
+                <div class="form-label">Sexo</div>
                 <div class="form-check form-check-inline">
                   <input class="form-check-input" type="radio" name="sexoNuevo" id="sexoMasculino" value="M" />
                   <label class="form-check-label" for="sexoMasculino">Masculino</label>
@@ -510,19 +384,20 @@
               </div>
             </div>
 
-            <div class="form-check mt-4" id="menorWrapper">
+            <!-- Checkbox + edit icon wrapper - Solo para transferencia -->
+            <div class="form-check mt-3" id="menorWrapper">
               <input class="form-check-input" type="checkbox" id="conMenor" />
               <label class="form-check-label" for="conMenor">Con menor de edad en brazos</label>
-              <i id="editMenor" class="fa-solid fa-pencil ms-2 text-info" style="display: none"></i>
+              <i id="editMenor" class="fa-solid fa-pencil ms-2" style="display: none"></i>
             </div>
 
-            <div id="MenorBlock" class="mt-4 d-none">
-              <h6 class="mb-3 text-primary"><i class="fas fa-child me-2"></i>Datos del Menor</h6>
+            <!-- Bloque extra del menor -->
+            <div id="MenorBlock" class="border p-3 mt-3 d-none">
               <div class="row gy-3">
                 <div class="col-md-4">
                   <label class="form-label">Tipo documento</label>
                   <select id="tipoDocMenor" class="form-select">
-                    <option value="">Seleccione tipo</option>
+                    <option value="">Tipo documento</option>
                     <option>DNI</option>
                     <option>CE</option>
                   </select>
@@ -550,13 +425,13 @@
                 <div class="col-md-4">
                   <label class="form-label">Relación con el menor</label>
                   <select id="relacionMenor" class="form-select">
-                    <option value="">Seleccione relación</option>
+                    <option value="">Relación</option>
                     <option>Madre</option>
                     <option>Padre</option>
                     <option>Otro</option>
                   </select>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-4 align-content-center">
                   <div class="form-label">Sexo</div>
                   <div class="form-check form-check-inline">
                     <input class="form-check-input" type="radio" name="sexoMenor" id="sexoMenorM" value="M" />
@@ -566,22 +441,21 @@
                     <input class="form-check-input" type="radio" name="sexoMenor" id="sexoMenorF" value="F" />
                     <label class="form-check-label" for="sexoMenorF">Femenino</label>
                   </div>
+
                 </div>
               </div>
             </div>
 
+            <!-- Checkbox de menor de edad - Solo para transferencia -->
             <div class="form-check mt-3">
               <input class="form-check-input" type="checkbox" id="esMenor" disabled />
-              <label class="form-check-label text-muted" for="esMenor">Es menor de edad</label>
+              <label class="form-check-label disabled" for="esMenor" style="color: rgb(0, 0, 0)">Es menor de
+                edad</label>
             </div>
 
-            <div class="d-flex justify-content-center mt-4">
-              <button class="btn btn-danger me-3" id="btnCancelarTransferencia">
-                <i class="fas fa-times-circle me-2"></i>Cancelar
-              </button>
-              <button class="btn btn-primary" id="btnPagarTransferencia">
-                <i class="fas fa-money-bill-wave me-2"></i>Pagar
-              </button>
+            <div class="d-flex justify-content-center">
+              <button class="btn btn-danger mt-3 me-3" id="btnCancelarTransferencia">Cancelar</button>
+              <button class="btn btn-primary mt-3" id="btnPagarTransferencia">Pagar</button>
             </div>
 
           </div>
@@ -591,12 +465,14 @@
           </div>
 
 
-          <div id="contenidoOtrasOperaciones" class="section-border" style="display: none;">
+          <!-- Contenido para otras operaciones -->
+          <div id="contenidoOtrasOperaciones" class="border p-3 mb-4" style="display: none;">
             <h5 id="tituloOperacion"><strong>Contenido de la operación</strong></h5>
-            <p id="descripcionOperacion" class="text-muted">Seleccione una operación para ver su contenido específico.</p>
+            <p id="descripcionOperacion">Seleccione una operación para ver su contenido específico.</p>
             <div id="datosReembolso" style="display: none;">
               <div class="accordion" id="formularioCompra">
 
+                <!-- Sección Contacto -->
                 <div class="accordion-item">
                   <h2 class="accordion-header" id="headingContacto">
                     <button class="accordion-button" type="button" data-bs-toggle="collapse"
@@ -609,7 +485,7 @@
                     <div class="accordion-body">
                       <div class="row gy-3">
                         <div class="col-md-4">
-                          <label class="form-label">Tipo documento *</label>
+                          <label class="form-label">Tipo documento</label>
                           <select required id="tipoDocNuevoRem" class="form-select">
                             {% for tipoDoc in TipoDocumento %}
                             <option value="{{ tipoDoc.id }}">{{ tipoDoc.abreviatura }}</option>
@@ -617,38 +493,38 @@
                           </select>
                         </div>
                         <div class="col-md-4">
-                          <label class="form-label">Número de documento *</label>
+                          <label class="form-label">Número de documento</label>
                           <input required type="text" id="numeroDocNuevoRem" maxlength="11" class="form-control"
                             placeholder="Número de documento" />
                         </div>
                         <div class="col-md-4">
-                          <label required class="form-label">Correo *</label>
-                          <input type="email" id="correoRem" class="form-control" placeholder="ejemplo@correo.com" />
+                          <label required class="form-label">Correo</label>
+                          <input type="email" id="correoRem" class="form-control" placeholder="Correo" />
                         </div>
                         <div class="col-md-4">
-                          <label class="form-label" id="labelNombresRem">Nombres *</label>
+                          <label class="form-label" id="labelNombresRem">Nombres</label>
                           <input required type="text" id="nombresRem" class="form-control" placeholder="Nombres" />
                         </div>
                         <div class="col-md-4" id="apellidoPaternoDivRem">
-                          <label class="form-label">Apellido paterno *</label>
+                          <label class="form-label">Apellido paterno</label>
                           <input type="text" id="apellidoPaternoRem" class="form-control"
                             placeholder="Apellido paterno" />
                         </div>
                         <div class="col-md-4" id="apellidoMaternoDivRem">
-                          <label class="form-label">Apellido materno *</label>
+                          <label class="form-label">Apellido materno</label>
                           <input type="text" id="apellidoMaternoRem" class="form-control"
                             placeholder="Apellido materno" />
                         </div>
                         <div class="col-md-4">
-                          <label class="form-label">Teléfono *</label>
-                          <input required type="tel" id="telefonoRem" class="form-control" placeholder="9XXXXXXXX" />
+                          <label class="form-label">Teléfono</label>
+                          <input required type="tel" id="telefonoRem" class="form-control" placeholder="Teléfono" />
                         </div>
                         <div class="col-md-4">
-                          <label class="form-label">Fecha de nacimiento *</label>
+                          <label class="form-label">Fecha de nacimiento</label>
                           <input type="date" id="fechaNacimientoRem" class="form-control" />
                         </div>
-                        <div class="col-md-4" id="sexoDivRem">
-                          <div class="form-label">Sexo *</div>
+                        <div class="col-md-4 align-content-center" id="sexoDivRem">
+                          <div class="form-label">Sexo</div>
                           <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="sexoRem" id="sexoMasculinoRem"
                               value="M" />
@@ -665,6 +541,7 @@
                   </div>
                 </div>
 
+                <!-- Sección Pago -->
                 <div class="accordion-item">
                   <h2 class="accordion-header" id="headingPago">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
@@ -700,34 +577,41 @@
                           </select>
                         </div>
                         <div class="col-md-6" id="contenedorInputExtraRem"></div>
-                        <div class="col-12 mt-4 text-end">
-                          <button id="btnCancelarReembolso" type="button" class="btn btn-danger me-2">
+                        <div class="col-12 my-2 text-end">
+                          <button id="btnCancelarReembolso" type="button" class="btn btn-secondary me-2 bg-danger">
                             <i class="fas fa-times me-1"></i> Cancelar
                           </button>
                           <button id="btnGuardarReembolso" type="submit" class="btn btn-success">
                             <i class="fas fa-paper-plane me-1"></i> Enviar solicitud de reembolso
                           </button>
                         </div>
+
+
                       </div>
+
                     </div>
+
                   </div>
+
                 </div>
+
               </div>
             </div>
           </div>
 
-          <div id="checkboxesGenerales" class="mt-4">
-            <div class="form-check mb-3">
+          <!-- Checkboxes generales (aparecen para todas las operaciones) -->
+          <div id="checkboxesGenerales">
+            <div class="form-check mt-3 hidden">
               <input class="form-check-input" type="checkbox" id="aceptoTerminos" />
               <label class="form-check-label" for="aceptoTerminos">
                 Declaro haber leído los
-                <a href="{{url_for('homeClientes.terminos_y_condiciones')}}" class="text-decoration-none text-primary fw-bold">términos y condiciones</a>
+                <a href="{{url_for('homeClientes.terminos_y_condiciones')}}">términos y condiciones</a>
               </label>
             </div>
-            <div class="form-check" id="checkboxCargo" style="display: none;">
+            <div class="form-check mt-3 hidden" id="checkboxCargo" style="display: none;">
               <input class="form-check-input" type="checkbox" id="aceptoCargo" />
               <label class="form-check-label" for="aceptoCargo">
-                Estoy de acuerdo con el cargo extra que pueda generar las operaciones con mi pasaje
+                Estoy de acuerdo con el cargo extra que pueda generar los operaciones con mi pasaje
               </label>
             </div>
           </div>
@@ -738,22 +622,23 @@
 </div>
 
 
+
+<!-- MODAL MENSAJE REEMBOLSO -->
 <div class="modal fade" id="modalReembolsoExito" tabindex="-1" aria-labelledby="modalReembolsoExitoLabel"
   aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow-lg rounded-4">
-      <div class="modal-header bg-success text-white border-0 rounded-top-4 d-flex justify-content-between align-items-center">
+    <div class="modal-content border-0 shadow rounded-4">
+      <div class="modal-header bg-success text-white border-0 rounded-top-4">
         <h5 class="modal-title fw-bold" id="modalReembolsoExitoLabel">
-          <i class="fas fa-check-circle me-2"></i> ¡Solicitud Enviada!
+          <i class="fas fa-circle-check me-2"></i> ¡Solicitud Enviada!
         </h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
-      <div class="modal-body text-center pt-4 pb-0 fs-6 text-dark">
-        <p class="mb-3 lead">Se ha registrado la <strong>solicitud de reembolso</strong>.</p>
-        <p class="mb-4">Espere una pronta respuesta a su solicitud.</p>
+      <div class="modal-body text-center fs-6 text-dark">
+        <p class="mb-0">Se ha registrado la <strong>solicitud de reembolso</strong>,<br>espere pronta respuesta.</p>
       </div>
-      <div class="modal-footer border-0 justify-content-center pb-4 pt-0">
-        <button type="button" class="btn btn-outline-success px-5 rounded-pill fw-semibold" data-bs-dismiss="modal">
+      <div class="modal-footer border-0 justify-content-center pb-4">
+        <button type="button" class="btn btn-outline-success px-4 rounded-pill fw-semibold" data-bs-dismiss="modal">
           Aceptar
         </button>
       </div>
@@ -761,11 +646,12 @@
   </div>
 </div>
 
+<!-- Añade este modal justo antes de los <script src=...> -->
 <div class="modal fade" id="modalReloadConfirm" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header bg-warning text-dark">
-        <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i> ¿Deseas recargar?</h5>
+      <div class="modal-header">
+        <h5 class="modal-title">¿Deseas recargar?</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
@@ -773,48 +659,52 @@
       </div>
       <div class="modal-footer">
         <button id="reloadCancel" type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-          <i class="fas fa-times me-2"></i>Permanecer
+          Permanecer
         </button>
         <button id="reloadOk" type="button" class="btn btn-danger">
-          <i class="fas fa-redo me-2"></i>Recargar
+          Recargar
         </button>
       </div>
     </div>
   </div>
 </div>
 
+<!-- Modal método de pago -->
 <div class="modal fade" id="modalPagoCustom" tabindex="-1" aria-labelledby="modalPagoCustomLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title" id="modalPagoCustomLabel"><i class="fas fa-credit-card me-2"></i> Pasarela de Pago</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalPagoCustomLabel">Pasarela de Pago (Custom)</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
         <div class="accordion" id="accordionPagoCustom">
 
+          <!-- SECCIÓN CONTACTO -->
           <div class="accordion-item">
             <h2 class="accordion-header" id="headingContactoCustom">
               <button class="accordion-button" type="button" data-bs-toggle="collapse"
                 data-bs-target="#collapseContactoCustom" aria-expanded="true" aria-controls="collapseContactoCustom">
-                <i class="fas fa-user-circle me-2"></i> Información de Contacto y Comprobante
+                <i class="fas fa-id-card me-2"></i> Contacto
               </button>
             </h2>
             <div id="collapseContactoCustom" class="accordion-collapse collapse show"
               data-bs-parent="#accordionPagoCustom">
               <div class="accordion-body">
                 <form id="formContactoCustom">
+                  <!-- Tipo de comprobante -->
                   <div class="mb-3">
-                    <label for="tipoComprobanteCustom" class="form-label">Tipo de comprobante <span class="text-danger">*</span></label>
+                    <label for="tipoComprobanteCustom" class="form-label">Tipo de comprobante</label>
                     <select id="tipoComprobanteCustom" class="form-select">
                       <option value="Boleta">Boleta</option>
                       <option value="Factura">Factura</option>
                     </select>
                   </div>
 
+                  <!-- Información común para todos los tipos de comprobante -->
                   <div class="row g-3">
                     <div class="col-md-6">
-                      <label for="tipoDocumentoCustom" class="form-label">Tipo de documento <span class="text-danger">*</span></label>
+                      <label for="tipoDocumentoCustom" class="form-label">Tipo de documento *</label>
                       <select id="tipoDocumentoCustom" class="form-select">
                         {% for doc in TipoDocumento %}
                         <option value="{{ doc.id }}">{{ doc.abreviatura }}</option>
@@ -822,58 +712,93 @@
                       </select>
                     </div>
                     <div class="col-md-6">
-                      <label for="numeroDocumentoCustom" class="form-label">Número de documento <span class="text-danger">*</span></label>
+                      <label for="numeroDocumentoCustom" class="form-label">Número de documento *</label>
                       <input type="text" id="numeroDocumentoCustom" class="form-control" required>
                     </div>
                     <div class="col-md-6">
-                      <label for="nombresCustom" class="form-label">Nombres <span class="text-danger">*</span></label>
+                      <label for="nombresCustom" class="form-label">Nombres *</label>
                       <input type="text" id="nombresCustom" class="form-control" required>
                     </div>
                     <div class="col-md-6">
-                      <label for="apePaternoCustom" class="form-label">Apellido paterno <span class="text-danger">*</span></label>
+                      <label for="apePaternoCustom" class="form-label">Apellido paterno *</label>
                       <input type="text" id="apePaternoCustom" class="form-control" required>
                     </div>
                     <div class="col-md-6">
-                      <label for="apeMaternoCustom" class="form-label">Apellido materno <span class="text-danger">*</span></label>
+                      <label for="apeMaternoCustom" class="form-label">Apellido materno *</label>
                       <input type="text" id="apeMaternoCustom" class="form-control" required>
                     </div>
                     <div class="col-md-6">
-                      <label for="correoCustom" class="form-label">Correo electrónico <span class="text-danger">*</span></label>
+                      <label for="correoCustom" class="form-label">Correo electrónico *</label>
                       <input type="email" id="correoCustom" class="form-control" required>
                     </div>
                     <div class="col-md-6">
-                      <label for="telefonoCustom" class="form-label">Teléfono/móvil <span class="text-danger">*</span></label>
+                      <label for="telefonoCustom" class="form-label">Teléfono/móvil *</label>
                       <input type="tel" id="telefonoCustom" class="form-control" required>
                     </div>
                   </div>
 
-                  <div id="facturaFieldsCustom" class="mt-4" style="display: none;">
-                    <h6 class="mb-3 text-primary"><i class="fas fa-building me-2"></i> Información de Facturación</h6>
-                    <div class="row g-3">
-                      <div class="col-md-6">
-                        <label for="razonSocialCustom" class="form-label">Razón Social <span class="text-danger">*</span></label>
-                        <input type="text" id="razonSocialCustom" class="form-control">
-                      </div>
-                      <div class="col-md-6">
-                        <label for="rucCustom" class="form-label">RUC <span class="text-danger">*</span></label>
-                        <input type="text" id="rucCustom" class="form-control">
-                      </div>
-                      <div class="col-12">
-                        <label for="direccionFiscalCustom" class="form-label">Dirección Fiscal <span class="text-danger">*</span></label>
-                        <input type="text" id="direccionFiscalCustom" class="form-control">
-                      </div>
+                  <!-- Campos adicionales para "Factura" -->
+                  <div id="facturaFieldsCustom" style="display: none;">
+                    <div class="col-md-6">
+                      <label for="rucCustom" class="form-label">RUC *</label>
+                      <input type="text" id="rucCustom" class="form-control" required>
                     </div>
+                    <div class="col-md-6">
+                      <label for="razonSocialCustom" class="form-label">Razón Social *</label>
+                      <input type="text" id="razonSocialCustom" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="direccionCustom" class="form-label">Dirección *</label>
+                      <input type="text" id="direccionCustom" class="form-control" required>
+                    </div>
+                  </div>
+
+                  <div class="text-end mt-3">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="collapse"
+                      data-bs-target="#collapsePagoCustom" aria-expanded="false" aria-controls="collapsePagoCustom">
+                      Siguiente →
+                    </button>
                   </div>
                 </form>
               </div>
             </div>
           </div>
+
+          <!-- SECCIÓN PAGO -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingPagoCustom">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#collapsePagoCustom" aria-expanded="false" aria-controls="collapsePagoCustom">
+                <i class="fas fa-credit-card me-2"></i> Pago
+              </button>
+            </h2>
+            <div id="collapsePagoCustom" class="accordion-collapse collapse" data-bs-parent="#accordionPagoCustom">
+              <div class="accordion-body">
+                <div class="mb-3">
+                  <label for="metodoPagoCustom" class="form-label">Método de pago</label>
+                  <select id="metodoPagoCustom" class="form-select">
+                    {% for mp in MetodosPagos %}
+                    <option value="{{ mp.id }}">{{ mp.nombre }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div id="contenidoPagoCustomDinamico">
+                  <!-- aquí inyecta renderizarContenidoMetodo(metodo, tipoMetodo) -->
+                </div>
+              </div>
+            </div>
           </div>
+
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button id="btnProcesarPagoCustom" type="button" class="btn btn-success">Procesar pago</button>
       </div>
     </div>
   </div>
 </div>
-
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
