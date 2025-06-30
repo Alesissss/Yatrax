@@ -2598,13 +2598,12 @@ const PaymentManager = {
                     <i class="fas fa-check" style="color: white; font-size: 60px;"></i>
                 </div>
                 <h1 style="color: #155724; margin-bottom: 20px; font-weight: bold;">¡Pago Confirmado!</h1>
-                <h4 style="color: #155724; margin-bottom: 15px;">Código de confirmación: <strong>${resultado.codigo_confirmacion || 'PAY-' + Date.now()}</strong></h4>
                 <p style="color: #155724; font-size: 18px; margin-bottom: 30px;">
                     Su operación ha sido procesada exitosamente.<br>
                     Recibirá un correo de confirmación en ${this.datosContacto.email || 'su email'}
                 </p>
                 <button id="btn_nueva_reserva" class="btn btn-success btn-lg" style="margin-right: 15px;">
-                    <i class="fas fa-plus me-2"></i>Nueva Reserva
+                    <i class="fas fa-plus me-2"></i>Nueva compra
                 </button>
                 <button id="btn_descargar_boleto" class="btn btn-outline-success btn-lg">
                     <i class="fas fa-download me-2"></i>Descargar Boleto
@@ -2635,7 +2634,7 @@ const PaymentManager = {
         document.body.appendChild(overlay);
 
         document.getElementById('btn_nueva_reserva').addEventListener('click', () => {
-            this.iniciarNuevaReserva();
+            this.iniciarNuevaCompra();
         });
 
         document.getElementById('btn_descargar_boleto').addEventListener('click', () => {
@@ -2645,14 +2644,14 @@ const PaymentManager = {
         this.limpiarDatosReserva();
     },
 
-    iniciarNuevaReserva() {
+    iniciarNuevaCompra() {
         const overlay = document.getElementById('payment-success-overlay');
         if (overlay) overlay.remove();
 
         App.resetearSistemaCompleto();
         NavigationManager.updateFormVisibility();
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        toastr.success('Listo para una nueva reserva');
+        toastr.success('Listo para una nueva compra');
     },
 
     descargarBoleto(resultado) {

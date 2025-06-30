@@ -15,4 +15,5 @@ tinyhtml5
 fpdf2
 qrcode[pil]
 apscheduler
+num2words
 # $ pip install -r requirements.txt
