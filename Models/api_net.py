@@ -45,7 +45,7 @@ class ApiNetPe:
             data = self._get("/v2/reniec/dni", {"numero": dni})
             if data:
                 return data
-        # Si ninguno funcionó, devuelve None
+        # Si ninguno funcionó, devuelve un mensaje de error
         return None
 
     def get_company(self, ruc: str) -> Optional[dict]:
