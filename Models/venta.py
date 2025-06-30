@@ -469,7 +469,7 @@ class Venta:
                 "ruc": empresa["ruc"],
                 "direccion": empresa["direccion"],
                 "telefono": empresa["telefono"],
-                "tipo_comprobante": f"{generales["nom_comprobante"].upper()} DE VENTA ELECTRÓNICA",
+                "tipo_comprobante": f"{generales['nom_comprobante'].upper()} DE VENTA ELECTRÓNICA",
                 "numero_comprobante": num_boleta
             },
             "comprobante": {
