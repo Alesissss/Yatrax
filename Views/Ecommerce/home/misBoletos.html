@@ -58,12 +58,52 @@
   margin-bottom: 0;
 }
 
-/* Estilos para los estados con colores más suaves */
-.card-text.text-success { color: #28a745 !important; font-weight: 500; }
-.card-text.text-danger { color: #dc3545 !important; font-weight: 500; }
-.card-text.text-warning { color: #fd7e14 !important; font-weight: 500; }
-.card-text.text-primary { color: #007bff !important; font-weight: 500; }
-.card-text.text-info { color: #17a2b8 !important; font-weight: 500; }
+/* Estilos para las etiquetas de estado */
+.estado-badge {
+  display: block;
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  margin: 8px 0 4px 0;
+  border: none;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.estado-reserva {
+  background-color: #28a745;
+  color: #ffffff;
+}
+
+.estado-reembolso {
+  background-color: #dc3545;
+  color: #ffffff;
+}
+
+.estado-transferencia {
+  background-color: #fd7e14;
+  color: #ffffff;
+}
+
+.estado-normal {
+  background-color: #007bff;
+  color: #ffffff;
+}
+
+.estado-cambio {
+  background-color: #17a2b8;
+  color: #ffffff;
+}
+
+/* Contenedor para múltiples etiquetas */
+.estados-container {
+  margin-top: 12px;
+  margin-bottom: 8px;
+}
 
 .fas.fa-download {
   font-size: 20px;
@@ -204,16 +244,16 @@
           <p class="card-text text-success"><strong>Estado:</strong> Reserva</p>
           {% endif %}
           {% if tarjeta.estado_reembolso == 1 %}
-          <p class="card-text text-danger">Se realizo una reembolso</p>
+          <p class="card-text text-danger">Este pasaje ha sido reembolsado</p>
           {% endif %}
           {% if tarjeta.estado_transferencia == 1 %}
-          <p class="card-text text-warning">Se realizo una transferencia</p>
+          <p class="card-text text-warning">Este pasaje ha sido transferido</p>
           {% endif %}
           {% if tarjeta.estado_pasaje_normal == 1 %}
-          <p class="card-text text-primary"><strong>Pasaje Normal</strong> </p>
+          <p class="card-text text-primary"><strong>Tipo:</strong> Pasaje Normal</p>
           {% endif %}
           {% if tarjeta.estado_cambio_ruta == 1 %}
-          <p class="card-text text-info">Se realizo un cambio de ruta</p>
+          <p class="card-text text-info">Este pasaje ha cambiado de ruta</p>
           {% endif %}
         </div>
 
@@ -233,7 +273,7 @@
 </div>
 
 <script>
-  const itemsPerPage = 1; // Número de tarjetas por página
+  const itemsPerPage = 2; // Número de tarjetas por página
   const cards = document.querySelectorAll('.card-jinja'); // Selecciona todas las tarjetas
   const pagination = document.getElementById('pagination'); // Contenedor de la paginación
   const totalPages = Math.ceil(cards.length / itemsPerPage); // Total de páginas

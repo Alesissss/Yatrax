@@ -128,7 +128,7 @@ INNER JOIN asiento a on dva.idAsiento=a.id
                 return resultado[0]
             else:
                 conexion.ejecutar(
-                    "UPDATE pasaje set esReembolso= 0, enTransaccion=0 WHERE id = (SELECT idPasaje FROM reembolso WHERE id = %s);",
+                    "UPDATE pasaje set esReembolso= 0 WHERE id = (SELECT idPasaje FROM reembolso WHERE id = %s);",
                     (id_reembolso,)
                 )
                 conexion.ejecutar(
