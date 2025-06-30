@@ -315,9 +315,9 @@
                 .done(function (response) {
                     if (response.Status === 'success' && response.data.length) {
                         const empresa = response.data[0];
-                        $('#direccion').text(empresa.direccion);
+                        $('ul.list-unstyled li#direccion').text(empresa.direccion);
                         $('ul.list-unstyled li#telefono').text(empresa.telefono);
-                        $('#correo').text(empresa.email);
+                        $('ul.list-unstyled li#correo').text(empresa.email);
                         $('#facebook').text(empresa.redes);
                         $('#instagram').text(empresa.redes);
                         $('#tiktok').text(empresa.redes);
