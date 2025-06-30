@@ -1,120 +1,213 @@
 {% extends "maestra.html" %}
+
 {% block contenido %}
-<div id="formPerfil" class="p-4 rounded bg-white shadow-sm">
-  <h4 class="mb-4">Mi Perfil</h4>
-  {% set datosUsuario = session['cliente'] %}
+<style>
+  :root {
+    --primary-color: #003b8b;
+    --secondary-color: #315CAC;
+    --light-blue: #2196f3;
+    --success-color: #4caf50;
+    --danger-color: #c62828;
+    --border-radius: 10px;
+    --transition: all 0.3s ease;
+  }
 
-  <input type="hidden" name="id_cliente" value="{{ datosUsuario.id }}">
-  <input type="hidden" name="usuario" value="{{ datosUsuario.usuario }}">
-  <!-- Sección: Datos del cliente -->
-  <h5 class="text-primary mt-3 mb-3">Datos del Cliente</h5>
-  <div class="row">
-    <div class="col-md-4 mb-3">
-      <label for="id_pais" class="form-label">País</label>
-      <select id="id_pais" name="id_pais" class="form-select" required>
-        {% for pais in paises %}
-          <option value="{{ pais.id }}" {% if pais.id == datosUsuario.id_pais %}selected{% endif %}>{{ pais.nombre }}</option>
-        {% endfor %}
-      </select>
-    </div>
+  .subtitulo {
+    color: var(--secondary-color);
+  }
 
-    <div class="col-md-4 mb-3">
-      <label for="id_tipo_cliente" class="form-label">Tipo de Cliente</label>
-      <select id="id_tipo_cliente" name="id_tipo_cliente" class="form-select" required>
-        {% for tipoCliente in tiposCliente %}
-          <option value="{{ tipoCliente.ID }}" {% if tipoCliente.ID == datosUsuario.id_tipo_cliente %}selected{% endif %}>{{ tipoCliente.TIPO }}</option>
-        {% endfor %}
-      </select>
-    </div>
 
-    <div class="col-md-4 mb-3">
-      <label for="razon_social" class="form-label">Razón Social</label>
-      <input type="text" id="razon_social" name="razon_social" value="{{ datosUsuario.razon_social if datosUsuario.razon_social else '' }}" class="form-control">
-    </div>
+
+  #formPerfil {
+    max-width: 1000px;
+    margin: 0 auto;
+    border: 1px solid #ddd;
+    background: #fff;
+    border-radius: var(--border-radius);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  h4,
+  h5 {
+    color: var(--primary-color);
+    font-weight: 600;
+  }
+
+  label {
+    font-weight: 500;
+  }
+
+  .form-control,
+  .form-select {
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    border: 1px solid #ccc;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px rgba(0, 59, 139, 0.3);
+  }
+
+  .btn-primary {
+    background-color: var(--primary-color);
+    border: none;
+    transition: var(--transition);
+  }
+
+  .btn-primary:hover {
+    background-color: var(--secondary-color);
+  }
+
+  .btn-secondary {
+    background-color: #6c757d;
+    border: none;
+  }
+
+  .btn-secondary:hover {
+    background-color: #5a6268;
+  }
+
+  .section-card {
+    background-color: #f9fbfd;
+    padding: 20px;
+    border-radius: var(--border-radius);
+    margin-bottom: 25px;
+    border: 1px solid #e0e6ed;
+  }
+</style>
+
+<div class="row">
+  <div class="col-4 p-4 rounded bg-white shadow-sm">
+
   </div>
+  <div id="formPerfil" class="col-8 p-4 rounded bg-white shadow-sm">
+    <h4 class="mb-4">Mi perfil</h4>
+    {% set datosUsuario = session['cliente'] %}
 
-  <!-- Sección: Documento de Identidad -->
-  <h5 class="text-primary mt-4 mb-3">Documento de Identidad</h5>
-  <div class="row">
-    <div class="col-md-4 mb-3">
-      <label for="id_tipo_doc" class="form-label">Tipo de Documento</label>
-      <select name="id_tipo_doc" id="id_tipo_doc" class="form-select">
-        {% for tipoDocumento in tipoDocumentos %}
-          <option value="{{ tipoDocumento.id }}" {% if tipoDocumento.id == datosUsuario.id_tipo_doc %}selected{% endif %}>{{ tipoDocumento.nombre }}</option>
-        {% endfor %}
-      </select>
+    <input type="hidden" name="id_cliente" value="{{ datosUsuario.id }}">
+    <input type="hidden" name="usuario" value="{{ datosUsuario.usuario }}">
+
+    <!-- Sección: Datos del cliente -->
+    <h5 class="mt-3 mb-3 subtitulo">Datos del cliente</h5>
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label for="id_pais" class="form-label">País</label>
+        <select id="id_pais" name="id_pais" class="form-select" required>
+          {% for pais in paises %}
+          <option value="{{ pais.id }}" {% if pais.id==datosUsuario.id_pais %}selected{% endif %}>{{ pais.nombre }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-4 mb-3">
+        <label for="id_tipo_cliente" class="form-label">Tipo de cliente</label>
+        <select id="id_tipo_cliente" name="id_tipo_cliente" class="form-select" required>
+          {% for tipoCliente in tiposCliente %}
+          <option value="{{ tipoCliente.ID }}" {% if tipoCliente.ID==datosUsuario.id_tipo_cliente %}selected{% endif %}>
+            {{ tipoCliente.TIPO }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-4 mb-3">
+        <input type="hidden" id="razon_social" name="razon_social"
+          value="{{ datosUsuario.razon_social if datosUsuario.razon_social else '' }}" class="form-control">
+      </div>
     </div>
 
-    <div class="col-md-4 mb-3">
-      <label for="numero_documento" class="form-label">Número de Documento</label>
-      <input type="text" id="numero_documento" name="numero_documento" value="{{ datosUsuario.numero_documento }}" class="form-control" required>
+    <!-- Sección: Documento de Identidad -->
+    <h5 class="mt-4 mb-3 subtitulo">Documento de identidad</h5>
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label for="id_tipo_doc" class="form-label">Tipo de documento</label>
+        <select name="id_tipo_doc" id="id_tipo_doc" class="form-select">
+          {% for tipoDocumento in tipoDocumentos %}
+          <option value="{{ tipoDocumento.id }}" {% if tipoDocumento.id==datosUsuario.id_tipo_doc %}selected{% endif %}>
+            {{ tipoDocumento.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-4 mb-3">
+        <label for="numero_documento" class="form-label">Número de documento</label>
+        <input type="text" id="numero_documento" name="numero_documento" value="{{ datosUsuario.numero_documento }}"
+          class="form-control" required>
+      </div>
+
+      <div class="col-md-4 mb-3">
+        <label for="f_nacimiento" class="form-label">Fecha de nacimiento</label>
+        {% set meses = {'Jan':'01', 'Feb':'02', 'Mar':'03', 'Apr':'04', 'May':'05', 'Jun':'06', 'Jul':'07', 'Aug':'08',
+        'Sep':'09', 'Oct':'10', 'Nov':'11', 'Dec':'12'} %}
+        {% set partes = datosUsuario.f_nacimiento.split() if datosUsuario.f_nacimiento else '' %}
+        <input type="date" id="f_nacimiento" name="f_nacimiento"
+          value="{% if partes|length >= 4 %}{{ partes[3] }}-{{ meses[partes[2]] }}-{{ partes[1] }}{% endif %}"
+          class="form-control">
+      </div>
+    </div>
+    <!-- Sección: Datos Personales -->
+    <h5 class="mt-4 mb-3 subtitulo">Datos personales</h5>
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label for="ape_paterno" class="form-label">Apellido paterno</label>
+        <input type="text" id="ape_paterno" name="ape_paterno" value="{{ datosUsuario.ape_paterno }}"
+          class="form-control">
+      </div>
+
+      <div class="col-md-4 mb-3">
+        <label for="ape_materno" class="form-label">Apellido materno</label>
+        <input type="text" id="ape_materno" name="ape_materno" value="{{ datosUsuario.ape_materno }}"
+          class="form-control">
+      </div>
+
+      <div class="col-md-4 mb-3">
+        <label for="nombres" class="form-label">Nombres</label>
+        <input type="text" id="nombres" name="nombres" class="form-control" value="{{ datosUsuario.nombre }}" required>
+      </div>
+
+
+
+      <div class="col-md-4 mb-3">
+        <label for="sexo" class="form-label">Sexo</label>
+        <select id="sexo" name="sexo" class="form-select">
+          <option value="1" {% if datosUsuario.sexo==1 or datosUsuario.sexo=='1' %}selected{% endif %}>Masculino
+          </option>
+          <option value="0" {% if datosUsuario.sexo==0 or datosUsuario.sexo=='0' %}selected{% endif %}>Femenino</option>
+        </select>
+      </div>
+
+      <div class="col-md-4 mb-3">
+        <label for="direccion" class="form-label">Dirección</label>
+        <input type="text" id="direccion" name="direccion" value="{{ datosUsuario.direccion }}" class="form-control">
+      </div>
+
+      <div class="col-md-4 mb-3">
+        <label for="telefono" class="form-label">Teléfono</label>
+        <input type="text" id="telefono" name="telefono" value="{{ datosUsuario.telefono }}" class="form-control">
+      </div>
     </div>
 
-    <div class="col-md-4 mb-3">
-      <label for="f_nacimiento" class="form-label">Fecha de Nacimiento</label>
-      {% set meses = {'Jan':'01', 'Feb':'02', 'Mar':'03', 'Apr':'04', 'May':'05', 'Jun':'06', 'Jul':'07', 'Aug':'08', 'Sep':'09', 'Oct':'10', 'Nov':'11', 'Dec':'12'} %}
-      {% set partes = datosUsuario.f_nacimiento.split() if datosUsuario.f_nacimiento else '' %}
-      <input type="date" id="f_nacimiento" name="f_nacimiento"
-             value="{% if partes|length >= 4 %}{{ partes[3] }}-{{ meses[partes[2]] }}-{{ partes[1] }}{% endif %}"
-             class="form-control">
-    </div>
-  </div>
+    <!-- Sección: Acceso -->
+    <h5 class="mt-4 mb-3 subtitulo">Datos de acceso</h5>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label for="email" class="form-label">Correo electrónico</label>
+        <input type="email" id="email" name="email" value="{{ datosUsuario.email }}" class="form-control" required>
+      </div>
 
-  <!-- Sección: Datos Personales -->
-  <h5 class="text-primary mt-4 mb-3">Datos Personales</h5>
-  <div class="row">
-    <div class="col-md-4 mb-3">
-      <label for="nombres" class="form-label">Nombres</label>
-      <input type="text" id="nombres" name="nombres" class="form-control" value="{{ datosUsuario.nombre }}" required>
+      <div class="col-md-6 mb-3">
+        <label for="password" class="form-label">Contraseña</label>
+        <input type="password" id="password" name="password" value="" class="form-control" placeholder="•••••••••••••">
+      </div>
     </div>
 
-    <div class="col-md-4 mb-3">
-      <label for="ape_paterno" class="form-label">Apellido Paterno</label>
-      <input type="text" id="ape_paterno" name="ape_paterno" value="{{ datosUsuario.ape_paterno }}" class="form-control">
+    <!-- Botones -->
+    <div class="mt-4 text-end">
+      <button type="button" id="regresar" class="btn btn-secondary">Regresar al inicio</button>
+      <button id="btnActualizar" class="btn btn-primary">Actualizar perfil</button>
     </div>
-
-    <div class="col-md-4 mb-3">
-      <label for="ape_materno" class="form-label">Apellido Materno</label>
-      <input type="text" id="ape_materno" name="ape_materno" value="{{ datosUsuario.ape_materno }}" class="form-control">
-    </div>
-
-    <div class="col-md-4 mb-3">
-      <label for="sexo" class="form-label">Sexo</label>
-      <select id="sexo" name="sexo" class="form-select">
-        <option value="1" {% if datosUsuario.sexo == 1 or datosUsuario.sexo == '1' %}selected{% endif %}>Masculino</option>
-        <option value="0" {% if datosUsuario.sexo == 0 or datosUsuario.sexo == '0' %}selected{% endif %}>Femenino</option>
-      </select>
-    </div>
-
-    <div class="col-md-4 mb-3">
-      <label for="direccion" class="form-label">Dirección</label>
-      <input type="text" id="direccion" name="direccion" value="{{ datosUsuario.direccion }}" class="form-control">
-    </div>
-
-    <div class="col-md-4 mb-3">
-      <label for="telefono" class="form-label">Teléfono</label>
-      <input type="text" id="telefono" name="telefono" value="{{ datosUsuario.telefono }}" class="form-control">
-    </div>
-  </div>
-
-  <!-- Sección: Acceso -->
-  <h5 class="text-primary mt-4 mb-3">Datos de Acceso</h5>
-  <div class="row">
-    <div class="col-md-6 mb-3">
-      <label for="email" class="form-label">Correo electrónico</label>
-      <input type="email" id="email" name="email" value="{{ datosUsuario.email }}" class="form-control" required>
-    </div>
-
-    <div class="col-md-6 mb-3">
-      <label for="password" class="form-label">Contraseña</label>
-      <input type="password" id="password" name="password" value="" class="form-control" placeholder="•••••••••••••">
-    </div>
-  </div>
-
-  <!-- Botones -->
-  <div class="mt-4 text-end">
-    <button type="button" id="regresar" class="btn btn-secondary">Regresar al inicio</button>
-    <button id="btnActualizar" class="btn btn-primary">Actualizar Perfil</button>
   </div>
 </div>
 {% endblock %}
@@ -126,61 +219,58 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
 
 <script>
-$(document).ready(function () {
+  $(document).ready(function () {
     $('#btnActualizar').click(function () {
-        var formData = {
-            id_cliente: $('#formPerfil').find('input[name="id_cliente"]').val(),
-            usuario: $('#formPerfil').find('input[name="usuario"]').val(),
-            id_pais: $('#formPerfil').find('select[name="id_pais"]').val(),
-            id_tipo_cliente: $('#formPerfil').find('select[name="id_tipo_cliente"]').val(),
-            razon_social: $('#formPerfil').find('input[name="razon_social"]').val(),
-            id_tipo_doc: $('#formPerfil').find('select[name="id_tipo_doc"]').val(),
-            numero_documento: $('#formPerfil').find('input[name="numero_documento"]').val(),
-            f_nacimiento: $('#formPerfil').find('input[name="f_nacimiento"]').val(),
-            nombres: $('#formPerfil').find('input[name="nombres"]').val(),
-            ape_paterno: $('#formPerfil').find('input[name="ape_paterno"]').val(),
-            ape_materno: $('#formPerfil').find('input[name="ape_materno"]').val(),
-            sexo: $('#formPerfil').find('select[name="sexo"]').val(),
-            direccion: $('#formPerfil').find('input[name="direccion"]').val(),
-            telefono: $('#formPerfil').find('input[name="telefono"]').val(),
-            email: $('#formPerfil').find('input[name="email"]').val(),
-            password: $('#formPerfil').find('input[name="password"]').val()
-        };
+      var formData = {
+        id_cliente: $('#formPerfil').find('input[name="id_cliente"]').val(),
+        usuario: $('#formPerfil').find('input[name="usuario"]').val(),
+        id_pais: $('#formPerfil').find('select[name="id_pais"]').val(),
+        id_tipo_cliente: $('#formPerfil').find('select[name="id_tipo_cliente"]').val(),
+        razon_social: $('#formPerfil').find('input[name="razon_social"]').val(),
+        id_tipo_doc: $('#formPerfil').find('select[name="id_tipo_doc"]').val(),
+        numero_documento: $('#formPerfil').find('input[name="numero_documento"]').val(),
+        f_nacimiento: $('#formPerfil').find('input[name="f_nacimiento"]').val(),
+        nombres: $('#formPerfil').find('input[name="nombres"]').val(),
+        ape_paterno: $('#formPerfil').find('input[name="ape_paterno"]').val(),
+        ape_materno: $('#formPerfil').find('input[name="ape_materno"]').val(),
+        sexo: $('#formPerfil').find('select[name="sexo"]').val(),
+        direccion: $('#formPerfil').find('input[name="direccion"]').val(),
+        telefono: $('#formPerfil').find('input[name="telefono"]').val(),
+        email: $('#formPerfil').find('input[name="email"]').val(),
+        password: $('#formPerfil').find('input[name="password"]').val()
+      };
 
-        console.log("Datos recopilados del formulario:", formData);
+      console.log("Datos recopilados del formulario:", formData);
 
-        var actionUrl = "{{ url_for('homeClientes.perfilCliente') }}";
-        console.log("URL de acción:", actionUrl);
+      var actionUrl = "{{ url_for('homeClientes.perfilCliente') }}";
+      console.log("URL de acción:", actionUrl);
 
-        $.ajax({
-            url: actionUrl,
-            type: 'POST',
-            data: JSON.stringify(formData),
-            contentType: 'application/json',
-            dataType: 'json',
-            success: function (response) {
-                console.log("Respuesta del servidor:", response);
-                if (response.Status == 1) {
-                    toastr.success(response.Mensaje);
-                    setTimeout(() => {
-                        window.location.href = "/ecommerce/home/logout";
-                    }, 1000);
-                } else {
-                    toastr.error(response.Mensaje);
-                }
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                console.error("Error en la petición AJAX:", textStatus, errorThrown);
-                console.error("Respuesta del servidor:", jqXHR.responseText);
-                toastr.error('Error inesperado al enviar el formulario.');
-            }
-        });
+      $.ajax({
+        url: actionUrl,
+        type: 'POST',
+        data: JSON.stringify(formData),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function (response) {
+          console.log("Respuesta del servidor:", response);
+          if (response.Status == 1) {
+            toastr.success(response.Mensaje);
+            setTimeout(() => {
+              window.location.href = "/ecommerce/home/logout";
+            }, 1000);
+          } else {
+            toastr.error(response.Mensaje);
+          }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          console.error("Error en la petición AJAX:", textStatus, errorThrown);
+          console.error("Respuesta del servidor:", jqXHR.responseText);
+          toastr.error('Error inesperado al enviar el formulario.');
+        }
+      });
     });
-});
+  });
 
-</script>
-
-<script>
   $("#regresar").click(function () {
     window.location.href = "/ecommerce/home/inicio";
   });

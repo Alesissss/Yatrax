@@ -197,7 +197,7 @@ class Venta:
             conexion.cerrar()
 
     @classmethod
-    def registrar_operacion_x(cls, contacto:    dict, pago: dict, ventas: dict, precio_venta_total: float = 0.0, datos_viaje: dict = None):
+    def registrar_operacion_x(cls, contacto: dict, pago: dict, ventas: dict, precio_venta_total: float = 0.0, datos_viaje: dict = None):
         conexion = bd.Conexion()
         try:
             # TIPO COMPROBANTE 1 == BOLETA ,  2 == FACTURA
