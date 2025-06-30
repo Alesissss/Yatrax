@@ -13,7 +13,7 @@ class TicketTransporteSimple:
         self.margen = 5
         self.ancho_util = self.ancho_total - 2 * self.margen
         # Inicializa el objeto FPDF con dimensiones personalizadas
-        self.pdf = FPDF("P", "mm", (self.ancho_total, 250))
+        self.pdf = FPDF("P", "mm", (self.ancho_total, 300))
         self.pdf.add_page()
         # Configura el salto de página automático y los márgenes
         self.pdf.set_auto_page_break(auto=True, margin=10)
@@ -152,7 +152,7 @@ class TicketTransporteSimple:
 
             # Guarda el PDF en la ruta especificada
             self.pdf.output(absoluteName)
-            return os.path.abspath(absoluteName) if os.path.exists(absoluteName) else None
+            return absoluteName if os.path.exists(absoluteName) else None
 
         except Exception as e:
             print(f"❌ Error al generar ticket: {str(e)}")

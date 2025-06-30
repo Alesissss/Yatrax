@@ -147,6 +147,8 @@
               name="ytrx-doc-number"
               class="ytrx-form-input"
               placeholder="Número de documento"
+              maxlength="11"
+              minlength="8"
               required
             />
           </div>
@@ -219,6 +221,8 @@
           name="ytrx-phone"
           class="ytrx-form-input"
           placeholder="Número de teléfono"
+          minlength="9"
+          maxlength="9"
           required
         />
       </div>
@@ -253,6 +257,7 @@
           name="ytrx-email"
           class="ytrx-form-input"
           placeholder="Correo electrónico"
+          oninput="validarCorreo(this)"
           required
         />
       </div>
@@ -288,47 +293,49 @@
       </div>
 
       <button type="submit" class="ytrx-submit-btn">Registrarse</button>
-
-      <!-- Redes sociales -->
-      <div style="text-align: center; margin-top: 30px">
-        <p style="margin-bottom: 15px; color: #666">O conéctate con</p>
-        <div class="social-buttons">
-          <button type="button">
-            <img
-              src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
-              alt="Google"
-              width="32"
-              height="32"
-            />
-          </button>
-          <button type="button">
-            <img
-              src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/facebook/facebook-original.svg"
-              alt="Facebook"
-              width="32"
-              height="32"
-            />
-          </button>
-          <button type="button">
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg"
-              alt="Microsoft"
-              width="32"
-              height="32"
-            />
-          </button>
-        </div>
-      </div>
+      
     </form>
 
-    <p class="ytrx-login-link">
-      ¿Ya tienes una cuenta? <a href="/login">Inicia sesión</a>
+    <p class="ytrx-login-link mt-5">
+      ¿Ya tienes una cuenta?
+        <a id="abrirModalLoginFormRegister" style="cursor: pointer; color: #1669c1;">Iniciar sesión</a>
+                        
     </p>
   </div>
 </main>
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
+
+
+            const btnAbrirLogin = document.getElementById("abrirModalLoginFormRegister");
+            if (btnAbrirLogin) {
+              btnAbrirLogin.addEventListener("click", function (event) {
+                event.preventDefault();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+                setTimeout(() => {
+                  loadInicioSesion();
+                }, 200); // Espera a que termine el scroll
+              });
+            }
+
+            function loadBigModal(url, title) {
+              $.ajax({
+                url: url,
+                type: 'GET',
+                success: function (html) {
+                  // Cambiar el contenido del modal
+                  $('#dynamic-modal .modal-dialog').attr('class', 'modal-dialog modal-xl');
+                  $('#modal-body').html(html);
+                  $('#modal-title').text(title);
+                  $('#dynamic-modal').modal('show');
+                },
+                error: function (xhr, status, error) {
+                  console.error('Error al cargar el contenido del modal:', error);
+                }
+              });
+            }
+
     const tipoDoc = document.getElementById("tipo-doc");
     const form = document.getElementById("ytrx-register-form");
 
@@ -336,16 +343,16 @@
     const grupoApellidos = document.getElementById("grupo-apellidos");
     const grupoSexo = document.getElementById("grupo-sexo");
     const grupoNacimiento = document.getElementById("grupo-fecha-nacimiento");
-
     const campoPassword = document.getElementById("ytrx-password");
     const campoConfirmPassword = document.getElementById(
       "ytrx-confirm-password"
     );
+    
 
     // Mostrar/ocultar campos según tipo de documento
     tipoDoc.addEventListener("change", function () {
       const seleccionado = tipoDoc.options[tipoDoc.selectedIndex].text;
-
+      const genero = document.getElementById("ytrx-gender");
       if (seleccionado === "RUC") {
         grupoApellidos.style.display = "none";
         grupoSexo.style.display = "none";
@@ -356,12 +363,14 @@
         document.getElementById("ytrx-gender").selectedIndex = 0;
         document.getElementById("ytrx-birthdate").value = "";
         document.getElementById("ytrx-fullname").required = false;
+        genero.removeAttribute("required");
       } else {
         grupoNombres.style.display = "block";
         grupoApellidos.style.display = "flex";
         grupoSexo.style.display = "flex";
         grupoNacimiento.style.display = "block";
         document.getElementById("ytrx-fullname").required = true;
+        genero.setAttribute("required", "required");
       }
     });
 
@@ -377,7 +386,12 @@
       } else {
         errorMsg.style.display = "none";
       }
-
+      const correo = document.getElementById("ytrx-email").value.trim();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(correo)) {
+        toastr.warning("Ingrese un correo electrónico válido", "MENSAJE DEL SISTEMA");
+        return;
+      }
 
       const formData = new FormData(form);
 
@@ -395,7 +409,7 @@
                       window.location.href = "/ecommerce/home/inicio";
                     }, 500);
           } else {
-            toastr.error("❌ Error: " + (data.Msj || data.Msj2));
+            toastr.error( (data.Msj || data.Msj2), "Error");
           }
         },
         error: function (xhr, status, error) {
@@ -409,7 +423,7 @@
       .getElementById("ytrx-doc-number")
       .addEventListener("input", function () {
         clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(buscarPersona, 1000);
+        debounceTimer = setTimeout(buscarPersona, 500);
       });
 
     document
@@ -468,12 +482,12 @@
                   "Apellido materno";
               toastr.success(json.Msj, "OK");
             } else {
-              document.getElementById("ytrx-fullname").value = "Nombres";
+              document.getElementById("ytrx-fullname").value = "";
               document.getElementById("ytrx-lastname-father").value =
-                "Apellido paterno";
+                "";
               document.getElementById("ytrx-lastname-mother").value =
-                "Apellido materno";
-              toastr.error(json.Msj, "ERROR");
+                "";
+              toastr.warning(json.Msj, "No se ha encontrado datos");
             }
           })
           .catch(() =>
@@ -500,9 +514,8 @@
                   "RazonSocial";
             } else {
               document.getElementById("ytrx-fullname").value =
-                "RazonSocial";
-              toastr.error(json.Msj, "ERROR");
-            }
+                "";
+                toastr.warning(json.Msj, "No se ha encontrado datos");            }
           })
           .catch(() =>
             toastr.error("No se ha podido conectar con el servidor", "ERROR")
@@ -549,6 +562,9 @@
       } else {
       }
     }
+    
+   
+
   });
 </script>
 

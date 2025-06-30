@@ -556,7 +556,7 @@
         </form>
 
         <div class="forgot-password">
-          <a href="#" id="forgotPasswordLink">¿Olvidaste tu contraseña?</a>
+          <a href="{{ url_for('homeClientes.recuperarContrasena') }}" id="forgotPasswordLink">¿Olvidaste tu contraseña?</a>
         </div>
       </div>
     </div>
@@ -798,19 +798,6 @@
                   resetButton();
                 });
             });
-        });
-        // Manejo del enlace "¿Olvidaste tu contraseña?"
-        $("#forgotPasswordLink").on("click", function (e) {
-          e.preventDefault();
-
-          // Mostrar opciones para recuperar contraseña
-          toastr.info(
-            "Por favor, contacte al administrador del sistema para recuperar su contraseña.",
-            "Recuperar contraseña"
-          );
-
-          // Alternativamente, puedes redirigir a una página específica
-          // window.location.href = '/recovery-options';
         });
       });
     </script>

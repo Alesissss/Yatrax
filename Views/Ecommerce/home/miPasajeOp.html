@@ -812,12 +812,12 @@
       if (tipoTexto.includes("tarjeta")) {
         contenedorInputExtra.innerHTML = `
       <label for="cciRem" class="form-label">CCI</label>
-      <input type="text" id="cciRem" class="form-control" placeholder="Número de CCI (20 dígitos)" maxlength="20" />
+      <input type="text" id="cciRem" class="form-control" placeholder="Número de CCI (20 dígitos)" maxlength="20" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/>
       `;
       } else if (tipoTexto.includes("billetera")) {
         contenedorInputExtra.innerHTML = `
         <label for="celularRem" class="form-label">Número de celular</label>
-        <input type="tel" id="celularRem" class="form-control" placeholder="Número asociado a billetera" maxlength="9" />
+        <input type="text" id="celularRem" class="form-control" placeholder="Número asociado a billetera" maxlength="9" oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
       `;
       }
     });
@@ -833,12 +833,12 @@
         if (tipoTexto.includes("tarjeta")) {
           contenedorInputExtra.innerHTML = `
         <label for="cciRem" class="form-label">CCI</label>
-        <input type="text" id="cciRem" class="form-control" placeholder="Número de CCI (20 dígitos)" maxlength="20" />
+        <input type="text" id="cciRem" class="form-control" placeholder="Número de CCI (20 dígitos)" maxlength="20" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/>
       `;
         } else if (tipoTexto.includes("billetera")) {
           contenedorInputExtra.innerHTML = `
         <label for="celularRem" class="form-label">Número de celular</label>
-        <input type="tel" id="celularRem" class="form-control" placeholder="Número asociado a billetera" maxlength="9" />
+        <input type="text" id="celularRem" class="form-control" placeholder="Número asociado a billetera" maxlength="9" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/>
       `;
         } else {
           contenedorInputExtra.innerHTML = "";
@@ -1509,6 +1509,7 @@
       }
       if (codigoIngresado === codigoCorrecto) {
         if (operacionSeleccionada === 'reembolso') {
+          // Validar que el pasaje este dado de baja, se haya reprogramado y que no pertenezca a una reserva
           fetch('/ecommerce/home/validarPasajeDadoBaja', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1517,6 +1518,7 @@
             .then(r => r.json())
             .then(json => {
               if (json.Status === "success") {
+                // Validar si ya se ha solicitado un reembolso para este pasaje
                 fetch('/ecommerce/home/validarSolicitudReembolso', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
@@ -2266,10 +2268,12 @@
     })
   })
 
+  let total = 0;
+
   function renderResumen(data) {
     const viaje = data.detalle_viaje;
     const pasajeros = data.pasajeros;
-    const total = parseFloat(data.precio_total) || 0;  // Asegurarse de que total sea un número
+    total = parseFloat(data.precio_total) || 0;  // Asegurarse de que total sea un número
 
     // Usar el descuento directamente desde la variable global:
     const descuento = parseFloat(descuentoAplicado) || 0;  // Convertir a número
@@ -2312,6 +2316,12 @@
     const contenedorResumen = $('#contenedorResumen');
     if (contenedorResumen.length) {
       contenedorResumen.html(html);
+      // Calcular el precio total final incluyendo cambio de ruta y descuento
+      const precioFinal = (descuento >= (total + cambioRuta)) ? 0 : ((total - descuento) + cambioRuta);
+      sessionStorage.setItem('precio_venta_total', precioFinal.toFixed(2));
+      
+      // Guardar los datos del resumen completo para usar en la generación del ticket
+      sessionStorage.setItem('datos_resumen_viaje', JSON.stringify(data));
     } else {
       console.error("No se encontró el contenedor #contenedorResumen");
     }

@@ -226,23 +226,13 @@ def perfilCliente():
             return jsonify({"Status":0,"Mensaje":"Error: "+str(e)})
 
 
-#Los HTML para recuperar contraseña del lado del cliente aun no existen
-@homeClientes_bp.route("",methods=["GET","POST"])
-def cambiarContrasena():
+#Recuperar contraseña terminado y arreglado
+@homeClientes_bp.route("/recuperarContrasena")
+def recuperarContrasena():
     if request.method == "GET":
-        return render_template("Ecommerce/home/forgotPassword.html")
-    else:
-        email = request.form["correo"]
-        respuesta = Cliente.verificar_correo_cliente(email)
-        if respuesta == 1:
-            return jsonify({"mensaje":"Correo valido, a continuación se enviará el código de verificación","status":1})
-        else:
-            return jsonify({"mensaje":"Correo no valido, vuelva a intentarlo","status":0})
-            
-# END POR TERMINAR
-@homeClientes_bp.route('/forgotPass')
-def forgot_password():
-    return render_template('Ecommerce/home/forgotPassword.html')
+        return render_template("home/changePassword.html")
+        
+#End region
 
 @homeClientes_bp.route('/register')
 def register_cliente():
@@ -279,6 +269,11 @@ def mi_pasaje_operaciones():
 @homeClientes_bp.route('/seguimientoViaje')
 def seguimiento_viaje():
     return render_template('Ecommerce/home/seguimientoViaje.html')
+
+@homeClientes_bp.route('/misBoletos')
+def misboletos():
+    boletos= Viaje.obtener_todos()
+    return render_template('Ecommerce/home/misBoletos.html', boletos=boletos)
 
 @homeClientes_bp.route('/pago')
 def pago_pasajes():
@@ -791,8 +786,10 @@ def procesar_pago_x():
         contacto = data.get("contacto", {})
         pago = data.get("pago", {})
         ventas = data.get("ventas", {})
+        precio_venta_total = data.get("precio_venta_total", 0.0)  # Obtener el precio total
+        datos_viaje = data.get("datos_viaje", {})  # Obtener datos del viaje
             
-        resultado = Venta.registrar_operacion_x(contacto, pago, ventas)
+        resultado = Venta.registrar_operacion_x(contacto, pago, ventas, precio_venta_total, datos_viaje)
 
         if resultado["status"] == 1:
             return jsonify({"Status": "success", "codigo_confirmacion": f"VENTA-{resultado['id_venta']}"})
@@ -1145,24 +1142,25 @@ def enviar_correos_reprogramacio():
             correo = datos.get("email")
             codigo = datos.get("codigo")
             asiento = datos.get("asiento")
-
+            fecha_reprogramacion = datos.get("fecha_salida")
             if not correo or not codigo:
                 print(f"[WARN] Datos incompletos: {datos}")
                 continue
-
+            fecha_formateada = fecha_reprogramacion.strftime("%d/%m/%Y")
+            hora_formateada = fecha_reprogramacion.strftime("%H:%M")
             datosEnvio = {
                 'asunto': 'Viaje reprogramado',
                 'remitente': 'yatraxyatusa@gmail.com',
                 'destinatario': correo,
                 'mensaje': (
-                    f"Estimado cliente, su viaje ha sido reprogramado."
-                    f"Por favor solicite su reembolso en nuestro apartado de mi pasaje. \n"
+                    f"Estimado cliente, su viaje ha sido reprogramado para el dia {fecha_formateada} a las {hora_formateada}.\n"
+                    f"Si no desea viajar en la fecha reprogramada, por favor solicite su reembolso en nuestro apartado de mi pasaje. \n"
                     f"Para más información visite nuestra página web.\n"
                     f"Su código de reembolso para el asiento {asiento} es: {codigo}"
                 )
             }
             resultado = enviar_correo(current_app.extensions['mail'], datosEnvio)
-            print(f"[INFO] Resultado del envío a {correo}: {resultado}")
+            
         return jsonify({'status': 'ok'})
     except Exception as e:
         print("[ERROR] Excepción capturada en el controlador:")
@@ -1186,7 +1184,6 @@ def enviar_correos_DarBajaViaje():
             asiento = datos.get("asiento")
 
             if not correo or not codigo:
-                print(f"[WARN] Datos incompletos: {datos}")
                 continue
 
             datosEnvio = {
@@ -1201,7 +1198,6 @@ def enviar_correos_DarBajaViaje():
                 )
             }
             resultado = enviar_correo(current_app.extensions['mail'], datosEnvio)
-            print(f"[INFO] Resultado del envío a {correo}: {resultado}")
         return jsonify({'status': 'ok'})
     except Exception as e:
         print("[ERROR] Excepción capturada en el controlador:")
@@ -1253,3 +1249,68 @@ def validar_codigo_reprogramacion():
         return jsonify({"Status": "error", "data": {}, "Msj": f"Error al validar el código: {repr(e)}"}), 500
 
 # END REPROGRAMACION
+
+@homeClientes_bp.route("/descargar_ticket", methods=["POST"])
+def descargar_ticket():
+    try:
+        from flask import send_file, abort
+        import os
+        
+        nombre_archivo = request.form.get("nombre_archivo")
+        if not nombre_archivo:
+            abort(400, "Nombre de archivo requerido")
+        
+        # Validar que el archivo tenga extensión .pdf
+        if not nombre_archivo.lower().endswith('.pdf'):
+            nombre_archivo += '.pdf'
+        
+        # Construir la ruta del archivo
+        ruta_archivo = os.path.join("Static", "tickets", nombre_archivo)
+        
+        # Verificar que el archivo existe
+        if not os.path.exists(ruta_archivo):
+            print(f"❌ Archivo no encontrado: {ruta_archivo}")
+            abort(404, "Archivo no encontrado")
+        
+        print(f"✅ Enviando archivo: {ruta_archivo}")
+        
+        # Enviar el archivo
+        return send_file(
+            ruta_archivo,
+            as_attachment=True,
+            download_name=nombre_archivo,
+            mimetype='application/pdf'
+        )
+        
+    except Exception as e:
+        print(f"❌ Error en descarga de ticket: {repr(e)}")
+        abort(500, f"Error al descargar archivo: {str(e)}")
+
+@homeClientes_bp.route("/verificar_ticket/<nombre_archivo>")
+def verificar_ticket(nombre_archivo):
+    try:
+        import os
+        
+        # Validar que el archivo tenga extensión .pdf
+        if not nombre_archivo.lower().endswith('.pdf'):
+            nombre_archivo += '.pdf'
+        
+        # Construir la ruta del archivo
+        ruta_archivo = os.path.join("Static", "tickets", nombre_archivo)
+        
+        # Verificar que el archivo existe
+        existe = os.path.exists(ruta_archivo)
+        
+        return jsonify({
+            "Status": "success" if existe else "error",
+            "existe": existe,
+            "ruta": ruta_archivo,
+            "nombre": nombre_archivo
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "Status": "error",
+            "existe": False,
+            "error": str(e)
+        })

@@ -67,4 +67,3 @@ class TipoComprobante:
             return resultado[0]
         finally:
             conexion.cerrar()
-            
