@@ -78,6 +78,7 @@ async function obtenerNombreTipoMetodo(idTipo) {
 // =============================================================================
 
 const AppState = {
+    estadoPago: 0,
     currentStep: 0,
     maxStep: 0,
     itinerarioRegreso: null,
@@ -88,6 +89,7 @@ const AppState = {
     },
 
     resetProgress() {
+        this.estadoPago = 0;
         this.currentStep = 0;
         this.maxStep = 0;
         this.itinerarioRegreso = null;
@@ -1737,7 +1739,7 @@ const TimerManager = {
 const PageUnloadManager = {
     init() {
         window.addEventListener('beforeunload', (event) => {
-            this.handlePageUnload(event);
+            return this.handlePageUnload(event);
         });
 
         window.addEventListener('unload', () => {
@@ -1746,12 +1748,16 @@ const PageUnloadManager = {
     },
 
     handlePageUnload(event) {
-        const hayProgreso = this.verificarProgreso();
+        // Si ya se pagó, no advertimos nada
+        if (AppState.estadoPago === 1) {
+            return;
+        }
 
+        const hayProgreso = this.verificarProgreso();
         if (hayProgreso) {
+            // Esto muestra el mensaje de confirmación
             event.preventDefault();
             event.returnValue = '¿Estás seguro de que quieres salir? Perderás tu progreso de reserva.';
-            this.cleanupOnExit();
             return '¿Estás seguro de que quieres salir? Perderás tu progreso de reserva.';
         }
     },
@@ -1765,6 +1771,11 @@ const PageUnloadManager = {
     },
 
     cleanupOnExit() {
+        // Si ya se pagó, no limpiamos nada
+        if (AppState.estadoPago === 1) {
+            return;
+        }
+
         try {
             const hayAsientosSeleccionados = SeatManager?.asientosSeleccionados?.size > 0;
             const ventasStorage = sessionStorage.getItem('ventas');
@@ -1790,7 +1801,7 @@ const PageUnloadManager = {
 
             sessionStorage.removeItem('ventas');
         } catch (error) {
-            // Error manejado silenciosamente
+            // Error silencioso
         }
     }
 };
@@ -2655,6 +2666,8 @@ const PaymentManager = {
                 // Almacenamos las rutas de los boletos en el array
                 this.rutas = resultado.tickets;
                 this.mostrarPagoExitoso(resultado);
+                AppState.estadoPago = 1;
+                App.resetearSistemaCompleto();
             } else {
                 throw new Error(resultado.Msj || 'Error en el procesamiento del pago');
             }
@@ -2915,7 +2928,7 @@ const PaymentManager = {
             document.body.removeChild(overlay);
             this.descargarBoleto(resultado);
             window.location.href = "/";  // Cambia si tu página de inicio tiene otra ruta
-        }, 5000);
+        }, 2000);
     },
     iniciarNuevaCompra() {
         const overlay = document.getElementById('payment-success-overlay');
