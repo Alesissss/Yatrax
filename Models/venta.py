@@ -98,10 +98,15 @@ class Venta:
             }
             empresa = Venta.consultar_empresa_activa()
             cantidad = len(ventas)
-            for key_asiento, pasajero_data in ventas.items():
+
+            # Generar todos los comprobantes necesarios (una sola vez)
+            numeros_comprobante = Pasaje.generar_numComprobante(cantidad)
+
+            for (key_asiento, pasajero_data), num_comprobante_pasaje in zip(ventas.items(), numeros_comprobante):
                 precio = pasajero_data.get("precio")
                 monto_venta_total += float(precio) if precio else 0.0
-                desc_por_ticket = montoDescuento/cantidad if cantidad != 0 else 0
+                desc_por_ticket = montoDescuento / cantidad if cantidad != 0 else 0
+
                 insert_pasajero_sql = """
                     INSERT INTO pasajero (nombre, ape_paterno, ape_materno, numero_documento, idTipoDocumento, sexo, f_nacimiento, telefono, email)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -119,24 +124,22 @@ class Venta:
                 ), auto_commit=False)
                 id_pasajero = conexion.cursor.lastrowid
 
-                num_comprobante_pasaje = Pasaje.generar_numComprobante()
                 codigo_unico_pasaje = Pasaje.generar_codigo_unico()
                 
                 datos_asiento = Asiento.obtener_datos_asiento(key_asiento)
                 datos_ruta = Asiento.obtener_datos_viaje(key_asiento)
                 
                 precio_float = float(precio) if precio else 0.0
-                precio_float = float(precio_float) - float(desc_por_ticket)
+                precio_float -= float(desc_por_ticket)
                 igv_float = float(IGV) if IGV is not None else 0.0
 
                 subtotal_asiento_calc = precio_float / (1 + igv_float) if (1 + igv_float) != 0 else precio_float
                 igv_asiento_calc = precio_float - float(subtotal_asiento_calc)
                 total_asiento_calc = precio_float
 
-                # Preparar datos para generar el ticket individual
                 datos_ticket_individual = { 
                     "codigo": codigo_unico_pasaje,
-                    "numero_comprobante": num_comprobante_pasaje,
+                    "numero_comprobante": num_comprobante_pasaje,  # <-- aquí el comprobante individual
                     "asiento_id": key_asiento,
                     "asiento_nombre": datos_asiento.get("nombre_asiento", "N/A"),
                     "pasajero": f"{pasajero_data.get('nombres', '')} {pasajero_data.get('apellidoPaterno', '')} {pasajero_data.get('apellidoMaterno', '')}",
@@ -150,10 +153,9 @@ class Venta:
                     "tipo_servicio": datos_asiento.get("tipo_asiento", "N/A"),
                     "desembarque": datos_ruta.get("desembarque", "N/A"),
                     "fecha_viaje": datos_ruta.get("fecha_salida", "N/A"),
-                    "hora_viaje": datos_ruta.get("hora_salida","N/A")
+                    "hora_viaje": datos_ruta.get("hora_salida", "N/A")
                 }
 
-                # Generar el ticket y obtener su ruta
                 ruta_ticket_generado = Venta.crearTicketIndividual(datos_ticket_individual, empresa, generales)
                 rutas_pdf_generadas.append(ruta_ticket_generado)
 
@@ -163,7 +165,7 @@ class Venta:
                 """
                 conexion.ejecutar(insert_pasaje_sql, (
                     key_asiento, num_comprobante_pasaje, 1, 0, 0, 0, 0,
-                    id_venta, codigo_unico_pasaje, 0, precio_float, ruta_ticket_generado # Se inserta la ruta del ticket aquí
+                    id_venta, codigo_unico_pasaje, 0, precio_float, ruta_ticket_generado
                 ), auto_commit=False)
                 id_pasaje = conexion.cursor.lastrowid
 
@@ -177,6 +179,7 @@ class Venta:
                     int(pasajero_data.get("esMenor", False)),
                     int(pasajero_data.get("brazos", False))
                 ), auto_commit=False)
+
 
             monto_venta_total = float(monto_venta_total) - float(montoDescuento)
             if(monto_venta_total<0): monto_venta_total = 0
