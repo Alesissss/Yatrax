@@ -795,8 +795,8 @@ def liberar_asiento():
 def verificarCupon():
     try:
         codCupon = request.json.get("cupon")
-        id_cupon = Promocion.obtener_por_codigo(codCupon)
-        if(id_cupon): return {"data":1,"msg":"Se ha encontrado el cupon","status":"success"}
+        cupon = Promocion.existencia_por_codigo(codCupon)
+        if(cupon): return {"data":cupon,"msg":"Se ha encontrado el cupon","status":"success"}
         else: return {"data":0,"msg":"No ha encontrado el cupon","status":"success"}
     except Exception as e:
         return {"data":[],"msg":f"Hubo un error al verificar el cupon:{repr(e)}","status":"error"}

@@ -59,8 +59,11 @@ class Venta:
             nombre_comprobante = TipoComprobante.obtener_por_id(contacto.get("tipo_comprobante"))["nombre"]
 
             cod_promocion = None
+
+            print(pago.get("datos_especificos").get("codigo_promocional"))
+
             if pago.get("datos_especificos") and pago.get("datos_especificos").get("codigo_promocional"):
-                cod_promocion = Promocion.obtener_por_codigo(pago.get("datos_especificos")["codigo_promocional"])
+                cod_promocion = Promocion.existencia_por_codigo(pago.get("datos_especificos")["codigo_promocional"])
                 insert_venta_sql = """
                     INSERT INTO venta (idCliente, subTotal, igv, idMetodoPago, idTipoComprobante, idPromocion)
                     VALUES (%s, %s, %s, %s, %s, %s)

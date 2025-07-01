@@ -105,3 +105,17 @@ class Promocion:
             return resultado[0]["id"] if resultado else None
         finally:
             conexion.cerrar()
+
+    @classmethod
+    def existencia_por_codigo(cls, cod):
+        conexion = bd.Conexion()
+        try:
+            resultado = conexion.obtener("""
+                SELECT id, monto_promo FROM promocion 
+                WHERE codigo = %s 
+                AND fecha_inicio <= CURRENT_DATE 
+                AND CURRENT_DATE <= fecha_fin
+            """, (cod,))
+            return resultado[0] if resultado else None
+        finally:
+            conexion.cerrar()

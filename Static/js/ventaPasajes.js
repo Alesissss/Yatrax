@@ -2217,28 +2217,25 @@ const PaymentManager = {
             const codigo = document.getElementById("codigo_promocional").value.trim();
             if (!codigo) return toastr.warning("Ingrese un código");
 
-            try {
-                const res = await fetch("/ecommerce/home/verificarCupon", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ "cupon": codigo })
-                });
-                const data = await res.json();
-                if (data.status = "success") {
-                    if (data.data == 1) {
-                        document.getElementById("codigo_aplicado").innerHTML = `
-                        <span class="badge bg-success">Código aplicado: ${codigo}</span>
+            const res = await fetch("/ecommerce/home/verificarCupon", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ "cupon": codigo })
+            });
+            const data = await res.json();
+            if (data.status = "success") {
+                if (data.data != 0) {
+                    document.getElementById("codigo_aplicado").innerHTML = `
+                        <span id="codigo_promocional_span" class="badge bg-primary">Código aplicado: ${codigo}</span>
                         <button class="btn btn-sm btn-outline-danger ms-2" onclick="PaymentManager.eliminarCodigo()">Eliminar</button>
                         `;
-                    } else {
-                        toastr.error("Código inválido o expirado");
-                    }
+                    document.getElementById("descuento_monto").innerHTML = `<strong>Descuento aplicado:</strong> S/ ${data.data.monto_promo}`
+                    document.getElementById("total_monto").innerHTML = `<strong>Total a pagar:</strong> S/ S/ ${sessionStorage.getItem(precios_asientos)["3"] - data.data.monto_promo}`
                 } else {
-                    toastr.error("Error al validar el código: " + data.msg)
+                    toastr.error("Código inválido o expirado");
                 }
-
-            } catch {
-                toastr.error("Error al validar el código");
+            } else {
+                toastr.error("Error al validar el código: " + data.msg)
             }
         });
     },
@@ -2310,12 +2307,12 @@ const PaymentManager = {
         divExtra.id = "extra_metodo_pago";
         divExtra.className = "mb-3";
 
-        if (tipoMetodo === "Tarjeta") {
+        if (tipoMetodo.toUpperCase() === "TARJETA") {
             divExtra.innerHTML = `
             <div class="row g-3">
                 <div class="col-12">
                     <div class="form-floating">
-                        <input id="numero_tarjeta" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                        <input id="numero_tarjeta" class="form-control" placeholder="1234 5678 9012 3456" maxlength="16" required>
                         <label for="numero_tarjeta"><i class="fas fa-credit-card me-1"></i> Número de tarjeta</label>
                     </div>
                 </div>
@@ -2352,7 +2349,7 @@ const PaymentManager = {
 
                 <div class="col-6">
                     <div class="form-floating">
-                        <input id="cvv_tarjeta" class="form-control" placeholder="123" maxlength="4" required>
+                        <input id="cvv_tarjeta" class="form-control" placeholder="123" maxlength="3" required>
                         <label for="cvv_tarjeta"><i class="fas fa-lock me-1"></i> CVV</label>
                     </div>
                 </div>
@@ -2773,24 +2770,23 @@ const PaymentManager = {
                 titular: document.getElementById("titular_tarjeta").value,
                 mes_vencimiento: document.getElementById("mes_vencimiento").value,
                 ano_vencimiento: document.getElementById("ano_vencimiento").value,
-                cvv: document.getElementById("cvv_tarjeta").value,
-                codigo_promocional: document.getElementById("codigo_promocional")?.value || null
+                cvv: document.getElementById("cvv_tarjeta").value
             };
         }
 
         if (document.getElementById("codigo_promocional_efectivo")) {
             datosPago.datos_especificos = {
-                codigo_promocional: document.getElementById("codigo_promocional_efectivo").value || null,
                 codigo_reserva: document.getElementById("codigo_reserva")?.textContent || null
             };
         }
 
-        if (document.getElementById("codigo_promocional_billetera")) {
-            datosPago.datos_especificos = {
-                codigo_promocional: document.getElementById("codigo_promocional_billetera").value || null,
-            };
-        }
+        const spanCodigo = document.getElementById("codigo_promocional_span");
+        const codigoAplicado = spanCodigo
+            ? spanCodigo.textContent.replace("Código aplicado: ", "").trim()
+            : null;
 
+        if (!datosPago.datos_especificos) datosPago.datos_especificos = {};
+        datosPago.datos_especificos.codigo_promocional = codigoAplicado;
         return {
             contacto: datosContacto,
             pago: datosPago,

@@ -367,8 +367,8 @@ function renderResumen(data) {
 
   html += `
     <div class="card shadow-sm mb-4">
-      <div class="card-header bg-primary text-white fw-bold">
-        <i class="fas fa-bus-alt me-2"></i>Detalle del Viaje
+      <div class="card-header text-white fw-bold" style="background-color:var(--primary-color)">
+        <i class="fas fa-bus-alt me-2"></i>Detalle del viaje
       </div>
       <div class="card-body">
         <div class="mb-2"><strong>Salida:</strong> ${fechaSalida} - ${viaje.ciudad_origen} (${viaje.origen})</div>
@@ -378,8 +378,8 @@ function renderResumen(data) {
     </div>
 
     <div class="card shadow-sm">
-      <div class="card-header bg-success text-white fw-bold">
-        <i class="fas fa-receipt me-2"></i>Resumen de Compra
+      <div class="card-header text-white fw-bold" style="background-color:var(--primary-color)">
+        <i class="fas fa-receipt me-2"></i>Resumen de compra
       </div>
       <div class="card-body">
         <div class="mb-3"><strong>Ruta:</strong> ${viaje.ciudad_origen} → ${viaje.ciudad_destino}</div>
@@ -391,8 +391,8 @@ function renderResumen(data) {
           `).join('')}
         </ul>
         <div class="text-end">
-          <p class="mb-1"><strong>Descuento aplicado:</strong> S/ ${descuento.toFixed(2)}</p>
-          <h5><strong>Total a pagar:</strong> S/ ${totalFinal.toFixed(2)}</h5>
+          <p class="mb-1" id="descuento_monto"><strong>Descuento aplicado:</strong> S/ ${descuento.toFixed(2)}</p>
+          <h5 id="total_monto"><strong>Total a pagar:</strong> S/ ${totalFinal.toFixed(2)}</h5>
         </div>
       </div>
     </div>
@@ -401,6 +401,14 @@ function renderResumen(data) {
   const contenedorResumen = $('#contenedorResumen');
   if (contenedorResumen.length) {
     contenedorResumen.html(html);
+    const codigo_aplicado = document.getElementById("codigo_aplicado")
+    if(codigo_aplicado){
+      codigo_aplicado.innerHTML = "";
+    }
+    const codigo_promocional = document.getElementById("codigo_promocional");
+    if (codigo_promocional) {
+      codigo_promocional.value = ""
+    }
   } else {
     console.error("No se encontró el contenedor #contenedorResumen");
   }
