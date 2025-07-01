@@ -407,7 +407,7 @@ def editarTipoVehiculo(idTipoVehiculo):
 
             # 1. Actualizar tipo vehículo
             mensajes = TipoVehiculo.actualizarTipoVehiculo(
-                idTipoVehiculo, nombre, marca, estado, servicio,niveles
+                idTipoVehiculo, nombre, marca, estado, servicio,niveles, usuario_actual
             )
             
             msj1 = mensajes.get('MSJ')
@@ -541,8 +541,9 @@ def editarVehiculo(idVehiculo):
             color = request.form.get('color')
             idTipoVehiculo = int(request.form.get('idTipoVehiculo'))
             estado = int(request.form.get('estado'))
+            usuario = session.get('usuario', {}).get('email', 'SIN USUARIO')
 
-            mensajes = Vehiculo.actualizarVehiculo(idVehiculo, placa, anio, color, idTipoVehiculo, estado)
+            mensajes = Vehiculo.actualizarVehiculo(idVehiculo, placa, anio, color, idTipoVehiculo, estado, usuario)
             msj1 = mensajes.get('MSJ') or mensajes.get('@MSJ')
             msj2 = mensajes.get('MSJ2') or mensajes.get('@MSJ2')
 

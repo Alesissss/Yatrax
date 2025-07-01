@@ -55,19 +55,29 @@ class Vehiculo:
         conexion = bd.Conexion()
         try:
             conexion.conn.begin()
-            cursor = conexion.ejecutar("INSERT INTO vehiculo(placa, anio, color, id_tipo_vehiculo, estado, usuario) VALUES (%s,%s,%s,%s,%s,%s)",(placa, anio, color, idTipoVehiculo, estado, usuario),auto_commit=False)
-            ultimo_id = cursor.lastrowid
-            cursor = conexion.ejecutar("""
+            # 1) Crear vehículo
+            cursor = conexion.ejecutar(
+                "INSERT INTO vehiculo(placa, anio, color, id_tipo_vehiculo, estado, usuario) "
+                "VALUES (%s, %s, %s, %s, %s, %s)",
+                (placa, anio, color, idTipoVehiculo, estado, usuario),
+                auto_commit=False
+            )
+            idVehiculo = cursor.lastrowid
+
+            # 2) Generar asientos según diseño de tipo_vehiculo
+            cursor = conexion.ejecutar(
+                """
                 SELECT nh.id AS id, nh.x_dimension AS x, nh.y_dimension AS y
                 FROM tipo_vehiculo tv
                 INNER JOIN nivel n ON tv.id = n.id_tipo_vehiculo
                 INNER JOIN nivel_herramienta nh ON nh.id_nivel = n.id
                 INNER JOIN herramienta h ON nh.id_herramienta = h.id
                 WHERE h.id_tipo = 1 and tv.id = %s
-                                       """,(idTipoVehiculo,),auto_commit=False)
+                """,
+                (idTipoVehiculo,),
+                auto_commit=False
+            )
             lista_codigos = cursor.fetchall()
-            if not lista_codigos:print(f"No se encontraron herramientas del tipo 1 para el tipo de vehículo {idTipoVehiculo}")
-
             for codigo in lista_codigos:
                 id_nh = codigo['id']
                 fila = codigo['x']
@@ -75,34 +85,85 @@ class Vehiculo:
 
                 letra = chr(64+columna)
                 nombre = f"{letra}{fila}"
+                cursor = conexion.ejecutar("INSERT INTO asiento (nombre,id_vehiculo,id_nivel_herramienta,estado,usuario) VALUES (%s,%s,%s,%s,%s)",(nombre,idVehiculo,id_nh,1,usuario),auto_commit=False)
 
-                cursor = conexion.ejecutar("INSERT INTO asiento (nombre,id_vehiculo,id_nivel_herramienta,estado,usuario) VALUES (%s,%s,%s,%s,%s)",(nombre,ultimo_id,id_nh,1,usuario),auto_commit=False)
             conexion.conn.commit()
             return True
         except Exception as e:
-            print(f"Error: {e}")
             conexion.conn.rollback()
+            print(f"Error en insertarVehiculo: {e}")
             return False
         finally:
             conexion.cerrar()
 
+
     @classmethod
-    def actualizarVehiculo(cls, idVehiculo, placa, anio, color, idTipoVehiculo, estado):
+    def actualizarVehiculo(cls, idVehiculo, placa, anio, color, idTipoVehiculo, estado, usuario):
+        conexion = bd.Conexion()
         try:
-            conexion = bd.Conexion()
-            # Ahora pasamos también 'estado' al SP
-            conexion.ejecutar(
-                "CALL SP_ACTUALIZAR_VEHICULO(%s, %s, %s, %s, %s, %s);",
-                (idVehiculo, placa, anio, color, idTipoVehiculo, estado)
+            conexion.conn.begin()
+
+            # 1) Verificar que este vehículo NO esté en ningún viaje activo
+            existe_en_viaje = conexion.obtener(
+                "SELECT 1 FROM viaje vi WHERE vi.idVehiculo = %s LIMIT 1",
+                (idVehiculo,)
             )
-            resultado = conexion.obtener("SELECT @MSJ AS MSJ, @MSJ2 AS MSJ2;")
-            return resultado[0]
+            if existe_en_viaje:
+                raise Exception("No se puede modificar: el vehículo está asignado a un viaje.")
+
+            # 2) Actualizar datos básicos del vehículo
+            conexion.ejecutar(
+                """
+                UPDATE vehiculo
+                   SET placa            = %s,
+                       anio             = %s,
+                       color            = %s,
+                       id_tipo_vehiculo = %s,
+                       estado           = %s
+                 WHERE id = %s
+                """,
+                (placa, anio, color, idTipoVehiculo, estado, idVehiculo),
+                auto_commit=False
+            )
+
+            # 3) Regenerar asientos: primero eliminar los viejos
+            conexion.ejecutar(
+                "DELETE FROM asiento WHERE id_vehiculo = %s",
+                (idVehiculo,),
+                auto_commit=False
+            )
+
+            # 4) Volver a insertar asientos según el nuevo tipo_vehiculo
+            cursor = conexion.ejecutar(
+                """
+                SELECT nh.id AS id, nh.x_dimension AS x, nh.y_dimension AS y
+                FROM tipo_vehiculo tv
+                INNER JOIN nivel n ON tv.id = n.id_tipo_vehiculo
+                INNER JOIN nivel_herramienta nh ON nh.id_nivel = n.id
+                INNER JOIN herramienta h ON nh.id_herramienta = h.id
+                WHERE h.id_tipo = 1 and tv.id = %s
+                """,
+                (idTipoVehiculo,),
+                auto_commit=False
+            )
+            lista_codigos = cursor.fetchall()
+            for codigo in lista_codigos:
+                id_nh = codigo['id']
+                fila = codigo['x']
+                columna = int(codigo['y'])
+
+                letra = chr(64+columna)
+                nombre = f"{letra}{fila}"
+                cursor = conexion.ejecutar("INSERT INTO asiento (nombre,id_vehiculo,id_nivel_herramienta,estado,usuario) VALUES (%s,%s,%s,%s,%s)",(nombre,idVehiculo,id_nh,1,usuario),auto_commit=False)
+
+
+            conexion.conn.commit()
+            return {"MSJ": "Vehículo y asientos actualizados correctamente", "MSJ2": ""}
         except Exception as e:
-            print(f"Error en actualizarVehiculo: {str(e)}")
-            raise
+            conexion.conn.rollback()
+            return {"MSJ": "", "MSJ2": f"Error al actualizar vehículo: {e}"}
         finally:
-            if conexion:
-                conexion.cerrar()
+            conexion.cerrar()
 
     @classmethod
     def darBajaVehiculo(cls, idVehiculo):
