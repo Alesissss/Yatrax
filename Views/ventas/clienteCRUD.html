@@ -60,7 +60,7 @@
                                 <input type="text" id="ape_pat" class="form-control" placeholder="Apellido paterno"
                                     value="{{ cliente.apellidos.split(' ')[0] if cliente.apellidos else '' }}" {% if
                                     btnId=='btn_Aceptar' %}disabled{% endif %}
-                                    oninput="this.value = this.value.toUpperCase();">
+                                    oninput="this.value = this.value.charAt(0).toUpperCase() + this.value.slice(1).toLowerCase();">
                             </div>
                         </div>
                         <div class="col-md-4 mb-3">
@@ -69,7 +69,7 @@
                                 <input type="text" id="ape_mat" class="form-control" placeholder="Apellido materno"
                                     value="{{ cliente.apellidos.split(' ')[1] if cliente.apellidos else '' }}" {% if
                                     btnId=='btn_Aceptar' %}disabled{% endif %}
-                                    oninput="this.value = this.value.toUpperCase();">
+                                    oninput="this.value = this.value.charAt(0).toUpperCase() + this.value.slice(1).toLowerCase();">
                             </div>
                         </div>
                         <div class="col-md-4 mb-3">
@@ -77,7 +77,7 @@
                             <div class="input-group">
                                 <input type="text" id="nombre" class="form-control" placeholder="Nombres"
                                     value="{{ cliente.nombre }}" {% if btnId=='btn_Aceptar' %}disabled{% endif %}
-                                    oninput="this.value = this.value.toUpperCase();">
+                                    oninput="this.value = this.value.charAt(0).toUpperCase() + this.value.slice(1).toLowerCase();">
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
@@ -94,8 +94,7 @@
                             <label for="telefono">Teléfono</label>
                             <div class="input-group">
                                 <input type="number" id="telefono" class="form-control" placeholder="Teléfono"
-                                    value="{{ cliente.telefono }}" {% if btnId=='btn_Aceptar' %}disabled{% endif %}
-                                    oninput="this.value = this.value.toUpperCase();">
+                                    value="{{ cliente.telefono }}" {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
                                 <div class="input-group-append">
                                     <div class="input-group-text"><i class="fas fa-phone"></i></div>
                                 </div>
@@ -106,7 +105,7 @@
                             <div class="input-group">
                                 <input type="email" id="correo" class="form-control" placeholder="Correo electrónico"
                                     value="{{ cliente.email }}" {% if btnId=='btn_Aceptar' %}disabled{% endif %}
-                                    oninput="this.value = this.value.toUpperCase();">
+                                    oninput="this.value = this.value.charAt(0).toUpperCase() + this.value.slice(1).toLowerCase();">
                                 <div class="input-group-append">
                                     <div class="input-group-text"><i class="fas fa-envelope"></i></div>
                                 </div>
@@ -116,7 +115,7 @@
                             <label for="contraseña">Contraseña</label>
                             <div class="input-group">
                                 <input type="password" id="contraseña" class="form-control" placeholder="Contraseña"
-                                    value="{{ cliente.password }}" {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
+                                    value="{{ cliente.password }}" {% if btnId=='btn_Aceptar' or btnId=='btn_Editar' %}disabled{% endif %}>
                                 <div class="input-group-append">
                                     <div class="input-group-text"><i class="fas fa-lock"></i></div>
                                 </div>
@@ -127,7 +126,7 @@
                             <div class="input-group">
                                 <input type="text" id="direccion" class="form-control" placeholder="Dirección"
                                     value="{{ cliente.direccion }}" {% if btnId=='btn_Aceptar' %}disabled{% endif %}
-                                    oninput="this.value = this.value.toUpperCase();">
+                                    oninput="this.value = this.value.charAt(0).toUpperCase() + this.value.slice(1).toLowerCase();">
                                 <div class="input-group-append">
                                     <div class="input-group-text"><i class="fas fa-map-marker-alt"></i></div>
                                 </div>
@@ -140,8 +139,8 @@
                                     endif %}>
                                     <option value="" {% if cliente.estado is none %}selected{% endif %}>--SELECCIONAR--
                                     </option>
-                                    <option value="1" {% if cliente.estado==1 %}selected{% endif %}>VIGENTE</option>
-                                    <option value="0" {% if cliente.estado==0 %}selected{% endif %}>NO VIGENTE</option>
+                                    <option value="1" {% if cliente.estado==1 %}selected{% endif %}>Vigente</option>
+                                    <option value="0" {% if cliente.estado==0 %}selected{% endif %}>No vigente</option>
                                 </select>
                             </div>
                         </div>
@@ -175,6 +174,9 @@
             // Cambia nombre y contraseña a col-12
             $('#nombre').closest('.col-md-4').removeClass('col-md-4').addClass('col-md-6');
             $('#contraseña').closest('.col-md-6').removeClass('col-md-6').addClass('col-md-12');
+
+            // Cambia el label de nombre a "Razón social"
+            $("label[for='nombre']").text("Razón social");
         } else {
             // Muestra los campos para otros documentos
             $('#txt_FechaNacimiento').closest('.col-md-6').show();
@@ -185,6 +187,9 @@
             // Restaura nombre y contraseña a sus tamaños originales
             $('#nombre').closest('.col-md-6').removeClass('col-md-6').addClass('col-md-4');
             $('#contraseña').closest('.col-md-12').removeClass('col-md-12').addClass('col-md-6');
+
+            // Restaura el label de nombre a "Nombre"
+            $("label[for='nombre']").text("Nombre");
         }
     }
 
