@@ -71,7 +71,7 @@ def procesar_reserva():
         ventas = data.get("ventas", {})
         codigoReserva = Pasaje.generar_codigo_reserva(),
         fecha = datetime.datetime.now()
-
+            
         resultado = Reserva.registrar_operacion(contacto, pago, ventas,codigoReserva,fecha)
 
         if resultado["status"] == 1:
@@ -86,13 +86,13 @@ def procesar_reserva():
             }
 
             enviar_correo(current_app.extensions['mail'],datosEnvio)
-            return jsonify({"Status": "success", "codigo_confirmacion": f"VENTA-{resultado['id_venta']}"})
+            return jsonify({"Status": "success", "codigo_confirmacion": codigoReserva})
         else:
             return jsonify({"Status": "error", "Msj": resultado["msg"]})
 
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Error inesperado: {repr(e)}"})
-
+  
 # END REGION
 
 def renderizarCompra():
