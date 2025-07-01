@@ -26,6 +26,18 @@ const CONFIG = {
     }
 };
 
+// =============================================================================
+// VARIABLES GLOBALES
+// =============================================================================
+
+// Variable global para almacenar el nombre visible del asiento seleccionado
+window.nombreAsientoGlobal = '';
+window.asientoIdGlobal = '';
+
+// =============================================================================
+// CONFIGURACIÓN DINÁMICA
+// =============================================================================
+
 $.ajax({
     url: '/ecommerce/home/GetConfGeneral',  // Ruta de la API
     method: 'GET',  // Método GET
@@ -1206,6 +1218,7 @@ const FormManager = {
                 elementoPrecio.textContent = `Asiento: ${asientoNombre} - S/ ${precioAsiento.toFixed(2)}`;
                 console.log(`💰 Precio del asiento ${asientoNombre} actualizado: S/ ${precioAsiento.toFixed(2)}`);
                 sessionStorage.setItem('asiento', asientoNombre);
+                console.log(`💾 Asiento guardado en sessionStorage: ${asientoNombre}`);
             }
         });
 
@@ -1307,8 +1320,8 @@ const FormManager = {
                 
                 // Guardar el nombre visible del asiento en la variable global
                 if (pasajero && pasajero.asiento) {
-                    window.nombreAsientoVisible = pasajero.asiento;
-                    console.log(`Nombre del asiento guardado: ${window.nombreAsientoVisible}`);
+                    window.nombreAsientoGlobal = pasajero.asiento;
+                    console.log(`Nombre del asiento guardado: ${window.nombreAsientoGlobal}`);
                 }
                 
                 return parseFloat(pasajero.precio) || 0;
@@ -2469,15 +2482,44 @@ const PaymentManager = {
         // Obtener datos del viaje desde sessionStorage o variables globales
         const datosViaje = JSON.parse(sessionStorage.getItem('datos_resumen_viaje') || 'null');
         
+        // Obtener el comprobante original para cambio de ruta
+        const comprobanteOriginal = document.getElementById('comprobante')?.value || '';
+        
+        // Obtener información del asiento seleccionado desde sessionStorage
+        const asientoNombreGuardado = sessionStorage.getItem('asiento') || '';
+        const ventas = JSON.parse(sessionStorage.getItem("ventas") || "{}");
+        let asientoInfo = {};
+        
+        if (ventas && Object.keys(ventas).length > 0) {
+            const primerAsiento = Object.keys(ventas)[0];
+            asientoInfo = {
+                asiento_nombre: asientoNombreGuardado, // Usar el valor del sessionStorage
+                asiento_id: primerAsiento
+            };
+        }
+        
+        console.log('📋 Información del asiento capturada:', {
+            asiento_nombre: asientoNombreGuardado,
+            asiento_id: asientoInfo.asiento_id
+        });
+        
         return {
             contacto: datosContacto,
             pago: datosPago,
-            ventas: JSON.parse(sessionStorage.getItem("ventas") || "{}"),
+            ventas: ventas,
             precio_venta_total: parseFloat(sessionStorage.getItem('precio_venta_total')) || 0,
-            datos_viaje: datosViaje ? datosViaje.detalle_viaje : null,  // Incluir datos del viaje
+            datos_viaje: datosViaje ? {
+                ...datosViaje.detalle_viaje,
+                numeroComprobante: comprobanteOriginal,
+                ...asientoInfo
+            } : {
+                numeroComprobante: comprobanteOriginal,
+                ...asientoInfo
+            },
             itinerario: {
-                currentStep: AppState.currentStep,
-                itinerarioRegreso: AppState.itinerarioRegreso
+                currentStep: 'cambio_ruta', // Siempre será cambio de ruta en este archivo
+                itinerarioRegreso: false,   // Por defecto false
+                comprobante_original: comprobanteOriginal
             }
         };
  

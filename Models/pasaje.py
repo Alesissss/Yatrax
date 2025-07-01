@@ -632,7 +632,7 @@ class Pasaje:
                 v.idEstadoViaje AS estado_viaje,    
                 pas.numeroComprobante,
                 pas.idDetalleViajeAsiento,
-                pas.id
+                pas.id, pa.email as email_pasajero
             FROM pasaje pas 
             INNER JOIN detalle_viaje_asiento dva 
                 ON dva.id = pas.idDetalleViajeAsiento
