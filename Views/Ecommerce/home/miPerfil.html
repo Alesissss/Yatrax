@@ -25,6 +25,7 @@
     background: #fff;
     border-radius: var(--border-radius);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    opacity:0.9;
   }
 
   h4,
@@ -76,13 +77,16 @@
     margin-bottom: 25px;
     border: 1px solid #e0e6ed;
   }
+
+  #fondazo{
+    background-image: url("../../../Static/img/miPerfil.png");
+    background-size: cover;
+    background-repeat: none;
+    background-position: center;
+  }
 </style>
-
-<div class="row">
-  <div class="col-4 p-4 rounded bg-white shadow-sm">
-
-  </div>
-  <div id="formPerfil" class="col-8 p-4 rounded bg-white shadow-sm">
+<div class="row" id="fondazo">
+  <div id="formPerfil" class="col-8 p-4 my-4 rounded bg-white shadow-sm">
     <h4 class="mb-4">Mi perfil</h4>
     {% set datosUsuario = session['cliente'] %}
 
