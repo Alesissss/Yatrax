@@ -301,7 +301,7 @@
                                 return;
                             }
                             fct_IniciarTablaUsuarios('#tbl_Usuarios');
-                            toastr.success(response.Msj, "MENSAJE DE SISTEMA");
+                            toastr.success("Reserva eliminada", "MENSAJE DE SISTEMA");
                         } else {
                             toastr.error(response.Msj, "MENSAJE DE SISTEMA");
                             console.error('Error: ' + response.Msj);
@@ -334,7 +334,7 @@
                     method: "POST",
                     success: function(response) {
                         if (response.Status === "success") {
-                            toastr.success(response.Msj);
+                            toastr.success("Reserva pagada correctamente", "MENSAJE DE SISTEMA");
                         } else {
                             toastr.error("Error al pagar reserva: " + response.Msj2);
                         }
