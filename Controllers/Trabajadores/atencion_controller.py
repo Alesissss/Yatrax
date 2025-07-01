@@ -132,8 +132,9 @@ def verReserva(idReserva):
 @atencion_bp.route('/CambiarEstado/<int:id_pasaje>', methods=["POST"])
 def cambiarEstadoPasaje(id_pasaje):
     try:
-        nuevo_estado = "P"
-        resultado = Pasaje.pagarReserva(id_pasaje)
+        numComprobante = Pasaje.generar_numComprobante()
+        codigoUnico = Pasaje.generar_codigo_unico()
+        resultado = Pasaje.pagarReserva(id_pasaje,numComprobante,codigoUnico)
         if resultado["msj"] is not None:
             return jsonify({"Status": "success", "Msj": resultado["msj"],"Msj2":resultado["msj2"]})
         else:

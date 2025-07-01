@@ -146,7 +146,7 @@ class Reserva:
                 """
                 params_pj = (
                     asiento_id,
-                    num_comp,
+                    None,
                     0, 0, 0,
                     1, 0,       # esReserva=1
                     id_venta,

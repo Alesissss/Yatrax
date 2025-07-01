@@ -132,8 +132,7 @@ class Pasaje:
                     ON dv.idSucursalOrigen = suc_origen.id
                 LEFT JOIN sucursal suc_destino 
                     ON dv.idSucursalDestino = suc_destino.id 
-                WHERE pas.esReserva = 1
-                AND pas.fecha_reserva >= NOW() - INTERVAL 2 HOUR;
+                WHERE esReserva=1;
             """)
         finally:
             if conexion:
@@ -849,14 +848,14 @@ class Pasaje:
 
         
     @classmethod
-    def pagarReserva(cls, id_pasaje):
+    def pagarReserva(cls, id_pasaje,num_comprobante,ruta):
         conexion = None
         try:
             conexion = bd.Conexion()
             # Llama al SP con la variable de salida en @MSJ y @MSJ2
             conexion.ejecutar(
-                "CALL SP_CAMBIAR_ESTADO_PASAJE(%s, @MSJ, @MSJ2);",
-                (id_pasaje,)
+                "CALL SP_CAMBIAR_ESTADO_PASAJE(%s,%s,%s, @MSJ, @MSJ2);",
+                (id_pasaje,num_comprobante,ruta)
             )
             # Recupera los mensajes de salida
             resultado = conexion.obtener(

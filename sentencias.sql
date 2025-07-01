@@ -7833,6 +7833,8 @@ DELIMITER $$
 
 CREATE PROCEDURE SP_CAMBIAR_ESTADO_PASAJE(
     IN  p_idPasaje INT,
+    IN p_numcom VARCHAR(255),
+    IN p_ruta_pdf   TEXT,
     OUT p_MSJ    VARCHAR(255),
     OUT p_MSJ2   VARCHAR(255)
 )
@@ -7850,8 +7852,10 @@ BEGIN
         esPasajeNormal  = 1,
         esPasajeLibre   = 0,
         esTransferencia = 0,
-        esReserva       = 0,
-        esCambioRuta    = 0
+        esReserva       = 1,
+        esCambioRuta    = 0,
+        numeroComprobante  = p_numcom,
+        rutaTicket      = p_ruta_pdf
     WHERE id = p_idPasaje;
 
     SELECT @idDetalle := idDetalleViajeAsiento FROM pasaje WHERE id=p_idPasaje;
