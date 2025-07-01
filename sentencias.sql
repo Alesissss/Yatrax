@@ -3445,12 +3445,12 @@ INSERT INTO cliente (
 ('20881234500', 'COMERCIAL EPSILON S.A.C.', NULL, NULL, NULL, NULL, 'AV. BRASIL 505', '945678901', 'epsilon@comercial.com', SHA2('123', 256), 1, 1, 1, 2, 'ADMIN'),
 
 -- CLIENTES CON DNI
-('12345678', 'JUAN', 'PÉREZ', 'LOPEZ', 1, '1990-05-10', 'MZ A LT 5', '956789012', 'juanp@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'ADMIN'),
-('87654321', 'ANA', 'GARCÍA', 'TORRES', 0, '1992-08-22', 'JR. AYACUCHO 123', '967890123', 'ana@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'ADMIN'),
-('11223344', 'CARLOS', 'RAMIREZ', 'PAREDES', 1, '1988-03-15', 'AV. GRAU 456', '978901234', 'carlosr@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'ADMIN'),
-('44332211', 'MARÍA', 'LÓPEZ', 'ROJAS', 0, '1995-12-01', 'JR. JUNÍN 789', '989012345', 'maria@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'ADMIN'),
-('55667788', 'LUIS', 'TORRES', 'GÓMEZ', 1, '1991-09-30', 'AV. SALAVERRY 101', '990123456', 'luist@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'ADMIN'),
-('60594837', 'SEBASTIAN', 'CELIZ', 'GUERRERO', 1, '2010-09-30', 'AV. BRASIL 101', '94435638', 'sebastian@gmail.com', SHA2('123', 256), 1, 1, 1, 1, 'ADMIN');
+('12345678', 'JUAN', 'PÉREZ', 'LOPEZ', 1, '1990-05-10', 'MZ A LT 5', '956789012', 'juanp@gmail.com', SHA2('123', 256), 1, 1, 3, 1, 'ADMIN'),
+('87654321', 'ANA', 'GARCÍA', 'TORRES', 0, '1992-08-22', 'JR. AYACUCHO 123', '967890123', 'ana@gmail.com', SHA2('123', 256), 1, 1, 3, 1, 'ADMIN'),
+('11223344', 'CARLOS', 'RAMIREZ', 'PAREDES', 1, '1988-03-15', 'AV. GRAU 456', '978901234', 'carlosr@gmail.com', SHA2('123', 256), 1, 1, 3, 1, 'ADMIN'),
+('44332211', 'MARÍA', 'LÓPEZ', 'ROJAS', 0, '1995-12-01', 'JR. JUNÍN 789', '989012345', 'maria@gmail.com', SHA2('123', 256), 1, 1, 3, 1, 'ADMIN'),
+('55667788', 'LUIS', 'TORRES', 'GÓMEZ', 1, '1991-09-30', 'AV. SALAVERRY 101', '990123456', 'luist@gmail.com', SHA2('123', 256), 1, 1, 3, 1, 'ADMIN'),
+('60594837', 'SEBASTIAN', 'CELIZ', 'GUERRERO', 1, '2010-09-30', 'AV. BRASIL 101', '94435638', 'sebastian@gmail.com', SHA2('123', 256), 1, 1, 3, 1, 'ADMIN');
 
 INSERT INTO `tipo_comprobante` (`nombre`, `estado`, `usuario`)
 VALUES ('Boleta', 1, 'alexis@gmail.com');
