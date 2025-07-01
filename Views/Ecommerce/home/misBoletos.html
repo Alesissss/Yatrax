@@ -253,6 +253,10 @@
 </style>
 
 <div class="container py-4">
+  {% if boletos|length == 0 %}
+  <div class="alert alert-info text-center" role="alert">
+    No tienes boletos comprados.
+    {% else %}
   <h2 class="text-center mb-4">Listado de boletos</h2>
 
   <div id="card-container" class="card-container-centered mx-3">
@@ -310,6 +314,7 @@
   <nav aria-label="Paginación tarjetas" class="mt-4">
     <ul id="pagination" class="pagination justify-content-center"></ul>
   </nav>
+  {% endif %}
 </div>
 
 <script>
