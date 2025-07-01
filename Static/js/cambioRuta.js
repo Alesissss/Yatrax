@@ -2565,16 +2565,15 @@ const PaymentManager = {
                     <i class="fas fa-check" style="color: white; font-size: 60px;"></i>
                 </div>
                 <h1 style="color: #155724; margin-bottom: 20px; font-weight: bold;">¡Pago Confirmado!</h1>
-                <h4 style="color: #155724; margin-bottom: 15px;">Código de confirmación: <strong>${resultado.codigo_confirmacion || 'PAY-' + Date.now()}</strong></h4>
                 <p style="color: #155724; font-size: 18px; margin-bottom: 30px;">
-                    Su reserva ha sido procesada exitosamente.<br>
-                    Recibirá un correo de confirmación en ${this.datosContacto.email}
+                    Su compra ha sido procesada exitosamente.<br>
+                    Recibirá un correo de confirmación
                 </p>
                 <button id="btn_nueva_reserva" class="btn btn-success btn-lg" style="margin-right: 15px;">
-                    <i class="fas fa-plus me-2"></i>Nueva Reserva
+                    <i class="fas fa-plus me-2"></i>Nueva compra
                 </button>
                 <button id="btn_descargar_boleto" class="btn btn-outline-success btn-lg">
-                    <i class="fas fa-download me-2"></i>Descargar Boleto
+                    <i class="fas fa-download me-2"></i>Descargar boleto
                 </button>
             </div>
         `;
@@ -2660,7 +2659,7 @@ const PaymentManager = {
                     }
                     
                     try {
-                        // Método 1: Intentar descarga directa con la ruta específica
+                        // Intentar descarga directa con enlace
                         const urlDescarga = `/Static/tickets/${nombreArchivo}`;
                         console.log(`🔗 Intentando descarga directa: ${urlDescarga}`);
                         
@@ -2673,20 +2672,7 @@ const PaymentManager = {
                         linkDirecto.click();
                         document.body.removeChild(linkDirecto);
                         
-                        console.log(`✅ Descarga iniciada con enlace directo: ${nombreArchivo}`);
-                        
-                        // Si el método directo no funciona, intentar con window.open como respaldo
-                        setTimeout(() => {
-                            const nuevaVentana = window.open(urlDescarga, '_blank');
-                            if (nuevaVentana) {
-                                console.log(`✅ Descarga de respaldo con window.open: ${nombreArchivo}`);
-                                setTimeout(() => {
-                                    if (nuevaVentana && !nuevaVentana.closed) {
-                                        nuevaVentana.close();
-                                    }
-                                }, 2000);
-                            }
-                        }, 500);
+                        console.log(`✅ Descarga iniciada: ${nombreArchivo}`);
                         
                         // Pequeña pausa entre descargas
                         if (index < this.rutas.length - 1) {
@@ -2730,9 +2716,16 @@ const PaymentManager = {
             nombreArchivo = ruta;
         }
         
+        // Convertir formato VENTA-X a A000-0000000X.pdf
+        if (nombreArchivo.startsWith('VENTA-')) {
+            const numero = nombreArchivo.replace('VENTA-', '');
+            // Formatear el número con ceros a la izquierda (8 dígitos)
+            const numeroFormateado = numero.padStart(8, '0');
+            nombreArchivo = `A000-${numeroFormateado}.pdf`;
+            console.log(`🔄 Convertido ${ruta} → ${nombreArchivo}`);
+        }
         // Si el nombre ya tiene la extensión, lo usamos tal cual
-        // Si no, asumimos que es el nombre del comprobante y agregamos .pdf
-        if (!nombreArchivo.toLowerCase().endsWith('.pdf')) {
+        else if (!nombreArchivo.toLowerCase().endsWith('.pdf')) {
             nombreArchivo = nombreArchivo + '.pdf';
         }
         

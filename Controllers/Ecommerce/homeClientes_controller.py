@@ -821,7 +821,7 @@ def procesar_pago_x():
         resultado = Venta.registrar_operacion_x(contacto, pago, ventas, precio_venta_total, datos_viaje)
 
         if resultado["status"] == 1:
-            return jsonify({"Status": "success", "codigo_confirmacion": f"VENTA-{resultado['id_venta']}"})
+            return jsonify({"tickets": resultado.get("tickets", []), "Status": "success", "codigo_confirmacion": f"VENTA-{resultado['id_venta']}"})
         else:
             return jsonify({"Status": "error", "Msj": resultado["msg"]})
 

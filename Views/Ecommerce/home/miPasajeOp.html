@@ -2361,6 +2361,8 @@
   let precioCambioRuta = 0;
 
   $(document).ready(function () {
+    let btn = $('#codigoPromocion');
+    btn.prop('disabled', true);
     $.ajax({
       url: '/ecommerce/home/ObtenerPrecioCambioRuta',
       type: 'GET',

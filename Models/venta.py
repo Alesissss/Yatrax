@@ -340,10 +340,14 @@ class Venta:
                     # precio
                     float(precio_pasajero)
                 ), auto_commit=False)
+                
+                # Obtener el nombre visible del asiento
+                nombre_asiento = Asiento.obtener_nombre_por_id(key)
+                
                 tickets_data.append({
                     "codigo": codigoUnico,
                     "numero_comprobante": numComprobante,
-                    "asiento": key,
+                    "asiento": nombre_asiento,
                     "pasajero": f"{pasajero.get('nombres')} {pasajero.get('apellidoPaterno')} {pasajero.get('apellidoMaterno')}",
                     "documento_pasajero": pasajero.get("numDoc"),
                     "precio_unitario": float(precio_pasajero),  # Usar el precio calculado
