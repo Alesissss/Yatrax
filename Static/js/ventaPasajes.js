@@ -2262,8 +2262,16 @@ const PaymentManager = {
     },
 
     eliminarCodigo() {
+        let sum = 0;
+        const preciosDict = JSON.parse(sessionStorage.getItem("precios_asientos") || "{}");
+        const valores = Object.values(preciosDict);
+        valores.forEach(element => {
+            sum += element;
+        });
         document.getElementById("codigo_aplicado").innerHTML = "";
         document.getElementById("codigo_promocional").value = "";
+        document.getElementById("descuento_monto").innerHTML = `<strong>Descuento aplicado:</strong> S/ 0`;
+                    document.getElementById("total_monto").innerHTML = `<strong>Total a pagar:</strong> S/ ${sum}`;
     },
 
     configurarEventos() {
@@ -2619,8 +2627,13 @@ const PaymentManager = {
                 const nombreTipoMetodo = (await obtenerNombreTipoMetodo(tipoMetodo))?.toLowerCase();
                 const nombreMetodo = (await obtenerNombreMetodo(metodoPago))?.toLowerCase();
 
-                if (!this.validarCamposContacto() || !this.validarCamposPago()) {
-                    toastr.error("Corrige los errores antes de continuar.");
+                if (!this.validarCamposContacto()) {
+                    toastr.error("Verificar los campos de contacto");
+                    return;
+                }
+
+                if(!this.validarCamposPago()){
+                    toastr.error("Verificar los campos de pago");
                     return;
                 }
 
