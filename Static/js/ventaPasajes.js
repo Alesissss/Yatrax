@@ -78,6 +78,7 @@ async function obtenerNombreTipoMetodo(idTipo) {
 // =============================================================================
 
 const AppState = {
+    estadoPago: 0,
     currentStep: 0,
     maxStep: 0,
     itinerarioRegreso: null,
@@ -88,6 +89,7 @@ const AppState = {
     },
 
     resetProgress() {
+        this.estadoPago = 0;
         this.currentStep = 0;
         this.maxStep = 0;
         this.itinerarioRegreso = null;
@@ -1737,7 +1739,7 @@ const TimerManager = {
 const PageUnloadManager = {
     init() {
         window.addEventListener('beforeunload', (event) => {
-            this.handlePageUnload(event);
+            return this.handlePageUnload(event);
         });
 
         window.addEventListener('unload', () => {
@@ -1746,12 +1748,16 @@ const PageUnloadManager = {
     },
 
     handlePageUnload(event) {
-        const hayProgreso = this.verificarProgreso();
+        // Si ya se pagó, no advertimos nada
+        if (AppState.estadoPago === 1) {
+            return;
+        }
 
+        const hayProgreso = this.verificarProgreso();
         if (hayProgreso) {
+            // Esto muestra el mensaje de confirmación
             event.preventDefault();
             event.returnValue = '¿Estás seguro de que quieres salir? Perderás tu progreso de reserva.';
-            this.cleanupOnExit();
             return '¿Estás seguro de que quieres salir? Perderás tu progreso de reserva.';
         }
     },
@@ -1765,6 +1771,11 @@ const PageUnloadManager = {
     },
 
     cleanupOnExit() {
+        // Si ya se pagó, no limpiamos nada
+        if (AppState.estadoPago === 1) {
+            return;
+        }
+
         try {
             const hayAsientosSeleccionados = SeatManager?.asientosSeleccionados?.size > 0;
             const ventasStorage = sessionStorage.getItem('ventas');
@@ -1790,7 +1801,7 @@ const PageUnloadManager = {
 
             sessionStorage.removeItem('ventas');
         } catch (error) {
-            // Error manejado silenciosamente
+            // Error silencioso
         }
     }
 };
@@ -2213,32 +2224,39 @@ const PaymentManager = {
     },
 
     verificarCupon() {
+        let sum = 0;
+        const preciosDict = JSON.parse(sessionStorage.getItem("precios_asientos") || "{}");
+        const valores = Object.values(preciosDict);
+        valores.forEach(element => {
+            sum += element;
+        });
+
         document.getElementById("btnAplicarCodigo").addEventListener("click", async () => {
             const codigo = document.getElementById("codigo_promocional").value.trim();
             if (!codigo) return toastr.warning("Ingrese un código");
 
-            try {
-                const res = await fetch("/ecommerce/home/verificarCupon", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ "cupon": codigo })
-                });
-                const data = await res.json();
-                if (data.status = "success") {
-                    if (data.data == 1) {
-                        document.getElementById("codigo_aplicado").innerHTML = `
-                        <span class="badge bg-success">Código aplicado: ${codigo}</span>
-                        <button class="btn btn-sm btn-outline-danger ms-2" onclick="PaymentManager.eliminarCodigo()">Eliminar</button>
-                        `;
-                    } else {
-                        toastr.error("Código inválido o expirado");
-                    }
-                } else {
-                    toastr.error("Error al validar el código: " + data.msg)
-                }
+            const res = await fetch("/ecommerce/home/verificarCupon", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ "cupon": codigo })
+            });
 
-            } catch {
-                toastr.error("Error al validar el código");
+            const data = await res.json();
+
+            if (data.status === "success") {
+                if (data.data != 0) {
+                    const descuento = Math.min(data.data.monto_promo, sum);
+                    document.getElementById("codigo_aplicado").innerHTML = `
+                    <span id="codigo_promocional_span" class="badge bg-primary">Código aplicado: ${codigo}</span>
+                    <button class="btn btn-sm btn-outline-danger ms-2" onclick="PaymentManager.eliminarCodigo()">Eliminar</button>
+                `;
+                    document.getElementById("descuento_monto").innerHTML = `<strong>Descuento aplicado:</strong> S/ ${descuento.toFixed(2)}`;
+                    document.getElementById("total_monto").innerHTML = `<strong>Total a pagar:</strong> S/ ${(sum - descuento).toFixed(2)}`;
+                } else {
+                    toastr.error("Código inválido o expirado");
+                }
+            } else {
+                toastr.error("Error al validar el código: " + data.msg);
             }
         });
     },
@@ -2310,12 +2328,12 @@ const PaymentManager = {
         divExtra.id = "extra_metodo_pago";
         divExtra.className = "mb-3";
 
-        if (tipoMetodo === "Tarjeta") {
+        if (tipoMetodo.toUpperCase() === "TARJETA") {
             divExtra.innerHTML = `
             <div class="row g-3">
                 <div class="col-12">
                     <div class="form-floating">
-                        <input id="numero_tarjeta" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                        <input id="numero_tarjeta" class="form-control" placeholder="1234 5678 9012 3456" maxlength="16" required>
                         <label for="numero_tarjeta"><i class="fas fa-credit-card me-1"></i> Número de tarjeta</label>
                     </div>
                 </div>
@@ -2352,7 +2370,7 @@ const PaymentManager = {
 
                 <div class="col-6">
                     <div class="form-floating">
-                        <input id="cvv_tarjeta" class="form-control" placeholder="123" maxlength="4" required>
+                        <input id="cvv_tarjeta" class="form-control" placeholder="123" maxlength="3" required>
                         <label for="cvv_tarjeta"><i class="fas fa-lock me-1"></i> CVV</label>
                     </div>
                 </div>
@@ -2648,6 +2666,8 @@ const PaymentManager = {
                 // Almacenamos las rutas de los boletos en el array
                 this.rutas = resultado.tickets;
                 this.mostrarPagoExitoso(resultado);
+                AppState.estadoPago = 1;
+                App.resetearSistemaCompleto();
             } else {
                 throw new Error(resultado.Msj || 'Error en el procesamiento del pago');
             }
@@ -2773,24 +2793,23 @@ const PaymentManager = {
                 titular: document.getElementById("titular_tarjeta").value,
                 mes_vencimiento: document.getElementById("mes_vencimiento").value,
                 ano_vencimiento: document.getElementById("ano_vencimiento").value,
-                cvv: document.getElementById("cvv_tarjeta").value,
-                codigo_promocional: document.getElementById("codigo_promocional")?.value || null
+                cvv: document.getElementById("cvv_tarjeta").value
             };
         }
 
         if (document.getElementById("codigo_promocional_efectivo")) {
             datosPago.datos_especificos = {
-                codigo_promocional: document.getElementById("codigo_promocional_efectivo").value || null,
                 codigo_reserva: document.getElementById("codigo_reserva")?.textContent || null
             };
         }
 
-        if (document.getElementById("codigo_promocional_billetera")) {
-            datosPago.datos_especificos = {
-                codigo_promocional: document.getElementById("codigo_promocional_billetera").value || null,
-            };
-        }
+        const spanCodigo = document.getElementById("codigo_promocional_span");
+        const codigoAplicado = spanCodigo
+            ? spanCodigo.textContent.replace("Código aplicado: ", "").trim()
+            : null;
 
+        if (!datosPago.datos_especificos) datosPago.datos_especificos = {};
+        datosPago.datos_especificos.codigo_promocional = codigoAplicado;
         return {
             contacto: datosContacto,
             pago: datosPago,
@@ -2846,71 +2865,71 @@ const PaymentManager = {
     },
 
     mostrarPagoExitoso(resultado) {
+        // Crear overlay oscuro de fondo
         const overlay = document.createElement('div');
         overlay.id = 'payment-success-overlay';
         overlay.style.cssText = `
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, #d4f8d4 0%, #a8e6a8 100%);
-            display: flex; justify-content: center; align-items: center; z-index: 9999;
-            animation: fadeIn 0.5s ease-in;
-        `;
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex; justify-content: center; align-items: center;
+        z-index: 9999;
+    `;
 
-        overlay.innerHTML = `
-            <div style="text-align: center; animation: bounceIn 0.8s ease-out;">
-                <div style="
-                    width: 120px; height: 120px; border-radius: 50%; background: #28a745;
-                    margin: 0 auto 30px; display: flex; align-items: center; justify-content: center;
-                    animation: checkmarkAnimation 0.6s ease-in-out 0.3s both;
-                ">
-                    <i class="fas fa-check" style="color: white; font-size: 60px;"></i>
-                </div>
-                <h1 style="color: #155724; margin-bottom: 20px; font-weight: bold;">¡Pago Confirmado!</h1>
-                <p style="color: #155724; font-size: 18px; margin-bottom: 30px;">
-                    Su operación ha sido procesada exitosamente.<br>
-                    Recibirá un correo de confirmación en ${this.datosContacto.email || 'su email'}
-                </p>
-                <button id="btn_nueva_reserva" class="btn btn-success btn-lg" style="margin-right: 15px;">
-                    <i class="fas fa-plus me-2"></i>Nueva compra
-                </button>
-                <button id="btn_descargar_boleto" class="btn btn-outline-success btn-lg">
-                    <i class="fas fa-download me-2"></i>Descargar Boleto
-                </button>
-            </div>
-        `;
+        // Crear el modal blanco con el check
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+        background: #fff;
+        padding: 40px;
+        border-radius: 15px;
+        text-align: center;
+        width: 400px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.2);
+        animation: bounceIn 0.6s ease-out;
+    `;
 
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fadeIn {
-                from { opacity: 0; }
-                to { opacity: 1; }
-            }
-            @keyframes bounceIn {
-                0% { transform: scale(0.3); opacity: 0; }
-                50% { transform: scale(1.05); opacity: 0.8; }
-                70% { transform: scale(0.9); opacity: 0.9; }
-                100% { transform: scale(1); opacity: 1; }
-            }
-            @keyframes checkmarkAnimation {
-                0% { transform: scale(0); }
-                50% { transform: scale(1.2); }
-                100% { transform: scale(1); }
-            }
-        `;
-        document.head.appendChild(style);
+        modal.innerHTML = `
+        <div style="
+            width: 100px; height: 100px; border-radius: 50%;
+            background: #28a745; display: flex;
+            align-items: center; justify-content: center;
+            margin: 0 auto 20px; animation: checkmarkAnimation 0.5s ease-in-out;
+        ">
+            <i class="fas fa-check" style="color: white; font-size: 50px;"></i>
+        </div>
+        <h2 style="color: #28a745;">¡Pago Exitoso!</h2>
+        <p style="color: #333;">Su operación fue procesada correctamente.</p>
+    `;
 
+        overlay.appendChild(modal);
         document.body.appendChild(overlay);
 
-        document.getElementById('btn_nueva_reserva').addEventListener('click', () => {
-            this.iniciarNuevaCompra();
-        });
+        // Animaciones
+        const style = document.createElement('style');
+        style.textContent = `
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            70% { transform: scale(0.95); opacity: 0.9; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes checkmarkAnimation {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+    `;
+        document.head.appendChild(style);
 
-        document.getElementById('btn_descargar_boleto').addEventListener('click', () => {
+        // Bloquear cierre manual
+        overlay.addEventListener('click', (e) => e.stopPropagation());
+
+        // Después de 5 segundos: cerrar, descargar y redirigir
+        setTimeout(() => {
+            document.body.removeChild(overlay);
             this.descargarBoleto(resultado);
-        });
-
-        this.limpiarDatosReserva();
+            window.location.href = "/";  // Cambia si tu página de inicio tiene otra ruta
+        }, 2000);
     },
-
     iniciarNuevaCompra() {
         const overlay = document.getElementById('payment-success-overlay');
         if (overlay) overlay.remove();
@@ -2923,17 +2942,12 @@ const PaymentManager = {
 
     descargarBoleto(resultado) {
         toastr.info('Preparando descarga de los boletos...');
-
         setTimeout(() => {
             // Verificamos si el array de rutas tiene boletos generados
             if (this.rutas && Array.isArray(this.rutas)) {
                 this.rutas.forEach((ruta, index) => {
                     const link = document.createElement('a');
-
-                    // Aquí aseguramos que la ruta tenga el formato adecuado para el navegador
-                    // Asumimos que la ruta es algo como "C:\\Users\\Edgar\\Desktop\\Calidad\\Yatrax\\Static\\tickets\\A000-00000009.pdf"
-                    // y necesitamos cambiarla a "/static/tickets/A000-00000009.pdf"
-                    const rutaFormateada = '/Static/tickets/' + ruta.split('\\').pop();  // Extraemos el nombre del archivo y lo anexamos a /static/tickets/
+                    const rutaFormateada = '/' + ruta;
 
                     link.href = rutaFormateada;  // Establece la ruta formateada
                     link.download = `boleto-${resultado.codigo_confirmacion || 'reserva'}-${index + 1}.pdf`;  // Asigna nombre único
