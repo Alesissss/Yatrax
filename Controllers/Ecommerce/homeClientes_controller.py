@@ -793,9 +793,13 @@ def liberar_asiento():
 
 @homeClientes_bp.route("/verificarCupon",methods=["POST"])
 def verificarCupon():
-    codCupon = request.json.get("cupon")
-
-
+    try:
+        codCupon = request.json.get("cupon")
+        id_cupon = Promocion.obtener_por_codigo(codCupon)
+        if(id_cupon): return {"data":1,"msg":"Se ha encontrado el cupon","status":"success"}
+        else: return {"data":0,"msg":"No ha encontrado el cupon","status":"success"}
+    except Exception as e:
+        return {"data":[],"msg":f"Hubo un error al verificar el cupon:{repr(e)}","status":"error"}
 
 @homeClientes_bp.route("/procesar_pago_x", methods=["POST"])
 def procesar_pago_x():

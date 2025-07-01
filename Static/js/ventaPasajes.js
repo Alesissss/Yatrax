@@ -1812,6 +1812,7 @@ const PaymentManager = {
             this.poblarTiposPago();
             this.configurarEventos();
             this.generarFormularioContactoDinamico();
+            this.verificarCupon();
         } catch (error) {
             toastr.error('Error al cargar métodos de pago');
         }
@@ -2217,20 +2218,25 @@ const PaymentManager = {
             if (!codigo) return toastr.warning("Ingrese un código");
 
             try {
-                const res = await fetch("/api/validar_codigo_promocional", {
+                const res = await fetch("/ecommerce/home/verificarCupon", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ codigo })
+                    body: JSON.stringify({"cupon":codigo})
                 });
                 const data = await res.json();
-                if (data.valido) {
-                    document.getElementById("codigo_aplicado").innerHTML = `
-          <span class="badge bg-success">Código aplicado: ${codigo}</span>
-          <button class="btn btn-sm btn-outline-danger ms-2" onclick="PaymentManager.eliminarCodigo()">Eliminar</button>
-        `;
+                if (data.status = "success") {
+                    if (data.data == 1) {
+                        document.getElementById("codigo_aplicado").innerHTML = `
+                        <span class="badge bg-success">Código aplicado: ${codigo}</span>
+                        <button class="btn btn-sm btn-outline-danger ms-2" onclick="PaymentManager.eliminarCodigo()">Eliminar</button>
+                        `;
+                    } else {
+                        toastr.error("Código inválido o expirado");
+                    }
                 } else {
-                    toastr.error("Código inválido o expirado");
+                    toastr.error("Error al validar el código: " + data.msg)
                 }
+
             } catch {
                 toastr.error("Error al validar el código");
             }
@@ -2350,13 +2356,6 @@ const PaymentManager = {
                         <label for="cvv_tarjeta"><i class="fas fa-lock me-1"></i> CVV</label>
                     </div>
                 </div>
-
-                <div class="col-6">
-                    <div class="form-floating">
-                        <input id="codigo_promocional" class="form-control" placeholder="Código">
-                        <label for="codigo_promocional"><i class="fas fa-tag me-1"></i> Código promocional</label>
-                    </div>
-                </div>
             </div>
         `;
         } else if (tipoMetodo.toUpperCase() === "BILLETERA VIRTUAL") {
@@ -2366,10 +2365,6 @@ const PaymentManager = {
                     <p class="mb-2">Escanea el código QR con tu app de ${metodo.metodo}</p>
                     <img src="${metodo.qr}" alt="QR ${metodo.metodo}" style="max-width: 200px; border: 1px solid #ddd; border-radius: 8px;">
                     <p class="mt-3 text-muted small">Una vez realizado el pago, haz clic en "Finalizar Pago"</p>
-                </div>
-                <div class="form-floating">
-                    <input id="codigo_promocional_billetera" class="form-control" placeholder="Código promocional">
-                    <label for="codigo_promocional_billetera"><i class="fas fa-tag me-1"></i> Código promocional</label>
                 </div>
             `;
             }
@@ -2383,10 +2378,6 @@ const PaymentManager = {
                     <li>Presente el código de reserva que se le asigne</li>
                     <li>El boleto será válido una vez confirmado el pago</li>
                 </ul>
-            </div>
-            <div class="form-floating">
-                <input id="codigo_promocional_efectivo" class="form-control" placeholder="Código promocional">
-                <label for="codigo_promocional_efectivo"><i class="fas fa-tag me-1"></i> Código promocional</label>
             </div>
         `;
         }
