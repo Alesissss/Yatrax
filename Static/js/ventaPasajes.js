@@ -2680,7 +2680,6 @@ const PaymentManager = {
                 this.rutas = resultado.tickets;
                 this.mostrarPagoExitoso(resultado);
                 AppState.estadoPago = 1;
-                App.resetearSistemaCompleto();
             } else {
                 throw new Error(resultado.Msj || 'Error en el procesamiento del pago');
             }
@@ -2712,6 +2711,7 @@ const PaymentManager = {
 
             if (resultado.Status === 'success') {
                 this.mostrarPagoExitoso(resultado);
+                AppState.estadoPago = 1;
             } else {
                 throw new Error(resultado.Msj || 'Error en el procesamiento del pago');
             }
@@ -2940,8 +2940,12 @@ const PaymentManager = {
         setTimeout(() => {
             document.body.removeChild(overlay);
             this.descargarBoleto(resultado);
+            App.resetearSistemaCompleto();
             window.location.href = "/";  // Cambia si tu página de inicio tiene otra ruta
+            
         }, 2000);
+        
+        
     },
     iniciarNuevaCompra() {
         const overlay = document.getElementById('payment-success-overlay');
