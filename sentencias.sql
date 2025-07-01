@@ -867,8 +867,7 @@ INSERT INTO preguntas_frecuentes (pregunta, respuesta, estado, fecha_registro, u
 para cualquier destino?','No. Solo se pueden comprar pasajes para los destinos que aparecen disponibles en la
 programación','1','2025-06-07 11:34:18','ander@gmail.com');
 INSERT INTO preguntas_frecuentes (pregunta, respuesta, estado, fecha_registro, usuario) VALUES ('¿Puedo transferir mi
-pasaje a otra persona?','Sí. Puedes solicitar la transferencia de tu pasaje hasta 4 horas antes del viaje, con un costo
-adicional de S/ 10.00. El trámite debe ser realizado por el titular del pasaje.','1','2025-06-07
+pasaje a otra persona?','Sí. Puedes solicitar la transferencia de tu pasaje antes de iniciar el viaje, sin costo adicional. El trámite debe ser realizado por el titular del pasaje.','1','2025-06-07
 11:34:18','ander@gmail.com');
 INSERT INTO preguntas_frecuentes (pregunta, respuesta, estado, fecha_registro, usuario) VALUES ('¿La empresa realiza
 reembolsos?','Solo se realiza reembolso si la empresa no cumple con brindar el servicio. No se hace reembolso si el
@@ -884,10 +883,6 @@ INSERT INTO preguntas_frecuentes (pregunta, respuesta, estado, fecha_registro, u
 presentar para abordar el bus?','Es obligatorio presentar el DNI físico del pasajero. En el caso de menores de edad,
 también se debe presentar una carta notarial de autorización de viaje y el DNI o partida original.','1','2025-06-07
 11:34:18','ander@gmail.com');
-INSERT INTO preguntas_frecuentes (pregunta, respuesta, estado, fecha_registro, usuario) VALUES ('¿Qué es un pasaje libre
-y cómo funciona?','Es un pasaje que puede ser activado en otra fecha dentro de los 90 días posteriores a la compra,
-sujeto a disponibilidad. Puedes convertir tu pasaje normal a pasaje libre hasta 6 horas antes del viaje pagando S/
-5.00.','1','2025-06-07 11:34:18','ander@gmail.com');
 
 INSERT INTO sucursal (`cod_sucursal`, `ciudad`, `nombre`, `direccion`, `latitud`, `longitud`, `estado`, `abreviatura`,
 `fecha_registro`, `usuario`)
@@ -3118,16 +3113,16 @@ INSERT INTO tipo_usuario (id,nombre, estado, fecha_registro, usuario) VALUES (1,
 
 -- Tabla Usuario
 INSERT INTO usuarios (id, id_personal, email, password, imagen, estado, id_tipousuario,fecha_registro,usuario) VALUES
-(1, 5,'alexis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
+(1, 5,'alexis@yatrax.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
 '/Static/img/trabajadores/alexis.jpeg', 1, 1,'2025-03-06 20:06:14','SYSTEM');
 INSERT INTO usuarios (id, id_personal, email, password, imagen, estado, id_tipousuario,fecha_registro,usuario) VALUES
-(2, 3,'edgar@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
+(2, 3,'edgar@yatrax.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
 '/Static/img/trabajadores/edgar.png', 1, 1,'2025-03-06 20:06:14','SYSTEM');
 INSERT INTO usuarios (id, id_personal, email, password, imagen, estado, id_tipousuario,fecha_registro,usuario) VALUES
-(3, 2,'ander@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
+(3, 2,'timcrocket1502@gmail.com.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
 '/Static/img/trabajadores/ander.jpg', 1, 1,'2025-03-06 20:06:14','SYSTEM');
 INSERT INTO usuarios (id, id_personal, email, password, imagen, estado, id_tipousuario,fecha_registro,usuario) VALUES
-(4, 4,'luis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
+(4, 4,'luis@yatrax.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
 '/Static/img/trabajadores/luis.jpg', 1, 1,'2025-03-06 20:06:14','SYSTEM');
 
 -- Tabla de configuración general
