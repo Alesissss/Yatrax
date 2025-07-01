@@ -2303,9 +2303,13 @@
             <p>${viaje.ciudad_origen} → ${viaje.ciudad_destino}</p>
             `;
 
+    // Recuperar el asiento seleccionado del sessionStorage
+    const asientoSeleccionado = sessionStorage.getItem('asiento') || '';
+
     pasajeros.forEach(p => {
-      // Asegurarse de que el precio sea un número
-      html += `<p>Pasajero ${p.numero} (Asiento ${p.asiento}) - S/ ${(parseFloat(p.precio) || 0).toFixed(2)}</p>`;
+      // Si hay un asiento seleccionado, solo mostrar ese pasajero
+      let asientoSeleccionado = sessionStorage.getItem('asiento');
+      html += `<p>Pasajero ${p.numero} (Asiento ${asientoSeleccionado}) - S/ ${(parseFloat(p.precio) || 0).toFixed(2)}</p>`;
     });
 
     html += `
@@ -2357,6 +2361,8 @@
   let precioCambioRuta = 0;
 
   $(document).ready(function () {
+    let btn = $('#codigoPromocion');
+    btn.prop('disabled', true);
     $.ajax({
       url: '/ecommerce/home/ObtenerPrecioCambioRuta',
       type: 'GET',
