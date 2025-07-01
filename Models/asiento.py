@@ -69,6 +69,20 @@ class Asiento:
             conexion.cerrar()
 
     @classmethod
+    def obtener_nombre_por_id(cls, asiento_id):
+        """Obtiene el nombre visible del asiento por su ID"""
+        conexion = bd.Conexion()
+        try:
+            resultado = conexion.obtener("""
+                SELECT a.nombre 
+                FROM asiento a 
+                WHERE a.id = %s
+            """, (asiento_id,))
+            return resultado[0]['nombre'] if resultado else None
+        finally:
+            conexion.cerrar()
+
+    @classmethod
     def registrar(cls, nro_asiento, id_nivel, tipo_asiento, estado, usuario):
         conexion = bd.Conexion()
         try:

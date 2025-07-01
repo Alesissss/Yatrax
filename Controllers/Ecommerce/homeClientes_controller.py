@@ -71,7 +71,7 @@ def procesar_reserva():
         ventas = data.get("ventas", {})
         codigoReserva = Pasaje.generar_codigo_reserva(),
         fecha = datetime.datetime.now()
-
+            
         resultado = Reserva.registrar_operacion(contacto, pago, ventas,codigoReserva,fecha)
 
         if resultado["status"] == 1:
@@ -86,13 +86,13 @@ def procesar_reserva():
             }
 
             enviar_correo(current_app.extensions['mail'],datosEnvio)
-            return jsonify({"Status": "success", "codigo_confirmacion": f"VENTA-{resultado['id_venta']}"})
+            return jsonify({"Status": "success", "codigo_confirmacion": codigoReserva})
         else:
             return jsonify({"Status": "error", "Msj": resultado["msg"]})
 
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Error inesperado: {repr(e)}"})
-
+  
 # END REGION
 
 def renderizarCompra():
@@ -320,12 +320,18 @@ def resumen_viaje():
         if not detalle:
             return jsonify({'Status': 'error', 'Msj': 'No se encontró detalle válido del viaje.'})
 
+        # Obtener el nombre visible del asiento
+        nombre_asiento = Asiento.obtener_nombre_por_id(asiento_id)
+        if not nombre_asiento:
+            nombre_asiento = f"Asiento {asiento_id}"  # Fallback si no se encuentra el nombre
+
         # Crear la respuesta con los detalles del viaje y el precio total
         resumen = {
             'detalle_viaje': detalle,
             'pasajeros': [{
                 'numero': 1,
-                'asiento': asiento_id,
+                'asiento': nombre_asiento,  # Usar el nombre visible del asiento
+                'asiento_id': asiento_id,   # Mantener el ID por compatibilidad
                 'precio': detalle.get('precio_total', 0),  # Se asegura de que el precio exista
             }],
             'precio_total': detalle.get('precio_total', 0)  # Usamos el precio_total
@@ -793,9 +799,13 @@ def liberar_asiento():
 
 @homeClientes_bp.route("/verificarCupon",methods=["POST"])
 def verificarCupon():
-    codCupon = request.json.get("cupon")
-
-
+    try:
+        codCupon = request.json.get("cupon")
+        id_cupon = Promocion.obtener_por_codigo(codCupon)
+        if(id_cupon): return {"data":1,"msg":"Se ha encontrado el cupon","status":"success"}
+        else: return {"data":0,"msg":"No ha encontrado el cupon","status":"success"}
+    except Exception as e:
+        return {"data":[],"msg":f"Hubo un error al verificar el cupon:{repr(e)}","status":"error"}
 
 @homeClientes_bp.route("/procesar_pago_x", methods=["POST"])
 def procesar_pago_x():
@@ -811,7 +821,7 @@ def procesar_pago_x():
         resultado = Venta.registrar_operacion_x(contacto, pago, ventas, precio_venta_total, datos_viaje)
 
         if resultado["status"] == 1:
-            return jsonify({"Status": "success", "codigo_confirmacion": f"VENTA-{resultado['id_venta']}"})
+            return jsonify({"tickets": resultado.get("tickets", []), "Status": "success", "codigo_confirmacion": f"VENTA-{resultado['id_venta']}"})
         else:
             return jsonify({"Status": "error", "Msj": resultado["msg"]})
 
