@@ -174,11 +174,19 @@ def nuevaContrasena():
         print("🔐 Actualizando clave para:", usuario)
 
         respuesta = Usuario.actualizar_contrasena(usuario, clave)
-
-        return jsonify({"Status": "success", "Msj": respuesta})
+        msj1 = respuesta.get('@MSJ')
+        msj2 = respuesta.get('@MSJ2')
+        
+        if msj1:
+            return jsonify({"Status": "success", "Msj": msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", "Msj": '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", "Msj": "No se pudo actualizar la contraseña"})
+        
     except Exception as e:
         print("❌ Error interno:", repr(e))
-        return jsonify({"Status": "error", "Msj": str(e)})
+        return jsonify({"Status": "error", "Msj": repr(e)})
 
 # END REGION
 
