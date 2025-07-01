@@ -64,6 +64,7 @@ class Venta:
 
             if pago.get("datos_especificos") and pago.get("datos_especificos").get("codigo_promocional"):
                 cod_promocion = Promocion.existencia_por_codigo(pago.get("datos_especificos")["codigo_promocional"])
+                montoDescuento = cod_promocion["monto_promo"]
                 insert_venta_sql = """
                     INSERT INTO venta (idCliente, subTotal, igv, idMetodoPago, idTipoComprobante, idPromocion)
                     VALUES (%s, %s, %s, %s, %s, %s)
@@ -72,9 +73,10 @@ class Venta:
                     id_cliente, 0.0, 0.0,
                     pago.get("metodo_especifico"),
                     contacto.get("tipo_comprobante"),
-                    cod_promocion
+                    cod_promocion["id"]
                 ), auto_commit=False)
             else:
+                montoDescuento = 0
                 insert_venta_sql = """
                     INSERT INTO venta (idCliente, subTotal, igv, idMetodoPago, idTipoComprobante)
                     VALUES (%s, %s, %s, %s, %s)
@@ -95,11 +97,11 @@ class Venta:
                 "cliente_nom": nombre_cliente
             }
             empresa = Venta.consultar_empresa_activa()
-
+            cantidad = len(ventas)
             for key_asiento, pasajero_data in ventas.items():
                 precio = pasajero_data.get("precio")
                 monto_venta_total += float(precio) if precio else 0.0
-
+                desc_por_ticket = montoDescuento/cantidad if cantidad != 0 else 0
                 insert_pasajero_sql = """
                     INSERT INTO pasajero (nombre, ape_paterno, ape_materno, numero_documento, idTipoDocumento, sexo, f_nacimiento, telefono, email)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -124,10 +126,11 @@ class Venta:
                 datos_ruta = Asiento.obtener_datos_viaje(key_asiento)
                 
                 precio_float = float(precio) if precio else 0.0
+                precio_float = float(precio_float) - float(desc_por_ticket)
                 igv_float = float(IGV) if IGV is not None else 0.0
 
                 subtotal_asiento_calc = precio_float / (1 + igv_float) if (1 + igv_float) != 0 else precio_float
-                igv_asiento_calc = precio_float - subtotal_asiento_calc
+                igv_asiento_calc = precio_float - float(subtotal_asiento_calc)
                 total_asiento_calc = precio_float
 
                 # Preparar datos para generar el ticket individual
@@ -138,6 +141,7 @@ class Venta:
                     "asiento_nombre": datos_asiento.get("nombre_asiento", "N/A"),
                     "pasajero": f"{pasajero_data.get('nombres', '')} {pasajero_data.get('apellidoPaterno', '')} {pasajero_data.get('apellidoMaterno', '')}",
                     "documento_pasajero": pasajero_data.get("numDoc", "N/A"),
+                    "descuento": desc_por_ticket,
                     "subtotal_asiento": subtotal_asiento_calc,
                     "igv_asiento": igv_asiento_calc,
                     "total_asiento": total_asiento_calc,
@@ -159,7 +163,7 @@ class Venta:
                 """
                 conexion.ejecutar(insert_pasaje_sql, (
                     key_asiento, num_comprobante_pasaje, 1, 0, 0, 0, 0,
-                    id_venta, codigo_unico_pasaje, 0, precio, ruta_ticket_generado # Se inserta la ruta del ticket aquí
+                    id_venta, codigo_unico_pasaje, 0, precio_float, ruta_ticket_generado # Se inserta la ruta del ticket aquí
                 ), auto_commit=False)
                 id_pasaje = conexion.cursor.lastrowid
 
@@ -173,6 +177,9 @@ class Venta:
                     int(pasajero_data.get("esMenor", False)),
                     int(pasajero_data.get("brazos", False))
                 ), auto_commit=False)
+
+            monto_venta_total = float(monto_venta_total) - float(montoDescuento)
+            if(monto_venta_total<0): monto_venta_total = 0
 
             if IGV is not None:
                 total_venta_bruto = monto_venta_total
@@ -193,7 +200,7 @@ class Venta:
                 "tickets": rutas_pdf_generadas # Retorna las rutas de todos los tickets generados
             }
         
-        except Exception as e:
+        except Exception as e:  
             conexion.conn.rollback()
             return {"status": -1, "msg": f"Error al registrar venta: {str(e)}"}
         finally:
@@ -523,7 +530,7 @@ class Venta:
                 "op_gravada": 0.00,
                 "op_exonerada": float(datos_ticket_individual["subtotal_asiento"]),
                 "igv": float(datos_ticket_individual["igv_asiento"]),
-                "descuento": 0.00,
+                "descuento": float(datos_ticket_individual["descuento"]),
                 "total": float(datos_ticket_individual["total_asiento"])
             },
             "total_letras": Venta.numero_a_soles_texto(float(datos_ticket_individual["total_asiento"])).upper(),
