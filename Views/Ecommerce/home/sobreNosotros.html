@@ -1,99 +1,129 @@
 {% extends "maestra.html" %}
-{% block titulo %}Yatrax - Sobre Nosotros{% endblock %}
-{% block estilos %}
-<link rel="stylesheet" href="{{url_for('static',filename='css/sobreNosotros.css')}}">
-<link rel="stylesheet" href="https://unpkg.com/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-<link rel="stylesheet" href="https://unpkg.com/bs-brain@2.0.4/utilities/font-size/font-size.css">
-<link rel="stylesheet" href="https://unpkg.com/bs-brain@2.0.4/utilities/margin/margin.css">
-<link rel="stylesheet" href="https://unpkg.com/bs-brain@2.0.4/utilities/padding/padding.css">
-<link rel="icon" href="{{url_for('static',filename='img/yatrax_icon.ico')}}">
-{% endblock %}
+{% block titulo %}Yatrax – Contáctanos{% endblock %}
+
 {% block contenido %}
-<main>
-  <section id="ctn_informativo">
-    <div class="card" id="mision">
-        <h2>Misión</h2>
-        <p>Brindar servicios de transporte terrestre de pasajeros y envío de encomiendas interdepartamentales en el Perú, asegurando la máxima seguridad, puntualidad y calidad en cada trayecto y entrega, fortaleciendo la conexión entre regiones y contribuyendo al desarrollo social y económico del país.</p>
-    </div>
-    <div class="card" id="vision">
-        <h2>Visión</h2>
-        <p>Ser la empresa líder en transporte y logística terrestre interdepartamental en los distritos peruanos, reconocida por su compromiso con la excelencia operativa, la innovación tecnológica y la satisfacción plena de nuestros clientes, contribuyendo al progreso regional y nacional.</p>
-    </div>
-    <div class="card" id="servicios">
-      <h2>Servicios</h2>
-      <ul>
-          <li>Transporte terrestre de pasajeros entre diferentes departamentos del Perú, con rutas que conectan las principales ciudades y provincias.</li>
-          <li>Envío seguro y eficiente de encomiendas interdepartamentales, asegurando entregas rápidas y confiables.</li>
-          <li>Flota moderna equipada con tecnología GPS para monitoreo en tiempo real y control de seguridad.</li>
-          <li>Atención personalizada y soporte continuo para optimizar la experiencia del usuario.</li>
-      </ul>
-    </div>
+<style>
+  /* Aseguramos que body y html llenen toda la pantalla */
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+
+  /* Main sin padding y 100% de alto para flex completo */
+  main.contact-page {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+  }
+
+  /* Secciones en fila */
+  .form-section,
+  .image-section {
+    flex: 1;
+  }
+
+  /* Ajustes del formulario */
+  .form-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #f5f7fa;
+    padding: 2rem;
+    overflow-y: auto;
+  }
+  .form-section .contact-form {
+    width: 100%;
+    max-width: 500px;
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .form-section .contact-form .form-group {
+    margin-bottom: 1rem;
+  }
+  .form-section .contact-form label {
+    font-weight: bold;
+    margin-bottom: .25rem;
+    display: block;
+  }
+  .form-section .contact-form input,
+  .form-section .contact-form textarea {
+    width: 100%;
+    padding: .75rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border-color .3s;
+  }
+  .form-section .contact-form input:focus,
+  .form-section .contact-form textarea:focus {
+    border-color: #003b8b;
+    outline: none;
+  }
+  .form-section .contact-form button {
+    margin-top: auto;
+    background: #003b8b;
+    color: #fff;
+    border: none;
+    padding: .75rem;
+    font-size: 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background .3s;
+  }
+  .form-section .contact-form button:hover {
+    background: #002669;
+  }
+
+  /* Sección de imagen */
+  .image-section {
+    background-image: url('{{ url_for("static", filename="img/sobreNosotros/unete.png") }}');
+    background-size: cover;
+    background-position: center;
+  }
+
+  /* Ocultar imagen en móvil */
+  @media (max-width: 900px) {
+    .image-section {
+      display: none;
+    }
+  }
+</style>
+
+<main class="contact-page">
+  <!-- IZQUIERDA: Formulario -->
+  <section class="form-section">
+    <h1>Contáctanos</h1>
+    <p>¿Tienes alguna pregunta o sugerencia? ¡Escríbenos!</p>
+    <form class="contact-form" action="/ecommerce/home/inicio" method="GET">
+      <div class="form-group">
+        <label for="name">Nombre</label>
+        <input id="name" name="name" type="text" placeholder="Tu nombre" required>
+      </div>
+      <div class="form-group">
+        <label for="email">Correo electrónico</label>
+        <input id="email" name="email" type="email" placeholder="tu@ejemplo.com" required>
+      </div>
+      <div class="form-group">
+        <label for="subject">Asunto</label>
+        <input id="subject" name="subject" type="text" placeholder="Asunto">
+      </div>
+      <div class="form-group">
+        <label for="message">Mensaje</label>
+        <textarea id="message" name="message" rows="6" placeholder="Escribe tu mensaje..." required></textarea>
+      </div>
+      <button type="submit">Enviar mensaje</button>
+    </form>
   </section>
-  <section id="contactanos">
-    <h2>Contáctanos</h2>
-    <p>En Yatrax, estamos comprometidos a ofrecerte el mejor servicio de transporte terrestre. Si tienes alguna pregunta, necesitas cotizar un servicio o deseas recibir asesoría personalizada, no dudes en ponerte en contacto con nosotros al número telefonico +51 915 854 123</p>
-  </section>
-  <h2 id="encabezado_fundadores">Fundadores ➜</h2>
-  <section id="fundadores" class="fundadores-scroll">
-    <div>
-      <img src="{{url_for('static',filename='img/sobreNosotros/ander.jpg')}}" alt="">
-      <div>
-        <h2>Anderson</h2>
-        <strong><em>Product Owner en Yatrax</em></strong>
-        <br>
-        <p>Como Product Owner en el equipo de desarrollo de Yatrax, lidere la planificación estratégica y supervisión del ciclo completo de nuestros productos digitales. Entablando una sólida comunicación entre el cliente y el equipo de desarrollo.</p>
-      </div>
-    </div>
-    <div>
-        <img src="{{url_for('static',filename='img/sobreNosotros/edgar.png')}}" alt="">
-        <div>
-          <h2>Edgar</h2>
-          <strong><em>Scrum Master en Yatrax</em></strong>
-          <br>
-          <p>Como Scrum Master en Yatrax, facilite la adopción de metodologías ágiles dentro del equipo de desarrollo, asegurando un entorno colaborativo, enfocado y productivo. Promoviendo siempre las buenas prácticas de Scrum.</p>
-        </div>
-    </div>
-    <div>
-        <img src="{{url_for('static',filename='img/sobreNosotros/luis.jpg')}}" alt="">
-        <div>
-          <h2>Luis</h2>
-          <strong><em>Desarrollador Fullstack en Yatrax</em></strong>
-          <br>
-          <p>Como Desarrollador en el equipo de Yatrax, participe activamente en la construcción de soluciones digitales orientadas al transporte inteligente. Me encargo del desarrollo de funcionalidades robustas y eficientes.</p>
-      </div>
-    </div>
-      <div>
-        <img src="{{url_for('static',filename='img/sobreNosotros/alexis.jpeg')}}" alt="">
-        <div>
-          <h2>Alexis</h2>
-          <strong><em>Desarrollador Fullstack en Yatrax</em></strong>
-          <br>
-          <p>Como Desarrollador en el equipo de Yatrax, participe activamente en la construcción de soluciones digitales orientadas al transporte inteligente. Me encargo del desarrollo de funcionalidades robustas y eficientes.</p>
-        </div>
-      </div>
-      <div>
-        <img src="{{url_for('static',filename='img/sobreNosotros/christian.png')}}" alt="">
-        <div>
-          <h2>Christian</h2>
-          <strong><em>Desarrollador Fullstack en Yatrax</em></strong>
-          <br>
-          <p>Como Desarrollador en el equipo de Yatrax, participe activamente en la construcción de soluciones digitales orientadas al transporte inteligente. Me encargo del desarrollo de funcionalidades robustas y eficientes.</p>
-        </div>
-      </div>
-      <div>
-        <img src="{{url_for('static',filename='img/sobreNosotros/louis.png')}}" alt="">
-        <div>
-          <h2>Louis</h2>
-          <strong><em>Ingeniero de calidad en Yatrax</em></strong>
-          <br>
-          <p>Como Ingeniero de Calidad en Yatrax me encargue de asegurar que cada entrega cumpla con los más altos estándares de confiabilidad y rendimiento.</p>
-        </div>
-      </div>
-  </section>
-  <section id="unete">
-      <h2>Únete</h2>
-      <p>Se parte del equipo Yatrax postula a nuestros múltiples puestos de trabajo.</p>
-  </section>
+
+  <!-- DERECHA: Imagen ocupa todo el alto y ancho restante -->
+  <section class="image-section"></section>
 </main>
 {% endblock %}
 {% block scripts %}

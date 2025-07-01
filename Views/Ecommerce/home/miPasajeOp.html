@@ -494,17 +494,14 @@
                         </div>
                         <div class="col-md-4">
                           <label class="form-label">Número de documento</label>
-                          <input required type="text" id="numeroDocNuevoRem" maxlength="11" class="form-control"
+                          <input required type="text" id="numeroDocNuevoRem" minlength="8" maxlength="11" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="form-control"
                             placeholder="Número de documento" />
                         </div>
                         <div class="col-md-4">
                           <label required class="form-label">Correo</label>
                           <input type="email" id="correoRem" class="form-control" placeholder="Correo" />
                         </div>
-                        <div class="col-md-4">
-                          <label class="form-label" id="labelNombresRem">Nombres</label>
-                          <input required type="text" id="nombresRem" class="form-control" placeholder="Nombres" />
-                        </div>
+
                         <div class="col-md-4" id="apellidoPaternoDivRem">
                           <label class="form-label">Apellido paterno</label>
                           <input type="text" id="apellidoPaternoRem" class="form-control"
@@ -515,9 +512,15 @@
                           <input type="text" id="apellidoMaternoRem" class="form-control"
                             placeholder="Apellido materno" />
                         </div>
+
+                        <div class="col-md-4">
+                          <label class="form-label" id="labelNombresRem">Nombres</label>
+                          <input required type="text" id="nombresRem" class="form-control" placeholder="Nombres" />
+                        </div>
+                        
                         <div class="col-md-4">
                           <label class="form-label">Teléfono</label>
-                          <input required type="tel" id="telefonoRem" class="form-control" placeholder="Teléfono" />
+                          <input required type="text" id="telefonoRem" class="form-control" placeholder="Teléfono" minlength="9" maxlength="9" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/>
                         </div>
                         <div class="col-md-4">
                           <label class="form-label">Fecha de nacimiento</label>

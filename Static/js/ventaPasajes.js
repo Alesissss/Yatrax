@@ -367,17 +367,19 @@ const NavigationManager = {
     puedeAccederATab(tabIndex) {
         switch (tabIndex) {
             case 0:
-                return AppState.currentStep === 0;
+                return true;
             case 1:
-                return AppState.currentStep === 1
+                return AppState.maxStep >= 1;
             case 2:
-                return AppState.currentStep === 2
+                return AppState.maxStep >= 2 && NavigationManager.eligioItinerarioRegreso();
             case 3:
-                return AppState.currentStep === 3;
+                const ventas = sessionStorage.getItem('ventas');
+                return AppState.maxStep >= 3 && ventas && Object.keys(JSON.parse(ventas)).length > 0;
             default:
                 return false;
         }
     },
+
 
     eligioItinerarioRegreso() {
         const fechaVuelta = $("input[name='fecha_vuelta']").val();
@@ -530,27 +532,48 @@ const NavigationManager = {
 
     validarDatosPasajerosCompletos() {
         const ventas = JSON.parse(sessionStorage.getItem("ventas") || "{}");
-
         if (Object.keys(ventas).length === 0) {
             toastr.warning("No hay asientos seleccionados");
             return false;
         }
 
-        const camposObligatorios = ['numDoc', 'nombres', 'apellidoPaterno', 'apellidoMaterno', 'telefono', 'correo'];
+        let todoValido = true;
+        for (const asientoId of Object.keys(ventas)) {
+            const campos = [
+                `tipo_doc_${asientoId}`,
+                `numeroDocNuevo_${asientoId}`,
+                `nombres_${asientoId}`,
+                `apellidoPaterno_${asientoId}`,
+                `apellidoMaterno_${asientoId}`,
+                `fechaNacimientoNuevo_${asientoId}`,
+                `telefono_${asientoId}`,
+                `correo_${asientoId}`
+            ];
 
-        for (const asientoId in ventas) {
-            const venta = ventas[asientoId];
+            for (const idCampo of campos) {
+                const campo = document.getElementById(idCampo);
+                if (!campo || campo.offsetParent === null) continue;
 
-            for (const campo of camposObligatorios) {
-                if (!venta[campo]?.trim()) {
-                    toastr.warning(`Complete los datos del pasajero en el asiento ${asientoId}`);
-                    return false;
+                const valido = Validator.validateField(campo);
+                if (!valido) {
+                    todoValido = false;
+                    campo.focus();
+                    break;
                 }
+            }
+
+            const masculino = document.getElementById(`sexoMasculino_${asientoId}`);
+            const femenino = document.getElementById(`sexoFemenino_${asientoId}`);
+            if (!masculino?.checked && !femenino?.checked) {
+                toastr.warning(`Seleccione el sexo para el asiento ${asientoId}`);
+                todoValido = false;
+                break;
             }
         }
 
-        return true;
+        return todoValido;
     },
+
 
     async volverAItinerarioIda() {
         const confirmacion = await Swal.fire({
@@ -759,7 +782,7 @@ const RouteManager = {
             allowClear: true
         }).trigger('change');
     },
-    
+
     configurarSelect2Vacio() {
         $('#cbx_Ciudades').html('<option disabled>-- No hay rutas disponibles --</option>')
             .select2({
@@ -967,7 +990,7 @@ const VehicleLayoutManager = {
 
     crearElementoMatriz(datos, x, y, tipoItinerario) {
         const dato = datos.find(d =>
-            parseInt(d.x_dimension) === x && parseInt(d.y_dimension) === y 
+            parseInt(d.x_dimension) === x && parseInt(d.y_dimension) === y
         );
 
         const btn = document.createElement('button');
@@ -977,7 +1000,7 @@ const VehicleLayoutManager = {
 
         if (dato) {
             this.configurarElementoConDatos(btn, dato, tipoItinerario);
-            
+
         } else {
             this.configurarElementoVacio(btn);
         }
@@ -988,7 +1011,7 @@ const VehicleLayoutManager = {
     configurarElementoConDatos(btn, dato, tipoItinerario) {
         btn.id = dato.id_asiento ?? '';
         btn.setAttribute('data-tipo', dato.tipo_herramienta);
-        btn.setAttribute('data-precio',dato.precio)
+        btn.setAttribute('data-precio', dato.precio)
         btn.style.cursor = 'pointer';
 
         if (dato.tipo_herramienta === 1) {
@@ -1330,7 +1353,7 @@ const SeatManager = {
         }
 
         if (!esValido && valor) {
-            Validator.showError(campo, mensaje);
+            setTimeout(() => Validator.showError(campo, mensaje), 10);
         } else {
             Validator.clearError(campo);
         }
@@ -1789,6 +1812,7 @@ const PaymentManager = {
             this.poblarTiposPago();
             this.configurarEventos();
             this.generarFormularioContactoDinamico();
+            this.verificarCupon();
         } catch (error) {
             toastr.error('Error al cargar métodos de pago');
         }
@@ -2027,6 +2051,7 @@ const PaymentManager = {
         }
     },
 
+    //BUSCARESTO
     validarCampoContacto(campo) {
         const elemento = document.getElementById(campo);
         if (!elemento) return true;
@@ -2187,6 +2212,42 @@ const PaymentManager = {
         }
     },
 
+    verificarCupon() {
+        document.getElementById("btnAplicarCodigo").addEventListener("click", async () => {
+            const codigo = document.getElementById("codigo_promocional").value.trim();
+            if (!codigo) return toastr.warning("Ingrese un código");
+
+            try {
+                const res = await fetch("/ecommerce/home/verificarCupon", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ "cupon": codigo })
+                });
+                const data = await res.json();
+                if (data.status = "success") {
+                    if (data.data == 1) {
+                        document.getElementById("codigo_aplicado").innerHTML = `
+                        <span class="badge bg-success">Código aplicado: ${codigo}</span>
+                        <button class="btn btn-sm btn-outline-danger ms-2" onclick="PaymentManager.eliminarCodigo()">Eliminar</button>
+                        `;
+                    } else {
+                        toastr.error("Código inválido o expirado");
+                    }
+                } else {
+                    toastr.error("Error al validar el código: " + data.msg)
+                }
+
+            } catch {
+                toastr.error("Error al validar el código");
+            }
+        });
+    },
+
+    eliminarCodigo() {
+        document.getElementById("codigo_aplicado").innerHTML = "";
+        document.getElementById("codigo_promocional").value = "";
+    },
+
     configurarEventos() {
         const selector = document.getElementById("selector_metodo_pago");
         if (!selector) return;
@@ -2251,24 +2312,33 @@ const PaymentManager = {
 
         if (tipoMetodo === "Tarjeta") {
             divExtra.innerHTML = `
-                <div class="row g-3">
-                    <div class="col-12">
-                        <label class="form-label">Número de tarjeta</label>
+            <div class="row g-3">
+                <div class="col-12">
+                    <div class="form-floating">
                         <input id="numero_tarjeta" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                        <label for="numero_tarjeta"><i class="fas fa-credit-card me-1"></i> Número de tarjeta</label>
                     </div>
-                    <div class="col-12">
-                        <label class="form-label">Nombre del titular</label>
-                        <input id="titular_tarjeta" class="form-control" placeholder="Nombre completo como aparece en la tarjeta" required>
+                </div>
+
+                <div class="col-12">
+                    <div class="form-floating">
+                        <input id="titular_tarjeta" class="form-control" placeholder="Titular" required>
+                        <label for="titular_tarjeta"><i class="fas fa-user me-1"></i> Nombre del titular</label>
                     </div>
-                    <div class="col-6">
-                        <label class="form-label">Mes de vencimiento</label>
+                </div>
+
+                <div class="col-6">
+                    <div class="form-floating">
                         <select id="mes_vencimiento" class="form-select">
                             <option value="">MM</option>
                             ${Array.from({ length: 12 }, (_, i) => `<option value="${(i + 1).toString().padStart(2, '0')}">${(i + 1).toString().padStart(2, '0')}</option>`).join('')}
                         </select>
+                        <label for="mes_vencimiento"><i class="fas fa-calendar-alt me-1"></i> Mes</label>
                     </div>
-                    <div class="col-6">
-                        <label class="form-label">Año de vencimiento</label>
+                </div>
+
+                <div class="col-6">
+                    <div class="form-floating">
                         <select id="ano_vencimiento" class="form-select">
                             <option value="">AA</option>
                             ${Array.from({ length: 10 }, (_, i) => {
@@ -2276,47 +2346,40 @@ const PaymentManager = {
                 return `<option value="${year}">${year}</option>`;
             }).join('')}
                         </select>
-                    </div>
-                    <div class="col-6">
-                        <label class="form-label">CVV</label>
-                        <input id="cvv_tarjeta" class="form-control" placeholder="123" maxlength="4" required>
-                    </div>
-                    <div class="col-6">
-                        <label class="form-label">Código promocional (opcional)</label>
-                        <input id="codigo_promocional" class="form-control" placeholder="Ingrese código">
+                        <label for="ano_vencimiento"><i class="fas fa-calendar me-1"></i> Año</label>
                     </div>
                 </div>
-            `;
+
+                <div class="col-6">
+                    <div class="form-floating">
+                        <input id="cvv_tarjeta" class="form-control" placeholder="123" maxlength="4" required>
+                        <label for="cvv_tarjeta"><i class="fas fa-lock me-1"></i> CVV</label>
+                    </div>
+                </div>
+            </div>
+        `;
         } else if (tipoMetodo.toUpperCase() === "BILLETERA VIRTUAL") {
             if (metodo.qr) {
                 divExtra.innerHTML = `
-                    <div class="text-center">
-                        <p class="mb-3">Escanea el código QR con tu app de ${metodo.metodo}</p>
-                        <img src="${metodo.qr}" alt="QR ${metodo.metodo}" style="max-width: 200px; border: 1px solid #ddd; border-radius: 8px;">
-                        <p class="mt-3 text-muted small">Una vez realizado el pago, haz clic en "Finalizar Pago"</p>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Código promocional (opcional)</label>
-                        <input id="codigo_promocional_billetera" class="form-control" placeholder="Ingrese código promocional">
-                    </div>
-                `;
-            }
-        } else if (tipoMetodo === "Efectivo") {
-            divExtra.innerHTML = `
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
-                    <strong>Instrucciones para pago en efectivo:</strong>
-                    <ul class="mt-2 mb-0">
-                        <li>Debe completar el pago en ventanilla dentro de las próximas 2 horas</li>
-                        <li>Presente el código de reserva que se le asigne</li>
-                        <li>El boleto será válido una vez confirmado el pago</li>
-                    </ul>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Código promocional (opcional)</label>
-                    <input id="codigo_promocional_efectivo" class="form-control" placeholder="Ingrese código promocional">
+                <div class="text-center mb-3">
+                    <p class="mb-2">Escanea el código QR con tu app de ${metodo.metodo}</p>
+                    <img src="${metodo.qr}" alt="QR ${metodo.metodo}" style="max-width: 200px; border: 1px solid #ddd; border-radius: 8px;">
+                    <p class="mt-3 text-muted small">Una vez realizado el pago, haz clic en "Finalizar Pago"</p>
                 </div>
             `;
+            }
+        } else if (tipoMetodo.toUpperCase() === "EFECTIVO") {
+            divExtra.innerHTML = `
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Instrucciones para pago en efectivo:</strong>
+                <ul class="mt-2 mb-0">
+                    <li>Debe completar el pago en ventanilla dentro de las próximas 2 horas</li>
+                    <li>Presente el código de reserva que se le asigne</li>
+                    <li>El boleto será válido una vez confirmado el pago</li>
+                </ul>
+            </div>
+        `;
         }
 
         const botonFinalizar = document.getElementById("btn_finalizar_pago");
@@ -2327,36 +2390,240 @@ const PaymentManager = {
         }
     },
 
+    validarCamposPago() {
+        const tipoMetodo = document.getElementById("selector_metodo_pago").value;
+        let esValido = true;
+
+        const mostrarError = (input, mensaje) => {
+            if (!input) return;
+
+            const spanId = `error_${input.id}`;
+            let errorSpan = document.getElementById(spanId);
+
+            if (!errorSpan) {
+                errorSpan = document.createElement("span");
+                errorSpan.id = spanId;
+                errorSpan.className = "text-danger small d-block mt-1";
+                input.parentElement.appendChild(errorSpan);
+            }
+
+            errorSpan.textContent = mensaje;
+            input.classList.add("is-invalid");
+
+            setTimeout(() => {
+                if (errorSpan) errorSpan.remove();
+                input.classList.remove("is-invalid");
+            }, 3000);
+        };
+
+        const limpiarError = (input) => {
+            if (!input) return;
+            const spanId = `error_${input.id}`;
+            const errorSpan = document.getElementById(spanId);
+            if (errorSpan) errorSpan.remove();
+            input.classList.remove("is-invalid");
+        };
+
+        if (tipoMetodo == 2) {
+            const numero = document.getElementById("numero_tarjeta");
+            const titular = document.getElementById("titular_tarjeta");
+            const cvv = document.getElementById("cvv_tarjeta");
+            const mes = document.getElementById("mes_vencimiento");
+            const ano = document.getElementById("ano_vencimiento");
+
+            // Validar existencia de todos los elementos antes de usarlos
+            if (!numero || !titular || !cvv || !mes || !ano) {
+                console.error("Uno o más campos de la tarjeta no existen en el DOM.");
+                return false;
+            }
+
+            const regexNumero = /^\d{16}$/;
+            const regexTitular = /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]{3,}$/;
+            const regexCVV = /^\d{3,4}$/;
+
+            // Validaciones
+            const numeroValor = numero.value.replace(/\s/g, '').trim();
+            if (!numeroValor || !regexNumero.test(numeroValor)) {
+                mostrarError(numero, "Número de tarjeta inválido");
+                esValido = false;
+            } else {
+                limpiarError(numero);
+            }
+
+            const titularValor = titular.value.trim();
+            if (!titularValor || !regexTitular.test(titularValor)) {
+                mostrarError(titular, "Nombre del titular inválido");
+                esValido = false;
+            } else {
+                limpiarError(titular);
+            }
+
+            const cvvValor = cvv.value.trim();
+            if (!cvvValor || !regexCVV.test(cvvValor)) {
+                mostrarError(cvv, "CVV inválido");
+                esValido = false;
+            } else {
+                limpiarError(cvv);
+            }
+
+            if (!mes.value.trim()) {
+                mostrarError(mes, "Seleccione un mes");
+                esValido = false;
+            } else {
+                limpiarError(mes);
+            }
+
+            if (!ano.value.trim()) {
+                mostrarError(ano, "Seleccione un año");
+                esValido = false;
+            } else {
+                limpiarError(ano);
+            }
+        }
+
+        return esValido;
+    },
+    //BUSCARESTO
+    validarCamposContacto() {
+        let esValido = true;
+
+        const mostrarError = (input, mensaje) => {
+            const spanId = `error_${input.id}`;
+            let errorSpan = document.getElementById(spanId);
+
+            if (!errorSpan) {
+                errorSpan = document.createElement("span");
+                errorSpan.id = spanId;
+                errorSpan.className = "text-danger small";
+                input.parentElement.appendChild(errorSpan);
+            }
+
+            errorSpan.textContent = mensaje;
+            input.classList.add("is-invalid");
+            esValido = false;
+
+            setTimeout(() => {
+                if (errorSpan) errorSpan.remove();
+                input.classList.remove("is-invalid");
+            }, 3000);
+        };
+
+        const limpiarError = (input) => {
+            const spanId = `error_${input.id}`;
+            const errorSpan = document.getElementById(spanId);
+            if (errorSpan) errorSpan.remove();
+            input.classList.remove("is-invalid");
+        };
+
+        const email = document.getElementById("email_contacto");
+        const nombre = document.getElementById("nombres_contacto");
+        const apellidoPat = document.getElementById("apellido_paterno_contacto");
+        const apellidoMat = document.getElementById("apellido_materno_contacto");
+        const tipoDoc = document.getElementById("tipo_documento_contacto");
+        const numDoc = document.getElementById("numero_documento_contacto");
+        const telefono = document.getElementById("telefono_contacto");
+
+        const regexNombre = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{2,}$/;
+        // ✅ Acepta letras (con tildes y ñ) y espacios, mínimo 2 caracteres.
+
+        const regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        // ✅ Correo electrónico válido. No permite espacios.
+
+        const regexTelefono = /^\d{7,15}$/;
+        // ✅ Solo números, de 7 a 15 dígitos.
+
+        const regexDNI = /^\d{8}$/;
+        // ✅ Exactamente 8 dígitos.
+
+        const regexCE = /^[A-Za-z0-9]{9,12}$/;
+        // ✅ Letras y números, entre 9 y 12 caracteres (sin símbolos especiales).
+
+
+        if (!regexCorreo.test(email.value)) {
+            mostrarError(email, "Correo inválido");
+        } else limpiarError(email);
+
+        if (!regexNombre.test(nombre.value)) {
+            mostrarError(nombre, "Nombre inválido");
+        } else limpiarError(nombre);
+
+        if (!regexNombre.test(apellidoPat.value)) {
+            mostrarError(apellidoPat, "Apellido paterno inválido");
+        } else limpiarError(apellidoPat);
+
+        if (!regexNombre.test(apellidoMat.value)) {
+            mostrarError(apellidoMat, "Apellido materno inválido");
+        } else limpiarError(apellidoMat);
+
+        if (tipoDoc.value === "1" && !regexDNI.test(numDoc.value)) {
+            mostrarError(numDoc, "DNI inválido (8 dígitos)");
+        } else if (tipoDoc.value === "3" && !regexCE.test(numDoc.value)) {
+            mostrarError(numDoc, "CE inválido (9 a 12 caracteres alfanuméricos)");
+        } else {
+            limpiarError(numDoc);
+        }
+
+        if (!regexTelefono.test(telefono.value)) {
+            mostrarError(telefono, "Teléfono inválido");
+        } else limpiarError(telefono);
+
+        return esValido;
+    },
+
     agregarBotonFinalizarPago(contenedor) {
         if (document.getElementById("btn_finalizar_pago")) return;
 
         const divBoton = document.createElement("div");
         divBoton.className = "d-grid gap-2 mt-4";
         divBoton.innerHTML = `
-            <button id="btn_finalizar_pago" class="btn btn-success btn-lg">
-                <i class="fas fa-credit-card me-2"></i>
-                Finalizar Pago
-            </button>
-        `;
+        <button id="btn_finalizar_pago" class="btn btn-success btn-lg">
+            <i class="fas fa-credit-card me-2"></i>
+            Finalizar Pago
+        </button>
+    `;
 
         contenedor.appendChild(divBoton);
 
         document.getElementById("btn_finalizar_pago").addEventListener("click", async () => {
-            const tipoMetodo = document.getElementById("selector_metodo_pago").value;
-            const metodoPago = document.getElementById("metodo_pago_especifico").value;
+            const boton = document.getElementById("btn_finalizar_pago");
+            boton.disabled = true;
+            boton.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> Procesando...`;
 
-            let nombreTipoMetodo = await obtenerNombreTipoMetodo(tipoMetodo);
-            let nombreMetodo = await obtenerNombreMetodo(metodoPago);
+            try {
+                const tipoMetodo = document.getElementById("selector_metodo_pago")?.value;
+                const metodoPago = document.getElementById("metodo_pago_especifico")?.value;
 
-            if (nombreMetodo == "tarjeta de credito" || nombreMetodo == "tarjeta") {
-                this.procesarPago();
-            } else if (nombreTipoMetodo == "efectivo" && nombreMetodo == "efectivo") {
-                this.procesarReserva();
-            } else {
-                this.procesarPago();
+                if (!tipoMetodo || !metodoPago) {
+                    toastr.warning("Debe seleccionar un método de pago.");
+                    return;
+                }
+
+                const nombreTipoMetodo = (await obtenerNombreTipoMetodo(tipoMetodo))?.toLowerCase();
+                const nombreMetodo = (await obtenerNombreMetodo(metodoPago))?.toLowerCase();
+
+                if (!this.validarCamposContacto() || !this.validarCamposPago()) {
+                    toastr.error("Corrige los errores antes de continuar.");
+                    return;
+                }
+
+                if (nombreMetodo.includes("tarjeta")) {
+                    await this.procesarPago();
+                } else if (nombreTipoMetodo === "efectivo" && nombreMetodo === "efectivo") {
+                    await this.procesarReserva();
+                } else {
+                    await this.procesarPago();
+                }
+            } catch (error) {
+                console.error("❌ Error en el procesamiento:", error);
+                toastr.error("Ocurrió un error inesperado.");
+            } finally {
+                boton.disabled = false;
+                boton.innerHTML = `<i class="fas fa-credit-card me-2"></i> Finalizar Pago`;
             }
         });
     },
+
+
     rutas: new Array(),
     async procesarPago() {
         if (!this.validarFormularioCompleto()) {
@@ -2494,7 +2761,7 @@ const PaymentManager = {
         const metodoEspecifico = document.getElementById("metodo_pago_especifico")?.value;
 
         const datosPago = {
-            igv:igv,
+            igv: igv,
             tipo_metodo: tipoMetodo,
             metodo_especifico: metodoEspecifico,
             timestamp: new Date().toISOString()
@@ -2528,7 +2795,7 @@ const PaymentManager = {
             contacto: datosContacto,
             pago: datosPago,
             ventas: JSON.parse(sessionStorage.getItem("ventas") || "{}"),
-            
+
             itinerario: {
                 currentStep: AppState.currentStep,
                 itinerarioRegreso: AppState.itinerarioRegreso

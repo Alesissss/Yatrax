@@ -34,6 +34,7 @@ class Promocion:
             """)
         finally:
             conexion.cerrar()
+        
 
     @classmethod
     def obtener_por_id(cls, id):
