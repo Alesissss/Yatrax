@@ -1195,6 +1195,85 @@ def enviar_correos_reprogramacio():
         print("[ERROR] Excepción capturada en el controlador:")
         traceback.print_exc()
         return jsonify({'status': 'error', 'message': 'Ocurrió un error interno.'}), 500
+
+@homeClientes_bp.route('/enviarCorreoCambioRuta', methods=['POST'])
+def enviarCorreoCambioRuta():
+    try:
+        data = request.get_json()
+        comprobante = data.get("comprobante")
+        nuevo_asiento = data.get("nuevo_asiento", "")
+        nueva_fecha = data.get("nueva_fecha", "")
+        nueva_hora = data.get("nueva_hora", "")
+        precio_cambio = data.get("precio_cambio", 0)
+        
+        if not comprobante:
+            return jsonify({
+                'status': 'error',
+                'message': 'El número de comprobante es requerido.'
+            }), 400
+        
+        # Obtener datos del pasaje y cliente
+        datos_pasaje = Pasaje.obtenerDatosPasaje(comprobante)
+        if not datos_pasaje:
+            return jsonify({
+                'status': 'error',
+                'message': 'No se encontró el pasaje con el comprobante proporcionado.'
+            }), 404
+        
+        # Obtener email del cliente a través del pasaje
+        correo_cliente = datos_pasaje.get("email")
+        if not correo_cliente:
+            return jsonify({
+                'status': 'error',
+                'message': 'No se encontró el correo electrónico del cliente.'
+            }), 404
+        
+        # Construir el mensaje del correo
+        mensaje = (
+            f"Estimado cliente,\n\n"
+            f"Su solicitud de cambio de ruta ha sido procesada exitosamente.\n\n"
+            f"Detalles del cambio:\n"
+            f"• Comprobante: {comprobante}\n"
+        )
+        
+        if nuevo_asiento:
+            mensaje += f"• Nuevo asiento: {nuevo_asiento}\n"
+        if nueva_fecha:
+            mensaje += f"• Nueva fecha: {nueva_fecha}\n"
+        if nueva_hora:
+            mensaje += f"• Nueva hora: {nueva_hora}\n"
+        if precio_cambio > 0:
+            mensaje += f"• Precio del cambio: S/ {precio_cambio:.2f}\n"
+        
+        mensaje += (
+            f"\nPara más información, visite nuestra página web o contacte con nuestro servicio al cliente.\n\n"
+            f"Gracias por su preferencia.\n"
+            f"Equipo Yatrax"
+        )
+        
+        # Preparar datos para envío de correo
+        datosEnvio = {
+            'asunto': f'Confirmación de cambio de ruta - Comprobante {comprobante}',
+            'remitente': 'yatraxyatusa@gmail.com',
+            'destinatario': correo_cliente,
+            'mensaje': mensaje
+        }
+        
+        # Enviar el correo
+        resultado = enviar_correo(current_app.extensions['mail'], datosEnvio)
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Correo de confirmación enviado exitosamente.'
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] Error al enviar correo de cambio de ruta: {repr(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Ocurrió un error al enviar el correo: {str(e)}'
+        }), 500
+
     
 @homeClientes_bp.route('/enviar_correos_darBaja_Viaje', methods=['POST'])
 def enviar_correos_DarBajaViaje():
