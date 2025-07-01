@@ -342,7 +342,16 @@ class Venta:
                 ), auto_commit=False)
                 
                 # Obtener el nombre visible del asiento
-                nombre_asiento = Asiento.obtener_nombre_por_id(key)
+                # Priorizar el nombre del asiento que viene desde el frontend (datos_viaje)
+                nombre_asiento = None
+                if datos_viaje and "asiento_nombre" in datos_viaje:
+                    nombre_asiento = datos_viaje["asiento_nombre"]
+                    print(f"DEBUG: Usando nombre de asiento desde datos_viaje: {nombre_asiento}")
+                
+                # Si no viene desde el frontend, obtenerlo desde la base de datos como fallback
+                if not nombre_asiento:
+                    nombre_asiento = Asiento.obtener_nombre_por_id(key)
+                    print(f"DEBUG: Usando nombre de asiento desde BD: {nombre_asiento}")
                 
                 tickets_data.append({
                     "codigo": codigoUnico,
@@ -387,6 +396,10 @@ class Venta:
                     nombre_cliente = contacto.get("razon_social")
                     documento_cliente = contacto.get("ruc")
 
+                # Obtener el nombre del asiento desde los datos del ticket
+                nombre_asiento_ticket = datos["asiento"]
+                print(f"DEBUG: Nombre de asiento para PDF: {nombre_asiento_ticket}")
+
                 datos_ticket = {
                     "empresa": {
                         "nombre": empresa["razon_social"],
@@ -416,7 +429,7 @@ class Venta:
                         "tipo_servicio": "BUS CAMA",
                         "origen": datos_viaje.get("origen", "Por determinar") if datos_viaje else "Por determinar",
                         "destino": datos_viaje.get("destino", "Por determinar") if datos_viaje else "Por determinar",
-                        "asiento": datos["asiento"],
+                        "asiento": nombre_asiento_ticket,
                         "pasajero": datos["pasajero"],
                         "documento_pasajero": datos["documento_pasajero"],
                         "fecha_viaje": datos_viaje.get("fechaSalida", datos["fecha_viaje"]) if datos_viaje else datos["fecha_viaje"],
