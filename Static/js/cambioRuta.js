@@ -2429,6 +2429,11 @@ const PaymentManager = {
             return;
         }
 
+        // 🔒 ESTABLECER BANDERA TEMPORAL DE PROCESO DE PAGO EN CURSO
+        sessionStorage.setItem('pago_en_proceso', 'true');
+        sessionStorage.setItem('timestamp_proceso_pago', new Date().toISOString());
+        console.log('🔄 Iniciando proceso de pago - Estableciendo protección temporal');
+
         const datosCompletos = this.capturarDatosPago();
 
         // Mostrar loader
@@ -2467,6 +2472,18 @@ const PaymentManager = {
             this.ocultarLoader();
 
             if (resultado.Status === 'success') {
+                // 🔒 LIMPIAR BANDERA TEMPORAL Y MARCAR PAGO COMO COMPLETADO INMEDIATAMENTE
+                sessionStorage.removeItem('pago_en_proceso');
+                sessionStorage.removeItem('timestamp_proceso_pago');
+                
+                console.log('🎉 Pago exitoso detectado - Estableciendo bandera de protección');
+                sessionStorage.setItem('pago_completado', 'true');
+                sessionStorage.setItem('timestamp_pago', new Date().toISOString());
+                
+                // Verificar que se estableció correctamente
+                const verificacion = sessionStorage.getItem('pago_completado');
+                console.log('✅ Bandera de pago establecida:', verificacion);
+                
                 // Almacenamos las rutas de los boletos en el array
                 console.log('🎉 Pago exitoso! Resultado completo:', resultado);
                 console.log('📂 Tickets en resultado:', resultado.tickets);
@@ -2481,6 +2498,11 @@ const PaymentManager = {
             }
 
         } catch (error) {
+            // 🔒 LIMPIAR BANDERA TEMPORAL EN CASO DE ERROR
+            sessionStorage.removeItem('pago_en_proceso');
+            sessionStorage.removeItem('timestamp_proceso_pago');
+            console.log('❌ Error en pago - Limpiando bandera temporal');
+            
             this.ocultarLoader();
             toastr.error("Error al procesar el pago: " + error.message);
             console.error('Error procesando pago:', error);
@@ -2728,10 +2750,11 @@ const PaymentManager = {
                 <h1 style="color: #155724; margin-bottom: 20px; font-weight: bold;">¡Pago Confirmado!</h1>
                 <p style="color: #155724; font-size: 18px; margin-bottom: 30px;">
                     Su compra ha sido procesada exitosamente.<br>
-                    Recibirá un correo de confirmación
+                    Recibirá un correo de confirmación<br>
+                    <small style="color: #6c757d; font-size: 14px;">Se redirigirá automáticamente en 10 segundos</small>
                 </p>
                 <button id="btn_nueva_reserva" class="btn btn-success btn-lg" style="margin-right: 15px;">
-                    <i class="fas fa-plus me-2"></i>Nueva compra
+                    <i class="fas fa-home me-2"></i>Ir al inicio
                 </button>
                 <button id="btn_descargar_boleto" class="btn btn-outline-success btn-lg">
                     <i class="fas fa-download me-2"></i>Descargar boleto
@@ -2773,6 +2796,29 @@ const PaymentManager = {
 
         // Limpiar datos de la reserva actual
         this.limpiarDatosReserva();
+
+        // 🕒 CONFIGURAR LIMPIEZA AUTOMÁTICA DE BANDERA DESPUÉS DE 30 MINUTOS
+        setTimeout(() => {
+            const pagoCompletado = sessionStorage.getItem('pago_completado');
+            if (pagoCompletado === 'true') {
+                console.log('🧹 Limpiando bandera de pago completado después de 30 minutos');
+                sessionStorage.removeItem('pago_completado');
+                sessionStorage.removeItem('timestamp_pago');
+            }
+        }, 30 * 60 * 1000); // 30 minutos
+
+        // Agregar redirección automática después de 10 segundos
+        setTimeout(() => {
+            const overlayActual = document.getElementById('payment-success-overlay');
+            if (overlayActual) {
+                toastr.info('Redirigiendo automáticamente en 3 segundos...');
+                setTimeout(() => {
+                    // 🧹 LIMPIAR COMPLETAMENTE ANTES DE REDIRIGIR AUTOMÁTICAMENTE
+                    sessionStorage.clear();
+                    window.location.href = '/';
+                }, 3000);
+            }
+        }, 10000); // 10 segundos para ver el mensaje de éxito
     },
 
     iniciarNuevaReserva() {
@@ -2780,14 +2826,17 @@ const PaymentManager = {
         const overlay = document.getElementById('payment-success-overlay');
         if (overlay) overlay.remove();
 
-        // Resetear sistema completo
-        App.resetearSistemaCompleto();
-        NavigationManager.updateFormVisibility();
+        // 🧹 LIMPIAR COMPLETAMENTE EL SESSIONSTORAGE INCLUYENDO BANDERA DE PAGO
+        sessionStorage.clear();
 
-        // Scroll hacia arriba
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Mostrar mensaje de éxito
+        toastr.success('Redirigiendo a la página principal...');
 
-        toastr.success('Listo para una nueva reserva');
+        // Pequeño delay para que se vea el mensaje antes de redirigir
+        setTimeout(() => {
+            // Redirigir a la ruta raíz
+            window.location.href = '/';
+        }, 1500);
     },
 
     async descargarBoleto(resultado) {
@@ -2958,14 +3007,16 @@ const PaymentManager = {
     },
 
     limpiarDatosReserva() {
-        // Limpiar sessionStorage
+        // Limpiar sessionStorage (EXCEPTO la bandera de pago completado)
         sessionStorage.removeItem('ventas');
         sessionStorage.removeItem('datos_pago');
+        
+        // NO remover 'pago_completado' y 'timestamp_pago' para evitar limpieza en recarga
 
         // Resetear estado
         this.datosContacto = {};
 
-        console.log('🧹 Datos de reserva limpiados tras pago exitoso');
+        console.log('🧹 Datos de reserva limpiados tras pago exitoso (preservando bandera de pago)');
     },
 
     limpiarFormularioPago() {
@@ -3072,6 +3123,13 @@ const App = {
 
     // ✅ NUEVA FUNCIÓN: Verificar si hay datos para limpiar
     verificarDatosParaLimpiar() {
+        // 🔒 VERIFICAR SI EL PAGO YA SE COMPLETÓ
+        const pagoCompletado = sessionStorage.getItem('pago_completado');
+        if (pagoCompletado === 'true') {
+            console.log('✅ Pago ya completado - No se ejecutará limpieza automática');
+            return false; // No limpiar si el pago se completó
+        }
+
         const ventasStorage = sessionStorage.getItem('ventas');
         const hayVentas = ventasStorage && Object.keys(JSON.parse(ventasStorage)).length > 0;
         const hayAsientosSeleccionados = SeatManager && SeatManager.asientosSeleccionados && SeatManager.asientosSeleccionados.size > 0;

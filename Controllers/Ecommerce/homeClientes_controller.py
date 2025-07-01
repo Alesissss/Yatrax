@@ -1140,7 +1140,15 @@ def obtenerDatosPasaje():
     try:
         numComprobante = request.args.get("comprobante")
         pasaje = Pasaje.obtenerDatosPasaje(numComprobante)
+        print("edbug", pasaje)
         if pasaje:
+            # Validar si el pasaje ya tiene cambio de ruta
+            if pasaje.get("esCambioRuta") == 1:
+                return jsonify({
+                    "Status": "success",
+                    "data": pasaje,
+                    "Msj": "El pasaje ya se hizo un cambio de ruta"
+                })
             return jsonify({
                 "Status": "success",
                 "data": pasaje,
