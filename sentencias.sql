@@ -1,4 +1,8 @@
 -- Primero eliminamos los procedimientos por si existen
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_TIPO_ASIENTO;
+DROP PROCEDURE IF EXISTS SP_EDITAR_TIPO_ASIENTO;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPO_ASIENTO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_ASIENTO;
 DROP PROCEDURE IF EXISTS SP_MODIFICAR_CONF_GENERAL;
 DROP PROCEDURE IF EXISTS SP_REGISTRAR_REEMBOLSO;
 DROP PROCEDURE IF EXISTS SP_REGISTRAR_CLIENTE;
@@ -638,6 +642,7 @@ CREATE TABLE herramienta(
     nombre varchar(60),
     icono varchar(200),
     precio DECIMAL(9,2),
+    estado BOOLEAN DEFAULT 1,
     id_tipo INT NOT NULL,
     FOREIGN KEY (id_tipo) REFERENCES tipo_herramienta(id)
 );
@@ -867,8 +872,7 @@ INSERT INTO preguntas_frecuentes (pregunta, respuesta, estado, fecha_registro, u
 para cualquier destino?','No. Solo se pueden comprar pasajes para los destinos que aparecen disponibles en la
 programación','1','2025-06-07 11:34:18','ander@gmail.com');
 INSERT INTO preguntas_frecuentes (pregunta, respuesta, estado, fecha_registro, usuario) VALUES ('¿Puedo transferir mi
-pasaje a otra persona?','Sí. Puedes solicitar la transferencia de tu pasaje hasta 4 horas antes del viaje, con un costo
-adicional de S/ 10.00. El trámite debe ser realizado por el titular del pasaje.','1','2025-06-07
+pasaje a otra persona?','Sí. Puedes solicitar la transferencia de tu pasaje antes de iniciar el viaje, sin costo adicional. El trámite debe ser realizado por el titular del pasaje.','1','2025-06-07
 11:34:18','ander@gmail.com');
 INSERT INTO preguntas_frecuentes (pregunta, respuesta, estado, fecha_registro, usuario) VALUES ('¿La empresa realiza
 reembolsos?','Solo se realiza reembolso si la empresa no cumple con brindar el servicio. No se hace reembolso si el
@@ -884,10 +888,6 @@ INSERT INTO preguntas_frecuentes (pregunta, respuesta, estado, fecha_registro, u
 presentar para abordar el bus?','Es obligatorio presentar el DNI físico del pasajero. En el caso de menores de edad,
 también se debe presentar una carta notarial de autorización de viaje y el DNI o partida original.','1','2025-06-07
 11:34:18','ander@gmail.com');
-INSERT INTO preguntas_frecuentes (pregunta, respuesta, estado, fecha_registro, usuario) VALUES ('¿Qué es un pasaje libre
-y cómo funciona?','Es un pasaje que puede ser activado en otra fecha dentro de los 90 días posteriores a la compra,
-sujeto a disponibilidad. Puedes convertir tu pasaje normal a pasaje libre hasta 6 horas antes del viaje pagando S/
-5.00.','1','2025-06-07 11:34:18','ander@gmail.com');
 
 INSERT INTO sucursal (`cod_sucursal`, `ciudad`, `nombre`, `direccion`, `latitud`, `longitud`, `estado`, `abreviatura`,
 `fecha_registro`, `usuario`)
@@ -3118,16 +3118,16 @@ INSERT INTO tipo_usuario (id,nombre, estado, fecha_registro, usuario) VALUES (1,
 
 -- Tabla Usuario
 INSERT INTO usuarios (id, id_personal, email, password, imagen, estado, id_tipousuario,fecha_registro,usuario) VALUES
-(1, 5,'alexis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
+(1, 5,'alexis@yatrax.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
 '/Static/img/trabajadores/alexis.jpeg', 1, 1,'2025-03-06 20:06:14','SYSTEM');
 INSERT INTO usuarios (id, id_personal, email, password, imagen, estado, id_tipousuario,fecha_registro,usuario) VALUES
-(2, 3,'edgar@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
+(2, 3,'edgar@yatrax.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
 '/Static/img/trabajadores/edgar.png', 1, 1,'2025-03-06 20:06:14','SYSTEM');
 INSERT INTO usuarios (id, id_personal, email, password, imagen, estado, id_tipousuario,fecha_registro,usuario) VALUES
-(3, 2,'ander@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
+(3, 2,'timcrocket1502@gmail.com.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
 '/Static/img/trabajadores/ander.jpg', 1, 1,'2025-03-06 20:06:14','SYSTEM');
 INSERT INTO usuarios (id, id_personal, email, password, imagen, estado, id_tipousuario,fecha_registro,usuario) VALUES
-(4, 4,'luis@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
+(4, 4,'luis@yatrax.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
 '/Static/img/trabajadores/luis.jpg', 1, 1,'2025-03-06 20:06:14','SYSTEM');
 
 -- Tabla de configuración general
@@ -4813,6 +4813,160 @@ BEGIN
     ELSE
         DELETE FROM sucursal WHERE id = P_ID;
         SET @MSJ = 'Se eliminó correctamente la sucursal';
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Crear procedimiento SP_REGISTRAR_TIPO_ASIENTO
+DELIMITER $$
+
+CREATE PROCEDURE SP_REGISTRAR_TIPO_ASIENTO(
+    IN P_NOMBRE VARCHAR(50),
+    IN P_ICONO VARCHAR(255),
+    IN P_PRECIO DECIMAL(9,2),
+    IN P_ESTADO BOOLEAN
+)
+BEGIN
+    DECLARE cTipoAsiento INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cTipoAsiento
+    FROM herramienta 
+    WHERE nombre = P_NOMBRE AND id_tipo = 1;
+
+    IF cTipoAsiento > 0 THEN
+        SET @MSJ2 = 'El tipo de asiento que intenta registrar ya está registrado';
+    ELSE
+        INSERT INTO herramienta (
+            nombre, icono, precio, id_tipo
+        ) VALUES (
+            P_NOMBRE, P_ICONO, P_PRECIO, 1
+        );
+
+        SET @MSJ = 'Se registró correctamente el tipo de asiento';
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Crear procedimiento SP_EDITAR_TIPO_ASIENTO
+DELIMITER $$
+
+CREATE PROCEDURE SP_EDITAR_TIPO_ASIENTO(
+    IN P_ID INT,
+    IN P_NOMBRE VARCHAR(50),
+    IN P_ICONO VARCHAR(255),
+    IN P_PRECIO DECIMAL(9,2),
+    IN P_ESTADO BOOLEAN
+)
+BEGIN
+    DECLARE cTipoAsiento INT;
+    DECLARE cNombre INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cTipoAsiento 
+    FROM herramienta 
+    WHERE id = P_ID AND id_tipo = 1;
+
+    SELECT COUNT(*) INTO cNombre 
+    FROM herramienta 
+    WHERE nombre = P_NOMBRE AND id != P_ID AND id_tipo = 1;
+
+    IF cTipoAsiento <= 0 THEN
+        SET @MSJ2 = 'El tipo de asiento que intenta editar no existe';
+    ELSEIF cNombre > 0 THEN
+        SET @MSJ2 = 'El nombre del tipo de asiento ya está en uso';
+    ELSE
+        UPDATE herramienta 
+        SET nombre = P_NOMBRE,
+            icono = P_ICONO,
+            precio = P_PRECIO,
+            estado = P_ESTADO
+        WHERE id = P_ID AND id_tipo = 1;
+
+        SET @MSJ = 'Se modificó correctamente el tipo de asiento';
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Crear procedimiento SP_DARBAJA_TIPO_ASIENTO
+DELIMITER $$
+
+CREATE PROCEDURE SP_DARBAJA_TIPO_ASIENTO(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cTipoAsiento INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cTipoAsiento 
+    FROM herramienta 
+    WHERE id = P_ID AND id_tipo = 1;
+
+    IF cTipoAsiento <= 0 THEN
+        SET @MSJ2 = 'El tipo de asiento que intenta dar de baja no existe';
+    ELSE
+        UPDATE herramienta 
+        SET estado = 0
+        WHERE id = P_ID AND id_tipo = 1;
+
+        SET @MSJ = 'Se dio de baja correctamente al tipo de asiento';
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_TIPO_ASIENTO
+DELIMITER $$
+
+CREATE PROCEDURE SP_ELIMINAR_TIPO_ASIENTO(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cTipoAsiento INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cTipoAsiento 
+    FROM herramienta 
+    WHERE id = P_ID AND id_tipo = 1;
+
+    IF EXISTS (SELECT 1 FROM nivel_herramienta WHERE id_herramienta = P_ID) THEN
+        SET @MSJ2 = 'Este tipo de asiento no se puede eliminar porque otros registros dependen de este';
+    ELSEIF cTipoAsiento <= 0 THEN
+        SET @MSJ2 = 'El tipo de asiento que intenta eliminar no existe';
+    ELSE
+        DELETE FROM herramienta WHERE id = P_ID AND id_tipo = 1;
+        SET @MSJ = 'Se eliminó correctamente el tipo de asiento';
     END IF;
 END $$
 

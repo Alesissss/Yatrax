@@ -71,7 +71,7 @@ def procesar_reserva():
         ventas = data.get("ventas", {})
         codigoReserva = Pasaje.generar_codigo_reserva(),
         fecha = datetime.datetime.now()
-
+            
         resultado = Reserva.registrar_operacion(contacto, pago, ventas,codigoReserva,fecha)
 
         if resultado["status"] == 1:
@@ -86,13 +86,13 @@ def procesar_reserva():
             }
 
             enviar_correo(current_app.extensions['mail'],datosEnvio)
-            return jsonify({"Status": "success", "codigo_confirmacion": f"VENTA-{resultado['id_venta']}"})
+            return jsonify({"Status": "success", "codigo_confirmacion": codigoReserva})
         else:
             return jsonify({"Status": "error", "Msj": resultado["msg"]})
 
     except Exception as e:
         return jsonify({"Status": "error", "Msj": f"Error inesperado: {repr(e)}"})
-
+  
 # END REGION
 
 def renderizarCompra():
@@ -320,12 +320,18 @@ def resumen_viaje():
         if not detalle:
             return jsonify({'Status': 'error', 'Msj': 'No se encontró detalle válido del viaje.'})
 
+        # Obtener el nombre visible del asiento
+        nombre_asiento = Asiento.obtener_nombre_por_id(asiento_id)
+        if not nombre_asiento:
+            nombre_asiento = f"Asiento {asiento_id}"  # Fallback si no se encuentra el nombre
+
         # Crear la respuesta con los detalles del viaje y el precio total
         resumen = {
             'detalle_viaje': detalle,
             'pasajeros': [{
                 'numero': 1,
-                'asiento': asiento_id,
+                'asiento': nombre_asiento,  # Usar el nombre visible del asiento
+                'asiento_id': asiento_id,   # Mantener el ID por compatibilidad
                 'precio': detalle.get('precio_total', 0),  # Se asegura de que el precio exista
             }],
             'precio_total': detalle.get('precio_total', 0)  # Usamos el precio_total
@@ -801,6 +807,122 @@ def verificarCupon():
     except Exception as e:
         return {"data":[],"msg":f"Hubo un error al verificar el cupon:{repr(e)}","status":"error"}
 
+def enviar_correo_cambio_ruta_interno(datos_correo):
+    """
+    Función interna para enviar correo de confirmación de cambio de ruta
+    Se llama automáticamente después de procesar un pago de cambio de ruta exitoso
+    """
+    try:
+        comprobante = datos_correo.get("comprobante")
+        nuevo_asiento = datos_correo.get("nuevo_asiento", "")
+        nueva_fecha = datos_correo.get("nueva_fecha", "")
+        nueva_hora = datos_correo.get("nueva_hora", "")
+        precio_cambio = datos_correo.get("precio_cambio", 0)
+        email_cliente_pagador = datos_correo.get("email_cliente", "")  # Email del que está pagando
+        
+        if not comprobante:
+            print("[ERROR] No se proporcionó comprobante para envío de correo")
+            return False
+        
+        # Usar el email del cliente que está pagando, o como fallback el del pasajero original
+        correo_cliente = email_cliente_pagador
+        
+        if not correo_cliente:
+            print("[INFO] No se proporcionó email del cliente pagador, usando email del pasajero original como fallback")
+            # Obtener datos del pasaje y cliente como fallback
+            datos_pasaje = Pasaje.obtenerDatosPasaje(comprobante)
+            if not datos_pasaje:
+                print(f"[ERROR] No se encontró el pasaje con comprobante: {comprobante}")
+                return False
+            
+            # Obtener email del cliente a través del pasaje
+            correo_cliente = datos_pasaje.get("email_pasajero")
+            if not correo_cliente:
+                print(f"[ERROR] No se encontró email para el comprobante: {comprobante}")
+                return False
+        
+        print(f"[INFO] Enviando correo de cambio de ruta a: {correo_cliente}")
+        
+        # Construir el mensaje del correo
+        comprobante_original = datos_correo.get("comprobante_original", "")
+        mensaje = (
+            f"Estimado cliente,\n\n"
+            f"Su solicitud de cambio de ruta ha sido procesada exitosamente.\n\n"
+            f"Detalles del cambio:\n"
+        )
+        
+        if comprobante_original:
+            mensaje += f"• Comprobante original: {comprobante_original}\n"
+            mensaje += f"• Nuevo comprobante: {comprobante}\n"
+        else:
+            mensaje += f"• Comprobante: {comprobante}\n"
+        
+        if nuevo_asiento:
+            mensaje += f"• Nuevo asiento: {nuevo_asiento}\n"
+        if nueva_fecha:
+            mensaje += f"• Nueva fecha: {nueva_fecha}\n"
+        if nueva_hora:
+            mensaje += f"• Nueva hora: {nueva_hora}\n"
+        if precio_cambio > 0:
+            mensaje += f"• Precio del cambio: S/ {precio_cambio:.2f}\n"
+        
+        mensaje += (
+            f"\nPor favor conserve este correo como comprobante de su cambio de ruta.\n"
+            f"En el archivo adjunto encontrará su nuevo comprobante de viaje.\n"
+            f"Para más información, visite nuestra página web o contacte con nuestro servicio al cliente.\n\n"
+            f"Gracias por su preferencia.\n"
+            f"Equipo Yatrax"
+        )
+        
+        # Construir la ruta del archivo PDF del comprobante
+        import os
+        archivo_pdf = None
+        
+        # El comprobante está en formato A000-XXXXXXXX, buscar el archivo correspondiente
+        ruta_tickets = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'Static', 'tickets')
+        nombre_archivo = f"{comprobante}.pdf"
+        ruta_completa_pdf = os.path.join(ruta_tickets, nombre_archivo)
+        
+        # Verificar si existe el archivo
+        if os.path.exists(ruta_completa_pdf):
+            archivo_pdf = ruta_completa_pdf
+            print(f"[INFO] Archivo PDF encontrado: {archivo_pdf}")
+        else:
+            print(f"[WARNING] No se encontró el archivo PDF: {ruta_completa_pdf}")
+            # Buscar cualquier archivo PDF que contenga el número del comprobante
+            try:
+                if os.path.exists(ruta_tickets):
+                    archivos_en_tickets = os.listdir(ruta_tickets)
+                    numero_comprobante = comprobante.split('-')[-1]  # Obtener solo el número
+                    for archivo in archivos_en_tickets:
+                        if archivo.endswith('.pdf') and numero_comprobante in archivo:
+                            archivo_pdf = os.path.join(ruta_tickets, archivo)
+                            print(f"[INFO] Archivo PDF alternativo encontrado: {archivo_pdf}")
+                            break
+            except Exception as e:
+                print(f"[ERROR] Error al buscar archivo PDF alternativo: {e}")
+        
+        # Preparar datos para envío de correo
+        datosEnvio = {
+            'asunto': f'Confirmación de cambio de ruta - Comprobante {comprobante}',
+            'remitente': 'yatraxyatusa@gmail.com',
+            'destinatario': correo_cliente,
+            'mensaje': mensaje
+        }
+        
+        # Agregar archivo adjunto si se encontró
+        if archivo_pdf:
+            datosEnvio['archivo_adjunto'] = archivo_pdf
+        
+        # Enviar el correo
+        resultado = enviar_correo(current_app.extensions['mail'], datosEnvio)
+        print(f"[INFO] Correo de cambio de ruta enviado a: {correo_cliente}")
+        return True
+        
+    except Exception as e:
+        print(f"[ERROR] Error en envío automático de correo de cambio de ruta: {repr(e)}")
+        return False
+
 @homeClientes_bp.route("/procesar_pago_x", methods=["POST"])
 def procesar_pago_x():
     try:
@@ -811,11 +933,91 @@ def procesar_pago_x():
         ventas = data.get("ventas", {})
         precio_venta_total = data.get("precio_venta_total", 0.0)  # Obtener el precio total
         datos_viaje = data.get("datos_viaje", {})  # Obtener datos del viaje
+        itinerario = data.get("itinerario", {})  # Obtener datos del itinerario
             
         resultado = Venta.registrar_operacion_x(contacto, pago, ventas, precio_venta_total, datos_viaje)
 
         if resultado["status"] == 1:
-            return jsonify({"Status": "success", "codigo_confirmacion": f"VENTA-{resultado['id_venta']}"})
+            # Si es un cambio de ruta (detectado por currentStep), enviar correo de confirmación
+            if itinerario.get("currentStep") == "cambio_ruta":
+                try:
+                    # Obtener el comprobante del pasaje original desde los datos del itinerario
+                    comprobante_original = itinerario.get("comprobante_original")
+                    
+                    # Si no se encuentra en itinerario, buscar en datos_viaje
+                    if not comprobante_original and datos_viaje:
+                        comprobante_original = datos_viaje.get("numeroComprobante")
+                    
+                    # Obtener el NUEVO comprobante generado tras el cambio de ruta
+                    nuevo_comprobante = f"A000-{str(resultado['id_venta']).zfill(8)}"
+                    print(f"[INFO] Nuevo comprobante generado: {nuevo_comprobante}")
+                    
+                    if comprobante_original:
+                        # Obtener información del nuevo asiento y viaje
+                        nuevo_asiento = ""
+                        nueva_fecha = ""
+                        nueva_hora = ""
+                        
+                        # PRIORIDAD 1: Extraer información del asiento desde datos_viaje (viene del frontend)
+                        if datos_viaje:
+                            nuevo_asiento = datos_viaje.get("asiento_nombre", "")
+                            nueva_fecha = datos_viaje.get("fechaSalida", "")
+                            nueva_hora = datos_viaje.get("horaSalida", "")
+                            print(f"[INFO] Asiento desde datos_viaje: {nuevo_asiento}")
+                        
+                        # PRIORIDAD 2: Si no se encuentra en datos_viaje, buscar en ventas
+                        if not nuevo_asiento and ventas:
+                            primer_venta = list(ventas.values())[0]
+                            nuevo_asiento = primer_venta.get("asiento_nombre", "") or primer_venta.get("asiento", "")
+                            print(f"[INFO] Asiento desde ventas: {nuevo_asiento}")
+                            
+                        # PRIORIDAD 3: Como último recurso, buscar por ID del asiento en la BD
+                        if not nuevo_asiento and ventas:
+                            primer_asiento_id = list(ventas.keys())[0]
+                            try:
+                                # Obtener el nombre del asiento por su ID
+                                from Models.asiento import Asiento
+                                nombre_asiento_db = Asiento.obtener_nombre_por_id(primer_asiento_id)
+                                if nombre_asiento_db:
+                                    nuevo_asiento = nombre_asiento_db
+                                    print(f"[INFO] Asiento desde BD: {nuevo_asiento}")
+                                else:
+                                    nuevo_asiento = f"Asiento {primer_asiento_id}"
+                                    print(f"[INFO] Asiento fallback con ID: {nuevo_asiento}")
+                            except Exception as e:
+                                print(f"[ERROR] Error al obtener nombre de asiento por ID: {e}")
+                                nuevo_asiento = f"Asiento {primer_asiento_id}"
+                            
+                        # PRIORIDAD 4: Como último recurso absoluto
+                        if not nuevo_asiento:
+                            nuevo_asiento = "Asiento seleccionado"
+                            print(f"[INFO] Asiento por defecto: {nuevo_asiento}")
+                        
+                        print(f"[INFO] Información del cambio - Asiento: {nuevo_asiento}, Fecha: {nueva_fecha}, Hora: {nueva_hora}")
+                        
+                        # Preparar datos para envío de correo
+                        datos_correo = {
+                            "comprobante": nuevo_comprobante,  # Usar el NUEVO comprobante
+                            "comprobante_original": comprobante_original,  # Mantener referencia al original
+                            "nuevo_asiento": nuevo_asiento,
+                            "nueva_fecha": nueva_fecha,
+                            "nueva_hora": nueva_hora,
+                            "precio_cambio": precio_venta_total,
+                            "email_cliente": contacto.get("email", "")  # Email del cliente que está pagando
+                        }
+                        
+                        # Llamar al método de envío de correo
+                        enviar_correo_cambio_ruta_interno(datos_correo)
+                        
+                    else:
+                        print("[WARN] No se pudo obtener el comprobante original para enviar correo de cambio de ruta")
+                        
+                except Exception as e:
+                    print(f"[ERROR] Error al enviar correo de cambio de ruta: {repr(e)}")
+                    # No fallar el proceso de pago por error en envío de correo
+                    pass
+            
+            return jsonify({"tickets": resultado.get("tickets", []), "Status": "success", "codigo_confirmacion": f"VENTA-{resultado['id_venta']}"})
         else:
             return jsonify({"Status": "error", "Msj": resultado["msg"]})
 
@@ -1189,6 +1391,87 @@ def enviar_correos_reprogramacio():
         print("[ERROR] Excepción capturada en el controlador:")
         traceback.print_exc()
         return jsonify({'status': 'error', 'message': 'Ocurrió un error interno.'}), 500
+
+@homeClientes_bp.route('/enviarCorreoCambioRuta', methods=['POST'])
+def enviarCorreoCambioRuta():
+    try:
+        data = request.get_json()
+        comprobante = data.get("comprobante")
+        nuevo_asiento = data.get("nuevo_asiento", "")
+        nueva_fecha = data.get("nueva_fecha", "")
+        nueva_hora = data.get("nueva_hora", "")
+        precio_cambio = data.get("precio_cambio", 0)
+        
+        if not comprobante:
+            return jsonify({
+                'status': 'error',
+                'message': 'El número de comprobante es requerido.'
+            }), 400
+        
+        # Obtener datos del pasaje y cliente
+        datos_pasaje = Pasaje.obtenerDatosPasaje(comprobante)
+        if not datos_pasaje:
+            return jsonify({
+                'status': 'error',
+                'message': 'No se encontró el pasaje con el comprobante proporcionado.'
+            }), 404
+        
+        # Obtener email del cliente a través del pasaje
+        correo_cliente = datos_pasaje.get("email")
+        if not correo_cliente:
+            return jsonify({
+                'status': 'error',
+                'message': 'No se encontró el correo electrónico del cliente.'
+            }), 404
+        
+        # Construir el mensaje del correo
+        mensaje = (
+            f"Estimado cliente,\n\n"
+            f"Su solicitud de cambio de ruta ha sido procesada exitosamente.\n\n"
+            f"Detalles del cambio:\n"
+            f"• Comprobante original: {comprobante}\n"
+        )
+        
+        if nuevo_asiento:
+            mensaje += f"• Nuevo asiento: {nuevo_asiento}\n"
+        if nueva_fecha:
+            mensaje += f"• Nueva fecha: {nueva_fecha}\n"
+        if nueva_hora:
+            mensaje += f"• Nueva hora: {nueva_hora}\n"
+        if precio_cambio > 0:
+            mensaje += f"• Precio del cambio: S/ {precio_cambio:.2f}\n"
+        
+        mensaje += (
+            f"\nPor favor conserve este correo como comprobante de su cambio de ruta.\n"
+            f"Para más información, visite nuestra página web o contacte con nuestro servicio al cliente.\n\n"
+            f"Gracias por su preferencia.\n"
+            f"Equipo Yatrax"
+        )
+        
+        # Preparar datos para envío de correo
+        datosEnvio = {
+            'asunto': f'Confirmación de cambio de ruta - Comprobante {comprobante}',
+            'remitente': 'yatraxyatusa@gmail.com',
+            'destinatario': correo_cliente,
+            'mensaje': mensaje
+        }
+        
+        # Enviar el correo
+        resultado = enviar_correo(current_app.extensions['mail'], datosEnvio)
+        print(resultado)
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Correo de confirmación enviado exitosamente.'
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] Error al enviar correo de cambio de ruta: {repr(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Ocurrió un error al enviar el correo: {str(e)}'
+        }), 500
+
     
 @homeClientes_bp.route('/enviar_correos_darBaja_Viaje', methods=['POST'])
 def enviar_correos_DarBajaViaje():

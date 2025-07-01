@@ -385,7 +385,7 @@
             </div>
 
             <!-- Checkbox + edit icon wrapper - Solo para transferencia -->
-            <div class="form-check mt-3" id="menorWrapper">
+            <div class="form-check mt-3 hidden" id="menorWrapper">
               <input class="form-check-input" type="checkbox" id="conMenor" />
               <label class="form-check-label" for="conMenor">Con menor de edad en brazos</label>
               <i id="editMenor" class="fa-solid fa-pencil ms-2" style="display: none"></i>
@@ -2303,9 +2303,13 @@
             <p>${viaje.ciudad_origen} → ${viaje.ciudad_destino}</p>
             `;
 
+    // Recuperar el asiento seleccionado del sessionStorage
+    const asientoSeleccionado = sessionStorage.getItem('asiento') || '';
+
     pasajeros.forEach(p => {
-      // Asegurarse de que el precio sea un número
-      html += `<p>Pasajero ${p.numero} (Asiento ${p.asiento}) - S/ ${(parseFloat(p.precio) || 0).toFixed(2)}</p>`;
+      // Si hay un asiento seleccionado, solo mostrar ese pasajero
+      let asientoSeleccionado = sessionStorage.getItem('asiento');
+      html += `<p>Pasajero ${p.numero} (Asiento ${asientoSeleccionado}) - S/ ${(parseFloat(p.precio) || 0).toFixed(2)}</p>`;
     });
 
     html += `
@@ -2357,6 +2361,8 @@
   let precioCambioRuta = 0;
 
   $(document).ready(function () {
+    let btn = $('#codigoPromocion');
+    btn.prop('disabled', true);
     $.ajax({
       url: '/ecommerce/home/ObtenerPrecioCambioRuta',
       type: 'GET',

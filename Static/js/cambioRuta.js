@@ -26,6 +26,18 @@ const CONFIG = {
     }
 };
 
+// =============================================================================
+// VARIABLES GLOBALES
+// =============================================================================
+
+// Variable global para almacenar el nombre visible del asiento seleccionado
+window.nombreAsientoGlobal = '';
+window.asientoIdGlobal = '';
+
+// =============================================================================
+// CONFIGURACIÓN DINÁMICA
+// =============================================================================
+
 $.ajax({
     url: '/ecommerce/home/GetConfGeneral',  // Ruta de la API
     method: 'GET',  // Método GET
@@ -43,6 +55,28 @@ $.ajax({
     },
     error: function (xhr, status, error) {
         console.error("Error en la llamada AJAX:", error);
+    }
+});
+
+// Obtener precio de cambio de ruta específico para cambios de ruta
+window.precioCambioRuta = 0;
+// Variable global para almacenar el nombre visible del asiento
+window.nombreAsientoVisible = '';
+
+$.ajax({
+    url: '/ecommerce/home/ObtenerPrecioCambioRuta',
+    type: 'GET',
+    dataType: 'json',
+    success: function (response) {
+        if (response.Status === 'success') {
+            window.precioCambioRuta = parseFloat(response.precio) || 0;
+            console.log("Precio de cambio de ruta cargado:", window.precioCambioRuta);
+        } else {
+            console.warn("No se pudo obtener el precio de cambio de ruta");
+        }
+    },
+    error: function () {
+        console.error("Error al consultar el precio de cambio de ruta");
     }
 });
 
@@ -204,20 +238,70 @@ const SearchManager = {
         }
         return true;
     },
-    // ✅ FUNCIÓN MODIFICADA: Búsqueda con verificación automática
+    // ✅ FUNCIÓN MODIFICADA: Búsqueda sin limpieza automática para cambio de ruta
     async buscarYMostrarItinerario() {
         if (!this.validarDatos()) return;
 
-        // ✅ VERIFICAR: Si hay datos previos, limpiar automáticamente
-        const hayDatosPrevios = this.verificarDatosPrevios();
+        // � DESHABILITAR BOTÓN DE BÚSQUEDA PARA EVITAR CLICS MÚLTIPLES
+        // 🔒 DESHABILITAR BOTÓN DE BÚSQUEDA PERMANENTEMENTE
+        this.encontrarYDeshabilitarBotonBuscar();
 
-        if (hayDatosPrevios) {
-            console.log('🔍 Datos previos detectados - Iniciando limpieza automática...');
-            await this.limpiarDatosPreviosCompleto();
+        try {
+            // �🔍 DEBUG: Verificar estado antes de la búsqueda
+            const ventasAntes = sessionStorage.getItem('ventas');
+            console.log('🔍 ESTADO ANTES DE BÚSQUEDA:');
+            console.log('- Ventas en sessionStorage:', ventasAntes ? JSON.parse(ventasAntes) : 'No hay ventas');
+            console.log('- Asientos seleccionados:', SeatManager.asientosSeleccionados.size);
+            console.log('- Paso actual:', AppState.currentStep);
+
+            // ✅ En cambio de ruta, NO limpiar automáticamente los datos previos
+            // El usuario ya tiene un pasaje válido y solo está cambiando la ruta
+            console.log('🔍 Iniciando búsqueda para cambio de ruta (manteniendo datos previos)');
+
+            // Ejecutar búsqueda normal sin limpiar datos
+            this.ejecutarBusqueda();
+
+            // 🔍 DEBUG: Verificar estado después de ejecutarBusqueda
+            setTimeout(() => {
+                const ventasDespues = sessionStorage.getItem('ventas');
+                console.log('🔍 ESTADO DESPUÉS DE ejecutarBusqueda():');
+                console.log('- Ventas en sessionStorage:', ventasDespues ? JSON.parse(ventasDespues) : 'No hay ventas');
+                console.log('- Asientos seleccionados:', SeatManager.asientosSeleccionados.size);
+                console.log('- Paso actual:', AppState.currentStep);
+            }, 100);
+
+        } catch (error) {
+            console.error('❌ Error en búsqueda:', error);
+            toastr.error('Error al realizar la búsqueda');
+        }
+    },
+
+    // ✅ FUNCIÓN MODIFICADA: Solo deshabilitar botón permanentemente
+    encontrarYDeshabilitarBotonBuscar() {
+        // Buscar botón por onclick que contenga buscarYMostrarItinerario
+        let botonBuscar = document.querySelector('button[onclick*="buscarYMostrarItinerario"]');
+        
+        // Si no se encuentra, buscar por texto "Buscar"
+        if (!botonBuscar) {
+            const botones = document.querySelectorAll('button');
+            botones.forEach(btn => {
+                if (btn.textContent.trim().toLowerCase().includes('buscar')) {
+                    botonBuscar = btn;
+                }
+            });
         }
 
-        // Ejecutar búsqueda normal
-        this.ejecutarBusqueda();
+        // Si se encuentra el botón, deshabilitarlo permanentemente
+        if (botonBuscar) {
+            botonBuscar.disabled = true;
+            botonBuscar.style.opacity = '0.6';
+            botonBuscar.style.cursor = 'not-allowed';
+            botonBuscar.textContent = 'Búsqueda realizada';
+            
+            console.log('🔒 Botón de búsqueda deshabilitado permanentemente');
+        }
+
+        return botonBuscar;
     },
 
     // ✅ NUEVA FUNCIÓN: Verificar si hay datos previos
@@ -241,9 +325,13 @@ const SearchManager = {
         return hayVentas || hayAsientosSeleccionados || hayProgreso;
     },
 
-    // ✅ NUEVA FUNCIÓN: Limpieza automática completa
-    async limpiarDatosPreviosCompleto() {
+    // ✅ FUNCIÓN MODIFICADA: Limpieza con opción de preservar datos
+    async limpiarDatosPreviosCompleto(preservarDatosUsuario = false) {
         console.log('🧹 Iniciando limpieza automática completa...');
+        
+        if (preservarDatosUsuario) {
+            console.log('💾 Modo cambio de ruta: preservando datos del usuario');
+        }
 
         try {
             // 1. Liberar asientos en backend (TODOS los que estén seleccionados)
@@ -255,16 +343,47 @@ const SearchManager = {
             // 2. También liberar asientos desde sessionStorage por si quedaron huérfanos
             await this.liberarAsientosDesdeStorage();
 
-            // 3. Resetear sistema completo (frontend)
-            App.resetearSistemaCompleto();
+            // 3. Resetear sistema (con opción de preservar datos del usuario)
+            if (preservarDatosUsuario) {
+                // Solo limpiar la UI y asientos, pero preservar ventas y formularios
+                this.limpiarSoloUIyAsientos();
+            } else {
+                // Limpieza completa normal
+                App.resetearSistemaCompleto(false);
+            }
 
             console.log('✅ Limpieza automática completada');
 
         } catch (error) {
             console.error('❌ Error en limpieza automática:', error);
             // Continuar con la búsqueda aunque haya error en limpieza
-            App.resetearSistemaCompleto();
+            if (!preservarDatosUsuario) {
+                App.resetearSistemaCompleto(false);
+            }
         }
+    },
+
+    // ✅ NUEVA FUNCIÓN: Limpiar solo UI y asientos (preservar datos del usuario)
+    limpiarSoloUIyAsientos() {
+        console.log('🧽 Limpiando solo UI y asientos, preservando datos del usuario...');
+        
+        // Limpiar asientos seleccionados
+        SeatManager.asientosSeleccionados.clear();
+        SeatManager.actualizarContadorAsientos();
+        
+        // Limpiar visualización de asientos
+        $('.seat.selected').removeClass('selected');
+        
+        // Limpiar resultados de búsqueda anteriores
+        $('#resultados-busqueda').empty();
+        
+        // Resetear solo AppState relacionado con búsqueda
+        AppState.currentStep = 0;
+        AppState.viajesEncontrados = [];
+        AppState.viajeSeleccionado = null;
+        
+        // NO limpiar ventas ni formularios del usuario
+        console.log('✅ UI limpiada, datos del usuario preservados');
     },
 
     // ✅ NUEVA FUNCIÓN: Liberar asientos desde sessionStorage
@@ -304,10 +423,32 @@ const SearchManager = {
     },
 
     ejecutarBusqueda() {
-        // Limpiar progreso anterior si existe
+        // 🔍 DEBUG: Estado al inicio de ejecutarBusqueda
+        const ventasInicio = sessionStorage.getItem('ventas');
+        console.log('🔍 ejecutarBusqueda() - INICIO:');
+        console.log('- Ventas:', ventasInicio ? JSON.parse(ventasInicio) : 'No hay ventas');
+        console.log('- AppState.currentStep:', AppState.currentStep);
+
+        // ✅ MODIFICADO: Preservar datos del usuario durante cambio de ruta
+        const ventasStorage = sessionStorage.getItem('ventas');
+        const hayVentas = ventasStorage && Object.keys(JSON.parse(ventasStorage)).length > 0;
+        
         if (AppState.currentStep > 0) {
-            App.resetearSistemaCompleto();
+            if (hayVentas) {
+                // En cambio de ruta: preservar datos del usuario
+                console.log('🔄 Cambio de ruta detectado - preservando datos del usuario');
+                App.resetearSistemaCompleto(true);
+            } else {
+                // Nueva búsqueda desde cero: limpiar todo
+                console.log('🔄 Nueva búsqueda desde cero - limpiando completamente');
+                App.resetearSistemaCompleto(false);
+            }
         }
+
+        // 🔍 DEBUG: Estado después de resetear
+        const ventasDespuesReset = sessionStorage.getItem('ventas');
+        console.log('🔍 ejecutarBusqueda() - DESPUÉS DE RESET:');
+        console.log('- Ventas:', ventasDespuesReset ? JSON.parse(ventasDespuesReset) : 'No hay ventas');
 
         const datos = this.capturarDatos();
 
@@ -321,6 +462,11 @@ const SearchManager = {
     },
 
     procesarRespuestaBusqueda(resp) {
+        // 🔍 DEBUG: Estado al procesar respuesta
+        const ventasAntesRespuesta = sessionStorage.getItem('ventas');
+        console.log('🔍 procesarRespuestaBusqueda() - INICIO:');
+        console.log('- Ventas antes de procesar:', ventasAntesRespuesta ? JSON.parse(ventasAntesRespuesta) : 'No hay ventas');
+
         if (resp.Status !== 'success') {
             toastr.warning('ERROR AL BUSCAR EL VIAJE: ' + resp.Msj);
             return;
@@ -339,6 +485,11 @@ const SearchManager = {
         if (resp.data_vuelta) {
             AppState.itinerarioRegreso = resp.data_vuelta;
         }
+
+        // 🔍 DEBUG: Estado final después de procesar
+        const ventasDespuesRespuesta = sessionStorage.getItem('ventas');
+        console.log('🔍 procesarRespuestaBusqueda() - FINAL:');
+        console.log('- Ventas después de procesar:', ventasDespuesRespuesta ? JSON.parse(ventasDespuesRespuesta) : 'No hay ventas');
 
         toastr.success('VIAJES RETORNADOS CORRECTAMENTE');
     }
@@ -928,6 +1079,7 @@ const SeatManager = {
             showCancelButton: true,
             confirmButtonText: 'Sí, eliminar',
             cancelButtonText: 'Cancelar',
+            reverseButtons: true
         });
 
         if (confirm.isConfirmed) {
@@ -1150,14 +1302,16 @@ const SeatManager = {
                         type="button" data-bs-toggle="collapse" 
                         data-bs-target="#${accordionItemId}" 
                         aria-expanded="${isFirstAccordion}" 
-                        aria-controls="${accordionItemId}">
-                    Asiento ${btnId}   
+                        aria-controls="${accordionItemId}"
+                        style="background-color: var(--primary-color); color: #e8f5e9;">
+                    Asiento ${nombreAsiento}  
                 </button>
             </h2>
             <div id="${accordionItemId}" 
                  class="accordion-collapse collapse ${isFirstAccordion ? 'show' : ''}" 
                  aria-labelledby="${headerId}" 
-                 data-bs-parent="#accordionPasajeros_${sufijo}">
+                 data-bs-parent="#accordionPasajeros_${sufijo}"
+                 data-asiento-id="${btnId}">
                 <div class="accordion-body">
                     ${FormManager.generarFormularioHTML(nombreAsiento, btnId)}
                 </div>
@@ -1175,6 +1329,18 @@ const FormManager = {
         // Recuperar el valor del DNI antes de renderizar el input
         const dniValue = document.getElementById("numDocAnt")?.value || "";
 
+        // Obtener el precio del asiento de forma asíncrona pasando el ID correcto
+        this.obtenerPrecioAsiento(asientoId).then(precioAsiento => {
+            // Actualizar el elemento del precio una vez que se obtenga
+            const elementoPrecio = document.querySelector(`[data-asiento-id="${asientoId}"] .precio-asiento`);
+            if (elementoPrecio) {
+                elementoPrecio.textContent = `Asiento: ${asientoNombre} - S/ ${precioAsiento.toFixed(2)}`;
+                console.log(`💰 Precio del asiento ${asientoNombre} actualizado: S/ ${precioAsiento.toFixed(2)}`);
+                sessionStorage.setItem('asiento', asientoNombre);
+                console.log(`💾 Asiento guardado en sessionStorage: ${asientoNombre}`);
+            }
+        });
+
         // Después de renderizar el input, si hay un valor de DNI, lanzar la consulta RENIEC automáticamente
         setTimeout(() => {
             if (dniValue) {
@@ -1189,7 +1355,7 @@ const FormManager = {
         }, 0);
 
         return `
-            <div class="mb-2 fw-bold text-primary">Asiento: ${asientoNombre} (<span></span>)</div>
+            <div class="mb-2 fw-bold text-primary precio-asiento">Asiento: ${asientoNombre} - Cargando precio...</div>
             <select class="form-select mb-2" id="tipo_doc_${asientoId}" disabled readonly>
             <option value="DNI">DNI</option>
             <option value="CE">CE</option>
@@ -1208,10 +1374,6 @@ const FormManager = {
             <label for="sexoFemenino_${asientoId}">Femenino</label>
             </div>
             <input class="form-control mb-2" id="correo_${asientoId}" placeholder="Correo electrónico" type="email" readonly disabled>
-            <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="brazos_${asientoId}" disabled readonly>
-            <label class="form-check-label" for="brazos_${asientoId}">Con menor en brazos</label>
-            </div>
             <div class="form-check mb-2">
             <input class="form-check-input" type="checkbox" id="esMenor_${asientoId}" disabled readonly>
             <label class="form-check-label" for="esMenor_${asientoId}">Es menor de edad</label>
@@ -1232,6 +1394,82 @@ const FormManager = {
             Complete todos los campos
             </button>
         `;
+    },
+
+    async obtenerPrecioAsiento(asientoId) {
+        // Primero intentar obtener desde sessionStorage
+        const datosResumen = sessionStorage.getItem('datos_resumen_viaje');
+        if (datosResumen) {
+            try {
+                const datos = JSON.parse(datosResumen);
+                if (datos.pasajeros && datos.pasajeros.length > 0) {
+                    // Buscar el pasajero específico por asiento o retornar el precio del primer pasajero
+                    const pasajero = datos.pasajeros.find(p => p.asiento_id === parseInt(asientoId)) 
+                                   || datos.pasajeros[0];
+                    return parseFloat(pasajero.precio) || 0;
+                }
+            } catch (e) {
+                console.error("Error al parsear datos del resumen:", e);
+            }
+        }
+
+        // Si no hay datos en sessionStorage, hacer llamada AJAX
+        try {
+            const viaje = sessionStorage.getItem('btn_id_ida');
+            const descuentoAplicado = 0; // Sin descuento para obtener precio base
+
+            const response = await $.ajax({
+                url: '/ecommerce/home/resumenViaje',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ 
+                    asiento_id: asientoId, 
+                    descuento: descuentoAplicado, 
+                    viaje: viaje 
+                })
+            });
+
+            if (response.Status === 'success' && response.data.pasajeros && response.data.pasajeros.length > 0) {
+                // Guardar en sessionStorage para uso futuro
+                sessionStorage.setItem('datos_resumen_viaje', JSON.stringify(response.data));
+                
+                // Retornar el precio del asiento específico
+                const pasajero = response.data.pasajeros.find(p => p.asiento_id === parseInt(asientoId)) 
+                               || response.data.pasajeros[0];
+                
+                // Guardar el nombre visible del asiento en la variable global
+                if (pasajero && pasajero.asiento) {
+                    window.nombreAsientoGlobal = pasajero.asiento;
+                    console.log(`Nombre del asiento guardado: ${window.nombreAsientoGlobal}`);
+                }
+                
+                return parseFloat(pasajero.precio) || 0;
+            }
+        } catch (error) {
+            console.error("Error al obtener precio del asiento:", error);
+        }
+
+        // Fallback: usar CONFIG.PRECIORUTA si todo falla
+        return CONFIG.PRECIORUTA || 0;
+    },
+
+    calcularPrecioAsiento() {
+        // Obtener el precio base desde el sessionStorage si está disponible
+        const datosResumen = sessionStorage.getItem('datos_resumen_viaje');
+        if (datosResumen) {
+            try {
+                const datos = JSON.parse(datosResumen);
+                if (datos.pasajeros && datos.pasajeros.length > 0) {
+                    // Retornar el precio del primer pasajero como precio base del asiento
+                    return parseFloat(datos.pasajeros[0].precio) || 0;
+                }
+            } catch (e) {
+                console.error("Error al parsear datos del resumen:", e);
+            }
+        }
+        
+        // Fallback: usar CONFIG.PRECIORUTA si no hay datos del resumen
+        return CONFIG.PRECIORUTA || 0;
     },
 
     enviarDatosPasajero(nombreAsiento, idAsiento) {
@@ -1257,7 +1495,11 @@ const FormManager = {
         const fechaNacimiento = document.getElementById(`fechaNacimientoNuevo_${idAsiento}`).value;
         const telefono = document.getElementById(`telefono_${idAsiento}`).value;
         const correo = document.getElementById(`correo_${idAsiento}`).value;
-        const brazos = document.getElementById(`brazos_${idAsiento}`).checked;
+        
+        // Verificar si el elemento brazos existe, si no usar false como valor por defecto
+        const brazosElement = document.getElementById(`brazos_${idAsiento}`);
+        const brazos = brazosElement ? brazosElement.checked : false;
+        
         const esMenor = document.getElementById(`esMenor_${idAsiento}`).checked;
 
         const recuperarSeleccion = document.querySelector(`input[name="sexo-${idAsiento}"]:checked`)?.id;
@@ -1680,7 +1922,7 @@ const PaymentManager = {
                     </div>
                     <div class="col-md-6">
                         <label for="numero_documento_contacto" class="form-label">Número de documento *</label>
-                        <input type="text" id="numero_documento_contacto" class="form-control" required>
+                        <input type="number" id="numero_documento_contacto" class="form-control" required>
                     </div>
                     <div class="col-md-12">
                         <label for="nombres_contacto" class="form-label">Nombres *</label>
@@ -1700,7 +1942,7 @@ const PaymentManager = {
                     </div>
                     <div class="col-md-12">
                         <label for="telefono_contacto" class="form-label">Teléfono/móvil *</label>
-                        <input type="tel" id="telefono_contacto" class="form-control" required>
+                        <input type="number" id="telefono_contacto" class="form-control" required>
                     </div>
 
                 </div>
@@ -1714,7 +1956,7 @@ const PaymentManager = {
                     </div>
                     <div class="col-md-12">
                         <label for="numero_documento_contacto" class="form-label">RUC *</label>
-                        <input type="text" id="numero_documento_contacto" class="form-control" placeholder="20123456789" maxlength="11" required>
+                        <input type="number" id="numero_documento_contacto" class="form-control" placeholder="20123456789" maxlength="11" required>
                     </div>
                     <div class="col-md-12">
                         <label for="razon_social_contacto" class="form-label">Razón Social *</label>
@@ -1726,7 +1968,7 @@ const PaymentManager = {
                     </div>
                     <div class="col-md-12">
                         <label for="telefono_contacto" class="form-label">Teléfono *</label>
-                        <input type="tel" id="telefono_contacto" class="form-control" required>
+                        <input type="number" id="telefono_contacto" class="form-control" required>
                     </div>
                 </div>
             `;
@@ -1971,11 +2213,12 @@ const PaymentManager = {
         // Limpiar opciones existentes (excepto la primera)
         selector.innerHTML = '<option value="">Seleccione</option>';
 
-        // Poblar combo de tipos
+        // Poblar combo de tipos, omitiendo "Efectivo"
         for (const tipoId in this.metodosPagoBD) {
             const grupo = this.metodosPagoBD[tipoId];
             if (grupo.length > 0) {
                 const tipoNombre = grupo[0].tipo_metodo;
+                if (tipoNombre && tipoNombre.trim().toLowerCase() === "efectivo") continue; // Omitir "Efectivo"
                 const option = document.createElement("option");
                 option.value = tipoId;
                 option.textContent = tipoNombre;
@@ -2057,7 +2300,7 @@ const PaymentManager = {
                 <div class="row g-3">
                     <div class="col-12">
                         <label class="form-label">Número de tarjeta</label>
-                        <input id="numero_tarjeta" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19">
+                        <input type="text" id="numero_tarjeta" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19" autocomplete="cc-number">
                     </div>
                     <div class="col-12">
                         <label class="form-label">Nombre del titular</label>
@@ -2075,14 +2318,14 @@ const PaymentManager = {
                         <select id="ano_vencimiento" class="form-select">
                             <option value="">AA</option>
                             ${Array.from({ length: 10 }, (_, i) => {
-                const year = new Date().getFullYear() + i;
-                return `<option value="${year}">${year}</option>`;
-            }).join('')}
+                                const year = new Date().getFullYear() + i;
+                                return `<option value="${year}">${year}</option>`;
+                            }).join('')}
                         </select>
                     </div>
                     <div class="col-6">
                         <label class="form-label">CVV</label>
-                        <input id="cvv_tarjeta" class="form-control" placeholder="123" maxlength="4">
+                        <input type="number" id="cvv_tarjeta" class="form-control" placeholder="123" maxlength="3">
                     </div>
                     <div class="col-6">
                         <label class="form-label">Código promocional (opcional)</label>
@@ -2090,6 +2333,35 @@ const PaymentManager = {
                     </div>
                 </div>
             `;
+
+            // Solo aceptar 16 dígitos en tiempo real para el número de tarjeta
+            setTimeout(() => {
+                const numeroTarjetaInput = document.getElementById("numero_tarjeta");
+                if (numeroTarjetaInput) {
+                    numeroTarjetaInput.addEventListener("input", function () {
+                        // Eliminar todo lo que no sea dígito
+                        let val = this.value.replace(/\D/g, "");
+                        // Limitar a 16 dígitos
+                        val = val.slice(0, 16);
+                        // Opcional: Formatear con espacios cada 4 dígitos
+                        this.value = val.replace(/(.{4})/g, "$1 ").trim();
+                    });
+                }
+                // Solo permitir máximo 3 caracteres en tiempo real para el CVV
+                const cvvInput = document.getElementById("cvv_tarjeta");
+                if (cvvInput) {
+                    cvvInput.addEventListener("input", function () {
+                        this.value = this.value.replace(/\D/g, '').slice(0, 3);
+                    });
+                }
+                // Solo aceptar letras en el campo "Nombre del titular"
+                const titularInput = document.getElementById("titular_tarjeta");
+                if (titularInput) {
+                    titularInput.addEventListener("input", function () {
+                        this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]/g, "");
+                    });
+                }
+            }, 0);
         } else if (tipoMetodo.toUpperCase() === "BILLETERA VIRTUAL") {
             if (metodo.qr) {
                 divExtra.innerHTML = `
@@ -2329,15 +2601,44 @@ const PaymentManager = {
         // Obtener datos del viaje desde sessionStorage o variables globales
         const datosViaje = JSON.parse(sessionStorage.getItem('datos_resumen_viaje') || 'null');
         
+        // Obtener el comprobante original para cambio de ruta
+        const comprobanteOriginal = document.getElementById('comprobante')?.value || '';
+        
+        // Obtener información del asiento seleccionado desde sessionStorage
+        const asientoNombreGuardado = sessionStorage.getItem('asiento') || '';
+        const ventas = JSON.parse(sessionStorage.getItem("ventas") || "{}");
+        let asientoInfo = {};
+        
+        if (ventas && Object.keys(ventas).length > 0) {
+            const primerAsiento = Object.keys(ventas)[0];
+            asientoInfo = {
+                asiento_nombre: asientoNombreGuardado, // Usar el valor del sessionStorage
+                asiento_id: primerAsiento
+            };
+        }
+        
+        console.log('📋 Información del asiento capturada:', {
+            asiento_nombre: asientoNombreGuardado,
+            asiento_id: asientoInfo.asiento_id
+        });
+        
         return {
             contacto: datosContacto,
             pago: datosPago,
-            ventas: JSON.parse(sessionStorage.getItem("ventas") || "{}"),
+            ventas: ventas,
             precio_venta_total: parseFloat(sessionStorage.getItem('precio_venta_total')) || 0,
-            datos_viaje: datosViaje ? datosViaje.detalle_viaje : null,  // Incluir datos del viaje
+            datos_viaje: datosViaje ? {
+                ...datosViaje.detalle_viaje,
+                numeroComprobante: comprobanteOriginal,
+                ...asientoInfo
+            } : {
+                numeroComprobante: comprobanteOriginal,
+                ...asientoInfo
+            },
             itinerario: {
-                currentStep: AppState.currentStep,
-                itinerarioRegreso: AppState.itinerarioRegreso
+                currentStep: 'cambio_ruta', // Siempre será cambio de ruta en este archivo
+                itinerarioRegreso: false,   // Por defecto false
+                comprobante_original: comprobanteOriginal
             }
         };
  
@@ -2425,16 +2726,15 @@ const PaymentManager = {
                     <i class="fas fa-check" style="color: white; font-size: 60px;"></i>
                 </div>
                 <h1 style="color: #155724; margin-bottom: 20px; font-weight: bold;">¡Pago Confirmado!</h1>
-                <h4 style="color: #155724; margin-bottom: 15px;">Código de confirmación: <strong>${resultado.codigo_confirmacion || 'PAY-' + Date.now()}</strong></h4>
                 <p style="color: #155724; font-size: 18px; margin-bottom: 30px;">
-                    Su reserva ha sido procesada exitosamente.<br>
-                    Recibirá un correo de confirmación en ${this.datosContacto.email}
+                    Su compra ha sido procesada exitosamente.<br>
+                    Recibirá un correo de confirmación
                 </p>
                 <button id="btn_nueva_reserva" class="btn btn-success btn-lg" style="margin-right: 15px;">
-                    <i class="fas fa-plus me-2"></i>Nueva Reserva
+                    <i class="fas fa-plus me-2"></i>Nueva compra
                 </button>
                 <button id="btn_descargar_boleto" class="btn btn-outline-success btn-lg">
-                    <i class="fas fa-download me-2"></i>Descargar Boleto
+                    <i class="fas fa-download me-2"></i>Descargar boleto
                 </button>
             </div>
         `;
@@ -2520,7 +2820,7 @@ const PaymentManager = {
                     }
                     
                     try {
-                        // Método 1: Intentar descarga directa con la ruta específica
+                        // Intentar descarga directa con enlace
                         const urlDescarga = `/Static/tickets/${nombreArchivo}`;
                         console.log(`🔗 Intentando descarga directa: ${urlDescarga}`);
                         
@@ -2533,20 +2833,7 @@ const PaymentManager = {
                         linkDirecto.click();
                         document.body.removeChild(linkDirecto);
                         
-                        console.log(`✅ Descarga iniciada con enlace directo: ${nombreArchivo}`);
-                        
-                        // Si el método directo no funciona, intentar con window.open como respaldo
-                        setTimeout(() => {
-                            const nuevaVentana = window.open(urlDescarga, '_blank');
-                            if (nuevaVentana) {
-                                console.log(`✅ Descarga de respaldo con window.open: ${nombreArchivo}`);
-                                setTimeout(() => {
-                                    if (nuevaVentana && !nuevaVentana.closed) {
-                                        nuevaVentana.close();
-                                    }
-                                }, 2000);
-                            }
-                        }, 500);
+                        console.log(`✅ Descarga iniciada: ${nombreArchivo}`);
                         
                         // Pequeña pausa entre descargas
                         if (index < this.rutas.length - 1) {
@@ -2590,9 +2877,16 @@ const PaymentManager = {
             nombreArchivo = ruta;
         }
         
+        // Convertir formato VENTA-X a A000-0000000X.pdf
+        if (nombreArchivo.startsWith('VENTA-')) {
+            const numero = nombreArchivo.replace('VENTA-', '');
+            // Formatear el número con ceros a la izquierda (8 dígitos)
+            const numeroFormateado = numero.padStart(8, '0');
+            nombreArchivo = `A000-${numeroFormateado}.pdf`;
+            console.log(`🔄 Convertido ${ruta} → ${nombreArchivo}`);
+        }
         // Si el nombre ya tiene la extensión, lo usamos tal cual
-        // Si no, asumimos que es el nombre del comprobante y agregamos .pdf
-        if (!nombreArchivo.toLowerCase().endsWith('.pdf')) {
+        else if (!nombreArchivo.toLowerCase().endsWith('.pdf')) {
             nombreArchivo = nombreArchivo + '.pdf';
         }
         
@@ -2914,40 +3208,73 @@ const App = {
         console.log('✅ Frontend limpiado tras recarga');
     },
 
-    resetearSistemaCompleto() {
-        console.log('🔄 Recarga detectada - Limpiando progreso...');
+    resetearSistemaCompleto(preservarDatosUsuario = false) {
+        console.log('🔄 Limpiando sistema...');
+        
+        if (preservarDatosUsuario) {
+            console.log('💾 Modo cambio de ruta: preservando datos del usuario');
+        }
 
-        // 1. Limpiar estado de la aplicación
-        AppState.resetProgress();
+        // 1. Limpiar estado de la aplicación (solo progreso, no datos)
+        if (!preservarDatosUsuario) {
+            AppState.resetProgress();
+        } else {
+            // Solo resetear el paso actual, no el progreso máximo
+            AppState.currentStep = 0;
+        }
 
-        // 2. Limpiar almacenamiento del navegador
-        sessionStorage.removeItem('ventas');
-        sessionStorage.removeItem('datos_pago');
-        sessionStorage.clear();
+        // 2. Limpiar almacenamiento del navegador (condicionalmente)
+        if (!preservarDatosUsuario) {
+            sessionStorage.removeItem('ventas');
+            sessionStorage.removeItem('datos_pago');
+            sessionStorage.clear();
+        } else {
+            // Solo limpiar datos no críticos
+            sessionStorage.removeItem('btn_id_ida');
+            sessionStorage.removeItem('btn_id_vuelta');
+            // NO borrar 'ventas' ni 'datos_pago'
+            console.log('💾 Datos de ventas y pago preservados');
+        }
 
-        // 3. Limpiar formularios
+        // 3. Limpiar formularios (solo de búsqueda)
         this.limpiarFormularios();
 
         // 4. Limpiar contenedores dinámicos
         this.limpiarContenedoresDinamicos();
 
-        // 5.    Detener todos los temporizadores activos
+        // 5. Detener todos los temporizadores activos
         TimerManager.detenerTodos();
 
-        // 6. Resetear asientos seleccionados
-        this.limpiarAsientosSeleccionados();
+        // 6. Resetear asientos seleccionados (solo visualmente si preservamos datos)
+        if (!preservarDatosUsuario) {
+            this.limpiarAsientosSeleccionados();
+        } else {
+            // Solo limpiar la selección visual, no los datos
+            this.limpiarSoloVisualizacionAsientos();
+        }
 
-        // 7. Limpiar formulario de pago
-        if (typeof PaymentManager !== 'undefined') {
+        // 7. Limpiar formulario de pago (condicionalmente)
+        if (!preservarDatosUsuario && typeof PaymentManager !== 'undefined') {
             PaymentManager.limpiarFormularioPago();
         }
 
-        // 8. Resetear selección de asientos
-        if (typeof SeatManager !== 'undefined') {
+        // 8. Resetear selección de asientos (condicionalmente)
+        if (!preservarDatosUsuario && typeof SeatManager !== 'undefined') {
             SeatManager.asientosSeleccionados.clear();
         }
 
-        console.log('✅ Sistema completamente limpio');
+        console.log(`✅ Sistema ${preservarDatosUsuario ? 'parcialmente' : 'completamente'} limpio`);
+    },
+
+    // ✅ NUEVA FUNCIÓN: Limpiar solo visualización de asientos
+    limpiarSoloVisualizacionAsientos() {
+        // Remover clase de asientos seleccionados visualmente
+        document.querySelectorAll('.asiento-seleccionado').forEach(asiento => {
+            asiento.classList.remove('asiento-seleccionado');
+            asiento.style.backgroundColor = '';
+            asiento.style.color = '';
+        });
+        console.log('🎨 Visualización de asientos limpiada (datos preservados)');
     },
 
     limpiarFormularios() {
