@@ -205,10 +205,10 @@
                 { data: "destino", name: "Destino" },
                 { data: "codigo", name: "Codigo" },
                 {
-                    data: "reserva",
-                    name: "reserva",
+                    data: "pagado",
+                    name: "estado",
                     render: function (data, type, row) {
-                        let estado = data === 1 ? 'Reservado' : 'Pagado';
+                        let estado = data === 0 ? 'Reservado' : 'Pagado';
                         if (estado === "Reservado") {
                             return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-danger fs-5">${estado}</span></h5>`;
                         } else if (estado === "Pagado") {
@@ -324,7 +324,7 @@
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             cancelButtonColor: "#d33",
-            confirmButtonText: "Sí, eliminar",
+            confirmButtonText: "Sí, efectuar pago",
             cancelButtonText: "Cancelar",
             reverseButtons: true // Invertir el orden de los botones
         }).then((result) => {
