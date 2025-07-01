@@ -282,17 +282,29 @@
                     data: "nombre_pais", 
                     name: "nombre_pais",
                     render: function(data, type, row) {
-                        return data ? data.toUpperCase() : '';
+                        return data ? data.charAt(0).toUpperCase() + data.slice(1).toLowerCase() : '';
                     }
                 },
-                { data: "abreviatura", name: "abreviatura" },
+                { data: "abreviatura", name: "abreviatura",
+                    render: function(data, type, row) {
+                        return data ? data.charAt(0).toUpperCase() + data.slice(1).toLowerCase() : '';
+                    }
+                },
                 { data: "numero_documento", name: "numero_documento" },
-                { data: "apellidos", name: "apellidos" },
-                { data: "nombre", name: "nombre" },
+                { data: "apellidos", name: "apellidos",
+                    render: function(data, type, row) {
+                        return data ? data.charAt(0).toUpperCase() + data.slice(1).toLowerCase() : '';
+                    }
+                },
+                { data: "nombre", name: "nombre",
+                    render: function(data, type, row) {
+                        return data ? data.charAt(0).toUpperCase() + data.slice(1).toLowerCase() : '';
+                    }
+                },
                 {
                     data: "sexo", name: "sexo",
                     render: function (data, type, row) {
-                        return data === 1 ? 'MASCULINO' : 'FEMENINO';
+                        return data === 1 ? 'Masculino' : 'Femenino';
                     }
                 },
                 {
@@ -302,11 +314,15 @@
                         return data ? moment(data).format('DD/MM/YYYY') : '';
                     }
                 },
-                { data: "direccion", name: "direccion" },
+                { data: "direccion", name: "direccion",
+                    render: function(data, type, row) {
+                        return data ? data.charAt(0).toUpperCase() + data.slice(1).toLowerCase() : '';
+                    }
+                },
                 { data: "telefono", name: "telefono" },
                 { data: "email", name: "email",
                     render: function(data,type,row) {
-                        return data ? data.toUpperCase() : '';
+                        return data ? data.charAt(0).toUpperCase() + data.slice(1).toLowerCase() : '';
                     }
                  },
                 {

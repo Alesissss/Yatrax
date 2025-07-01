@@ -1,4 +1,8 @@
 -- Primero eliminamos los procedimientos por si existen
+DROP PROCEDURE IF EXISTS SP_REGISTRAR_TIPO_ASIENTO;
+DROP PROCEDURE IF EXISTS SP_EDITAR_TIPO_ASIENTO;
+DROP PROCEDURE IF EXISTS SP_DARBAJA_TIPO_ASIENTO;
+DROP PROCEDURE IF EXISTS SP_ELIMINAR_TIPO_ASIENTO;
 DROP PROCEDURE IF EXISTS SP_MODIFICAR_CONF_GENERAL;
 DROP PROCEDURE IF EXISTS SP_REGISTRAR_REEMBOLSO;
 DROP PROCEDURE IF EXISTS SP_REGISTRAR_CLIENTE;
@@ -638,6 +642,7 @@ CREATE TABLE herramienta(
     nombre varchar(60),
     icono varchar(200),
     precio DECIMAL(9,2),
+    estado BOOLEAN DEFAULT 1,
     id_tipo INT NOT NULL,
     FOREIGN KEY (id_tipo) REFERENCES tipo_herramienta(id)
 );
@@ -4808,6 +4813,160 @@ BEGIN
     ELSE
         DELETE FROM sucursal WHERE id = P_ID;
         SET @MSJ = 'Se eliminó correctamente la sucursal';
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Crear procedimiento SP_REGISTRAR_TIPO_ASIENTO
+DELIMITER $$
+
+CREATE PROCEDURE SP_REGISTRAR_TIPO_ASIENTO(
+    IN P_NOMBRE VARCHAR(50),
+    IN P_ICONO VARCHAR(255),
+    IN P_PRECIO DECIMAL(9,2),
+    IN P_ESTADO BOOLEAN
+)
+BEGIN
+    DECLARE cTipoAsiento INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cTipoAsiento
+    FROM herramienta 
+    WHERE nombre = P_NOMBRE AND id_tipo = 1;
+
+    IF cTipoAsiento > 0 THEN
+        SET @MSJ2 = 'El tipo de asiento que intenta registrar ya está registrado';
+    ELSE
+        INSERT INTO herramienta (
+            nombre, icono, precio, id_tipo
+        ) VALUES (
+            P_NOMBRE, P_ICONO, P_PRECIO, 1
+        );
+
+        SET @MSJ = 'Se registró correctamente el tipo de asiento';
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Crear procedimiento SP_EDITAR_TIPO_ASIENTO
+DELIMITER $$
+
+CREATE PROCEDURE SP_EDITAR_TIPO_ASIENTO(
+    IN P_ID INT,
+    IN P_NOMBRE VARCHAR(50),
+    IN P_ICONO VARCHAR(255),
+    IN P_PRECIO DECIMAL(9,2),
+    IN P_ESTADO BOOLEAN
+)
+BEGIN
+    DECLARE cTipoAsiento INT;
+    DECLARE cNombre INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cTipoAsiento 
+    FROM herramienta 
+    WHERE id = P_ID AND id_tipo = 1;
+
+    SELECT COUNT(*) INTO cNombre 
+    FROM herramienta 
+    WHERE nombre = P_NOMBRE AND id != P_ID AND id_tipo = 1;
+
+    IF cTipoAsiento <= 0 THEN
+        SET @MSJ2 = 'El tipo de asiento que intenta editar no existe';
+    ELSEIF cNombre > 0 THEN
+        SET @MSJ2 = 'El nombre del tipo de asiento ya está en uso';
+    ELSE
+        UPDATE herramienta 
+        SET nombre = P_NOMBRE,
+            icono = P_ICONO,
+            precio = P_PRECIO,
+            estado = P_ESTADO
+        WHERE id = P_ID AND id_tipo = 1;
+
+        SET @MSJ = 'Se modificó correctamente el tipo de asiento';
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Crear procedimiento SP_DARBAJA_TIPO_ASIENTO
+DELIMITER $$
+
+CREATE PROCEDURE SP_DARBAJA_TIPO_ASIENTO(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cTipoAsiento INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cTipoAsiento 
+    FROM herramienta 
+    WHERE id = P_ID AND id_tipo = 1;
+
+    IF cTipoAsiento <= 0 THEN
+        SET @MSJ2 = 'El tipo de asiento que intenta dar de baja no existe';
+    ELSE
+        UPDATE herramienta 
+        SET estado = 0
+        WHERE id = P_ID AND id_tipo = 1;
+
+        SET @MSJ = 'Se dio de baja correctamente al tipo de asiento';
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Crear procedimiento SP_ELIMINAR_TIPO_ASIENTO
+DELIMITER $$
+
+CREATE PROCEDURE SP_ELIMINAR_TIPO_ASIENTO(
+    IN P_ID INT
+)
+BEGIN
+    DECLARE cTipoAsiento INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SET @MSJ2 = 'Error inesperado al ejecutar el procedimiento almacenado';
+    END;
+
+    SET @MSJ = NULL;
+    SET @MSJ2 = NULL;
+
+    SELECT COUNT(*) INTO cTipoAsiento 
+    FROM herramienta 
+    WHERE id = P_ID AND id_tipo = 1;
+
+    IF EXISTS (SELECT 1 FROM nivel_herramienta WHERE id_herramienta = P_ID) THEN
+        SET @MSJ2 = 'Este tipo de asiento no se puede eliminar porque otros registros dependen de este';
+    ELSEIF cTipoAsiento <= 0 THEN
+        SET @MSJ2 = 'El tipo de asiento que intenta eliminar no existe';
+    ELSE
+        DELETE FROM herramienta WHERE id = P_ID AND id_tipo = 1;
+        SET @MSJ = 'Se eliminó correctamente el tipo de asiento';
     END IF;
 END $$
 

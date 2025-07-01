@@ -26,6 +26,18 @@ const CONFIG = {
     }
 };
 
+// =============================================================================
+// VARIABLES GLOBALES
+// =============================================================================
+
+// Variable global para almacenar el nombre visible del asiento seleccionado
+window.nombreAsientoGlobal = '';
+window.asientoIdGlobal = '';
+
+// =============================================================================
+// CONFIGURACIÓN DINÁMICA
+// =============================================================================
+
 $.ajax({
     url: '/ecommerce/home/GetConfGeneral',  // Ruta de la API
     method: 'GET',  // Método GET
@@ -226,20 +238,70 @@ const SearchManager = {
         }
         return true;
     },
-    // ✅ FUNCIÓN MODIFICADA: Búsqueda con verificación automática
+    // ✅ FUNCIÓN MODIFICADA: Búsqueda sin limpieza automática para cambio de ruta
     async buscarYMostrarItinerario() {
         if (!this.validarDatos()) return;
 
-        // ✅ VERIFICAR: Si hay datos previos, limpiar automáticamente
-        const hayDatosPrevios = this.verificarDatosPrevios();
+        // � DESHABILITAR BOTÓN DE BÚSQUEDA PARA EVITAR CLICS MÚLTIPLES
+        // 🔒 DESHABILITAR BOTÓN DE BÚSQUEDA PERMANENTEMENTE
+        this.encontrarYDeshabilitarBotonBuscar();
 
-        if (hayDatosPrevios) {
-            console.log('🔍 Datos previos detectados - Iniciando limpieza automática...');
-            await this.limpiarDatosPreviosCompleto();
+        try {
+            // �🔍 DEBUG: Verificar estado antes de la búsqueda
+            const ventasAntes = sessionStorage.getItem('ventas');
+            console.log('🔍 ESTADO ANTES DE BÚSQUEDA:');
+            console.log('- Ventas en sessionStorage:', ventasAntes ? JSON.parse(ventasAntes) : 'No hay ventas');
+            console.log('- Asientos seleccionados:', SeatManager.asientosSeleccionados.size);
+            console.log('- Paso actual:', AppState.currentStep);
+
+            // ✅ En cambio de ruta, NO limpiar automáticamente los datos previos
+            // El usuario ya tiene un pasaje válido y solo está cambiando la ruta
+            console.log('🔍 Iniciando búsqueda para cambio de ruta (manteniendo datos previos)');
+
+            // Ejecutar búsqueda normal sin limpiar datos
+            this.ejecutarBusqueda();
+
+            // 🔍 DEBUG: Verificar estado después de ejecutarBusqueda
+            setTimeout(() => {
+                const ventasDespues = sessionStorage.getItem('ventas');
+                console.log('🔍 ESTADO DESPUÉS DE ejecutarBusqueda():');
+                console.log('- Ventas en sessionStorage:', ventasDespues ? JSON.parse(ventasDespues) : 'No hay ventas');
+                console.log('- Asientos seleccionados:', SeatManager.asientosSeleccionados.size);
+                console.log('- Paso actual:', AppState.currentStep);
+            }, 100);
+
+        } catch (error) {
+            console.error('❌ Error en búsqueda:', error);
+            toastr.error('Error al realizar la búsqueda');
+        }
+    },
+
+    // ✅ FUNCIÓN MODIFICADA: Solo deshabilitar botón permanentemente
+    encontrarYDeshabilitarBotonBuscar() {
+        // Buscar botón por onclick que contenga buscarYMostrarItinerario
+        let botonBuscar = document.querySelector('button[onclick*="buscarYMostrarItinerario"]');
+        
+        // Si no se encuentra, buscar por texto "Buscar"
+        if (!botonBuscar) {
+            const botones = document.querySelectorAll('button');
+            botones.forEach(btn => {
+                if (btn.textContent.trim().toLowerCase().includes('buscar')) {
+                    botonBuscar = btn;
+                }
+            });
         }
 
-        // Ejecutar búsqueda normal
-        this.ejecutarBusqueda();
+        // Si se encuentra el botón, deshabilitarlo permanentemente
+        if (botonBuscar) {
+            botonBuscar.disabled = true;
+            botonBuscar.style.opacity = '0.6';
+            botonBuscar.style.cursor = 'not-allowed';
+            botonBuscar.textContent = 'Búsqueda realizada';
+            
+            console.log('🔒 Botón de búsqueda deshabilitado permanentemente');
+        }
+
+        return botonBuscar;
     },
 
     // ✅ NUEVA FUNCIÓN: Verificar si hay datos previos
@@ -263,9 +325,13 @@ const SearchManager = {
         return hayVentas || hayAsientosSeleccionados || hayProgreso;
     },
 
-    // ✅ NUEVA FUNCIÓN: Limpieza automática completa
-    async limpiarDatosPreviosCompleto() {
+    // ✅ FUNCIÓN MODIFICADA: Limpieza con opción de preservar datos
+    async limpiarDatosPreviosCompleto(preservarDatosUsuario = false) {
         console.log('🧹 Iniciando limpieza automática completa...');
+        
+        if (preservarDatosUsuario) {
+            console.log('💾 Modo cambio de ruta: preservando datos del usuario');
+        }
 
         try {
             // 1. Liberar asientos en backend (TODOS los que estén seleccionados)
@@ -277,16 +343,47 @@ const SearchManager = {
             // 2. También liberar asientos desde sessionStorage por si quedaron huérfanos
             await this.liberarAsientosDesdeStorage();
 
-            // 3. Resetear sistema completo (frontend)
-            App.resetearSistemaCompleto();
+            // 3. Resetear sistema (con opción de preservar datos del usuario)
+            if (preservarDatosUsuario) {
+                // Solo limpiar la UI y asientos, pero preservar ventas y formularios
+                this.limpiarSoloUIyAsientos();
+            } else {
+                // Limpieza completa normal
+                App.resetearSistemaCompleto(false);
+            }
 
             console.log('✅ Limpieza automática completada');
 
         } catch (error) {
             console.error('❌ Error en limpieza automática:', error);
             // Continuar con la búsqueda aunque haya error en limpieza
-            App.resetearSistemaCompleto();
+            if (!preservarDatosUsuario) {
+                App.resetearSistemaCompleto(false);
+            }
         }
+    },
+
+    // ✅ NUEVA FUNCIÓN: Limpiar solo UI y asientos (preservar datos del usuario)
+    limpiarSoloUIyAsientos() {
+        console.log('🧽 Limpiando solo UI y asientos, preservando datos del usuario...');
+        
+        // Limpiar asientos seleccionados
+        SeatManager.asientosSeleccionados.clear();
+        SeatManager.actualizarContadorAsientos();
+        
+        // Limpiar visualización de asientos
+        $('.seat.selected').removeClass('selected');
+        
+        // Limpiar resultados de búsqueda anteriores
+        $('#resultados-busqueda').empty();
+        
+        // Resetear solo AppState relacionado con búsqueda
+        AppState.currentStep = 0;
+        AppState.viajesEncontrados = [];
+        AppState.viajeSeleccionado = null;
+        
+        // NO limpiar ventas ni formularios del usuario
+        console.log('✅ UI limpiada, datos del usuario preservados');
     },
 
     // ✅ NUEVA FUNCIÓN: Liberar asientos desde sessionStorage
@@ -326,10 +423,32 @@ const SearchManager = {
     },
 
     ejecutarBusqueda() {
-        // Limpiar progreso anterior si existe
+        // 🔍 DEBUG: Estado al inicio de ejecutarBusqueda
+        const ventasInicio = sessionStorage.getItem('ventas');
+        console.log('🔍 ejecutarBusqueda() - INICIO:');
+        console.log('- Ventas:', ventasInicio ? JSON.parse(ventasInicio) : 'No hay ventas');
+        console.log('- AppState.currentStep:', AppState.currentStep);
+
+        // ✅ MODIFICADO: Preservar datos del usuario durante cambio de ruta
+        const ventasStorage = sessionStorage.getItem('ventas');
+        const hayVentas = ventasStorage && Object.keys(JSON.parse(ventasStorage)).length > 0;
+        
         if (AppState.currentStep > 0) {
-            App.resetearSistemaCompleto();
+            if (hayVentas) {
+                // En cambio de ruta: preservar datos del usuario
+                console.log('🔄 Cambio de ruta detectado - preservando datos del usuario');
+                App.resetearSistemaCompleto(true);
+            } else {
+                // Nueva búsqueda desde cero: limpiar todo
+                console.log('🔄 Nueva búsqueda desde cero - limpiando completamente');
+                App.resetearSistemaCompleto(false);
+            }
         }
+
+        // 🔍 DEBUG: Estado después de resetear
+        const ventasDespuesReset = sessionStorage.getItem('ventas');
+        console.log('🔍 ejecutarBusqueda() - DESPUÉS DE RESET:');
+        console.log('- Ventas:', ventasDespuesReset ? JSON.parse(ventasDespuesReset) : 'No hay ventas');
 
         const datos = this.capturarDatos();
 
@@ -343,6 +462,11 @@ const SearchManager = {
     },
 
     procesarRespuestaBusqueda(resp) {
+        // 🔍 DEBUG: Estado al procesar respuesta
+        const ventasAntesRespuesta = sessionStorage.getItem('ventas');
+        console.log('🔍 procesarRespuestaBusqueda() - INICIO:');
+        console.log('- Ventas antes de procesar:', ventasAntesRespuesta ? JSON.parse(ventasAntesRespuesta) : 'No hay ventas');
+
         if (resp.Status !== 'success') {
             toastr.warning('ERROR AL BUSCAR EL VIAJE: ' + resp.Msj);
             return;
@@ -361,6 +485,11 @@ const SearchManager = {
         if (resp.data_vuelta) {
             AppState.itinerarioRegreso = resp.data_vuelta;
         }
+
+        // 🔍 DEBUG: Estado final después de procesar
+        const ventasDespuesRespuesta = sessionStorage.getItem('ventas');
+        console.log('🔍 procesarRespuestaBusqueda() - FINAL:');
+        console.log('- Ventas después de procesar:', ventasDespuesRespuesta ? JSON.parse(ventasDespuesRespuesta) : 'No hay ventas');
 
         toastr.success('VIAJES RETORNADOS CORRECTAMENTE');
     }
@@ -950,6 +1079,7 @@ const SeatManager = {
             showCancelButton: true,
             confirmButtonText: 'Sí, eliminar',
             cancelButtonText: 'Cancelar',
+            reverseButtons: true
         });
 
         if (confirm.isConfirmed) {
@@ -1172,7 +1302,8 @@ const SeatManager = {
                         type="button" data-bs-toggle="collapse" 
                         data-bs-target="#${accordionItemId}" 
                         aria-expanded="${isFirstAccordion}" 
-                        aria-controls="${accordionItemId}">
+                        aria-controls="${accordionItemId}"
+                        style="background-color: var(--primary-color); color: #e8f5e9;">
                     Asiento ${nombreAsiento}  
                 </button>
             </h2>
@@ -1206,6 +1337,7 @@ const FormManager = {
                 elementoPrecio.textContent = `Asiento: ${asientoNombre} - S/ ${precioAsiento.toFixed(2)}`;
                 console.log(`💰 Precio del asiento ${asientoNombre} actualizado: S/ ${precioAsiento.toFixed(2)}`);
                 sessionStorage.setItem('asiento', asientoNombre);
+                console.log(`💾 Asiento guardado en sessionStorage: ${asientoNombre}`);
             }
         });
 
@@ -1307,8 +1439,8 @@ const FormManager = {
                 
                 // Guardar el nombre visible del asiento en la variable global
                 if (pasajero && pasajero.asiento) {
-                    window.nombreAsientoVisible = pasajero.asiento;
-                    console.log(`Nombre del asiento guardado: ${window.nombreAsientoVisible}`);
+                    window.nombreAsientoGlobal = pasajero.asiento;
+                    console.log(`Nombre del asiento guardado: ${window.nombreAsientoGlobal}`);
                 }
                 
                 return parseFloat(pasajero.precio) || 0;
@@ -2469,15 +2601,44 @@ const PaymentManager = {
         // Obtener datos del viaje desde sessionStorage o variables globales
         const datosViaje = JSON.parse(sessionStorage.getItem('datos_resumen_viaje') || 'null');
         
+        // Obtener el comprobante original para cambio de ruta
+        const comprobanteOriginal = document.getElementById('comprobante')?.value || '';
+        
+        // Obtener información del asiento seleccionado desde sessionStorage
+        const asientoNombreGuardado = sessionStorage.getItem('asiento') || '';
+        const ventas = JSON.parse(sessionStorage.getItem("ventas") || "{}");
+        let asientoInfo = {};
+        
+        if (ventas && Object.keys(ventas).length > 0) {
+            const primerAsiento = Object.keys(ventas)[0];
+            asientoInfo = {
+                asiento_nombre: asientoNombreGuardado, // Usar el valor del sessionStorage
+                asiento_id: primerAsiento
+            };
+        }
+        
+        console.log('📋 Información del asiento capturada:', {
+            asiento_nombre: asientoNombreGuardado,
+            asiento_id: asientoInfo.asiento_id
+        });
+        
         return {
             contacto: datosContacto,
             pago: datosPago,
-            ventas: JSON.parse(sessionStorage.getItem("ventas") || "{}"),
+            ventas: ventas,
             precio_venta_total: parseFloat(sessionStorage.getItem('precio_venta_total')) || 0,
-            datos_viaje: datosViaje ? datosViaje.detalle_viaje : null,  // Incluir datos del viaje
+            datos_viaje: datosViaje ? {
+                ...datosViaje.detalle_viaje,
+                numeroComprobante: comprobanteOriginal,
+                ...asientoInfo
+            } : {
+                numeroComprobante: comprobanteOriginal,
+                ...asientoInfo
+            },
             itinerario: {
-                currentStep: AppState.currentStep,
-                itinerarioRegreso: AppState.itinerarioRegreso
+                currentStep: 'cambio_ruta', // Siempre será cambio de ruta en este archivo
+                itinerarioRegreso: false,   // Por defecto false
+                comprobante_original: comprobanteOriginal
             }
         };
  
@@ -3047,40 +3208,73 @@ const App = {
         console.log('✅ Frontend limpiado tras recarga');
     },
 
-    resetearSistemaCompleto() {
-        console.log('🔄 Recarga detectada - Limpiando progreso...');
+    resetearSistemaCompleto(preservarDatosUsuario = false) {
+        console.log('🔄 Limpiando sistema...');
+        
+        if (preservarDatosUsuario) {
+            console.log('💾 Modo cambio de ruta: preservando datos del usuario');
+        }
 
-        // 1. Limpiar estado de la aplicación
-        AppState.resetProgress();
+        // 1. Limpiar estado de la aplicación (solo progreso, no datos)
+        if (!preservarDatosUsuario) {
+            AppState.resetProgress();
+        } else {
+            // Solo resetear el paso actual, no el progreso máximo
+            AppState.currentStep = 0;
+        }
 
-        // 2. Limpiar almacenamiento del navegador
-        sessionStorage.removeItem('ventas');
-        sessionStorage.removeItem('datos_pago');
-        sessionStorage.clear();
+        // 2. Limpiar almacenamiento del navegador (condicionalmente)
+        if (!preservarDatosUsuario) {
+            sessionStorage.removeItem('ventas');
+            sessionStorage.removeItem('datos_pago');
+            sessionStorage.clear();
+        } else {
+            // Solo limpiar datos no críticos
+            sessionStorage.removeItem('btn_id_ida');
+            sessionStorage.removeItem('btn_id_vuelta');
+            // NO borrar 'ventas' ni 'datos_pago'
+            console.log('💾 Datos de ventas y pago preservados');
+        }
 
-        // 3. Limpiar formularios
+        // 3. Limpiar formularios (solo de búsqueda)
         this.limpiarFormularios();
 
         // 4. Limpiar contenedores dinámicos
         this.limpiarContenedoresDinamicos();
 
-        // 5.    Detener todos los temporizadores activos
+        // 5. Detener todos los temporizadores activos
         TimerManager.detenerTodos();
 
-        // 6. Resetear asientos seleccionados
-        this.limpiarAsientosSeleccionados();
+        // 6. Resetear asientos seleccionados (solo visualmente si preservamos datos)
+        if (!preservarDatosUsuario) {
+            this.limpiarAsientosSeleccionados();
+        } else {
+            // Solo limpiar la selección visual, no los datos
+            this.limpiarSoloVisualizacionAsientos();
+        }
 
-        // 7. Limpiar formulario de pago
-        if (typeof PaymentManager !== 'undefined') {
+        // 7. Limpiar formulario de pago (condicionalmente)
+        if (!preservarDatosUsuario && typeof PaymentManager !== 'undefined') {
             PaymentManager.limpiarFormularioPago();
         }
 
-        // 8. Resetear selección de asientos
-        if (typeof SeatManager !== 'undefined') {
+        // 8. Resetear selección de asientos (condicionalmente)
+        if (!preservarDatosUsuario && typeof SeatManager !== 'undefined') {
             SeatManager.asientosSeleccionados.clear();
         }
 
-        console.log('✅ Sistema completamente limpio');
+        console.log(`✅ Sistema ${preservarDatosUsuario ? 'parcialmente' : 'completamente'} limpio`);
+    },
+
+    // ✅ NUEVA FUNCIÓN: Limpiar solo visualización de asientos
+    limpiarSoloVisualizacionAsientos() {
+        // Remover clase de asientos seleccionados visualmente
+        document.querySelectorAll('.asiento-seleccionado').forEach(asiento => {
+            asiento.classList.remove('asiento-seleccionado');
+            asiento.style.backgroundColor = '';
+            asiento.style.color = '';
+        });
+        console.log('🎨 Visualización de asientos limpiada (datos preservados)');
     },
 
     limpiarFormularios() {

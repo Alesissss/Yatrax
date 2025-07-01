@@ -107,6 +107,10 @@ def TipoAsiento_Nuevo():
 
 # FUNCIONES
 
+def allowed_file(filename):
+    ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
 # REGION NIVEL
 @viajes_bp.route("/GetData_Nivel", methods=["GET"])
 def get_niveles():
@@ -285,7 +289,7 @@ def get_tipoVehiculo():
 def nuevoTipoVehiculo():
     if request.method == "GET":
         lista_tipo_herramienta = TipoHerramienta.obtener_todos()
-        lista_herramienta = Herramienta.obtener_todos()
+        lista_herramienta = [{'id': h['id'], 'nombre': h['nombre'], 'icono': h['icono'], 'id_tipo': h['id_tipo'], 'estado': h['estado']} for h in Herramienta.obtener_todos() if h['estado'] == 1]
         return render_template(
             "viajes/tipoVehiculoCRUD.html",
             title="Nuevo tipo de vehículo",
@@ -350,7 +354,7 @@ def verTipoVehiculo(idVehiculo):
             })
 
     lista_tipo_herramienta = TipoHerramienta.obtener_todos()
-    lista_herramienta = Herramienta.obtener_todos()
+    lista_herramienta = [{'id': h['id'], 'nombre': h['nombre'], 'icono': h['icono'], 'id_tipo': h['id_tipo'], 'estado': h['estado']} for h in Herramienta.obtener_todos() if h['estado'] == 1]
     return render_template(
         "viajes/tipoVehiculoCRUD.html",
         title="Ver tipo de vehículo",
@@ -378,7 +382,7 @@ def editarTipoVehiculo(idTipoVehiculo):
                     "piso": nivel["nroPiso"]
                 })
         lista_tipo_herramienta = TipoHerramienta.obtener_todos()
-        lista_herramienta = Herramienta.obtener_todos()
+        lista_herramienta = [{'id': h['id'], 'nombre': h['nombre'], 'icono': h['icono'], 'id_tipo': h['id_tipo'], 'estado': h['estado']} for h in Herramienta.obtener_todos() if h['estado'] == 1]
         return render_template(
             "viajes/tipoVehiculoCRUD.html",
             title="Editar tipo de vehículo",
@@ -1225,7 +1229,7 @@ def darBaja_ruta(id):  # Recibe el ID de la URL
 # END REGION RUTA
 
 # REGION TIPO ASIENTO
-# Obtener todos los asientos
+# Obtener todos los tipos de asientos
 @viajes_bp.route("/GetData_TipoAsiento", methods=["GET"])
 def get_tipoAsiento():
     try:
@@ -1234,112 +1238,135 @@ def get_tipoAsiento():
     except Exception as e:
         return jsonify({'data': [], 'Status': 'error', 'Msj': f'Ocurrió un error al listar tipos de asientos: {repr(e)}'})
 
-# Registrar asiento
-# @viajes_bp.route("/RegistrarAsiento", methods=["POST"])
-# def registrar_asiento():
-#     try:
-#         nro_asiento = request.form.get("nro_asiento").strip()
-#         nivel = request.form.get("nivel")
-#         tipo_asiento = request.form.get("tipo")
-#         estado = request.form.get("estado")
-#         usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
+# Registrar tipo asiento
+@viajes_bp.route("/RegistrarTipoAsiento", methods=["POST"])
+def registrar_tipo_asiento():
+    try:
+        UPLOAD_FOLDER = "Static/img/herramienta/"
+        nombre = request.form.get("nombre").strip()
+        precio = request.form.get("precio")
+        estado = request.form.get("estado")
 
-#         if not nro_asiento or not nivel or not tipo_asiento or not estado:
-#             return jsonify({"Status": "error", "Msj": f"Todos los campos son obligatorios {nro_asiento},{nivel},{tipo_asiento},{estado}"})
+        if not nombre or not precio or not estado:
+            return jsonify({"Status": "error", "Msj": f"Todos los campos son obligatorios {nombre},{precio},{estado}"})
 
-#         mensajes = Asiento.registrar(nro_asiento, nivel, tipo_asiento, estado, usuario_actual)
-#         msj1 = mensajes.get('@MSJ')
-#         msj2 = mensajes.get('@MSJ2')
+        ruta_imagen_db = ""
 
-#         if msj1:
-#             return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
-#         elif msj2:
-#             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
-#         else:
-#             return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar asiento'})
+        if 'icono' in request.files:
+            imagen = request.files['icono']
 
-#     except Exception as e:
-#         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+            if imagen and allowed_file(imagen.filename):
+                extension = imagen.filename.rsplit(".", 1)[1].lower()
+                filename = f"{nombre}.{extension}"
+                ruta_imagen_db = f"img/herramienta/{filename}"
 
-# # Eliminar asiento
-# @viajes_bp.route("/EliminarAsiento/<int:id>", methods=['POST'])
-# def eliminar_asiento(id):
-#     try:
-#         mensajes = Asiento.eliminar(id)
-#         msj1 = mensajes.get('@MSJ')
-#         msj2 = mensajes.get('@MSJ2')
+        mensajes = TipoAsiento.registrar(nombre, ruta_imagen_db, precio, estado)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
 
-#         if msj1:
-#             return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
-#         elif msj2:
-#             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
-#         else:
-#             return jsonify({"Status": "error", 'Msj': 'Error desconocido al eliminar asiento'})
-#     except Exception as e:
-#         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+        if msj1:
+            if 'icono' in request.files and imagen and allowed_file(imagen.filename):
+                filepath = os.path.join(UPLOAD_FOLDER, filename)
+                imagen.save(filepath)
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar tipo de asiento'})
 
-# # Editar asiento
-# @viajes_bp.route("/EditarAsiento/<int:id>", methods=['GET', 'POST'])
-# def editar_asiento(id):
-#     try:
-#         asiento = Asiento.obtener_por_id(id)
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
-#         if request.method == 'POST':
-#             nro_asiento = request.form.get("nro_asiento").strip()
-#             nivel = request.form.get("nivel")
-#             tipo_asiento = request.form.get("tipo")
-#             estado = request.form.get("estado")
-#             usuario_actual = session.get('usuario', {}).get('email', 'SIN USUARIO').strip()
+# Eliminar tipo asiento
+@viajes_bp.route("/EliminarTipoAsiento/<int:id>", methods=['POST'])
+def eliminar_tipo_asiento(id):
+    try:
+        mensajes = TipoAsiento.eliminar(id)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
 
-#             if not nro_asiento or not nivel or not tipo_asiento or not estado:
-#                 return jsonify({"Status": "error", "Msj": "Todos los campos son obligatorios"})
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al eliminar tipo de asiento'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+
+# Editar tipo asiento
+@viajes_bp.route("/EditarTipoAsiento/<int:id>", methods=['GET', 'POST'])
+def editar_tipo_asiento(id):
+    try:
+        UPLOAD_FOLDER = "Static/img/herramienta/"
+        tipoAsiento = TipoAsiento.obtener_por_id(id)
+
+        if request.method == 'POST':
+            nombre = request.form.get("nombre").strip()
+            precio = request.form.get("precio")
+            estado = request.form.get("estado")
+
+            if not nombre or not precio or not estado:
+                return jsonify({"Status": "error", "Msj": f"Todos los campos son obligatorios {nombre},{precio},{estado}"})
             
+            ruta_imagen_db = tipoAsiento['icono'] if tipoAsiento and 'icono' in tipoAsiento else ""
 
-#             mensajes = Asiento.editar(id, nro_asiento, nivel, tipo_asiento, estado,usuario_actual)
-#             msj1 = mensajes.get('@MSJ')
-#             msj2 = mensajes.get('@MSJ2')
+            if 'icono' in request.files:
+                imagen = request.files['icono']
 
-#             if msj1:
-#                 return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
-#             elif msj2:
-#                 return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
-#             else:
-#                 return jsonify({"Status": "error", 'Msj': 'Error desconocido al editar asiento'})
+                if imagen and allowed_file(imagen.filename):
+                    extension = imagen.filename.rsplit(".", 1)[1].lower()
+                    filename = f"{nombre}.{extension}"
+                    ruta_imagen_db = f"img/herramienta/{filename}"
 
-#         if asiento:
-#             return render_template('viajes/asientoCRUD.html', active_page="asientos", active_menu='mAsientos', asiento=asiento, tittle='Editar asiento', btnId='btn_Editar')
-#         return render_template('viajes/asientoCRUD.html', active_page="asientos", active_menu='mAsientos', asiento={}, tittle='Editar asiento', btnId='btn_Editar')
+            mensajes = TipoAsiento.editar(id, nombre, ruta_imagen_db, precio, estado)
+            msj1 = mensajes.get('@MSJ')
+            msj2 = mensajes.get('@MSJ2')
 
-#     except Exception as e:
-#         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+            if msj1:
+                if 'icono' in request.files and imagen and allowed_file(imagen.filename):
+                    filepath = os.path.join(UPLOAD_FOLDER, filename)
+                    imagen.save(filepath)
+                return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+            elif msj2:
+                return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+            else:
+                return jsonify({"Status": "error", 'Msj': 'Error desconocido al registrar tipo de asiento'})
+        
+        if tipoAsiento:
+            return render_template('viajes/tipoAsientoCRUD.html', active_page="tipoAsiento", active_menu='mViajes', tipoAsiento=tipoAsiento, tittle = 'Editar tipo asiento', btnId = 'btn_Editar')
+        return render_template('viajes/tipoAsientoCRUD.html', active_page="tipoAsiento", active_menu='mViajes', tipoAsiento=tipoAsiento, tittle = 'Editar tipo asiento', btnId = 'btn_Editar')
 
-# # Ver asiento
-# @viajes_bp.route("/VerAsiento/<int:id>", methods=['GET'])
-# def ver_asiento(id):
-#     try:
-#         asiento = Asiento.obtener_por_id(id)
-#         if asiento:
-#             return render_template('viajes/asientoCRUD.html', active_page="asientos", active_menu='mAsientos', asiento=asiento, tittle='Ver asiento', btnId='btn_Aceptar')
-#         return render_template('viajes/asientoCRUD.html', active_page="asientos", active_menu='mAsientos', asiento={}, tittle='Ver asiento', btnId='btn_Aceptar')
-#     except Exception as e:
-#         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
-# # Dar de baja asiento
-# @viajes_bp.route("/DarBajaAsiento/<int:id>", methods=['POST'])
-# def dar_baja_asiento(id):
-#     try:
-#         mensajes = Asiento.dar_baja(id)
-#         msj1 = mensajes.get('@MSJ')
-#         msj2 = mensajes.get('@MSJ2')
+# Ver tipo asiento
+@viajes_bp.route("/VerTipoAsiento/<int:id>", methods=['GET'])
+def ver_tipo_asiento(id):
+    try:
+        tipoAsiento = TipoAsiento.obtener_por_id(id)
+        if tipoAsiento:
+            return render_template('viajes/tipoAsientoCRUD.html', active_page="tipoAsiento", active_menu='mViajes', tipoAsiento=tipoAsiento, tittle = 'Ver tipo asiento', btnId = 'btn_Aceptar')
+        return render_template('viajes/tipoAsientoCRUD.html', active_page="tipoAsiento", active_menu='mViajes', tipoAsiento={}, tittle = 'Ver tipo asiento', btnId = 'btn_Aceptar')
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 
-#         if msj1:
-#             return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
-#         elif msj2:
-#             return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
-#         else:
-#             return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja el asiento'})
-#     except Exception as e:
-#         return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
+# Dar de baja asiento
+@viajes_bp.route("/DarBajaTipoAsiento/<int:id>", methods=['POST'])
+def dar_baja_tipo_asiento(id):
+    try:
+        mensajes = TipoAsiento.dar_baja(id)
+        msj1 = mensajes.get('@MSJ')
+        msj2 = mensajes.get('@MSJ2')
+
+        if msj1:
+            return jsonify({"Status": "success", 'Msj': msj1, 'Msj2': ''})
+        elif msj2:
+            return jsonify({"Status": "success", 'Msj': '', 'Msj2': msj2})
+        else:
+            return jsonify({"Status": "error", 'Msj': 'Error desconocido al dar de baja al tipo de asiento'})
+    except Exception as e:
+        return jsonify({"Status": "error", 'Msj': f'Ocurrió un error inesperado: {repr(e)}'})
 # END REGION TIPO ASIENTO
 
 # REGION DE ASIENTO
