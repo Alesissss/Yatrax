@@ -579,30 +579,40 @@ class Pasaje:
             conexion.cerrar()
 
     @classmethod
-    def generar_numComprobante(cls):
+    def generar_numComprobante(cls, numPasajes=None):
         conexion = bd.Conexion()
+        comprobantes = []
         try:
+            if numPasajes is None:
+                numPasajes = 1
+            # Consulta solo una vez la base para obtener el último comprobante.
             row = conexion.obtener("SELECT MAX(numeroComprobante) as numero FROM pasaje")
-            ultimo = row[0] if row and row[0] else None
-            if not ultimo['numero']:
-                return 'A000-00000001'
-            ultimo = ultimo['numero']
-            letra = ultimo[0]
-            serie = int(ultimo[1:4])
-            corr  = int(ultimo[5:]) + 1
-            if corr > 99999999:
-                corr = 0
-                serie += 1
+            ultimo = row[0]['numero'] if row and row[0] and row[0]['numero'] else None
 
-                if serie > 999:
-                    serie = 0
-                    if letra.upper() == 'Z':
-                        raise ValueError("Se alcanzó el límite máximo: Z999-99999999")
-                    letra = chr(ord(letra.upper()) + 1)
+            if not ultimo:
+                letra, serie, corr = 'A', 0, 0
+            else:
+                letra = ultimo[0]
+                serie = int(ultimo[1:4])
+                corr = int(ultimo[5:])
 
-            s_txt = f"{serie:03d}"
-            c_txt = f"{corr:08d}"
-            return f"{letra}{s_txt}-{c_txt}"
+            for _ in range(numPasajes):
+                corr += 1
+                if corr > 99999999:
+                    corr = 1
+                    serie += 1
+                    if serie > 999:
+                        serie = 0
+                        if letra.upper() == 'Z':
+                            raise ValueError("Se alcanzó el límite máximo: Z999-99999999")
+                        letra = chr(ord(letra.upper()) + 1)
+
+                s_txt = f"{serie:03d}"
+                c_txt = f"{corr:08d}"
+                nuevo_comprobante = f"{letra}{s_txt}-{c_txt}"
+                comprobantes.append(nuevo_comprobante)
+
+            return comprobantes
 
         finally:
             conexion.cerrar()
@@ -631,7 +641,7 @@ class Pasaje:
                 v.idEstadoViaje AS estado_viaje,    
                 pas.numeroComprobante,
                 pas.idDetalleViajeAsiento,
-                pas.id
+                pas.id, pa.email as email_pasajero, pas.esCambioRuta AS esCambioRuta
             FROM pasaje pas 
             INNER JOIN detalle_viaje_asiento dva 
                 ON dva.id = pas.idDetalleViajeAsiento

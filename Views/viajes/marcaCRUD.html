@@ -30,7 +30,7 @@
                                 <label class="btn btn-warning {% if btnId == 'btn_Aceptar' %}disabled{% endif %}" for="file_Imagen">
                                     <i class="bi bi-file-earmark-arrow-up-fill"></i> Subir archivo
                                 </label>
-                                <input {% if ver %}disabled{% endif %} type="file" class="d-none" id="file_Imagen" name="logo" accept=".jpg, .jpeg, .png" {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
+                                <input  {% if ver %}disabled{% endif %} type="file" class="d-none" id="file_Imagen" name="logo" accept=".jpg, .jpeg, .png" {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
                                 <span id="checkIcon" class="d-none text-success ml-2">
                                     <i class="bi bi-check-circle-fill"></i> Archivo subido
                                 </span>
@@ -89,6 +89,12 @@
             var nombre = $("#txt_Nombre").val().trim();
             if (!nombre) {
                 toastr.warning("El nombre es obligatorio", "MENSAJE DE SISTEMA");
+                return;
+            }
+
+            var imagen = $("#file_Imagen").val().trim();
+            if (!imagen) {
+                toastr.warning("Debes subir una imagen o seleccionar una existente", "MENSAJE DE SISTEMA");
                 return;
             }
 

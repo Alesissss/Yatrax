@@ -59,8 +59,12 @@ class Venta:
             nombre_comprobante = TipoComprobante.obtener_por_id(contacto.get("tipo_comprobante"))["nombre"]
 
             cod_promocion = None
+
+            print(pago.get("datos_especificos").get("codigo_promocional"))
+
             if pago.get("datos_especificos") and pago.get("datos_especificos").get("codigo_promocional"):
-                cod_promocion = Promocion.obtener_por_codigo(pago.get("datos_especificos")["codigo_promocional"])
+                cod_promocion = Promocion.existencia_por_codigo(pago.get("datos_especificos")["codigo_promocional"])
+                montoDescuento = cod_promocion["monto_promo"]
                 insert_venta_sql = """
                     INSERT INTO venta (idCliente, subTotal, igv, idMetodoPago, idTipoComprobante, idPromocion)
                     VALUES (%s, %s, %s, %s, %s, %s)
@@ -69,9 +73,10 @@ class Venta:
                     id_cliente, 0.0, 0.0,
                     pago.get("metodo_especifico"),
                     contacto.get("tipo_comprobante"),
-                    cod_promocion
+                    cod_promocion["id"]
                 ), auto_commit=False)
             else:
+                montoDescuento = 0
                 insert_venta_sql = """
                     INSERT INTO venta (idCliente, subTotal, igv, idMetodoPago, idTipoComprobante)
                     VALUES (%s, %s, %s, %s, %s)
@@ -92,10 +97,15 @@ class Venta:
                 "cliente_nom": nombre_cliente
             }
             empresa = Venta.consultar_empresa_activa()
+            cantidad = len(ventas)
 
-            for key_asiento, pasajero_data in ventas.items():
+            # Generar todos los comprobantes necesarios (una sola vez)
+            numeros_comprobante = Pasaje.generar_numComprobante(cantidad)
+
+            for (key_asiento, pasajero_data), num_comprobante_pasaje in zip(ventas.items(), numeros_comprobante):
                 precio = pasajero_data.get("precio")
                 monto_venta_total += float(precio) if precio else 0.0
+                desc_por_ticket = montoDescuento / cantidad if cantidad != 0 else 0
 
                 insert_pasajero_sql = """
                     INSERT INTO pasajero (nombre, ape_paterno, ape_materno, numero_documento, idTipoDocumento, sexo, f_nacimiento, telefono, email)
@@ -114,27 +124,27 @@ class Venta:
                 ), auto_commit=False)
                 id_pasajero = conexion.cursor.lastrowid
 
-                num_comprobante_pasaje = Pasaje.generar_numComprobante()
                 codigo_unico_pasaje = Pasaje.generar_codigo_unico()
                 
                 datos_asiento = Asiento.obtener_datos_asiento(key_asiento)
                 datos_ruta = Asiento.obtener_datos_viaje(key_asiento)
                 
                 precio_float = float(precio) if precio else 0.0
+                precio_float -= float(desc_por_ticket)
                 igv_float = float(IGV) if IGV is not None else 0.0
 
                 subtotal_asiento_calc = precio_float / (1 + igv_float) if (1 + igv_float) != 0 else precio_float
-                igv_asiento_calc = precio_float - subtotal_asiento_calc
+                igv_asiento_calc = precio_float - float(subtotal_asiento_calc)
                 total_asiento_calc = precio_float
 
-                # Preparar datos para generar el ticket individual
                 datos_ticket_individual = { 
                     "codigo": codigo_unico_pasaje,
-                    "numero_comprobante": num_comprobante_pasaje,
+                    "numero_comprobante": num_comprobante_pasaje,  # <-- aquí el comprobante individual
                     "asiento_id": key_asiento,
                     "asiento_nombre": datos_asiento.get("nombre_asiento", "N/A"),
                     "pasajero": f"{pasajero_data.get('nombres', '')} {pasajero_data.get('apellidoPaterno', '')} {pasajero_data.get('apellidoMaterno', '')}",
                     "documento_pasajero": pasajero_data.get("numDoc", "N/A"),
+                    "descuento": desc_por_ticket,
                     "subtotal_asiento": subtotal_asiento_calc,
                     "igv_asiento": igv_asiento_calc,
                     "total_asiento": total_asiento_calc,
@@ -143,10 +153,9 @@ class Venta:
                     "tipo_servicio": datos_asiento.get("tipo_asiento", "N/A"),
                     "desembarque": datos_ruta.get("desembarque", "N/A"),
                     "fecha_viaje": datos_ruta.get("fecha_salida", "N/A"),
-                    "hora_viaje": datos_ruta.get("hora_salida","N/A")
+                    "hora_viaje": datos_ruta.get("hora_salida", "N/A")
                 }
 
-                # Generar el ticket y obtener su ruta
                 ruta_ticket_generado = Venta.crearTicketIndividual(datos_ticket_individual, empresa, generales)
                 rutas_pdf_generadas.append(ruta_ticket_generado)
 
@@ -156,7 +165,7 @@ class Venta:
                 """
                 conexion.ejecutar(insert_pasaje_sql, (
                     key_asiento, num_comprobante_pasaje, 1, 0, 0, 0, 0,
-                    id_venta, codigo_unico_pasaje, 0, precio, ruta_ticket_generado # Se inserta la ruta del ticket aquí
+                    id_venta, codigo_unico_pasaje, 0, precio_float, ruta_ticket_generado
                 ), auto_commit=False)
                 id_pasaje = conexion.cursor.lastrowid
 
@@ -170,6 +179,10 @@ class Venta:
                     int(pasajero_data.get("esMenor", False)),
                     int(pasajero_data.get("brazos", False))
                 ), auto_commit=False)
+
+
+            monto_venta_total = float(monto_venta_total) - float(montoDescuento)
+            if(monto_venta_total<0): monto_venta_total = 0
 
             if IGV is not None:
                 total_venta_bruto = monto_venta_total
@@ -190,7 +203,7 @@ class Venta:
                 "tickets": rutas_pdf_generadas # Retorna las rutas de todos los tickets generados
             }
         
-        except Exception as e:
+        except Exception as e:  
             conexion.conn.rollback()
             return {"status": -1, "msg": f"Error al registrar venta: {str(e)}"}
         finally:
@@ -340,10 +353,23 @@ class Venta:
                     # precio
                     float(precio_pasajero)
                 ), auto_commit=False)
+                
+                # Obtener el nombre visible del asiento
+                # Priorizar el nombre del asiento que viene desde el frontend (datos_viaje)
+                nombre_asiento = None
+                if datos_viaje and "asiento_nombre" in datos_viaje:
+                    nombre_asiento = datos_viaje["asiento_nombre"]
+                    print(f"DEBUG: Usando nombre de asiento desde datos_viaje: {nombre_asiento}")
+                
+                # Si no viene desde el frontend, obtenerlo desde la base de datos como fallback
+                if not nombre_asiento:
+                    nombre_asiento = Asiento.obtener_nombre_por_id(key)
+                    print(f"DEBUG: Usando nombre de asiento desde BD: {nombre_asiento}")
+                
                 tickets_data.append({
                     "codigo": codigoUnico,
                     "numero_comprobante": numComprobante,
-                    "asiento": key,
+                    "asiento": nombre_asiento,
                     "pasajero": f"{pasajero.get('nombres')} {pasajero.get('apellidoPaterno')} {pasajero.get('apellidoMaterno')}",
                     "documento_pasajero": pasajero.get("numDoc"),
                     "precio_unitario": float(precio_pasajero),  # Usar el precio calculado
@@ -383,6 +409,10 @@ class Venta:
                     nombre_cliente = contacto.get("razon_social")
                     documento_cliente = contacto.get("ruc")
 
+                # Obtener el nombre del asiento desde los datos del ticket
+                nombre_asiento_ticket = datos["asiento"]
+                print(f"DEBUG: Nombre de asiento para PDF: {nombre_asiento_ticket}")
+
                 datos_ticket = {
                     "empresa": {
                         "nombre": empresa["razon_social"],
@@ -412,7 +442,7 @@ class Venta:
                         "tipo_servicio": "BUS CAMA",
                         "origen": datos_viaje.get("origen", "Por determinar") if datos_viaje else "Por determinar",
                         "destino": datos_viaje.get("destino", "Por determinar") if datos_viaje else "Por determinar",
-                        "asiento": datos["asiento"],
+                        "asiento": nombre_asiento_ticket,
                         "pasajero": datos["pasajero"],
                         "documento_pasajero": datos["documento_pasajero"],
                         "fecha_viaje": datos_viaje.get("fechaSalida", datos["fecha_viaje"]) if datos_viaje else datos["fecha_viaje"],
@@ -503,7 +533,7 @@ class Venta:
                 "op_gravada": 0.00,
                 "op_exonerada": float(datos_ticket_individual["subtotal_asiento"]),
                 "igv": float(datos_ticket_individual["igv_asiento"]),
-                "descuento": 0.00,
+                "descuento": float(datos_ticket_individual["descuento"]),
                 "total": float(datos_ticket_individual["total_asiento"])
             },
             "total_letras": Venta.numero_a_soles_texto(float(datos_ticket_individual["total_asiento"])).upper(),

@@ -11,3 +11,6 @@ __pycache__/
 Models/__pycache__/
 Controllers/__pycache__/
 .vscode
+
+Static/qr/
+Static/tickets/

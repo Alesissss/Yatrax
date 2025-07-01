@@ -297,11 +297,11 @@
                     <div class="col-md-12" id="contenedorResumen">
                         
                     </div>
-                    <div class="col-md-12">
+                    <div class="col-md-12" id="codigoPromocion">
                         <div class="input-group mt-4">
                             <input type="text" class="form-control" id="codigo_promocional"
                                 placeho lder="Ingrese código promocional">
-                            <button class="btn btn-success" id="btnAplicarCodigo">Aplicar código</button>
+                            <button class="btn" style="background-color:var(--primary-color)" id="btnAplicarCodigo">Aplicar código</button>
                         </div>
                         <div id="codigo_aplicado" class="mt-2"></div>
                     </div>
@@ -312,6 +312,24 @@
     </div>
 </section>
 <script>
+    // Verificar si estamos en la página miPasajeOp y deshabilitar código promocional
+    document.addEventListener("DOMContentLoaded", function() {
+        // Verificar si estamos en miPasajeOp.html por la URL o por elementos específicos de esa página
+        const currentPath = window.location.pathname;
+        const isInMiPasajeOp = currentPath.includes('miPasajeOp') || 
+                              document.getElementById('comprobante') !== null || // Elemento específico de miPasajeOp
+                              document.getElementById('pasCod') !== null; // Otro elemento específico de miPasajeOp
+        
+        if (isInMiPasajeOp) {
+            const codigoPromocionDiv = document.getElementById('codigoPromocion');
+            if (codigoPromocionDiv) {
+                // Ocultar completamente el div
+                codigoPromocionDiv.style.display = 'none';
+                console.log('Código promocional deshabilitado en miPasajeOp');
+            }
+        }
+    });
+
     function actualizarProgressBarContactoPago(etapa) {
         const barra = document.getElementById("progress-bar-contacto-pago");
         if (!barra) return;
