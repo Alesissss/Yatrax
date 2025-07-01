@@ -320,12 +320,18 @@ def resumen_viaje():
         if not detalle:
             return jsonify({'Status': 'error', 'Msj': 'No se encontró detalle válido del viaje.'})
 
+        # Obtener el nombre visible del asiento
+        nombre_asiento = Asiento.obtener_nombre_por_id(asiento_id)
+        if not nombre_asiento:
+            nombre_asiento = f"Asiento {asiento_id}"  # Fallback si no se encuentra el nombre
+
         # Crear la respuesta con los detalles del viaje y el precio total
         resumen = {
             'detalle_viaje': detalle,
             'pasajeros': [{
                 'numero': 1,
-                'asiento': asiento_id,
+                'asiento': nombre_asiento,  # Usar el nombre visible del asiento
+                'asiento_id': asiento_id,   # Mantener el ID por compatibilidad
                 'precio': detalle.get('precio_total', 0),  # Se asegura de que el precio exista
             }],
             'precio_total': detalle.get('precio_total', 0)  # Usamos el precio_total
