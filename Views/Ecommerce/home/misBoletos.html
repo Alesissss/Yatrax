@@ -201,6 +201,7 @@
 .pagination .page-item.active .page-link {
   background-color: #1e88e5;
   border-color: #1e88e5;
+  color: #fff;
 }
 
 .pagination .page-link {
@@ -213,6 +214,42 @@
   color: #0d47a1;
   background-color: #f8f9fa;
 }
+
+/* Estilo general para todos los estados tipo badge */
+.estado-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+/* Colores específicos por estado */
+.estado-reserva {
+  background-color: #28a745; /* verde */
+}
+
+.estado-reembolso {
+  background-color: #dc3545; /* rojo */
+}
+
+.estado-transferencia {
+  background-color: #fd7e14; /* naranja */
+}
+
+.estado-normal {
+  background-color: #007bff; /* azul */
+}
+
+.estado-cambio {
+  background-color: #17a2b8; /* celeste */
+}
+
 </style>
 
 <div class="container py-4">
@@ -240,21 +277,24 @@
             <strong>Código:</strong> {{tarjeta.codigo}}
           </p>
           
-          {% if tarjeta.estado_reserva == 1 %}
-          <p class="card-text text-success"><strong>Estado:</strong> Reserva</p>
-          {% endif %}
-          {% if tarjeta.estado_reembolso == 1 %}
-          <p class="card-text text-danger">Este pasaje ha sido reembolsado</p>
-          {% endif %}
-          {% if tarjeta.estado_transferencia == 1 %}
-          <p class="card-text text-warning">Este pasaje ha sido transferido</p>
-          {% endif %}
-          {% if tarjeta.estado_pasaje_normal == 1 %}
-          <p class="card-text text-primary"><strong>Tipo:</strong> Pasaje Normal</p>
-          {% endif %}
-          {% if tarjeta.estado_cambio_ruta == 1 %}
-          <p class="card-text text-info">Este pasaje ha cambiado de ruta</p>
-          {% endif %}
+          <div class="estados-container">
+            {% if tarjeta.estado_reserva == 1 %}
+            <span class="estado-badge estado-reserva">Reserva</span>
+            {% endif %}
+            {% if tarjeta.estado_reembolso == 1 %}
+            <span class="estado-badge estado-reembolso">Reembolsado</span>
+            {% endif %}
+            {% if tarjeta.estado_transferencia == 1 %}
+            <span class="estado-badge estado-transferencia">Transferido</span>
+            {% endif %}
+            {% if tarjeta.estado_pasaje_normal == 1 %}
+            <span class="estado-badge estado-normal">Pasaje Normal</span>
+            {% endif %}
+            {% if tarjeta.estado_cambio_ruta == 1 %}
+            <span class="estado-badge estado-cambio">Cambio de Ruta</span>
+            {% endif %}
+          </div>
+
         </div>
 
         <a class="py-2 px-2 mx-1 mb-1 fas fa-download"
@@ -273,7 +313,8 @@
 </div>
 
 <script>
-  const itemsPerPage = 2; // Número de tarjetas por página
+  const itemsPerPage = 3; // Número de tarjetas por página
+  const maxVisiblePages = 2; // Máximo de páginas visibles en la paginación
   const cards = document.querySelectorAll('.card-jinja'); // Selecciona todas las tarjetas
   const pagination = document.getElementById('pagination'); // Contenedor de la paginación
   const totalPages = Math.ceil(cards.length / itemsPerPage); // Total de páginas
@@ -290,6 +331,28 @@
     renderPagination(page);
   }
   
+  // Función para calcular el rango de páginas visibles
+  function getVisiblePageRange(currentPage) {
+    let start, end;
+    
+    if (totalPages <= maxVisiblePages) {
+      // Si hay menos páginas que el máximo visible, mostrar todas
+      start = 1;
+      end = totalPages;
+    } else {
+      // Lógica: mostrar la página actual y las siguientes (hasta completar maxVisiblePages)
+      start = currentPage;
+      end = Math.min(totalPages, currentPage + maxVisiblePages - 1);
+      
+      // Si no hay suficientes páginas hacia adelante, completar hacia atrás
+      if (end - start + 1 < maxVisiblePages) {
+        start = Math.max(1, end - maxVisiblePages + 1);
+      }
+    }
+    
+    return { start, end };
+  }
+  
   // Función para renderizar la paginación
   function renderPagination(currentPage) {
     pagination.innerHTML = '';
@@ -297,18 +360,61 @@
     // Solo mostrar paginación si hay más de una página
     if (totalPages <= 1) return;
     
-    for (let i = 1; i <= totalPages; i++) {
+    const { start, end } = getVisiblePageRange(currentPage);
+    
+    // Botón "Anterior" (solo si no estamos en la primera página)
+    if (currentPage > 1) {
+      const prevLi = document.createElement('li');
+      prevLi.className = 'page-item';
+      prevLi.innerHTML = `<button class="page-link" title="Página anterior">‹</button>`;
+      prevLi.addEventListener('click', (e) => {
+        e.preventDefault();
+        renderPage(currentPage - 1);
+      });
+      pagination.appendChild(prevLi);
+    }
+    
+    // Indicador de páginas anteriores (si hay páginas antes del rango visible)
+    if (start > 1) {
+      const indicatorLi = document.createElement('li');
+      indicatorLi.className = 'page-item disabled';
+      indicatorLi.innerHTML = `<span class="page-link" title="Hay más páginas anteriores">...</span>`;
+      pagination.appendChild(indicatorLi);
+    }
+    
+    // Páginas del rango visible
+    for (let i = start; i <= end; i++) {
       const li = document.createElement('li');
-      li.className = `page-item ${i === currentPage ? 'active' : ''}`; // Clase activa para la página actual
-      li.innerHTML = `<button class="page-link">${i}</button>`; // Botón de la página
+      li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+      li.innerHTML = `<button class="page-link">${i}</button>`;
       li.addEventListener('click', (e) => {
         e.preventDefault();
         renderPage(i);
       });
       pagination.appendChild(li);
     }
+    
+    // Indicador de páginas posteriores (si hay páginas después del rango visible)
+    if (end < totalPages) {
+      const indicatorLi = document.createElement('li');
+      indicatorLi.className = 'page-item disabled';
+      indicatorLi.innerHTML = `<span class="page-link" title="Hay más páginas posteriores">...</span>`;
+      pagination.appendChild(indicatorLi);
+    }
+    
+    // Botón "Siguiente" (solo si no estamos en la última página)
+    if (currentPage < totalPages) {
+      const nextLi = document.createElement('li');
+      nextLi.className = 'page-item';
+      nextLi.innerHTML = `<button class="page-link" title="Página siguiente">›</button>`;
+      nextLi.addEventListener('click', (e) => {
+        e.preventDefault();
+        renderPage(currentPage + 1);
+      });
+      pagination.appendChild(nextLi);
+    }
   }
-
+  
   // Iniciar en página 1
   renderPage();
 </script>

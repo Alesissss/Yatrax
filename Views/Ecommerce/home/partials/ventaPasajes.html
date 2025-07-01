@@ -1,4 +1,28 @@
 <style>
+    .tab-link:not(.active):not(.disabled) {
+        background-color: #557cc0;
+        /* color suave azul */
+        color: #ffffff;
+    }
+
+    .tab-link.active {
+        background-color: #557cc0;
+        color: #ffffff;
+        animation: saltoActivo 0.8s ease-in-out infinite alternate;
+    }
+
+    /* Animación rebote */
+    @keyframes saltoActivo {
+        0% {
+            transform: translateY(0px);
+        }
+
+        100% {
+            transform: translateY(-5px);
+        }
+    }
+
+
     .step {
         display: none;
         padding: 1rem;
@@ -149,16 +173,22 @@
 
     <div class="step" id="step-3">
         <div class="row">
-            <div class="row d-flex justify-content-center">
-                <div class="progress m-6" role="progressbar" aria-label="Example 20px high" aria-valuenow="25"
-                    aria-valuemin="0" aria-valuemax="100" style="height: 3em">
-                    <div class="progress-bar" style="width: 25%"></div>
+            <div class="row d-flex justify-content-center mb-4">
+                <div class="col-md-8">
+                    <div class="progress" id="progress-contacto-pago"
+                        style="height: 2rem; background-color: #dbe4f3; border-radius: 30px;">
+                        <div id="progress-bar-contacto-pago"
+                            class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                            style="width: 0%; background-color: #3f71c6; font-weight: bold; font-size: 1rem; border-radius: 30px;"
+                            aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                            Contacto
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-8">
-
                     <div class="accordion" id="accordionPago">
                         <!--Contenedor de contacto-->
                         <div class="accordion-item">
@@ -172,37 +202,66 @@
                             <div id="collapseContacto" class="accordion-collapse collapse show"
                                 data-bs-parent="#accordionPago">
                                 <div class="accordion-body">
+
                                     <div class="row g-3">
+
                                         <div class="col-md-12">
-                                            <label for="email" class="form-label">Correo</label>
-                                            <input type="email" id="email" class="form-control" required>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label for="nombre" class="form-label">Nombre</label>
-                                            <input type="text" id="nombre" class="form-control" required>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label for="apellido" class="form-label">Apellidos</label>
-                                            <input type="text" id="apellido" class="form-control" required>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label for="tipo_documento" class="form-label">Tipo de documento</label>
-                                            <select id="tipo_documento" class="form-select">
-                                                <option>DNI</option>
-                                                <option>CE</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label for="numero_documento" class="form-label">Número de documento</label>
-                                            <input type="text" id="numero_documento" class="form-control" required>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label for="telefono" class="form-label">Teléfono/móvil</label>
-                                            <input type="tel" id="telefono" class="form-control" required>
+                                            <div class="form-floating">
+                                                <input type="email" class="form-control" id="email" placeholder="Correo"
+                                                    required>
+                                                <label for="email"><i class="fas fa-envelope me-1"></i> Correo</label>
+                                            </div>
                                         </div>
 
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" id="nombre" placeholder="Nombre"
+                                                    required>
+                                                <label for="nombre"><i class="fas fa-user me-1"></i> Nombre</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" id="apellido"
+                                                    placeholder="Apellidos" required>
+                                                <label for="apellido"><i class="fas fa-user-tag me-1"></i>
+                                                    Apellidos</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <select class="form-select" id="tipo_documento" required>
+                                                    <option value="1">DNI</option>
+                                                    <option value="3">CE</option>
+                                                </select>
+                                                <label for="tipo_documento"><i class="fas fa-id-card me-1"></i> Tipo de
+                                                    documento</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" id="numero_documento"
+                                                    placeholder="Número de documento" required>
+                                                <label for="numero_documento"><i class="fas fa-id-badge me-1"></i>
+                                                    Número de documento</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input type="tel" class="form-control" id="telefono"
+                                                    placeholder="Teléfono" required>
+                                                <label for="telefono"><i class="fas fa-phone me-1"></i>
+                                                    Teléfono/móvil</label>
+                                            </div>
+                                        </div>
 
                                     </div>
+
+
                                     <div class="mt-4 d-flex justify-content-end">
                                         <a class="btn btn-primary" data-bs-toggle="collapse" href="#collapsePago"
                                             role="button" aria-expanded="false" aria-controls="collapsePago">
@@ -228,6 +287,13 @@
                                     </select>
 
                                     <div id="contenido_pago_dinamico"></div>
+                                    <div class="input-group mt-4">
+                                        <input type="text" class="form-control" id="codigo_promocional"
+                                            placeholder="Ingrese código promocional">
+                                        <button class="btn btn-success" id="btnAplicarCodigo">Aplicar código</button>
+                                    </div>
+                                    <div id="codigo_aplicado" class="mt-2"></div>
+
                                 </div>
                             </div>
                         </div>
@@ -260,3 +326,36 @@
         </div>
     </div>
 </section>
+<script>
+function actualizarProgressBarContactoPago(etapa) {
+    const barra = document.getElementById("progress-bar-contacto-pago");
+    if (!barra) return;
+
+    if (etapa === "contacto") {
+        barra.style.width = "0%";
+        barra.setAttribute("aria-valuenow", "0");
+        barra.textContent = "Contacto";
+    } else if (etapa === "pago") {
+        barra.style.width = "100%";
+        barra.setAttribute("aria-valuenow", "100");
+        barra.textContent = "Pago";
+    }
+}
+
+// Eventos del acordeón
+document.addEventListener("DOMContentLoaded", () => {
+    const contacto = document.getElementById("collapseContacto");
+    const pago = document.getElementById("collapsePago");
+
+    contacto.addEventListener("show.bs.collapse", () => {
+        actualizarProgressBarContactoPago("contacto");
+    });
+
+    pago.addEventListener("show.bs.collapse", () => {
+        actualizarProgressBarContactoPago("pago");
+    });
+
+    // Por si carga en contacto abierto
+    actualizarProgressBarContactoPago("contacto");
+});
+</script>

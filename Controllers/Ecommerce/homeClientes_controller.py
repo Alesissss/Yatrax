@@ -791,6 +791,12 @@ def liberar_asiento():
     except Exception as e:
         return {"data": [], "msg": f"Error al liberar el asiento: {repr(e)}", "status": -1}
 
+@homeClientes_bp.route("/verificarCupon",methods=["POST"])
+def verificarCupon():
+    codCupon = request.json.get("cupon")
+
+
+
 @homeClientes_bp.route("/procesar_pago_x", methods=["POST"])
 def procesar_pago_x():
     try:
