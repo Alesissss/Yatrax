@@ -46,6 +46,28 @@ $.ajax({
     }
 });
 
+// Obtener precio de cambio de ruta específico para cambios de ruta
+window.precioCambioRuta = 0;
+// Variable global para almacenar el nombre visible del asiento
+window.nombreAsientoVisible = '';
+
+$.ajax({
+    url: '/ecommerce/home/ObtenerPrecioCambioRuta',
+    type: 'GET',
+    dataType: 'json',
+    success: function (response) {
+        if (response.Status === 'success') {
+            window.precioCambioRuta = parseFloat(response.precio) || 0;
+            console.log("Precio de cambio de ruta cargado:", window.precioCambioRuta);
+        } else {
+            console.warn("No se pudo obtener el precio de cambio de ruta");
+        }
+    },
+    error: function () {
+        console.error("Error al consultar el precio de cambio de ruta");
+    }
+});
+
 
 
 // =============================================================================
@@ -1151,13 +1173,14 @@ const SeatManager = {
                         data-bs-target="#${accordionItemId}" 
                         aria-expanded="${isFirstAccordion}" 
                         aria-controls="${accordionItemId}">
-                    Asiento ${btnId}   
+                    Asiento ${nombreAsiento}  
                 </button>
             </h2>
             <div id="${accordionItemId}" 
                  class="accordion-collapse collapse ${isFirstAccordion ? 'show' : ''}" 
                  aria-labelledby="${headerId}" 
-                 data-bs-parent="#accordionPasajeros_${sufijo}">
+                 data-bs-parent="#accordionPasajeros_${sufijo}"
+                 data-asiento-id="${btnId}">
                 <div class="accordion-body">
                     ${FormManager.generarFormularioHTML(nombreAsiento, btnId)}
                 </div>
@@ -1175,6 +1198,17 @@ const FormManager = {
         // Recuperar el valor del DNI antes de renderizar el input
         const dniValue = document.getElementById("numDocAnt")?.value || "";
 
+        // Obtener el precio del asiento de forma asíncrona pasando el ID correcto
+        this.obtenerPrecioAsiento(asientoId).then(precioAsiento => {
+            // Actualizar el elemento del precio una vez que se obtenga
+            const elementoPrecio = document.querySelector(`[data-asiento-id="${asientoId}"] .precio-asiento`);
+            if (elementoPrecio) {
+                elementoPrecio.textContent = `Asiento: ${asientoNombre} - S/ ${precioAsiento.toFixed(2)}`;
+                console.log(`💰 Precio del asiento ${asientoNombre} actualizado: S/ ${precioAsiento.toFixed(2)}`);
+                sessionStorage.setItem('asiento', asientoNombre);
+            }
+        });
+
         // Después de renderizar el input, si hay un valor de DNI, lanzar la consulta RENIEC automáticamente
         setTimeout(() => {
             if (dniValue) {
@@ -1189,7 +1223,7 @@ const FormManager = {
         }, 0);
 
         return `
-            <div class="mb-2 fw-bold text-primary">Asiento: ${asientoNombre} (<span></span>)</div>
+            <div class="mb-2 fw-bold text-primary precio-asiento">Asiento: ${asientoNombre} - Cargando precio...</div>
             <select class="form-select mb-2" id="tipo_doc_${asientoId}" disabled readonly>
             <option value="DNI">DNI</option>
             <option value="CE">CE</option>
@@ -1208,10 +1242,6 @@ const FormManager = {
             <label for="sexoFemenino_${asientoId}">Femenino</label>
             </div>
             <input class="form-control mb-2" id="correo_${asientoId}" placeholder="Correo electrónico" type="email" readonly disabled>
-            <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="brazos_${asientoId}" disabled readonly>
-            <label class="form-check-label" for="brazos_${asientoId}">Con menor en brazos</label>
-            </div>
             <div class="form-check mb-2">
             <input class="form-check-input" type="checkbox" id="esMenor_${asientoId}" disabled readonly>
             <label class="form-check-label" for="esMenor_${asientoId}">Es menor de edad</label>
@@ -1232,6 +1262,82 @@ const FormManager = {
             Complete todos los campos
             </button>
         `;
+    },
+
+    async obtenerPrecioAsiento(asientoId) {
+        // Primero intentar obtener desde sessionStorage
+        const datosResumen = sessionStorage.getItem('datos_resumen_viaje');
+        if (datosResumen) {
+            try {
+                const datos = JSON.parse(datosResumen);
+                if (datos.pasajeros && datos.pasajeros.length > 0) {
+                    // Buscar el pasajero específico por asiento o retornar el precio del primer pasajero
+                    const pasajero = datos.pasajeros.find(p => p.asiento_id === parseInt(asientoId)) 
+                                   || datos.pasajeros[0];
+                    return parseFloat(pasajero.precio) || 0;
+                }
+            } catch (e) {
+                console.error("Error al parsear datos del resumen:", e);
+            }
+        }
+
+        // Si no hay datos en sessionStorage, hacer llamada AJAX
+        try {
+            const viaje = sessionStorage.getItem('btn_id_ida');
+            const descuentoAplicado = 0; // Sin descuento para obtener precio base
+
+            const response = await $.ajax({
+                url: '/ecommerce/home/resumenViaje',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ 
+                    asiento_id: asientoId, 
+                    descuento: descuentoAplicado, 
+                    viaje: viaje 
+                })
+            });
+
+            if (response.Status === 'success' && response.data.pasajeros && response.data.pasajeros.length > 0) {
+                // Guardar en sessionStorage para uso futuro
+                sessionStorage.setItem('datos_resumen_viaje', JSON.stringify(response.data));
+                
+                // Retornar el precio del asiento específico
+                const pasajero = response.data.pasajeros.find(p => p.asiento_id === parseInt(asientoId)) 
+                               || response.data.pasajeros[0];
+                
+                // Guardar el nombre visible del asiento en la variable global
+                if (pasajero && pasajero.asiento) {
+                    window.nombreAsientoVisible = pasajero.asiento;
+                    console.log(`Nombre del asiento guardado: ${window.nombreAsientoVisible}`);
+                }
+                
+                return parseFloat(pasajero.precio) || 0;
+            }
+        } catch (error) {
+            console.error("Error al obtener precio del asiento:", error);
+        }
+
+        // Fallback: usar CONFIG.PRECIORUTA si todo falla
+        return CONFIG.PRECIORUTA || 0;
+    },
+
+    calcularPrecioAsiento() {
+        // Obtener el precio base desde el sessionStorage si está disponible
+        const datosResumen = sessionStorage.getItem('datos_resumen_viaje');
+        if (datosResumen) {
+            try {
+                const datos = JSON.parse(datosResumen);
+                if (datos.pasajeros && datos.pasajeros.length > 0) {
+                    // Retornar el precio del primer pasajero como precio base del asiento
+                    return parseFloat(datos.pasajeros[0].precio) || 0;
+                }
+            } catch (e) {
+                console.error("Error al parsear datos del resumen:", e);
+            }
+        }
+        
+        // Fallback: usar CONFIG.PRECIORUTA si no hay datos del resumen
+        return CONFIG.PRECIORUTA || 0;
     },
 
     enviarDatosPasajero(nombreAsiento, idAsiento) {
@@ -1257,7 +1363,11 @@ const FormManager = {
         const fechaNacimiento = document.getElementById(`fechaNacimientoNuevo_${idAsiento}`).value;
         const telefono = document.getElementById(`telefono_${idAsiento}`).value;
         const correo = document.getElementById(`correo_${idAsiento}`).value;
-        const brazos = document.getElementById(`brazos_${idAsiento}`).checked;
+        
+        // Verificar si el elemento brazos existe, si no usar false como valor por defecto
+        const brazosElement = document.getElementById(`brazos_${idAsiento}`);
+        const brazos = brazosElement ? brazosElement.checked : false;
+        
         const esMenor = document.getElementById(`esMenor_${idAsiento}`).checked;
 
         const recuperarSeleccion = document.querySelector(`input[name="sexo-${idAsiento}"]:checked`)?.id;
@@ -1680,7 +1790,7 @@ const PaymentManager = {
                     </div>
                     <div class="col-md-6">
                         <label for="numero_documento_contacto" class="form-label">Número de documento *</label>
-                        <input type="text" id="numero_documento_contacto" class="form-control" required>
+                        <input type="number" id="numero_documento_contacto" class="form-control" required>
                     </div>
                     <div class="col-md-12">
                         <label for="nombres_contacto" class="form-label">Nombres *</label>
@@ -1700,7 +1810,7 @@ const PaymentManager = {
                     </div>
                     <div class="col-md-12">
                         <label for="telefono_contacto" class="form-label">Teléfono/móvil *</label>
-                        <input type="tel" id="telefono_contacto" class="form-control" required>
+                        <input type="number" id="telefono_contacto" class="form-control" required>
                     </div>
 
                 </div>
@@ -1714,7 +1824,7 @@ const PaymentManager = {
                     </div>
                     <div class="col-md-12">
                         <label for="numero_documento_contacto" class="form-label">RUC *</label>
-                        <input type="text" id="numero_documento_contacto" class="form-control" placeholder="20123456789" maxlength="11" required>
+                        <input type="number" id="numero_documento_contacto" class="form-control" placeholder="20123456789" maxlength="11" required>
                     </div>
                     <div class="col-md-12">
                         <label for="razon_social_contacto" class="form-label">Razón Social *</label>
@@ -1726,7 +1836,7 @@ const PaymentManager = {
                     </div>
                     <div class="col-md-12">
                         <label for="telefono_contacto" class="form-label">Teléfono *</label>
-                        <input type="tel" id="telefono_contacto" class="form-control" required>
+                        <input type="number" id="telefono_contacto" class="form-control" required>
                     </div>
                 </div>
             `;
@@ -1971,11 +2081,12 @@ const PaymentManager = {
         // Limpiar opciones existentes (excepto la primera)
         selector.innerHTML = '<option value="">Seleccione</option>';
 
-        // Poblar combo de tipos
+        // Poblar combo de tipos, omitiendo "Efectivo"
         for (const tipoId in this.metodosPagoBD) {
             const grupo = this.metodosPagoBD[tipoId];
             if (grupo.length > 0) {
                 const tipoNombre = grupo[0].tipo_metodo;
+                if (tipoNombre && tipoNombre.trim().toLowerCase() === "efectivo") continue; // Omitir "Efectivo"
                 const option = document.createElement("option");
                 option.value = tipoId;
                 option.textContent = tipoNombre;
@@ -2057,7 +2168,7 @@ const PaymentManager = {
                 <div class="row g-3">
                     <div class="col-12">
                         <label class="form-label">Número de tarjeta</label>
-                        <input id="numero_tarjeta" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19">
+                        <input type="text" id="numero_tarjeta" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19" autocomplete="cc-number">
                     </div>
                     <div class="col-12">
                         <label class="form-label">Nombre del titular</label>
@@ -2075,14 +2186,14 @@ const PaymentManager = {
                         <select id="ano_vencimiento" class="form-select">
                             <option value="">AA</option>
                             ${Array.from({ length: 10 }, (_, i) => {
-                const year = new Date().getFullYear() + i;
-                return `<option value="${year}">${year}</option>`;
-            }).join('')}
+                                const year = new Date().getFullYear() + i;
+                                return `<option value="${year}">${year}</option>`;
+                            }).join('')}
                         </select>
                     </div>
                     <div class="col-6">
                         <label class="form-label">CVV</label>
-                        <input id="cvv_tarjeta" class="form-control" placeholder="123" maxlength="4">
+                        <input type="number" id="cvv_tarjeta" class="form-control" placeholder="123" maxlength="3">
                     </div>
                     <div class="col-6">
                         <label class="form-label">Código promocional (opcional)</label>
@@ -2090,6 +2201,35 @@ const PaymentManager = {
                     </div>
                 </div>
             `;
+
+            // Solo aceptar 16 dígitos en tiempo real para el número de tarjeta
+            setTimeout(() => {
+                const numeroTarjetaInput = document.getElementById("numero_tarjeta");
+                if (numeroTarjetaInput) {
+                    numeroTarjetaInput.addEventListener("input", function () {
+                        // Eliminar todo lo que no sea dígito
+                        let val = this.value.replace(/\D/g, "");
+                        // Limitar a 16 dígitos
+                        val = val.slice(0, 16);
+                        // Opcional: Formatear con espacios cada 4 dígitos
+                        this.value = val.replace(/(.{4})/g, "$1 ").trim();
+                    });
+                }
+                // Solo permitir máximo 3 caracteres en tiempo real para el CVV
+                const cvvInput = document.getElementById("cvv_tarjeta");
+                if (cvvInput) {
+                    cvvInput.addEventListener("input", function () {
+                        this.value = this.value.replace(/\D/g, '').slice(0, 3);
+                    });
+                }
+                // Solo aceptar letras en el campo "Nombre del titular"
+                const titularInput = document.getElementById("titular_tarjeta");
+                if (titularInput) {
+                    titularInput.addEventListener("input", function () {
+                        this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]/g, "");
+                    });
+                }
+            }, 0);
         } else if (tipoMetodo.toUpperCase() === "BILLETERA VIRTUAL") {
             if (metodo.qr) {
                 divExtra.innerHTML = `
