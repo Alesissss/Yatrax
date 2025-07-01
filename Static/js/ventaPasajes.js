@@ -2221,7 +2221,7 @@ const PaymentManager = {
                 const res = await fetch("/ecommerce/home/verificarCupon", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({"cupon":codigo})
+                    body: JSON.stringify({ "cupon": codigo })
                 });
                 const data = await res.json();
                 if (data.status = "success") {
@@ -2395,19 +2395,20 @@ const PaymentManager = {
         let esValido = true;
 
         const mostrarError = (input, mensaje) => {
+            if (!input) return;
+
             const spanId = `error_${input.id}`;
             let errorSpan = document.getElementById(spanId);
 
             if (!errorSpan) {
                 errorSpan = document.createElement("span");
                 errorSpan.id = spanId;
-                errorSpan.className = "text-danger small";
+                errorSpan.className = "text-danger small d-block mt-1";
                 input.parentElement.appendChild(errorSpan);
             }
 
             errorSpan.textContent = mensaje;
             input.classList.add("is-invalid");
-            esValido = false;
 
             setTimeout(() => {
                 if (errorSpan) errorSpan.remove();
@@ -2416,42 +2417,68 @@ const PaymentManager = {
         };
 
         const limpiarError = (input) => {
+            if (!input) return;
             const spanId = `error_${input.id}`;
             const errorSpan = document.getElementById(spanId);
             if (errorSpan) errorSpan.remove();
             input.classList.remove("is-invalid");
         };
 
-        if (tipoMetodo === "Tarjeta") {
+        if (tipoMetodo == 2) {
             const numero = document.getElementById("numero_tarjeta");
             const titular = document.getElementById("titular_tarjeta");
             const cvv = document.getElementById("cvv_tarjeta");
             const mes = document.getElementById("mes_vencimiento");
             const ano = document.getElementById("ano_vencimiento");
 
+            // Validar existencia de todos los elementos antes de usarlos
+            if (!numero || !titular || !cvv || !mes || !ano) {
+                console.error("Uno o más campos de la tarjeta no existen en el DOM.");
+                return false;
+            }
+
             const regexNumero = /^\d{16}$/;
             const regexTitular = /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]{3,}$/;
             const regexCVV = /^\d{3,4}$/;
 
-            if (!regexNumero.test(numero.value.replace(/\s/g, ''))) {
+            // Validaciones
+            const numeroValor = numero.value.replace(/\s/g, '').trim();
+            if (!numeroValor || !regexNumero.test(numeroValor)) {
                 mostrarError(numero, "Número de tarjeta inválido");
-            } else limpiarError(numero);
+                esValido = false;
+            } else {
+                limpiarError(numero);
+            }
 
-            if (!regexTitular.test(titular.value)) {
+            const titularValor = titular.value.trim();
+            if (!titularValor || !regexTitular.test(titularValor)) {
                 mostrarError(titular, "Nombre del titular inválido");
-            } else limpiarError(titular);
+                esValido = false;
+            } else {
+                limpiarError(titular);
+            }
 
-            if (!regexCVV.test(cvv.value)) {
+            const cvvValor = cvv.value.trim();
+            if (!cvvValor || !regexCVV.test(cvvValor)) {
                 mostrarError(cvv, "CVV inválido");
-            } else limpiarError(cvv);
+                esValido = false;
+            } else {
+                limpiarError(cvv);
+            }
 
-            if (mes.value === "") {
+            if (!mes.value.trim()) {
                 mostrarError(mes, "Seleccione un mes");
-            } else limpiarError(mes);
+                esValido = false;
+            } else {
+                limpiarError(mes);
+            }
 
-            if (ano.value === "") {
+            if (!ano.value.trim()) {
                 mostrarError(ano, "Seleccione un año");
-            } else limpiarError(ano);
+                esValido = false;
+            } else {
+                limpiarError(ano);
+            }
         }
 
         return esValido;

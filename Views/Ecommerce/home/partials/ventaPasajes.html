@@ -287,75 +287,60 @@
                                     </select>
 
                                     <div id="contenido_pago_dinamico"></div>
-                                    <div class="input-group mt-4">
-                                        <input type="text" class="form-control" id="codigo_promocional"
-                                            placeholder="Ingrese código promocional">
-                                        <button class="btn btn-success" id="btnAplicarCodigo">Aplicar código</button>
-                                    </div>
-                                    <div id="codigo_aplicado" class="mt-2"></div>
 
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="col-md-4" id="contenedorResumen">
-                    <!-- <div class="card mb-3">
-                        <div class="card-header bg-dark text-white">Detalle del viaje</div>
-                        <div class="card-body">
-                            <p><strong>16:00</strong> CHICLAYO (Bolognesi)</p>
-                            <p><strong>21:00</strong> TRUJILLO (El Ejercito)</p>
-                            <p><i class="fas fa-clock"></i> 5h 00m</p>
-                            <p><i class="fas fa-user"></i> 2 pasajeros</p>
-                            <p><i class="fas fa-calendar-alt"></i> Viernes 16, mayo</p>
-                        </div>
+                <div class="col-md-4">
+                    <div class="col-md-12" id="contenedorResumen">
+                        
                     </div>
-                    <div class="card">
-                        <div class="card-header bg-dark text-white">Resumen de compra</div>
-                        <div class="card-body">
-                            <p>Chiclayo → Trujillo</p>
-                            <p>Pasajero 1 (Asiento 44) - S/ 40.00</p>
-                            <p>Pasajero 2 (Asiento 45) - S/ 40.00</p>
-                            <hr>
-                            <p><strong>Total:</strong> S/ 80.00</p>
+                    <div class="col-md-12">
+                        <div class="input-group mt-4">
+                            <input type="text" class="form-control" id="codigo_promocional"
+                                placeho lder="Ingrese código promocional">
+                            <button class="btn btn-success" id="btnAplicarCodigo">Aplicar código</button>
                         </div>
-                    </div> -->
+                        <div id="codigo_aplicado" class="mt-2"></div>
+                    </div>
                 </div>
+
             </div>
         </div>
     </div>
 </section>
 <script>
-function actualizarProgressBarContactoPago(etapa) {
-    const barra = document.getElementById("progress-bar-contacto-pago");
-    if (!barra) return;
+    function actualizarProgressBarContactoPago(etapa) {
+        const barra = document.getElementById("progress-bar-contacto-pago");
+        if (!barra) return;
 
-    if (etapa === "contacto") {
-        barra.style.width = "0%";
-        barra.setAttribute("aria-valuenow", "0");
-        barra.textContent = "Contacto";
-    } else if (etapa === "pago") {
-        barra.style.width = "100%";
-        barra.setAttribute("aria-valuenow", "100");
-        barra.textContent = "Pago";
+        if (etapa === "contacto") {
+            barra.style.width = "0%";
+            barra.setAttribute("aria-valuenow", "0");
+            barra.textContent = "Contacto";
+        } else if (etapa === "pago") {
+            barra.style.width = "100%";
+            barra.setAttribute("aria-valuenow", "100");
+            barra.textContent = "Pago";
+        }
     }
-}
 
-// Eventos del acordeón
-document.addEventListener("DOMContentLoaded", () => {
-    const contacto = document.getElementById("collapseContacto");
-    const pago = document.getElementById("collapsePago");
+    // Eventos del acordeón
+    document.addEventListener("DOMContentLoaded", () => {
+        const contacto = document.getElementById("collapseContacto");
+        const pago = document.getElementById("collapsePago");
 
-    contacto.addEventListener("show.bs.collapse", () => {
+        contacto.addEventListener("show.bs.collapse", () => {
+            actualizarProgressBarContactoPago("contacto");
+        });
+
+        pago.addEventListener("show.bs.collapse", () => {
+            actualizarProgressBarContactoPago("pago");
+        });
+
+        // Por si carga en contacto abierto
         actualizarProgressBarContactoPago("contacto");
     });
-
-    pago.addEventListener("show.bs.collapse", () => {
-        actualizarProgressBarContactoPago("pago");
-    });
-
-    // Por si carga en contacto abierto
-    actualizarProgressBarContactoPago("contacto");
-});
 </script>

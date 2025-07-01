@@ -328,86 +328,76 @@ let descuentoAplicado = 0;
 function renderResumen(data) {
   let html = '';
 
-  // Verificar que 'data' sea un array
   if (!Array.isArray(data) || data.length === 0) {
     console.error('No hay datos válidos para renderizar.');
     return;
   }
 
-  // Inicializar variables
-  let totalPasajes = 0;  // Variable para acumular el total
-  let pasajeros = [];  // Array para almacenar los datos de los pasajeros
-  let viaje = null;  // Detalles del viaje
-  let asientosPrecios = {}; // Para almacenar los precios por asiento
+  let totalPasajes = 0;
+  let pasajeros = [];
+  let viaje = null;
+  let asientosPrecios = {};
 
-  // Iterar sobre los datos para agrupar los pasajes
   data.forEach((resumen) => {
     if (!resumen.detalle_viaje || !resumen.pasajero) {
       console.error('Datos del resumen incompletos:', resumen);
       return;
     }
 
-    // Asignar los detalles del viaje (suponemos que es el mismo para todos los pasajes)
     if (!viaje) {
       viaje = resumen.detalle_viaje;
     }
 
-    // Agregar los datos del pasajero a la lista, incluyendo el precio individual
     let pasajero = Object.assign({}, resumen.pasajero);
     pasajero.precio = parseFloat(resumen.precio_total) || 0;
     pasajeros.push(pasajero);
-    totalPasajes += pasajero.precio;  // Acumulamos el precio total de todos los pasajes
+    totalPasajes += pasajero.precio;
 
-    // Guardar el precio del asiento en el objeto asientosPrecios
     if (pasajero.asiento) {
       asientosPrecios[pasajero.asiento] = pasajero.precio;
     }
   });
 
-  // Guardar los precios de los asientos en sessionStorage
   guardarPreciosAsientos(asientosPrecios);
 
-  // Formato de fecha para la salida y llegada
   const fechaSalida = moment(viaje.fechaSalida).format("DD-MM-YYYY, HH:mm");
   const fechaLlegada = moment(viaje.fechaLlegadaEstimada).format("DD-MM-YYYY, HH:mm");
-
-  // Generamos el HTML para el detalle del viaje (único para todos los pasajes)
-  html += `
-    <div class="card mb-3">
-      <div class="card-header bg-dark text-white">Detalle del viaje</div>
-      <div class="card-body">
-        <p><strong>${fechaSalida}</strong> ${viaje.ciudad_origen} (${viaje.origen})</p>
-        <p><strong>${fechaLlegada}</strong> ${viaje.ciudad_destino} (${viaje.destino})</p>
-        <p><i class="fas fa-user"></i> ${pasajeros.length} pasajero${pasajeros.length > 1 ? 's' : ''}</p>
-      </div>
-    </div>
-  `;
-
-  // Resumen de compra: Aquí agrupamos todos los pasajes
-  html += `
-    <div class="card">
-      <div class="card-header bg-dark text-white">Resumen de compra</div>
-      <div class="card-body">
-        <p>${viaje.ciudad_origen} → ${viaje.ciudad_destino}</p>
-  `;
-
-  // Aquí agregamos los detalles de cada pasajero
-  pasajeros.forEach((p, index) => {
-    html += `<p id="precio - ${p.asiento}">Pasajero ${index + 1} (Asiento ${p.asiento}) - S/ ${(parseFloat(p.precio) || 0).toFixed(2)}</p>`;
-  });
-
-  // Descuento y cálculo del total
   const descuento = parseFloat(descuentoAplicado) || 0;
+  const totalFinal = descuento >= totalPasajes ? 0 : totalPasajes - descuento;
 
   html += `
-      <hr>
-      <p><strong>Descuento aplicado:</strong> S/ ${descuento.toFixed(2)}</p>
-      <p><strong>Total a pagar:</strong> S/ ${(descuento >= (totalPasajes)) ? '0.00' : ((totalPasajes - descuento)).toFixed(2)}</p>
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-primary text-white fw-bold">
+        <i class="fas fa-bus-alt me-2"></i>Detalle del Viaje
+      </div>
+      <div class="card-body">
+        <div class="mb-2"><strong>Salida:</strong> ${fechaSalida} - ${viaje.ciudad_origen} (${viaje.origen})</div>
+        <div class="mb-2"><strong>Llegada:</strong> ${fechaLlegada} - ${viaje.ciudad_destino} (${viaje.destino})</div>
+        <div><i class="fas fa-users me-1"></i>${pasajeros.length} pasajero${pasajeros.length > 1 ? 's' : ''}</div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-header bg-success text-white fw-bold">
+        <i class="fas fa-receipt me-2"></i>Resumen de Compra
+      </div>
+      <div class="card-body">
+        <div class="mb-3"><strong>Ruta:</strong> ${viaje.ciudad_origen} → ${viaje.ciudad_destino}</div>
+        <ul class="list-group mb-3">
+          ${pasajeros.map((p, i) => `
+            <li class="list-group-item d-flex justify-content-between align-items-center" id="precio-${p.asiento}">
+              Pasajero ${i + 1} <span class="badge bg-secondary rounded-pill">Asiento ${p.asiento} - S/ ${p.precio.toFixed(2)}</span>
+            </li>
+          `).join('')}
+        </ul>
+        <div class="text-end">
+          <p class="mb-1"><strong>Descuento aplicado:</strong> S/ ${descuento.toFixed(2)}</p>
+          <h5><strong>Total a pagar:</strong> S/ ${totalFinal.toFixed(2)}</h5>
+        </div>
       </div>
     </div>
   `;
 
-  // Verifica que el contenedor esté presente antes de actualizar el HTML
   const contenedorResumen = $('#contenedorResumen');
   if (contenedorResumen.length) {
     contenedorResumen.html(html);
