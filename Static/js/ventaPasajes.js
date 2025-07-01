@@ -2271,7 +2271,7 @@ const PaymentManager = {
         document.getElementById("codigo_aplicado").innerHTML = "";
         document.getElementById("codigo_promocional").value = "";
         document.getElementById("descuento_monto").innerHTML = `<strong>Descuento aplicado:</strong> S/ 0`;
-                    document.getElementById("total_monto").innerHTML = `<strong>Total a pagar:</strong> S/ ${sum}`;
+        document.getElementById("total_monto").innerHTML = `<strong>Total a pagar:</strong> S/ ${sum}`;
     },
 
     configurarEventos() {
@@ -2632,7 +2632,7 @@ const PaymentManager = {
                     return;
                 }
 
-                if(!this.validarCamposPago()){
+                if (!this.validarCamposPago()) {
                     toastr.error("Verificar los campos de pago");
                     return;
                 }
@@ -2680,7 +2680,6 @@ const PaymentManager = {
                 this.rutas = resultado.tickets;
                 this.mostrarPagoExitoso(resultado);
                 AppState.estadoPago = 1;
-                App.resetearSistemaCompleto();
             } else {
                 throw new Error(resultado.Msj || 'Error en el procesamiento del pago');
             }
@@ -2712,6 +2711,7 @@ const PaymentManager = {
 
             if (resultado.Status === 'success') {
                 this.mostrarPagoExitoso(resultado);
+                AppState.estadoPago = 1;
             } else {
                 throw new Error(resultado.Msj || 'Error en el procesamiento del pago');
             }
@@ -2939,43 +2939,38 @@ const PaymentManager = {
         // Después de 5 segundos: cerrar, descargar y redirigir
         setTimeout(() => {
             document.body.removeChild(overlay);
-            this.descargarBoleto(resultado);
-            window.location.href = "/";  // Cambia si tu página de inicio tiene otra ruta
-        }, 2000);
-    },
-    iniciarNuevaCompra() {
-        const overlay = document.getElementById('payment-success-overlay');
-        if (overlay) overlay.remove();
+            this.descargarBoleto(resultado); // ← PRIMERO DESCARGAR
+            setTimeout(() => {
+                App.resetearSistemaCompleto();  // ← LUEGO RESETEAR
+                window.location.href = "/";
+            }, 3000); // Dale 3s más para asegurar descarga
+        }, 10000);
 
-        App.resetearSistemaCompleto();
-        NavigationManager.updateFormVisibility();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        toastr.success('Listo para una nueva compra');
+
+
     },
 
     descargarBoleto(resultado) {
+        const rutas = this.rutas;
+        console.log(rutas)
         toastr.info('Preparando descarga de los boletos...');
         setTimeout(() => {
-            // Verificamos si el array de rutas tiene boletos generados
-            if (this.rutas && Array.isArray(this.rutas)) {
-                this.rutas.forEach((ruta, index) => {
+            if (rutas && Array.isArray(rutas)) {
+                rutas.forEach((ruta, index) => {
                     const link = document.createElement('a');
                     const rutaFormateada = '/' + ruta;
-
-                    link.href = rutaFormateada;  // Establece la ruta formateada
-                    link.download = `boleto-${resultado.codigo_confirmacion || 'reserva'}-${index + 1}.pdf`;  // Asigna nombre único
-                    document.body.appendChild(link);  // Necesario para algunos navegadores
-                    link.click();  // Dispara la descarga
-                    document.body.removeChild(link);  // Limpia el DOM
+                    link.href = rutaFormateada;
+                    link.download = `boleto-${resultado.codigo_confirmacion || 'reserva'}-${index + 1}.pdf`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
                 });
-
                 toastr.success('Boletos descargados exitosamente');
             } else {
                 toastr.error('No se encontraron boletos para descargar');
             }
         }, 1500);
     },
-
 
 
 
