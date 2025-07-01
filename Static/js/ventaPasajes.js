@@ -1412,7 +1412,7 @@ const SeatManager = {
                         data-bs-target="#${accordionItemId}" 
                         aria-expanded="${isFirstAccordion}"
                         aria-controls="${accordionItemId}">
-                    Asiento: ${nombreAsiento}   
+                    Asiento: ${nombreAsiento}
                 </button>
             </h2>
             <div id="${accordionItemId}" 

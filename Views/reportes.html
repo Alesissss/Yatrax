@@ -1,0 +1,154 @@
+
+<!-- Line chart -->
+<div id="line-chart" style="width: 600px; height: 400px;"></div>
+<script>
+    var myChart = echarts.init(document.getElementById('line-chart'));
+    var option = {
+        title: { text: 'Evolución de Ventas' },
+        tooltip: {},
+        xAxis: { data: ['Enero', 'Febrero', 'Marzo', 'Abril'] },
+        yAxis: {},
+        series: [{ type: 'line', data: [100, 200, 150, 80] }]
+    };
+    myChart.setOption(option);
+</script>
+
+<!-- Bar chart -->
+
+<div id="bar-chart" style="width: 600px; height: 400px;"></div>
+<script>
+    var myChart = echarts.init(document.getElementById('bar-chart'));
+    var option = {
+        title: { text: 'Comparativa de Productos' },
+        tooltip: {},
+        xAxis: { data: ['Producto A', 'Producto B', 'Producto C'] },
+        yAxis: {},
+        series: [{ type: 'bar', data: [50, 120, 80] }]
+    };
+    myChart.setOption(option);
+</script>
+
+<!-- Pie chart -->
+
+<div id="pie-chart" style="width: 600px; height: 400px;"></div>
+<script>
+    var myChart = echarts.init(document.getElementById('pie-chart'));
+    var option = {
+        title: { text: 'Distribución de Ventas' },
+        tooltip: { trigger: 'item' },
+        series: [{
+            type: 'pie',
+            radius: '50%',
+            data: [
+                { value: 335, name: 'Producto A' },
+                { value: 234, name: 'Producto B' },
+                { value: 154, name: 'Producto C' }
+            ]
+        }]
+    };
+    myChart.setOption(option);
+</script>
+
+
+<!-- Gráfico de mapas -->
+ <div id="map-chart" style="width: 600px; height: 400px;"></div>
+<script>
+    var myChart = echarts.init(document.getElementById('map-chart'));
+    var option = {
+        title: { text: 'Distribución Geográfica' },
+        series: [{
+            type: 'map',
+            mapType: 'world',
+            roam: true,
+            data: [
+                { name: 'USA', value: 100 },
+                { name: 'China', value: 200 },
+                { name: 'India', value: 300 }
+            ]
+        }]
+    };
+    myChart.setOption(option);
+</script>
+
+<!-- Gráfico de árbol -->
+ <div id="tree-chart" style="width: 600px; height: 400px;"></div>
+<script>
+    var myChart = echarts.init(document.getElementById('tree-chart'));
+    var option = {
+        title: { text: 'Jerarquía de la Empresa' },
+        series: [{
+            type: 'tree',
+            data: [{
+                name: 'Empresa',
+                children: [
+                    { name: 'Departamento A' },
+                    { name: 'Departamento B', children: [{ name: 'Equipo 1' }, { name: 'Equipo 2' }] }
+                ]
+            }],
+            top: '5%',
+            left: '20%',
+            bottom: '5%',
+            right: '20%'
+        }]
+    };
+    myChart.setOption(option);
+</script>
+
+<!-- Gráfico de candlestick -->
+<div id="candlestick-chart" style="width: 600px; height: 400px;"></div>
+<script>
+    var myChart = echarts.init(document.getElementById('candlestick-chart'));
+    var option = {
+        title: { text: 'Análisis de Precios' },
+        xAxis: {
+            type: 'category',
+            data: ['2022-01-01', '2022-01-02', '2022-01-03', '2022-01-04']
+        },
+        yAxis: {},
+        series: [{
+            type: 'candlestick',
+            data: [
+                [820, 932, 901, 934],
+                [832, 901, 930, 934],
+                [834, 933, 915, 923],
+                [835, 926, 916, 935]
+            ]
+        }]
+    };
+    myChart.setOption(option);
+</script>
+
+<!-- Gráfico de torta de anillo -->
+ <div id="doughnut-chart" style="width: 600px; height: 400px;"></div>
+<script>
+    var myChart = echarts.init(document.getElementById('doughnut-chart'));
+    var option = {
+        title: { text: 'Participación de Mercado' },
+        tooltip: { trigger: 'item' },
+        series: [{
+            type: 'pie',
+            radius: ['40%', '70%'],
+            data: [
+                { value: 335, name: 'Marca A' },
+                { value: 234, name: 'Marca B' },
+                { value: 154, name: 'Marca C' }
+            ]
+        }]
+    };
+    myChart.setOption(option);
+</script>
+
+<!-- 
+    const miObjeto = {a: 1, b: 2, c: 3};
+const claves = Object.keys(miObjeto);
+console.log(claves);  // Salida: ['a', 'b', 'c']
+
+-->
+
+<!-- 
+
+const valores = Object.values(miObjeto);
+console.log(valores);  // Salida: [1, 2, 3]
+
+
+-->
