@@ -1,13 +1,15 @@
 import bd
 
 class Empresa:
-    def __init__(self, id=None, razon_social=None, ruc=None, direccion=None, telefono=None, email=None, estado=1, fecha_registro=None, usuario=None):
+    def __init__(self, id=None, razon_social=None, ruc=None, direccion=None, telefono=None, email=None, redes=None, eslogan=None, estado=1, fecha_registro=None, usuario=None):
         self.id = id
         self.razon_social = razon_social
         self.ruc = ruc
         self.direccion = direccion
         self.telefono = telefono
         self.email = email
+        self.redes = redes
+        self.eslogan = eslogan
         self.estado = estado
         self.fecha_registro = fecha_registro
         self.usuario = usuario
@@ -17,7 +19,7 @@ class Empresa:
         conexion = bd.Conexion()
         try:
             query = """
-                SELECT id, razon_social, ruc, direccion, telefono, email, estado, fecha_registro, usuario
+                SELECT id, razon_social, ruc, direccion, telefono, email, redes, eslogan, estado, fecha_registro, usuario
                 FROM empresa
             """
             return conexion.obtener(query)
@@ -29,7 +31,7 @@ class Empresa:
         conexion = bd.Conexion()
         try:
             query = """
-                SELECT id, razon_social, ruc, direccion, telefono, email, estado, fecha_registro, usuario
+                SELECT id, razon_social, ruc, direccion, telefono, email, redes, eslogan, estado, fecha_registro, usuario
                 FROM empresa
                 WHERE id = %s
             """
@@ -43,7 +45,7 @@ class Empresa:
         conexion = bd.Conexion()
         try:
             query = """
-                SELECT id, razon_social, ruc, direccion, telefono, email, estado, fecha_registro, usuario
+                SELECT id, razon_social, ruc, direccion, telefono, email, redes, eslogan, estado, fecha_registro, usuario
                 FROM empresa
                 WHERE estado = 1
             """
@@ -52,12 +54,12 @@ class Empresa:
             conexion.cerrar()
 
     @classmethod
-    def registrar(cls, razon_social, ruc, direccion, telefono, email, usuario_actual):
+    def registrar(cls, razon_social, ruc, direccion, telefono, email, redes, eslogan, usuario_actual):
         conexion = bd.Conexion()
         try:
             conexion.ejecutar(
-                "CALL SP_REGISTRAR_EMPRESA(%s, %s, %s, %s, %s, %s);",
-                (razon_social, ruc, direccion, telefono, email, usuario_actual)
+                "CALL SP_REGISTRAR_EMPRESA(%s, %s, %s, %s, %s, %s, %s, %s);",
+                (razon_social, ruc, direccion, telefono, email, redes, eslogan, usuario_actual)
             )
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
             return resultado[0]
@@ -65,12 +67,12 @@ class Empresa:
             conexion.cerrar()
 
     @classmethod
-    def editar(cls, id, razon_social, ruc, direccion, telefono, email, usuario_actual):
+    def editar(cls, id, razon_social, ruc, direccion, telefono, email, redes, eslogan, usuario_actual):
         conexion = bd.Conexion()
         try:
             conexion.ejecutar(
-                "CALL SP_EDITAR_EMPRESA(%s, %s, %s, %s, %s, %s, %s);",
-                (id, razon_social, ruc, direccion, telefono, email, usuario_actual)
+                "CALL SP_EDITAR_EMPRESA(%s, %s, %s, %s, %s, %s, %s, %s, %s);",
+                (id, razon_social, ruc, direccion, telefono, email, redes, eslogan, usuario_actual)
             )
             resultado = conexion.obtener("SELECT @MSJ, @MSJ2;")
             return resultado[0]

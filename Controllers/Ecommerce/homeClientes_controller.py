@@ -37,6 +37,7 @@ from Models.venta import Venta
 from Models.reserva import Reserva
 from Models.conf_general import ConfGeneral
 from Models.promocion import Promocion
+from Models.empresa import Empresa
 
 
 homeClientes_bp = Blueprint('homeClientes', __name__, url_prefix='/ecommerce/home')
@@ -724,6 +725,13 @@ def buscarViajes():
             "Status": "error"
         })
 
+@homeClientes_bp.route('/obtenerDataEmpresa', methods=['GET'])
+def obtener_data_empresa():
+    try:
+        data = Empresa.obtener_activos()
+        return jsonify({"Status": "success", "data": data})
+    except Exception as e:
+        return jsonify({"Status": "error", "Msj": f"Error al obtener datos de la empresa: {repr(e)}", "data": []})
 
 @homeClientes_bp.route("/obtener_diseno_vehiculo", methods=['POST'])
 def obtener_diseno_vehiculo():
