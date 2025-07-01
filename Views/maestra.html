@@ -52,7 +52,8 @@
                             href="{{url_for('homeClientes.index')}}#seccionServicio">Servicios</a>
                     </li>
                     <li class="nav-item">
-                        <a class="navbar-brand text-white" href="{{ url_for('homeClientes.mi_pasaje_operaciones') }}">Mi pasaje</a>
+                        <a class="navbar-brand text-white" href="{{ url_for('homeClientes.mi_pasaje_operaciones') }}">Mi
+                            pasaje</a>
                     </li>
                     <!-- <li class="nav-item dropdown position-relative">
                         <div style="position: relative; z-index: +2;">
@@ -95,7 +96,8 @@
                         </li>
                         <li><a href="{{ url_for('homeClientes.perfilCliente') }}"
                                 class="dropdown-item border-bottom border-top">Mi Perfil</a></li>
-                        <li><a class="dropdown-item mb-0 border-bottom" href="{{ url_for('homeClientes.misboletos') }}">Mis viajes</a></li>
+                        <li><a class="dropdown-item mb-0 border-bottom"
+                                href="{{ url_for('homeClientes.misboletos') }}">Mis viajes</a></li>
                         <li><a class="dropdown-item rounded mb-3"
                                 href="{{ url_for('homeClientes.logoutCliente') }}">Cerrar Sesión</a></li>
                     </ul>
@@ -115,7 +117,7 @@
             </div>
         </div>
     </nav>
-    
+
     <!-- <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-custom" id="maestra_header">
         <div class="container-fluid align-items-center">
             <div class="col-md-3 d-flex align-items-center justify-content-center">
@@ -179,18 +181,19 @@
     <footer>
         <div class="container-fluid bg-info py-3 py-md-6 py-xl-9 py-xxl-10" id="maestra_footer">
             <div class="row text-white">
-                <div class="col-md-4">
-                    <b><span>"Dime y olvidaré, muéstrame y podría </span><br></b>
-                    <b><span>recordar, involúcrame y entenderé"</span></b><br>
-                    <span>Proverbio Chino</span><br>
+                <div class="col-md-4 mx-auto">
+                    <h6>Eslogan</h6>
+                    <ul class="list-unstyled text-white">
+                        <li id="eslogan" class="text-decoration-none text-white">Cargando eslogan…</li>
+                    </ul>
                     <img src="" alt="logo_yatrax_footer" id="maestra_logo_footer" style="
-                                                                                            max-height: 80px;
-                                                                                            width: auto;
-                                                                                            max-width: 100%;
-                                                                                            margin-left: 15%;
-                                                                                            margin-top: 2%;
-                                                                                            margin-bottom: 3%;
-                                                                                            display: block;">
+                        max-height: 80px;
+                        width: auto;
+                        max-width: 100%;
+                        margin-left: 15%;
+                        margin-top: 2%;
+                        margin-bottom: 3%;
+                        display: block;">
                 </div>
                 <div class="col-md-3 mx-auto text-white">
                     <h6>Ayuda</h6>
@@ -208,31 +211,36 @@
                     </ul>
                 </div>
                 <div class="col-md-3 text-white">
-                    <h6>Contacto</h6>
-                    <ul class="list-unstyled">
-                        <a class="text-decoration-none text-white" href="">
-                            <li>Av. José Leonardo Ortiz 010</li>
-                        </a>
-                        <a class="text-decoration-none text-white" href="">
-                            <li>972 013 941</li>
-                        </a>
-                        <a class="text-decoration-none text-white" href="">
-                            <li>TrxChiclyo@gmail.com</li>
-                        </a>
+                    <h6 class="text-white">Contacto</h6>
+                    <ul class="list-unstyled text-white">
+                        <li id="direccion" class="text-decoration-none text-white">Cargando dirección…</li>
+                        <li id="telefono" class="text-decoration-none text-white">Cargando teléfono…</li>
+                        <li id="correo" class="text-decoration-none text-white">Cargando correo…</li>
                     </ul>
                 </div>
                 <div class="col-md-2 text-white">
                     <h6>Redes</h6>
-                    <ul class="list-unstyled">
-                        <a class="text-decoration-none text-white" href="">
-                            <li>Facebook: /yatrax</li>
-                        </a>
-                        <a class="text-decoration-none text-white" href="">
-                            <li>Instagram: @yatrax</li>
-                        </a>
-                        <a class="text-decoration-none text-white" href="">
-                            <li>Twitter: @yatrax_oficial</li>
-                        </a>
+                    <ul class="list-unstyled text-white">
+                        <li>
+                            <a href="#" class="d-flex align-items-center text-decoration-none text-white">
+                                <!-- Icono con su propia etiqueta -->
+                                <i class="nav-icon fab fa-facebook-f me-2"></i>
+                                <!-- Texto con fuente normal -->
+                                <span id="facebook">Cargando…</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="d-flex align-items-center text-decoration-none text-white">
+                                <i class="nav-icon fab fa-instagram me-2"></i>
+                                <span id="instagram">Cargando…</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="d-flex align-items-center text-decoration-none text-white">
+                                <i class="nav-icon fab fa-tiktok me-2"></i>
+                                <span id="tiktok">Cargando…</span>
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -297,6 +305,31 @@
         //     }
         //   });
         // }
+
+        $(function () {
+            $.ajax({
+                url: '/ecommerce/home/obtenerDataEmpresa',
+                type: 'GET',
+                dataType: 'json'
+            })
+                .done(function (response) {
+                    if (response.Status === 'success' && response.data.length) {
+                        const empresa = response.data[0];
+                        $('ul.list-unstyled li#direccion').text(empresa.direccion);
+                        $('ul.list-unstyled li#telefono').text(empresa.telefono);
+                        $('ul.list-unstyled li#correo').text(empresa.email);
+                        $('#facebook').text(empresa.redes);
+                        $('#instagram').text(empresa.redes);
+                        $('#tiktok').text(empresa.redes);
+                        $('#eslogan').text(empresa.eslogan);
+                    } else {
+                        console.error('No hay datos de empresa');
+                    }
+                })
+                .fail(function (xhr, status, error) {
+                    console.error('Error en la solicitud AJAX:', error);
+                });
+        });
 
         $.ajax({
             url: '/ecommerce/home/GetConfApariencia',

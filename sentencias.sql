@@ -484,6 +484,8 @@ CREATE TABLE empresa (
     direccion VARCHAR(255) NOT NULL,
     telefono VARCHAR(15) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
+    redes VARCHAR(255) NOT NULL,
+    eslogan VARCHAR(255) NOT NULL,
     estado BOOLEAN NOT NULL DEFAULT TRUE,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NOT NULL
@@ -593,6 +595,7 @@ CREATE TABLE nivel(
     y_dimension int not null,
     estado BOOLEAN not null,
     foreign key (id_tipo_vehiculo) references tipo_vehiculo(id)
+        ON DELETE CASCADE
 );
 -- Crear tabla tipo metodo pago
 CREATE TABLE tipo_metodopago (
@@ -645,8 +648,10 @@ CREATE TABLE nivel_herramienta(
         id_nivel int NOT NULL,
         x_dimension int not null,
         y_dimension int not null,
-        FOREIGN KEY (id_nivel) REFERENCES nivel(id),
+        FOREIGN KEY (id_nivel) REFERENCES nivel(id)
+            ON DELETE CASCADE,
         FOREIGN KEY (id_herramienta) REFERENCES herramienta(id)
+            ON DELETE CASCADE
     );
 
 CREATE TABLE estado_viaje (
@@ -709,8 +714,10 @@ CREATE TABLE asiento (
     estado TINYINT NOT NULL CHECK (estado IN (0, 1, 2, 3)),
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NOT NULL,
-    FOREIGN KEY (id_vehiculo) REFERENCES vehiculo(id),
+    FOREIGN KEY (id_vehiculo) REFERENCES vehiculo(id)
+        ON DELETE CASCADE,
     FOREIGN KEY (id_nivel_herramienta) REFERENCES nivel_herramienta(id)
+        ON DELETE CASCADE
 );
 CREATE TABLE detalle_viaje_asiento(
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -849,8 +856,8 @@ VALUES
 ('Descuento', 1, '2025-02-12', '2025-12-25', 'GINGOBELL', 30.00);
 
 
-INSERT INTO `empresa`(`id`, `razon_social`, `ruc`, `direccion`, `telefono`, `email`, `estado`, `fecha_registro`, `usuario`) VALUES (1,'YATRAX SAC','20709942650','
-Av. José Balta 2704, Chiclayo 14003', '913626759','yatraxcontacto@yatusa.com',1,CURRENT_TIMESTAMP,'ander@gmail.com');
+INSERT INTO `empresa`(`id`, `razon_social`, `ruc`, `direccion`, `telefono`, `email`, `redes`, `eslogan`, `estado`, `fecha_registro`, `usuario`) VALUES (1,'YATRAX SAC','20709942650','
+Av. José Balta 2704, Chiclayo 14003', '913626759','yatraxcontacto@yatusa.com','yatrax_peru','Conectamos destinos, impulsamos confianza',1,CURRENT_TIMESTAMP,'ander@gmail.com');
 
 
 INSERT INTO preguntas_frecuentes (pregunta, respuesta, estado, fecha_registro, usuario) VALUES ('¿Qué medios de pago
@@ -3451,6 +3458,9 @@ VALUES ('Boleta', 1, 'alexis@gmail.com');
 INSERT INTO `tipo_comprobante` (`nombre`, `estado`, `usuario`)
 VALUES ('Factura', 1, 'alexis@gmail.com');
 
+INSERT INTO `tipo_comprobante` (`nombre`, `estado`, `usuario`)
+VALUES ('Ticket', 1, 'alexis@gmail.com');
+
 INSERT INTO `tipo_metodopago` (`nombre`, `estado`, `usuario`)
 VALUES ('Efectivo', 1, 'alexis@gmail.com');
 INSERT INTO `tipo_metodopago` (`nombre`, `estado`, `usuario`)
@@ -3952,6 +3962,8 @@ CREATE PROCEDURE SP_REGISTRAR_EMPRESA(
     IN P_DIRECCION VARCHAR(255),
     IN P_TELEFONO VARCHAR(15),
     IN P_EMAIL VARCHAR(255),
+    IN P_REDES VARCHAR(255),
+    IN P_ESLOGAN VARCHAR(255),
     IN P_USUARIO VARCHAR(100)
 )
 BEGIN
@@ -3975,9 +3987,9 @@ BEGIN
         SET @MSJ2 = 'El correo electrónico ya está registrado en una empresa';
     ELSE
         INSERT INTO empresa (
-            razon_social, ruc, direccion, telefono, email, estado, usuario
+            razon_social, ruc, direccion, telefono, email, redes, eslogan, estado, usuario
         ) VALUES (
-            P_RAZON_SOCIAL, P_RUC, P_DIRECCION, P_TELEFONO, P_EMAIL, 0, P_USUARIO
+            P_RAZON_SOCIAL, P_RUC, P_DIRECCION, P_TELEFONO, P_EMAIL, P_REDES, P_ESLOGAN, 0, P_USUARIO
         );
 
         SET @MSJ = 'Empresa registrada correctamente';
@@ -3995,6 +4007,8 @@ CREATE PROCEDURE SP_EDITAR_EMPRESA(
     IN P_DIRECCION VARCHAR(255),
     IN P_TELEFONO VARCHAR(15),
     IN P_EMAIL VARCHAR(255),
+    IN P_REDES VARCHAR(255),
+    IN P_ESLOGAN VARCHAR(255),
     IN P_USUARIO VARCHAR(100)
 )
 BEGIN
@@ -4027,6 +4041,8 @@ BEGIN
             direccion = P_DIRECCION,
             telefono = P_TELEFONO,
             email = P_EMAIL,
+            redes = P_REDES,
+            eslogan = P_ESLOGAN,
             usuario = P_USUARIO
         WHERE id = P_ID;
 
@@ -5743,6 +5759,7 @@ BEGIN
         START TRANSACTION;
         DELETE FROM tipo_vehiculo
         WHERE id = p_id;
+        
         COMMIT;
 
         SET MSJ = 'Tipo de vehículo eliminado correctamente';

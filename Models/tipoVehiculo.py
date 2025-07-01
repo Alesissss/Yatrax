@@ -87,7 +87,7 @@ class TipoVehiculo:
             conexion.conn.begin()
             # Comprobamos la existencia de vehículos que ya tengan este modelo de asientos
             result = conexion.obtener("SELECT 1 FROM vehiculo WHERE id_tipo_vehiculo = %s LIMIT 1", (id,))
-            
+
             if result:
                 raise Exception('El tipo vehículo no se puede modificar porque otros registros ya existen con esta referencia.')
 

@@ -117,7 +117,7 @@ INNER JOIN asiento a on dva.idAsiento=a.id
                     (id_reembolso,)
                 )
                 conexion.ejecutar(
-                    "UPDATE detalle_viaje_asiento set esDisponible= 1 WHERE id = (select pa.idDetalleViajeAsiento from reembolso re inner join pasaje pa on pa.id=re.idPasaje where re.id=%s and pa.codigoReserva is not null);",
+                    "UPDATE detalle_viaje_asiento set esDisponible= 1 WHERE id = (select pa.idDetalleViajeAsiento from reembolso re inner join pasaje pa on pa.id=re.idPasaje where re.id=%s);",
                     (id_reembolso,)
                 )
                 conexion.ejecutar(
@@ -128,7 +128,7 @@ INNER JOIN asiento a on dva.idAsiento=a.id
                 return resultado[0]
             else:
                 conexion.ejecutar(
-                    "UPDATE pasaje set esReembolso= 0, enTransaccion=0 WHERE id = (SELECT idPasaje FROM reembolso WHERE id = %s);",
+                    "UPDATE pasaje set esReembolso= 0 WHERE id = (SELECT idPasaje FROM reembolso WHERE id = %s);",
                     (id_reembolso,)
                 )
                 conexion.ejecutar(
