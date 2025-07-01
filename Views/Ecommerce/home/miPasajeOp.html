@@ -385,7 +385,7 @@
             </div>
 
             <!-- Checkbox + edit icon wrapper - Solo para transferencia -->
-            <div class="form-check mt-3" id="menorWrapper">
+            <div class="form-check mt-3 hidden" id="menorWrapper">
               <input class="form-check-input" type="checkbox" id="conMenor" />
               <label class="form-check-label" for="conMenor">Con menor de edad en brazos</label>
               <i id="editMenor" class="fa-solid fa-pencil ms-2" style="display: none"></i>
@@ -1056,6 +1056,71 @@
   });
   document.addEventListener("DOMContentLoaded", () => {
 
+    // 🔒 FUNCIÓN GLOBAL PARA VERIFICAR SI EL PAGO YA SE COMPLETÓ O ESTÁ EN PROCESO
+    function esPagoCompletado() {
+      const pagoCompletado = sessionStorage.getItem('pago_completado');
+      const pagoEnProceso = sessionStorage.getItem('pago_en_proceso');
+      const timestampPago = sessionStorage.getItem('timestamp_pago');
+      const timestampProceso = sessionStorage.getItem('timestamp_proceso_pago');
+      
+      // Si el pago ya se completó
+      if (pagoCompletado === 'true') {
+        console.log('🔒 Pago completado detectado:', {
+          timestamp: timestampPago,
+          hace: timestampPago ? Math.round((Date.now() - new Date(timestampPago).getTime()) / 1000) + ' segundos' : 'desconocido'
+        });
+        return true;
+      }
+      
+      // Si el pago está en proceso (protección temporal)
+      if (pagoEnProceso === 'true') {
+        const tiempoTranscurrido = timestampProceso ? Math.round((Date.now() - new Date(timestampProceso).getTime()) / 1000) : 0;
+        console.log('🔄 Pago en proceso detectado:', {
+          timestamp: timestampProceso,
+          hace: tiempoTranscurrido + ' segundos'
+        });
+        
+        // Solo proteger si el proceso tiene menos de 5 minutos (timeout de seguridad)
+        if (tiempoTranscurrido < 300) { // 5 minutos
+          return true;
+        } else {
+          // Limpiar bandera vencida
+          sessionStorage.removeItem('pago_en_proceso');
+          sessionStorage.removeItem('timestamp_proceso_pago');
+          console.log('⚠️ Proceso de pago vencido - Limpiando bandera temporal');
+        }
+      }
+      
+      return false;
+    }
+
+    // 🔒 FUNCIÓN GLOBAL PARA LIMPIAR BANDERA DE PAGO (solo para casos específicos)
+    function limpiarBanderaPago() {
+      sessionStorage.removeItem('pago_completado');
+      sessionStorage.removeItem('timestamp_pago');
+      sessionStorage.removeItem('pago_en_proceso');
+      sessionStorage.removeItem('timestamp_proceso_pago');
+      console.log('🧹 Todas las banderas de pago limpiadas manualmente');
+    }
+
+    // 🔍 FUNCIÓN DE DEBUGGING PARA VERIFICAR ESTADO ACTUAL
+    function verificarEstadoPago() {
+      const estado = {
+        pago_completado: sessionStorage.getItem('pago_completado'),
+        timestamp_pago: sessionStorage.getItem('timestamp_pago'),
+        pago_en_proceso: sessionStorage.getItem('pago_en_proceso'),
+        timestamp_proceso_pago: sessionStorage.getItem('timestamp_proceso_pago'),
+        funcion_retorna: esPagoCompletado()
+      };
+      console.table(estado);
+      return estado;
+    }
+
+    // Hacer funciones disponibles globalmente para debugging
+    window.esPagoCompletado = esPagoCompletado;
+    window.limpiarBanderaPago = limpiarBanderaPago;
+    window.verificarEstadoPago = verificarEstadoPago;
+
     const enTransaccion = document.getElementById("pasEstTran");
     const estadoViaje = document.getElementById("pasEstViaje");
 
@@ -1300,50 +1365,58 @@
     buscarDatos.addEventListener("click", () => {
       let numComprobante = document.getElementById("comprobante").value.trim();
       if (numComprobante === "") {
-        toastr.warning("El número de comprobante es obligatorio", "MENSAJE DEL SISTEMA");
-        return;
+      toastr.warning("El número de comprobante es obligatorio", "MENSAJE DEL SISTEMA");
+      return;
       }
       // Validar formato del número de comprobante
       const regex = /^[A-Z]\d{3}-\d{8}$/;
       if (!regex.test(numComprobante)) {
-        toastr.warning("El formato del número de comprobante es incorrecto. Debe ser como 'A001-12345678'", "MENSAJE DEL SISTEMA");
-        return;
+      toastr.warning("El formato del número de comprobante es incorrecto. Debe ser como 'A001-12345678'", "MENSAJE DEL SISTEMA");
+      return;
       }
       fetch(`/ecommerce/home/obtenerDatosPasaje?comprobante=${encodeURIComponent(numComprobante)}`)
-        .then((r) => r.json())
-        .then((json) => {
-          if ((json.status && json.status === "success") || (json.Status && json.Status === "success")) {
-            const data = json.data;
-            // Actualizar los campos con los datos obtenidos
-            document.getElementById("tipoDocAnt").value = data.tipo_documento;
-            document.getElementById("numDocAnt").value = data.numero_documento;
-            document.getElementById("nombreComAnt").value = data.nombre_completo;
-            document.getElementById("origenViaje").value = data.origen;
-            document.getElementById("destinoViaje").value = data.destino;
-            document.querySelector("#fechaSalida").value = moment(data.fecha_salida).format("YYYY-MM-DD");
-            document.querySelector("#horaSalida").value = data.hora_salida
-            document.getElementById("asientoViaje").value = data.asiento;
-            document.getElementById("servicioViaje").value = data.servicio;
+      .then((r) => r.json())
+      .then((json) => {
+        // Validación principal para esCambioRuta === 1
+        if (
+        ((json.status && json.status === "success") || (json.Status && json.Status === "success")) &&
+        json.data && json.data.esCambioRuta === 1
+        ) {
+        toastr.warning("Ya se realizó un cambio de ruta con este comprobante", "MENSAJE DEL SISTEMA");
+        return;
+        }
+        if ((json.status && json.status === "success") || (json.Status && json.Status === "success")) {
+        const data = json.data;
+        // Actualizar los campos con los datos obtenidos
+        document.getElementById("tipoDocAnt").value = data.tipo_documento;
+        document.getElementById("numDocAnt").value = data.numero_documento;
+        document.getElementById("nombreComAnt").value = data.nombre_completo;
+        document.getElementById("origenViaje").value = data.origen;
+        document.getElementById("destinoViaje").value = data.destino;
+        document.querySelector("#fechaSalida").value = moment(data.fecha_salida).format("YYYY-MM-DD");
+        document.querySelector("#horaSalida").value = data.hora_salida
+        document.getElementById("asientoViaje").value = data.asiento;
+        document.getElementById("servicioViaje").value = data.servicio;
 
-            document.getElementById("pasCod").value = data.codigo_pasaje;
-            document.getElementById("pasEstTran").value = data.estado_transaccion;
-            document.getElementById("pasEstViaje").value = data.estado_viaje;
-            document.getElementById("detViajeAsiento").value = data.idDetalleViajeAsiento;
-            document.getElementById("pasId").value = data.id;
-            // Mostrar el contenido de la operación
-            contenidoOperacion.style.display = 'none';
-            datosNuevoPasajero.style.display = 'none';
-            datosCambioRuta.style.display = 'none';
-            contenidoOtrasOperaciones.style.display = 'none';
-            checkboxCargo.style.display = 'none';
-            resetearColoresBotones(); // Resetear colores de botones
-            obtenerConfiguracion();
-          } else
-            toastr.error("No se encontraron datos para el comprobante ingresado", "ERROR");
-        })
-        .catch((error) => {
-          toastr.error("Error al obtener los datos del pasajero: " + error.message, "ERROR");
-        });
+        document.getElementById("pasCod").value = data.codigo_pasaje;
+        document.getElementById("pasEstTran").value = data.estado_transaccion;
+        document.getElementById("pasEstViaje").value = data.estado_viaje;
+        document.getElementById("detViajeAsiento").value = data.idDetalleViajeAsiento;
+        document.getElementById("pasId").value = data.id;
+        // Mostrar el contenido de la operación
+        contenidoOperacion.style.display = 'none';
+        datosNuevoPasajero.style.display = 'none';
+        datosCambioRuta.style.display = 'none';
+        contenidoOtrasOperaciones.style.display = 'none';
+        checkboxCargo.style.display = 'none';
+        resetearColoresBotones(); // Resetear colores de botones
+        obtenerConfiguracion();
+        } else
+        toastr.error("No se encontraron datos para el comprobante ingresado", "ERROR");
+      })
+      .catch((error) => {
+        toastr.error("Error al obtener los datos del pasajero: " + error.message, "ERROR");
+      });
     })
 
     function verificarEstadoViaje() {
@@ -1407,13 +1480,27 @@
 
     // funcion para cambiar el estado de transacción de un pasaje al cambiar de operacion internamente
     function cambiarEstadoTransaccion() {
+      // 🔒 VERIFICAR SI EL PAGO YA SE COMPLETÓ ANTES DE CAMBIAR ESTADO
+      if (esPagoCompletado()) {
+        console.log('🚫 No se cambia el estado de transacción porque el pago ya se completó');
+        return; // No ejecutar el cambio si el pago ya se completó
+      }
+
       const idPasaje = document.getElementById("pasId").value;
+      if (!idPasaje) {
+        console.warn('⚠️ No hay ID de pasaje para cambiar estado de transacción');
+        return;
+      }
+
+      console.log('🔄 Cambiando estado de transacción para pasaje:', idPasaje);
+      
       fetch(`/ecommerce/home/cambiarEnTransaccion?pasId=${encodeURIComponent(idPasaje)}`)
         .then(response => response.json())
         .then(json => {
           if (json.status === "success") {
             // Actualizamos el campo con el nuevo estado
             document.getElementById("pasEstTran").value = json.nuevoEstado;
+            console.log('✅ Estado de transacción actualizado:', json.nuevoEstado);
           } else {
             console.error("Error del servidor:", json.message);
           }
@@ -2159,7 +2246,14 @@
     // Antes de cerrar/recargar: ejecuta siempre tus funciones,
     // pero lanza sólo el prompt nativo (no sabes si confirma)
     window.addEventListener('beforeunload', function (e) {
+      // 🔒 NO EJECUTAR LIMPIEZA SI EL PAGO YA SE COMPLETÓ
+      if (esPagoCompletado()) {
+        console.log('🚫 No se ejecuta limpieza en beforeunload porque el pago ya se completó');
+        return; // Salir sin hacer nada si el pago ya se completó
+      }
+
       if (hayOperacionActiva()) {
+        console.log('🧹 Ejecutando limpieza en beforeunload por operación activa');
         cambiarEstadoTransaccion();
         ocultarContenido();
         e.preventDefault();
@@ -2170,6 +2264,12 @@
     // Configura tu propio modal para F5/Ctrl+R
     const reloadModal = new bootstrap.Modal(document.getElementById('modalReloadConfirm'));
     function handleReloadIntent() {
+      // 🔒 NO MOSTRAR MODAL SI EL PAGO YA SE COMPLETÓ
+      if (esPagoCompletado()) {
+        console.log('🚫 No se muestra modal de confirmación porque el pago ya se completó');
+        return false; // Permitir recarga normal
+      }
+
       if (hayOperacionActiva()) {
         reloadModal.show();
         return true;
@@ -2184,8 +2284,15 @@
     });
 
     document.getElementById('reloadOk').addEventListener('click', () => {
-      cambiarEstadoTransaccion();
-      ocultarContenido();
+      // 🔒 NO EJECUTAR LIMPIEZA SI EL PAGO YA SE COMPLETÓ
+      if (!esPagoCompletado()) {
+        console.log('🧹 Ejecutando limpieza manual antes de recargar');
+        cambiarEstadoTransaccion();
+        ocultarContenido();
+      } else {
+        console.log('🚫 No se ejecuta limpieza manual porque el pago ya se completó');
+      }
+      
       reloadModal.hide();
       location.reload();
     });
