@@ -595,6 +595,7 @@ CREATE TABLE nivel(
     y_dimension int not null,
     estado BOOLEAN not null,
     foreign key (id_tipo_vehiculo) references tipo_vehiculo(id)
+        ON DELETE CASCADE
 );
 -- Crear tabla tipo metodo pago
 CREATE TABLE tipo_metodopago (
@@ -647,8 +648,10 @@ CREATE TABLE nivel_herramienta(
         id_nivel int NOT NULL,
         x_dimension int not null,
         y_dimension int not null,
-        FOREIGN KEY (id_nivel) REFERENCES nivel(id),
+        FOREIGN KEY (id_nivel) REFERENCES nivel(id)
+            ON DELETE CASCADE,
         FOREIGN KEY (id_herramienta) REFERENCES herramienta(id)
+            ON DELETE CASCADE
     );
 
 CREATE TABLE estado_viaje (
@@ -711,8 +714,10 @@ CREATE TABLE asiento (
     estado TINYINT NOT NULL CHECK (estado IN (0, 1, 2, 3)),
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(100) NOT NULL,
-    FOREIGN KEY (id_vehiculo) REFERENCES vehiculo(id),
+    FOREIGN KEY (id_vehiculo) REFERENCES vehiculo(id)
+        ON DELETE CASCADE,
     FOREIGN KEY (id_nivel_herramienta) REFERENCES nivel_herramienta(id)
+        ON DELETE CASCADE
 );
 CREATE TABLE detalle_viaje_asiento(
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -5754,6 +5759,7 @@ BEGIN
         START TRANSACTION;
         DELETE FROM tipo_vehiculo
         WHERE id = p_id;
+        
         COMMIT;
 
         SET MSJ = 'Tipo de vehículo eliminado correctamente';

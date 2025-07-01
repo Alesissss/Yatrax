@@ -20,8 +20,9 @@
                         </div>
                         <div class="col-md-12 mb-3">
                             <label for="txt_anio">Año</label>
-<input type="date" name="txt_anio" id="txt_anio" class="form-control"
-    placeholder="Ingrese el año del vehículo" value="{{ vehiculo.anio }}" {% if btnId=="btn_Regresar" %} disabled {% endif %}>
+                            <input type="text" name="txt_anio" id="txt_anio" class="form-control"
+                                placeholder="Ingrese el año del vehículo (ej: 2024)" value="{{ vehiculo.anio }}" 
+                                maxlength="4" minlength="4" pattern="[0-9]{4}" {% if btnId=="btn_Regresar" %} disabled {% endif %}>
                         </div>
                         <div class="col-md-12 mb-3">
                             <label for="txt_color">Color:</label>
@@ -38,7 +39,7 @@
                             </select>
                         </div>
                         <div class="col-md-12 mb-3">
-                            <label for="cbx_Tipo">Tipo Vehículo</label>
+                            <label for="cbx_Tipo">Tipo vehículo</label>
                             <div class="input-group">
                                 <select id="cbx_Tipo" name="cbx_Tipo" class="form-control" {% if
                                     btnId=='btn_Regresar' %}disabled{% endif %}>
@@ -92,11 +93,32 @@
     $(document).ready(function () {
 
         $('#txt_placa').mask('AAA-AAA', {
-        translation: {
-            'A': { pattern: /[A-Za-z0-9]/ }
-        },
-        placeholder: "___-___"
-    });
+            translation: {
+                'A': { pattern: /[A-Za-z0-9]/ }
+            },
+            placeholder: "___-___"
+        });
+
+        // Máscara para el año - solo números, exactamente 4 dígitos
+        $('#txt_anio').mask('0000', {
+            translation: {
+                '0': { pattern: /[0-9]/ }
+            },
+            placeholder: "____"
+        });
+
+        // Validación adicional para el input de año
+        $('#txt_anio').on('input', function() {
+            let value = $(this).val();
+            // Solo permitir números
+            value = value.replace(/[^0-9]/g, '');
+            // Limitar a 4 caracteres
+            if (value.length > 4) {
+                value = value.substring(0, 4);
+            }
+            $(this).val(value);
+        });
+
         fct_GetTipos();
 
         $("#btn_Listado").click(() => {
@@ -107,16 +129,9 @@
             window.location.href = "/trabajadores/viajes/GestionarVehiculo"
         })
 
-
-        // Validar formato exacto XXX-XXX
-
-
         $("#btn_Registrar").click(function () {
             let placa = $("#txt_placa").val().trim();
-            let anio = $("#txt_anio").val();
-if (anio) {
-    anio = anio.substring(0, 4); // Solo el año
-}
+            let anio = $("#txt_anio").val().trim();
             let color = $("#txt_color").val().toUpperCase();
             let idTipoVehiculo = $("#cbx_Tipo").val();
             let estado = $('#cbx_Estado').val();
@@ -124,12 +139,27 @@ if (anio) {
             if (!placa || !anio || !color || !idTipoVehiculo || !estado) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
                 return;
-            }else{
-                const placaRegex = /^[A-Za-z0-9]{3}-[A-Za-z0-9]{3}$/;
-if (!placaRegex.test(placa)) {
-    toastr.warning("La placa debe tener el formato XXX-XXX (6 caracteres y un guion)", "MENSAJE DE SISTEMA");
-    return;
-}
+            }
+
+            // Validación de placa
+            const placaRegex = /^[A-Za-z0-9]{3}-[A-Za-z0-9]{3}$/;
+            if (!placaRegex.test(placa)) {
+                toastr.warning("La placa debe tener el formato XXX-XXX (6 caracteres y un guion)", "MENSAJE DE SISTEMA");
+                return;
+            }
+
+            // Validación de año
+            if (anio.length !== 4 || !/^\d{4}$/.test(anio)) {
+                toastr.warning("El año debe tener exactamente 4 dígitos", "MENSAJE DE SISTEMA");
+                return;
+            }
+
+            // Validación de rango de año (opcional)
+            const currentYear = new Date().getFullYear();
+            const inputYear = parseInt(anio);
+            if (inputYear < 1900 || inputYear > currentYear + 1) {
+                toastr.warning(`El año debe estar entre 1900 y ${currentYear + 1}`, "MENSAJE DE SISTEMA");
+                return;
             }
            
             Swal.fire({
@@ -187,13 +217,27 @@ if (!placaRegex.test(placa)) {
             const id = Number("{{ vehiculo.id }}");
 
             let placa = $("#txt_placa").val().trim();
-            let anio = $("#txt_anio").val();
+            let anio = $("#txt_anio").val().trim();
             let color = $("#txt_color").val().toUpperCase();
             let idTipoVehiculo = $("#cbx_Tipo").val();
             let estado = $('#cbx_Estado').val();
 
             if (!placa || !anio || !color || !idTipoVehiculo) {
                 toastr.warning("Todos los campos son obligatorios", "MENSAJE DE SISTEMA");
+                return;
+            }
+
+            // Validación de año para actualizar
+            if (anio.length !== 4 || !/^\d{4}$/.test(anio)) {
+                toastr.warning("El año debe tener exactamente 4 dígitos", "MENSAJE DE SISTEMA");
+                return;
+            }
+
+            // Validación de rango de año (opcional)
+            const currentYear = new Date().getFullYear();
+            const inputYear = parseInt(anio);
+            if (inputYear < 1900 || inputYear > currentYear + 1) {
+                toastr.warning(`El año debe estar entre 1900 y ${currentYear + 1}`, "MENSAJE DE SISTEMA");
                 return;
             }
 
@@ -213,9 +257,9 @@ if (!placaRegex.test(placa)) {
                     let formData = new FormData();
                     formData.append("placa", placa);
                     formData.append("anio", anio);
+                    formData.append("estado", estado);
                     formData.append("color", color);
                     formData.append("idTipoVehiculo", idTipoVehiculo);
-                    formData.append("estado", estado);
 
                     $.ajax({
                         url: `/trabajadores/viajes/editarVehiculo/${id}`,

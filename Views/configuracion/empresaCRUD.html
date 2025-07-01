@@ -35,10 +35,11 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label for="txt_Telefono" class="form-label">Teléfono</label>
+                                <label for="txt_Telefono" class="form-label">Teléfono </label><span
+                                    class="text-danger">*</span>
                                 <input type="tel" id="txt_Telefono" name="telefono" class="form-control"
                                     placeholder="Ingrese el teléfono" value="{{ empresa.telefono if empresa else '' }}"
-                                    maxlength="9" {% if btnId=='btn_Aceptar' %}disabled{% endif %}>
+                                    maxlength="9" {% if btnId=='btn_Aceptar' %}disabled{% endif %} required>
                             </div>
                         </div>
 
@@ -184,15 +185,7 @@
                     </div>
                     {% endif %}
                 </div>
-                {% if empresa %}
-                <div class="card-footer text-muted text-center">
-                    <small>
-                        <i class="bi bi-clock"></i>
-                        Última actualización: {{ empresa.fecha_actualizacion.strftime('%d/%m/%Y %H:%M') if
-                        empresa.fecha_actualizacion else 'N/A' }}
-                    </small>
-                </div>
-                {% endif %}
+                
             </div>
         </div>
     </div>
