@@ -2315,7 +2315,7 @@ const PaymentManager = {
             <div class="row g-3">
                 <div class="col-12">
                     <div class="form-floating">
-                        <input id="numero_tarjeta" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                        <input id="numero_tarjeta" class="form-control" placeholder="1234 5678 9012 3456" maxlength="16" required>
                         <label for="numero_tarjeta"><i class="fas fa-credit-card me-1"></i> Número de tarjeta</label>
                     </div>
                 </div>
@@ -2352,7 +2352,7 @@ const PaymentManager = {
 
                 <div class="col-6">
                     <div class="form-floating">
-                        <input id="cvv_tarjeta" class="form-control" placeholder="123" maxlength="4" required>
+                        <input id="cvv_tarjeta" class="form-control" placeholder="123" maxlength="3" required>
                         <label for="cvv_tarjeta"><i class="fas fa-lock me-1"></i> CVV</label>
                     </div>
                 </div>

@@ -400,6 +400,8 @@
                     data: null,
                     name: "estado_viaje",
                     render: function (data, type, row) {
+                        if (data.estado == 0) return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-danger fs-5">No vigente</span></h5>`;
+
                         if (!estadosViaje.length) return `<span>Cargando...</span>`;
 
                         if (type === 'filter' || type === 'sort') {
@@ -438,11 +440,13 @@
                     data: null,
                     name: "escala_actual",
                     render: function (data, type, row) {
+                        if (data.estado == 0) return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-danger fs-5">No vigente</span></h5>`;
+
                         if (data.idEstadoViaje === 1) {
                             return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge fs-5" style="background-color: #800080; color: white;">Viaje no iniciado</span></h5>`;
                         } else if (data.idEstadoViaje === 3) {
                             return `<h5 class="mb-0 d-flex align-items-center justify-content-center"><span class="badge badge-danger fs-5">Viaje finalizado</span></h5>`;
-                        }else if (data.idEstadoViaje === 2) {
+                        } else if (data.idEstadoViaje === 2) {
                             if (!data.escalas.length) return `<span>Cargando...</span>`;
 
                             let idSucursalActual = data.idSucursalActual;
