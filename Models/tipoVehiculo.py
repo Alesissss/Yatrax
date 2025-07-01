@@ -86,15 +86,8 @@ class TipoVehiculo:
         try:
             conexion.conn.begin()
             # Comprobamos la existencia de vehículos que ya tengan este modelo de asientos
-            result = conexion.obtener("""
-                SELECT 1 FROM viaje vi 
-                    inner join vehiculo veh on vi.idVehiculo = veh.id
-                    inner join tipo_vehiculo tv on tv.id = veh.id_tipo_vehiculo
-                    where veh.id_tipo_vehiculo = %s LIMIT 1""", (id,))
-            
-            # Si hay algún viaje que ya tenga este tipo de vehículo, no se puede modificar
-            # porque ya hay registros asociados a este tipo de vehículo
-            
+            result = conexion.obtener("SELECT 1 FROM vehiculo WHERE id_tipo_vehiculo = %s LIMIT 1", (id,))
+
             if result:
                 raise Exception('El tipo vehículo no se puede modificar porque otros registros ya existen con esta referencia.')
 
