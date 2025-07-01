@@ -34,6 +34,9 @@ class Promocion:
             """)
         finally:
             conexion.cerrar()
+    
+    def validarExistencia(cls,codigo):
+        
 
     @classmethod
     def obtener_por_id(cls, id):
