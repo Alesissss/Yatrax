@@ -191,6 +191,28 @@
         <label for="telefono" class="form-label">Teléfono</label>
         <input type="text" id="telefono" name="telefono" value="{{ datosUsuario.telefono }}" class="form-control">
       </div>
+
+      <h5>Datos de tarjeta</h5>
+      <div class="col-md-4 mb-3">
+        <label for="numero_tarjeta" class="form-label">Número de tarjeta</label>
+        <input type="text" id="numero_tarjeta" name="numero_tarjeta" value="{{ datosUsuario.numero_tarjeta }}" maxlength="16"
+          class="form-control" placeholder="1234 5678 9012 3456">
+      </div>
+      <div class="col-md-4 mb-3">
+        <label for="fecha_vencimiento" class="form-label">Fecha de vencimiento</label>
+        <input type="text" id="fecha_vencimiento" name="fecha_vencimiento"
+          value="{{ datosUsuario.fecha_vencimiento }}" class="form-control" placeholder="MM/AA" maxlength="5">
+      </div>
+      <div class="col-md-4 mb-3">
+        <label for="codigo_seguridad" class="form-label">Código de seguridad</label>
+        <input type="text" id="codigo_seguridad" name="codigo_seguridad"
+          value="{{ datosUsuario.codigo_seguridad }}" class="form-control" placeholder="123" maxlength="3">
+      </div>
+      <div class="col-md-4 mb-3">
+        <label for="saldo_tarjeta" class="form-label">Saldo de tarjeta</label>
+        <input type="text" id="saldo_tarjeta" name="saldo_tarjeta"
+          value="{{ datosUsuario.saldo_tarjeta }}" class="form-control" placeholder="0.00">
+      </div>
     </div>
 
     <!-- Sección: Acceso -->

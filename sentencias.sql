@@ -247,6 +247,14 @@ CREATE TABLE preguntas_frecuentes (
     usuario VARCHAR(100) NOT NULL
 );
 
+create table intentos_pasaje_cambios(
+    id int AUTO_INCREMENT PRIMARY KEY,
+    idPasaje INT NOT NULL,
+    idPasajeNuevo INT NOT NULL,
+    esCambioRuta int NOT NULL,
+    esTransferencia int NOT NULL
+)
+
 -- Crear tabla terminos_condiciones
 CREATE TABLE terminos_condiciones (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -3124,7 +3132,7 @@ INSERT INTO usuarios (id, id_personal, email, password, imagen, estado, id_tipou
 (2, 3,'edgar@yatrax.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
 '/Static/img/trabajadores/edgar.png', 1, 1,'2025-03-06 20:06:14','SYSTEM');
 INSERT INTO usuarios (id, id_personal, email, password, imagen, estado, id_tipousuario,fecha_registro,usuario) VALUES
-(3, 2,'timcrocket1502@gmail.com.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
+(3, 2,'timrocket1502@gmail.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
 '/Static/img/trabajadores/ander.jpg', 1, 1,'2025-03-06 20:06:14','SYSTEM');
 INSERT INTO usuarios (id, id_personal, email, password, imagen, estado, id_tipousuario,fecha_registro,usuario) VALUES
 (4, 4,'luis@yatrax.com','ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f',
@@ -3491,6 +3499,9 @@ INSERT INTO `metodo_pago`
 (`nombre`, `logo`, `estado`, `id_tipo_metodoPago`, `qr`, `usuario`)
 VALUES
 ('Plin','/Static/img/metodos_pago/logo/plin.png',1,3,'/Static/img/metodos_pago/qr/qrplin.png','luis@gmail.com');
+
+alter table pasaje add column cantModificado int default 0;
+
 -- Crear procedimiento SP_REGISTRAR_PERSONAL_INCIDENCIA
 DELIMITER $$
 
@@ -6816,7 +6827,7 @@ DELIMITER ;
 
 DELIMITER $$
 
-CREATE PROCEDURE SP_ACTUALIZAR_CLIENTE (
+CREATE OR REPLACE PROCEDURE SP_ACTUALIZAR_CLIENTE (
     IN p_id INT,
     IN p_id_pais INT,
     IN p_id_tipo_cliente INT,
@@ -6838,6 +6849,9 @@ CREATE PROCEDURE SP_ACTUALIZAR_CLIENTE (
 )
 BEGIN
     DECLARE existe_duplicado INT DEFAULT 0;
+    DECLARE email_actual VARCHAR(100) DEFAULT NULL;
+    DECLARE tipo_doc_actual INT DEFAULT NULL;
+    DECLARE numero_doc_actual VARCHAR(20) DEFAULT NULL;
 
     DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -6849,46 +6863,77 @@ BEGIN
     SET MSJ = NULL;
     SET MSJ2 = NULL;
 
-    -- Verificar duplicado
-    SELECT COUNT(*) INTO existe_duplicado
-    FROM cliente
-    WHERE id_tipo_doc = p_id_tipo_doc
-      AND numero_documento = p_numero_documento
-      AND id <> p_id;
+    -- Obtener datos actuales del cliente
+    SELECT email, id_tipo_doc, numero_documento 
+    INTO email_actual, tipo_doc_actual, numero_doc_actual
+    FROM cliente 
+    WHERE id = p_id;
 
-    IF existe_duplicado > 0 THEN
+    -- Verificar si el cliente existe
+    IF email_actual IS NULL THEN
         SET MSJ = NULL;
-        SET MSJ2 = 'El número de documento ya está registrado para ese tipo de documento.';
+        SET MSJ2 = 'Cliente no encontrado';
     ELSE
-        -- Actualizar datos
-        UPDATE cliente
-        SET id_pais = p_id_pais,
-            id_tipo_cliente = p_id_tipo_cliente,
-            id_tipo_doc = p_id_tipo_doc,
-            numero_documento = p_numero_documento,
-            nombre = p_nombres,
-            ape_paterno = p_ape_paterno,
-            ape_materno = p_ape_materno,
-            sexo = p_sexo,
-            f_nacimiento = p_f_nacimiento,
-            razon_social = p_razon_social,
-            direccion = p_direccion,
-            telefono = p_telefono,
-            email = p_email,
-            usuario = p_usuario
-        WHERE id = p_id;
+        -- Verificar duplicado de documento solo si cambió el tipo de documento o número
+        IF (p_id_tipo_doc != tipo_doc_actual OR p_numero_documento != numero_doc_actual) THEN
+            SELECT COUNT(*) INTO existe_duplicado
+            FROM cliente
+            WHERE id_tipo_doc = p_id_tipo_doc
+              AND numero_documento = p_numero_documento
+              AND id <> p_id;
 
-        IF p_password IS NOT NULL AND LENGTH(p_password) > 0 THEN
-            UPDATE cliente
-            SET password = p_password
-            WHERE id = p_id;
+            IF existe_duplicado > 0 THEN
+                SET MSJ = NULL;
+                SET MSJ2 = 'El número de documento ya está registrado en otro cliente.';
+            END IF;
         END IF;
 
-        SET MSJ = 'Cliente actualizado correctamente';
-        SET MSJ2 = NULL;
+        -- Verificar duplicado de email solo si cambió el email
+        IF existe_duplicado = 0 AND p_email != email_actual THEN
+            SELECT COUNT(*) INTO existe_duplicado
+            FROM cliente
+            WHERE email = p_email
+              AND id <> p_id;
+
+            IF existe_duplicado > 0 THEN
+                SET MSJ = NULL;
+                SET MSJ2 = 'El email ya está registrado en otro cliente.';
+            END IF;
+        END IF;
+
+        -- Si no hay duplicados, proceder con la actualización
+        IF existe_duplicado = 0 THEN
+            -- Actualizar datos
+            UPDATE cliente
+            SET id_pais = p_id_pais,
+                id_tipo_cliente = p_id_tipo_cliente,
+                id_tipo_doc = p_id_tipo_doc,
+                numero_documento = p_numero_documento,
+                nombre = p_nombres,
+                ape_paterno = p_ape_paterno,
+                ape_materno = p_ape_materno,
+                sexo = p_sexo,
+                f_nacimiento = p_f_nacimiento,
+                razon_social = p_razon_social,
+                direccion = p_direccion,
+                telefono = p_telefono,
+                email = p_email,
+                usuario = p_usuario
+            WHERE id = p_id;
+
+            -- Actualizar contraseña solo si se proporciona
+            IF p_password IS NOT NULL AND LENGTH(p_password) > 0 THEN
+                UPDATE cliente
+                SET password = p_password
+                WHERE id = p_id;
+            END IF;
+
+            SET MSJ = 'Cliente actualizado correctamente';
+            SET MSJ2 = NULL;
+        END IF;
     END IF;
 
-END $$
+END;
 
 DELIMITER ;
 

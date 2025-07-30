@@ -62,6 +62,18 @@ def Menu_SancionPersonal():
 def SancionPersonalNuevo():
     return render_template('personal/sancionPersonalCRUD.html', active_page='sancionPersonal', active_menu='mPersonal', sancion_personal = {}, tittle = 'Registrar sanción a personal', btnId = 'btn_Registrar')
 
+@personal_bp.route('/ReporteCambiosPasaje')
+def reporteCambiosPasaje():
+    return render_template('personal/reporteCambiosPasaje.html', active_page="reportePersonal", active_menu='mPersonal')
+
+@personal_bp.route('/CantidadPasajesCambios')
+def cantidadPasajesCambios():
+    try:
+        datos = Reporte.intentos_pasajes_cambiados()
+        return jsonify({'data': datos, 'Status': 'success', 'Msj': 'Listado de pasajes retornado exitosamente'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 # END VIEWS
 
 # FUNCIONES

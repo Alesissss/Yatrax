@@ -11,7 +11,7 @@ class Reporte:
             resultados = conexion.obtener("select tipUsu.nombre as tipo, count(usu.id) as cantidad from usuarios usu left join tipo_usuario tipUsu on usu.id_tipousuario=tipUsu.id group by tipUsu.nombre;")
             return resultados
         except Exception as e:
-            print("Error al obtener la cantidad de usuarios por tipo: ", e)
+            print("Error al obtener la cantidad de usuarios por tipo: ", e)    
 
     @classmethod
     def cantidadUsuariosActivos(cls):
@@ -171,8 +171,31 @@ class Reporte:
             return resultados[0]
         except Exception as e:
             print("Error al obtener la cantidad de clientes por tipo: ", e)
-    
-
-
-
+            
+    @classmethod
+    def cantidadPersonalPorTipo(cls):
+        conexion = None
+        try:
+            # estado, cantidad
+            conexion = bd.Conexion()
+            resultados = conexion.obtener("""
+                SELECT tp.nombre, COUNT(*) as cantidad FROM personal pe
+                    inner join tipo_personal tp on pe.id_tipopersonal = tp.id
+                    GROUP by tp.nombre;
+            """)
+            return resultados
+        except Exception as e:
+            print("Error al obtener la cantidad de usuarios inactivos: ", e)
+            return None
         
+    @classmethod
+    def intentos_pasajes_cambiados(cls):
+        conexion = None
+        try:
+            conexion = bd.Conexion()
+            resultados = conexion.obtener(
+                "select numeroComprobante as nombre, cantModificado as cantidad from pasaje where cantModificado > 2"
+            )
+            return resultados
+        except Exception as e:
+            return None

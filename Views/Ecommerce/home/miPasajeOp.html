@@ -183,6 +183,13 @@
   }
 </style>
 
+{% if 'cliente' in session %}
+{% set cliente = session["cliente"] %}
+<!-- <input type="hidden" id="nombre_cliente" name="nombre_cliente" value="{{ cliente['nombre'] }}"> -->
+
+<!-- <h1 class="text-center mb-4">Hola, {{ cliente['nombre'] }}</h1> -->
+{% endif %}
+
 <div class="row justify-content-center py-2">
   <div class="col-lg-12 col-md-10 col-sm-12">
     <div class="card">
@@ -494,7 +501,8 @@
                         </div>
                         <div class="col-md-4">
                           <label class="form-label">Número de documento</label>
-                          <input required type="text" id="numeroDocNuevoRem" minlength="8" maxlength="11" oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="form-control"
+                          <input required type="text" id="numeroDocNuevoRem" minlength="8" maxlength="11"
+                            oninput="this.value=this.value.replace(/[^0-9]/g,'')" class="form-control"
                             placeholder="Número de documento" />
                         </div>
                         <div class="col-md-4">
@@ -517,10 +525,11 @@
                           <label class="form-label" id="labelNombresRem">Nombres</label>
                           <input required type="text" id="nombresRem" class="form-control" placeholder="Nombres" />
                         </div>
-                        
+
                         <div class="col-md-4">
                           <label class="form-label">Teléfono</label>
-                          <input required type="text" id="telefonoRem" class="form-control" placeholder="Teléfono" minlength="9" maxlength="9" oninput="this.value=this.value.replace(/[^0-9]/g,'')"/>
+                          <input required type="text" id="telefonoRem" class="form-control" placeholder="Teléfono"
+                            minlength="9" maxlength="9" oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
                         </div>
                         <div class="col-md-4">
                           <label class="form-label">Fecha de nacimiento</label>
@@ -1062,7 +1071,7 @@
       const pagoEnProceso = sessionStorage.getItem('pago_en_proceso');
       const timestampPago = sessionStorage.getItem('timestamp_pago');
       const timestampProceso = sessionStorage.getItem('timestamp_proceso_pago');
-      
+
       // Si el pago ya se completó
       if (pagoCompletado === 'true') {
         console.log('🔒 Pago completado detectado:', {
@@ -1071,7 +1080,7 @@
         });
         return true;
       }
-      
+
       // Si el pago está en proceso (protección temporal)
       if (pagoEnProceso === 'true') {
         const tiempoTranscurrido = timestampProceso ? Math.round((Date.now() - new Date(timestampProceso).getTime()) / 1000) : 0;
@@ -1079,7 +1088,7 @@
           timestamp: timestampProceso,
           hace: tiempoTranscurrido + ' segundos'
         });
-        
+
         // Solo proteger si el proceso tiene menos de 5 minutos (timeout de seguridad)
         if (tiempoTranscurrido < 300) { // 5 minutos
           return true;
@@ -1090,7 +1099,7 @@
           console.log('⚠️ Proceso de pago vencido - Limpiando bandera temporal');
         }
       }
-      
+
       return false;
     }
 
@@ -1365,58 +1374,58 @@
     buscarDatos.addEventListener("click", () => {
       let numComprobante = document.getElementById("comprobante").value.trim();
       if (numComprobante === "") {
-      toastr.warning("El número de comprobante es obligatorio", "MENSAJE DEL SISTEMA");
-      return;
+        toastr.warning("El número de comprobante es obligatorio", "MENSAJE DEL SISTEMA");
+        return;
       }
       // Validar formato del número de comprobante
       const regex = /^[A-Z]\d{3}-\d{8}$/;
       if (!regex.test(numComprobante)) {
-      toastr.warning("El formato del número de comprobante es incorrecto. Debe ser como 'A001-12345678'", "MENSAJE DEL SISTEMA");
-      return;
+        toastr.warning("El formato del número de comprobante es incorrecto. Debe ser como 'A001-12345678'", "MENSAJE DEL SISTEMA");
+        return;
       }
       fetch(`/ecommerce/home/obtenerDatosPasaje?comprobante=${encodeURIComponent(numComprobante)}`)
-      .then((r) => r.json())
-      .then((json) => {
-        // Validación principal para esCambioRuta === 1
-        if (
-        ((json.status && json.status === "success") || (json.Status && json.Status === "success")) &&
-        json.data && json.data.esCambioRuta === 1
-        ) {
-        toastr.warning("Ya se realizó un cambio de ruta con este comprobante", "MENSAJE DEL SISTEMA");
-        return;
-        }
-        if ((json.status && json.status === "success") || (json.Status && json.Status === "success")) {
-        const data = json.data;
-        // Actualizar los campos con los datos obtenidos
-        document.getElementById("tipoDocAnt").value = data.tipo_documento;
-        document.getElementById("numDocAnt").value = data.numero_documento;
-        document.getElementById("nombreComAnt").value = data.nombre_completo;
-        document.getElementById("origenViaje").value = data.origen;
-        document.getElementById("destinoViaje").value = data.destino;
-        document.querySelector("#fechaSalida").value = moment(data.fecha_salida).format("YYYY-MM-DD");
-        document.querySelector("#horaSalida").value = data.hora_salida
-        document.getElementById("asientoViaje").value = data.asiento;
-        document.getElementById("servicioViaje").value = data.servicio;
+        .then((r) => r.json())
+        .then((json) => {
+          // Validación principal para esCambioRuta === 1
+          if (
+            ((json.status && json.status === "success") || (json.Status && json.Status === "success")) &&
+            json.data && json.data.esCambioRuta === 1
+          ) {
+            toastr.warning("Ya se realizó un cambio de ruta con este comprobante", "MENSAJE DEL SISTEMA");
+            return;
+          }
+          if ((json.status && json.status === "success") || (json.Status && json.Status === "success")) {
+            const data = json.data;
+            // Actualizar los campos con los datos obtenidos
+            document.getElementById("tipoDocAnt").value = data.tipo_documento;
+            document.getElementById("numDocAnt").value = data.numero_documento;
+            document.getElementById("nombreComAnt").value = data.nombre_completo;
+            document.getElementById("origenViaje").value = data.origen;
+            document.getElementById("destinoViaje").value = data.destino;
+            document.querySelector("#fechaSalida").value = moment(data.fecha_salida).format("YYYY-MM-DD");
+            document.querySelector("#horaSalida").value = data.hora_salida
+            document.getElementById("asientoViaje").value = data.asiento;
+            document.getElementById("servicioViaje").value = data.servicio;
 
-        document.getElementById("pasCod").value = data.codigo_pasaje;
-        document.getElementById("pasEstTran").value = data.estado_transaccion;
-        document.getElementById("pasEstViaje").value = data.estado_viaje;
-        document.getElementById("detViajeAsiento").value = data.idDetalleViajeAsiento;
-        document.getElementById("pasId").value = data.id;
-        // Mostrar el contenido de la operación
-        contenidoOperacion.style.display = 'none';
-        datosNuevoPasajero.style.display = 'none';
-        datosCambioRuta.style.display = 'none';
-        contenidoOtrasOperaciones.style.display = 'none';
-        checkboxCargo.style.display = 'none';
-        resetearColoresBotones(); // Resetear colores de botones
-        obtenerConfiguracion();
-        } else
-        toastr.error("No se encontraron datos para el comprobante ingresado", "ERROR");
-      })
-      .catch((error) => {
-        toastr.error("Error al obtener los datos del pasajero: " + error.message, "ERROR");
-      });
+            document.getElementById("pasCod").value = data.codigo_pasaje;
+            document.getElementById("pasEstTran").value = data.estado_transaccion;
+            document.getElementById("pasEstViaje").value = data.estado_viaje;
+            document.getElementById("detViajeAsiento").value = data.idDetalleViajeAsiento;
+            document.getElementById("pasId").value = data.id;
+            // Mostrar el contenido de la operación
+            contenidoOperacion.style.display = 'none';
+            datosNuevoPasajero.style.display = 'none';
+            datosCambioRuta.style.display = 'none';
+            contenidoOtrasOperaciones.style.display = 'none';
+            checkboxCargo.style.display = 'none';
+            resetearColoresBotones(); // Resetear colores de botones
+            obtenerConfiguracion();
+          } else
+            toastr.error("No se encontraron datos para el comprobante ingresado", "ERROR");
+        })
+        .catch((error) => {
+          toastr.error("Error al obtener los datos del pasajero: " + error.message, "ERROR");
+        });
     })
 
     function verificarEstadoViaje() {
@@ -1493,7 +1502,7 @@
       }
 
       console.log('🔄 Cambiando estado de transacción para pasaje:', idPasaje);
-      
+
       fetch(`/ecommerce/home/cambiarEnTransaccion?pasId=${encodeURIComponent(idPasaje)}`)
         .then(response => response.json())
         .then(json => {
@@ -2292,7 +2301,7 @@
       } else {
         console.log('🚫 No se ejecuta limpieza manual porque el pago ya se completó');
       }
-      
+
       reloadModal.hide();
       location.reload();
     });
@@ -2435,7 +2444,7 @@
       // Calcular el precio total final incluyendo cambio de ruta y descuento
       const precioFinal = (descuento >= (total + cambioRuta)) ? 0 : ((total - descuento) + cambioRuta);
       sessionStorage.setItem('precio_venta_total', precioFinal.toFixed(2));
-      
+
       // Guardar los datos del resumen completo para usar en la generación del ticket
       sessionStorage.setItem('datos_resumen_viaje', JSON.stringify(data));
     } else {

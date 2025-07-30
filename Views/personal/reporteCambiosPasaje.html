@@ -1,0 +1,293 @@
+{% extends "index.html" %}
+
+{% block title %}YATRAX - Gestión de sanción{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4">
+    <div class="panel-heading">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Reporte de pasajes modificados</h1>
+            </div>
+        </div>
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-12">
+                <table id="tbl_sancion" class="table table-bordered table-short-rows">
+                    <thead class="bg-gray">
+                        <tr>
+                            <th class="text-center">PASAJE</th>
+                            <th class="text-center">CANTIDAD MODIFICADO</th>
+                            <th class="text-center">MEDIO</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white table-short-rows">
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="mt-4">Gráfico de distribución de pasajes modificados</h2>
+                        <div class="d-flex justify-content-center">
+                                       <div id="pie-chart" style="width: 600px; height: 400px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/theme/dark.min.js"></script>
+
+<script>
+    var dtSancion;
+
+    $(document).ready(function () {
+        // Configuración por defecto de DataTables
+        var windowHeight = $('body > div.wrapper > div.content-wrapper').height() / 2;
+
+        $.extend($.fn.dataTable.defaults, {
+            dom: "<'row align-items-center'<'col-sm-8 justify-content-start'f><'col-sm-4 c1 d-flex justify-content-end'>>" + "<'row align-items-center'<'col-sm-4'l><'col-sm-4 my-3 justify-content-start d-flex'B><'col-sm-4 d-flex justify-content-end'p>>" + "rt" + "<'row'<'col-sm-6'i><'col-sm-6 mt-1 d-flex justify-content-end'p>>",
+            paging: true,
+            select: true,
+            scroller: false,
+            deferRender: true,
+            scrollY: windowHeight,
+            scrollX: false,
+            fixedHeader: true,
+            ordering: true,
+            destroy: true,
+            responsive: true,
+            autoWidth: false,
+            processing: true,
+            filter: true,
+            orderMulti: true,
+            stateSave: false,
+            serverSide: false,
+            language: {
+                processing: "Procesando...",
+                sSearch: "Buscar:",
+                lengthMenu: "Mostrar _MENU_ registros",
+                info: "Mostrando del _START_ al _END_ de un total de _TOTAL_ registros",
+                infoEmpty: "Sin registros encontrados.",
+                infoFiltered: "(Total de _MAX_ registros filtrados)",
+                loadingRecords: "Cargando...",
+                zeroRecords: "No se encontraron registros",
+                emptyTable: "No hay datos disponibles en la tabla",
+                paginate: {
+                    previous: "Anterior",
+                    next: "Siguiente",
+                    first: "Primero",
+                    last: "Último",
+                },
+                aria: {
+                    sortAscending: ": Activar para ordenar la columna de manera ascendente",
+                    sortDescending: ": Activar para ordenar la columna de manera descendente"
+                },
+                select: {
+                    rows: {
+                        _: "%d filas seleccionadas",
+                        0: "Haz clic en una fila para seleccionarla",
+                        1: "1 fila seleccionada"
+                    }
+                },
+                buttons: {
+                    copyTitle: 'Copiado en el portapapeles',
+                    copyKeys: 'Presiona <i>ctrl</i> o <i>\u2318</i> + <i>C</i> para copiar los datos de la tabla a tu portapapeles. <br><br>Para cancelar, haga clic en este mensaje o presione Esc.',
+                    copySuccess: {
+                        _: '%d registros copiados correctamente',
+                        1: '1 registro copiado correctamente'
+                    }
+                }
+            },
+            lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
+        });
+
+        fct_IniciarTablaSancion('#tbl_sancion');
+
+        fct_ReporteTipoPorUsuario();
+    });
+
+    function fct_IniciarTablaSancion(IdTabla) {
+        // Inicializar DataTables con botones
+        dtSancion = $(IdTabla).DataTable({
+            buttons: [
+                {
+                    extend: 'copy',
+                    text: '<i class="bi bi-back"></i>',
+                    titleAttr: 'Copiar en portapapeles',
+                    className: 'btn btn-primary',
+                },
+                {
+                    extend: 'excel',
+                    text: '<i class="bi bi-file-earmark-excel"></i>',
+                    titleAttr: 'Exportar a Excel',
+                    className: 'btn btn-success',
+                    filename: 'Personal_por_tipo_' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    footer: true,
+                    exportOptions: {
+                        stripHtml: true,
+                        columns: ':visible'
+                        // columns: ':not(:last-child)'
+                    },
+                },
+                {
+                    extend: 'pdf',
+                    text: '<i class="bi bi-file-earmark-pdf"></i>',
+                    titleAttr: 'Exportar a PDF',
+                    className: 'btn btn-danger',
+                    filename: 'Personal_por_tipo_' + ' ' + moment().format('DD-MM-YYYY HH_mm'),
+                    exportOptions: {
+                        stripHtml: true,
+                        columns: [0, 1]
+                        // columns: ':not(:last-child)'
+                    },
+                    orientation: 'landscape',
+                    pageSize: 'LEGAL',
+                },
+                {
+                    extend: 'print',
+                    text: '<i class="bi bi-printer-fill"></i>',
+                    titleAttr: 'Imprimir',
+                    className: 'btn btn-info',
+                    exportOptions: {
+                        stripHtml: true,
+                        columns: ':visible'
+                        // columns: ':not(:last-child)'
+                    },
+                },
+                {
+                    extend: 'colvis',
+                    text: '<i class="bi bi-ui-checks"></i>',
+                    titleAttr: 'Seleccionar',
+                    className: 'btn btn-warning',
+                    columns: ':not(.noVis)',
+                },
+                {
+                    text: '<i class= "bi bi-plus-circle" style="margin-right: 5px;"></i>Nuevo sanción',
+                    className: 'btn bg-success m-1',
+                    titleAttr: 'Nuevo',
+                    action: function (e, dt, node, config) {
+                        fct_SancionNuevo();
+                    },
+                },
+            ],
+            ajax: {
+                url: "/trabajadores/personal/CantidadPasajesCambios",
+                type: "GET",
+                datatype: "json",
+                data: function (d) { },
+                dataSrc: function (json) {
+                    if (json.Status === "error") {
+                        toastr.error('Ocurrió un error inesperado al intentar listar la tabla');
+                        console.error(json.Msj);
+                        return [];
+                    }
+                    return json.data;
+                },
+                error: function (xhr, error, thrown) {
+                    toastr.error('Ocurrió un error inesperado al intentar listar la tabla');
+                    console.error('Error en la solicitud Ajax: ' + error + xhr.Msj + thrown);
+                },
+            },
+            columns: [
+                { data: "nombre", name: "nombre" },
+                { data: "cantidad", name: "cantidad" },
+                //  el medio sera seteado a solo WEB
+                { defaultContent: "WEB" }
+            ],
+            columnDefs: [
+                {
+                    targets: [0],
+                    className: "text-center align-middle",
+                },
+                {
+                    targets: [1,2],
+                    className: 'align-middle',
+                },
+            ],
+            lengthMenu: [[100, 200, 500, -1], [100, 200, 500, 'Todos']],
+            initComplete: function (data, row, cell, start, end, display) {
+                $('.dt-buttons button').addClass('m-1');
+                $('.dt-button-collection').appendTo('.dt-buttons');
+                $('.btn.btn-success').removeClass('dt-button btn-secondary buttons-excel buttons-html5');
+                $('.btn.btn-danger').removeClass('dt-button btn-secondary buttons-pdf buttons-html5');
+                $('.btn.btn-primary').removeClass('dt-button btn-secondary buttons-copy buttons-html5');
+                $('.btn.btn-info').removeClass('dt-button btn-secondary buttons-print');
+                $('.btn.btn-warning').removeClass('dt-button btn-secondary buttons-collection buttons-colvis');
+                $('.btn.btn-success.m-1').addClass('btn-xs');
+                $('.btn.btn-danger.m-1').addClass('btn-xs');
+                $('.btn.btn-primary.m-1').addClass('btn-xs');
+                $('.btn.btn-info.m-1').addClass('btn-xs');
+                $('.btn.btn-warning.m-1').addClass('btn-xs');
+                $('button[title="Nuevo"]').attr('id', 'btn_Nuevo');
+                $('#btn_Nuevo').removeClass('dt-button');
+                $('#btn_Nuevo').appendTo('div.col-sm-4.c1.d-flex.justify-content-end');
+            },
+        });
+    }
+
+    function fct_ReporteTipoPorUsuario() {
+        $.getJSON('/trabajadores/personal/CantidadPasajesCambios', function (response) {
+            if (response && response.Status === "success") {
+                var myChart = echarts.init(document.getElementById('pie-chart'), 'dark');
+
+                var data = response.data;
+
+                var chartData = data.map(item => ({
+                    name: item.nombre, 
+                    value: item.cantidad  
+                }));
+
+                var option = {
+                    title: {
+                        text: 'Distribución de personal por tipo',
+                        subtext: 'Cantidad por tipo',
+                        left: 'center'
+                    },
+                    tooltip: {
+                        trigger: 'item',
+
+                        formatter: '{a} <br/>{b} : {c} ({d}%)' // a: Nombre de la serie, b: Nombre del elemento, c: Valor, d: Porcentaje
+                    },
+                    legend: {
+                        top: '15%',
+                        left: 'center'
+                    },
+                    series: [
+                        {
+                            name: 'Usuarios',
+                            type: 'pie',
+                            radius: '50%',
+                            data: chartData,
+                            emphasis: {
+                                itemStyle: {
+                                    shadowBlur: 10,
+                                    shadowOffsetX: 0,
+                                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                }
+                            }
+                        }
+                    ]
+                };
+
+                // Asignar la opción al gráfico
+                myChart.setOption(option);
+
+            } else {
+                toastr.error('Error al obtener los datos de tipos de personal', 'MENSAJE DE SISTEMA');
+                console.error(response.Msj);
+                return;
+            }
+
+        });
+    }
+</script>
+{% endblock %}
