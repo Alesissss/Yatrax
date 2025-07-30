@@ -182,14 +182,6 @@
     font-weight: bold;
   }
 </style>
-
-{% if 'cliente' in session %}
-{% set cliente = session["cliente"] %}
-<!-- <input type="hidden" id="nombre_cliente" name="nombre_cliente" value="{{ cliente['nombre'] }}"> -->
-
-<!-- <h1 class="text-center mb-4">Hola, {{ cliente['nombre'] }}</h1> -->
-{% endif %}
-
 <div class="row justify-content-center py-2">
   <div class="col-lg-12 col-md-10 col-sm-12">
     <div class="card">
