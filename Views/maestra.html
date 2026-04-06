@@ -286,26 +286,6 @@
     <!-- AdminLTE JS -->
     <script src="/Static/js/adminlte.min.js"></script>
     <script>
-        // function loadInicioSesion() {
-        //   $.ajax({
-        //     url: "/ecommerce/home/login",
-        //     type: 'GET',
-        //     success: function (html) {
-        //       // Cambiar el contenido del modal
-        //       $('#dynamic-modal .modal-dialog').attr('class', 'modal-dialog modal-lg');
-        //       // Oculta el encabezado del modal
-        //       $('#dynamic-modal .modal-header').hide();
-        //       // Actualiza solo el cuerpo
-        //       $('#modal-body').html(html);
-        //       // Muestra el modal
-        //       $('#dynamic-modal').modal('show');
-        //     },
-        //     error: function (xhr, status, error) {
-        //       console.error('Error al cargar el contenido del modal:', error);
-        //     }
-        //   });
-        // }
-
         $(function () {
             $.ajax({
                 url: '/ecommerce/home/obtenerDataEmpresa',

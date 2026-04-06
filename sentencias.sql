@@ -248,12 +248,12 @@ CREATE TABLE preguntas_frecuentes (
 );
 
 create table intentos_pasaje_cambios(
-    id int AUTO_INCREMENT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     idPasaje INT NOT NULL,
     idPasajeNuevo INT NOT NULL,
     esCambioRuta int NOT NULL,
     esTransferencia int NOT NULL
-)
+);
 
 -- Crear tabla terminos_condiciones
 CREATE TABLE terminos_condiciones (

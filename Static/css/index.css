@@ -1,0 +1,21 @@
+/* Alinear imagen y nombre verticalmente */
+.user-panel {
+  align-items: flex-start !important;
+}
+
+.user-panel .image {
+  margin-top: 5px;
+}
+
+.user-panel .info {
+  overflow: visible !important;
+  white-space: normal !important;
+  word-wrap: break-word;
+  max-width: 160px;
+}
+
+.user-panel .info a {
+  display: block;
+  line-height: 1.3;
+  word-break: break-word;
+}

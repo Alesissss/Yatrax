@@ -68,3 +68,17 @@ header {
   border-radius: 2px;     /* borde redondeado opcional */
 }
 
+/* Permitir que el nombre del usuario en el sidebar pase a la siguiente línea */
+.user-panel .info {
+  overflow: visible !important;
+  white-space: normal !important;
+  word-wrap: break-word;
+  max-width: 160px;
+}
+
+.user-panel .info a {
+  display: block;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
